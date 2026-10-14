@@ -1,0 +1,18 @@
+{
+  "eu-central-1|eu.amazon.nova-2-lite-v1:0": {
+    "inputUsdPerMillion": 0.429,
+    "outputUsdPerMillion": 3.597,
+    "cacheReadUsdPerMillion": 0.10725,
+    "cacheWriteUsdPerMillion": 0,
+    "verifiedAt": "2026-10-05T00:00:00Z",
+    "source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrock/current/eu-central-1/index.json"
+  },
+  "eu-central-1|eu.anthropic.claude-haiku-4-5-20251001-v1:0": {
+    "inputUsdPerMillion": 1.1,
+    "outputUsdPerMillion": 5.5,
+    "cacheReadUsdPerMillion": 0.11,
+    "cacheWriteUsdPerMillion": 1.375,
+    "verifiedAt": "2026-10-05T00:00:00Z",
+    "source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrockFoundationModels/current/eu-central-1/index.json"
+  }
+}

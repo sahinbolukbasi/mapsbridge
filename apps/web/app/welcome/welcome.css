@@ -1,0 +1,354 @@
+/* ========================================================= */
+/* MAPSBRIDGE — NATIVE MOBILE WELCOME & AUTH EXPERIENCE       */
+/* True mobile-first, high-fidelity iOS & Android onboarding */
+/* ========================================================= */
+
+.welcome-page-container {
+  min-height: 100dvh;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #020e0a;
+  background-image:
+    linear-gradient(180deg, rgba(2, 14, 10, 0.35) 0%, rgba(2, 14, 10, 0.65) 45%, rgba(1, 10, 7, 0.96) 100%),
+    url("/images/mobile-welcome-bg.jpg");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  color: #ffffff;
+  padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+
+/* Header & Platform Mode Switcher */
+.welcome-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 20px;
+}
+
+.welcome-brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.welcome-brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.welcome-brand-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.welcome-brand-sub {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Elegant Platform Pill Switcher */
+.welcome-platform-pill {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  padding: 3px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.welcome-platform-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.welcome-platform-btn.active {
+  background: #ffffff;
+  color: #064e3b;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Main Content Area */
+.welcome-main-content {
+  width: 100%;
+  max-width: 520px;
+  margin: auto auto 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.welcome-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.welcome-title {
+  font-size: clamp(2rem, 8vw, 2.75rem);
+  font-weight: 850;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: #ffffff;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.6);
+}
+
+.welcome-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 3 Core Highlights (Harita, AI, Topluluk) */
+.welcome-feature-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.welcome-feature-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.welcome-feature-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: rgba(16, 185, 129, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #34d399;
+  flex-shrink: 0;
+}
+
+.welcome-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.welcome-feature-text strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.welcome-feature-text span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+}
+
+/* Actions Section */
+.welcome-action-section {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Native Action Buttons */
+.native-mobile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 20px;
+  font-size: 15.5px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+}
+
+.native-mobile-btn:active {
+  transform: scale(0.97);
+}
+
+/* Direct Map Button ("Açılınca direkt harita gelsin") */
+.btn-direct-map {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-radius: 18px;
+  font-size: 16px;
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.45);
+}
+
+.btn-direct-map svg {
+  transition: transform 0.2s ease;
+}
+
+.btn-direct-map:hover svg {
+  transform: translateX(4px);
+}
+
+/*  Apple Sign-In Button */
+.btn-apple-signin {
+  background: #ffffff;
+  color: #000000;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+}
+
+.btn-apple-signin:hover {
+  background: #f3f4f6;
+}
+
+/* G Google Sign-In Button */
+.btn-google-signin {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 18px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btn-google-signin:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* E-posta ile Giriş Yap Button */
+.btn-email-signin {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
+}
+
+.btn-email-signin:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+/* Kayıt Ol Button */
+.btn-register-action {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+}
+
+.btn-register-action:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================================= */
+/* iOS CUPERTINO SPECIFIC STYLES ([data-platform="ios"])      */
+/* ========================================================= */
+[data-platform="ios"] .welcome-page-container {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+}
+
+[data-platform="ios"] .native-mobile-btn {
+  border-radius: 20px;
+}
+
+[data-platform="ios"] .welcome-feature-card {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+}
+
+[data-platform="ios"] .btn-apple-signin {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ========================================================= */
+/* ANDROID MATERIAL 3 SPECIFIC STYLES ([data-platform="android"]) */
+/* ========================================================= */
+[data-platform="android"] .welcome-page-container {
+  font-family: "Plus Jakarta Sans", "Roboto", system-ui, sans-serif;
+}
+
+[data-platform="android"] .native-mobile-btn {
+  border-radius: 28px;
+}
+
+[data-platform="android"] .welcome-feature-card {
+  border-radius: 24px;
+  background: rgba(20, 38, 30, 0.75);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+}
+
+[data-platform="android"] .btn-google-signin {
+  background: #ffffff;
+  color: #1f2937;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+[data-platform="android"] .btn-direct-map {
+  background: #10b981;
+  color: #012417;
+  font-weight: 800;
+}

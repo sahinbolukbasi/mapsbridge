@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KnowledgeBaseMetadata",
+  "description": "AWS Bedrock Knowledge Base kayıtları için metadata şeması",
+  "type": "object",
+  "properties": {
+    "sehir": {
+      "type": "string",
+      "description": "Hedef şehir adı (örn: New York, İstanbul, Roma)",
+      "maxLength": 100
+    },
+    "kategori": {
+      "type": "string",
+      "enum": ["cafe", "food", "lodging", "parks_sports", "transit", "culture", "emergency"],
+      "description": "İçerik kategorisi"
+    },
+    "mahalle": {
+      "type": "string",
+      "description": "İlgili mahalle, semt veya bölge",
+      "maxLength": 150
+    },
+    "fiyat_seviyesi": {
+      "type": "string",
+      "enum": ["$", "$$", "$$$", "$$$$", "ucretsiz", "belirsiz"],
+      "description": "Fiyat seviyesi"
+    },
+    "kaynak": {
+      "type": "string",
+      "format": "uri",
+      "description": "Doğrulanan resmî HTTPS kaynak adresi"
+    },
+    "son_dogrulama_tarihi": {
+      "type": "string",
+      "format": "date",
+      "description": "Son doğrulama tarihi (YYYY-MM-DD)"
+    }
+  },
+  "required": ["sehir", "kategori", "kaynak", "son_dogrulama_tarihi"],
+  "additionalProperties": false
+}

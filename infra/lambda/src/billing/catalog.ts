@@ -1,0 +1,9 @@
+export const catalog = () => [
+  { id:'explorer', mode:'subscription', credits:100, amount:19900, priceId:process.env.STRIPE_EXPLORER_PRICE_ID },
+  { id:'pro', mode:'subscription', credits:500, amount:49900, priceId:process.env.STRIPE_PRO_PRICE_ID },
+  { id:'agency', mode:'subscription', credits:2500, amount:149900, priceId:process.env.STRIPE_AGENCY_PRICE_ID },
+  { id:'pack-starter', mode:'credit_pack', credits:50, amount:8900, priceId:process.env.STRIPE_PACK_STARTER_PRICE_ID },
+  { id:'pack-popular', mode:'credit_pack', credits:300, amount:29900, priceId:process.env.STRIPE_PACK_POPULAR_PRICE_ID },
+  { id:'pack-master', mode:'credit_pack', credits:1000, amount:74900, priceId:process.env.STRIPE_PACK_MASTER_PRICE_ID },
+  { id:'pack-pro', mode:'credit_pack', credits:3000, amount:189900, priceId:process.env.STRIPE_PACK_PRO_PRICE_ID },
+];

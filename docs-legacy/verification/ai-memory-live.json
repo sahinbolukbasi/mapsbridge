@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-09T09:24:17.695Z",
+  "checks": [
+    "default-opt-out",
+    "cross-user-isolation"
+  ],
+  "cleanup": "Temporary Cognito accounts and application rows removed. Retired actor purge audits remain until deletion verification completes."
+}

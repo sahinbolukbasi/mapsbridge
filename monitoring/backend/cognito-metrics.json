@@ -1,0 +1,28 @@
+{
+  "service": "AWS/Cognito",
+  "userPoolId": "eu-central-1_mapsbridge",
+  "metrics": [
+    {
+      "metricName": "SignInSuccesses",
+      "stat": "Sum"
+    },
+    {
+      "metricName": "SignInThrottles",
+      "stat": "Sum",
+      "alertThreshold": 5
+    },
+    {
+      "metricName": "SignUpSuccesses",
+      "stat": "Sum"
+    },
+    {
+      "metricName": "TokenRefreshSuccesses",
+      "stat": "Sum"
+    },
+    {
+      "metricName": "RiskEvents",
+      "stat": "Sum",
+      "description": "Compromised credential / suspicious location sign-in attempts"
+    }
+  ]
+}

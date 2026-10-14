@@ -1,0 +1,17 @@
+{
+  "at": "2026-09-27T07:58:34.388Z",
+  "checks": [
+    {
+      "route": "profile/edit",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "route": "ai",
+      "status": 200,
+      "matchesBuild": true
+    }
+  ],
+  "visualCheck": "Unavailable: no connected browser",
+  "invalidation": "I84ENJ670TJ40G3XK32QTR6VEE"
+}

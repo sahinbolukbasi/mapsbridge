@@ -1,0 +1,37 @@
+[
+  {
+    "id": "REG-01-CONCIERGE-COMPLETENESS",
+    "component": "Concierge",
+    "description": "Hedef, gün sayısı ve ilgi alanları tanımlandığında completeness >= 0.70 olmalı",
+    "testType": "unit",
+    "expectedStatus": "PASS"
+  },
+  {
+    "id": "REG-02-FEASIBILITY-SAFETY",
+    "component": "FeasibilityEngine",
+    "description": "Zaman çakışması ve bütçe aşımı durumlarında plan onaylanmamalı",
+    "testType": "unit",
+    "expectedStatus": "PASS"
+  },
+  {
+    "id": "REG-03-ROUTER-FINOPS",
+    "component": "AgentRouter",
+    "description": "Talep edilmeyen alt ajanlar çağrılmayıp FinOps tasarrufu sağlanmalı",
+    "testType": "unit",
+    "expectedStatus": "PASS"
+  },
+  {
+    "id": "REG-04-EMERGENCY-DETERMINISTIC",
+    "component": "EmergencyAgent",
+    "description": "Acil durum yanıtının ilk satırında yerel acil numara (911/112) bulunmalı",
+    "testType": "unit",
+    "expectedStatus": "PASS"
+  },
+  {
+    "id": "REG-05-GUARDRAILS-PII-GROUNDING",
+    "component": "Guardrails",
+    "description": "TCKN, kredi kartı ve e-posta maskelenmeli, dayanaksız iddialar uydurma olarak yakalanmalı",
+    "testType": "unit",
+    "expectedStatus": "PASS"
+  }
+]

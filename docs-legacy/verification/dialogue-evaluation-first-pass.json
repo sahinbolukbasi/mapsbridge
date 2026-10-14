@@ -1,0 +1,583 @@
+{
+  "startedAt": "2026-09-19T11:02:57.264Z",
+  "model": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "source": "local-workspace",
+  "ragEnabled": false,
+  "turns": [
+    {
+      "scenario": "natural-conversation",
+      "prompt": "Selam, nasılsın?",
+      "elapsedMs": 5325,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 5323
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "interests": [],
+          "constraints": [],
+          "planningRequested": false
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "Selam! İyiyim, teşekkür ederim. Seyahat planlamada sana yardımcı olmak için buradayım. Nereye gitmek istiyorsun veya hangi şehir hakkında bilgi almak istersin?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 1,
+          "context": {
+            "interests": [],
+            "constraints": [],
+            "planningRequested": false
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Selam, nasılsın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Selam! İyiyim, teşekkür ederim. Seyahat planlamada sana yardımcı olmak için buradayım. Nereye gitmek istiyorsun veya hangi şehir hakkında bilgi almak istersin?"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "natural-conversation",
+      "prompt": "İlk İtalya seyahatimde Roma mı Floransa mı daha uygun? Sanat ve sakin gezmeyi seviyorum, henüz rota hazırlama.",
+      "elapsedMs": 8857,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 8857
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "interests": [
+            "sanat"
+          ],
+          "constraints": [
+            "sakin gezmeyi seviyorum"
+          ],
+          "planningRequested": false
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "İlk İtalya seyahatinde Roma ve Floransa arasında seçim yapmak güzel bir dilemmadır. Her ikisi de sanat açısından eşsiz, ama farklı deneyimler sunuyor:\n\n**Roma** – Antik ve Rönesans sanatının karışımı. Kolosseum, Vatikan Müzesi, Sistine Şapeli gibi ikonlar var, ama çok kalabalık ve hızlı tempolu olabilir. Sakin gezmeyi seviyorsan, erken saatlerde veya az bilinen mahalleler (Trastevere, Testaccio) daha rahatlatıcı.\n\n**Floransa** – Rönesans'ın kalbi, daha kompakt ve yönetilebilir. Uffizi Galerisi, Duomo, Ponte Vecchio... Genel olarak Roma'dan daha sakin, yürüyüş için uygun. Sanat yoğunluğu yüksek ama kalabalık daha kontrol edilebilir.\n\n**Tavsiyem:** Sakin gezmeyi tercih ediyorsan **Floransa** daha uygun başlangıç. Daha küçük, sanat koleksiyonları daha erişilebilir, ve şehir atmosferi daha rahatlatıcı. Roma'ya sonraki seyahatlerde gidebilirsin.\n\nKaç gün düşünüyorsun? Floransa için 3-4 gün ideal, ama daha kısa da olabilir.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 2,
+          "context": {
+            "interests": [
+              "sanat"
+            ],
+            "constraints": [
+              "sakin gezmeyi seviyorum"
+            ],
+            "planningRequested": false
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Selam, nasılsın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Selam! İyiyim, teşekkür ederim. Seyahat planlamada sana yardımcı olmak için buradayım. Nereye gitmek istiyorsun veya hangi şehir hakkında bilgi almak istersin?"
+            },
+            {
+              "role": "user",
+              "content": "İlk İtalya seyahatimde Roma mı Floransa mı daha uygun? Sanat ve sakin gezmeyi seviyorum, henüz rota hazırlama."
+            },
+            {
+              "role": "assistant",
+              "content": "İlk İtalya seyahatinde Roma ve Floransa arasında seçim yapmak güzel bir dilemmadır. Her ikisi de sanat açısından eşsiz, ama farklı deneyimler sunuyor:\n\n**Roma** – Antik ve Rönesans sanatının karışımı. Kolosseum, Vatikan Müzesi, Sistine Şapeli gibi ikonlar var, ama çok kalabalık ve hızlı tempolu olabilir. Sakin gezmeyi seviyorsan, erken saatlerde veya az bilinen mahalleler (Trastevere, Testaccio) daha rahatlatıcı.\n\n**Floransa** – Rönesans'ın kalbi, daha kompakt ve yönetilebilir. Uffizi Galerisi, Duomo, Ponte Vecchio... Genel olarak Roma'dan daha sakin, yürüyüş için uygun. Sanat yoğunluğu yüksek ama kalabalık daha kontrol edilebilir.\n\n**Tavsiyem:** Sakin gezmeyi tercih ediyorsan **Floransa** daha uygun başlangıç. Daha küçük, sanat koleksiyonları daha erişilebilir, ve şehir atmosferi daha rahatlatıcı. Roma'ya sonraki seyahatlerde gidebilirsin.\n\nKaç gün düşünüyorsun? Floransa için 3-4 gün ideal, ama daha kısa da olabilir."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Bana bir seyahat rotası çıkarır mısın?",
+      "elapsedMs": 3188,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 3188
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "clarify",
+        "orchestratorSummary": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 1,
+          "context": {
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Roma olsun.",
+      "elapsedMs": 2805,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 2805
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "clarify",
+        "orchestratorSummary": "Roma için kaç gün ayıralım?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 2,
+          "context": {
+            "destination": "Roma",
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Üç gün ayırabilirim. Her gün iki durak olsun; tarih ve açık hava seviyorum, çok yürümek istemiyorum.",
+      "elapsedMs": 5391,
+      "failures": [
+        "Yer araştırması tamamlanamadı; rota oluşturulmadı."
+      ]
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın.",
+      "elapsedMs": 3133,
+      "failures": [
+        "mode: expected route, got clarify",
+        "trip length changed",
+        "existing stops changed",
+        "new stop not on requested day"
+      ],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 3133
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "clarify",
+        "orchestratorSummary": "Bu seyahat için kaç gün ayırmak istiyorsun? 1–7 günlük bir rota hazırlayabilirim.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 3,
+          "context": {
+            "destination": "Roma",
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            },
+            {
+              "role": "user",
+              "content": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın."
+            },
+            {
+              "role": "assistant",
+              "content": "Bu seyahat için kaç gün ayırmak istiyorsun? 1–7 günlük bir rota hazırlayabilirim."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Roma rotama dokunma; meraktan soruyorum, Tokyo'da hangi yerel yemekler denenir?",
+      "elapsedMs": 9354,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 9354
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "Tokyo'da denenmesi gereken yerel yemekler arasında şunlar yer alır:\n\n- **Ramen** – Çeşitli broth ve topping'lerle yapılan ünlü erişte yemeği\n- **Sushi ve sashimi** – Taze balık ve deniz ürünleri\n- **Tempura** – Hafif kızartılmış sebze ve deniz ürünleri\n- **Tonkatsu** – Panolu domuz şnitzel\n- **Okonomiyaki** – Malzemeli krep benzeri savory pancake\n- **Yakitori** – Şişte pişirilmiş tavuk\n- **Monjayaki** – Okonomiyaki'nin daha sıvı versiyonu\n- **Edamame** – Haşlanmış soya fasulyesi\n- **Miso soup** – Geleneksel miso çorbası\n- **Karaage** – Kızartılmış tavuk\n\nTokyo'nun farklı semtlerinde (Shibuya, Shinjuku, Tsukiji) bu yemekleri bulabilirsin. Yerel izakaya (barlar) ve küçük restoranlar genellikle en otantik deneyimi sunar.\n\nRoma rotanız değişmeden kalıyor. Tokyo hakkında başka merak ettikleriniz var mı?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 4,
+          "context": {
+            "destination": "Roma",
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            },
+            {
+              "role": "user",
+              "content": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın."
+            },
+            {
+              "role": "assistant",
+              "content": "Bu seyahat için kaç gün ayırmak istiyorsun? 1–7 günlük bir rota hazırlayabilirim."
+            },
+            {
+              "role": "user",
+              "content": "Roma rotama dokunma; meraktan soruyorum, Tokyo'da hangi yerel yemekler denenir?"
+            },
+            {
+              "role": "assistant",
+              "content": "Tokyo'da denenmesi gereken yerel yemekler arasında şunlar yer alır:\n\n- **Ramen** – Çeşitli broth ve topping'lerle yapılan ünlü erişte yemeği\n- **Sushi ve sashimi** – Taze balık ve deniz ürünleri\n- **Tempura** – Hafif kızartılmış sebze ve deniz ürünleri\n- **Tonkatsu** – Panolu domuz şnitzel\n- **Okonomiyaki** – Malzemeli krep benzeri savory pancake\n- **Yakitori** – Şişte pişirilmiş tavuk\n- **Monjayaki** – Okonomiyaki'nin daha sıvı versiyonu\n- **Edamame** – Haşlanmış soya fasulyesi\n- **Miso soup** – Geleneksel miso çorbası\n- **Karaage** – Kızartılmış tavuk\n\nTokyo'nun farklı semtlerinde (Shibuya, Shinjuku, Tsukiji) bu yemekleri bulabilirsin. Yerel izakaya (barlar) ve küçük restoranlar genellikle en otantik deneyimi sunar.\n\nRoma rotanız değişmeden kalıyor. Tokyo hakkında başka merak ettikleriniz var mı?"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Mevcut rotamın ilk günündeki durakları neden seçtin?",
+      "elapsedMs": 7219,
+      "failures": [
+        "explanation does not reference actual route"
+      ],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 7219
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "Henüz Roma için bir rota oluşturmadık. Siz \"ikinci güne bir kahve molası ekle\" dediğinizde, önce kaç günlük bir rota istediğinizi sordum, ancak yanıt almadık. \n\nRotayı hazırlamak için şu bilgilere ihtiyacım var:\n- **Kaç gün** için rota planlıyorsunuz?\n- **İlgi alanlarınız** neler? (örneğin: tarih, sanat, mimari, yemek, doğa vb.)\n- **Bütçe** ve **tempo** tercihiniz? (sakin gezinti mi, yoğun program mı?)\n- **Herhangi bir kısıtlama** var mı? (örneğin müze istemiyorum, vegan tercihim var vb.)\n\nBu bilgiler sayesinde Roma'nın en uygun duraklarını seçebilirim.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 5,
+          "context": {
+            "destination": "Roma",
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            },
+            {
+              "role": "user",
+              "content": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın."
+            },
+            {
+              "role": "assistant",
+              "content": "Bu seyahat için kaç gün ayırmak istiyorsun? 1–7 günlük bir rota hazırlayabilirim."
+            },
+            {
+              "role": "user",
+              "content": "Roma rotama dokunma; meraktan soruyorum, Tokyo'da hangi yerel yemekler denenir?"
+            },
+            {
+              "role": "assistant",
+              "content": "Tokyo'da denenmesi gereken yerel yemekler arasında şunlar yer alır:\n\n- **Ramen** – Çeşitli broth ve topping'lerle yapılan ünlü erişte yemeği\n- **Sushi ve sashimi** – Taze balık ve deniz ürünleri\n- **Tempura** – Hafif kızartılmış sebze ve deniz ürünleri\n- **Tonkatsu** – Panolu domuz şnitzel\n- **Okonomiyaki** – Malzemeli krep benzeri savory pancake\n- **Yakitori** – Şişte pişirilmiş tavuk\n- **Monjayaki** – Okonomiyaki'nin daha sıvı versiyonu\n- **Edamame** – Haşlanmış soya fasulyesi\n- **Miso soup** – Geleneksel miso çorbası\n- **Karaage** – Kızartılmış tavuk\n\nTokyo'nun farklı semtlerinde (Shibuya, Shinjuku, Tsukiji) bu yemekleri bulabilirsin. Yerel izakaya (barlar) ve küçük restoranlar genellikle en otantik deneyimi sunar.\n\nRoma rotanız değişmeden kalıyor. Tokyo hakkında başka merak ettikleriniz var mı?"
+            },
+            {
+              "role": "user",
+              "content": "Mevcut rotamın ilk günündeki durakları neden seçtin?"
+            },
+            {
+              "role": "assistant",
+              "content": "Henüz Roma için bir rota oluşturmadık. Siz \"ikinci güne bir kahve molası ekle\" dediğinizde, önce kaç günlük bir rota istediğinizi sordum, ancak yanıt almadık. \n\nRotayı hazırlamak için şu bilgilere ihtiyacım var:\n- **Kaç gün** için rota planlıyorsunuz?\n- **İlgi alanlarınız** neler? (örneğin: tarih, sanat, mimari, yemek, doğa vb.)\n- **Bütçe** ve **tempo** tercihiniz? (sakin gezinti mi, yoğun program mı?)\n- **Herhangi bir kısıtlama** var mı? (örneğin müze istemiyorum, vegan tercihim var vb.)\n\nBu bilgiler sayesinde Roma'nın en uygun duraklarını seçebilirim."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "limits-and-uncovered-destination",
+      "prompt": "Lima'da ne yiyebilirim? Kaynağın yoksa söyle; rota istemiyorum.",
+      "elapsedMs": 11178,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 11178
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "interests": [],
+          "constraints": [],
+          "planningRequested": false
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "Lima, dünya mutfağının en heyecan verici şehirlerinden biri. İşte başlıca yemek deneyimleri:\n\n**Geleneksel Peruano Mutfağı**\n- **Ceviche**: Taze balık, limon suyu, soğan ve ají (Peruvian biber) ile hazırlanan ikonik yemek\n- **Lomo Saltado**: Sığır eti, soğan, domates ve patates ile wok tarzı pişirilen lezzetli bir yemek\n- **Causa**: Patates, avokado ve balık/tavuk ile yapılan soğuk bir tabaka yemeği\n- **Tiradito**: Cevicheye benzer ama daha ince dilimlenmiş balık ve daha sofistike soslarla sunulan\n\n**Deniz Ürünleri**\nLima'nın Pasifik kıyısında olması, taze balık ve deniz ürünlerinin bolluğu anlamına gelir. Balık çorbası (chupe de camarones) ve taze istakoz da popüler.\n\n**Sokak Yemekleri & Hafif Atıştırmalar**\n- **Anticuchos**: Baharat marineli et şişleri\n- **Empanadas**: Çeşitli dolguları olan hamur poğaçaları\n- **Papa a la Huancaína**: Patates ve sos ile yapılan bir başka klasik\n\n**Nerede Yemek Yenir**\nMiraflores ve San Isidro mahallelerinde yüksek kaliteli restoranlar, Barranco'da daha bohemyen seçenekler, merkezi pazarlarda (özellikle Mercado Central) ise otantik ve uygun fiyatlı seçenekler bulunur.\n\nKaynağım yok; bu genel bilgi. Güncel fiyat, müsaitlik ve açılış saatleri için resmi turizm sitelerini veya TripAdvisor gibi platformları kontrol etmeyi tavsiye ederim.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 1,
+          "context": {
+            "interests": [],
+            "constraints": [],
+            "planningRequested": false
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Lima'da ne yiyebilirim? Kaynağın yoksa söyle; rota istemiyorum."
+            },
+            {
+              "role": "assistant",
+              "content": "Lima, dünya mutfağının en heyecan verici şehirlerinden biri. İşte başlıca yemek deneyimleri:\n\n**Geleneksel Peruano Mutfağı**\n- **Ceviche**: Taze balık, limon suyu, soğan ve ají (Peruvian biber) ile hazırlanan ikonik yemek\n- **Lomo Saltado**: Sığır eti, soğan, domates ve patates ile wok tarzı pişirilen lezzetli bir yemek\n- **Causa**: Patates, avokado ve balık/tavuk ile yapılan soğuk bir tabaka yemeği\n- **Tiradito**: Cevicheye benzer ama daha ince dilimlenmiş balık ve daha sofistike soslarla sunulan\n\n**Deniz Ürünleri**\nLima'nın Pasifik kıyısında olması, taze balık ve deniz ürünlerinin bolluğu anlamına gelir. Balık çorbası (chupe de camarones) ve taze istakoz da popüler.\n\n**Sokak Yemekleri & Hafif Atıştırmalar**\n- **Anticuchos**: Baharat marineli et şişleri\n- **Empanadas**: Çeşitli dolguları olan hamur poğaçaları\n- **Papa a la Huancaína**: Patates ve sos ile yapılan bir başka klasik\n\n**Nerede Yemek Yenir**\nMiraflores ve San Isidro mahallelerinde yüksek kaliteli restoranlar, Barranco'da daha bohemyen seçenekler, merkezi pazarlarda (özellikle Mercado Central) ise otantik ve uygun fiyatlı seçenekler bulunur.\n\nKaynağım yok; bu genel bilgi. Güncel fiyat, müsaitlik ve açılış saatleri için resmi turizm sitelerini veya TripAdvisor gibi platformları kontrol etmeyi tavsiye ederim."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "limits-and-uncovered-destination",
+      "prompt": "Paris'te on günlük bir rota oluştur.",
+      "elapsedMs": 4136,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 4136
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Paris",
+          "days": 10,
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "clarify",
+        "orchestratorSummary": "On gün oldukça uzun bir süre! Paris'i iki bölüme ayırmak isteyebilirsin (örneğin 5+5 gün) veya çevredeki şehirleri (Versailles, Giverny gibi) eklemek isteyebilirsin. Ayrıca, seni en çok neyin ilgilendirdiğini bilmek isterim: tarih ve müzeler, sanat, yemek, manzaralar, fotoğrafçılık, alışveriş, yoksa bunların bir karışımı mı?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 2,
+          "context": {
+            "destination": "Paris",
+            "days": 10,
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "discussedDestination": "Paris",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Lima'da ne yiyebilirim? Kaynağın yoksa söyle; rota istemiyorum."
+            },
+            {
+              "role": "assistant",
+              "content": "Lima, dünya mutfağının en heyecan verici şehirlerinden biri. İşte başlıca yemek deneyimleri:\n\n**Geleneksel Peruano Mutfağı**\n- **Ceviche**: Taze balık, limon suyu, soğan ve ají (Peruvian biber) ile hazırlanan ikonik yemek\n- **Lomo Saltado**: Sığır eti, soğan, domates ve patates ile wok tarzı pişirilen lezzetli bir yemek\n- **Causa**: Patates, avokado ve balık/tavuk ile yapılan soğuk bir tabaka yemeği\n- **Tiradito**: Cevicheye benzer ama daha ince dilimlenmiş balık ve daha sofistike soslarla sunulan\n\n**Deniz Ürünleri**\nLima'nın Pasifik kıyısında olması, taze balık ve deniz ürünlerinin bolluğu anlamına gelir. Balık çorbası (chupe de camarones) ve taze istakoz da popüler.\n\n**Sokak Yemekleri & Hafif Atıştırmalar**\n- **Anticuchos**: Baharat marineli et şişleri\n- **Empanadas**: Çeşitli dolguları olan hamur poğaçaları\n- **Papa a la Huancaína**: Patates ve sos ile yapılan bir başka klasik\n\n**Nerede Yemek Yenir**\nMiraflores ve San Isidro mahallelerinde yüksek kaliteli restoranlar, Barranco'da daha bohemyen seçenekler, merkezi pazarlarda (özellikle Mercado Central) ise otantik ve uygun fiyatlı seçenekler bulunur.\n\nKaynağım yok; bu genel bilgi. Güncel fiyat, müsaitlik ve açılış saatleri için resmi turizm sitelerini veya TripAdvisor gibi platformları kontrol etmeyi tavsiye ederim."
+            },
+            {
+              "role": "user",
+              "content": "Paris'te on günlük bir rota oluştur."
+            },
+            {
+              "role": "assistant",
+              "content": "On gün oldukça uzun bir süre! Paris'i iki bölüme ayırmak isteyebilirsin (örneğin 5+5 gün) veya çevredeki şehirleri (Versailles, Giverny gibi) eklemek isteyebilirsin. Ayrıca, seni en çok neyin ilgilendirdiğini bilmek isterim: tarih ve müzeler, sanat, yemek, manzaralar, fotoğrafçılık, alışveriş, yoksa bunların bir karışımı mı?"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Scripted cases do not establish factual correctness or universal quality.",
+    "No model weights are trained by this evaluation."
+  ],
+  "passed": 7,
+  "total": 10,
+  "finishedAt": "2026-09-19T11:03:57.857Z"
+}

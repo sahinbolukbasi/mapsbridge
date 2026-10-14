@@ -1,0 +1,37 @@
+{
+  "name": "location-root",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "npm --prefix apps/web run dev",
+    "build": "npm --prefix apps/web run build",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "test": "npm --prefix apps/web test",
+    "test:backend": "node --test infra/lambda/tests/*.test.cjs",
+    "eval:ai": "node infra/scripts/evaluate-ai-dialogues.cjs",
+    "eval:golden": "node infra/scripts/evaluate-ai-dialogues.cjs --golden",
+    "eval:golden:validate": "node infra/scripts/validate-golden-eval.cjs",
+    "smoke:preflight": "node infra/scripts/verify-live-ai-prerequisites.cjs",
+    "monitor:synthetics": "node monitoring/synthetics/canary-runner.cjs",
+    "monitor:typecheck": "tsc -p monitoring/tsconfig.json --noEmit",
+    "mobile:start": "npm --prefix apps/mobile start",
+    "mobile:ios": "npm --prefix apps/mobile run ios",
+    "mobile:android": "npm --prefix apps/mobile run android",
+    "mobile:typecheck": "tsc --noEmit --project apps/mobile/tsconfig.json",
+    "mobile:bundle:ios": "npm --prefix apps/mobile exec -- expo export:embed --platform ios --dev false --entry-file index.ts --bundle-output ios/main.jsbundle --assets-dest ios",
+    "mobile:export": "npm --prefix apps/mobile run export:ios && npm --prefix apps/mobile run export:android",
+    "mobile:export:ios": "npm --prefix apps/mobile run export:ios",
+    "mobile:export:android": "npm --prefix apps/mobile run export:android",
+    "expo:start": "npm --prefix apps/mobile start",
+    "expo:ios": "npm --prefix apps/mobile run ios",
+    "expo:android": "npm --prefix apps/mobile run android",
+    "deploy:prod": "./scripts/deploy-production.sh",
+    "docker:build": "docker build -t mapsbridge:latest .",
+    "docker:run": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "region": "us-east-1",
+  "jobName": "travel-intake-v1",
+  "customModelName": "travel-intake-v1",
+  "baseModelIdentifier": "amazon.nova-micro-v1:0:128k",
+  "roleArn": "REPLACE_WITH_TRAINING_ROLE_ARN",
+  "kmsKeyArn": "REPLACE_WITH_KMS_KEY_ARN",
+  "trainingS3Uri": "s3://REPLACE_BUCKET/travel/v1/train.jsonl",
+  "validationS3Uri": "s3://REPLACE_BUCKET/travel/v1/validation.jsonl",
+  "outputS3Uri": "s3://REPLACE_BUCKET/travel/v1/output/",
+  "datasetReviewed": false,
+  "regionalProcessingReviewed": false,
+  "budgetReviewed": false,
+  "hyperParameters": {}
+}

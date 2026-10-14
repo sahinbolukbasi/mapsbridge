@@ -1,0 +1,43 @@
+{
+  "service": "AWS/Lambda",
+  "periodSeconds": 60,
+  "metrics": [
+    {
+      "metricName": "Invocations",
+      "stat": "Sum",
+      "description": "Total Lambda invocations across all microservices"
+    },
+    {
+      "metricName": "Duration",
+      "stat": "Average",
+      "extendedStats": ["p50", "p90", "p99"],
+      "unit": "Milliseconds",
+      "alertThresholdP99": 2000
+    },
+    {
+      "metricName": "Errors",
+      "stat": "Sum",
+      "description": "Function execution errors",
+      "alertThreshold": 5
+    },
+    {
+      "metricName": "Throttles",
+      "stat": "Sum",
+      "description": "Concurrent execution throttles",
+      "alertThreshold": 1
+    },
+    {
+      "metricName": "ConcurrentExecutions",
+      "stat": "Maximum",
+      "description": "Concurrent executing instances"
+    }
+  ],
+  "monitoredFunctions": [
+    "mapsbridge-prod-auth",
+    "mapsbridge-prod-billing",
+    "mapsbridge-prod-ai",
+    "mapsbridge-prod-trips",
+    "mapsbridge-prod-chat",
+    "mapsbridge-prod-admin"
+  ]
+}

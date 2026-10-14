@@ -1,0 +1,40 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+node_modules/
+.next/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.auto.tfvars.json
+.state-backup-old-account/
+infra/*/terraform.tfvars
+!infra/*/terraform.tfvars.example
+
+# Build artifacts
+apps/web/out/
+.build/testflight/
+infra/terraform/.build/
+infra/admin-runtime/.build/
+infra/agentcore-gateway/.build/
+infra/ai-memory/.build/
+infra/ai-training/.build/
+*.tsbuildinfo
+
+# Secrets
+client_secret*.json
+*.pem
+.mcp.json
+
+# Test artifacts
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/test-results-google/

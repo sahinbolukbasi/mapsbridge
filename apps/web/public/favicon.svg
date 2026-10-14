@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="mbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e4d3e"/>
+      <stop offset="100%" stop-color="#013628"/>
+    </linearGradient>
+    <linearGradient id="needleNorth" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="needleSouth" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Squircle matching .header-brand-icon -->
+  <rect width="64" height="64" rx="16" fill="url(#mbGrad)"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="14.5" fill="none" stroke="#34d399" stroke-width="1" opacity="0.25"/>
+
+  <!-- Compass dial circle -->
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.95"/>
+  <circle cx="32" cy="32" r="22.5" fill="none" stroke="#10b981" stroke-width="1" opacity="0.5" stroke-dasharray="2 3"/>
+
+  <!-- Compass Needle pointing top-right (standard explore icon orientation) -->
+  <!-- North pointer (Emerald) -->
+  <polygon points="32,32 30.5,25.5 44,20 38.5,33.5" fill="url(#needleNorth)"/>
+  <!-- South pointer (Silver/White) -->
+  <polygon points="32,32 33.5,38.5 20,44 25.5,30.5" fill="url(#needleSouth)"/>
+
+  <!-- Center pivot pin -->
+  <circle cx="32" cy="32" r="3.5" fill="#013628"/>
+  <circle cx="32" cy="32" r="2" fill="#34d399"/>
+  <circle cx="32" cy="32" r="0.9" fill="#ffffff"/>
+</svg>

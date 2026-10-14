@@ -1,0 +1,529 @@
+/* ============================================================
+   MapsBridge Upgrade & Credit Modal Styles (Stitch Design System)
+   Tokens: #020E0A, #10B981, #286954, #F8FAFC
+   ============================================================ */
+
+.mb-upgrade-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 14, 10, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: mbFadeIn 0.22s ease-out;
+}
+
+@keyframes mbFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mbScaleUp {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.mb-upgrade-modal-dialog {
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 920px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(16, 185, 129, 0.15);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: mbScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+[data-theme="dark"] .mb-upgrade-modal-dialog {
+  background: #0d211a;
+  color: #f1f5f9;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(16, 185, 129, 0.3);
+}
+
+.mb-upgrade-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+[data-theme="dark"] .mb-upgrade-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.mb-upgrade-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mb-upgrade-modal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+}
+
+.mb-upgrade-modal-title-wrap h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.mb-upgrade-modal-title-wrap p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+[data-theme="dark"] .mb-upgrade-modal-title-wrap p {
+  color: #94a3b8;
+}
+
+.mb-upgrade-modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  transition: all 0.15s ease;
+}
+
+.mb-upgrade-modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+
+[data-theme="dark"] .mb-upgrade-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.mb-upgrade-modal-body {
+  padding: 24px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Current Balance Warning Card ── */
+.mb-upgrade-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.mb-upgrade-status-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mb-upgrade-status-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #059669;
+}
+
+.mb-upgrade-status-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.mb-upgrade-status-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+[data-theme="dark"] .mb-upgrade-status-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+/* ── Main Category Tabs ── */
+.mb-upgrade-category-tabs {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 14px;
+  gap: 4px;
+}
+
+[data-theme="dark"] .mb-upgrade-category-tabs {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mb-upgrade-cat-tab-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .mb-upgrade-cat-tab-btn {
+  color: #94a3b8;
+}
+
+.mb-upgrade-cat-tab-btn.active {
+  background: #ffffff;
+  color: #065f46;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .mb-upgrade-cat-tab-btn.active {
+  background: #15392e;
+  color: #34d399;
+}
+
+/* ── Cycle Switcher (Monthly / Yearly) ── */
+.mb-upgrade-cycle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.mb-upgrade-cycle-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.mb-upgrade-cycle-label.active {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+[data-theme="dark"] .mb-upgrade-cycle-label.active {
+  color: #ffffff;
+}
+
+.mb-upgrade-cycle-toggle {
+  width: 48px;
+  height: 26px;
+  background: #cbd5e1;
+  border-radius: 9999px;
+  padding: 3px;
+  cursor: pointer;
+  border: none;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.mb-upgrade-cycle-toggle.yearly {
+  background: #10b981;
+}
+
+.mb-upgrade-cycle-knob {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.mb-upgrade-cycle-toggle.yearly .mb-upgrade-cycle-knob {
+  transform: translateX(22px);
+}
+
+.mb-upgrade-discount-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #fef08a;
+  color: #854d0e;
+  letter-spacing: 0.02em;
+}
+
+/* ── 3 Plans Grid ── */
+.mb-upgrade-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .mb-upgrade-plans-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mb-upgrade-plan-card {
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-theme="dark"] .mb-upgrade-plan-card {
+  background: #102820;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.mb-upgrade-plan-card.highlight {
+  border-color: #10b981;
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%);
+  box-shadow: 0 10px 30px -8px rgba(16, 185, 129, 0.25);
+}
+
+.mb-upgrade-plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.12);
+}
+
+.mb-upgrade-popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.mb-upgrade-plan-header h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.mb-upgrade-plan-credits {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #059669;
+  margin-top: 4px;
+}
+
+[data-theme="dark"] .mb-upgrade-plan-credits {
+  color: #34d399;
+}
+
+.mb-upgrade-plan-price-wrap {
+  margin: 16px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.mb-upgrade-plan-price {
+  font-size: 1.85rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.mb-upgrade-plan-period {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.mb-upgrade-plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.mb-upgrade-plan-features li {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #334155;
+}
+
+[data-theme="dark"] .mb-upgrade-plan-features li {
+  color: #cbd5e1;
+}
+
+.mb-upgrade-feature-check {
+  color: #10b981;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.mb-upgrade-plan-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .mb-upgrade-plan-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.mb-upgrade-plan-btn.primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+}
+
+.mb-upgrade-plan-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.mb-upgrade-plan-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Extra Credit Packs Grid ── */
+.mb-upgrade-packs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .mb-upgrade-packs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mb-upgrade-pack-card {
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .mb-upgrade-pack-card {
+  background: #102820;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.mb-upgrade-pack-card.popular {
+  border-color: #10b981;
+  box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.25);
+}
+
+.mb-upgrade-pack-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mb-upgrade-pack-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.mb-upgrade-pack-amount {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #059669;
+  letter-spacing: -0.02em;
+}
+
+[data-theme="dark"] .mb-upgrade-pack-amount {
+  color: #34d399;
+}
+
+.mb-upgrade-pack-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 16px;
+  flex-grow: 1;
+}
+
+[data-theme="dark"] .mb-upgrade-pack-desc {
+  color: #94a3b8;
+}
+
+.mb-upgrade-pack-price {
+  font-size: 1.45rem;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+
+/* ── Footer Info ── */
+.mb-upgrade-footer-note {
+  font-size: 0.78rem;
+  color: #64748b;
+  text-align: center;
+  margin: 0;
+}
+
+[data-theme="dark"] .mb-upgrade-footer-note {
+  color: #94a3b8;
+}
+
+.mb-upgrade-alert {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}

@@ -1,0 +1,9 @@
+{
+  "serviceName": "community",
+  "runtime": "AWS Lambda + CloudFront CDN",
+  "slo": {
+    "publicGuideLoadP95Ms": 180,
+    "articlesCatalogResponseP95Ms": 200,
+    "availabilityPercent": 99.95
+  }
+}

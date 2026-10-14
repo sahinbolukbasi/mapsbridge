@@ -1,0 +1,14 @@
+{
+  "serviceName": "messaging",
+  "runtime": "AWS API Gateway WebSocket + Lambda",
+  "slo": {
+    "webSocketDeliveryLatencyP95Ms": 150,
+    "connectionLifetimeMaxHours": 1,
+    "unauthorizedConnectionDropRate": 100.0
+  },
+  "metrics": [
+    { "name": "ActiveWebSocketConnections", "stat": "Maximum" },
+    { "name": "MessagesDeliveredPerSecond", "stat": "Sum" },
+    { "name": "DisconnectedUnexpectedly", "stat": "Sum", "alertThreshold": 10 }
+  ]
+}

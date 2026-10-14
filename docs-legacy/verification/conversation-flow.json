@@ -1,0 +1,223 @@
+[
+  {
+    "prompt": "Bana güzel bir gezi planla.",
+    "mode": "clarify",
+    "context": {
+      "interests": [],
+      "constraints": [],
+      "planningRequested": true
+    },
+    "answer": "Hangi şehre seyahat etmek istersin?"
+  },
+  {
+    "prompt": "Roma için iki gün, tarih ve müzeler ilgimi çekiyor. Orta bütçeyle bir rota hazırla.",
+    "mode": "route",
+    "context": {
+      "destination": "Roma",
+      "days": 2,
+      "interests": [
+        "tarih"
+      ],
+      "budget": "Orta",
+      "constraints": [],
+      "planningRequested": true
+    },
+    "answer": "Roma'da iki günlük bir tarih ve müze gezisi hazırladım. Rotada antik Roma'nın en önemli eserleri ve müzelerini bir araya getirdim.\n\n**1. Gün – Antik Roma ve Müzeler**\n- Sabah: Museo Nazionale Romano Palazzo Massimo (antik Roma heykelleri ve mozaikler)\n- Öğleden sonra: Colosseum (ikonik amfitiyatro)\n- Akşam: Piazza Navona'da gezinti\n\n**2. Gün – Müzeler ve Dini Mimarlar**\n- Sabah: Baths of Diocletian (Dioclezianus Hamamları müzesi)\n- Öğleden sonra: Basilica di Santa Maria degli Angeli e dei Martiri (Dioclezianus Hamamları'nın içine inşa edilmiş)\n\nTüm mekanlar merkezi Roma'da birbirine yakın, yürüyüş mesafesinde. Müze biletleri orta bütçeye uygun fiyatlıdır. Önceden online rezervasyon yapmanı tavsiye ederim, özellikle Colosseum için.\n\nKaynaklar:\n[Roma / Rome geleneksel mutfağı](https://www.turismoroma.it/it/node/48592)",
+    "route": {
+      "title": "Roma'da 2 Günlük Tarih ve Müze Gezisi",
+      "summary": "Antik Roma'nın en önemli anıtları ve müzelerini kapsayan, merkezi Roma'da yürüyüş mesafesinde bir rota. Colosseum, Palazzo Massimo ve Dioclezianus Hamamları müzesi gibi dünya mirası mekanları içerir.",
+      "theme": "Tarih ve Müzeler",
+      "destination": "Roma",
+      "estimatedDays": 2,
+      "stops": [
+        {
+          "id": "AQAAAFUAHpt2E0OaquoykolecJHhgrgZh_bTWXzqrjN0STv0C0vbAkwzjlanX6TYFUW5uW4rAOLj1WmtoQS7w10ascsZq-QHC-RNmJEG1Up2nsBZlQUK-siCn3i_LgdnIquTNwH8LCd_-SfaxmyizegF9lAN1XFpsNEc",
+          "name": "Museo Nazionale Romano Palazzo Massimo",
+          "lat": 41.90318,
+          "lng": 12.49877,
+          "address": "Museo Nazionale Romano Palazzo Massimo, Viale Enrico De Nicola, 53, 00185 Rome RM, Italy",
+          "category": "History Museum",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 1,
+          "description": "Museo Nazionale Romano Palazzo Massimo – Antik Roma'nın en zengin heykelleri, mozaikler ve sanat eserleri koleksiyonu. Tarih meraklıları için kaçılmaz.",
+          "suggestedDuration": "2 saat",
+          "estimatedMinutes": 120,
+          "timeSlot": "morning",
+          "distanceToNextKm": 1.5
+        },
+        {
+          "id": "AQAAAFUA9bsJMr-jGSgsP9dX61S5-sb9u41W1KkT9bvBFTENQIqAFu4c_ShgR1wq6S2ipejl-_WswyjXeEatEvWCabv3qL2YsxNUWpr56rgFAnzD-ffplJW_HRuIOrT3WoSXDEywoh3g-uEj-OU1QsDKcsbr58SnjduS",
+          "name": "Colosseum",
+          "lat": 41.89028,
+          "lng": 12.49216,
+          "address": "Colosseum, Piazza del Colosseo, 00184 Rome RM, Italy",
+          "category": "Historical Monument",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 1,
+          "description": "Colosseum – Roma'nın sembolü, 70-80 yılında inşa edilen devasa amfitiyatro. Antik Roma'nın mimarisinin en etkileyici örneği.",
+          "suggestedDuration": "1-1.5 saat",
+          "estimatedMinutes": 60,
+          "timeSlot": "afternoon",
+          "distanceToNextKm": 1.8
+        },
+        {
+          "id": "AQAAAFUAd0Eo6D1mO5P-M31NcDXeq-hcJPsr4RLy0FV3J2VLpB4U_oFUXDInMPqRNPGk8iRZZik6Dioi9USzVAtW7CLf1yieYUGRhalS-wdH7NAEBNK9hV9IGt8fhDdb7f5xGVCDcR-XnVuS1x4Ww0aEQZXnikN_vz0p",
+          "name": "Piazza Navona",
+          "lat": 41.89848,
+          "lng": 12.47345,
+          "address": "Piazza Navona, Piazza Navona, 00186 Rome RM, Italy",
+          "category": "Tourist Attraction",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 1,
+          "description": "Piazza Navona – Barok mimarinin şaheseri, Bernini çeşmeleriyle süslü meydanda akşam gezintisi.",
+          "suggestedDuration": "1 saat",
+          "estimatedMinutes": 60,
+          "timeSlot": "evening"
+        },
+        {
+          "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+          "name": "National Roman Museum - the Baths of Diocletian",
+          "lat": 41.90255,
+          "lng": 12.49899,
+          "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+          "category": "History Museum",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 2,
+          "description": "National Roman Museum - Baths of Diocletian – Dioclezianus Hamamları müzesi, antik Roma'nın günlük yaşamını anlatan eserler.",
+          "suggestedDuration": "2 saat",
+          "estimatedMinutes": 120,
+          "timeSlot": "morning",
+          "distanceToNextKm": 0.2
+        },
+        {
+          "id": "AQAAAFUAcRNfhLn7ZcstWSjhLI3_BQ3SXbwj99HZ52HrLOdqRZlqVJngb8vnX9CVMqzRA_ydy9LsdF9FFOLbgCa8o3hH1T48vYUW74hWibHtDTJvzVvvtR1kzf3LMTkMenQQboTcCW67-L5gD_qh4TvOZ9YYYXBu-1iV",
+          "name": "Basilica di Santa Maria degli Angeli E dei Martiri",
+          "lat": 41.90307,
+          "lng": 12.4968,
+          "address": "Basilica di Santa Maria degli Angeli E dei Martiri, Piazza della Repubblica, 00185 Rome RM, Italy",
+          "category": "Church",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 2,
+          "description": "Basilica di Santa Maria degli Angeli e dei Martiri – Dioclezianus Hamamları'nın kalıntıları üzerine inşa edilen 16. yüzyıl bazilikası. Antik ve modern mimarinin birleşimi.",
+          "suggestedDuration": "1 saat",
+          "estimatedMinutes": 60,
+          "timeSlot": "afternoon"
+        }
+      ]
+    },
+    "placeCount": 14
+  },
+  {
+    "prompt": "Aynı şehirde kalalım. İkinci güne kahve ekle; diğer durakları koru.",
+    "mode": "route",
+    "context": {
+      "destination": "Roma",
+      "days": 2,
+      "interests": [
+        "tarih"
+      ],
+      "budget": "Orta",
+      "constraints": [],
+      "planningRequested": true
+    },
+    "answer": "İkinci güne kahve durağı ekledim. Rotanız şu şekilde güncellendi:\n\n**1. Gün – Antik Roma ve Müzeler**\n- Sabah: Museo Nazionale Romano Palazzo Massimo\n- Öğleden sonra: Colosseum\n- Akşam: Piazza Navona\n\n**2. Gün – Müzeler, Kahve ve Dini Mimarlar**\n- Sabah: National Roman Museum - the Baths of Diocletian\n- Sabah/Erken öğleden sonra: Caffe Piccarozzi (Piazza della Repubblica'da, müzelerden hemen sonra)\n- Öğleden sonra: Basilica di Santa Maria degli Angeli e dei Martiri\n\nCaffe Piccarozzi, ikinci günün müze ziyaretlerinin arasında rahat bir kahve molası için ideal konumdadır. Diğer tüm duraklar korunmuştur.",
+    "route": {
+      "title": "Roma'da 2 Günlük Tarih ve Müze Gezisi",
+      "summary": "Antik Roma'nın en önemli anıtları ve müzelerini kapsayan, merkezi Roma'da yürüyüş mesafesinde bir rota. Colosseum, Palazzo Massimo ve Dioclezianus Hamamları müzesi gibi dünya mirası mekanları içerir. İkinci güne kahve durağı eklendi.",
+      "theme": "Tarih ve Müzeler",
+      "destination": "Roma",
+      "estimatedDays": 2,
+      "stops": [
+        {
+          "id": "AQAAAFUAHpt2E0OaquoykolecJHhgrgZh_bTWXzqrjN0STv0C0vbAkwzjlanX6TYFUW5uW4rAOLj1WmtoQS7w10ascsZq-QHC-RNmJEG1Up2nsBZlQUK-siCn3i_LgdnIquTNwH8LCd_-SfaxmyizegF9lAN1XFpsNEc",
+          "name": "Museo Nazionale Romano Palazzo Massimo",
+          "lat": 41.90318,
+          "lng": 12.49877,
+          "address": "Museo Nazionale Romano Palazzo Massimo, Viale Enrico De Nicola, 53, 00185 Rome RM, Italy",
+          "category": "History Museum",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 1,
+          "description": "Museo Nazionale Romano Palazzo Massimo – Antik Roma'nın en zengin heykelleri, mozaikler ve sanat eserleri koleksiyonu. Tarih meraklıları için kaçılmaz.",
+          "suggestedDuration": "2 saat",
+          "estimatedMinutes": 120,
+          "timeSlot": "morning",
+          "distanceToNextKm": 1.5
+        },
+        {
+          "id": "AQAAAFUA9bsJMr-jGSgsP9dX61S5-sb9u41W1KkT9bvBFTENQIqAFu4c_ShgR1wq6S2ipejl-_WswyjXeEatEvWCabv3qL2YsxNUWpr56rgFAnzD-ffplJW_HRuIOrT3WoSXDEywoh3g-uEj-OU1QsDKcsbr58SnjduS",
+          "name": "Colosseum",
+          "lat": 41.89028,
+          "lng": 12.49216,
+          "address": "Colosseum, Piazza del Colosseo, 00184 Rome RM, Italy",
+          "category": "Historical Monument",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 1,
+          "description": "Colosseum – Roma'nın sembolü, 70-80 yılında inşa edilen devasa amfitiyatro. Antik Roma'nın mimarisinin en etkileyici örneği.",
+          "suggestedDuration": "1-1.5 saat",
+          "estimatedMinutes": 90,
+          "timeSlot": "afternoon",
+          "distanceToNextKm": 1.8
+        },
+        {
+          "id": "AQAAAFUAd0Eo6D1mO5P-M31NcDXeq-hcJPsr4RLy0FV3J2VLpB4U_oFUXDInMPqRNPGk8iRZZik6Dioi9USzVAtW7CLf1yieYUGRhalS-wdH7NAEBNK9hV9IGt8fhDdb7f5xGVCDcR-XnVuS1x4Ww0aEQZXnikN_vz0p",
+          "name": "Piazza Navona",
+          "lat": 41.89848,
+          "lng": 12.47345,
+          "address": "Piazza Navona, Piazza Navona, 00186 Rome RM, Italy",
+          "category": "Tourist Attraction",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 1,
+          "description": "Piazza Navona – Barok mimarinin şaheseri, Bernini çeşmeleriyle süslü meydanda akşam gezintisi.",
+          "suggestedDuration": "1 saat",
+          "estimatedMinutes": 60,
+          "timeSlot": "evening"
+        },
+        {
+          "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+          "name": "National Roman Museum - the Baths of Diocletian",
+          "lat": 41.90255,
+          "lng": 12.49899,
+          "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+          "category": "History Museum",
+          "checkedAt": "2026-10-05T13:40:06.247Z",
+          "day": 2,
+          "description": "National Roman Museum - Baths of Diocletian – Dioclezianus Hamamları müzesi, antik Roma'nın günlük yaşamını anlatan eserler.",
+          "suggestedDuration": "2 saat",
+          "estimatedMinutes": 120,
+          "timeSlot": "morning",
+          "distanceToNextKm": 0.3
+        },
+        {
+          "id": "AQAAAFUAqJkir9RDEJvvskyjMQIfi2d79qr28Z8oa7BCiZR-0nl-aagA8viwkl4KQMpDU8TsVoAjEHaBOpduz2GvKQmWaxOKbT3YKKeIDbEuhL7384KnMxh7j33LxEKL7Ms1uEZ6wvuOTkcl_4cgrq3sXvTAV_oBD3uF",
+          "name": "Caffe Piccarozzi",
+          "lat": 41.90274,
+          "lng": 12.49519,
+          "address": "Caffe Piccarozzi, Piazza della Repubblica, 62, 00184 Rome RM, Italy",
+          "category": "Coffee Shop",
+          "checkedAt": "2026-10-05T13:40:06.247Z",
+          "day": 2,
+          "description": "Caffe Piccarozzi – Piazza della Repubblica'da konumlu, müze ziyaretleri arasında rahat bir kahve molası.",
+          "suggestedDuration": "45 dakika",
+          "estimatedMinutes": 45,
+          "timeSlot": "morning",
+          "distanceToNextKm": 0.1
+        },
+        {
+          "id": "AQAAAFUAcRNfhLn7ZcstWSjhLI3_BQ3SXbwj99HZ52HrLOdqRZlqVJngb8vnX9CVMqzRA_ydy9LsdF9FFOLbgCa8o3hH1T48vYUW74hWibHtDTJvzVvvtR1kzf3LMTkMenQQboTcCW67-L5gD_qh4TvOZ9YYYXBu-1iV",
+          "name": "Basilica di Santa Maria degli Angeli E dei Martiri",
+          "lat": 41.90307,
+          "lng": 12.4968,
+          "address": "Basilica di Santa Maria degli Angeli E dei Martiri, Piazza della Repubblica, 00185 Rome RM, Italy",
+          "category": "Church",
+          "checkedAt": "2026-10-05T13:39:53.755Z",
+          "day": 2,
+          "description": "Basilica di Santa Maria degli Angeli e dei Martiri – Dioclezianus Hamamları'nın kalıntıları üzerine inşa edilen 16. yüzyıl bazilikası. Antik ve modern mimarinin birleşimi.",
+          "suggestedDuration": "1 saat",
+          "estimatedMinutes": 60,
+          "timeSlot": "afternoon"
+        }
+      ]
+    },
+    "placeCount": 28
+  }
+]

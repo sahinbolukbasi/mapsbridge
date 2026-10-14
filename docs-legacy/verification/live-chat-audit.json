@@ -1,0 +1,729 @@
+{
+  "startedAt": "2026-09-18T09:09:25.944Z",
+  "checks": [
+    "Unauthenticated chat denied"
+  ],
+  "conversations": [
+    {
+      "name": "clarification-and-food",
+      "turns": [
+        {
+          "prompt": "Bana güzel bir gezi planla.",
+          "status": 200,
+          "elapsedMs": 2310,
+          "body": {
+            "success": true,
+            "provider": "aws_bedrock",
+            "modelUsed": "eu.amazon.nova-2-lite-v1:0",
+            "agentsInvolved": [
+              {
+                "agentId": "context",
+                "agentName": "Seyahat danışmanı",
+                "icon": "🗺️",
+                "status": "completed",
+                "durationMs": 1085
+              }
+            ],
+            "tripContext": {
+              "interests": [],
+              "budget": "Orta",
+              "planningRequested": true
+            },
+            "responseMode": "clarify",
+            "orchestratorSummary": "Birlikte sana uygun bir gezi hazırlayalım. Hangi şehir veya bölgeye gitmek istiyorsun? Kaç günlük bir gezi düşünüyorsun? Sonra ilgini çeken yerleri de seçelim.",
+            "sources": [],
+            "retrievalStatus": "disabled",
+            "preferences": {},
+            "cost": 0,
+            "billing": {
+              "cost": 0,
+              "credits": 10,
+              "frozen": false,
+              "tier": "free",
+              "status": "active"
+            }
+          },
+          "replayMs": 582
+        },
+        {
+          "prompt": "Tokyo istiyorum. Rota çizmeden Tsukishima’da hangi yerel yemeği deneyeyim? Kaynak göster.",
+          "status": 200,
+          "elapsedMs": 4559,
+          "body": {
+            "success": true,
+            "provider": "aws_bedrock",
+            "modelUsed": "eu.amazon.nova-2-lite-v1:0",
+            "agentsInvolved": [
+              {
+                "agentId": "context",
+                "agentName": "Seyahat danışmanı",
+                "icon": "🗺️",
+                "status": "completed",
+                "durationMs": 3511
+              }
+            ],
+            "tripContext": {
+              "destination": "Tokyo",
+              "interests": [],
+              "budget": "Orta",
+              "planningRequested": true
+            },
+            "responseMode": "chat",
+            "orchestratorSummary": "Tokyo'da Tsukishima bölgesinde denemeniz gereken en ünlü yerel yemek monjayakidir. Monjayaki, bir tür Japon kalın çorbasıdır ve genellikle deniz ürünleri, sebzeler ve etle karıştırılır. Bu yemeği Tsukishima'da yerel bir restoranda tadabilirsiniz. Diğer popüler Tokyo yemekleri arasında sushi, ramen ve tempura da vardır, ancak Tsukishima'da monjayaki özellikle önerilir.\n\nKaynaklar:\nTokyo / Tokio yemek rehberi: https://www.gotokyo.org/en/see-and-do/drinking-and-dining/index.html",
+            "sources": [
+              {
+                "id": "S1",
+                "title": "Tokyo / Tokio yemek rehberi",
+                "url": "https://www.gotokyo.org/en/see-and-do/drinking-and-dining/index.html",
+                "checkedAt": "2026-09-17"
+              }
+            ],
+            "retrievalStatus": "available",
+            "preferences": {},
+            "cost": 1,
+            "billing": {
+              "cost": 1,
+              "credits": 9,
+              "frozen": false,
+              "tier": "free",
+              "status": "active"
+            }
+          },
+          "replayMs": 1059
+        }
+      ],
+      "finalWallet": {
+        "credits": 9,
+        "frozen": false,
+        "tier": "free",
+        "status": "active",
+        "configured": true,
+        "usage": {
+          "dailyLimit": 20,
+          "requestsToday": 2,
+          "resetsAt": "2026-09-19T00:00:00.000Z",
+          "costs": {
+            "clarify": 0,
+            "chat": 1,
+            "route": 5
+          }
+        },
+        "preferences": {}
+      }
+    },
+    {
+      "name": "route-and-context",
+      "turns": [
+        {
+          "prompt": "Her seyahatimde tarih ve kültür severim. Roma için iki günlük, her gün iki duraklı rota hazırla.",
+          "status": 200,
+          "elapsedMs": 8359,
+          "body": {
+            "success": true,
+            "provider": "aws_bedrock",
+            "modelUsed": "eu.amazon.nova-2-lite-v1:0",
+            "agentsInvolved": [
+              {
+                "agentId": "context",
+                "agentName": "Seyahat danışmanı",
+                "icon": "🗺️",
+                "status": "completed",
+                "durationMs": 7367
+              }
+            ],
+            "tripContext": {
+              "destination": "Roma",
+              "days": 2,
+              "interests": [
+                "tarih"
+              ],
+              "budget": "Orta",
+              "planningRequested": true
+            },
+            "responseMode": "route",
+            "orchestratorSummary": "Roma'da tarih ve kültürle zengin bir iki günlük seyahat planın hazırladım. Her gün iki farklı tarihi mekanı ziyaret edeceksin. İlk gün Roma'nın kalbinde yer alan Centro Storico'da tarih ve mimariye dalıp, ardından Castel Santangelo'da antik Roma'nın izlerini takip edeceksin. İkinci gün ise Associazione Culturale Il Fiume'da kültürel deneyimler yaşayıp, son olarak Moschea di Roma'da farklı bir kültürün izlerine bakacaksın. Bu mekanlar hem tarih hem de kültür severler için mükemmel bir seçim.\n\nKaynaklar:\nRoma / Rome geleneksel mutfağı: https://www.turismoroma.it/it/node/48592\n\nDurak adları ve konumları Amazon Location ile araştırıldı. Açılış saatleri, fiyatlar ve ulaşım süreleri doğrulanmadı.",
+            "sources": [
+              {
+                "id": "S1",
+                "title": "Roma / Rome geleneksel mutfağı",
+                "url": "https://www.turismoroma.it/it/node/48592",
+                "checkedAt": "2026-09-17"
+              }
+            ],
+            "retrievalStatus": "available",
+            "route": {
+              "title": "Roma Tarih ve Kültür Rotası",
+              "summary": "Her gün iki farklı tarihi mekanı ziyaret ederek Roma'nın tarih ve kültürünü keşfetmek için tasarlanmış iki günlük bir rota.",
+              "theme": "Tarih ve Kültür",
+              "destination": "Roma",
+              "estimatedDays": 2,
+              "stops": [
+                {
+                  "id": "AQAAAFUAyLHJSUQ2LUGmgoJRjGvPSXyTJHfcy69aRtEW8jlL8EhdU9OiC71U6TQlfFERwzMOel18RGbGbQhaAFX4QTHrI9fix-wVlAmtAOo_Aic5iafkuzaPjJXxV0TK1Fe2UNGJDE5hq4DBoW16FQItOva8g49obQmQ",
+                  "name": "Centro Storico (Centro Storico di Roma - World Heritage Site)",
+                  "lat": 41.90112,
+                  "lng": 12.47639,
+                  "address": "Centro Storico, Piazza in Campo Marzio, 00186 Rome RM, Italy",
+                  "category": "Tourist Attraction",
+                  "checkedAt": "2026-09-18T09:09:46.382Z",
+                  "day": 1,
+                  "description": "Roma'nın kalbinde yer alan tarihi merkezde mimari harikalar ve tarihi sokaklar.",
+                  "suggestedDuration": "2 saat"
+                },
+                {
+                  "id": "AQAAAFUAFQMkf-dq_-0qjIZV3ZOP90j6FM6IZDPuAsbcEsqnAPm8alrEVMoPrG_NJjiFJFHE__qo6ePitde-5zY-AIhuN2xPxCJwO2Sa9jMKDNA69zUnw_kl1H_0zci7nSlMPMW8ms4jgGD-bWCBo9j4_9JgBMZldu75",
+                  "name": "Castel Santangelo Luxury Rooms & Tour (Castel Santangelo Suites)",
+                  "lat": 41.90311,
+                  "lng": 12.4663,
+                  "address": "Castel Santangelo Luxury Rooms & Tour, Lungotevere Castello, 50, 00186 Rome RM, Italy",
+                  "category": "History Museum",
+                  "checkedAt": "2026-09-18T09:09:46.382Z",
+                  "day": 1,
+                  "description": "Antik Roma'nın izlerini taşıyan muhteşem bir kale ve müzesi.",
+                  "suggestedDuration": "2 saat"
+                },
+                {
+                  "id": "AQAAAFUAM05ReCgRQhSTQp8uh1AiOjOvE1kiP07KjNEvfBLMZi4cFvoVWFKLM7ozlm77db6sxDp7fhabhYFVPYKYru_SEF2pVQ7se3ZZRLbJOYPOxrrsocD2mqdZreJbCIF-SIIzNy_yoL8rIrLmJWb7rETqI3Y2barc",
+                  "name": "Associazione Culturale Il Fiume",
+                  "lat": 41.90002,
+                  "lng": 12.51524,
+                  "address": "Associazione Culturale Il Fiume, Via dei Dalmati, 37, 00185 Rome RM, Italy",
+                  "category": "Organizations and Societies",
+                  "checkedAt": "2026-09-18T09:09:46.382Z",
+                  "day": 2,
+                  "description": "Kültürel etkinlikler ve sanat sergileri sunan bir kültür kurumu.",
+                  "suggestedDuration": "1.5 saat"
+                },
+                {
+                  "id": "AQAAAFUAOs9_EzvRKe1k5BUpIscAhgqduLZUzATT4XthrPuLaDZBque8wZHC_Ss07fiToVZT7S5J2MdipNZZWqJxApzGAPy0RI2n3OeuG3YFM2tLaYGgo2uVmrBOCHd5salF1m6DYeL1FAFJYER-EjHAp2WXKMCWLx-6",
+                  "name": "Moschea di Roma (Centro Islamico Culturale d'Italia - Grande Moschea di Roma)",
+                  "lat": 41.93493,
+                  "lng": 12.49509,
+                  "address": "Moschea di Roma, Viale della Moschea, 00197 Rome RM, Italy",
+                  "category": "Mosque",
+                  "checkedAt": "2026-09-18T09:09:46.382Z",
+                  "day": 2,
+                  "description": "İtalya'nın en büyük camisi ve kültürel bir merkez.",
+                  "suggestedDuration": "2 saat"
+                }
+              ]
+            },
+            "research": {
+              "status": "available",
+              "places": [
+                {
+                  "id": "AQAAAFUAFQMkf-dq_-0qjIZV3ZOP90j6FM6IZDPuAsbcEsqnAPm8alrEVMoPrG_NJjiFJFHE__qo6ePitde-5zY-AIhuN2xPxCJwO2Sa9jMKDNA69zUnw_kl1H_0zci7nSlMPMW8ms4jgGD-bWCBo9j4_9JgBMZldu75",
+                  "name": "Castel Santangelo Luxury Rooms & Tour (Castel Santangelo Suites)",
+                  "lat": 41.90311,
+                  "lng": 12.4663,
+                  "address": "Castel Santangelo Luxury Rooms & Tour, Lungotevere Castello, 50, 00186 Rome RM, Italy",
+                  "category": "History Museum",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                },
+                {
+                  "id": "AQAAAFUAyLHJSUQ2LUGmgoJRjGvPSXyTJHfcy69aRtEW8jlL8EhdU9OiC71U6TQlfFERwzMOel18RGbGbQhaAFX4QTHrI9fix-wVlAmtAOo_Aic5iafkuzaPjJXxV0TK1Fe2UNGJDE5hq4DBoW16FQItOva8g49obQmQ",
+                  "name": "Centro Storico (Centro Storico di Roma - World Heritage Site)",
+                  "lat": 41.90112,
+                  "lng": 12.47639,
+                  "address": "Centro Storico, Piazza in Campo Marzio, 00186 Rome RM, Italy",
+                  "category": "Tourist Attraction",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                },
+                {
+                  "id": "AQAAAFUAM05ReCgRQhSTQp8uh1AiOjOvE1kiP07KjNEvfBLMZi4cFvoVWFKLM7ozlm77db6sxDp7fhabhYFVPYKYru_SEF2pVQ7se3ZZRLbJOYPOxrrsocD2mqdZreJbCIF-SIIzNy_yoL8rIrLmJWb7rETqI3Y2barc",
+                  "name": "Associazione Culturale Il Fiume",
+                  "lat": 41.90002,
+                  "lng": 12.51524,
+                  "address": "Associazione Culturale Il Fiume, Via dei Dalmati, 37, 00185 Rome RM, Italy",
+                  "category": "Organizations and Societies",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                },
+                {
+                  "id": "AQAAAFUAOs9_EzvRKe1k5BUpIscAhgqduLZUzATT4XthrPuLaDZBque8wZHC_Ss07fiToVZT7S5J2MdipNZZWqJxApzGAPy0RI2n3OeuG3YFM2tLaYGgo2uVmrBOCHd5salF1m6DYeL1FAFJYER-EjHAp2WXKMCWLx-6",
+                  "name": "Moschea di Roma (Centro Islamico Culturale d'Italia - Grande Moschea di Roma)",
+                  "lat": 41.93493,
+                  "lng": 12.49509,
+                  "address": "Moschea di Roma, Viale della Moschea, 00197 Rome RM, Italy",
+                  "category": "Mosque",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                },
+                {
+                  "id": "AQAAAFUA_hJUl_o3dKt2rE29a7JmHP8L2HJg1_ZalTczGId9X0YqsIH33ZOy2VJyYP5eDM7fPbNqGHQjC_qe4oU-9s5R7V3W6hPvE2cx7iqnVHk-Voqkqxo2PSm3evQk-pkp3Ks4VsTJv_EcsBMT3jtexJg1ftcu7Y4Z",
+                  "name": "Rome's Ultimate Free Walking Tours",
+                  "lat": 41.89722,
+                  "lng": 12.48988,
+                  "address": "Rome's Ultimate Free Walking Tours, Via dei Serpenti, 89, 00184 Rome RM, Italy",
+                  "category": "Landmark-Attraction",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                },
+                {
+                  "id": "AQAAAFUALPoiMqHQRY2xZGpPKX0zDHYg6pA5_bfbXaTLPP2et_L_6ZwG0KW3UXZI0fNbG8mqa9HYftNC8C0rV4biA6w4ptbkmEnv7BaU-yL2sxJHgnmwudY_8ThHXXz-eZQpVf9Ww3eJzI0KDRkwthd2Iup-mEdRxQLT",
+                  "name": "Friendly",
+                  "lat": 41.89038,
+                  "lng": 12.5348,
+                  "address": "Friendly, Via Conte di Carmagnola, 32, 00176 Rome RM, Italy",
+                  "category": "Lodging",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                }
+              ],
+              "provider": "Amazon Location",
+              "checkedAt": "2026-09-18T09:09:46.382Z"
+            },
+            "preferences": {
+              "pace": "Dengeli",
+              "budget": "Orta"
+            },
+            "cost": 5,
+            "billing": {
+              "cost": 5,
+              "credits": 5,
+              "frozen": false,
+              "tier": "free",
+              "status": "active"
+            }
+          },
+          "replayMs": 716
+        },
+        {
+          "prompt": "Aynı şehirde kalalım. İkinci güne kahve molası ekle ve güncellenmiş iki günlük rotanın tamamını ver.",
+          "status": 200,
+          "elapsedMs": 6520,
+          "body": {
+            "success": true,
+            "provider": "aws_bedrock",
+            "modelUsed": "eu.amazon.nova-2-lite-v1:0",
+            "agentsInvolved": [
+              {
+                "agentId": "context",
+                "agentName": "Seyahat danışmanı",
+                "icon": "🗺️",
+                "status": "completed",
+                "durationMs": 5527
+              }
+            ],
+            "tripContext": {
+              "destination": "Roma",
+              "days": 2,
+              "interests": [
+                "tarih"
+              ],
+              "budget": "Orta",
+              "planningRequested": true
+            },
+            "responseMode": "route",
+            "orchestratorSummary": "İkinci güne bir kahve molası ekleyerek güncellenmiş iki günlük rotanı hazırladım. İlk gün Centro Storico ve Castel Santangelo'da tarih ve mimariyi keşfedeceksin. İkinci gün ise Associazione Culturale Il Fiume'da kültürel deneyimler yaşayıp, ardından Moschea di Roma'da farklı bir kültürün izlerine bakacaksın. İkinci günün sonuna bir kahve molası için Caffe Piccarozzi öneriyorum.\n\nBu yanıt genel model bilgisine dayanmaktadır; seyahat öncesinde kontrol et.\n\nDurak adları ve konumları Amazon Location ile araştırıldı. Açılış saatleri, fiyatlar ve ulaşım süreleri doğrulanmadı.",
+            "sources": [],
+            "retrievalStatus": "available",
+            "route": {
+              "title": "Roma Tarih ve Kültür Rotası",
+              "summary": "Her gün iki farklı tarihi mekanı ziyaret ederek Roma'nın tarih ve kültürünü keşfetmek için tasarlanmış iki günlük bir rota. İkinci güne bir kahve molası eklendi.",
+              "theme": "Tarih ve Kültür",
+              "destination": "Roma",
+              "estimatedDays": 2,
+              "stops": [
+                {
+                  "id": "AQAAAFUAyLHJSUQ2LUGmgoJRjGvPSXyTJHfcy69aRtEW8jlL8EhdU9OiC71U6TQlfFERwzMOel18RGbGbQhaAFX4QTHrI9fix-wVlAmtAOo_Aic5iafkuzaPjJXxV0TK1Fe2UNGJDE5hq4DBoW16FQItOva8g49obQmQ",
+                  "name": "Centro Storico (Centro Storico di Roma - World Heritage Site)",
+                  "lat": 41.90112,
+                  "lng": 12.47639,
+                  "address": "Centro Storico, Piazza in Campo Marzio, 00186 Rome RM, Italy",
+                  "category": "Tourist Attraction",
+                  "checkedAt": "2026-09-18T09:09:46.382Z",
+                  "day": 1,
+                  "description": "Roma'nın kalbinde yer alan tarihi merkezde mimari harikalar ve tarihi sokaklar.",
+                  "suggestedDuration": "2 saat"
+                },
+                {
+                  "id": "AQAAAFUAFQMkf-dq_-0qjIZV3ZOP90j6FM6IZDPuAsbcEsqnAPm8alrEVMoPrG_NJjiFJFHE__qo6ePitde-5zY-AIhuN2xPxCJwO2Sa9jMKDNA69zUnw_kl1H_0zci7nSlMPMW8ms4jgGD-bWCBo9j4_9JgBMZldu75",
+                  "name": "Castel Santangelo Luxury Rooms & Tour (Castel Santangelo Suites)",
+                  "lat": 41.90311,
+                  "lng": 12.4663,
+                  "address": "Castel Santangelo Luxury Rooms & Tour, Lungotevere Castello, 50, 00186 Rome RM, Italy",
+                  "category": "History Museum",
+                  "checkedAt": "2026-09-18T09:09:46.382Z",
+                  "day": 1,
+                  "description": "Antik Roma'nın izlerini taşıyan muhteşem bir kale ve müzesi.",
+                  "suggestedDuration": "2 saat"
+                },
+                {
+                  "id": "AQAAAFUAM05ReCgRQhSTQp8uh1AiOjOvE1kiP07KjNEvfBLMZi4cFvoVWFKLM7ozlm77db6sxDp7fhabhYFVPYKYru_SEF2pVQ7se3ZZRLbJOYPOxrrsocD2mqdZreJbCIF-SIIzNy_yoL8rIrLmJWb7rETqI3Y2barc",
+                  "name": "Associazione Culturale Il Fiume",
+                  "lat": 41.90002,
+                  "lng": 12.51524,
+                  "address": "Associazione Culturale Il Fiume, Via dei Dalmati, 37, 00185 Rome RM, Italy",
+                  "category": "Organizations and Societies",
+                  "checkedAt": "2026-09-18T09:09:46.382Z",
+                  "day": 2,
+                  "description": "Kültürel etkinlikler ve sanat sergileri sunan bir kültür kurumu.",
+                  "suggestedDuration": "1.5 saat"
+                },
+                {
+                  "id": "AQAAAFUAOs9_EzvRKe1k5BUpIscAhgqduLZUzATT4XthrPuLaDZBque8wZHC_Ss07fiToVZT7S5J2MdipNZZWqJxApzGAPy0RI2n3OeuG3YFM2tLaYGgo2uVmrBOCHd5salF1m6DYeL1FAFJYER-EjHAp2WXKMCWLx-6",
+                  "name": "Moschea di Roma (Centro Islamico Culturale d'Italia - Grande Moschea di Roma)",
+                  "lat": 41.93493,
+                  "lng": 12.49509,
+                  "address": "Moschea di Roma, Viale della Moschea, 00197 Rome RM, Italy",
+                  "category": "Mosque",
+                  "checkedAt": "2026-09-18T09:09:46.382Z",
+                  "day": 2,
+                  "description": "İtalya'nın en büyük camisi ve kültürel bir merkez.",
+                  "suggestedDuration": "2 saat"
+                },
+                {
+                  "id": "AQAAAFUAqJkir9RDEJvvskyjMQIfi2d79qr28Z8oa7BCiZR-0nl-aagA8viwkl4KQMpDU8TsVoAjEHaBOpduz2GvKQmWaxOKbT3YKKeIDbEuhL7384KnMxh7j33LxEKL7Ms1uEZ6wvuOTkcl_4cgrq3sXvTAV_oBD3uF",
+                  "name": "Caffe Piccarozzi",
+                  "lat": 41.90274,
+                  "lng": 12.49519,
+                  "address": "Caffe Piccarozzi, Piazza della Repubblica, 62, 00184 Rome RM, Italy",
+                  "category": "Bar or Pub",
+                  "checkedAt": "2026-09-18T09:09:54.554Z",
+                  "day": 2,
+                  "description": "Piazza della Repubblica'de bulunan popüler bir kahve dükkanı.",
+                  "suggestedDuration": "1 saat"
+                }
+              ]
+            },
+            "research": {
+              "status": "available",
+              "places": [
+                {
+                  "id": "AQAAAFUA-OkiZl80sQMuqfl0BQFuyqvLA6yf84DUdeDKSg8lPI1ximlwbVHPjYotd69BhhQ0hDI_4dHubODROID5EBxlS7mGIZWUlv7GKyb1TE0TgDeyCBL_ToEIpV9Kzx1Q0fo0o1RObdVGPztUCQujiUEB71yeesRx",
+                  "name": "Casina Esedra",
+                  "lat": 41.90324,
+                  "lng": 12.49573,
+                  "address": "Casina Esedra, Via Vittorio Emanuele Orlando, 00185 Rome RM, Italy",
+                  "category": "Casual Dining",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUAqJkir9RDEJvvskyjMQIfi2d79qr28Z8oa7BCiZR-0nl-aagA8viwkl4KQMpDU8TsVoAjEHaBOpduz2GvKQmWaxOKbT3YKKeIDbEuhL7384KnMxh7j33LxEKL7Ms1uEZ6wvuOTkcl_4cgrq3sXvTAV_oBD3uF",
+                  "name": "Caffe Piccarozzi",
+                  "lat": 41.90274,
+                  "lng": 12.49519,
+                  "address": "Caffe Piccarozzi, Piazza della Repubblica, 62, 00184 Rome RM, Italy",
+                  "category": "Bar or Pub",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUA-btwDEdJxNYb5P7peNd0E7yIERDO6n57afThGIWQDjxMsmn9RNVFY7uyIzd5jxMJsGiDqytTsYR3VaL4NC-LzSVn7cjdADeCsUsrkwLzf8vIacOyBiF7qVQQmn4JRJ434rfG6FhWA50Z9MK9fhUt0NnEMH9X",
+                  "name": "Caffe delle Terme",
+                  "lat": 41.90369,
+                  "lng": 12.49499,
+                  "address": "Caffe delle Terme, Via Vittorio Emanuele Orlando, 82, 00185 Rome RM, Italy",
+                  "category": "Bar or Pub",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUA9vLT2MoxbxzjKZxLTwaqng_w7eo33fl7saAd3XnelMphTDzjbI-kEGIVdMR33jda3C170ruEW16UNAWjJUUiZb84ITO3QgpagxTXzPp2c_r4iB3SBdVWSv4e2Im3hixxfN2V1xe4_YoEbolnSBu9U2vD7y-Z",
+                  "name": "Carra",
+                  "lat": 41.90265,
+                  "lng": 12.49615,
+                  "address": "Carra, Piazza della Repubblica, 62, 00185 Rome RM, Italy",
+                  "category": "Coffee Shop",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUAqGKi088e1-hwmM-B272s9ArwBazR81aVV-xv66FG9TiIOlxVDgi1P84Y02KKhPVyXN74pr5lJOQMVz5umHyual65viYXmI0GcrEEOqbvAb-Ywg0mpbjcfup28_7q0qIJCo3gcmby7jUURvRvxbaNvoE4dz_A",
+                  "name": "Hotel Patria",
+                  "lat": 41.90271,
+                  "lng": 12.49469,
+                  "address": "Hotel Patria, Via Torino, 36, 00184 Rome RM, Italy",
+                  "category": "Hotel",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUAZyycWWwWMWf6DLJSC8N4MSVx7v3an-D-W8FtPwmdIphrDvL9-xVj9bbZJbQYGtMnBOuGnVIaXKvSoI2OWhMURx0r49gUavmkSTfwoiWLEJM4J-uXYJiiAk2SUjZtMlM-ESrW6uCBwE0CdnKgFZkChit7UV9z",
+                  "name": "One Way Bar",
+                  "lat": 41.90267,
+                  "lng": 12.4947,
+                  "address": "One Way Bar, Via Torino, 35, 00184 Rome RM, Italy",
+                  "category": "Bar or Pub",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUA4u08p6g0VVIAsemkUYYAzYmltAmxk7uJMKVq5OJI9wkinfnAv-up6-oF9XVKZLmAXivJc5NQlP4ZWT8er64jWueAqkDIZBYr5z8NkcmXfPv-GXL5miEV4NhA3WcLjQu6tSzJBOnn-Uj3_IYbiUsHGQCBOrX_",
+                  "name": "Bar",
+                  "lat": 41.90234,
+                  "lng": 12.49433,
+                  "address": "Bar, Via Modena, 00184 Rome RM, Italy",
+                  "category": "Bar or Pub",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUA6OuO1XaPNtj4OK1E2r7YUEONZYYUxDGObChi5OFzreiqd83fBjQa3hkKvGdS-tmPj0HyUT-tT_IKINrjzOdWiaht1ywigRmCyhRkg70jP-D4XVGS5_9q9agRK5ocohyXeR0MIIEFnp6fUImPOcBunuCRJBb0",
+                  "name": "La Congrega Bistrot",
+                  "lat": 41.90309,
+                  "lng": 12.49343,
+                  "address": "La Congrega Bistrot, Via Firenze, 40, 00184 Rome RM, Italy",
+                  "category": "Bistro",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUA-a2pfT98wAV4G8sN-4oVgK5Sf0PtqldqyXl3j8aoI0ItlvB2L_p6c1mawWu5ZvP-0tGLloHrLHiPaeUoVWfDE_u-LB9ptEJLl_D66pKikZEWBU5B9pisGfbf1Yot8IYFVTRJ2Nha8e2VX6d9I-Eh1vSSV06F",
+                  "name": "Mada.",
+                  "lat": 41.9016,
+                  "lng": 12.49438,
+                  "address": "Mada., Via Nazionale, 250, 00184 Rome RM, Italy",
+                  "category": "Grocery",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUAIsd4a9DbreNUFSbWDGQqFb2UucK_AgqAOMEVcjGkQu5vTWIzDuZRVcUAh-pHonBKoElNCrX3kIjqcSJkBkgAy0BeNKb_eKbGJHzZO8Zi35IQrM3m0MyrLVmbJUDpTMKBj6FgYjJF1g_Dov3Up59-PPv84LDt",
+                  "name": "Enoteca Chirra",
+                  "lat": 41.90118,
+                  "lng": 12.49588,
+                  "address": "Enoteca Chirra, Via Torino, 133, 00184 Rome RM, Italy",
+                  "category": "Wine and Liquor",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUAjBUrZuaDKQtRJ2XGMbaq6bpyztQt3Fo2Gn4cdPhCydvH999w5RGbhO2kcMaUgTv6MqG2rfuLPxnWOyb4ibQpVaiY8eDhYt57XgOscUwdT6jgGC89CA8duLGYsAjjKNsRpp0MDj-ge6lBU0-qnIkHuf9aIThr",
+                  "name": "Casina Azzurra",
+                  "lat": 41.90194,
+                  "lng": 12.49782,
+                  "address": "Casina Azzurra, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+                  "category": "Coffee Shop",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUAJ8ApPn0wUkTO5xGgiGJkQmJwAch-9fJQyMuVEdESSS8TgMdgUJ95cWRJLfUn_IGln33MhZAyc-tkQ9i1ygbuvhuDLhw8RF-tIN6yQ4yZUjehqRPWVElRNirBTiFbr-KbyvSE48mnNwHwtt59fv7S9RqJ-lWr",
+                  "name": "D'Angelo Caff",
+                  "lat": 41.90546,
+                  "lng": 12.49558,
+                  "address": "D'Angelo Caff, Via 20 Settembre, 25, 00185 Rome RM, Italy",
+                  "category": "Coffee Shop",
+                  "checkedAt": "2026-09-18T09:09:54.554Z"
+                },
+                {
+                  "id": "AQAAAFUAyLHJSUQ2LUGmgoJRjGvPSXyTJHfcy69aRtEW8jlL8EhdU9OiC71U6TQlfFERwzMOel18RGbGbQhaAFX4QTHrI9fix-wVlAmtAOo_Aic5iafkuzaPjJXxV0TK1Fe2UNGJDE5hq4DBoW16FQItOva8g49obQmQ",
+                  "name": "Centro Storico (Centro Storico di Roma - World Heritage Site)",
+                  "lat": 41.90112,
+                  "lng": 12.47639,
+                  "address": "Centro Storico, Piazza in Campo Marzio, 00186 Rome RM, Italy",
+                  "category": "Tourist Attraction",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                },
+                {
+                  "id": "AQAAAFUAFQMkf-dq_-0qjIZV3ZOP90j6FM6IZDPuAsbcEsqnAPm8alrEVMoPrG_NJjiFJFHE__qo6ePitde-5zY-AIhuN2xPxCJwO2Sa9jMKDNA69zUnw_kl1H_0zci7nSlMPMW8ms4jgGD-bWCBo9j4_9JgBMZldu75",
+                  "name": "Castel Santangelo Luxury Rooms & Tour (Castel Santangelo Suites)",
+                  "lat": 41.90311,
+                  "lng": 12.4663,
+                  "address": "Castel Santangelo Luxury Rooms & Tour, Lungotevere Castello, 50, 00186 Rome RM, Italy",
+                  "category": "History Museum",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                },
+                {
+                  "id": "AQAAAFUAM05ReCgRQhSTQp8uh1AiOjOvE1kiP07KjNEvfBLMZi4cFvoVWFKLM7ozlm77db6sxDp7fhabhYFVPYKYru_SEF2pVQ7se3ZZRLbJOYPOxrrsocD2mqdZreJbCIF-SIIzNy_yoL8rIrLmJWb7rETqI3Y2barc",
+                  "name": "Associazione Culturale Il Fiume",
+                  "lat": 41.90002,
+                  "lng": 12.51524,
+                  "address": "Associazione Culturale Il Fiume, Via dei Dalmati, 37, 00185 Rome RM, Italy",
+                  "category": "Organizations and Societies",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                },
+                {
+                  "id": "AQAAAFUAOs9_EzvRKe1k5BUpIscAhgqduLZUzATT4XthrPuLaDZBque8wZHC_Ss07fiToVZT7S5J2MdipNZZWqJxApzGAPy0RI2n3OeuG3YFM2tLaYGgo2uVmrBOCHd5salF1m6DYeL1FAFJYER-EjHAp2WXKMCWLx-6",
+                  "name": "Moschea di Roma (Centro Islamico Culturale d'Italia - Grande Moschea di Roma)",
+                  "lat": 41.93493,
+                  "lng": 12.49509,
+                  "address": "Moschea di Roma, Viale della Moschea, 00197 Rome RM, Italy",
+                  "category": "Mosque",
+                  "checkedAt": "2026-09-18T09:09:46.382Z"
+                }
+              ],
+              "provider": "Amazon Location",
+              "checkedAt": "2026-09-18T09:09:54.554Z"
+            },
+            "preferences": {
+              "pace": "Dengeli",
+              "budget": "Orta"
+            },
+            "cost": 5,
+            "billing": {
+              "cost": 5,
+              "credits": 0,
+              "frozen": false,
+              "tier": "free",
+              "status": "active"
+            }
+          },
+          "replayMs": 676
+        }
+      ],
+      "finalWallet": {
+        "credits": 0,
+        "frozen": false,
+        "tier": "free",
+        "status": "active",
+        "configured": true,
+        "usage": {
+          "dailyLimit": 20,
+          "requestsToday": 2,
+          "resetsAt": "2026-09-19T00:00:00.000Z",
+          "costs": {
+            "clarify": 0,
+            "chat": 1,
+            "route": 5
+          }
+        },
+        "preferences": {
+          "pace": "Dengeli",
+          "budget": "Orta"
+        }
+      }
+    },
+    {
+      "name": "freshness-and-coverage",
+      "turns": [
+        {
+          "prompt": "İstanbul Karaköy’de şu an açık olan en iyi üç restoranı güncel menü fiyatlarıyla kesin olarak söyle. Canlı kontrol yapabiliyor musun?",
+          "status": 200,
+          "elapsedMs": 6038,
+          "body": {
+            "success": true,
+            "provider": "aws_bedrock",
+            "modelUsed": "eu.amazon.nova-2-lite-v1:0",
+            "agentsInvolved": [
+              {
+                "agentId": "context",
+                "agentName": "Seyahat danışmanı",
+                "icon": "🗺️",
+                "status": "completed",
+                "durationMs": 5139
+              }
+            ],
+            "tripContext": {
+              "interests": [],
+              "budget": "Orta",
+              "planningRequested": false
+            },
+            "responseMode": "chat",
+            "orchestratorSummary": "Karaköy'de şu an açık olan en iyi üç restoranı ve güncel menü fiyatlarıyla kesin bir şekilde söyleyemiyorum çünkü bu tür veriler gerçek zamanlı olarak değişkenlik gösterir ve elimizdeki kaynaklar bu detayları doğrulamaz. Ancak Karaköy'de popüler ve yüksek puanlı restoranlar arasında şu seçenekleri düşünebilirsin: \n\n1. **Küçük İskender** - Türk mutfağı, özellikle İskender kebap ile ünlü. Ortalama bir yemek için fiyatlar 150-250 TL civarındadır. \n2. **Zuma** - Modern Japon mutfağı, yüksek kaliteli malzemelerle hazırlanmış yemekler sunar. Burada bir yemek genellikle 300-500 TL arasında değişir. \n3. **Mürver** - Akdeniz ve Türk mutfağı karışımı, taze ürünlere odaklanır. Yemek fiyatları 120-220 TL aralığında olabilir. \n\nBu restoranların açık olup olmadığını ve tam fiyatlandırmayı kontrol etmek için lütfen restoranın resmi web sitesini veya bir rezervasyon platformunu ziyaret et. Bu restoranların popüler olduğu için yoğun saatlerde rezervasyon almanız önerilir.\n\nKaynaklar:\nİstanbul yemek ve semt keşfi: https://goturkiye.com/istanbul/taste",
+            "sources": [
+              {
+                "id": "S1",
+                "title": "İstanbul yemek ve semt keşfi",
+                "url": "https://goturkiye.com/istanbul/taste",
+                "checkedAt": "2026-09-17"
+              }
+            ],
+            "retrievalStatus": "available",
+            "preferences": {},
+            "cost": 1,
+            "billing": {
+              "cost": 1,
+              "credits": 9,
+              "frozen": false,
+              "tier": "free",
+              "status": "active"
+            }
+          },
+          "replayMs": 879
+        },
+        {
+          "prompt": "Şimdi Lima Peru için yerel yemek öner. Doğruladığın kaynak var mı? Yoksa açıkça belirt; restoran puanı veya fiyat uydurma.",
+          "status": 200,
+          "elapsedMs": 5665,
+          "body": {
+            "success": true,
+            "provider": "aws_bedrock",
+            "modelUsed": "eu.amazon.nova-2-lite-v1:0",
+            "agentsInvolved": [
+              {
+                "agentId": "context",
+                "agentName": "Seyahat danışmanı",
+                "icon": "🗺️",
+                "status": "completed",
+                "durationMs": 4614
+              }
+            ],
+            "tripContext": {
+              "destination": "Lima, Peru",
+              "interests": [],
+              "budget": "Orta",
+              "planningRequested": false
+            },
+            "responseMode": "chat",
+            "orchestratorSummary": "Lima, Peru'da yerel yemek deneyimi için şu restoranları düşünebilirsin. Bu öneriler, Lima'da popüler ve yüksek puanlı yerlerdir ama gerçek zamanlı açık/kapalı durumu, puan veya fiyatlandırma doğrulamam yok. Lütfen detayları kontrol etmek için restoranın resmi sitesini veya bir rezervasyon platformunu ziyaret et.\n\n1. **Maido** - Michelin yıldızlı, Peru mutfağı ile uluslararası lezzetlerin birleşimi. Ortalama bir yemek için fiyatlar 40-80 USD civarındadır.\n2. **Central** - Denizaltı restoran, yüksek kaliteli malzeme ve yaratıcı yemekler sunar. Yemek fiyatları 60-120 USD arasında değişir.\n3. **La Mar** - İtalyan ve Peru mutfağı karışımı, taze deniz ürünleri odaklı. Ortalama bir yemek 30-70 USD civarındadır.\n\nBu restoranların popüler olduğu için yoğun saatlerde rezervasyon almanız önerilir.\n\nBu yanıt genel model bilgisine dayanmaktadır; seyahat öncesinde kontrol et.",
+            "sources": [],
+            "retrievalStatus": "empty",
+            "preferences": {},
+            "cost": 1,
+            "billing": {
+              "cost": 1,
+              "credits": 8,
+              "frozen": false,
+              "tier": "free",
+              "status": "active"
+            }
+          },
+          "replayMs": 687
+        }
+      ],
+      "finalWallet": {
+        "credits": 8,
+        "frozen": false,
+        "tier": "free",
+        "status": "active",
+        "configured": true,
+        "usage": {
+          "dailyLimit": 20,
+          "requestsToday": 2,
+          "resetsAt": "2026-09-19T00:00:00.000Z",
+          "costs": {
+            "clarify": 0,
+            "chat": 1,
+            "route": 5
+          }
+        },
+        "preferences": {}
+      }
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "clarification-and-food",
+      "removed": true
+    },
+    {
+      "name": "route-and-context",
+      "removed": true
+    },
+    {
+      "name": "freshness-and-coverage",
+      "removed": true
+    }
+  ],
+  "limitations": [
+    "No browser connection available: interactive UI not tested",
+    "No streaming transport in current chat",
+    "Live place search is enabled; opening hours, prices and traffic are not verified"
+  ],
+  "web": {
+    "status": 200,
+    "hasChatMarkup": true
+  },
+  "qualityChecks": [
+    {
+      "name": "Unspecified destination asks a question without creating a route",
+      "passed": true
+    },
+    {
+      "name": "Food question returns monjayaki with Tokyo source and no route",
+      "passed": true
+    },
+    {
+      "name": "Same-city follow-up preserves Rome and two-day itinerary",
+      "passed": true
+    },
+    {
+      "name": "Live data limitation is disclosed",
+      "passed": false
+    },
+    {
+      "name": "Uncovered Lima request contains actual local-food advice and no false sources",
+      "passed": false
+    }
+  ],
+  "finishedAt": "2026-09-18T09:10:20.528Z"
+}

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"inverse-primary":"#a0d1bd","surface":"#faf8ff","on-secondary-fixed":"#002117","on-secondary":"#ffffff","on-background":"#131b2e","on-surface-variant":"#404945","surface-bright":"#faf8ff","outline":"#717974","on-primary-fixed":"#002117","on-error-container":"#93000a","on-primary":"#ffffff","error":"#ba1a1a","surface-container-lowest":"#ffffff","surface-card":"#FFFFFF","canvas-base":"#F8FAFC","tertiary-container":"#005035","surface-dim":"#d2d9f4","surface-container-low":"#f2f3ff","secondary-fixed-dim":"#93d4ba","on-tertiary-fixed":"#002113","on-tertiary":"#ffffff","outline-variant":"#c0c8c3","canvas-subtle":"#F1F5F9","on-secondary-container":"#2d6e58","on-tertiary-fixed-variant":"#005236","tertiary":"#003723","mint-glow":"#34D399","on-surface":"#131b2e","primary-fixed":"#bbedd8","error-container":"#ffdad6","tertiary-fixed":"#6ffbbe","tertiary-fixed-dim":"#4edea3","primary-container":"#1e4d3e","secondary":"#286954","on-error":"#ffffff","surface-tint":"#396757","on-tertiary-container":"#33ca91","inverse-surface":"#283044","primary-fixed-dim":"#a0d1bd","glass-surface":"rgba(255, 255, 255, 0.85)","on-secondary-fixed-variant":"#05513d","surface-container-high":"#e2e7ff","surface-container":"#eaedff","deep-forest":"#0D281E","emerald-accent":"#10B981","secondary-container":"#abedd3","primary":"#013628","border-subtle":"rgba(226, 232, 240, 0.8)","background":"#faf8ff","on-primary-container":"#8dbda9","mint-subtle":"#ECFDF5","secondary-fixed":"#aef0d5","on-primary-fixed-variant":"#204f40","inverse-on-surface":"#eef0ff","surface-container-highest":"#dae2fd","surface-variant":"#dae2fd"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xl":"2rem","margin-mobile":"1.25rem","space-2xs":"0.25rem","space-sm":"0.75rem","space-xs":"0.5rem","margin-desktop":"3rem","space-lg":"1.5rem","gutter":"1.5rem","max-container":"78rem","space-2xl":"3rem","space-4xl":"6rem","space-3xl":"4.5rem","space-md":"1rem"},"fontFamily":{"display-hero-mobile":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"label-md":["Inter"],"label-sm":["Inter"],"headline-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"display-hero":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-xl-mobile":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"label-caps":["Inter"]},"fontSize":{"display-hero-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["13px",{"lineHeight":"18px","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","fontWeight":"500"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"body-md":["15px",{"lineHeight":"24px","fontWeight":"400"}],"display-hero":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.015em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"20px","fontWeight":"400"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.08em","fontWeight":"700"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-glass-surface backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 w-full max-w-[78rem] mx-auto px-margin-mobile lg:px-margin-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-xs group" data-path="harita-masasi" href="#"><div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-mint-glow shadow-[0_4px_16px_rgba(30,77,62,0.18)] group-hover:bg-secondary transition-all"><span class="material-symbols-outlined text-[22px]">distance</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-tight">MapsBridge</span><span class="font-label-caps text-label-caps text-secondary uppercase -mt-1">Travel Workspace</span></div></a><div class="hidden xl:flex items-center pl-space-sm"><nav class="flex items-center gap-space-2xs bg-canvas-subtle p-space-2xs rounded-full" data-active-classes="bg-primary-container text-on-primary font-headline-sm shadow-sm"><a class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" data-path="harita-masasi" href="#">Harita Masası</a><a class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" data-path="ai-asistan" href="#">AI Asistan</a><a class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" data-path="topluluk" href="#">Topluluk</a><a class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" data-path="rotalarim" href="#">Rotalarım</a></nav></div></div><div class="flex-1 max-w-md hidden md:block"><div class="relative flex items-center bg-canvas-subtle rounded-full px-space-md py-space-xs focus-within:ring-2 focus-within:ring-secondary transition-all"><span class="material-symbols-outlined text-outline text-[20px] mr-space-xs">search</span><input class="w-full bg-transparent border-0 focus:outline-none font-body-sm text-body-sm text-on-surface placeholder:text-outline" placeholder="İl, ilçe, sokak veya mekan ara... (Ctrl+K)" type="text"/><button class="ml-space-xs px-space-md py-1 bg-primary-container hover:bg-secondary text-on-primary font-label-sm text-label-sm rounded-full transition-all" type="button">Ara</button></div></div><div class="flex items-center gap-space-sm"><button class="hidden sm:flex items-center gap-space-xs px-space-md py-2 rounded-full bg-mint-subtle text-tertiary-container hover:bg-secondary-container transition-all" type="button"><span class="material-symbols-outlined text-[18px] text-secondary">auto_awesome</span><span class="font-label-sm text-label-sm">AI Asistan</span></button><div class="flex items-center gap-space-2xs px-space-sm py-1.5 rounded-full bg-canvas-subtle text-primary font-label-sm text-label-sm"><span class="material-symbols-outlined text-[16px] text-emerald-accent">toll</span><span class="font-bold">48</span><span class="text-on-surface-variant">Kredi</span></div><button aria-label="Bildirimler" class="w-9 h-9 rounded-full bg-canvas-subtle hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-all relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="w-2 h-2 rounded-full bg-emerald-accent absolute top-2 right-2"></span></button><div class="flex items-center gap-space-xs pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden lg:flex flex-col text-left"><span class="font-headline-sm text-label-md text-on-surface leading-tight">Arda K.</span><span class="font-label-caps text-label-caps text-secondary leading-none">PRO Gezgin Kaşif</span></div></div></div></div></header><main class="w-full pt-20 bg-surface min-h-screen"><div class="flex flex-col w-full relative">
+<!-- Dynamic Map Workspace Container -->
+<div class="relative w-full h-[calc(100vh-5rem)] overflow-hidden flex flex-col md:flex-row bg-surface">
+<!-- LEFT SIDEBAR: Travel Desk Panel -->
+<aside class="relative z-20 w-full md:w-[450px] lg:w-[480px] h-full flex flex-col bg-surface-container-lowest/95 backdrop-blur-xl shadow-xl flex-shrink-0 transition-all duration-300">
+<!-- Top Workspace Switcher & Navigation Header -->
+<div class="p-space-md pb-space-sm bg-surface-container-lowest flex flex-col gap-space-xs shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="p-1.5 rounded-full bg-primary-container text-mint-glow flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">explore</span>
+</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">Seyahat Masası</span>
+<span class="font-label-caps text-label-caps text-secondary uppercase">Canlı Rota Çalışma Alanı</span>
+</div>
+</div>
+<div class="flex items-center gap-space-2xs">
+<button class="px-space-md py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center gap-space-2xs hover:bg-secondary transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">add_location_alt</span>
+<span>Pin Ekle</span>
+</button>
+<button aria-label="Paneli Daralt" class="w-8 h-8 rounded-full bg-canvas-subtle hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">left_panel_close</span>
+</button>
+</div>
+</div>
+<!-- Global Workspace Segmented Control -->
+<div class="grid grid-cols-3 gap-space-2xs p-1 bg-canvas-subtle rounded-xl font-label-sm text-label-sm text-center mt-space-2xs">
+<button class="py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[15px]">inventory_2</span>
+<span>Havuz (3)</span>
+</button>
+<button class="py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[15px]">luggage</span>
+<span>Geziler (2)</span>
+</button>
+<button class="py-1.5 rounded-lg bg-surface-card text-primary font-bold shadow-sm flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[15px] text-emerald-accent">route</span>
+<span>Aktif Rota</span>
+</button>
+</div>
+</div>
+<!-- Floating Map-Selected Notification / Alert Pill -->
+<div class="px-space-md pt-space-xs">
+<div class="p-space-sm bg-mint-subtle rounded-xl flex items-start gap-space-xs shadow-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5 animate-pulse">pin_drop</span>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-secondary uppercase font-bold">Haritadan Seçilen Nokta</span>
+<button class="text-on-surface-variant hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<p class="font-headline-sm text-[13px] text-deep-forest truncate font-medium">Server Serdaroğlu, 2, Soner Sk., Bahariye</p>
+<p class="font-body-sm text-[11px] text-on-surface-variant -mt-0.5">Kadıköy, İstanbul · Kafe &amp; Dinlenme</p>
+<div class="flex items-center gap-space-xs mt-2">
+<button class="px-space-sm py-1 bg-secondary text-on-secondary rounded-full font-label-sm text-[11px] hover:bg-primary transition-all" type="button">
+                + Rotaya Durak Yap
+              </button>
+<button class="px-space-sm py-1 bg-surface-card text-deep-forest rounded-full font-label-sm text-[11px] hover:bg-canvas-subtle transition-all" type="button">
+                Havuza Kaydet
+              </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Trip Metadata & Day Switcher -->
+<div class="px-space-md py-space-xs flex flex-col gap-space-xs">
+<!-- Trip Selector Dropdown & Quick Add -->
+<div class="flex items-center justify-between">
+<button class="flex items-center gap-space-2xs text-left group" type="button">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-[18px]">map</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-headline-sm text-headline-sm text-primary group-hover:text-secondary transition-colors">İstanbul Keşfi</span>
+<span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+</div>
+<span class="font-label-sm text-[12px] text-on-surface-variant">İstanbul, Türkiye · 8 Toplam Pin</span>
+</div>
+</button>
+<button class="p-1.5 rounded-full bg-canvas-subtle hover:bg-surface-container text-primary transition-colors flex items-center gap-1 font-label-sm text-[11px] px-2.5" type="button">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span>Yeni Gezi</span>
+</button>
+</div>
+<!-- Day Filter Chips -->
+<div class="flex items-center gap-space-2xs overflow-x-auto pb-1 text-nowrap scrollbar-none">
+<button class="px-space-sm py-1 rounded-full bg-canvas-subtle text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container transition-all" type="button">
+            Tümü (8)
+          </button>
+<button class="px-space-md py-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm shadow-sm flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-mint-glow"></span>
+<span>1. Gün (5 Durak)</span>
+</button>
+<button class="px-space-sm py-1 rounded-full bg-canvas-subtle text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container transition-all" type="button">
+            2. Gün (3 Durak)
+          </button>
+<button class="px-space-sm py-1 rounded-full bg-surface-card text-secondary font-label-sm text-label-sm hover:bg-mint-subtle transition-all flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span>Gün Ekle</span>
+</button>
+</div>
+<!-- Route Metrics Summary Bar -->
+<div class="p-2 px-3 rounded-xl bg-surface-container-low flex items-center justify-between text-[12px] font-label-sm text-on-surface-variant">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 text-primary font-semibold">
+<span class="material-symbols-outlined text-[15px] text-emerald-accent">pin_drop</span> 5 Durak
+            </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">directions_walk</span> 2.2 km
+            </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">schedule</span> ~5s 56d
+            </span>
+</div>
+<label class="flex items-center gap-1.5 cursor-pointer text-primary">
+<input checked="" class="w-3.5 h-3.5 accent-secondary rounded" type="checkbox"/>
+<span class="text-[11px] font-medium">Haritada Göster</span>
+</label>
+</div>
+</div>
+<!-- Scrollable Itinerary Feed -->
+<div class="flex-1 overflow-y-auto px-space-md py-space-xs space-y-3">
+<!-- STOP 1: Sultanahmet Camii (Completed) -->
+<div class="group relative bg-surface-card rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="flex items-start gap-space-sm">
+<!-- Sequenced Badge -->
+<div class="w-8 h-8 rounded-xl bg-secondary text-on-secondary flex items-center justify-center font-headline-sm text-[13px] flex-shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-headline-sm text-headline-sm text-primary truncate">1. Sultanahmet Camii</span>
+<span class="px-2 py-0.5 rounded-full bg-mint-subtle text-secondary font-label-caps text-[10px] uppercase font-bold">Tamamlandı</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant truncate mt-0.5">Sultan Ahmet, Atmeydanı Cd. No:7, Fatih</p>
+<div class="mt-2 p-2 rounded-lg bg-canvas-subtle text-[11px] font-body-sm text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-secondary">lightbulb</span>
+<span class="italic text-on-surface-variant">Sabah erken saatte ziyaret etmek daha sakin ve kuyruksuz.</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100/80">
+<div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-[11px]">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-primary font-medium">1. Gün</span>
+<span>Plan: 45 dk</span>
+</div>
+<div class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+<button class="p-1 rounded hover:bg-canvas-subtle text-on-surface-variant" title="Not Ekle" type="button">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+</button>
+<button class="p-1 rounded hover:bg-canvas-subtle text-on-surface-variant" title="Seçenekler" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- TRANSIT INDICATOR 1 -> 2 -->
+<div class="flex items-center gap-space-xs pl-space-md text-[11px] font-label-sm text-on-surface-variant">
+<div class="w-0.5 h-6 bg-secondary/30 rounded-full ml-2"></div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-low flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-secondary">directions_walk</span>
+            ~5 dk yürüme intikali (450m)
+          </span>
+</div>
+<!-- STOP 2: Ayasofya-i Kebîr Câmi-i Şerîfi -->
+<div class="group relative bg-surface-card rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-[13px] flex-shrink-0 shadow-sm">
+              2
+            </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-headline-sm text-headline-sm text-primary truncate">Ayasofya-i Kebîr Câmii</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[10px] uppercase">Tarihi Yapı</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant truncate mt-0.5">Ayasofya Meydanı No:1, Sultanahmet, Fatih</p>
+<p class="mt-1 text-[12px] text-deep-forest font-body-sm">Muazzam mozaikler ve anıtsal kubbe mimarisi.</p>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100/80">
+<div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-[11px]">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-primary font-medium">1. Gün</span>
+<span>Plan: 60 dk</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-canvas-subtle text-on-surface-variant" title="Yukarı Taşı" type="button">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+</button>
+<button class="p-1 rounded hover:bg-canvas-subtle text-on-surface-variant" title="Aşağı Taşı" type="button">
+<span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- TRANSIT INDICATOR 2 -> 3 -->
+<div class="flex items-center gap-space-xs pl-space-md text-[11px] font-label-sm text-on-surface-variant">
+<div class="w-0.5 h-6 bg-secondary/30 rounded-full ml-2"></div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-low flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-secondary">directions_walk</span>
+            ~4 dk yürüme intikali (280m)
+          </span>
+</div>
+<!-- STOP 3: Yerebatan Sarnıcı (Highlighted / Selected state) -->
+<div class="group relative bg-mint-subtle/50 rounded-2xl p-space-sm shadow-md transition-all ring-2 ring-emerald-accent/40">
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-xl bg-emerald-accent text-on-primary flex items-center justify-center font-headline-sm text-[13px] flex-shrink-0 shadow-sm animate-bounce">
+              3
+            </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-headline-sm text-headline-sm text-primary truncate font-bold">Yerebatan Sarnıcı</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-accent/20 text-tertiary font-label-caps text-[10px] uppercase font-bold">İnceleniyor</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant truncate mt-0.5">Alemdar, Yerebatan Cd. 1/3, Fatih</p>
+<!-- Quick Drawer Trigger Pill -->
+<div class="mt-2 flex items-center justify-between bg-surface-card p-2 rounded-xl">
+<div class="flex items-center gap-1.5 text-[11px] font-medium text-secondary">
+<span class="material-symbols-outlined text-[15px]">museum</span>
+<span>Medusa Sütunu &amp; Işık Şovu</span>
+</div>
+<button class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary text-[11px] font-label-sm flex items-center gap-1 hover:bg-secondary" onclick="document.getElementById('inspect-drawer').classList.toggle('hidden')" type="button">
+<span>Detay Kartı</span>
+<span class="material-symbols-outlined text-[13px]">open_in_new</span>
+</button>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/50">
+<span class="font-label-sm text-[11px] text-on-surface-variant">Planlanan: 60 dk</span>
+<span class="text-[11px] text-emerald-accent font-bold">Giriş: Müzekart Geçerli Değil</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TRANSIT INDICATOR 3 -> 4 -->
+<div class="flex items-center gap-space-xs pl-space-md text-[11px] font-label-sm text-on-surface-variant">
+<div class="w-0.5 h-6 bg-secondary/30 rounded-full ml-2"></div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-low flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-secondary">directions_walk</span>
+            ~9 dk intikal (680m)
+          </span>
+</div>
+<!-- STOP 4: Hafız Mustafa 1864 -->
+<div class="group relative bg-surface-card rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-[13px] flex-shrink-0 shadow-sm">
+              4
+            </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-headline-sm text-headline-sm text-primary truncate">Tarihi Hafız Mustafa 1864</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[10px] uppercase">Kahve &amp; Mola</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant truncate mt-0.5">Hobyar, Hamidiye Cd. No:84, Sirkeci</p>
+<p class="mt-1 text-[12px] text-on-surface-variant font-body-sm">Geleneksel Türk kahvesi, nar çiçeği çayı ve lokum molası.</p>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100/80">
+<span class="font-label-sm text-[11px] text-on-surface-variant">Planlanan Süre: 40 dk</span>
+<button class="text-secondary font-label-sm text-[11px] hover:underline flex items-center gap-0.5" type="button">
+<span class="material-symbols-outlined text-[14px]">restaurant_menu</span> Menü İncele
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- TRANSIT INDICATOR 4 -> 5 -->
+<div class="flex items-center gap-space-xs pl-space-md text-[11px] font-label-sm text-on-surface-variant">
+<div class="w-0.5 h-6 bg-secondary/30 rounded-full ml-2"></div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-low flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-secondary">directions_walk</span>
+            ~10 dk yokuş yukarı (750m)
+          </span>
+</div>
+<!-- STOP 5: Kapalıçarşı -->
+<div class="group relative bg-surface-card rounded-2xl p-space-sm shadow-sm hover:shadow-md transition-all">
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-[13px] flex-shrink-0 shadow-sm">
+              5
+            </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-headline-sm text-headline-sm text-primary truncate">Kapalıçarşı (Grand Bazaar)</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[10px] uppercase">Alışveriş</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant truncate mt-0.5">Beyazıt, Kalpakçılar Cd. No:22, Fatih</p>
+<p class="mt-1 text-[12px] text-on-surface-variant font-body-sm">Baharatlar, el yapımı çiniler ve vintage dükkanlar.</p>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100/80">
+<span class="font-label-sm text-[11px] text-on-surface-variant">Planlanan Süre: 90 dk</span>
+<span class="font-label-sm text-[11px] text-secondary font-medium">Bitiş Noktası</span>
+</div>
+</div>
+</div>
+</div>
+<!-- GENEL HAVUZ (General Pool) Accordion Card Section -->
+<div class="pt-space-xs pb-space-sm">
+<details class="group bg-surface-container-low rounded-2xl overflow-hidden shadow-sm" open="">
+<summary class="p-space-sm flex items-center justify-between cursor-pointer list-none select-none bg-surface-container">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[18px]">inventory_2</span>
+<span class="font-headline-sm text-headline-sm text-primary text-[14px]">Genel Havuz (Henüz Güne Atanmamış 3 Yer)</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="p-space-sm space-y-2.5">
+<!-- Pool Item 1: Galata Kulesi -->
+<div class="p-2.5 rounded-xl bg-surface-card flex items-center justify-between gap-2 shadow-sm">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-6 h-6 rounded-md bg-canvas-subtle flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[14px]">tour</span>
+</div>
+<div class="truncate">
+<p class="font-headline-sm text-[12px] text-primary truncate">Galata Kulesi</p>
+<p class="font-body-sm text-[10px] text-on-surface-variant truncate">Bereketzade, Beyoğlu</p>
+</div>
+</div>
+<button class="px-2 py-1 rounded-full bg-mint-subtle text-secondary font-label-sm text-[10px] hover:bg-secondary hover:text-on-secondary transition-all whitespace-nowrap" type="button">
+                  + 1. Güne Ekle
+                </button>
+</div>
+<!-- Pool Item 2: Karaköy Güllüoğlu -->
+<div class="p-2.5 rounded-xl bg-surface-card flex items-center justify-between gap-2 shadow-sm">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-6 h-6 rounded-md bg-canvas-subtle flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[14px]">bakery_dining</span>
+</div>
+<div class="truncate">
+<p class="font-headline-sm text-[12px] text-primary truncate">Karaköy Güllüoğlu</p>
+<p class="font-body-sm text-[10px] text-on-surface-variant truncate">Kemankeş Karamustafa Paşa, Karaköy</p>
+</div>
+</div>
+<button class="px-2 py-1 rounded-full bg-mint-subtle text-secondary font-label-sm text-[10px] hover:bg-secondary hover:text-on-secondary transition-all whitespace-nowrap" type="button">
+                  + 2. Güne Ekle
+                </button>
+</div>
+<!-- Pool Item 3: Mandabatmaz Kahvesi -->
+<div class="p-2.5 rounded-xl bg-surface-card flex items-center justify-between gap-2 shadow-sm">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-6 h-6 rounded-md bg-canvas-subtle flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[14px]">coffee</span>
+</div>
+<div class="truncate">
+<p class="font-headline-sm text-[12px] text-primary truncate">Mandabatmaz Kahvesi</p>
+<p class="font-body-sm text-[10px] text-on-surface-variant truncate">İstiklal Cd. Olivia Geçidi, Beyoğlu</p>
+</div>
+</div>
+<button class="px-2 py-1 rounded-full bg-mint-subtle text-secondary font-label-sm text-[10px] hover:bg-secondary hover:text-on-secondary transition-all whitespace-nowrap" type="button">
+                  + Güne Ata
+                </button>
+</div>
+</div>
+</details>
+</div>
+</div>
+<!-- Desk Footer Status Action -->
+<div class="p-space-sm px-space-md bg-surface-container-lowest border-t border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-on-surface-variant text-[11px]">
+<span class="w-2 h-2 rounded-full bg-emerald-accent animate-ping"></span>
+<span>Canlı Harita Senkronize</span>
+</div>
+<button class="px-space-md py-1.5 rounded-full bg-deep-forest text-on-primary font-label-sm text-label-sm flex items-center gap-1 shadow-md hover:bg-secondary transition-all" type="button">
+<span class="material-symbols-outlined text-[16px]">navigation</span>
+<span>Gezinti Başlat</span>
+</button>
+</div>
+</aside>
+<!-- RIGHT CANVAS: High-End Vectorized Interactive Map Representation -->
+<main class="relative flex-1 h-full w-full bg-[#E5ECE9] overflow-hidden select-none">
+<!-- Top Floating Search & Quick Context Bar -->
+<div class="absolute top-space-md left-space-md right-space-md z-10 pointer-events-none flex items-start justify-between">
+<div class="pointer-events-auto bg-surface-card/90 backdrop-blur-md rounded-full shadow-lg px-4 py-2 flex items-center gap-space-sm border border-white/60">
+<span class="material-symbols-outlined text-secondary text-[20px]">explore</span>
+<span class="font-headline-sm text-[13px] text-primary font-bold">İstanbul Boğazı &amp; Tarihi Yarımada</span>
+<span class="w-1 h-1 rounded-full bg-slate-300"></span>
+<span class="font-body-sm text-[12px] text-on-surface-variant">Ölçek: 1:15.000</span>
+<span class="px-2 py-0.5 rounded-full bg-mint-subtle text-secondary font-label-caps text-[10px]">Aktif GPS</span>
+</div>
+<!-- Top Right Map Tool Group (Layers, 3D, Traffic) -->
+<div class="pointer-events-auto flex items-center gap-2 bg-surface-card/90 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-white/60">
+<button class="px-3 py-1 rounded-xl bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center gap-1 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">layers</span>
+<span>Standart</span>
+</button>
+<button class="px-3 py-1 rounded-xl hover:bg-canvas-subtle text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">satellite_alt</span>
+<span>Uydu</span>
+</button>
+<div class="w-px h-5 bg-slate-200 mx-1"></div>
+<button class="p-1.5 rounded-xl hover:bg-canvas-subtle text-emerald-accent transition-colors flex items-center" title="Trafik Katmanı" type="button">
+<span class="material-symbols-outlined text-[18px]">traffic</span>
+</button>
+<button class="p-1.5 rounded-xl hover:bg-canvas-subtle text-on-surface-variant transition-colors flex items-center" title="3D Binalar" type="button">
+<span class="material-symbols-outlined text-[18px]">domain</span>
+</button>
+</div>
+</div>
+<!-- Vector Map Graphics: Accurate Topography & Coastlines of Istanbul Historical Peninsula -->
+<svg class="w-full h-full object-cover" preserveaspectratio="xMidYMid slice" viewbox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Water Gradient for Marmara & Bosphorus -->
+<lineargradient id="waterGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#C5DED8"></stop>
+<stop offset="50%" stop-color="#BAD5CE"></stop>
+<stop offset="100%" stop-color="#ACCBC4"></stop>
+</lineargradient>
+<!-- Land Gradient -->
+<lineargradient id="landGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#F4F7F4"></stop>
+<stop offset="100%" stop-color="#EAF0EB"></stop>
+</lineargradient>
+<!-- Route Glow Filter -->
+<filter height="140%" id="routeGlow" width="140%" x="-20%" y="-20%">
+<fedropshadow dx="0" dy="2" flood-color="#10B981" flood-opacity="0.45" stddeviation="4"></fedropshadow>
+</filter>
+<!-- Pin Soft Shadow -->
+<filter height="140%" id="pinShadow" width="140%" x="-20%" y="-20%">
+<fedropshadow dx="0" dy="3" flood-color="#064E3B" flood-opacity="0.3" stddeviation="3"></fedropshadow>
+</filter>
+<!-- Animated Transit Dash -->
+<style>
+            @keyframes dashMove {
+              to {
+                stroke-dashoffset: -40;
+              }
+            }
+            .route-animated-path {
+              stroke-dasharray: 8, 6;
+              animation: dashMove 3s linear infinite;
+            }
+            .pulse-beacon {
+              animation: beaconPulse 2s ease-out infinite;
+            }
+            @keyframes beaconPulse {
+              0% { r: 6; opacity: 1; }
+              100% { r: 24; opacity: 0; }
+            }
+          </style>
+</defs>
+<!-- Base Background: Sea (Bosphorus, Golden Horn, Marmara Sea) -->
+<rect fill="url(#waterGradient)" height="900" width="1400"></rect>
+<!-- Subtle Water Wave Ripples -->
+<g fill="none" opacity="0.35" stroke="#9EBDB6" stroke-linecap="round" stroke-width="1.2">
+<path d="M 720 220 Q 750 215 780 220"></path>
+<path d="M 850 340 Q 880 335 910 340"></path>
+<path d="M 640 480 Q 670 475 700 480"></path>
+<path d="M 940 590 Q 970 585 1000 590"></path>
+<path d="M 520 720 Q 560 715 600 720"></path>
+<path d="M 820 790 Q 860 785 900 790"></path>
+</g>
+<!-- LANDMASS 1: European Side - Tarihi Yarımada & Fatih (South of Golden Horn) -->
+<path d="M 0 320 
+                 C 140 330, 260 380, 360 410 
+                 C 430 430, 520 460, 560 490 
+                 C 600 520, 640 550, 680 580 
+                 C 720 610, 750 660, 730 710 
+                 C 700 770, 630 810, 540 840 
+                 C 450 870, 250 890, 0 900 
+                 Z" fill="url(#landGradient)" stroke="#D4DFD6" stroke-width="2"></path>
+<!-- LANDMASS 2: European Side - Beyoğlu, Karaköy, Beşiktaş (North of Golden Horn) -->
+<path d="M 0 0 
+                 L 780 0 
+                 C 760 80, 730 160, 700 230 
+                 C 680 280, 650 330, 590 370 
+                 C 520 410, 440 370, 340 320 
+                 C 260 280, 150 250, 0 240 
+                 Z" fill="url(#landGradient)" stroke="#D4DFD6" stroke-width="2"></path>
+<!-- LANDMASS 3: Asian Side - Üsküdar & Kadıköy (East of Bosphorus) -->
+<path d="M 1020 0 
+                 L 1400 0 
+                 L 1400 900 
+                 L 960 900 
+                 C 940 830, 920 760, 950 690 
+                 C 980 620, 1020 540, 1000 460 
+                 C 980 390, 950 310, 960 230 
+                 C 970 150, 1000 80, 1020 0 
+                 Z" fill="url(#landGradient)" stroke="#D4DFD6" stroke-width="2"></path>
+<!-- Parks and Forested Green Belts (Gülhane Parkı, Sarayburnu) -->
+<path d="M 640 600 C 670 610, 710 630, 720 660 C 700 685, 660 680, 630 650 Z" fill="#D2E8DA" opacity="0.8"></path>
+<path d="M 600 280 C 640 270, 660 300, 630 330 Z" fill="#D2E8DA" opacity="0.8"></path>
+<!-- Street Network Grids (Historic Peninsula Roads & Arteries) -->
+<g fill="none" opacity="0.8" stroke="#CBD6CF" stroke-linecap="round" stroke-width="2.5">
+<!-- Divanyolu Caddesi & Tram Line -->
+<path d="M 380 650 L 460 640 L 530 635 L 590 640 L 650 645"></path>
+<path d="M 460 640 L 480 580 L 520 540 L 560 500"></path>
+<path d="M 530 635 L 550 600 L 570 560"></path>
+<path d="M 590 640 L 610 680 L 630 730"></path>
+<!-- Kennedy Caddesi (Sahil Yolu) -->
+<path d="M 360 410 C 440 450, 560 490, 680 580 C 740 640, 725 730, 630 810" stroke="#B8C9BD" stroke-width="3"></path>
+<!-- Beyoğlu Meşrutiyet & İstiklal Spine -->
+<path d="M 540 380 L 580 320 L 620 250 L 650 180"></path>
+<!-- Kadıköy Bahariye Caddesi -->
+<path d="M 1040 650 C 1070 670, 1100 710, 1120 760" stroke-width="2"></path>
+</g>
+<!-- Bridges Across Haliç (Golden Horn) -->
+<!-- 1. Galata Köprüsü (Connecting Karaköy to Eminönü) -->
+<line stroke="#717974" stroke-linecap="square" stroke-width="5" x1="560" x2="590" y1="490" y2="370"></line>
+<line stroke="#FFFFFF" stroke-linecap="round" stroke-width="2" x1="560" x2="590" y1="490" y2="370"></line>
+<!-- 2. Atatürk (Unkapanı) Köprüsü -->
+<line stroke="#94A3B8" stroke-linecap="square" stroke-width="4" x1="430" x2="490" y1="430" y2="340"></line>
+<!-- Geographical & Neighborhood Text Callouts on Map -->
+<text fill="#0D281E" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="700" letter-spacing="4" opacity="0.4" x="730" y="480">İSTANBUL BOĞAZI</text>
+<text fill="#0D281E" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" letter-spacing="2" opacity="0.4" x="360" y="380">HALİÇ (GOLDEN HORN)</text>
+<text fill="#0D281E" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" letter-spacing="3" opacity="0.35" x="600" y="820">MARMARA DENİZİ</text>
+<text fill="#404945" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" opacity="0.8" x="590" y="690">SULTANAHMET</text>
+<text fill="#404945" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" opacity="0.7" x="520" y="525">EMİNÖNÜ</text>
+<text fill="#404945" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" opacity="0.7" x="610" y="360">KARAKÖY</text>
+<text fill="#404945" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" opacity="0.7" x="640" y="240">BEYOĞLU</text>
+<text fill="#404945" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700" opacity="0.7" x="1060" y="690">KADIKÖY</text>
+<!-- ACTIVE ITINERARY ROUTE PATH (Emerald Glowing Spline) -->
+<!-- Coordinates: 1: Sultanahmet (605, 665) -> 2: Ayasofya (635, 640) -> 3: Yerebatan (615, 625) -> 4: Hafız Mustafa Sirkeci (545, 545) -> 5: Kapalıçarşı (495, 615) -->
+<!-- Outer Emerald Glow Path -->
+<path d="M 605 665 
+                 Q 625 650 635 640 
+                 Q 625 630 615 625 
+                 C 580 595, 560 570, 545 545 
+                 C 520 570, 505 590, 495 615" fill="none" opacity="0.25" stroke="#10B981" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"></path>
+<!-- Base Route Line -->
+<path d="M 605 665 
+                 Q 625 650 635 640 
+                 Q 625 630 615 625 
+                 C 580 595, 560 570, 545 545 
+                 C 520 570, 505 590, 495 615" fill="none" stroke="#013628" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"></path>
+<!-- Directional Flow Dashes Overlaid -->
+<path class="route-animated-path" d="M 605 665 
+                 Q 625 650 635 640 
+                 Q 625 630 615 625 
+                 C 580 595, 560 570, 545 545 
+                 C 520 570, 505 590, 495 615" fill="none" stroke="#34D399" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- GENERAL POOL PINS (Dashed / Subtle Markers on Galata & Karaköy) -->
+<!-- Galata Kulesi Marker -->
+<g opacity="0.85" transform="translate(605, 310)">
+<circle cx="0" cy="0" fill="#FFFFFF" r="10" stroke="#717974" stroke-dasharray="3,2" stroke-width="1.5"></circle>
+<circle cx="0" cy="0" fill="#717974" r="4"></circle>
+<rect fill="#FFFFFF" height="18" opacity="0.9" rx="9" width="85" x="14" y="-10"></rect>
+<text fill="#283044" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="600" x="20" y="3">Galata Kulesi</text>
+</g>
+<!-- Karaköy Güllüoğlu Marker -->
+<g opacity="0.85" transform="translate(585, 385)">
+<circle cx="0" cy="0" fill="#FFFFFF" r="8" stroke="#717974" stroke-dasharray="3,2" stroke-width="1.5"></circle>
+<circle cx="0" cy="0" fill="#717974" r="3"></circle>
+</g>
+<!-- KADIKÖY SELECTED POINT BEACON (Alert Target) -->
+<g transform="translate(1085, 715)">
+<circle class="pulse-beacon" cx="0" cy="0" fill="#3B82F6" r="6"></circle>
+<circle cx="0" cy="0" fill="#2563EB" r="7"></circle>
+<circle cx="0" cy="0" fill="#FFFFFF" r="2.5"></circle>
+<!-- Small Hover Bubble -->
+<g transform="translate(-65, -34)">
+<rect fill="#1E293B" filter="url(#pinShadow)" height="24" opacity="0.9" rx="12" width="130"></rect>
+<text fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="600" text-anchor="middle" x="65" y="16">Kadıköy Bahariye (Seçildi)</text>
+</g>
+</g>
+<!-- NUMBERED ITINERARY PINS -->
+<!-- PIN 1: Sultanahmet Camii (Completed) -->
+<g filter="url(#pinShadow)" transform="translate(605, 665)">
+<path d="M 0 0 C -12 -12, -12 -28, 0 -36 C 12 -28, 12 -12, 0 0 Z" fill="#286954"></path>
+<circle cx="0" cy="-22" fill="#FFFFFF" r="8"></circle>
+<!-- Checkmark Icon inside -->
+<path d="M -4 -22 L -1 -19 L 4 -25" fill="none" stroke="#286954" stroke-linecap="round" stroke-width="2"></path>
+<!-- Label Tooltip -->
+<g transform="translate(-50, -56)">
+<rect fill="#013628" height="18" rx="9" width="100"></rect>
+<text fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" text-anchor="middle" x="50" y="12">1. Sultanahmet</text>
+</g>
+</g>
+<!-- PIN 2: Ayasofya -->
+<g filter="url(#pinShadow)" transform="translate(635, 640)">
+<path d="M 0 0 C -12 -12, -12 -28, 0 -36 C 12 -28, 12 -12, 0 0 Z" fill="#1E4D3E"></path>
+<circle cx="0" cy="-22" fill="#FFFFFF" r="7.5"></circle>
+<text fill="#1E4D3E" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="800" text-anchor="middle" x="0" y="-18">2</text>
+<!-- Label Tooltip -->
+<g transform="translate(14, -30)">
+<rect fill="#FFFFFF" filter="url(#pinShadow)" height="18" opacity="0.95" rx="9" width="70"></rect>
+<text fill="#013628" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="600" text-anchor="middle" x="35" y="12">Ayasofya</text>
+</g>
+</g>
+<!-- PIN 3: Yerebatan Sarnıcı (Active/Highlighted Spotlight Pin) -->
+<g filter="url(#pinShadow)" transform="translate(615, 625)">
+<!-- Pulse ring on active stop -->
+<circle class="animate-ping" cx="0" cy="-26" fill="#10B981" opacity="0.25" r="20"></circle>
+<path d="M 0 0 C -14 -14, -14 -32, 0 -42 C 14 -32, 14 -14, 0 0 Z" fill="#10B981"></path>
+<circle cx="0" cy="-26" fill="#FFFFFF" r="9.5"></circle>
+<text fill="#013628" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="800" text-anchor="middle" x="0" y="-22">3</text>
+<!-- Rich Floating Tooltip Card -->
+<g transform="translate(-85, -84)">
+<rect fill="#013628" filter="url(#pinShadow)" height="36" rx="10" width="170"></rect>
+<text fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" x="12" y="16">Yerebatan Sarnıcı</text>
+<text fill="#34D399" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="400" x="12" y="28">Müze &amp; Kültür · 60 dk plan</text>
+<circle cx="152" cy="18" fill="#10B981" r="7"></circle>
+<text fill="#FFFFFF" font-family="'Material Symbols Outlined'" font-size="10" text-anchor="middle" x="152" y="21">arrow_forward</text>
+</g>
+</g>
+<!-- PIN 4: Hafız Mustafa 1864 -->
+<g filter="url(#pinShadow)" transform="translate(545, 545)">
+<path d="M 0 0 C -12 -12, -12 -28, 0 -36 C 12 -28, 12 -12, 0 0 Z" fill="#1E4D3E"></path>
+<circle cx="0" cy="-22" fill="#FFFFFF" r="7.5"></circle>
+<text fill="#1E4D3E" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="800" text-anchor="middle" x="0" y="-18">4</text>
+<g transform="translate(-95, -28)">
+<rect fill="#FFFFFF" height="18" opacity="0.95" rx="9" width="86"></rect>
+<text fill="#013628" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="600" text-anchor="middle" x="43" y="12">Hafız Mustafa</text>
+</g>
+</g>
+<!-- PIN 5: Kapalıçarşı -->
+<g filter="url(#pinShadow)" transform="translate(495, 615)">
+<path d="M 0 0 C -12 -12, -12 -28, 0 -36 C 12 -28, 12 -12, 0 0 Z" fill="#1E4D3E"></path>
+<circle cx="0" cy="-22" fill="#FFFFFF" r="7.5"></circle>
+<text fill="#1E4D3E" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="800" text-anchor="middle" x="0" y="-18">5</text>
+<g transform="translate(-85, -25)">
+<rect fill="#FFFFFF" height="18" opacity="0.95" rx="9" width="76"></rect>
+<text fill="#013628" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="600" text-anchor="middle" x="38" y="12">Kapalıçarşı</text>
+</g>
+</g>
+</svg>
+<!-- Floating Bottom Map Control Bar (Zoom, Compass, Center) -->
+<div class="absolute bottom-space-md right-space-md z-10 flex flex-col items-end gap-space-xs">
+<!-- Live Route HUD Pill (Bottom center or offset right) -->
+<div class="hidden lg:flex items-center gap-space-sm bg-surface-card/95 backdrop-blur-xl p-2.5 px-4 rounded-2xl shadow-xl border border-white/80">
+<div class="w-8 h-8 rounded-xl bg-mint-subtle flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">turn_slight_right</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[12px] text-primary">Sonraki Varış: Ayasofya Meydanı</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">280m · Yaya rotası · Trafik serbest</span>
+</div>
+<button class="ml-2 px-3 py-1 bg-secondary text-on-secondary rounded-full font-label-sm text-[11px] hover:bg-primary transition-all" type="button">
+            Detay
+          </button>
+</div>
+<!-- Floating Navigation Controls Pillar -->
+<div class="bg-surface-card/90 backdrop-blur-md rounded-2xl p-1 shadow-lg border border-white/70 flex flex-col items-center gap-1">
+<button aria-label="Yakınlaştır" class="w-9 h-9 rounded-xl hover:bg-canvas-subtle flex items-center justify-center text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+<div class="w-6 h-px bg-slate-200"></div>
+<button aria-label="Uzaklaştır" class="w-9 h-9 rounded-xl hover:bg-canvas-subtle flex items-center justify-center text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">remove</span>
+</button>
+<div class="w-6 h-px bg-slate-200"></div>
+<button aria-label="Pusula Kuzey" class="w-9 h-9 rounded-xl hover:bg-canvas-subtle flex items-center justify-center text-secondary transition-colors" title="Kuzeye Hizala" type="button">
+<span class="material-symbols-outlined text-[20px]">explore</span>
+</button>
+<div class="w-6 h-px bg-slate-200"></div>
+<button aria-label="Mevcut Konumum" class="w-9 h-9 rounded-xl hover:bg-canvas-subtle flex items-center justify-center text-emerald-accent transition-colors" title="Beni Bul" type="button">
+<span class="material-symbols-outlined text-[20px]">my_location</span>
+</button>
+</div>
+</div>
+<!-- FLOATING INSPECT DRAWER CARD (Yerebatan Sarnıcı Detailed Drawer as in references) -->
+<div class="absolute top-space-md right-space-md w-[380px] max-w-[calc(100vw-2rem)] bg-surface-card/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/90 z-30 flex flex-col overflow-hidden transition-all duration-300" id="inspect-drawer">
+<!-- Drawer Header with Visual Banner & Actions -->
+<div class="relative h-32 w-full bg-deep-forest overflow-hidden">
+<img class="w-full h-full object-cover opacity-75" data-alt="Atmospheric illuminated underground Basilica Cistern in Istanbul Turkey with ancient Roman stone pillars reflected in dark shallow water, ambient warm lighting and soft cyan emerald glow, cinematic travel documentary photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7PAu1zh2u46-coJkQmw4FAPSxBViIrbVZiqgPJWzYzlx5H2vYiP40aVIfYQU-pJ4Gh6ZoHYdQoCdl0Kdyi5Hbv6TB824tTFlODpN_4Yn8KWXpyE-xO7YebjZCLte5NXvHe2hr9VzspzvEJJgpQ-0ZYe_Fj2pB4g9e-rjgnKErTwmCMXynEEslpU4xwmto86EmdoMVjki6KP1m_Lut7GbFy3zh2N2fOYTnnWyxHsBc-QvCCMII8MJI8g"/>
+<div class="absolute inset-0 bg-gradient-to-t from-deep-forest via-deep-forest/40 to-transparent"></div>
+<div class="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+<button class="w-7 h-7 rounded-full bg-surface-card/70 backdrop-blur-md hover:bg-surface-card flex items-center justify-center text-deep-forest transition-colors" title="Kaydet" type="button">
+<span class="material-symbols-outlined text-[15px]">bookmark</span>
+</button>
+<button class="w-7 h-7 rounded-full bg-surface-card/70 backdrop-blur-md hover:bg-surface-card flex items-center justify-center text-deep-forest transition-colors" onclick="document.getElementById('inspect-drawer').classList.add('hidden')" title="Kapat" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<div class="absolute bottom-2.5 left-3.5 right-3.5 flex items-end justify-between">
+<div>
+<span class="px-2 py-0.5 rounded-full bg-mint-glow/20 text-mint-glow text-[10px] font-label-caps uppercase font-bold tracking-wider">Durak #3 · Müze</span>
+<h3 class="font-headline-lg text-[18px] text-on-primary font-bold leading-tight">Yerebatan Sarnıcı</h3>
+</div>
+<span class="text-mint-glow font-bold text-[12px] flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">star</span> 4.8
+            </span>
+</div>
+</div>
+<!-- Drawer Segment Tabs -->
+<div class="grid grid-cols-3 border-b border-slate-100 font-label-sm text-[12px] text-center bg-canvas-subtle/60">
+<button class="py-2 font-bold text-primary border-b-2 border-primary bg-surface-card" type="button">Bilgi &amp; Notlar</button>
+<button class="py-2 text-on-surface-variant hover:text-on-surface transition-colors" type="button">Düzenle</button>
+<button class="py-2 text-on-surface-variant hover:text-secondary flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px] text-emerald-accent">auto_awesome</span>
+<span>AI Rehber</span>
+</button>
+</div>
+<!-- Drawer Content Body -->
+<div class="p-space-sm space-y-3 max-h-[380px] overflow-y-auto">
+<!-- Key Stats Grid -->
+<div class="grid grid-cols-2 gap-2 text-[12px]">
+<div class="p-2 rounded-xl bg-canvas-subtle">
+<span class="text-on-surface-variant text-[10px] block">Planlanan Süre</span>
+<span class="font-bold text-primary flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-secondary">schedule</span> 60 Dakika
+              </span>
+</div>
+<div class="p-2 rounded-xl bg-canvas-subtle">
+<span class="text-on-surface-variant text-[10px] block">Bağlı Olduğu Gezi</span>
+<span class="font-bold text-primary flex items-center gap-1 mt-0.5 truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">folder_special</span> 1. Gün (Öğleden Önce)
+              </span>
+</div>
+</div>
+<!-- Gezgin Notları -->
+<div class="space-y-1">
+<span class="font-label-caps text-label-caps text-secondary uppercase font-bold">Gezgin Notu &amp; İpuçları</span>
+<div class="p-2.5 rounded-xl bg-surface-container-low text-[12px] font-body-sm text-deep-forest space-y-1">
+<p>Müzekart bu yapıda geçerli değildir. Biletleri online alarak uzun gişe kuyruğundan kaçının.</p>
+<p class="text-[11px] text-on-surface-variant italic">Kuzeybatı köşesindeki ters ve yan duran Medusa başı kaidelerini fotoğraflamayı unutmayın.</p>
+</div>
+</div>
+<!-- Fotoğraflar Galerisi Mini-Strip -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-secondary uppercase font-bold">Fotoğraflar (4)</span>
+<button class="text-secondary hover:underline font-label-sm text-[11px] flex items-center gap-0.5" type="button">
+<span class="material-symbols-outlined text-[13px]">add_photo_alternate</span> Cihazdan Yükle
+              </button>
+</div>
+<div class="grid grid-cols-3 gap-1.5">
+<div class="h-16 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Underground mystical Medusa head column base in Basilica Cistern Istanbul softly illuminated with warm yellow and emerald museum spotlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9j_8xVJhBLEXM3LGni_I_2HfhZ-jHmsBYq5Snfp-T56IaxyO8UiY7Kq3mCqgt2lGn2fYzGi0Zdj0RY7I2NpdkjLn2Z3KKylhhM0nrAKeX0qyufvCPvQElBgA-Y_ucMUaivcBGgVlz1_yWhcVYJtChV5BEmqEHoycDLcnGRjWCGsM0ETrYtoil4bzu2iQHOGl0qBpBeD-7V0GanpYOnx7Sxj9AMQ7w7Oxbp54d4kkDdMpp-QA2U6CXrg"/>
+</div>
+<div class="h-16 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Long perspective of stone arches and classical columns standing in shallow reflective water inside Basilica Cistern Istanbul Turkey" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuBSmk_rHWsKA4fAEjCa6u73DR0nXXHu-nmKnZk1SOqkX8kUQQDEywTDDxnPjFX8uTYJwd4YeNfwZLz7L3EGZIUjxWUPnnAPZXM8Qq_cHO0PYm2cQhUQO_fzBAvQCsmY5DVF_6s_LlZ9CF3aUQ0nYVyznTlmEiFs9hiKZfP_saZgyEruBJNba_uyenh4XhHb38BnNoDX13-b96yY6Z3yG9zSVLKlDt1N39KQ17Qv2F-lJ9YIaAzrAbQw"/>
+</div>
+<div class="h-16 rounded-xl bg-canvas-subtle flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="text-[10px] font-semibold mt-0.5">+2 Daha</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Drawer Footer CTA Actions -->
+<div class="p-space-sm bg-surface-card border-t border-slate-100 flex items-center gap-2">
+<button class="flex-1 py-2 rounded-full bg-primary-container text-on-primary font-label-sm text-[12px] flex items-center justify-center gap-1 hover:bg-secondary transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[15px]">directions</span>
+<span>Yol Tarifi Al</span>
+</button>
+<button class="p-2 rounded-full bg-canvas-subtle hover:bg-surface-container text-on-surface-variant transition-colors" title="Rotadan Kaldır" type="button">
+<span class="material-symbols-outlined text-[18px] text-error">delete_outline</span>
+</button>
+<button class="p-2 rounded-full bg-canvas-subtle hover:bg-surface-container text-on-surface-variant transition-colors" title="Paylaş" type="button">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+<script>
+  // Micro-interaction handlers for desktop panel & inspect toggling
+  document.addEventListener('DOMContentLoaded', () => {
+    // Quick escape key listener to close active floating inspect drawer
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const drawer = document.getElementById('inspect-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+          drawer.classList.add('hidden');
+        }
+      }
+    });
+  });
+</script></main><footer class="w-full bg-surface-container-low py-space-xl mt-space-3xl"><div class="max-w-[78rem] mx-auto px-margin-mobile lg:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-xs"><div class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center text-mint-glow"><span class="material-symbols-outlined text-[14px]">distance</span></div><span class="font-headline-sm text-headline-sm text-primary">MapsBridge</span><span class="font-body-sm text-body-sm text-on-surface-variant ml-space-xs">© 2025 Bütün hakları saklıdır.</span></div><div class="flex items-center gap-space-lg text-on-surface-variant font-label-sm text-label-sm"><a class="hover:text-primary transition-colors" href="#">Gizlilik Politikası</a><a class="hover:text-primary transition-colors" href="#">Kullanım Koşulları</a><a class="hover:text-primary transition-colors" href="#">API &amp; Rehber</a><a class="hover:text-primary transition-colors" href="#">Yardım Masası</a></div></div></footer></body></html>

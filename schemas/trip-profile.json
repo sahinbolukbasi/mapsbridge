@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TripProfile",
+  "description": "AWS Bedrock AgentCore seyahat asistanı için yapılandırılmış seyahat profili şeması",
+  "type": "object",
+  "properties": {
+    "destination": {
+      "type": "string",
+      "description": "Hedef şehir veya ülke",
+      "maxLength": 120
+    },
+    "dates": {
+      "type": "object",
+      "properties": {
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" },
+        "flexible": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "duration_days": {
+      "type": "integer",
+      "description": "Planlanan gün sayısı",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "travelers": {
+      "type": "object",
+      "properties": {
+        "adults": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "children": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "pets": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "currency": { "type": "string", "maxLength": 10 },
+        "total": { "type": "number", "minimum": 0 },
+        "level": { "type": "string", "enum": ["budget", "mid", "luxury", "unspecified"] }
+      },
+      "additionalProperties": false
+    },
+    "interests": {
+      "type": "object",
+      "properties": {
+        "food": { "type": "array", "items": { "type": "string", "maxLength": 60 } },
+        "sports": { "type": "array", "items": { "type": "string", "maxLength": 60 } },
+        "culture": { "type": "array", "items": { "type": "string", "maxLength": 60 } },
+        "general": { "type": "array", "items": { "type": "string", "maxLength": 60 } }
+      },
+      "additionalProperties": false
+    },
+    "constraints": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 180 },
+      "description": "Kısıtlar ve kaçınılacak unsurlar (örn: no_seafood, avoid_crowds)"
+    },
+    "pace": {
+      "type": "string",
+      "enum": ["relaxed", "moderate", "fast", "unspecified"],
+      "description": "Seyahat temposu"
+    },
+    "lodging_type": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["hotel", "hostel", "apartment", "boutique", "resort"] }
+    },
+    "needs": {
+      "type": "object",
+      "properties": {
+        "flights": { "type": "boolean" },
+        "car_rental": { "type": "boolean" },
+        "local_transit": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "completeness": {
+      "type": "number",
+      "description": "Profilin doluluk ve planlamaya hazır olma oranı (0.0 - 1.0)",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "required": ["interests", "completeness"],
+  "additionalProperties": false
+}

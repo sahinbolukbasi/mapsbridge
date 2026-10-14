@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yeni Şifreni Belirle • MapsBridge</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Custom Tailwind Config -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#1e4d3e',
+              900: '#13352b',
+              950: '#0b201a'
+            },
+            mint: {
+              50: '#f2fbf7',
+              100: '#e1f6ee',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Fonts Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+<style data-purpose="visual-effects">
+    .code-input-letter-spacing {
+      letter-spacing: 0.35em;
+    }
+    .glass-effect {
+      background: rgba(19, 53, 43, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f7f9f8] text-gray-800 flex flex-col justify-between antialiased selection:bg-emerald-100 selection:text-forest-900">
+<!-- BEGIN: MainHeader -->
+<header class="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Brand Logo -->
+<a class="flex items-center space-x-2.5 group" data-purpose="brand-identity" href="#">
+<span class="w-7 h-7 rounded-full bg-forest-800 flex items-center justify-center text-white shadow-sm transition-transform duration-200 group-hover:scale-105">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+</svg>
+</span>
+<span class="font-bold text-xl tracking-tight text-[#14261f]">MapsBridge</span>
+</a>
+<!-- Right Header Actions -->
+<div class="flex items-center space-x-5 text-sm font-medium">
+<a class="text-gray-500 hover:text-forest-800 transition-colors flex items-center gap-1.5" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Yardım &amp; Destek
+        </a>
+<span class="text-gray-300">|</span>
+<a class="text-forest-800 font-semibold hover:text-forest-900 px-3 py-1.5 rounded-lg hover:bg-forest-50 transition-colors" href="#">
+          Giriş Yap
+        </a>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex items-center justify-center">
+<div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- LEFT COLUMN: Form Container -->
+<section class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-gray-100" data-purpose="password-reset-form-container">
+<!-- Header Pill Badge -->
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-forest-50 border border-emerald-100/80 mb-5">
+<span class="w-2 h-2 rounded-full bg-mint-500"></span>
+<span class="text-[11px] font-bold tracking-wider text-forest-800 uppercase">GÜVENLİ HESAP KURTARMA</span>
+</div>
+<!-- Section Title & Subtext -->
+<h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Yeni Şifreni Belirle</h1>
+<p class="mt-2 text-sm text-gray-600 leading-relaxed">
+          E-postanıza gelen 6 haneli doğrulama kodunu ve yeni şifrenizi girerek hesabınızı güncelleyin.
+        </p>
+<!-- Notification Banner -->
+<div class="mt-6 p-4 rounded-2xl bg-[#eafaf3] border border-[#c4f0dd] text-sm text-[#0c6b4b] leading-relaxed flex items-start gap-3" data-purpose="email-sent-notice">
+<svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-mint-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<div>
+            6 haneli doğrulama kodu <strong class="font-semibold text-[#085239]">sahinbolukbasii@gmail.com</strong> adresine gönderildi. Lütfen gelen kutunuzu (ve Gereksiz/Spam klasörünü) kontrol ediniz.
+          </div>
+</div>
+<!-- Recipient Information Strip -->
+<div class="mt-3.5 px-4 py-3 bg-[#f5f5f3] rounded-xl flex items-center justify-between text-xs sm:text-sm text-gray-700">
+<div class="flex items-center space-x-1.5 truncate">
+<span class="text-gray-500">Alıcı:</span>
+<span class="font-medium text-gray-900 truncate">sahinbolukbasii@gmail.com</span>
+</div>
+<a class="font-semibold text-forest-800 hover:text-forest-900 hover:underline flex-shrink-0 ml-3 transition-colors" href="#">
+            E-postayı Değiştir
+          </a>
+</div>
+<!-- Form Elements -->
+<form action="#" class="mt-7 space-y-6" method="POST" onsubmit="event.preventDefault();">
+<!-- Verification Code Field -->
+<div>
+<label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2" for="verification_code">
+              6 Haneli Doğrulama Kodu
+            </label>
+<div class="relative">
+<input class="w-full text-center text-xl font-semibold tracking-[0.25em] py-3.5 px-4 bg-[#eff5f9] border border-[#2a5647] rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-forest-800 focus:border-forest-800 transition-all placeholder:text-gray-400" id="verification_code" maxlength="6" name="verification_code" placeholder="Örn: 849201" type="text" value="849201"/>
+<span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-forest-700 bg-white/80 px-2 py-1 rounded border border-emerald-100">
+                Hazır
+              </span>
+</div>
+</div>
+<!-- New Password Field -->
+<div>
+<label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2" for="new_password">
+              Yeni Şifreniz
+            </label>
+<div class="relative">
+<input class="w-full py-3.5 px-4 pr-12 bg-[#eff5f9] border border-transparent rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-forest-800 focus:border-forest-800 transition-all placeholder:text-gray-400" id="new_password" name="new_password" placeholder="Yeni şifrenizi girin" type="password" value="SecureP@ssw0rd2026"/>
+<!-- Password Toggle Button -->
+<button class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 p-1 transition-colors" id="togglePassword" title="Şifreyi Göster/Gizle" type="button">
+<svg class="w-5 h-5" fill="none" id="eyeIcon" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Password Strength Rules Box -->
+<div class="p-4 bg-[#f2f4f2] rounded-2xl border border-gray-100/80" data-purpose="password-criteria-list">
+<ul class="space-y-2 text-xs font-medium text-forest-700">
+<li class="flex items-center space-x-2">
+<svg class="w-4 h-4 text-mint-600 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>En az 12 karakter</span>
+</li>
+<li class="flex items-center space-x-2">
+<svg class="w-4 h-4 text-mint-600 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>En az bir küçük harf</span>
+</li>
+<li class="flex items-center space-x-2">
+<svg class="w-4 h-4 text-mint-600 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>En az bir büyük harf</span>
+</li>
+<li class="flex items-center space-x-2">
+<svg class="w-4 h-4 text-mint-600 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>En az bir rakam</span>
+</li>
+<li class="flex items-center space-x-2">
+<svg class="w-4 h-4 text-mint-600 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>En az bir sembol (ör. !, ?, @, #)</span>
+</li>
+</ul>
+</div>
+<!-- New Password Confirmation Field -->
+<div>
+<label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2" for="confirm_password">
+              Yeni Şifreniz (Tekrar)
+            </label>
+<input class="w-full py-3.5 px-4 bg-[#f2f4f2] border border-transparent rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-forest-800 focus:border-forest-800 transition-all placeholder:text-gray-400" id="confirm_password" name="confirm_password" placeholder="Yeni şifrenizi tekrar girin" type="password"/>
+</div>
+<!-- Submit Action Button -->
+<button class="w-full py-3.5 px-6 rounded-xl bg-[#6f9687] hover:bg-[#5b8373] active:bg-forest-800 text-white font-semibold shadow-sm transition-all duration-200 flex items-center justify-center space-x-2 focus:ring-4 focus:ring-forest-200" type="submit">
+<span>Şifremi Sıfırla ve Giriş Yap</span>
+<span class="text-lg leading-none">→</span>
+</button>
+<!-- Secondary Bottom Actions -->
+<div class="pt-2 flex items-center justify-between text-xs sm:text-sm font-semibold">
+<a class="text-forest-800 hover:text-forest-900 hover:underline transition-colors flex items-center gap-1" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+              Kodu Tekrar Gönder
+            </a>
+<a class="text-gray-600 hover:text-gray-900 transition-colors" href="#">
+              Giriş Ekranına Dön
+            </a>
+</div>
+</form>
+</section>
+<!-- RIGHT COLUMN: Visual & Security Showcase -->
+<aside class="lg:col-span-5 flex flex-col space-y-5" data-purpose="security-and-visual-aside">
+<!-- Imagery Showcase Card with Frosted Overlay -->
+<div class="relative rounded-3xl overflow-hidden shadow-sm border border-gray-100 min-h-[440px] flex flex-col justify-between p-6 sm:p-8 text-white group">
+<!-- Background Image -->
+<img alt="Kapadokya gün doğumu ve sıcak hava balonları manzarası" class="absolute inset-0 w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/AEtjO1XtHVs6_hy38AIT9GFtIwcE7X5ym-UZmGs8vKTerYFBvryLN1Gj4BgULbMQjIxzhy-kqZ13MW6k0MTIMXJa-1_nD4hA2J11oNrZdHNsj7QbP69OT6v-tIh2mBww_Ao7YcczJ-vV67pnXIkrzucMdWfgMzByoxNR7MNowZRRLamGH2jbzp-dTu0eppHJzS5yRaBjy2h1VgL__G8-jGFn-vaEVSmtto7uZ2qdJjhTnqGVouvZHz-fGuELmVRq"/>
+<!-- Ambient Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/25"></div>
+<!-- Top Badge in Image -->
+<div class="relative z-10 flex items-center justify-between">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-xs font-medium tracking-wide text-white">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Güvenli Oturum Yenileme • Aktif Koruma
+            </div>
+<span class="text-xs bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-gray-200">
+              Kapadokya Rotaları
+            </span>
+</div>
+<!-- Bottom Card Overlay Content -->
+<div class="relative z-10 space-y-3 pt-12">
+<div class="glass-effect p-4 rounded-2xl border border-white/20 text-white/95">
+<div class="flex items-start gap-3">
+<div class="p-2 rounded-xl bg-forest-800/80 text-emerald-300 flex-shrink-0 mt-0.5">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-white">256-Bit Uçtan Uca Şifreleme</h3>
+<p class="text-xs text-white/80 mt-1 leading-normal">
+                    Şifreniz ve kişisel seyahat rotalarınız en güncel SSL ve kriptografik güvenlik protokolleri altında saklanır.
+                  </p>
+</div>
+</div>
+</div>
+<!-- Session Termination Option -->
+<div class="glass-effect p-4 rounded-2xl border border-white/20">
+<label class="flex items-start gap-3 cursor-pointer text-xs text-white/90 select-none">
+<input checked="" class="w-4 h-4 rounded text-forest-800 focus:ring-forest-700 bg-white/20 border-white/40 mt-0.5" type="checkbox"/>
+<span>
+<strong>Tüm Açık Oturumlardan Çıkış Yap:</strong> Şifre yenilendikten sonra diğer tüm cihazlardaki açık oturumları güvenliğiniz için derhal sonlandır (Önerilir).
+                </span>
+</label>
+</div>
+</div>
+</div>
+<!-- Quick Traveler Reassurance Card -->
+<div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-forest-50 text-forest-800 flex items-center justify-center flex-shrink-0">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-gray-900 tracking-wide uppercase">MapsBridge Güvencesi</h4>
+<p class="text-xs text-gray-500 mt-0.5">
+              Hesabınızı güncelledikten sonra favori lokasyonlarınıza kesintisiz erişim sağlamaya devam edebilirsiniz.
+            </p>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: MainFooter -->
+<footer class="w-full border-t border-gray-200/70 bg-white py-6">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+<div class="flex items-center space-x-2">
+<span>© 2026 MapsBridge Inc. Tüm hakları saklıdır.</span>
+</div>
+<div class="flex items-center space-x-6">
+<a class="hover:text-forest-800 transition-colors" href="#">Gizlilik Politikası</a>
+<a class="hover:text-forest-800 transition-colors" href="#">Kullanım Koşulları</a>
+<a class="hover:text-forest-800 transition-colors" href="#">Yardım Merkezi</a>
+</div>
+</div>
+</footer>
+<!-- END: MainFooter -->
+<!-- Password Visibility Toggle Interaction -->
+<script data-purpose="password-visibility">
+    document.addEventListener('DOMContentLoaded', function () {
+      const toggleBtn = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('new_password');
+
+      if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', function () {
+          const isPassword = passwordInput.getAttribute('type') === 'password';
+          passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+          
+          toggleBtn.innerHTML = isPassword 
+            ? `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+               </svg>`
+            : `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+               </svg>`;
+        });
+      }
+    });
+  </script>
+</body></html>

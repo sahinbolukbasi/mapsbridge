@@ -1,0 +1,1962 @@
+{
+  "startedAt": "2026-09-19T11:05:48.682Z",
+  "model": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "source": "local-workspace",
+  "ragEnabled": false,
+  "turns": [
+    {
+      "scenario": "natural-conversation",
+      "prompt": "Selam, nasılsın?",
+      "elapsedMs": 5503,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 5502
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "interests": [],
+          "constraints": [],
+          "planningRequested": false
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "Selam! İyiyim, teşekkür ederim. Seni tanımak ve seyahat planlamanıza yardımcı olmak için buradayım. Nereye gitmek istiyorsun?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 1,
+          "context": {
+            "interests": [],
+            "constraints": [],
+            "planningRequested": false
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Selam, nasılsın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Selam! İyiyim, teşekkür ederim. Seni tanımak ve seyahat planlamanıza yardımcı olmak için buradayım. Nereye gitmek istiyorsun?"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "natural-conversation",
+      "prompt": "İlk İtalya seyahatimde Roma mı Floransa mı daha uygun? Sanat ve sakin gezmeyi seviyorum, henüz rota hazırlama.",
+      "elapsedMs": 8570,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 8570
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "interests": [
+            "sanat"
+          ],
+          "constraints": [
+            "sakin gezmeyi seviyorum"
+          ],
+          "planningRequested": false
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "İlk İtalya seyahatı için ikisi de harika seçim, ama tercih senin tempo ve ilgine bağlı.\n\n**Roma** daha yoğun ve hızlı tempolu. Colosseum, Vatican, Forum gibi devasa siteler var; kalabalık, turist yoğun. Sanatı görmek için müzeler ve kiliseler arasında koşturmak gerekebilir. Ama tarih ve sanat bir arada, çok zengin.\n\n**Floransa** senin için daha uygun olabilir. Daha küçük, yürüyerek gezilir, sakin bir atmosferi var. Uffizi Galerisi, Accademia (Michelangelo'nun David'i), Duomo—hepsi birbirine yakın. Rönesans sanatının kalbi, ama daha rahat bir ritimde keşfedebilirsin. Sokakları, köprüleri, küçük müzeleri sakin sakin dolaşmaya müsait.\n\nKaç gün düşünüyorsun? Eğer ilk kez ve sakin gezmeyi seviyorsan, **Floransa'yı** daha çok tavsiye ederim. Ama her ikisini de görmek istersen, 10+ günlük bir rota ikisini birleştirebilir.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 2,
+          "context": {
+            "interests": [
+              "sanat"
+            ],
+            "constraints": [
+              "sakin gezmeyi seviyorum"
+            ],
+            "planningRequested": false
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Selam, nasılsın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Selam! İyiyim, teşekkür ederim. Seni tanımak ve seyahat planlamanıza yardımcı olmak için buradayım. Nereye gitmek istiyorsun?"
+            },
+            {
+              "role": "user",
+              "content": "İlk İtalya seyahatimde Roma mı Floransa mı daha uygun? Sanat ve sakin gezmeyi seviyorum, henüz rota hazırlama."
+            },
+            {
+              "role": "assistant",
+              "content": "İlk İtalya seyahatı için ikisi de harika seçim, ama tercih senin tempo ve ilgine bağlı.\n\n**Roma** daha yoğun ve hızlı tempolu. Colosseum, Vatican, Forum gibi devasa siteler var; kalabalık, turist yoğun. Sanatı görmek için müzeler ve kiliseler arasında koşturmak gerekebilir. Ama tarih ve sanat bir arada, çok zengin.\n\n**Floransa** senin için daha uygun olabilir. Daha küçük, yürüyerek gezilir, sakin bir atmosferi var. Uffizi Galerisi, Accademia (Michelangelo'nun David'i), Duomo—hepsi birbirine yakın. Rönesans sanatının kalbi, ama daha rahat bir ritimde keşfedebilirsin. Sokakları, köprüleri, küçük müzeleri sakin sakin dolaşmaya müsait.\n\nKaç gün düşünüyorsun? Eğer ilk kez ve sakin gezmeyi seviyorsan, **Floransa'yı** daha çok tavsiye ederim. Ama her ikisini de görmek istersen, 10+ günlük bir rota ikisini birleştirebilir."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Bana bir seyahat rotası çıkarır mısın?",
+      "elapsedMs": 2734,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 2734
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "clarify",
+        "orchestratorSummary": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 1,
+          "context": {
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Roma olsun.",
+      "elapsedMs": 2684,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 2684
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "clarify",
+        "orchestratorSummary": "Roma için kaç gün ayıralım?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 2,
+          "context": {
+            "destination": "Roma",
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Üç gün ayırabilirim. Her gün iki durak olsun; tarih ve açık hava seviyorum, çok yürümek istemiyorum.",
+      "elapsedMs": 19487,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 14976
+          },
+          {
+            "agentId": "emergency",
+            "agentName": "Güvenlik ve Konsolosluk",
+            "icon": "🛡️",
+            "status": "completed",
+            "durationMs": 0
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "days": 3,
+          "interests": [
+            "tarih"
+          ],
+          "constraints": [
+            "çok yürümek istemiyorum"
+          ],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "route",
+        "orchestratorSummary": "Roma'da 3 günlük bir tarih ve açık hava gezisi hazırladım. Her gün iki durak olacak şekilde, yürüyüş mesafelerini kısa tutarak planladım.\n\n**Gün 1 – Antik Roma ve Müzeler**\n- Sabah: Dioclezianus Hamamları Müzesi (Terme di Diocleziano) – Roma'nın en büyük antik hamamlarından biri, kapsamlı arkeolojik koleksiyonlar\n- Öğleden sonra: Piazza della Repubblica – tarihi meydanda rahat bir yürüyüş ve çevresi keşfi\n\n**Gün 2 – Kiliseler ve Anıtlar**\n- Sabah: Santa Maria della Vittoria – Bernini'nin ünlü heykeli \"Aziz Tereza'nın Ekstazı\"nı içeren muhteşem barok kilisesi\n- Öğleden sonra: Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi ve çevresindeki tarihi meydanlar\n\n**Gün 3 – Bahçeler ve Panoramik Noktalar**\n- Sabah: Giardini del Quirinale – Quirinal Sarayı'nın bahçeleri, açık hava ve tarihi atmosfer\n- Öğleden sonra: Villa Aldobrandini – sakin bahçe alanı, Roma'nın tepelerinden güzel manzaralar\n\nTüm duraklar birbirine yakın, toplu taşıma veya kısa yürüyüşle ulaşılabilir. Müze ve kiliseler içeride olduğu için hava durumundan etkilenmez.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "route": {
+          "title": "Roma'da 3 Günlük Tarih ve Açık Hava Gezisi",
+          "summary": "Antik Roma'nın en önemli müzelerinden başlayarak, barok kiliseler ve saray bahçeleri aracılığıyla Roma'nın zengin tarihini keşfeden, rahat tempolu bir tur.",
+          "theme": "Tarih ve Açık Hava",
+          "destination": "Roma",
+          "estimatedDays": 3,
+          "stops": [
+            {
+              "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+              "name": "National Roman Museum - the Baths of Diocletian",
+              "lat": 41.90261,
+              "lng": 12.49907,
+              "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+              "category": "History Museum",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 1,
+              "description": "Dioclezianus Hamamları Müzesi – Roma'nın en geniş antik hamamı kompleksi, arkeolojik eserler ve tarihi mimarisi",
+              "suggestedDuration": "2 saat",
+              "estimatedMinutes": 120,
+              "timeSlot": "morning",
+              "distanceToNextKm": 0.2
+            },
+            {
+              "id": "AQAAAFUACpeZ8SqY9LpoxvYf5y6Lc6KrGOkojC7wzj29-C4VtZ0Eht1Ud3M3ISn-ZOzaWJygPIJP4BKZz2AYp82OAm7GtcdDAc2mgFMySUkRuvK-Eafy9dejMTzCLkdpBL26jB9MYyZTOFyfbr0k3ed5Qpbc50SzO_bK",
+              "name": "Piazza della Repubblica",
+              "lat": 41.9027,
+              "lng": 12.49623,
+              "address": "Piazza della Repubblica, Piazza della Repubblica, 47, 00185 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 1,
+              "description": "Piazza della Repubblica – tarihi meydan, çeşmeler ve çevresindeki anıtlar",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUA3f8dP4JPeMUfEC-UFVLSMNEjPa58Ger8-27cVkUTO33voHBhCS6oRbyQYOp4AoRZSEmIJ0A3ucI30KHyTS8zuOpmJsqdWwiCmrEBXXaFqriFmCFNFoSC-SkS4Pc8K_4j7ICC-x0DEmN-Ov3gze_IgX261Ign",
+              "name": "Santa Maria della Vittoria",
+              "lat": 41.90377,
+              "lng": 12.49378,
+              "address": "Santa Maria della Vittoria, Piazza San Bernardo, 113, 00187 Rome RM, Italy",
+              "category": "Church",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 2,
+              "description": "Santa Maria della Vittoria – Bernini'nin meşhur heykeli ve barok iç dekorasyonu",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "morning",
+              "distanceToNextKm": 0.1
+            },
+            {
+              "id": "AQAAAFUAA7iL-LPX0JoaLxqn1QttGrsrHETc04_oL6DeQPJRZ75Ydk5P8ExsNH4cGqj9jmTfZziDmCofbKd238cYEN93__OH6doc0XVeVwW69mPbl_L9BWxv7cHOWwL5bpS7v3fKWWj-X0WyEtl7vznMEW8zQhtRIRVs",
+              "name": "Fontana Dell'Acqua Felice",
+              "lat": 41.90404,
+              "lng": 12.49441,
+              "address": "Fontana Dell'Acqua Felice, Piazza San Bernardo, 00187 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 2,
+              "description": "Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi, Piazza San Bernardo'da tarihi atmosfer",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAlZhFyKL1M4fpCLEFU2ajT3RK28BxVTRbxdF9s93eXtp-pipmfg7UIEe365WoeouXkh0Owx9FNxpVhFLhJq2QkPk_2XV2uX-WP6dv8R_03hTFZ8ykI27XDQfE2Fq-YuPBRJ0iqzTf67rQLKU7lOFJRM_32E9e",
+              "name": "Giardini del Quirinale",
+              "lat": 41.90117,
+              "lng": 12.48751,
+              "address": "Giardini del Quirinale, 00187 Rome RM, Italy",
+              "category": "Natural and Geographical",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 3,
+              "description": "Giardini del Quirinale – Quirinal Sarayı bahçeleri, açık hava ve tarihi manzaralar",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "morning",
+              "distanceToNextKm": 0.4
+            },
+            {
+              "id": "AQAAAFUADxOUj7XQsuA4dmFlnLts5fnc6USoC8qNVCZwEyWfJDB_IQV6IH3gfjNFcRRz5pdQHfj50iLjYpkca_OacGKSXlod3d_rNNBhqK2QHQ-htBARKfZCLcZEYReIlpAtH8oRjGelpt1gYR00NYGYlWpxXfbO3F_-",
+              "name": "Villa Aldobrandini",
+              "lat": 41.8975,
+              "lng": 12.48749,
+              "address": "Villa Aldobrandini, Via Mazzarino, 00184 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 3,
+              "description": "Villa Aldobrandini – sakin bahçe alanı, tepelerden Roma manzarası",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "afternoon"
+            }
+          ]
+        },
+        "research": {
+          "status": "available",
+          "places": [
+            {
+              "id": "AQAAAFUACpeZ8SqY9LpoxvYf5y6Lc6KrGOkojC7wzj29-C4VtZ0Eht1Ud3M3ISn-ZOzaWJygPIJP4BKZz2AYp82OAm7GtcdDAc2mgFMySUkRuvK-Eafy9dejMTzCLkdpBL26jB9MYyZTOFyfbr0k3ed5Qpbc50SzO_bK",
+              "name": "Piazza della Repubblica",
+              "lat": 41.9027,
+              "lng": 12.49623,
+              "address": "Piazza della Repubblica, Piazza della Repubblica, 47, 00185 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAj3iqjY6QDcme0-mFpZ7f5g4Y4tV91cmoaeI0QuOWGnfA3-5mD5syzsh_PXOgLisfSMDFqMrFgeJE0oYEyPdYRqRQLinyKrtQjmqvHCz6fNFzCYHagyrpI6MXtjTBv_47WJKbIn1KmHmS6QAGr7Cmsd64rdLY",
+              "name": "Monumento della Caravella",
+              "lat": 41.9042,
+              "lng": 12.49483,
+              "address": "Monumento della Caravella, Via Vittorio Emanuele Orlando, 00185 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAA7iL-LPX0JoaLxqn1QttGrsrHETc04_oL6DeQPJRZ75Ydk5P8ExsNH4cGqj9jmTfZziDmCofbKd238cYEN93__OH6doc0XVeVwW69mPbl_L9BWxv7cHOWwL5bpS7v3fKWWj-X0WyEtl7vznMEW8zQhtRIRVs",
+              "name": "Fontana Dell'Acqua Felice",
+              "lat": 41.90404,
+              "lng": 12.49441,
+              "address": "Fontana Dell'Acqua Felice, Piazza San Bernardo, 00187 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUA3f8dP4JPeMUfEC-UFVLSMNEjPa58Ger8-27cVkUTO33voHBhCS6oRbyQYOp4AoRZSEmIJ0A3ucI30KHyTS8zuOpmJsqdWwiCmrEBXXaFqriFmCFNFoSC-SkS4Pc8K_4j7ICC-x0DEmN-Ov3gze_IgX261Ign",
+              "name": "Santa Maria della Vittoria",
+              "lat": 41.90377,
+              "lng": 12.49378,
+              "address": "Santa Maria della Vittoria, Piazza San Bernardo, 113, 00187 Rome RM, Italy",
+              "category": "Church",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAIMPyo6W0eJrYh7cZlGtcs1kdQHT5CiME6X-NFlRnvwUUb5Q8Nd87OuTMNXQARBYRLzLE5knbGHz24cfwJd6snI-SmaMKy6bWy5FVaGxhv46YpZQvhqu2abQhhs5oNLf4wjMrY73CdxzBRQtkT8tbkeOrMMRH",
+              "name": "Ristorante Terme di Diocleziano",
+              "lat": 41.90191,
+              "lng": 12.49474,
+              "address": "Ristorante Terme di Diocleziano, Via Nazionale, 251, 00184 Rome RM, Italy",
+              "category": "Restaurant",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 75,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAMa5f3mAW3P1rrc3g1bOhWIYfoiRZwjLe9ahNxOQ1insin8SW-G59k7kUO-SrJ3oP2zfPwU-aBxaX8TuPJHMPOjFamXw-brMQxR8JFqOzEnM48rLL0WEvXK0alkcl5cq7nyRgjHw7iCCxYjBEhBcffwJUPf1i",
+              "name": "Obelisco Dogali",
+              "lat": 41.90217,
+              "lng": 12.49746,
+              "address": "Obelisco Dogali, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAfvF0pZS79spAk2l1DrT_78EvPukKcTkoTW-t2yFRwuyZ2x_I69SYJSqn9d47VlNUl7OL5VSBeiuMIKiVk8HNsDAy3YCeGGUpKQxQspgGiDLgmgPwjip1GGHFpXReuYuUAKbcMtskcvv0JTaJUyZfzTwdvuJ1",
+              "name": "Chiostro Piccolo della Certosa",
+              "lat": 41.90296,
+              "lng": 12.49806,
+              "address": "Chiostro Piccolo della Certosa, 00185 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUA4K3m8mdVBzrUmkuEhoKc-YbLFEnMulHKogm54n1vnXPD4U57mA3xE8er0dqGD7RiCSWB7S9ZzZoMWve5oNeAr3Qc9jqL6qjHHdHjqazc1WlEJnAd2Rot6pgKSi0KmojxjxMfJAgMYaBco1qviMXeKj5l3tmE",
+              "name": "Chiesa di San Paolo Entro le Mura",
+              "lat": 41.90128,
+              "lng": 12.49428,
+              "address": "Chiesa di San Paolo Entro le Mura, Via Nazionale, 16, 00184 Rome RM, Italy",
+              "category": "Church",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+              "name": "National Roman Museum - the Baths of Diocletian",
+              "lat": 41.90261,
+              "lng": 12.49907,
+              "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+              "category": "History Museum",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 120,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAGKq0xhjbp3DOOMrR3draHeRWCQOGhMLcWEH97hwy_UhTzsraQLbXDlgqiDBh2oL6wF5VozdDiKwpxWLH3J0uOkdHGJJ3DkrL8zEsWcR0vYWoAQKjs7kmp6ykebVahF4JSsH_IrTQgegg1PaTvPFytRLxPI2F",
+              "name": "Colossal Vase",
+              "lat": 41.90373,
+              "lng": 12.49934,
+              "address": "Colossal Vase, Via Gaeta, 00185 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUA_IxdcLWk7ShtUZ2fMzDaw0pRrH_0_iEukjeNv4RHKeuPEKY2dzqx7iLQlWkdSjaG3Vd0ZuKNobkGfX_xEXh9tHlYfPL4_sBd910eJFQPUNc7jS-S02ML6WoE2MByUk9Q3U-uc42bwtXa6hUT_UCnd0Q-LvcY",
+              "name": "Statua di San Giovanni Paolo II",
+              "lat": 41.90201,
+              "lng": 12.49902,
+              "address": "Statua di San Giovanni Paolo II, Piazza dei Cinquecento, 62, 00185 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAhF3opOmnJcFtFFb5zYOybgBXJLG-cTdmrp8x3dZmlHqA6kkzE2K2G0qrnBMWGZjyGiA4YixTqbtEY440ZdZaUkvgYVn_BuuBGBB2S87-9luUl6S8-6pcK3Hn-CV8jeuXYOp1_fqCihnUfVeubzyhLUiZ66DB",
+              "name": "Monumento A Quintino Sella",
+              "lat": 41.90552,
+              "lng": 12.49842,
+              "address": "Monumento A Quintino Sella, Via Cernaia, 00185 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAWdCZ25wHzvHSehEsKNZgkIvAWSnJuSkifgL6UJb8jSTaqkBgAH2CtaVpOzS50CaHmW7Q1_1k_MV60wNbFdZj3RusALNn71VJeV1X_yxXgY5VjPvlgE3ubwSWSFtT-JCP9KD0uH_kTcbdcddyFHTsB9jDi93Q",
+              "name": "Federazione Italiana dei Parchi e delle Riserve Naturali (Federparchi)",
+              "lat": 41.901,
+              "lng": 12.49342,
+              "address": "Federazione Italiana dei Parchi e delle Riserve Naturali (Federparchi), Via Nazionale, 230, 00184 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAeye49HoXPI_ejO35xANwnx0JLLodsB6cdlWnDCJ99JftnpilkyostZm7S2KXvtdOnHk4esAZ0TUpG3_hrkBRkhxYjZCaYZv6UOSd_ZJN3OwZsla1312Scd_HZfVfIUSCdUpfN4IpKKpa_g9HHgqp0LcnBVQR",
+              "name": "Piazza delle Finanze",
+              "lat": 41.90552,
+              "lng": 12.49842,
+              "address": "Piazza delle Finanze, Piazza delle Finanze, 00185 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUApqhZGmyk9WQQtORl2HSy3PP3jW9iTX3fH7YrPYSLZNrqv82bmofFevwy6XpaFL_7z9N5QQ25D3ic6jiSuK2yRn6ujFxOK_dv2gr7_3VNWoUewHFMBnKrxryt7r0Od_f22GDu455CxJEJN-XdrP63jsNq8coo",
+              "name": "Piazza del Viminale",
+              "lat": 41.89991,
+              "lng": 12.49452,
+              "address": "Piazza del Viminale, Piazza del Viminale, 00184 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAiKEM_yUQlGzPxKDnz_A4_FkhXhqHoRtrq4q8qA8-vXSpv_Y4bEPLO7i86ydbqFF0heWkhlFqsLQtJOHWPX1v0Sluo4EtBlB7mV0ur2LmFqhxB4s0qsE8CAR3tGGAGbyNoDJwlTHkwygNSWTETwXC0sIiXUmf",
+              "name": "Michael's Gate Museum",
+              "lat": 41.90629,
+              "lng": 12.49266,
+              "address": "Michael's Gate Museum, Via Sallustiana, 27, 00187 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 120,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAJZmu4IKhN6Y58Kd0Qwqg0g7W-r1JyR6TCpacRiFnRkiGggrKqpbDIuxk5_ZKiSqgvvoZqXioSmwHL8QQOutkzXJXbNZom2HBd-AGeAR-SaocrHW79EGFnHficMJI5Alha9qANtbDk3qmd1W6XroDr8XxRIAj",
+              "name": "Parco delle Rimembranze",
+              "lat": 41.90625,
+              "lng": 12.4895,
+              "address": "Parco delle Rimembranze, Via Vittorio Veneto, 00187 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUA39-3a5Brrj3eQ-wnUOMS4VYIQneHr4xwJL6cAUba_y4P5YIcT3Oyt-_b701d0hwT2MzUAkSPv3Te0dQA3f_Aw8ahZtYAGS_UBBFZTC-xW8mqq5J9eG9Wxg_jbF52MZ-dtkeNRITS1Gj3UJi4Wwps6ihmu4-D",
+              "name": "Giardino di Sant'Andrea al Quirinale",
+              "lat": 41.9005,
+              "lng": 12.48853,
+              "address": "Giardino di Sant'Andrea al Quirinale, Via del Quirinale, 27, 00184 Rome RM, Italy",
+              "category": "Garden",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAlZhFyKL1M4fpCLEFU2ajT3RK28BxVTRbxdF9s93eXtp-pipmfg7UIEe365WoeouXkh0Owx9FNxpVhFLhJq2QkPk_2XV2uX-WP6dv8R_03hTFZ8ykI27XDQfE2Fq-YuPBRJ0iqzTf67rQLKU7lOFJRM_32E9e",
+              "name": "Giardini del Quirinale",
+              "lat": 41.90117,
+              "lng": 12.48751,
+              "address": "Giardini del Quirinale, 00187 Rome RM, Italy",
+              "category": "Natural and Geographical",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAD9uz7p5ayyLmBmpU5BgOxd-O3yMuH_lNitbkIYTeZwA-x21KsUgC2sjWjiHYH-OVXO7QFZ5ExbmqlEiNQ9NT72n7yTcdp85H4MywmibVFLd6dT8Kn32fZ0hSxqu8lBuNMa39eU1KW-ameLn5ROnwBjc68KYS",
+              "name": "Monumento A Carlo Alberto",
+              "lat": 41.89968,
+              "lng": 12.48826,
+              "address": "Monumento A Carlo Alberto, Via del Quirinale, 00184 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAZMh9Ezy3knVaGugtAkfbfthYix7rCNeNgUfliT7J9Mho1Ln5SLs4hcI3xdSGAtULjvr1U8ltB8wCxEnQnwfqa6-hbxCBd5TzFnqzw9hg1Wx8bH12OH4HJmhVg_bj6hJ-89esuQswiBh9crJSG2h_zouqqSs-",
+              "name": "Piazza Manfredo Fanti",
+              "lat": 41.89765,
+              "lng": 12.50237,
+              "address": "Piazza Manfredo Fanti, Piazza Manfredo Fanti, 47, 00185 Rome RM, Italy",
+              "category": "Landmark-Attraction",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUADxOUj7XQsuA4dmFlnLts5fnc6USoC8qNVCZwEyWfJDB_IQV6IH3gfjNFcRRz5pdQHfj50iLjYpkca_OacGKSXlod3d_rNNBhqK2QHQ-htBARKfZCLcZEYReIlpAtH8oRjGelpt1gYR00NYGYlWpxXfbO3F_-",
+              "name": "Villa Aldobrandini",
+              "lat": 41.8975,
+              "lng": 12.48749,
+              "address": "Villa Aldobrandini, Via Mazzarino, 00184 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAa74lTfAdOA1Tpy1I3j4ARr8tgUAyLgX10R7eLHztd-8l1mCzANCUFChZ45F_2nqfpimqc4gA0SyqmusefsR-LTszHm6t5CKVkhD8uZNMUnhCDQKHNiyKgB23iXhhR4J9Z8vr5zz6yrc9QxwzS5fMurwmEVMQ",
+              "name": "Heaven Villa Borghese",
+              "lat": 41.9096,
+              "lng": 12.48687,
+              "address": "Heaven Villa Borghese, Viale del Galoppatoio, 33, 00197 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAYvy1lUkiYUBaVuhkJBXobLVsLZJleOpNNd-uTLunjZjVJyDs6XCQweDql1Z-hrEmdqa7X6-_CseC8XbDlUnMPl449FSykfYYLXPGvQ4QsYqfzOsjgC5BWTD-fUZDCZeWl7LcffNZsXlOGdWVLSLxMjb6mPGJ",
+              "name": "Skatepark Cinetown",
+              "lat": 41.89468,
+              "lng": 12.50203,
+              "address": "Skatepark Cinetown, Via Giacomo Leopardi, 54, 00185 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "morning"
+            }
+          ],
+          "provider": "Amazon Location",
+          "checkedAt": "2026-09-19T11:06:11.037Z"
+        },
+        "emergency": {
+          "destinationCountry": "İtalya (Roma)",
+          "turkishEmbassyConsulate": {
+            "title": "T.C. Roma Büyükelçiliği & Konsolosluk Şubesi",
+            "address": "Via Palestro, 28, 00185 Roma RM, İtalya (Termini İstasyonu yakınında)",
+            "phone": "+39 06 445941 / +39 06 44594200",
+            "emergencyHotline": "+90 312 292 29 29 (T.C. Dışişleri Bakanlığı 7/24 Konsolosluk Çağrı Merkezi)",
+            "email": "ambasciata.roma@mfa.gov.tr",
+            "workingHours": "Hafta içi 09:00 - 17:00 (Acil nöbetçi konsolosluk hattı 7/24)"
+          },
+          "localEmergencyNumbers": {
+            "police": "113 (Polizia di Stato) / 112 (Carabinieri)",
+            "ambulance": "118 (Pronto Soccorso)",
+            "fire": "115 (Vigili del Fuoco)",
+            "generalEmergency": "112 (Avrupa Birliği Tek Acil Numara)"
+          },
+          "safetyAndPassportTips": [
+            "Pasaport Kaybı Durumunda: Vakit kaybetmeden en yakın 'Carabinieri' veya 'Polizia' karakoluna giderek 'Denuncia di Furto/Smarrimento' (Kayıp/Çalıntı Tutanağı) düzenletin.",
+            "Geçici Pasaport (Pasavan): Karakol tutanağı, 2 adet biyometrik fotoğraf ve T.C. Kimlik Kartınız ile Via Palestro 28'deki T.C. Roma Konsolosluk Şubesi'ne başvurun. Türkiye'ye dönüş için aynı gün Geçici Seyahat Belgesi verilir.",
+            "Yankesicilik Uyarısı: Kolezyum çevresi, Termini İstasyonu ve 64 numaralı Vatikan otobüsünde sırt çantalarınızı önünüzde tutun ve pasaportunuzun orijinali yerine otel kasasında bırakıp telefonunuzda fotoğrafını taşıyın."
+          ]
+        },
+        "conversationState": {
+          "version": 3,
+          "context": {
+            "destination": "Roma",
+            "days": 3,
+            "interests": [
+              "tarih"
+            ],
+            "constraints": [
+              "çok yürümek istemiyorum"
+            ],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "route": {
+            "title": "Roma'da 3 Günlük Tarih ve Açık Hava Gezisi",
+            "summary": "Antik Roma'nın en önemli müzelerinden başlayarak, barok kiliseler ve saray bahçeleri aracılığıyla Roma'nın zengin tarihini keşfeden, rahat tempolu bir tur.",
+            "theme": "Tarih ve Açık Hava",
+            "destination": "Roma",
+            "estimatedDays": 3,
+            "stops": [
+              {
+                "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+                "name": "National Roman Museum - the Baths of Diocletian",
+                "lat": 41.90261,
+                "lng": 12.49907,
+                "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+                "category": "History Museum",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 1,
+                "description": "Dioclezianus Hamamları Müzesi – Roma'nın en geniş antik hamamı kompleksi, arkeolojik eserler ve tarihi mimarisi",
+                "suggestedDuration": "2 saat",
+                "estimatedMinutes": 120,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.2
+              },
+              {
+                "id": "AQAAAFUACpeZ8SqY9LpoxvYf5y6Lc6KrGOkojC7wzj29-C4VtZ0Eht1Ud3M3ISn-ZOzaWJygPIJP4BKZz2AYp82OAm7GtcdDAc2mgFMySUkRuvK-Eafy9dejMTzCLkdpBL26jB9MYyZTOFyfbr0k3ed5Qpbc50SzO_bK",
+                "name": "Piazza della Repubblica",
+                "lat": 41.9027,
+                "lng": 12.49623,
+                "address": "Piazza della Repubblica, Piazza della Repubblica, 47, 00185 Rome RM, Italy",
+                "category": "Tourist Attraction",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 1,
+                "description": "Piazza della Repubblica – tarihi meydan, çeşmeler ve çevresindeki anıtlar",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              },
+              {
+                "id": "AQAAAFUA3f8dP4JPeMUfEC-UFVLSMNEjPa58Ger8-27cVkUTO33voHBhCS6oRbyQYOp4AoRZSEmIJ0A3ucI30KHyTS8zuOpmJsqdWwiCmrEBXXaFqriFmCFNFoSC-SkS4Pc8K_4j7ICC-x0DEmN-Ov3gze_IgX261Ign",
+                "name": "Santa Maria della Vittoria",
+                "lat": 41.90377,
+                "lng": 12.49378,
+                "address": "Santa Maria della Vittoria, Piazza San Bernardo, 113, 00187 Rome RM, Italy",
+                "category": "Church",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 2,
+                "description": "Santa Maria della Vittoria – Bernini'nin meşhur heykeli ve barok iç dekorasyonu",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.1
+              },
+              {
+                "id": "AQAAAFUAA7iL-LPX0JoaLxqn1QttGrsrHETc04_oL6DeQPJRZ75Ydk5P8ExsNH4cGqj9jmTfZziDmCofbKd238cYEN93__OH6doc0XVeVwW69mPbl_L9BWxv7cHOWwL5bpS7v3fKWWj-X0WyEtl7vznMEW8zQhtRIRVs",
+                "name": "Fontana Dell'Acqua Felice",
+                "lat": 41.90404,
+                "lng": 12.49441,
+                "address": "Fontana Dell'Acqua Felice, Piazza San Bernardo, 00187 Rome RM, Italy",
+                "category": "Historical Monument",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 2,
+                "description": "Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi, Piazza San Bernardo'da tarihi atmosfer",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              },
+              {
+                "id": "AQAAAFUAlZhFyKL1M4fpCLEFU2ajT3RK28BxVTRbxdF9s93eXtp-pipmfg7UIEe365WoeouXkh0Owx9FNxpVhFLhJq2QkPk_2XV2uX-WP6dv8R_03hTFZ8ykI27XDQfE2Fq-YuPBRJ0iqzTf67rQLKU7lOFJRM_32E9e",
+                "name": "Giardini del Quirinale",
+                "lat": 41.90117,
+                "lng": 12.48751,
+                "address": "Giardini del Quirinale, 00187 Rome RM, Italy",
+                "category": "Natural and Geographical",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 3,
+                "description": "Giardini del Quirinale – Quirinal Sarayı bahçeleri, açık hava ve tarihi manzaralar",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.4
+              },
+              {
+                "id": "AQAAAFUADxOUj7XQsuA4dmFlnLts5fnc6USoC8qNVCZwEyWfJDB_IQV6IH3gfjNFcRRz5pdQHfj50iLjYpkca_OacGKSXlod3d_rNNBhqK2QHQ-htBARKfZCLcZEYReIlpAtH8oRjGelpt1gYR00NYGYlWpxXfbO3F_-",
+                "name": "Villa Aldobrandini",
+                "lat": 41.8975,
+                "lng": 12.48749,
+                "address": "Villa Aldobrandini, Via Mazzarino, 00184 Rome RM, Italy",
+                "category": "Park-Recreation Area",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 3,
+                "description": "Villa Aldobrandini – sakin bahçe alanı, tepelerden Roma manzarası",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              }
+            ]
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            },
+            {
+              "role": "user",
+              "content": "Üç gün ayırabilirim. Her gün iki durak olsun; tarih ve açık hava seviyorum, çok yürümek istemiyorum."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma'da 3 günlük bir tarih ve açık hava gezisi hazırladım. Her gün iki durak olacak şekilde, yürüyüş mesafelerini kısa tutarak planladım.\n\n**Gün 1 – Antik Roma ve Müzeler**\n- Sabah: Dioclezianus Hamamları Müzesi (Terme di Diocleziano) – Roma'nın en büyük antik hamamlarından biri, kapsamlı arkeolojik koleksiyonlar\n- Öğleden sonra: Piazza della Repubblica – tarihi meydanda rahat bir yürüyüş ve çevresi keşfi\n\n**Gün 2 – Kiliseler ve Anıtlar**\n- Sabah: Santa Maria della Vittoria – Bernini'nin ünlü heykeli \"Aziz Tereza'nın Ekstazı\"nı içeren muhteşem barok kilisesi\n- Öğleden sonra: Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi ve çevresindeki tarihi meydanlar\n\n**Gün 3 – Bahçeler ve Panoramik Noktalar**\n- Sabah: Giardini del Quirinale – Quirinal Sarayı'nın bahçeleri, açık hava ve tarihi atmosfer\n- Öğleden sonra: Villa Aldobrandini – sakin bahçe alanı, Roma'nın tepelerinden güzel manzaralar\n\nTüm duraklar birbirine yakın, toplu taşıma veya kısa yürüyüşle ulaşılabilir. Müze ve kiliseler içeride olduğu için hava durumundan etkilenmez."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın.",
+      "elapsedMs": 17429,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 12920
+          },
+          {
+            "agentId": "emergency",
+            "agentName": "Güvenlik ve Konsolosluk",
+            "icon": "🛡️",
+            "status": "completed",
+            "durationMs": 0
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "days": 3,
+          "interests": [
+            "tarih"
+          ],
+          "constraints": [
+            "çok yürümek istemiyorum"
+          ],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "route",
+        "orchestratorSummary": "İkinci güne bir kahve molası ekledim. Santa Maria della Vittoria'yı ziyaret ettikten sonra, sabah geç saatinde **Caffe Piccarozzi** (Piazza della Repubblica'da) veya **Caffe delle Terme** (Via Vittorio Emanuele Orlando'da) gibi yakındaki bir kahvede kısa bir mola verebilirsiniz. Diğer tüm duraklar ve günler aynı kaldı.\n\n**Güncellenmiş İkinci Gün:**\n- Sabah: Santa Maria della Vittoria (1 saat)\n- Sabah/Öğle Arası: Kahve molası (45 dakika)\n- Öğleden sonra: Fontana Dell'Acqua Felice (1 saat)",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "route": {
+          "title": "Roma'da 3 Günlük Tarih ve Açık Hava Gezisi",
+          "summary": "Antik Roma'nın en önemli müzelerinden başlayarak, barok kiliseler ve saray bahçeleri aracılığıyla Roma'nın zengin tarihini keşfeden, rahat tempolu bir tur. İkinci gün kahve molası ile dinlenme fırsatı.",
+          "theme": "Tarih ve Açık Hava",
+          "destination": "Roma",
+          "estimatedDays": 3,
+          "stops": [
+            {
+              "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+              "name": "National Roman Museum - the Baths of Diocletian",
+              "lat": 41.90261,
+              "lng": 12.49907,
+              "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+              "category": "History Museum",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "day": 1,
+              "description": "Dioclezianus Hamamları Müzesi – Roma'nın en geniş antik hamamı kompleksi, arkeolojik eserler ve tarihi mimarisi",
+              "suggestedDuration": "2 saat",
+              "estimatedMinutes": 120,
+              "timeSlot": "morning",
+              "distanceToNextKm": 0.2
+            },
+            {
+              "id": "AQAAAFUACpeZ8SqY9LpoxvYf5y6Lc6KrGOkojC7wzj29-C4VtZ0Eht1Ud3M3ISn-ZOzaWJygPIJP4BKZz2AYp82OAm7GtcdDAc2mgFMySUkRuvK-Eafy9dejMTzCLkdpBL26jB9MYyZTOFyfbr0k3ed5Qpbc50SzO_bK",
+              "name": "Piazza della Repubblica",
+              "lat": 41.9027,
+              "lng": 12.49623,
+              "address": "Piazza della Repubblica, Piazza della Repubblica, 47, 00185 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "day": 1,
+              "description": "Piazza della Repubblica – tarihi meydan, çeşmeler ve çevresindeki anıtlar",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUA3f8dP4JPeMUfEC-UFVLSMNEjPa58Ger8-27cVkUTO33voHBhCS6oRbyQYOp4AoRZSEmIJ0A3ucI30KHyTS8zuOpmJsqdWwiCmrEBXXaFqriFmCFNFoSC-SkS4Pc8K_4j7ICC-x0DEmN-Ov3gze_IgX261Ign",
+              "name": "Santa Maria della Vittoria",
+              "lat": 41.90377,
+              "lng": 12.49378,
+              "address": "Santa Maria della Vittoria, Piazza San Bernardo, 113, 00187 Rome RM, Italy",
+              "category": "Church",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "day": 2,
+              "description": "Santa Maria della Vittoria – Bernini'nin meşhur heykeli ve barok iç dekorasyonu",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "morning",
+              "distanceToNextKm": 0.1
+            },
+            {
+              "id": "AQAAAFUA-btwDEdJxNYb5P7peNd0E7yIERDO6n57afThGIWQDjxMsmn9RNVFY7uyIzd5jxMJsGiDqytTsYR3VaL4NC-LzSVn7cjdADeCsUsrkwLzf8vIacOyBiF7qVQQmn4JRJ434rfG6FhWA50Z9MK9fhUt0NnEMH9X",
+              "name": "Caffe delle Terme",
+              "lat": 41.90369,
+              "lng": 12.49499,
+              "address": "Caffe delle Terme, Via Vittorio Emanuele Orlando, 82, 00185 Rome RM, Italy",
+              "category": "Bar or Pub",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "day": 2,
+              "description": "Caffe delle Terme – Dioclezianus Hamamları yakınında sakin bir kahve molası",
+              "suggestedDuration": "45 dakika",
+              "estimatedMinutes": 60,
+              "timeSlot": "morning",
+              "distanceToNextKm": 0.1
+            },
+            {
+              "id": "AQAAAFUAA7iL-LPX0JoaLxqn1QttGrsrHETc04_oL6DeQPJRZ75Ydk5P8ExsNH4cGqj9jmTfZziDmCofbKd238cYEN93__OH6doc0XVeVwW69mPbl_L9BWxv7cHOWwL5bpS7v3fKWWj-X0WyEtl7vznMEW8zQhtRIRVs",
+              "name": "Fontana Dell'Acqua Felice",
+              "lat": 41.90404,
+              "lng": 12.49441,
+              "address": "Fontana Dell'Acqua Felice, Piazza San Bernardo, 00187 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 2,
+              "description": "Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi, Piazza San Bernardo'da tarihi atmosfer",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAlZhFyKL1M4fpCLEFU2ajT3RK28BxVTRbxdF9s93eXtp-pipmfg7UIEe365WoeouXkh0Owx9FNxpVhFLhJq2QkPk_2XV2uX-WP6dv8R_03hTFZ8ykI27XDQfE2Fq-YuPBRJ0iqzTf67rQLKU7lOFJRM_32E9e",
+              "name": "Giardini del Quirinale",
+              "lat": 41.90117,
+              "lng": 12.48751,
+              "address": "Giardini del Quirinale, 00187 Rome RM, Italy",
+              "category": "Natural and Geographical",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 3,
+              "description": "Giardini del Quirinale – Quirinal Sarayı bahçeleri, açık hava ve tarihi manzaralar",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "morning",
+              "distanceToNextKm": 0.4
+            },
+            {
+              "id": "AQAAAFUADxOUj7XQsuA4dmFlnLts5fnc6USoC8qNVCZwEyWfJDB_IQV6IH3gfjNFcRRz5pdQHfj50iLjYpkca_OacGKSXlod3d_rNNBhqK2QHQ-htBARKfZCLcZEYReIlpAtH8oRjGelpt1gYR00NYGYlWpxXfbO3F_-",
+              "name": "Villa Aldobrandini",
+              "lat": 41.8975,
+              "lng": 12.48749,
+              "address": "Villa Aldobrandini, Via Mazzarino, 00184 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z",
+              "day": 3,
+              "description": "Villa Aldobrandini – sakin bahçe alanı, tepelerden Roma manzarası",
+              "suggestedDuration": "1 saat",
+              "estimatedMinutes": 60,
+              "timeSlot": "afternoon"
+            }
+          ]
+        },
+        "research": {
+          "status": "available",
+          "places": [
+            {
+              "id": "AQAAAFUA-OkiZl80sQMuqfl0BQFuyqvLA6yf84DUdeDKSg8lPI1ximlwbVHPjYotd69BhhQ0hDI_4dHubODROID5EBxlS7mGIZWUlv7GKyb1TE0TgDeyCBL_ToEIpV9Kzx1Q0fo0o1RObdVGPztUCQujiUEB71yeesRx",
+              "name": "Casina Esedra",
+              "lat": 41.90324,
+              "lng": 12.49573,
+              "address": "Casina Esedra, Via Vittorio Emanuele Orlando, 00185 Rome RM, Italy",
+              "category": "Casual Dining",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAqJkir9RDEJvvskyjMQIfi2d79qr28Z8oa7BCiZR-0nl-aagA8viwkl4KQMpDU8TsVoAjEHaBOpduz2GvKQmWaxOKbT3YKKeIDbEuhL7384KnMxh7j33LxEKL7Ms1uEZ6wvuOTkcl_4cgrq3sXvTAV_oBD3uF",
+              "name": "Caffe Piccarozzi",
+              "lat": 41.90274,
+              "lng": 12.49519,
+              "address": "Caffe Piccarozzi, Piazza della Repubblica, 62, 00184 Rome RM, Italy",
+              "category": "Bar or Pub",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "evening"
+            },
+            {
+              "id": "AQAAAFUA-btwDEdJxNYb5P7peNd0E7yIERDO6n57afThGIWQDjxMsmn9RNVFY7uyIzd5jxMJsGiDqytTsYR3VaL4NC-LzSVn7cjdADeCsUsrkwLzf8vIacOyBiF7qVQQmn4JRJ434rfG6FhWA50Z9MK9fhUt0NnEMH9X",
+              "name": "Caffe delle Terme",
+              "lat": 41.90369,
+              "lng": 12.49499,
+              "address": "Caffe delle Terme, Via Vittorio Emanuele Orlando, 82, 00185 Rome RM, Italy",
+              "category": "Bar or Pub",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "evening"
+            },
+            {
+              "id": "AQAAAFUA9vLT2MoxbxzjKZxLTwaqng_w7eo33fl7saAd3XnelMphTDzjbI-kEGIVdMR33jda3C170ruEW16UNAWjJUUiZb84ITO3QgpagxTXzPp2c_r4iB3SBdVWSv4e2Im3hixxfN2V1xe4_YoEbolnSBu9U2vD7y-Z",
+              "name": "Carra",
+              "lat": 41.90265,
+              "lng": 12.49615,
+              "address": "Carra, Piazza della Repubblica, 62, 00185 Rome RM, Italy",
+              "category": "Coffee Shop",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 45,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAqGKi088e1-hwmM-B272s9ArwBazR81aVV-xv66FG9TiIOlxVDgi1P84Y02KKhPVyXN74pr5lJOQMVz5umHyual65viYXmI0GcrEEOqbvAb-Ywg0mpbjcfup28_7q0qIJCo3gcmby7jUURvRvxbaNvoE4dz_A",
+              "name": "Hotel Patria",
+              "lat": 41.90271,
+              "lng": 12.49469,
+              "address": "Hotel Patria, Via Torino, 36, 00184 Rome RM, Italy",
+              "category": "Hotel",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAZyycWWwWMWf6DLJSC8N4MSVx7v3an-D-W8FtPwmdIphrDvL9-xVj9bbZJbQYGtMnBOuGnVIaXKvSoI2OWhMURx0r49gUavmkSTfwoiWLEJM4J-uXYJiiAk2SUjZtMlM-ESrW6uCBwE0CdnKgFZkChit7UV9z",
+              "name": "One Way Bar",
+              "lat": 41.90267,
+              "lng": 12.4947,
+              "address": "One Way Bar, Via Torino, 35, 00184 Rome RM, Italy",
+              "category": "Bar or Pub",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "evening"
+            },
+            {
+              "id": "AQAAAFUA4u08p6g0VVIAsemkUYYAzYmltAmxk7uJMKVq5OJI9wkinfnAv-up6-oF9XVKZLmAXivJc5NQlP4ZWT8er64jWueAqkDIZBYr5z8NkcmXfPv-GXL5miEV4NhA3WcLjQu6tSzJBOnn-Uj3_IYbiUsHGQCBOrX_",
+              "name": "Bar",
+              "lat": 41.90234,
+              "lng": 12.49433,
+              "address": "Bar, Via Modena, 00184 Rome RM, Italy",
+              "category": "Bar or Pub",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "evening"
+            },
+            {
+              "id": "AQAAAFUA6OuO1XaPNtj4OK1E2r7YUEONZYYUxDGObChi5OFzreiqd83fBjQa3hkKvGdS-tmPj0HyUT-tT_IKINrjzOdWiaht1ywigRmCyhRkg70jP-D4XVGS5_9q9agRK5ocohyXeR0MIIEFnp6fUImPOcBunuCRJBb0",
+              "name": "La Congrega Bistrot",
+              "lat": 41.90309,
+              "lng": 12.49343,
+              "address": "La Congrega Bistrot, Via Firenze, 40, 00184 Rome RM, Italy",
+              "category": "Bistro",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUA-a2pfT98wAV4G8sN-4oVgK5Sf0PtqldqyXl3j8aoI0ItlvB2L_p6c1mawWu5ZvP-0tGLloHrLHiPaeUoVWfDE_u-LB9ptEJLl_D66pKikZEWBU5B9pisGfbf1Yot8IYFVTRJ2Nha8e2VX6d9I-Eh1vSSV06F",
+              "name": "Mada.",
+              "lat": 41.9016,
+              "lng": 12.49438,
+              "address": "Mada., Via Nazionale, 250, 00184 Rome RM, Italy",
+              "category": "Grocery",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAIsd4a9DbreNUFSbWDGQqFb2UucK_AgqAOMEVcjGkQu5vTWIzDuZRVcUAh-pHonBKoElNCrX3kIjqcSJkBkgAy0BeNKb_eKbGJHzZO8Zi35IQrM3m0MyrLVmbJUDpTMKBj6FgYjJF1g_Dov3Up59-PPv84LDt",
+              "name": "Enoteca Chirra",
+              "lat": 41.90118,
+              "lng": 12.49588,
+              "address": "Enoteca Chirra, Via Torino, 133, 00184 Rome RM, Italy",
+              "category": "Wine and Liquor",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAjBUrZuaDKQtRJ2XGMbaq6bpyztQt3Fo2Gn4cdPhCydvH999w5RGbhO2kcMaUgTv6MqG2rfuLPxnWOyb4ibQpVaiY8eDhYt57XgOscUwdT6jgGC89CA8duLGYsAjjKNsRpp0MDj-ge6lBU0-qnIkHuf9aIThr",
+              "name": "Casina Azzurra",
+              "lat": 41.90194,
+              "lng": 12.49782,
+              "address": "Casina Azzurra, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+              "category": "Coffee Shop",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 45,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAJ8ApPn0wUkTO5xGgiGJkQmJwAch-9fJQyMuVEdESSS8TgMdgUJ95cWRJLfUn_IGln33MhZAyc-tkQ9i1ygbuvhuDLhw8RF-tIN6yQ4yZUjehqRPWVElRNirBTiFbr-KbyvSE48mnNwHwtt59fv7S9RqJ-lWr",
+              "name": "D'Angelo Caff",
+              "lat": 41.90546,
+              "lng": 12.49558,
+              "address": "D'Angelo Caff, Via 20 Settembre, 25, 00185 Rome RM, Italy",
+              "category": "Coffee Shop",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 45,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUACpeZ8SqY9LpoxvYf5y6Lc6KrGOkojC7wzj29-C4VtZ0Eht1Ud3M3ISn-ZOzaWJygPIJP4BKZz2AYp82OAm7GtcdDAc2mgFMySUkRuvK-Eafy9dejMTzCLkdpBL26jB9MYyZTOFyfbr0k3ed5Qpbc50SzO_bK",
+              "name": "Piazza della Repubblica",
+              "lat": 41.9027,
+              "lng": 12.49623,
+              "address": "Piazza della Repubblica, Piazza della Repubblica, 47, 00185 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUANqn9QrKR0XyLbGXW7rToHd3A_MmqW36zGWo7zjX6yeV2cX_iiMf4hdGLU4jN_VHz5PtV-SvujuDdXcF36HxDfmBfY7xpsJSeAyHeQL9SAi3a1XxjL5VNCXWdW8fo4BWqV55z3LIkd40ZD_LMMefK7oDNnPm_",
+              "name": "Fontana delle Naiadi",
+              "lat": 41.90263,
+              "lng": 12.49633,
+              "address": "Fontana delle Naiadi, Piazza della Repubblica, 00185 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAu9vcpMCD7qUqDnhgd0mq81t46Vn3xNmBM1cBkAoCRBEOwPnm8TQthaZUHmub5efilSYVEm6ZfnHXGxhEQbJyppQ8oeMQ54cPx1yiZPPddTMbDG5KTqVYPL9y9X2hmxI92ZxeNBuOrMxm3TfpvWs0PsTlMOo1",
+              "name": "Fountain of Moses",
+              "lat": 41.90443,
+              "lng": 12.49445,
+              "address": "Fountain of Moses, Piazza San Bernardo, 00185 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUA3f8dP4JPeMUfEC-UFVLSMNEjPa58Ger8-27cVkUTO33voHBhCS6oRbyQYOp4AoRZSEmIJ0A3ucI30KHyTS8zuOpmJsqdWwiCmrEBXXaFqriFmCFNFoSC-SkS4Pc8K_4j7ICC-x0DEmN-Ov3gze_IgX261Ign",
+              "name": "Santa Maria della Vittoria",
+              "lat": 41.90377,
+              "lng": 12.49378,
+              "address": "Santa Maria della Vittoria, Piazza San Bernardo, 113, 00187 Rome RM, Italy",
+              "category": "Church",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUANrZrKVWS-YZpjYRxOMKCqjuezlH6c_6CU1UCh7U8h9bzdcG7-0WDhwV_jUL1axP1C4DU082bb8eKciRoNA-tWp-nEessGFPyxNZGoxVOa6e1qeLXcPxXohjTC_iIEOa4UQqX9XPdizV7ZHRru1Z2bGt1RRuq",
+              "name": "Hotel Quirinale",
+              "lat": 41.90299,
+              "lng": 12.49357,
+              "address": "Hotel Quirinale, Via Firenze, 43, 00184 Rome RM, Italy",
+              "category": "Hotel",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAG0x5H1yUvprFzSxrAjCLyDmUmBbOmdaxoSvm4QDUazbhC-4k4C_OH9KKrCUd6kgu-zTmQ0xgR4pld2GmNwPT7Xt_s9gYYQ2en73BaAyRFn2fbgwcWVIt2zcAYbxeLatHsDiSsntwjLhWAX8X4UnT32njNBkF",
+              "name": "東方市場",
+              "lat": 41.90382,
+              "lng": 12.49366,
+              "address": "東方市場, Via 20 Settembre, 00184 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAdZns48t43dH8Ubivd6-zOlzTWUy2tGyw2m0n5uZfzgBgDxFThgndo4_1gvyT8kzUvyso4q5uB8uZHEwSvQ2yV4siFAtKwS-g2RToDRCJwbHyP51dS2VtN1IT5kylrBlddHR9YnYaWArwaTno-UPnkQ0yNonj",
+              "name": "Gamm Game Museum",
+              "lat": 41.90191,
+              "lng": 12.49694,
+              "address": "Gamm Game Museum, Via delle Terme di Diocleziano, 35, 00184 Rome RM, Italy",
+              "category": "Museum",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 120,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAMacjCU-1Qm4120F86fQixRzy3UIyA6zRCusHTjKJ4xwtCummoY6tlBk7-P2UKg2__RydjGGxcAQZpKIyR3yZrzJMDrP7GolpeOZuP7abdLmZ7JT60gljKVYx_8dwKWZ8wtdPNvdVhw9QQAFL8KOH7GDeUdD3",
+              "name": "Fiera del Libro",
+              "lat": 41.90183,
+              "lng": 12.49712,
+              "address": "Fiera del Libro, Via delle Terme di Diocleziano, 00184 Rome RM, Italy",
+              "category": "Bookstore",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAeM2DM2RVAHzecvd4_1cKUEexI51xp9268cMpv7f_dIoSPKfO6sNSnupI-lAhl_uzXejQKtjJTfI18cj7udUP0J9PC_NWJkqFsdP4XBMlOzFG0M-LBy7TO9R-6WVmEHfubSqZqGlnrc0wJJebF_jNs33PjHzn",
+              "name": "Cipressi di Michelangelo",
+              "lat": 41.90423,
+              "lng": 12.49833,
+              "address": "Cipressi di Michelangelo, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+              "category": "Tourist Attraction",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAtrq0cSMQd-vStaRCk_tm_OzcUbg-7S9nw59ECGy_94Q36uMOb5epjz_cQfWqogTugqHWQay9thWSELaJJ84cEdmjbadvpuMEnd2i96GJaYZ1X52PtpXd1gNqL3qluXbKX8CMWhRWHjyRWiI9xZqW4ZQ88d0P",
+              "name": "Bici & Baci",
+              "lat": 41.90115,
+              "lng": 12.49706,
+              "address": "Bici & Baci, Via del Viminale, 5, 00184 Rome RM, Italy",
+              "category": "Rental Car Agency",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUANujOaHHtEtsV0ac6dbVYU35T-6k6BF6J9Pp4_7Kspg98Ref6CqCAHy679j5jGprQc-I8aG9Z54XCUynnYtvVjWmtVcqUaSPv2gr0wklZmslw5dzvXt8s1i9rjfl8c83FK6Hd8CRlwTpaxr1yO_9hYE_w6muK",
+              "name": "Hotel Columbia",
+              "lat": 41.90093,
+              "lng": 12.49662,
+              "address": "Hotel Columbia, Piazza del Viminale, 5, 00184 Rome RM, Italy",
+              "category": "Hotel",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 60,
+              "recommendedSlot": "afternoon"
+            },
+            {
+              "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+              "name": "National Roman Museum - the Baths of Diocletian",
+              "lat": 41.90261,
+              "lng": 12.49907,
+              "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+              "category": "History Museum",
+              "checkedAt": "2026-09-19T11:06:30.811Z",
+              "typicalDurationMins": 120,
+              "recommendedSlot": "morning"
+            },
+            {
+              "id": "AQAAAFUAA7iL-LPX0JoaLxqn1QttGrsrHETc04_oL6DeQPJRZ75Ydk5P8ExsNH4cGqj9jmTfZziDmCofbKd238cYEN93__OH6doc0XVeVwW69mPbl_L9BWxv7cHOWwL5bpS7v3fKWWj-X0WyEtl7vznMEW8zQhtRIRVs",
+              "name": "Fontana Dell'Acqua Felice",
+              "lat": 41.90404,
+              "lng": 12.49441,
+              "address": "Fontana Dell'Acqua Felice, Piazza San Bernardo, 00187 Rome RM, Italy",
+              "category": "Historical Monument",
+              "checkedAt": "2026-09-19T11:06:11.037Z"
+            },
+            {
+              "id": "AQAAAFUAlZhFyKL1M4fpCLEFU2ajT3RK28BxVTRbxdF9s93eXtp-pipmfg7UIEe365WoeouXkh0Owx9FNxpVhFLhJq2QkPk_2XV2uX-WP6dv8R_03hTFZ8ykI27XDQfE2Fq-YuPBRJ0iqzTf67rQLKU7lOFJRM_32E9e",
+              "name": "Giardini del Quirinale",
+              "lat": 41.90117,
+              "lng": 12.48751,
+              "address": "Giardini del Quirinale, 00187 Rome RM, Italy",
+              "category": "Natural and Geographical",
+              "checkedAt": "2026-09-19T11:06:11.037Z"
+            },
+            {
+              "id": "AQAAAFUADxOUj7XQsuA4dmFlnLts5fnc6USoC8qNVCZwEyWfJDB_IQV6IH3gfjNFcRRz5pdQHfj50iLjYpkca_OacGKSXlod3d_rNNBhqK2QHQ-htBARKfZCLcZEYReIlpAtH8oRjGelpt1gYR00NYGYlWpxXfbO3F_-",
+              "name": "Villa Aldobrandini",
+              "lat": 41.8975,
+              "lng": 12.48749,
+              "address": "Villa Aldobrandini, Via Mazzarino, 00184 Rome RM, Italy",
+              "category": "Park-Recreation Area",
+              "checkedAt": "2026-09-19T11:06:11.037Z"
+            }
+          ],
+          "provider": "Amazon Location",
+          "checkedAt": "2026-09-19T11:06:30.811Z"
+        },
+        "emergency": {
+          "destinationCountry": "İtalya (Roma)",
+          "turkishEmbassyConsulate": {
+            "title": "T.C. Roma Büyükelçiliği & Konsolosluk Şubesi",
+            "address": "Via Palestro, 28, 00185 Roma RM, İtalya (Termini İstasyonu yakınında)",
+            "phone": "+39 06 445941 / +39 06 44594200",
+            "emergencyHotline": "+90 312 292 29 29 (T.C. Dışişleri Bakanlığı 7/24 Konsolosluk Çağrı Merkezi)",
+            "email": "ambasciata.roma@mfa.gov.tr",
+            "workingHours": "Hafta içi 09:00 - 17:00 (Acil nöbetçi konsolosluk hattı 7/24)"
+          },
+          "localEmergencyNumbers": {
+            "police": "113 (Polizia di Stato) / 112 (Carabinieri)",
+            "ambulance": "118 (Pronto Soccorso)",
+            "fire": "115 (Vigili del Fuoco)",
+            "generalEmergency": "112 (Avrupa Birliği Tek Acil Numara)"
+          },
+          "safetyAndPassportTips": [
+            "Pasaport Kaybı Durumunda: Vakit kaybetmeden en yakın 'Carabinieri' veya 'Polizia' karakoluna giderek 'Denuncia di Furto/Smarrimento' (Kayıp/Çalıntı Tutanağı) düzenletin.",
+            "Geçici Pasaport (Pasavan): Karakol tutanağı, 2 adet biyometrik fotoğraf ve T.C. Kimlik Kartınız ile Via Palestro 28'deki T.C. Roma Konsolosluk Şubesi'ne başvurun. Türkiye'ye dönüş için aynı gün Geçici Seyahat Belgesi verilir.",
+            "Yankesicilik Uyarısı: Kolezyum çevresi, Termini İstasyonu ve 64 numaralı Vatikan otobüsünde sırt çantalarınızı önünüzde tutun ve pasaportunuzun orijinali yerine otel kasasında bırakıp telefonunuzda fotoğrafını taşıyın."
+          ]
+        },
+        "conversationState": {
+          "version": 4,
+          "context": {
+            "destination": "Roma",
+            "days": 3,
+            "interests": [
+              "tarih"
+            ],
+            "constraints": [
+              "çok yürümek istemiyorum"
+            ],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "route": {
+            "title": "Roma'da 3 Günlük Tarih ve Açık Hava Gezisi",
+            "summary": "Antik Roma'nın en önemli müzelerinden başlayarak, barok kiliseler ve saray bahçeleri aracılığıyla Roma'nın zengin tarihini keşfeden, rahat tempolu bir tur. İkinci gün kahve molası ile dinlenme fırsatı.",
+            "theme": "Tarih ve Açık Hava",
+            "destination": "Roma",
+            "estimatedDays": 3,
+            "stops": [
+              {
+                "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+                "name": "National Roman Museum - the Baths of Diocletian",
+                "lat": 41.90261,
+                "lng": 12.49907,
+                "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+                "category": "History Museum",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 1,
+                "description": "Dioclezianus Hamamları Müzesi – Roma'nın en geniş antik hamamı kompleksi, arkeolojik eserler ve tarihi mimarisi",
+                "suggestedDuration": "2 saat",
+                "estimatedMinutes": 120,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.2
+              },
+              {
+                "id": "AQAAAFUACpeZ8SqY9LpoxvYf5y6Lc6KrGOkojC7wzj29-C4VtZ0Eht1Ud3M3ISn-ZOzaWJygPIJP4BKZz2AYp82OAm7GtcdDAc2mgFMySUkRuvK-Eafy9dejMTzCLkdpBL26jB9MYyZTOFyfbr0k3ed5Qpbc50SzO_bK",
+                "name": "Piazza della Repubblica",
+                "lat": 41.9027,
+                "lng": 12.49623,
+                "address": "Piazza della Repubblica, Piazza della Repubblica, 47, 00185 Rome RM, Italy",
+                "category": "Tourist Attraction",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 1,
+                "description": "Piazza della Repubblica – tarihi meydan, çeşmeler ve çevresindeki anıtlar",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              },
+              {
+                "id": "AQAAAFUA3f8dP4JPeMUfEC-UFVLSMNEjPa58Ger8-27cVkUTO33voHBhCS6oRbyQYOp4AoRZSEmIJ0A3ucI30KHyTS8zuOpmJsqdWwiCmrEBXXaFqriFmCFNFoSC-SkS4Pc8K_4j7ICC-x0DEmN-Ov3gze_IgX261Ign",
+                "name": "Santa Maria della Vittoria",
+                "lat": 41.90377,
+                "lng": 12.49378,
+                "address": "Santa Maria della Vittoria, Piazza San Bernardo, 113, 00187 Rome RM, Italy",
+                "category": "Church",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 2,
+                "description": "Santa Maria della Vittoria – Bernini'nin meşhur heykeli ve barok iç dekorasyonu",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.1
+              },
+              {
+                "id": "AQAAAFUA-btwDEdJxNYb5P7peNd0E7yIERDO6n57afThGIWQDjxMsmn9RNVFY7uyIzd5jxMJsGiDqytTsYR3VaL4NC-LzSVn7cjdADeCsUsrkwLzf8vIacOyBiF7qVQQmn4JRJ434rfG6FhWA50Z9MK9fhUt0NnEMH9X",
+                "name": "Caffe delle Terme",
+                "lat": 41.90369,
+                "lng": 12.49499,
+                "address": "Caffe delle Terme, Via Vittorio Emanuele Orlando, 82, 00185 Rome RM, Italy",
+                "category": "Bar or Pub",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 2,
+                "description": "Caffe delle Terme – Dioclezianus Hamamları yakınında sakin bir kahve molası",
+                "suggestedDuration": "45 dakika",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.1
+              },
+              {
+                "id": "AQAAAFUAA7iL-LPX0JoaLxqn1QttGrsrHETc04_oL6DeQPJRZ75Ydk5P8ExsNH4cGqj9jmTfZziDmCofbKd238cYEN93__OH6doc0XVeVwW69mPbl_L9BWxv7cHOWwL5bpS7v3fKWWj-X0WyEtl7vznMEW8zQhtRIRVs",
+                "name": "Fontana Dell'Acqua Felice",
+                "lat": 41.90404,
+                "lng": 12.49441,
+                "address": "Fontana Dell'Acqua Felice, Piazza San Bernardo, 00187 Rome RM, Italy",
+                "category": "Historical Monument",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 2,
+                "description": "Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi, Piazza San Bernardo'da tarihi atmosfer",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              },
+              {
+                "id": "AQAAAFUAlZhFyKL1M4fpCLEFU2ajT3RK28BxVTRbxdF9s93eXtp-pipmfg7UIEe365WoeouXkh0Owx9FNxpVhFLhJq2QkPk_2XV2uX-WP6dv8R_03hTFZ8ykI27XDQfE2Fq-YuPBRJ0iqzTf67rQLKU7lOFJRM_32E9e",
+                "name": "Giardini del Quirinale",
+                "lat": 41.90117,
+                "lng": 12.48751,
+                "address": "Giardini del Quirinale, 00187 Rome RM, Italy",
+                "category": "Natural and Geographical",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 3,
+                "description": "Giardini del Quirinale – Quirinal Sarayı bahçeleri, açık hava ve tarihi manzaralar",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.4
+              },
+              {
+                "id": "AQAAAFUADxOUj7XQsuA4dmFlnLts5fnc6USoC8qNVCZwEyWfJDB_IQV6IH3gfjNFcRRz5pdQHfj50iLjYpkca_OacGKSXlod3d_rNNBhqK2QHQ-htBARKfZCLcZEYReIlpAtH8oRjGelpt1gYR00NYGYlWpxXfbO3F_-",
+                "name": "Villa Aldobrandini",
+                "lat": 41.8975,
+                "lng": 12.48749,
+                "address": "Villa Aldobrandini, Via Mazzarino, 00184 Rome RM, Italy",
+                "category": "Park-Recreation Area",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 3,
+                "description": "Villa Aldobrandini – sakin bahçe alanı, tepelerden Roma manzarası",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              }
+            ]
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            },
+            {
+              "role": "user",
+              "content": "Üç gün ayırabilirim. Her gün iki durak olsun; tarih ve açık hava seviyorum, çok yürümek istemiyorum."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma'da 3 günlük bir tarih ve açık hava gezisi hazırladım. Her gün iki durak olacak şekilde, yürüyüş mesafelerini kısa tutarak planladım.\n\n**Gün 1 – Antik Roma ve Müzeler**\n- Sabah: Dioclezianus Hamamları Müzesi (Terme di Diocleziano) – Roma'nın en büyük antik hamamlarından biri, kapsamlı arkeolojik koleksiyonlar\n- Öğleden sonra: Piazza della Repubblica – tarihi meydanda rahat bir yürüyüş ve çevresi keşfi\n\n**Gün 2 – Kiliseler ve Anıtlar**\n- Sabah: Santa Maria della Vittoria – Bernini'nin ünlü heykeli \"Aziz Tereza'nın Ekstazı\"nı içeren muhteşem barok kilisesi\n- Öğleden sonra: Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi ve çevresindeki tarihi meydanlar\n\n**Gün 3 – Bahçeler ve Panoramik Noktalar**\n- Sabah: Giardini del Quirinale – Quirinal Sarayı'nın bahçeleri, açık hava ve tarihi atmosfer\n- Öğleden sonra: Villa Aldobrandini – sakin bahçe alanı, Roma'nın tepelerinden güzel manzaralar\n\nTüm duraklar birbirine yakın, toplu taşıma veya kısa yürüyüşle ulaşılabilir. Müze ve kiliseler içeride olduğu için hava durumundan etkilenmez."
+            },
+            {
+              "role": "user",
+              "content": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın."
+            },
+            {
+              "role": "assistant",
+              "content": "İkinci güne bir kahve molası ekledim. Santa Maria della Vittoria'yı ziyaret ettikten sonra, sabah geç saatinde **Caffe Piccarozzi** (Piazza della Repubblica'da) veya **Caffe delle Terme** (Via Vittorio Emanuele Orlando'da) gibi yakındaki bir kahvede kısa bir mola verebilirsiniz. Diğer tüm duraklar ve günler aynı kaldı.\n\n**Güncellenmiş İkinci Gün:**\n- Sabah: Santa Maria della Vittoria (1 saat)\n- Sabah/Öğle Arası: Kahve molası (45 dakika)\n- Öğleden sonra: Fontana Dell'Acqua Felice (1 saat)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Roma rotama dokunma; meraktan soruyorum, Tokyo'da hangi yerel yemekler denenir?",
+      "elapsedMs": 8680,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 8680
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "days": 3,
+          "interests": [
+            "tarih"
+          ],
+          "constraints": [
+            "çok yürümek istemiyorum"
+          ],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "Tokyo'da denenmesi gereken yerel yemekler:\n\n**Klasik Sokak Yemekleri**\n- **Ramen** – sıcak et suyu çorbası, erişte ve çeşitli ek malzemeler; her bölgenin kendine özgü stili vardır\n- **Takoyaki** – ahtapot parçaları içeren kızarmış hamur topları\n- **Okonomiyaki** – Japon krep tarzı yemek, sebze ve et/deniz ürünleriyle hazırlanır\n- **Yakitori** – şişte kızartılmış tavuk parçaları\n\n**Restoran Yemekleri**\n- **Sushi ve Sashimi** – taze balık ve deniz ürünleri\n- **Tempura** – hafif hamurda kızartılmış sebze ve deniz ürünleri\n- **Tonkatsu** – panolu domuz eti şnitzel\n- **Sukiyaki** – sıcak pot yemeği, ince dilimlenmiş et ve sebzeler\n\n**Hafif Atıştırmalıklar**\n- **Edamame** – tuzlu yeşil soya fasulyesi\n- **Gyoza** – Çin usulü mantı\n- **Mochi** – pirinç unu tatlısı, çeşitli tatlarla\n\n**İçecekler**\n- **Sake** – pirinç şarabı\n- **Matcha çayı** – yeşil çay tozu\n\nTokyo'da Tsukiji, Shibuya ve Shinjuku gibi bölgelerde bu yemekleri bulabilirsiniz. Fiyatlar sokak yemeklerinde uygun, restoranlarda değişkendir.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 5,
+          "context": {
+            "destination": "Roma",
+            "days": 3,
+            "interests": [
+              "tarih"
+            ],
+            "constraints": [
+              "çok yürümek istemiyorum"
+            ],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "route": {
+            "title": "Roma'da 3 Günlük Tarih ve Açık Hava Gezisi",
+            "summary": "Antik Roma'nın en önemli müzelerinden başlayarak, barok kiliseler ve saray bahçeleri aracılığıyla Roma'nın zengin tarihini keşfeden, rahat tempolu bir tur. İkinci gün kahve molası ile dinlenme fırsatı.",
+            "theme": "Tarih ve Açık Hava",
+            "destination": "Roma",
+            "estimatedDays": 3,
+            "stops": [
+              {
+                "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+                "name": "National Roman Museum - the Baths of Diocletian",
+                "lat": 41.90261,
+                "lng": 12.49907,
+                "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+                "category": "History Museum",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 1,
+                "description": "Dioclezianus Hamamları Müzesi – Roma'nın en geniş antik hamamı kompleksi, arkeolojik eserler ve tarihi mimarisi",
+                "suggestedDuration": "2 saat",
+                "estimatedMinutes": 120,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.2
+              },
+              {
+                "id": "AQAAAFUACpeZ8SqY9LpoxvYf5y6Lc6KrGOkojC7wzj29-C4VtZ0Eht1Ud3M3ISn-ZOzaWJygPIJP4BKZz2AYp82OAm7GtcdDAc2mgFMySUkRuvK-Eafy9dejMTzCLkdpBL26jB9MYyZTOFyfbr0k3ed5Qpbc50SzO_bK",
+                "name": "Piazza della Repubblica",
+                "lat": 41.9027,
+                "lng": 12.49623,
+                "address": "Piazza della Repubblica, Piazza della Repubblica, 47, 00185 Rome RM, Italy",
+                "category": "Tourist Attraction",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 1,
+                "description": "Piazza della Repubblica – tarihi meydan, çeşmeler ve çevresindeki anıtlar",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              },
+              {
+                "id": "AQAAAFUA3f8dP4JPeMUfEC-UFVLSMNEjPa58Ger8-27cVkUTO33voHBhCS6oRbyQYOp4AoRZSEmIJ0A3ucI30KHyTS8zuOpmJsqdWwiCmrEBXXaFqriFmCFNFoSC-SkS4Pc8K_4j7ICC-x0DEmN-Ov3gze_IgX261Ign",
+                "name": "Santa Maria della Vittoria",
+                "lat": 41.90377,
+                "lng": 12.49378,
+                "address": "Santa Maria della Vittoria, Piazza San Bernardo, 113, 00187 Rome RM, Italy",
+                "category": "Church",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 2,
+                "description": "Santa Maria della Vittoria – Bernini'nin meşhur heykeli ve barok iç dekorasyonu",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.1
+              },
+              {
+                "id": "AQAAAFUA-btwDEdJxNYb5P7peNd0E7yIERDO6n57afThGIWQDjxMsmn9RNVFY7uyIzd5jxMJsGiDqytTsYR3VaL4NC-LzSVn7cjdADeCsUsrkwLzf8vIacOyBiF7qVQQmn4JRJ434rfG6FhWA50Z9MK9fhUt0NnEMH9X",
+                "name": "Caffe delle Terme",
+                "lat": 41.90369,
+                "lng": 12.49499,
+                "address": "Caffe delle Terme, Via Vittorio Emanuele Orlando, 82, 00185 Rome RM, Italy",
+                "category": "Bar or Pub",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 2,
+                "description": "Caffe delle Terme – Dioclezianus Hamamları yakınında sakin bir kahve molası",
+                "suggestedDuration": "45 dakika",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.1
+              },
+              {
+                "id": "AQAAAFUAA7iL-LPX0JoaLxqn1QttGrsrHETc04_oL6DeQPJRZ75Ydk5P8ExsNH4cGqj9jmTfZziDmCofbKd238cYEN93__OH6doc0XVeVwW69mPbl_L9BWxv7cHOWwL5bpS7v3fKWWj-X0WyEtl7vznMEW8zQhtRIRVs",
+                "name": "Fontana Dell'Acqua Felice",
+                "lat": 41.90404,
+                "lng": 12.49441,
+                "address": "Fontana Dell'Acqua Felice, Piazza San Bernardo, 00187 Rome RM, Italy",
+                "category": "Historical Monument",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 2,
+                "description": "Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi, Piazza San Bernardo'da tarihi atmosfer",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              },
+              {
+                "id": "AQAAAFUAlZhFyKL1M4fpCLEFU2ajT3RK28BxVTRbxdF9s93eXtp-pipmfg7UIEe365WoeouXkh0Owx9FNxpVhFLhJq2QkPk_2XV2uX-WP6dv8R_03hTFZ8ykI27XDQfE2Fq-YuPBRJ0iqzTf67rQLKU7lOFJRM_32E9e",
+                "name": "Giardini del Quirinale",
+                "lat": 41.90117,
+                "lng": 12.48751,
+                "address": "Giardini del Quirinale, 00187 Rome RM, Italy",
+                "category": "Natural and Geographical",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 3,
+                "description": "Giardini del Quirinale – Quirinal Sarayı bahçeleri, açık hava ve tarihi manzaralar",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.4
+              },
+              {
+                "id": "AQAAAFUADxOUj7XQsuA4dmFlnLts5fnc6USoC8qNVCZwEyWfJDB_IQV6IH3gfjNFcRRz5pdQHfj50iLjYpkca_OacGKSXlod3d_rNNBhqK2QHQ-htBARKfZCLcZEYReIlpAtH8oRjGelpt1gYR00NYGYlWpxXfbO3F_-",
+                "name": "Villa Aldobrandini",
+                "lat": 41.8975,
+                "lng": 12.48749,
+                "address": "Villa Aldobrandini, Via Mazzarino, 00184 Rome RM, Italy",
+                "category": "Park-Recreation Area",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 3,
+                "description": "Villa Aldobrandini – sakin bahçe alanı, tepelerden Roma manzarası",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              }
+            ]
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            },
+            {
+              "role": "user",
+              "content": "Üç gün ayırabilirim. Her gün iki durak olsun; tarih ve açık hava seviyorum, çok yürümek istemiyorum."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma'da 3 günlük bir tarih ve açık hava gezisi hazırladım. Her gün iki durak olacak şekilde, yürüyüş mesafelerini kısa tutarak planladım.\n\n**Gün 1 – Antik Roma ve Müzeler**\n- Sabah: Dioclezianus Hamamları Müzesi (Terme di Diocleziano) – Roma'nın en büyük antik hamamlarından biri, kapsamlı arkeolojik koleksiyonlar\n- Öğleden sonra: Piazza della Repubblica – tarihi meydanda rahat bir yürüyüş ve çevresi keşfi\n\n**Gün 2 – Kiliseler ve Anıtlar**\n- Sabah: Santa Maria della Vittoria – Bernini'nin ünlü heykeli \"Aziz Tereza'nın Ekstazı\"nı içeren muhteşem barok kilisesi\n- Öğleden sonra: Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi ve çevresindeki tarihi meydanlar\n\n**Gün 3 – Bahçeler ve Panoramik Noktalar**\n- Sabah: Giardini del Quirinale – Quirinal Sarayı'nın bahçeleri, açık hava ve tarihi atmosfer\n- Öğleden sonra: Villa Aldobrandini – sakin bahçe alanı, Roma'nın tepelerinden güzel manzaralar\n\nTüm duraklar birbirine yakın, toplu taşıma veya kısa yürüyüşle ulaşılabilir. Müze ve kiliseler içeride olduğu için hava durumundan etkilenmez."
+            },
+            {
+              "role": "user",
+              "content": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın."
+            },
+            {
+              "role": "assistant",
+              "content": "İkinci güne bir kahve molası ekledim. Santa Maria della Vittoria'yı ziyaret ettikten sonra, sabah geç saatinde **Caffe Piccarozzi** (Piazza della Repubblica'da) veya **Caffe delle Terme** (Via Vittorio Emanuele Orlando'da) gibi yakındaki bir kahvede kısa bir mola verebilirsiniz. Diğer tüm duraklar ve günler aynı kaldı.\n\n**Güncellenmiş İkinci Gün:**\n- Sabah: Santa Maria della Vittoria (1 saat)\n- Sabah/Öğle Arası: Kahve molası (45 dakika)\n- Öğleden sonra: Fontana Dell'Acqua Felice (1 saat)"
+            },
+            {
+              "role": "user",
+              "content": "Roma rotama dokunma; meraktan soruyorum, Tokyo'da hangi yerel yemekler denenir?"
+            },
+            {
+              "role": "assistant",
+              "content": "Tokyo'da denenmesi gereken yerel yemekler:\n\n**Klasik Sokak Yemekleri**\n- **Ramen** – sıcak et suyu çorbası, erişte ve çeşitli ek malzemeler; her bölgenin kendine özgü stili vardır\n- **Takoyaki** – ahtapot parçaları içeren kızarmış hamur topları\n- **Okonomiyaki** – Japon krep tarzı yemek, sebze ve et/deniz ürünleriyle hazırlanır\n- **Yakitori** – şişte kızartılmış tavuk parçaları\n\n**Restoran Yemekleri**\n- **Sushi ve Sashimi** – taze balık ve deniz ürünleri\n- **Tempura** – hafif hamurda kızartılmış sebze ve deniz ürünleri\n- **Tonkatsu** – panolu domuz eti şnitzel\n- **Sukiyaki** – sıcak pot yemeği, ince dilimlenmiş et ve sebzeler\n\n**Hafif Atıştırmalıklar**\n- **Edamame** – tuzlu yeşil soya fasulyesi\n- **Gyoza** – Çin usulü mantı\n- **Mochi** – pirinç unu tatlısı, çeşitli tatlarla\n\n**İçecekler**\n- **Sake** – pirinç şarabı\n- **Matcha çayı** – yeşil çay tozu\n\nTokyo'da Tsukiji, Shibuya ve Shinjuku gibi bölgelerde bu yemekleri bulabilirsiniz. Fiyatlar sokak yemeklerinde uygun, restoranlarda değişkendir."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plan-edit-and-side-question",
+      "prompt": "Mevcut rotamın ilk günündeki durakları neden seçtin?",
+      "elapsedMs": 10313,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 10313
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Roma",
+          "days": 3,
+          "interests": [
+            "tarih"
+          ],
+          "constraints": [
+            "çok yürümek istemiyorum"
+          ],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "İlk günün iki durakını bu nedenlerle seçtim:\n\n**Dioclezianus Hamamları Müzesi (sabah)**\nRoma'nın antik döneminin en etkileyici yapılarından biri. Devasa hamamlar kompleksi, arkeolojik eserler ve tarihi mimarisi ile tarih meraklıları için ideal. Müze içeride olduğu için hava durumundan etkilenmez ve rahat gezebilirsiniz.\n\n**Piazza della Repubblica (öğleden sonra)**\nMüzeden sadece 200 metre uzakta, yürüyüş mesafesi çok kısa. Tarihi meydan, çeşmeler ve çevresindeki anıtlar Roma'nın 19. yüzyıl modernleşmesini yansıtır. Açık havada ama oturup dinlenebileceğiniz bir ortam sunuyor.\n\nHer iki durak da **coğrafi olarak çok yakın** (aynı bölgede), **tarih temasına uygun** ve **yürüyüş mesafesi kısa** olduğu için seçildiler. Böylece ilk günü rahat bir tempoda geçirebilirsiniz.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 6,
+          "context": {
+            "destination": "Roma",
+            "days": 3,
+            "interests": [
+              "tarih"
+            ],
+            "constraints": [
+              "çok yürümek istemiyorum"
+            ],
+            "planningRequested": true
+          },
+          "discussedDestination": "Roma",
+          "route": {
+            "title": "Roma'da 3 Günlük Tarih ve Açık Hava Gezisi",
+            "summary": "Antik Roma'nın en önemli müzelerinden başlayarak, barok kiliseler ve saray bahçeleri aracılığıyla Roma'nın zengin tarihini keşfeden, rahat tempolu bir tur. İkinci gün kahve molası ile dinlenme fırsatı.",
+            "theme": "Tarih ve Açık Hava",
+            "destination": "Roma",
+            "estimatedDays": 3,
+            "stops": [
+              {
+                "id": "AQAAAFUAYXPuRI4DO5E3UF22cCmalSxJs3zeS0vnf_3vA58NUo5JhVEF5E7uRNvEFHnbH_vseA8ZLGGuR7m59nARQbpO8yp71zjV4fYgW7goOaSANnjp6CypJBja0pMZ8DYuCp6QOKJfOVhIQqBzDIKArFaFKiDlXIkz",
+                "name": "National Roman Museum - the Baths of Diocletian",
+                "lat": 41.90261,
+                "lng": 12.49907,
+                "address": "National Roman Museum - the Baths of Diocletian, Viale Enrico De Nicola, 00185 Rome RM, Italy",
+                "category": "History Museum",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 1,
+                "description": "Dioclezianus Hamamları Müzesi – Roma'nın en geniş antik hamamı kompleksi, arkeolojik eserler ve tarihi mimarisi",
+                "suggestedDuration": "2 saat",
+                "estimatedMinutes": 120,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.2
+              },
+              {
+                "id": "AQAAAFUACpeZ8SqY9LpoxvYf5y6Lc6KrGOkojC7wzj29-C4VtZ0Eht1Ud3M3ISn-ZOzaWJygPIJP4BKZz2AYp82OAm7GtcdDAc2mgFMySUkRuvK-Eafy9dejMTzCLkdpBL26jB9MYyZTOFyfbr0k3ed5Qpbc50SzO_bK",
+                "name": "Piazza della Repubblica",
+                "lat": 41.9027,
+                "lng": 12.49623,
+                "address": "Piazza della Repubblica, Piazza della Repubblica, 47, 00185 Rome RM, Italy",
+                "category": "Tourist Attraction",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 1,
+                "description": "Piazza della Repubblica – tarihi meydan, çeşmeler ve çevresindeki anıtlar",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              },
+              {
+                "id": "AQAAAFUA3f8dP4JPeMUfEC-UFVLSMNEjPa58Ger8-27cVkUTO33voHBhCS6oRbyQYOp4AoRZSEmIJ0A3ucI30KHyTS8zuOpmJsqdWwiCmrEBXXaFqriFmCFNFoSC-SkS4Pc8K_4j7ICC-x0DEmN-Ov3gze_IgX261Ign",
+                "name": "Santa Maria della Vittoria",
+                "lat": 41.90377,
+                "lng": 12.49378,
+                "address": "Santa Maria della Vittoria, Piazza San Bernardo, 113, 00187 Rome RM, Italy",
+                "category": "Church",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 2,
+                "description": "Santa Maria della Vittoria – Bernini'nin meşhur heykeli ve barok iç dekorasyonu",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.1
+              },
+              {
+                "id": "AQAAAFUA-btwDEdJxNYb5P7peNd0E7yIERDO6n57afThGIWQDjxMsmn9RNVFY7uyIzd5jxMJsGiDqytTsYR3VaL4NC-LzSVn7cjdADeCsUsrkwLzf8vIacOyBiF7qVQQmn4JRJ434rfG6FhWA50Z9MK9fhUt0NnEMH9X",
+                "name": "Caffe delle Terme",
+                "lat": 41.90369,
+                "lng": 12.49499,
+                "address": "Caffe delle Terme, Via Vittorio Emanuele Orlando, 82, 00185 Rome RM, Italy",
+                "category": "Bar or Pub",
+                "checkedAt": "2026-09-19T11:06:30.811Z",
+                "day": 2,
+                "description": "Caffe delle Terme – Dioclezianus Hamamları yakınında sakin bir kahve molası",
+                "suggestedDuration": "45 dakika",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.1
+              },
+              {
+                "id": "AQAAAFUAA7iL-LPX0JoaLxqn1QttGrsrHETc04_oL6DeQPJRZ75Ydk5P8ExsNH4cGqj9jmTfZziDmCofbKd238cYEN93__OH6doc0XVeVwW69mPbl_L9BWxv7cHOWwL5bpS7v3fKWWj-X0WyEtl7vznMEW8zQhtRIRVs",
+                "name": "Fontana Dell'Acqua Felice",
+                "lat": 41.90404,
+                "lng": 12.49441,
+                "address": "Fontana Dell'Acqua Felice, Piazza San Bernardo, 00187 Rome RM, Italy",
+                "category": "Historical Monument",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 2,
+                "description": "Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi, Piazza San Bernardo'da tarihi atmosfer",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              },
+              {
+                "id": "AQAAAFUAlZhFyKL1M4fpCLEFU2ajT3RK28BxVTRbxdF9s93eXtp-pipmfg7UIEe365WoeouXkh0Owx9FNxpVhFLhJq2QkPk_2XV2uX-WP6dv8R_03hTFZ8ykI27XDQfE2Fq-YuPBRJ0iqzTf67rQLKU7lOFJRM_32E9e",
+                "name": "Giardini del Quirinale",
+                "lat": 41.90117,
+                "lng": 12.48751,
+                "address": "Giardini del Quirinale, 00187 Rome RM, Italy",
+                "category": "Natural and Geographical",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 3,
+                "description": "Giardini del Quirinale – Quirinal Sarayı bahçeleri, açık hava ve tarihi manzaralar",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "morning",
+                "distanceToNextKm": 0.4
+              },
+              {
+                "id": "AQAAAFUADxOUj7XQsuA4dmFlnLts5fnc6USoC8qNVCZwEyWfJDB_IQV6IH3gfjNFcRRz5pdQHfj50iLjYpkca_OacGKSXlod3d_rNNBhqK2QHQ-htBARKfZCLcZEYReIlpAtH8oRjGelpt1gYR00NYGYlWpxXfbO3F_-",
+                "name": "Villa Aldobrandini",
+                "lat": 41.8975,
+                "lng": 12.48749,
+                "address": "Villa Aldobrandini, Via Mazzarino, 00184 Rome RM, Italy",
+                "category": "Park-Recreation Area",
+                "checkedAt": "2026-09-19T11:06:11.037Z",
+                "day": 3,
+                "description": "Villa Aldobrandini – sakin bahçe alanı, tepelerden Roma manzarası",
+                "suggestedDuration": "1 saat",
+                "estimatedMinutes": 60,
+                "timeSlot": "afternoon"
+              }
+            ]
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Bana bir seyahat rotası çıkarır mısın?"
+            },
+            {
+              "role": "assistant",
+              "content": "Hangi şehre seyahat etmek istiyorsunuz ve kaç gün için bir rota hazırlamam gerekiyor?"
+            },
+            {
+              "role": "user",
+              "content": "Roma olsun."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma için kaç gün ayıralım?"
+            },
+            {
+              "role": "user",
+              "content": "Üç gün ayırabilirim. Her gün iki durak olsun; tarih ve açık hava seviyorum, çok yürümek istemiyorum."
+            },
+            {
+              "role": "assistant",
+              "content": "Roma'da 3 günlük bir tarih ve açık hava gezisi hazırladım. Her gün iki durak olacak şekilde, yürüyüş mesafelerini kısa tutarak planladım.\n\n**Gün 1 – Antik Roma ve Müzeler**\n- Sabah: Dioclezianus Hamamları Müzesi (Terme di Diocleziano) – Roma'nın en büyük antik hamamlarından biri, kapsamlı arkeolojik koleksiyonlar\n- Öğleden sonra: Piazza della Repubblica – tarihi meydanda rahat bir yürüyüş ve çevresi keşfi\n\n**Gün 2 – Kiliseler ve Anıtlar**\n- Sabah: Santa Maria della Vittoria – Bernini'nin ünlü heykeli \"Aziz Tereza'nın Ekstazı\"nı içeren muhteşem barok kilisesi\n- Öğleden sonra: Fontana Dell'Acqua Felice – 16. yüzyıl çeşmesi ve çevresindeki tarihi meydanlar\n\n**Gün 3 – Bahçeler ve Panoramik Noktalar**\n- Sabah: Giardini del Quirinale – Quirinal Sarayı'nın bahçeleri, açık hava ve tarihi atmosfer\n- Öğleden sonra: Villa Aldobrandini – sakin bahçe alanı, Roma'nın tepelerinden güzel manzaralar\n\nTüm duraklar birbirine yakın, toplu taşıma veya kısa yürüyüşle ulaşılabilir. Müze ve kiliseler içeride olduğu için hava durumundan etkilenmez."
+            },
+            {
+              "role": "user",
+              "content": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın."
+            },
+            {
+              "role": "assistant",
+              "content": "İkinci güne bir kahve molası ekledim. Santa Maria della Vittoria'yı ziyaret ettikten sonra, sabah geç saatinde **Caffe Piccarozzi** (Piazza della Repubblica'da) veya **Caffe delle Terme** (Via Vittorio Emanuele Orlando'da) gibi yakındaki bir kahvede kısa bir mola verebilirsiniz. Diğer tüm duraklar ve günler aynı kaldı.\n\n**Güncellenmiş İkinci Gün:**\n- Sabah: Santa Maria della Vittoria (1 saat)\n- Sabah/Öğle Arası: Kahve molası (45 dakika)\n- Öğleden sonra: Fontana Dell'Acqua Felice (1 saat)"
+            },
+            {
+              "role": "user",
+              "content": "Roma rotama dokunma; meraktan soruyorum, Tokyo'da hangi yerel yemekler denenir?"
+            },
+            {
+              "role": "assistant",
+              "content": "Tokyo'da denenmesi gereken yerel yemekler:\n\n**Klasik Sokak Yemekleri**\n- **Ramen** – sıcak et suyu çorbası, erişte ve çeşitli ek malzemeler; her bölgenin kendine özgü stili vardır\n- **Takoyaki** – ahtapot parçaları içeren kızarmış hamur topları\n- **Okonomiyaki** – Japon krep tarzı yemek, sebze ve et/deniz ürünleriyle hazırlanır\n- **Yakitori** – şişte kızartılmış tavuk parçaları\n\n**Restoran Yemekleri**\n- **Sushi ve Sashimi** – taze balık ve deniz ürünleri\n- **Tempura** – hafif hamurda kızartılmış sebze ve deniz ürünleri\n- **Tonkatsu** – panolu domuz eti şnitzel\n- **Sukiyaki** – sıcak pot yemeği, ince dilimlenmiş et ve sebzeler\n\n**Hafif Atıştırmalıklar**\n- **Edamame** – tuzlu yeşil soya fasulyesi\n- **Gyoza** – Çin usulü mantı\n- **Mochi** – pirinç unu tatlısı, çeşitli tatlarla\n\n**İçecekler**\n- **Sake** – pirinç şarabı\n- **Matcha çayı** – yeşil çay tozu\n\nTokyo'da Tsukiji, Shibuya ve Shinjuku gibi bölgelerde bu yemekleri bulabilirsiniz. Fiyatlar sokak yemeklerinde uygun, restoranlarda değişkendir."
+            },
+            {
+              "role": "user",
+              "content": "Mevcut rotamın ilk günündeki durakları neden seçtin?"
+            },
+            {
+              "role": "assistant",
+              "content": "İlk günün iki durakını bu nedenlerle seçtim:\n\n**Dioclezianus Hamamları Müzesi (sabah)**\nRoma'nın antik döneminin en etkileyici yapılarından biri. Devasa hamamlar kompleksi, arkeolojik eserler ve tarihi mimarisi ile tarih meraklıları için ideal. Müze içeride olduğu için hava durumundan etkilenmez ve rahat gezebilirsiniz.\n\n**Piazza della Repubblica (öğleden sonra)**\nMüzeden sadece 200 metre uzakta, yürüyüş mesafesi çok kısa. Tarihi meydan, çeşmeler ve çevresindeki anıtlar Roma'nın 19. yüzyıl modernleşmesini yansıtır. Açık havada ama oturup dinlenebileceğiniz bir ortam sunuyor.\n\nHer iki durak da **coğrafi olarak çok yakın** (aynı bölgede), **tarih temasına uygun** ve **yürüyüş mesafesi kısa** olduğu için seçildiler. Böylece ilk günü rahat bir tempoda geçirebilirsiniz."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "limits-and-uncovered-destination",
+      "prompt": "Lima'da ne yiyebilirim? Kaynağın yoksa söyle; rota istemiyorum.",
+      "elapsedMs": 9786,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 9786
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "interests": [],
+          "constraints": [],
+          "planningRequested": false
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "chat",
+        "orchestratorSummary": "Lima, dünya mutfağının en heyecan verici şehirlerinden biri. Perucu mutfağı deniz ürünleri, yerel malzemeler ve Andean etkileriyle ünlü.\n\n**Deniz ürünleri:** Ceviche (çiğ balık limon suyunda marine edilmiş), tiradito (cevicheye benzer ama daha ince dilimlenmiş), moqueca (balık ve deniz ürünleri güveç). Limada bu yemekleri en iyi balık restoranlarında bulursun.\n\n**Geleneksel yemekler:** Lomo saltado (sığır eti, soğan, domates), ají de gallina (tavuk, biber sosu), causa (patates ve avokado katmanı). Cevichería ve comedor (yerel lokanta) tipi yerlerde ucuz ve lezzetli.\n\n**Pisco:** Peru'nun meşhur rakısı. Pisco sour (pisco, limon, şeker, yumurta beytu) Lima'da her barista tarafından yapılır.\n\n**Sokak yemekleri:** Anticuchos (marine edilmiş et şişleri), empanada, papa a la huancaína (patates, biber sosu).\n\n**Nerede yemek yenir:** Miraflores ve Barranco semtlerinde turist restoranları, San Isidro'da daha yerel seçenekler, Chinatown'da (Chifa) Çin-Perucu füzyonu.\n\nKaynağım yok; bu genel bilgi. Güncel fiyat, açılış saati ve rezervasyon durumu için TripAdvisor, Google Maps veya yerel turizm sitelerini kontrol et. Belirli bir restoran veya yemek türü hakkında daha çok merak ediyorsan sorabilirsin.",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 1,
+          "context": {
+            "interests": [],
+            "constraints": [],
+            "planningRequested": false
+          },
+          "messages": [
+            {
+              "role": "user",
+              "content": "Lima'da ne yiyebilirim? Kaynağın yoksa söyle; rota istemiyorum."
+            },
+            {
+              "role": "assistant",
+              "content": "Lima, dünya mutfağının en heyecan verici şehirlerinden biri. Perucu mutfağı deniz ürünleri, yerel malzemeler ve Andean etkileriyle ünlü.\n\n**Deniz ürünleri:** Ceviche (çiğ balık limon suyunda marine edilmiş), tiradito (cevicheye benzer ama daha ince dilimlenmiş), moqueca (balık ve deniz ürünleri güveç). Limada bu yemekleri en iyi balık restoranlarında bulursun.\n\n**Geleneksel yemekler:** Lomo saltado (sığır eti, soğan, domates), ají de gallina (tavuk, biber sosu), causa (patates ve avokado katmanı). Cevichería ve comedor (yerel lokanta) tipi yerlerde ucuz ve lezzetli.\n\n**Pisco:** Peru'nun meşhur rakısı. Pisco sour (pisco, limon, şeker, yumurta beytu) Lima'da her barista tarafından yapılır.\n\n**Sokak yemekleri:** Anticuchos (marine edilmiş et şişleri), empanada, papa a la huancaína (patates, biber sosu).\n\n**Nerede yemek yenir:** Miraflores ve Barranco semtlerinde turist restoranları, San Isidro'da daha yerel seçenekler, Chinatown'da (Chifa) Çin-Perucu füzyonu.\n\nKaynağım yok; bu genel bilgi. Güncel fiyat, açılış saati ve rezervasyon durumu için TripAdvisor, Google Maps veya yerel turizm sitelerini kontrol et. Belirli bir restoran veya yemek türü hakkında daha çok merak ediyorsan sorabilirsin."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "limits-and-uncovered-destination",
+      "prompt": "Paris'te on günlük bir rota oluştur.",
+      "elapsedMs": 4395,
+      "failures": [],
+      "result": {
+        "provider": "aws_bedrock",
+        "modelUsed": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "agentsInvolved": [
+          {
+            "agentId": "context",
+            "agentName": "Seyahat danışmanı",
+            "icon": "🗺️",
+            "status": "completed",
+            "durationMs": 4394
+          }
+        ],
+        "preferenceUpdates": {},
+        "tripContext": {
+          "destination": "Paris",
+          "days": 10,
+          "interests": [],
+          "constraints": [],
+          "planningRequested": true
+        },
+        "promptVersion": "travel-dialogue-v2",
+        "responseMode": "clarify",
+        "orchestratorSummary": "On gün oldukça uzun bir süre. Paris'i iki bölüme ayırmak ister misin (örneğin 5+5 gün), yoksa tüm on günü Paris'te mi geçirmek istiyorsun? Ayrıca, seni en çok neyin ilgilendiriyor: tarih ve müzeler, sanat, yemek, manzaralar, alışveriş, yoksa bunların karışımı?",
+        "sources": [],
+        "retrievalStatus": "disabled",
+        "conversationState": {
+          "version": 2,
+          "context": {
+            "destination": "Paris",
+            "days": 10,
+            "interests": [],
+            "constraints": [],
+            "planningRequested": true
+          },
+          "discussedDestination": "Paris",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Lima'da ne yiyebilirim? Kaynağın yoksa söyle; rota istemiyorum."
+            },
+            {
+              "role": "assistant",
+              "content": "Lima, dünya mutfağının en heyecan verici şehirlerinden biri. Perucu mutfağı deniz ürünleri, yerel malzemeler ve Andean etkileriyle ünlü.\n\n**Deniz ürünleri:** Ceviche (çiğ balık limon suyunda marine edilmiş), tiradito (cevicheye benzer ama daha ince dilimlenmiş), moqueca (balık ve deniz ürünleri güveç). Limada bu yemekleri en iyi balık restoranlarında bulursun.\n\n**Geleneksel yemekler:** Lomo saltado (sığır eti, soğan, domates), ají de gallina (tavuk, biber sosu), causa (patates ve avokado katmanı). Cevichería ve comedor (yerel lokanta) tipi yerlerde ucuz ve lezzetli.\n\n**Pisco:** Peru'nun meşhur rakısı. Pisco sour (pisco, limon, şeker, yumurta beytu) Lima'da her barista tarafından yapılır.\n\n**Sokak yemekleri:** Anticuchos (marine edilmiş et şişleri), empanada, papa a la huancaína (patates, biber sosu).\n\n**Nerede yemek yenir:** Miraflores ve Barranco semtlerinde turist restoranları, San Isidro'da daha yerel seçenekler, Chinatown'da (Chifa) Çin-Perucu füzyonu.\n\nKaynağım yok; bu genel bilgi. Güncel fiyat, açılış saati ve rezervasyon durumu için TripAdvisor, Google Maps veya yerel turizm sitelerini kontrol et. Belirli bir restoran veya yemek türü hakkında daha çok merak ediyorsan sorabilirsin."
+            },
+            {
+              "role": "user",
+              "content": "Paris'te on günlük bir rota oluştur."
+            },
+            {
+              "role": "assistant",
+              "content": "On gün oldukça uzun bir süre. Paris'i iki bölüme ayırmak ister misin (örneğin 5+5 gün), yoksa tüm on günü Paris'te mi geçirmek istiyorsun? Ayrıca, seni en çok neyin ilgilendiriyor: tarih ve müzeler, sanat, yemek, manzaralar, alışveriş, yoksa bunların karışımı?"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Scripted cases do not establish factual correctness or universal quality.",
+    "No model weights are trained by this evaluation."
+  ],
+  "passed": 10,
+  "total": 10,
+  "finishedAt": "2026-09-19T11:07:18.274Z"
+}

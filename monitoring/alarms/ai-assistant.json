@@ -1,0 +1,34 @@
+{
+  "alarmGroup": "AI-ASSISTANT",
+  "namespace": "MapsBridge/TravelAI",
+  "notes": "Templates for CloudWatch deployment. Use the production Lambda Environment dimension and route-specific dashboard dimensions.",
+  "rules": [
+    {
+      "alarmName": "AI-Request-FailureRate",
+      "metric": "RequestFailures / Requests",
+      "comparison": "metric-math",
+      "thresholdPercent": 2,
+      "evaluationPeriods": 3,
+      "periodSeconds": 300,
+      "description": "Request failures exceed 2% of completed AI requests."
+    },
+    {
+      "alarmName": "AI-Request-LatencyP95",
+      "metric": "RequestLatencyMs",
+      "statistic": "p95",
+      "threshold": 15000,
+      "evaluationPeriods": 3,
+      "periodSeconds": 300,
+      "description": "AI request p95 latency exceeds 15 seconds."
+    },
+    {
+      "alarmName": "AI-ProviderOrResearch-TimeoutRate",
+      "metric": "Timeouts / ModelCalls",
+      "comparison": "metric-math",
+      "thresholdPercent": 5,
+      "evaluationPeriods": 3,
+      "periodSeconds": 300,
+      "description": "Provider or research timeout rate exceeds 5%; emit this metric from the timeout classification path."
+    }
+  ]
+}

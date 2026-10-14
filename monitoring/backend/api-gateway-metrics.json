@@ -1,0 +1,24 @@
+{
+  "service": "AWS/ApiGateway",
+  "apis": {
+    "httpApi": {
+      "name": "mapsbridge-http-api-v2",
+      "metrics": [
+        { "name": "Count", "stat": "Sum" },
+        { "name": "4xx", "stat": "Sum", "alertThresholdPercent": 5 },
+        { "name": "5xx", "stat": "Sum", "alertThreshold": 1 },
+        { "name": "Latency", "stat": "Average", "unit": "Milliseconds", "target": "< 250ms" },
+        { "name": "IntegrationLatency", "stat": "Average", "unit": "Milliseconds" }
+      ]
+    },
+    "webSocketApi": {
+      "name": "mapsbridge-chat-ws",
+      "metrics": [
+        { "name": "ConnectCount", "stat": "Sum" },
+        { "name": "MessageCount", "stat": "Sum" },
+        { "name": "IntegrationError", "stat": "Sum", "alertThreshold": 1 },
+        { "name": "ExecutionError", "stat": "Sum", "alertThreshold": 1 }
+      ]
+    }
+  }
+}

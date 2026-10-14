@@ -1,0 +1,8 @@
+{
+  "name": "MapsBridge Designs",
+  "id": "mapsbridge-designs-001",
+  "api": "1.0.0",
+  "main": "mapsbridge-frames.js",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page"
+}

@@ -1,0 +1,17 @@
+{
+  "service": "AWS/CloudFront",
+  "distributionId": "E3V1EXAMPLECF",
+  "targetDomain": "dzofhz77g8a7j.cloudfront.net",
+  "sloTargets": {
+    "cacheHitRatioMinPercent": 85,
+    "originLatencyMaxMs": 350,
+    "errorRateMaxPercent": 0.5
+  },
+  "metrics": [
+    { "name": "Requests", "stat": "Sum" },
+    { "name": "BytesDownloaded", "stat": "Sum" },
+    { "name": "4xxErrorRate", "stat": "Average", "alertThreshold": 5.0 },
+    { "name": "5xxErrorRate", "stat": "Average", "alertThreshold": 1.0 },
+    { "name": "OriginLatency", "stat": "Average", "unit": "Milliseconds" }
+  ]
+}

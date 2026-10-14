@@ -1,0 +1,54 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix ../../infra/lambda --ignore-scripts
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm test
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: infra/lambda/package-lock.json
+      - run: npm ci --prefix infra/lambda --ignore-scripts
+      - run: node --test infra/lambda/tests/*.test.cjs
+
+  terraform:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stack: [terraform, admin-runtime, agentcore-gateway, ai-memory]
+    defaults:
+      run:
+        working-directory: infra/${{ matrix.stack }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend=false
+      - run: terraform validate

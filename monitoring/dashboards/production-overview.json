@@ -1,0 +1,53 @@
+{
+  "dashboardName": "MapsBridge-Production-Overview",
+  "widgets": [
+    {
+      "type": "metric",
+      "properties": {
+        "title": "API Gateway Request Volume & 5xx Spikes",
+        "region": "eu-central-1",
+        "metrics": [
+          ["AWS/ApiGateway", "Count", { "stat": "Sum", "color": "#10b981" }],
+          [".", "5xx", { "stat": "Sum", "color": "#ef4444" }]
+        ],
+        "period": 300
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "title": "Microservices Lambda Execution Duration (P90 & P99)",
+        "region": "eu-central-1",
+        "metrics": [
+          ["AWS/Lambda", "Duration", { "extendedStatistic": "p90", "color": "#3b82f6" }],
+          [".", ".", { "extendedStatistic": "p99", "color": "#f59e0b" }]
+        ],
+        "period": 300
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "title": "DynamoDB Consumed Capacity Units (Read & Write)",
+        "region": "eu-central-1",
+        "metrics": [
+          ["AWS/DynamoDB", "ConsumedReadCapacityUnits", { "stat": "Sum", "color": "#06b6d4" }],
+          [".", "ConsumedWriteCapacityUnits", { "stat": "Sum", "color": "#8b5cf6" }]
+        ],
+        "period": 300
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "title": "Bedrock AI Token Invocations & Daily User Quotas",
+        "region": "eu-central-1",
+        "metrics": [
+          ["MapsBridge/AI", "TokensConsumed", { "stat": "Sum", "color": "#ec4899" }],
+          [".", "ActiveConversations", { "stat": "Maximum", "color": "#10b981" }]
+        ],
+        "period": 300
+      }
+    }
+  ]
+}

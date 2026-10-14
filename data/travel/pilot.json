@@ -1,0 +1,44 @@
+[
+  {
+    "id": "tokyo-food",
+    "title": "Tokyo / Tokio yemek rehberi",
+    "city": "Tokyo",
+    "country": "JP",
+    "source_url": "https://www.gotokyo.org/en/see-and-do/drinking-and-dining/index.html",
+    "text": "Tokyo’da sushi için Ginza, Tsukiji Outer Market ve Toyosu çevresi; ramen için Shinjuku ve Tokyo Station çevresi araştırılabilir. Asakusa, Kanda ve Nihonbashi geleneksel tempura ve soba seçenekleriyle anılır. Tsukishima monjayaki ile bilinir. Bahşiş yaygın değildir. Özel beslenme ihtiyaçları için önceden araştırma gerekir. Bu özet tekil restoran, güncel fiyat veya açılış saati doğrulaması içermez.",
+    "checked_at": "2026-09-17",
+    "valid_until": "2026-12-16",
+    "reviewer": "Codex source review 2026-09-17",
+    "rights": "Original short factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public"
+  },
+  {
+    "id": "istanbul-food",
+    "title": "İstanbul yemek ve semt keşfi",
+    "city": "İstanbul",
+    "country": "TR",
+    "source_url": "https://goturkiye.com/istanbul/taste",
+    "text": "İstanbul resmî gastronomi rehberi Kadıköy, Beyoğlu, Tarihi Yarımada, Galataport ve Karaköy bölgelerini öne çıkarır. Yerel deneyimler arasında çay, Türk kahvesi, lokanta kültürü, kahvaltı ve sokak yemekleri bulunur. Beyoğlu ve Galata çevresinde Türk ve Akdeniz mutfağına odaklanan seçenekler araştırılabilir. Bu özet tekil işletme, fiyat ve açılış saatlerini doğrulamaz.",
+    "checked_at": "2026-09-17",
+    "valid_until": "2026-12-16",
+    "reviewer": "Codex source review 2026-09-17",
+    "rights": "Original short factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public"
+  },
+  {
+    "id": "rome-food",
+    "title": "Roma / Rome geleneksel mutfağı",
+    "city": "Roma",
+    "country": "IT",
+    "source_url": "https://www.turismoroma.it/it/node/48592",
+    "text": "Roma mutfağındaki klasik makarnalar arasında amatriciana, cacio e pepe, gricia ve carbonara bulunur. Amatriciana domates, guanciale, pecorino ve karabiber; gricia guanciale, pecorino ve karabiber; carbonara ayrıca yumurta içerir. Cacio e pepe pecorino ve karabiber temellidir. Guanciale domuz ürünüdür; bu yemekler beslenme tercihlerine göre değerlendirilmelidir. Tarif bilgisi işletmenin alerjen veya çapraz bulaşma güvenliğini doğrulamaz. Restoran fiyatı ve çalışma saati bu kaynakla doğrulanmamıştır.",
+    "checked_at": "2026-09-17",
+    "valid_until": "2026-12-16",
+    "reviewer": "Codex source review 2026-09-17",
+    "rights": "Original short factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public"
+  }
+]

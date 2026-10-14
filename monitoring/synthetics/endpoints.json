@@ -1,0 +1,46 @@
+{
+  "webBaseUrl": "https://dzofhz77g8a7j.cloudfront.net",
+  "apiBaseUrl": "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com",
+  "checks": [
+    {
+      "name": "Live Web Desk Page",
+      "target": "web",
+      "path": "/desk/",
+      "method": "GET",
+      "expectedStatus": 200,
+      "maxLatencyMs": 1500
+    },
+    {
+      "name": "Live Web AI Planner Page",
+      "target": "web",
+      "path": "/ai/",
+      "method": "GET",
+      "expectedStatus": 200,
+      "maxLatencyMs": 1500
+    },
+    {
+      "name": "API Gateway System Status",
+      "target": "api",
+      "path": "/system/status",
+      "method": "GET",
+      "expectedStatus": 200,
+      "maxLatencyMs": 2000
+    },
+    {
+      "name": "API Gateway Public Marketplace Blogs",
+      "target": "api",
+      "path": "/marketplace/blogs",
+      "method": "GET",
+      "expectedStatus": 200,
+      "maxLatencyMs": 2000
+    },
+    {
+      "name": "API Gateway Protected Session Guard",
+      "target": "api",
+      "path": "/admin/session",
+      "method": "GET",
+      "expectedStatus": 401,
+      "description": "Ensures unauthenticated requests fail closed with 401"
+    }
+  ]
+}

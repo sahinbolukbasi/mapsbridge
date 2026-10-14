@@ -1,0 +1,855 @@
+/* ========================================================= */
+/* MapsBridge - Nasıl Çalışır (How It Works) Dedicated Styles */
+/* ========================================================= */
+
+.nasil-page {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] .nasil-page {
+  background-color: #09120e;
+  color: #f1f5f9;
+}
+
+/* Ambient glow backgrounds */
+.nasil-ambient-glow-1 {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 1200px);
+  height: 500px;
+  background: radial-gradient(circle at 50% 10%, rgba(16, 185, 129, 0.12) 0%, rgba(52, 211, 153, 0.04) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="dark"] .nasil-ambient-glow-1 {
+  background: radial-gradient(circle at 50% 10%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 95, 70, 0.08) 50%, transparent 75%);
+}
+
+.nasil-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Hero Section ── */
+.nasil-hero {
+  padding: 5rem 0 3.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.nasil-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #047857;
+  font-family: Inter, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="dark"] .nasil-hero-badge {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: #6ee7b7;
+}
+
+.nasil-hero-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.nasil-hero-title {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  max-width: 840px;
+  margin: 0 auto 1.5rem;
+}
+
+[data-theme="dark"] .nasil-hero-title {
+  color: #ffffff;
+}
+
+.nasil-hero-highlight {
+  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.nasil-hero-desc {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.6;
+  color: #475569;
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
+}
+
+[data-theme="dark"] .nasil-hero-desc {
+  color: #94a3b8;
+}
+
+.nasil-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.nasil-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  transition: all 0.25s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.nasil-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.nasil-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.nasil-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .nasil-btn-secondary {
+  background: rgba(15, 34, 27, 0.8);
+  border-color: rgba(45, 110, 88, 0.5);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .nasil-btn-secondary:hover {
+  background: rgba(20, 46, 36, 0.95);
+  border-color: rgba(52, 211, 153, 0.5);
+}
+
+/* ── Metrics Strip ── */
+.nasil-metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin: 3.5rem auto 4.5rem;
+  max-width: 900px;
+}
+
+@media (min-width: 768px) {
+  .nasil-metrics-strip {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.nasil-metric-box {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.25rem;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.nasil-metric-box:hover {
+  transform: translateY(-3px);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="dark"] .nasil-metric-box {
+  background: rgba(13, 26, 21, 0.7);
+  border-color: rgba(45, 110, 88, 0.4);
+}
+
+[data-theme="dark"] .nasil-metric-box:hover {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.nasil-metric-val {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #059669;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+[data-theme="dark"] .nasil-metric-val {
+  color: #34d399;
+}
+
+.nasil-metric-lbl {
+  font-size: 0.78125rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+[data-theme="dark"] .nasil-metric-lbl {
+  color: #94a3b8;
+}
+
+/* ── Section Header ── */
+.nasil-section-head {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 3rem;
+}
+
+.nasil-section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+}
+
+[data-theme="dark"] .nasil-section-eyebrow {
+  color: #34d399;
+}
+
+.nasil-section-title {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  margin: 0 0 0.75rem;
+}
+
+[data-theme="dark"] .nasil-section-title {
+  color: #ffffff;
+}
+
+.nasil-section-desc {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0;
+}
+
+[data-theme="dark"] .nasil-section-desc {
+  color: #94a3b8;
+}
+
+/* ── Detailed 4-Step Walkthrough Flow ── */
+.nasil-steps-section {
+  padding: 2.5rem 0 5rem;
+}
+
+.nasil-step-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: center;
+  margin-bottom: 4.5rem;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 2rem;
+  padding: 2.5rem;
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 992px) {
+  .nasil-step-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    padding: 3rem;
+  }
+
+  .nasil-step-row.reverse {
+    direction: rtl;
+  }
+
+  .nasil-step-row.reverse > * {
+    direction: ltr;
+  }
+}
+
+.nasil-step-row:hover {
+  box-shadow: 0 20px 40px -8px rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  transform: translateY(-4px);
+}
+
+[data-theme="dark"] .nasil-step-row {
+  background: rgba(13, 26, 21, 0.75);
+  border-color: rgba(45, 110, 88, 0.4);
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .nasil-step-row:hover {
+  background: rgba(15, 34, 27, 0.9);
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.1);
+}
+
+.nasil-step-badge-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  color: #065f46;
+  font-weight: 800;
+  font-size: 1.5rem;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.15);
+  margin-bottom: 1.5rem;
+}
+
+[data-theme="dark"] .nasil-step-badge-num {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 95, 70, 0.4) 100%);
+  color: #6ee7b7;
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.nasil-step-h3 {
+  font-size: 1.625rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 1rem;
+  line-height: 1.25;
+}
+
+[data-theme="dark"] .nasil-step-h3 {
+  color: #ffffff;
+}
+
+.nasil-step-desc {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: #475569;
+  margin-bottom: 1.5rem;
+}
+
+[data-theme="dark"] .nasil-step-desc {
+  color: #94a3b8;
+}
+
+.nasil-step-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nasil-step-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .nasil-step-feature-item {
+  color: #cbd5e1;
+}
+
+.nasil-step-feature-item .material-symbols-outlined {
+  color: #10b981;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+/* Interactive Mockup Container */
+.nasil-step-visual {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .nasil-step-visual {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(13, 26, 21, 0.6) 100%);
+  border-color: rgba(45, 110, 88, 0.35);
+}
+
+/* Mockup elements */
+.nasil-mockup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+[data-theme="dark"] .nasil-mockup-header {
+  border-bottom-color: rgba(45, 110, 88, 0.3);
+}
+
+.nasil-mockup-dots {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.nasil-mockup-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+[data-theme="dark"] .nasil-mockup-dot {
+  background: #475569;
+}
+
+.nasil-mockup-tag {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+[data-theme="dark"] .nasil-mockup-tag {
+  color: #34d399;
+}
+
+/* Step 1 Interactive Prompt Box */
+.nasil-interactive-prompt-box {
+  background: #ffffff;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .nasil-interactive-prompt-box {
+  background: rgba(13, 26, 21, 0.9);
+  border-color: rgba(45, 110, 88, 0.4);
+}
+
+.nasil-interactive-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .nasil-interactive-input-row {
+  color: #f1f5f9;
+}
+
+.nasil-prompt-chips-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.nasil-prompt-chip {
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  font-size: 0.75rem;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nasil-prompt-chip:hover {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #047857;
+}
+
+[data-theme="dark"] .nasil-prompt-chip {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .nasil-prompt-chip:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #34d399;
+  color: #6ee7b7;
+}
+
+/* Step 2 AI Route Visualization */
+.nasil-route-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nasil-timeline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  font-size: 0.8125rem;
+}
+
+[data-theme="dark"] .nasil-timeline-item {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(45, 110, 88, 0.3);
+}
+
+.nasil-timeline-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nasil-timeline-badge {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #059669;
+  font-weight: 800;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .nasil-timeline-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.nasil-timeline-time {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-family: monospace;
+}
+
+/* Step 3 Map Pin Reorder Widget */
+.nasil-pin-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.nasil-pin-card:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+[data-theme="dark"] .nasil-pin-card {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(45, 110, 88, 0.3);
+}
+
+/* Step 4 6-Digit Code Preview Box */
+.nasil-code-demo-box {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .nasil-code-demo-box {
+  background: rgba(13, 26, 21, 0.8);
+  border-color: rgba(45, 110, 88, 0.4);
+}
+
+.nasil-code-display {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+}
+
+.nasil-code-digit-box {
+  width: 2.5rem;
+  height: 3rem;
+  border-radius: 0.625rem;
+  background: #f8fafc;
+  border: 2px solid #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #065f46;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.12);
+}
+
+[data-theme="dark"] .nasil-code-digit-box {
+  background: rgba(15, 23, 42, 0.8);
+  color: #34d399;
+}
+
+/* ── Creator Marketplace 3 Steps ── */
+.nasil-creator-section {
+  background: linear-gradient(135deg, rgba(240, 253, 250, 0.7) 0%, rgba(236, 253, 245, 0.7) 100%);
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 5rem 0;
+  margin: 3rem 0;
+}
+
+[data-theme="dark"] .nasil-creator-section {
+  background: linear-gradient(135deg, rgba(9, 24, 18, 0.6) 0%, rgba(13, 33, 25, 0.6) 100%);
+  border-color: rgba(45, 110, 88, 0.35);
+}
+
+.nasil-creator-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .nasil-creator-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.nasil-creator-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nasil-creator-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 16px 30px rgba(16, 185, 129, 0.1);
+}
+
+[data-theme="dark"] .nasil-creator-card {
+  background: rgba(13, 26, 21, 0.8);
+  border-color: rgba(45, 110, 88, 0.4);
+}
+
+.nasil-creator-icon {
+  font-size: 2.25rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.nasil-creator-card h4 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem;
+}
+
+[data-theme="dark"] .nasil-creator-card h4 {
+  color: #ffffff;
+}
+
+.nasil-creator-card p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0;
+}
+
+[data-theme="dark"] .nasil-creator-card p {
+  color: #94a3b8;
+}
+
+/* ── FAQ Section ── */
+.nasil-faq-section {
+  padding: 4rem 0 5rem;
+}
+
+.nasil-faq-list {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nasil-faq-item {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.nasil-faq-item:hover {
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.06);
+}
+
+[data-theme="dark"] .nasil-faq-item {
+  background: rgba(13, 26, 21, 0.7);
+  border-color: rgba(45, 110, 88, 0.4);
+}
+
+.nasil-faq-item[open] {
+  border-color: #10b981;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+}
+
+.nasil-faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  color: #0f172a;
+  list-style: none;
+}
+
+.nasil-faq-question::-webkit-details-marker {
+  display: none;
+}
+
+[data-theme="dark"] .nasil-faq-question {
+  color: #f8fafc;
+}
+
+.nasil-faq-answer {
+  margin-top: 0.875rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #475569;
+}
+
+[data-theme="dark"] .nasil-faq-answer {
+  color: #94a3b8;
+}
+
+/* ── CTA Banner ── */
+.nasil-cta-section {
+  padding: 0 0 6rem;
+}
+
+.nasil-cta-card {
+  background: linear-gradient(135deg, #013628 0%, #065f46 50%, #047857 100%);
+  border-radius: 2.25rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -8px rgba(1, 54, 40, 0.35);
+}
+
+.nasil-cta-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  margin: 0 auto 1rem;
+  max-width: 680px;
+  line-height: 1.2;
+}
+
+.nasil-cta-sub {
+  font-size: 1.0625rem;
+  color: #a7f3d0;
+  max-width: 540px;
+  margin: 0 auto 2.25rem;
+  line-height: 1.6;
+}
+
+.nasil-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2.25rem;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #013628;
+  font-weight: 800;
+  font-size: 1rem;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.25s ease;
+}
+
+.nasil-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+  background: #ecfdf5;
+}

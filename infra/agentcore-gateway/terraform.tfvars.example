@@ -1,0 +1,4 @@
+account_id = "123456789012"
+prefix = "mapsbridge-staging"
+ai_role_name = "mapsbridge-staging-ai-runtime"
+region = "eu-central-1"

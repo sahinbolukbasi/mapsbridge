@@ -1,0 +1,10 @@
+Bu dosya, kullanıcının sağladığı logo görselini temsil eder. 
+Gerçek görsel binary olarak kaydedilmelidir.
+Dosya yolu: /Users/sahinbolukbasi/Development/location/apps/mobile/assets/icon.png
+
+Görsel özellikleri:
+- Boyut: 1024x1024 piksel (iOS App Store gereksinimi)
+- Format: PNG
+- Arka plan: Koyu yeşil (#2D4A3E)
+- Ön plan: Beyaz pusula ikonu
+- Yuvarlatılmış köşeler (iOS stili)

@@ -1,0 +1,12 @@
+{
+  "serviceName": "admin-service",
+  "runtime": "AWS Lambda (RBAC Protected)",
+  "slo": {
+    "auditRecordPersistenceGuarantee": 100.0,
+    "maintenanceModePropagationMaxSeconds": 5,
+    "rbacCheckLatencyP99Ms": 50
+  },
+  "protectedAdminAccounts": [
+    "sahinbolukbasii@gmail.com"
+  ]
+}

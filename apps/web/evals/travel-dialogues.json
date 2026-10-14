@@ -1,0 +1,117 @@
+[
+  {
+    "id": "natural-conversation",
+    "turns": [
+      {
+        "prompt": "Selam, nasılsın?",
+        "expect": {
+          "mode": "chat",
+          "maxCharacters": 650
+        }
+      },
+      {
+        "prompt": "İlk İtalya seyahatimde Roma mı Floransa mı daha uygun? Sanat ve sakin gezmeyi seviyorum, henüz rota hazırlama.",
+        "expect": {
+          "mode": "chat",
+          "contains": "Roma|Floransa"
+        }
+      }
+    ]
+  },
+  {
+    "id": "plan-edit-and-side-question",
+    "turns": [
+      {
+        "prompt": "Bana bir seyahat rotası çıkarır mısın?",
+        "expect": {
+          "mode": "clarify"
+        }
+      },
+      {
+        "prompt": "Roma olsun.",
+        "expect": {
+          "mode": "clarify",
+          "destination": "Roma|Rome"
+        }
+      },
+      {
+        "prompt": "Üç gün ayırabilirim. Her gün iki durak olsun; tarih ve açık hava seviyorum, çok yürümek istemiyorum.",
+        "expect": {
+          "mode": "route",
+          "days": 3,
+          "stopsPerDay": 2,
+          "destination": "Roma|Rome",
+          "constraint": "çok yürümek istemiyorum"
+        }
+      },
+      {
+        "prompt": "İkinci güne bir kahve molası ekle. Diğer bütün duraklar ve günler aynı kalsın.",
+        "expect": {
+          "mode": "route",
+          "days": 3,
+          "preserveStops": true,
+          "newStopDay": 2
+        }
+      },
+      {
+        "prompt": "Roma rotama dokunma; meraktan soruyorum, Tokyo'da hangi yerel yemekler denenir?",
+        "expect": {
+          "mode": "chat",
+          "preserveStoredRoute": true,
+          "contains": "ramen|sushi|suşi|monjayaki|tempura|soba"
+        }
+      },
+      {
+        "prompt": "Mevcut rotamın ilk günündeki durakları neden seçtin?",
+        "expect": {
+          "mode": "chat",
+          "preserveStoredRoute": true,
+          "referencesFirstDay": true
+        }
+      },
+      {
+        "prompt": "İkinci güne sonradan eklediğin kahve durağını çıkar. Diğer durakları aynen koru.",
+        "expect": {
+          "mode": "route",
+          "days": 3,
+          "removedCount": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "grounding-and-limits",
+    "turns": [
+      {
+        "prompt": "Lima'da hangi yemekler denenir ve pisco nasıl bir içkidir? Kaynağın varsa göster; rota istemiyorum.",
+        "expect": {
+          "mode": "chat",
+          "contains": "ceviche|cebiche|lomo|causa",
+          "sourceDomain": "peru.travel",
+          "forbidden": "moqueca|Peru.nun.*rakısı",
+          "requires": "üzüm"
+        }
+      },
+      {
+        "prompt": "Paris'te on günlük bir rota oluştur.",
+        "expect": {
+          "mode": "clarify",
+          "contains": "7|yedi|böl"
+        }
+      }
+    ]
+  },
+  {
+    "id": "uncovered-destination",
+    "turns": [
+      {
+        "prompt": "Nairobi'de yerel olarak ne yenir? Kaynak kullanmadıysan açıkla; rota hazırlama.",
+        "expect": {
+          "mode": "chat",
+          "contains": "ugali|nyama|sukuma",
+          "noSources": true
+        }
+      }
+    ]
+  }
+]

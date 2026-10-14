@@ -1,0 +1,24 @@
+{
+  "serviceName": "ai-assistant",
+  "runtime": "AWS Bedrock / Lambda",
+  "models": [
+    "eu.amazon.nova-micro-v1:0",
+    "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
+  ],
+  "slo": {
+    "clarificationLatencyP95Ms": 1500,
+    "chatLatencyP95Ms": 3500,
+    "routeGenerationLatencyP95Ms": 12000,
+    "successRatePercent": 99.0
+  },
+  "quotas": {
+    "maxDailyPerUser": 20,
+    "maxDailySystemTotal": 200,
+    "resetSchedule": "00:00 UTC (03:00 TRT)"
+  },
+  "finOps": {
+    "costPerChatCredit": 1,
+    "costPerRouteCredit": 5,
+    "clarificationCost": 0
+  }
+}

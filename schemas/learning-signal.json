@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LearningFeedbackSignal",
+  "description": "Knowledge Base öğrenme döngüsü için anonimleştirilmiş kullanıcı geri bildirim sinyali",
+  "type": "object",
+  "properties": {
+    "signal_id": {
+      "type": "string",
+      "description": "Anonim rastgele sinyal kimliği"
+    },
+    "city": {
+      "type": "string",
+      "description": "Seyahat şehri (örn: New York)"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["cafe", "food", "lodging", "parks_sports", "transit", "culture", "route_overall"]
+    },
+    "place_name": {
+      "type": "string",
+      "description": "Değerlendirilen veya plana eklenen/çıkarılan mekan"
+    },
+    "action": {
+      "type": "string",
+      "enum": ["liked", "disliked", "kept_in_plan", "removed_from_plan", "completed_trip"]
+    },
+    "rating": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "coarse_week": {
+      "type": "string",
+      "description": "Kişisel zaman damgası yerine genel hafta (örn: 2026-W38)"
+    }
+  },
+  "required": ["signal_id", "city", "category", "action", "coarse_week"],
+  "additionalProperties": false
+}

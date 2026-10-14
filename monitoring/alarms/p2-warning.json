@@ -1,0 +1,25 @@
+{
+  "alarmGroup": "P2-WARNING",
+  "notificationTarget": "arn:aws:sns:eu-central-1:123456789012:mapsbridge-p2-warnings",
+  "rules": [
+    {
+      "alarmName": "Warning-Lambda-HighLatencyP99",
+      "metric": "Duration",
+      "namespace": "AWS/Lambda",
+      "extendedStatistic": "p99",
+      "threshold": 2500,
+      "evaluationPeriods": 3,
+      "periodSeconds": 300,
+      "comparisonOperator": "GreaterThanThreshold"
+    },
+    {
+      "alarmName": "Warning-CloudFront-High4xxRate",
+      "metric": "4xxErrorRate",
+      "namespace": "AWS/CloudFront",
+      "threshold": 5.0,
+      "evaluationPeriods": 2,
+      "periodSeconds": 300,
+      "comparisonOperator": "GreaterThanThreshold"
+    }
+  ]
+}

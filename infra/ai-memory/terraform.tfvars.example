@@ -1,0 +1,7 @@
+account_id         = "996270854731"
+prefix             = "adreskopru-prod"
+api_id             = "0duy2hfjd2"
+application_table  = "adreskopru-prod-data"
+ai_role_name       = "adreskopru-prod-ai-runtime"
+cognito_pool_id    = "eu-central-1_TKABiLn5f"
+cognito_client_id  = "62t35qsehl3o9cdc6i4mg01tqt"

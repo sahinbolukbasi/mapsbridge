@@ -1,0 +1,14 @@
+{
+  "serviceName": "map-trip",
+  "runtime": "AWS Lambda / DynamoDB",
+  "slo": {
+    "routeSaveLatencyP95Ms": 250,
+    "shareCodeLookupP95Ms": 100,
+    "shareExpirationTtlAccuracySeconds": 300
+  },
+  "metrics": [
+    { "name": "ActiveShareTokens", "stat": "SampleCount" },
+    { "name": "ExpiredTokensPurged", "stat": "Sum" },
+    { "name": "RouteCalculationErrors", "stat": "Sum", "alertThreshold": 5 }
+  ]
+}

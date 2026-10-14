@@ -1,0 +1,30 @@
+[
+  {
+    "city": "Lima",
+    "country": "PE",
+    "checked_at": "2026-09-19",
+    "valid_until": "2026-12-18",
+    "reviewer": "Codex source review 2026-09-19",
+    "rights": "Original short factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public",
+    "id": "lima-food",
+    "title": "Lima mutfağı — Peru Travel",
+    "source_url": "https://www.peru.travel/gastronomy/en/peruvian-cuisine/cuisine-of-lima.html",
+    "text": "Peru resmî turizm kaynağı Lima için ceviche, tiradito, parihuela, causa limeña, ají de gallina, arroz chaufa ve lomo saltado yemeklerini anlatır. Causa patates temellidir; tavuk, deniz ürünü veya avokado-domates dolgulu çeşitleri olabilir. Ají de gallina tavuk ve süt içerir. Lomo saltado et, patates, soğan ve domatesle hazırlanır. Anticuchos geleneksel olarak sığır kalbi şişidir. Bu kısa kaynak özeti restoran, fiyat, açılış saati veya alerjen güvenliği doğrulamaz."
+  },
+  {
+    "city": "Lima",
+    "country": "PE",
+    "checked_at": "2026-09-19",
+    "valid_until": "2026-12-18",
+    "reviewer": "Codex source review 2026-09-19",
+    "rights": "Original short factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public",
+    "id": "lima-pisco",
+    "title": "Pisco — Peru Travel",
+    "source_url": "https://www.peru.travel/gastronomy/en/peruvian-products/pisco.html",
+    "text": "Pisco, taze üzüm şırası temelinde üretilen bir üzüm distilatıdır. Kaynak, Peru üretiminde Puro, Acholado ve Mosto Verde türlerini açıklar. Pisco anasonlu Türk rakısı olarak tanımlanmamalıdır. Bu özet bir içkinin içeriğiyle ilgilidir; fiyat, işletme veya bulunabilirlik verisi değildir."
+  }
+]

@@ -1,0 +1,134 @@
+[
+  {
+    "id": "nyc-neighborhoods",
+    "title": "New York Mahalle Karakterleri ve Güvenlik Rehberi",
+    "city": "New York",
+    "country": "US",
+    "source_url": "https://www.nycgo.com/neighborhoods",
+    "text": "New York farklı mahalle karakterleriyle öne çıkar. Manhattan'da West Village ve Greenwich Village sakin sokakları, tarihi taş evleri ve butik kafeleriyle yürüyüş için idealdir. SoHo dökme demir mimarisi, sanat galerileri ve alışveriş imkanlarıyla bilinir. Lower East Side genç ve dinamik gece hayatı, bağımsız restoranları ve tarihi göçmen kültürüyle öne çıkar. Brooklyn tarafında Williamsburg bağımsız butikleri, vintage mağazaları ve çatı barlarıyla; DUMBO ise Manhattan Köprüsü manzarası, sahil parkı ve sanat stüdyolarıyla ziyaret edilir. Midtown turist yoğunluğu yüksek, Times Square ve tiyatro bölgesini barındırır. Genel olarak turist rotalarındaki ana mahalleler gündüz ve gece iyi aydınlatılmıştır ve metro bağlantıları güçlüdür.",
+    "metadata": {
+      "sehir": "New York",
+      "kategori": "lodging",
+      "mahalle": "West Village, SoHo, Williamsburg, DUMBO",
+      "fiyat_seviyesi": "$$$",
+      "kaynak": "https://www.nycgo.com/neighborhoods",
+      "son_dogrulama_tarihi": "2026-09-20"
+    },
+    "checked_at": "2026-09-20",
+    "valid_until": "2027-03-20",
+    "reviewer": "NYC Local Travel Editorial 2026-09-20",
+    "rights": "Original factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public"
+  },
+  {
+    "id": "nyc-specialty-coffee",
+    "title": "New York 3. Dalga Nitelikli Kahve Rehberi",
+    "city": "New York",
+    "country": "US",
+    "source_url": "https://www.nycgo.com/dining/coffee-shops",
+    "text": "New York nitelikli kahve sahnesi üçüncü dalga kavurucularla dünya çapında ünlüdür. Brooklyn Williamsburg'da Devoción, Kolombiya'dan taze getirilen yeşil çekirdekleri kavurarak tropikal bitkilerle bezeli geniş mekanında sunar. Bushwick'te Sey Coffee, açık kavrum İskandinav tarzı tek kökenli filtre kahveleriyle bilinir. Manhattan'da Birch Coffee soğuk demleme ve klasik espresso harmanlarıyla yerel zincirdir. West Village ve Nolita'da Cafe Lyria, Abraco ve Partners Coffee nitelikli demlemeleriyle öne çıkar. Kahve siparişinde yulaf sütü (oat milk) ve filtre kahve (batch brew / pour over) yaygındır. Bahşiş olarak kartlı ödemelerde yüzde 15-20 standart kabul edilir.",
+    "metadata": {
+      "sehir": "New York",
+      "kategori": "cafe",
+      "mahalle": "Williamsburg, Bushwick, West Village",
+      "fiyat_seviyesi": "$$",
+      "kaynak": "https://www.nycgo.com/dining/coffee-shops",
+      "son_dogrulama_tarihi": "2026-09-20"
+    },
+    "checked_at": "2026-09-20",
+    "valid_until": "2027-03-20",
+    "reviewer": "NYC Food & Coffee Desk 2026-09-20",
+    "rights": "Original factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public"
+  },
+  {
+    "id": "nyc-local-food",
+    "title": "New York İkonik Sokak Lezzetleri, Pizza ve Burger",
+    "city": "New York",
+    "country": "US",
+    "source_url": "https://www.nycgo.com/dining/iconic-dishes",
+    "text": "New York'ta yemek deneyiminin temeli sokak ve mahalle lezzetlerine dayanır. New York usulü dilim pizza (foldable slice) çıtır tabanı ve domates sosuyla karakterizedir; Greenwich Village'daki Joe's Pizza ve Lower East Side'daki Scarr's Pizza (kendi ununu öğütür) klasik örneklerdir. Yahudi şarküteri kültüründe pastrami on rye (çavdar ekmeğinde sıcak pastırma) Katz's Delicatessen ile anılır. Bagel kahvaltısında somon füme (lox), krem peynir ve kapariyle servis edilen bagel'lar için Russ & Daughters ve Ess-a-Bagel bilinir. Smash burger kategorisinde 7th Street Burger hızlı ve lezzetli bir alternatiftir. Balık ve deniz ürünleri tüketmeyenler için peynirli pizza, pastırma ve burger seçenekleri çok geniştir.",
+    "metadata": {
+      "sehir": "New York",
+      "kategori": "food",
+      "mahalle": "Lower East Side, Greenwich Village, Midtown",
+      "fiyat_seviyesi": "$$",
+      "kaynak": "https://www.nycgo.com/dining/iconic-dishes",
+      "son_dogrulama_tarihi": "2026-09-20"
+    },
+    "checked_at": "2026-09-20",
+    "valid_until": "2027-03-20",
+    "reviewer": "NYC Food & Coffee Desk 2026-09-20",
+    "rights": "Original factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public"
+  },
+  {
+    "id": "nyc-michelin-guide-facts",
+    "title": "New York Michelin ve Nitelikli Restoran Olgusal Özeti",
+    "city": "New York",
+    "country": "US",
+    "source_url": "https://guide.michelin.com/en/us/new-york-state/new-york/restaurants",
+    "text": "New York City dünyanın en zengin Michelin yıldızlı restoran yoğunluğuna sahip şehirlerindendir. Üç yıldızlı Le Bernardin deniz ürünleri odaklı Fransız mutfağıyla bilinir (deniz ürünü tüketmeyenlere uygun değildir). Eleven Madison Park tamamen bitkisel bazlı (vegan) inceleme menüsü sunar. Per Se Fransız-Amerikan tadım menüsüyle Central Park manzarasına bakar. İki yıldızlı Gramercy Tavern mevsimsel Amerikan mutfağını tavern ve dining room bölümlerinde sunar. Bib Gourmand kategorisinde Thai Villa, Via Carota ve Dhamaka gibi yüksek lezzet/fiyat dengesi sunan mekanlar yer alır. Michelin seviyesi restoranlarda 3-4 hafta öncesinden rezervasyon şarttır.",
+    "metadata": {
+      "sehir": "New York",
+      "kategori": "food",
+      "mahalle": "Flatiron, Gramercy, Midtown",
+      "fiyat_seviyesi": "$$$$",
+      "kaynak": "https://guide.michelin.com",
+      "son_dogrulama_tarihi": "2026-09-20"
+    },
+    "checked_at": "2026-09-20",
+    "valid_until": "2027-03-20",
+    "reviewer": "Gastronomy Fact Check 2026-09-20",
+    "rights": "Original short factual summary of guide listings; copyrighted reviews not used",
+    "approved": true,
+    "visibility": "public"
+  },
+  {
+    "id": "nyc-parks-and-running",
+    "title": "New York Parklar, Koşu Parkurları ve Açık Hava",
+    "city": "New York",
+    "country": "US",
+    "source_url": "https://www.nycgovparks.org/highlights/running-in-parks",
+    "text": "New York açık hava ve spor olanakları bakımından zengindir. Central Park'ta Jacqueline Kennedy Onassis Reservoir çevresindeki 2.5 kilometrelik çakıl parkur düz ve manzaralı bir koşu deneyimi sağlar. Central Park ana döngüsü (Central Park Loop) 9.7 km uzunluğundadır ve bisikletçiler ile koşucular için araç trafiğine kapalıdır. Manhattan batı kıyısında uzanan Hudson River Greenway, Battery Park'tan George Washington Köprüsü'ne kadar nehir kenarında kesintisiz yürüyüş ve bisiklet rotası sunar. Brooklyn'deki Prospect Park 5.4 km'lik döngüsüyle daha sakin ve yeşildir. High Line terkedilmiş yükseltilmiş demiryolu üzerinde bir park olup yürüyüş için idealdir ancak koşuya uygun değildir.",
+    "metadata": {
+      "sehir": "New York",
+      "kategori": "parks_sports",
+      "mahalle": "Central Park, Hudson River, Prospect Park",
+      "fiyat_seviyesi": "ucretsiz",
+      "kaynak": "https://www.nycgovparks.org",
+      "son_dogrulama_tarihi": "2026-09-20"
+    },
+    "checked_at": "2026-09-20",
+    "valid_until": "2027-03-20",
+    "reviewer": "Parks & Recreation Fact Check 2026-09-20",
+    "rights": "Original factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public"
+  },
+  {
+    "id": "nyc-subway-transit",
+    "title": "New York Metro, OMNY ve Ulaşım Rehberi",
+    "city": "New York",
+    "country": "US",
+    "source_url": "https://new.mta.info/guides/riding-the-subway",
+    "text": "MTA New York metrosu 24 saat kesintisiz hizmet verir ve şehir içi en hızlı ulaşım yoludur. Turnikelerde temassız kredi kartı, banka kartı veya telefonla OMNY sistemi kullanılır; fiziksel MetroCard satın almaya gerek yoktur. Bir takvim haftasında aynı kartla 12 geçişten sonraki tüm metro ve yerel otobüs geçişleri ücretsizdir (fare capping). Ekspres ve yerel tren ayrımına dikkat edilmelidir; ekspres trenler bazı durakları atlar. JFK Havalimanı'ndan Manhattan'a ulaşımda JFK AirTrain ile Jamaica istasyonuna gidilip E metrosuna veya Long Island Rail Road (LIRR) trenine aktarma yapılır. LaGuardia Havalimanı için Jackson Heights metrosundan kalkan ücretsiz Q70 SBS LaGuardia Link otobüsü en pratik yoldur.",
+    "metadata": {
+      "sehir": "New York",
+      "kategori": "transit",
+      "mahalle": "Tüm New York",
+      "fiyat_seviyesi": "$",
+      "kaynak": "https://new.mta.info",
+      "son_dogrulama_tarihi": "2026-09-20"
+    },
+    "checked_at": "2026-09-20",
+    "valid_until": "2027-03-20",
+    "reviewer": "Transit Guides Desk 2026-09-20",
+    "rights": "Original factual summary; source text not reproduced",
+    "approved": true,
+    "visibility": "public"
+  }
+]

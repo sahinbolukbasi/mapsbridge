@@ -1,0 +1,37 @@
+{
+  "alarmGroup": "P1-CRITICAL",
+  "notificationTarget": "arn:aws:sns:eu-central-1:123456789012:mapsbridge-p1-alerts",
+  "rules": [
+    {
+      "alarmName": "Critical-APIGateway-5xxSpike",
+      "metric": "5xx",
+      "namespace": "AWS/ApiGateway",
+      "threshold": 10,
+      "evaluationPeriods": 1,
+      "periodSeconds": 60,
+      "comparisonOperator": "GreaterThanOrEqualToThreshold",
+      "action": "Immediate PagerDuty / On-Call Notification"
+    },
+    {
+      "alarmName": "Critical-DynamoDB-Throttling",
+      "metric": "ReadThrottleEvents",
+      "namespace": "AWS/DynamoDB",
+      "threshold": 1,
+      "evaluationPeriods": 2,
+      "periodSeconds": 60,
+      "comparisonOperator": "GreaterThanOrEqualToThreshold",
+      "action": "Auto-scaling / Capacity adjustment alert"
+    },
+    {
+      "alarmName": "Critical-StripeWebhook-DeadLetterQueueDepth",
+      "metric": "ApproximateNumberOfMessagesVisible",
+      "namespace": "AWS/SQS",
+      "dimensions": { "QueueName": "mapsbridge-stripe-dlq" },
+      "threshold": 1,
+      "evaluationPeriods": 1,
+      "periodSeconds": 60,
+      "comparisonOperator": "GreaterThanOrEqualToThreshold",
+      "action": "Payment Entitlement Failure Review"
+    }
+  ]
+}

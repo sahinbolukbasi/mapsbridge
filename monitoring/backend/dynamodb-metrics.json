@@ -1,0 +1,44 @@
+{
+  "service": "AWS/DynamoDB",
+  "periodSeconds": 60,
+  "tables": [
+    "mapsbridge-production-table",
+    "mapsbridge-identity-table",
+    "mapsbridge-trips-table",
+    "mapsbridge-chat-table",
+    "mapsbridge-ai-table"
+  ],
+  "metrics": [
+    {
+      "metricName": "ConsumedReadCapacityUnits",
+      "stat": "Sum",
+      "description": "Total read units consumed across table and GSIs"
+    },
+    {
+      "metricName": "ConsumedWriteCapacityUnits",
+      "stat": "Sum",
+      "description": "Total write units consumed"
+    },
+    {
+      "metricName": "ReadThrottleEvents",
+      "stat": "Sum",
+      "alertThreshold": 1
+    },
+    {
+      "metricName": "WriteThrottleEvents",
+      "stat": "Sum",
+      "alertThreshold": 1
+    },
+    {
+      "metricName": "SuccessfulRequestLatency",
+      "stat": "Average",
+      "unit": "Milliseconds",
+      "target": "< 15ms"
+    },
+    {
+      "metricName": "SystemErrors",
+      "stat": "Sum",
+      "alertThreshold": 1
+    }
+  ]
+}
