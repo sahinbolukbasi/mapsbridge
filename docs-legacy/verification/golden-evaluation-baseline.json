@@ -1,9 +1,0 @@
-{
-  "version": "golden-travel-v1",
-  "passRate": 0.98,
-  "p95LatencyMs": 15000,
-  "averageSourceCoverage": 0.85,
-  "routeValidityRate": 1,
-  "safeDecisionSummaryRate": 1,
-  "notes": "Initial quality gate. Replace only after a reviewed evaluation run and explicit prompt/model change approval."
-}

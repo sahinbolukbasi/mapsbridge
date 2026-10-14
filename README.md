@@ -1,105 +1,227 @@
-# MapsBridge (AdresKöprü)
+<p align="center">
+  <img src="apps/web/public/favicon.svg" alt="MapsBridge" width="80" height="80" />
+</p>
 
-> Harita merkezli, yapay zekâ destekli, kurumsal mikroservis mimarisine sahip, güvenli ve açık rızaya dayalı seyahat planlama ve konum paylaşım platformu.
+<h1 align="center">MapsBridge</h1>
 
-Kullanıcılar harita masasında çok günlük seyahat rotaları oluşturabilir, OSRM motoruyla duraklarını optimize edebilir, AWS Bedrock destekli çok katmanlı AI seyahat asistanından (Nova Micro, Claude Haiku, Claude Sonnet) kişiselleştirilmiş gezi planları alabilir, gezgin profilleri ve topluluk rotalarını keşfedebilir ve süreli/tahmin edilemez bağlantılar (`/k/?kod=...`) ile konumlarını güvenle paylaşabilir.
+<p align="center">
+  AI-powered travel planning &amp; location sharing platform built on AWS serverless.
+</p>
 
-Uygulama **gizli takip**, arka planda izinsiz veri toplama veya başkasının konumunu rızasız paylaşma amacıyla **kesinlikle kullanılmaz**.
+<p align="center">
+  <a href="https://mapsbridge.com">Live Site</a> &middot;
+  <a href="#architecture">Architecture</a> &middot;
+  <a href="#getting-started">Getting Started</a> &middot;
+  <a href="#deployment">Deployment</a>
+</p>
 
 ---
 
-## 🏛️ Monorepo ve Sistem Mimarisi
+## Overview
 
-Codebase; Clean Architecture, Domain-Driven Design (DDD) ve bağımsız mikroservis ilkelerine göre yapılandırılmıştır:
+MapsBridge is a full-stack travel platform where users create multi-day trip itineraries, get AI-powered travel recommendations via AWS Bedrock (Claude, Nova), explore community routes, and securely share their location through time-limited links.
 
-```text
-/
+**Key capabilities:**
+- Multi-day trip planner with route optimization (OSRM)
+- AI travel assistant with multi-model orchestration (Bedrock AgentCore)
+- Real-time WebSocket messaging
+- Secure, consent-based location sharing (`/k/?code=...`)
+- Bilingual UI (Turkish / English) with locale detection
+- Credit-based billing with Stripe integration
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        CloudFront CDN                       │
+│                     mapsbridge.com (S3)                     │
+└──────────────┬──────────────────────────────┬───────────────┘
+               │                              │
+    ┌──────────▼──────────┐       ┌───────────▼────────────┐
+    │   API Gateway v2    │       │   Lambda Function URL  │
+    │   (HTTP + WebSocket)│       │   (AI Streaming)       │
+    │   103 routes        │       └───────────┬────────────┘
+    └──────────┬──────────┘                   │
+               │                              │
+    ┌──────────▼──────────┐       ┌───────────▼────────────┐
+    │   Lambda (Node.js)  │       │   Bedrock AgentCore    │
+    │   Admin Runtime     │       │   Claude / Nova Models │
+    └──────────┬──────────┘       └───────────┬────────────┘
+               │                              │
+    ┌──────────▼──────────────────────────────▼────────────┐
+    │              DynamoDB (Single-Table Design)           │
+    │              + AI Memory Table                        │
+    └──────────────────────────────────────────────────────┘
+```
+
+**Infrastructure:** 4 Terraform stacks &middot; 38 Lambda handlers &middot; Cognito auth &middot; CloudWatch alarms
+
+---
+
+## Repository Structure
+
+```
+mapsbridge/
 ├── apps/
-│   └── web/                   # Next.js 16 SPA Frontend (38 Statik Sayfa, Vanilla CSS)
-├── services/                  # 6 Bağımsız Kurumsal Mikroservis
-│   ├── ai-assistant/          # AWS Bedrock, Nova Micro, Alt Ajanlar & JSONL Boru Hattı
-│   ├── identity-billing/      # Cognito JWT, Kredi Cüzdanı, Stripe Checkout/Webhooks
-│   ├── map-trip/              # Rota Motoru, OSRM Entegrasyonu, Süreli Konum Paylaşımı
-│   ├── messaging/             # Gerçek Zamanlı WebSocket Sohbet & Thread Yönetimi
-│   ├── community/             # Gezgin Rotaları, Makaleler & Pazaryeri
-│   └── admin-service/         # Rol Tabanlı Denetim (RBAC), Sistem Bakım Modu & Loglama
-├── packages/                  # Paylaşılan Paketler
-│   ├── contracts/             # Domain Tipleri, DTO'lar, Değer Nesneleri & Arayüzler
-│   ├── shared/                # Ortak Validatörler & Hata Sınıfları
-│   └── ui/                    # Çoklu Platform Tasarım Sistemi (Web + Mobile Tokens, SVG İkonlar)
-├── monitoring/                # Kapsamlı İzleme, Sentetik Canary & Dağıtık Telemetri
-│   ├── backend/               # Lambda, DynamoDB, API Gateway & Cognito Metrikleri
-│   ├── frontend/              # Core Web Vitals & İstemci Hata Takibi
-│   ├── services/              # 6 Mikroservis İçin Servis Seviyesi Tanımları
-│   ├── dashboards/            # CloudWatch Operasyonel Pano Şablonu
-│   ├── alarms/                # P1 (Kritik) ve P2 (Uyarı) CloudWatch Alarmları
-│   ├── synthetics/            # Canlı Uç Nokta Canary Sağlık Denetleyicisi
-│   └── tracing/               # AWS X-Ray Dağıtık İzleme ve Korelasyon Bağlamı
-├── infra/                     # AWS Altyapı Kodları (Terraform, Lambda Handlers, Evals)
-├── docs/                      # Güncel ve Konsolide Teknik Dokümantasyon
-└── archive/                   # Arşivlenmiş Eski Kodlar ve Prototip Kalıntıları
+│   ├── web/                    # Next.js 16 static export (32 pages, vanilla CSS)
+│   └── mobile/                 # React Native / Expo (iOS + Android)
+├── services/                   # Domain microservices (DDD, Clean Architecture)
+│   ├── ai-assistant/           # Bedrock orchestration, sub-agents, JSONL pipeline
+│   ├── identity-billing/       # Cognito JWT, credit wallet, Stripe webhooks
+│   ├── map-trip/               # Route engine, OSRM, timed location sharing
+│   ├── messaging/              # Real-time WebSocket chat & threads
+│   ├── community/              # Traveler routes, articles, marketplace
+│   ├── admin/                  # RBAC, maintenance mode, audit logging
+│   └── place-intelligence/     # POI data, Google Places integration
+├── packages/                   # Shared libraries
+│   ├── contracts/              # Domain types, DTOs, value objects
+│   ├── api-client/             # Typed HTTP client for all API routes
+│   ├── shared/                 # Validators, error classes
+│   ├── ui/                     # Design tokens, icons (web + mobile)
+│   ├── database/               # DynamoDB client wrapper
+│   ├── security/               # Rate limiter, Lambda middleware
+│   └── monitoring/             # Structured logger
+├── infra/                      # Infrastructure as Code
+│   ├── terraform/              # Core stack: S3, CloudFront, Cognito, DynamoDB, API GW
+│   ├── admin-runtime/          # Lambda functions, route integrations, AI config
+│   ├── agentcore-gateway/      # Bedrock AgentCore MCP gateway
+│   ├── ai-memory/              # AI memory table, guardrails, model access
+│   └── lambda/                 # Lambda handler source (TypeScript)
+├── monitoring/                 # Observability
+│   ├── alarms/                 # P1/P2 CloudWatch alarm definitions
+│   ├── dashboards/             # Production overview dashboard
+│   ├── synthetics/             # Canary health checks
+│   ├── tracing/                # X-Ray distributed tracing
+│   └── runbooks/               # Incident response guides
+├── schemas/                    # JSON schemas (trip-plan, trip-profile, KB metadata)
+├── data/                       # Travel content (pilot cities)
+├── training/                   # Model fine-tuning pipeline
+├── docs/                       # Technical documentation
+├── scripts/                    # Deployment & utility scripts
+└── .github/                    # CI/CD workflows, PR & issue templates
 ```
 
 ---
 
-## 📚 Mimari ve Geliştirici Dokümantasyonu
+## Getting Started
 
-| Doküman | Amacı |
-|---|---|
-| 🤖 [AGENTS.md](AGENTS.md) | AI Agent çalışma sözleşmesi, anayasa ve katı kurallar |
-| 📋 [docs/README.md](docs/README.md) | Merkezi dokümantasyon indeksi |
-| 📄 [docs/operations/modernization-documentation.md](docs/operations/modernization-documentation.md) | Sistem modernizasyonu için kapsamlı kurumsal dokümantasyon |
-| 📊 [docs/operations/modernization-summary.md](docs/operations/modernization-summary.md) | Modernizasyon değişikliklerinin özetini içerir |
-| 🗺️ [docs/operations/modernization-roadmap.md](docs/operations/modernization-roadmap.md) | Modernizasyon sürecinin zaman çizelgesi ve yolu |
-| 🔍 [docs/operations/modernization-changelog.md](docs/operations/modernization-changelog.md) | Yapılan değişikliklerin detaylı kaydı |
-| 🎯 [docs/product/overview.md](docs/product/overview.md) | Ürün vizyonu, temel değer önerileri ve kapsam |
-| 🏛️ [docs/architecture/system.md](docs/architecture/system.md) | Sistem mimarisi, katmanlar ve veri akışları |
-| 🌐 [docs/architecture/microservices-architecture.md](docs/architecture/microservices-architecture.md) | 6 Mikroservisli dağıtık mimari ve EventBridge haberleşmesi |
-| 🚀 [docs/ai-master-plan/ROADMAP.md](docs/ai-master-plan/ROADMAP.md) | 14 Aşamalı AI-First Seyahat Asistanı Master Planı (13 Şartname) |
-| 🤖 [docs/ai/model-selection-and-guardrails.md](docs/ai/model-selection-and-guardrails.md) | Çok katmanlı LLM seçimi, güvenlik kalkanları ve alt ajan orkestrasyonu |
-| 💰 [docs/product/business-model.md](docs/product/business-model.md) | İş modeli, kredi muhasebesi ve FinOps birim iktisadı |
-| 🧩 [docs/architecture/domain.md](docs/architecture/domain.md) | Bounded context sınırları ve domain kuralları |
-| 🗄️ [docs/architecture/database.md](docs/architecture/database.md) | Amazon DynamoDB Tek Tablo Tasarımı şeması ve erişim kalıpları |
-| 🔌 [docs/architecture/api.md](docs/architecture/api.md) | REST (HTTP v2) ve WebSocket v2 API sözleşmeleri |
-| 🛡️ [docs/operations/security.md](docs/operations/security.md) | Kimlik doğrulama, Stripe imza kontrolü ve KVKK/GDPR ilkeleri |
-| 🧪 [docs/development/testing.md](docs/development/testing.md) | Test piramidi, test komutları ve kabul kriterleri (230/230 Test Yeşil) |
-| 🚀 [docs/operations/deployment.md](docs/operations/deployment.md) | AWS Terraform dağıtımı ve CI/CD rehberi |
-| 📊 [monitoring/README.md](monitoring/README.md) | Gözlemlenebilirlik, CloudWatch alarmları ve sentetik canary rehberi |
-| 📜 [docs/development/coding-standards.md](docs/development/coding-standards.md) | Kodlama standartları ve mühendislik kuralları |
-| 📋 [docs/development/tasks.md](docs/development/tasks.md) | Görev ve geliştirme takip listesi |
+### Prerequisites
 
----
+- **Node.js** 22+
+- **npm** 10+
+- **AWS CLI** + **Terraform** (for infrastructure)
 
-## ⚡ Hızlı Başlangıç
+### Install & Run
 
-### Gereksinimler
-- Node.js 22+
-- npm 10+
-- AWS CLI & Terraform (Dağıtım için)
-
-### Testleri ve Doğrulamaları Çalıştırma
 ```bash
-# 1. TypeScript tip denetimi
+# Install all workspace dependencies
+npm ci
+
+# Start local dev server (web)
+npm run dev
+
+# Type checking
 npm run typecheck
 
-# 2. Tüm birim, AI değerlendirme ve backend entegrasyon testleri (230 Test)
-npm test && npm run test:backend
+# Run tests
+npm test
 
-# 3. Canlı bulut sentetik canary izleme (CloudFront + API Gateway)
-npm run monitor:synthetics
-
-# 4. Next.js statik export derlemesi (38 sayfa)
+# Production build (static export)
 npm run build
 ```
 
-### Yerel Geliştirme Sunucusu
+### Mobile
+
 ```bash
-# Web SPA uygulamasını yerelde başlatma
-npm run dev
+npm run mobile:start       # Start Expo dev server
+npm run mobile:ios         # Run on iOS simulator
+npm run mobile:android     # Run on Android emulator
 ```
 
 ---
 
-## ⚖️ Lisans ve Hukuki Uyarı
+## Deployment
 
-Tüm hakları saklıdır. KVKK/GDPR prensiplerine tam uyumludur.
+### CI/CD Pipeline
+
+Every push to `main` triggers the GitHub Actions pipeline:
+
+1. **Quality** — TypeScript type check + unit tests
+2. **Build** — Next.js static export with environment secrets
+3. **Deploy** — S3 sync + CloudFront invalidation (via OIDC)
+
+### Infrastructure
+
+Each Terraform stack is deployed independently:
+
+```bash
+cd infra/terraform
+terraform init
+terraform plan
+terraform apply
+
+cd ../admin-runtime
+terraform init
+terraform plan
+terraform apply
+```
+
+### AWS Services Used
+
+| Service | Purpose |
+|---------|---------|
+| S3 + CloudFront | Static hosting with edge caching |
+| API Gateway v2 | HTTP + WebSocket API (103 routes) |
+| Lambda (Node.js 22) | Serverless compute (38 handlers) |
+| DynamoDB | Single-table design + AI memory |
+| Cognito | User authentication (email + Google) |
+| Bedrock | AI models (Claude, Nova) via AgentCore |
+| CloudWatch | Monitoring, alarms, dashboards |
+| EventBridge | Async event routing between services |
+
+---
+
+## Development
+
+### Monorepo Structure
+
+This is an npm workspace monorepo. Shared packages under `packages/` are consumed by `apps/` and `services/` via workspace references.
+
+### Key Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start web dev server |
+| `npm run build` | Production build |
+| `npm run typecheck` | TypeScript check |
+| `npm test` | Run all tests |
+| `npm run test:backend` | Lambda handler tests |
+| `npm run monitor:synthetics` | Run synthetic canary checks |
+
+### Code Standards
+
+- **TypeScript** everywhere (frontend, backend, infrastructure scripts)
+- **Clean Architecture** with domain/application/infrastructure layers
+- **Single-table DynamoDB** design with PK/SK patterns
+- **No ORMs** — direct DynamoDB DocumentClient
+- **Vanilla CSS** — no CSS frameworks, custom design tokens
+
+---
+
+## Monitoring
+
+Production monitoring is configured in the `monitoring/` directory:
+
+- **Alarms**: P1 (critical) and P2 (warning) CloudWatch alarms for Lambda errors, API latency, DynamoDB throttling
+- **Dashboards**: Production overview with all service metrics
+- **Synthetics**: Automated canary runner testing live endpoints
+- **Tracing**: AWS X-Ray distributed tracing with correlation context
+- **Runbooks**: Incident response procedures for AI assistant issues
+
+---
+
+## License
+
+All rights reserved. KVKK/GDPR compliant.

@@ -1,0 +1,6 @@
+# Default owner
+* @sahinbolukbasi
+
+# Infrastructure requires explicit review
+infra/ @sahinbolukbasi
+.github/workflows/ @sahinbolukbasi

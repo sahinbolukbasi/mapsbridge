@@ -1,9 +1,21 @@
+# OS
 .DS_Store
+Thumbs.db
+
+# Environment
 .env
 .env.*
 !.env.example
+
+# Dependencies
 node_modules/
+
+# Frameworks
 .next/
+.expo/
+*.tsbuildinfo
+
+# Python
 __pycache__/
 .pytest_cache/
 .ruff_cache/
@@ -18,16 +30,12 @@ __pycache__/
 .state-backup-old-account/
 infra/*/terraform.tfvars
 !infra/*/terraform.tfvars.example
+crash.log
 
 # Build artifacts
 apps/web/out/
-.build/testflight/
-infra/terraform/.build/
-infra/admin-runtime/.build/
-infra/agentcore-gateway/.build/
-infra/ai-memory/.build/
-infra/ai-training/.build/
-*.tsbuildinfo
+.build/
+infra/*/.build/
 
 # Secrets
 client_secret*.json
@@ -38,3 +46,13 @@ client_secret*.json
 apps/web/test-results/
 apps/web/playwright-report/
 apps/web/test-results-google/
+coverage/
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Legacy / generated
+docs-legacy/
+.agent-advisor/
