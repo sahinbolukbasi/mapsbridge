@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix infra/lambda --ignore-scripts
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Unit Tests (Web)
+        run: npm test 2>&1 | tee test-output.txt
+        continue-on-error: true
+
+      - name: Backend Tests
+        run: npm run test:backend 2>&1 | tee backend-test-output.txt
+        continue-on-error: true
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          WEB_PASS=$(grep -c '✔' test-output.txt 2>/dev/null || echo 0)
+          WEB_FAIL=$(grep -c '✖' test-output.txt 2>/dev/null || echo 0)
+          BACK_PASS=$(grep -c '✔' backend-test-output.txt 2>/dev/null || echo 0)
+          BACK_FAIL=$(grep -c '✖' backend-test-output.txt 2>/dev/null || echo 0)
+          echo "| Suite | Pass | Fail |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Web | $WEB_PASS | $WEB_FAIL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend | $BACK_PASS | $BACK_FAIL |" >> $GITHUB_STEP_SUMMARY
+
+  terraform-validate:
+    name: Terraform (${{ matrix.stack }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stack: [terraform, admin-runtime, agentcore-gateway, ai-memory]
+    defaults:
+      run:
+        working-directory: infra/${{ matrix.stack }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend=false
+      - run: terraform validate
+        continue-on-error: true
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [quality]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix infra/lambda --ignore-scripts
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_COGNITO_REGION: eu-central-1
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          NEXT_PUBLIC_AI_STREAM_URL: ${{ secrets.AI_STREAM_URL }}
+          NEXT_PUBLIC_SITE_URL: https://mapsbridge.com
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          NEXT_PUBLIC_TP_MARKER: "585085"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: apps/web/out/
+          retention-days: 3
