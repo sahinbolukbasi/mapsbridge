@@ -70,7 +70,7 @@ jobs:
             --model-id "eu.anthropic.claude-sonnet-4-20250514-v1:0" \
             --content-type "application/json" \
             --accept "application/json" \
-            --body file:///tmp/payload.json \
+            --body fileb:///tmp/payload.json \
             /tmp/response.json 2>&1 || true
 
           if [ -f /tmp/response.json ] && jq -e '.content[0].text' /tmp/response.json > /dev/null 2>&1; then
