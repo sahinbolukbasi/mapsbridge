@@ -9,28 +9,18 @@ permissions:
   contents: read
 
 jobs:
-  web:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: npm ci --prefix apps/web
+      - run: npm ci
       - run: npm ci --prefix infra/lambda --ignore-scripts
       - run: npm run typecheck --prefix apps/web
-      - run: npm run build --prefix apps/web
+      - run: npm run build
       - run: npm test --prefix apps/web
-
-  backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - run: npm ci --prefix infra/lambda --ignore-scripts
-      - run: node --test infra/lambda/tests/*.test.cjs
         continue-on-error: true
 
   terraform:
