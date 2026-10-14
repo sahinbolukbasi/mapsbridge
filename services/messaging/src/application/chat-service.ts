@@ -1,4 +1,4 @@
-export { threadParticipants } from "../../../../infra/lambda/src/shared/thread-access.js";
+export { threadParticipants } from "../../../../infra/lambda/src/shared/thread-access";
 
 export class ChatService {
   static readonly MAX_MESSAGE_LENGTH = 2000;

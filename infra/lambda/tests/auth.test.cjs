@@ -55,6 +55,35 @@ function harness(options = {}) {
       PostToConnectionCommand: class { constructor(input) { this.input = input; } },
     },
     '@aws-sdk/util-dynamodb': { marshall: value => value, unmarshall: value => value },
+    '@aws-sdk/client-s3': {
+      S3Client: class { async send() { return { Contents: [], Body: { transformToString: async () => '{}' } }; } },
+      PutObjectCommand: class { constructor(input) { this.input = input; } },
+      GetObjectCommand: class { constructor(input) { this.input = input; } },
+      ListObjectsV2Command: class { constructor(input) { this.input = input; } },
+    },
+    '@aws-sdk/client-bedrock-agentcore-control': {
+      BedrockAgentCoreControlClient: class { async send() { return {}; } },
+      GetGatewayCommand: class { constructor(input) { this.input = input; } },
+      ListGatewayTargetsCommand: class { constructor(input) { this.input = input; } },
+      GetMemoryCommand: class { constructor(input) { this.input = input; } },
+    },
+    '@aws-sdk/client-lambda': {
+      LambdaClient: class { async send() { return { Payload: new TextEncoder().encode('{}') }; } },
+      InvokeCommand: class { constructor(input) { this.input = input; } },
+    },
+    '@aws-sdk/client-cloudwatch': {
+      CloudWatchClient: class { async send() { return { MetricDataResults: [] }; } },
+      GetMetricDataCommand: class { constructor(input) { this.input = input; } },
+    },
+    '@aws-sdk/client-sqs': {
+      SQSClient: class { async send() { return {}; } },
+      GetQueueAttributesCommand: class { constructor(input) { this.input = input; } },
+    },
+    '@aws-sdk/client-bedrock': {
+      BedrockClient: class { async send() { return { modelSummaries: [] }; } },
+      ListFoundationModelsCommand: class { constructor(input) { this.input = input; } },
+      GetFoundationModelCommand: class { constructor(input) { this.input = input; } },
+    },
     redis: { createClient() { throw new Error('Unexpected Redis access'); } },
   };
   function load(relative) {
