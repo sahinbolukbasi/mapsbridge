@@ -67,7 +67,7 @@ jobs:
             }' > /tmp/payload.json
 
           aws bedrock-runtime invoke-model \
-            --model-id "eu.anthropic.claude-haiku-5-5-v1:0" \
+            --model-id "eu.anthropic.claude-haiku-4-5-20251001-v1:0" \
             --content-type "application/json" \
             --accept "application/json" \
             --body fileb:///tmp/payload.json \
