@@ -49,48 +49,34 @@ jobs:
       - name: AI Review via Bedrock
         if: steps.diff.outputs.has_diff == 'true'
         run: |
-          DIFF=$(cat /tmp/pr-diff.txt)
           FILES=$(cat /tmp/changed-files.txt)
+          DIFF=$(cat /tmp/pr-diff.txt)
           TITLE="${{ github.event.pull_request.title }}"
 
-          PROMPT="You are a senior code reviewer for MapsBridge, an AI-powered travel platform (TypeScript + Terraform + AWS). Review this PR concisely.
-
-          PR Title: $TITLE
-
-          Changed files:
-          $FILES
-
-          Diff:
-          \`\`\`
-          $DIFF
-          \`\`\`
-
-          Provide a brief review with:
-          1. **Summary** — what this PR does (1-2 sentences)
-          2. **Issues** — bugs, security issues, or correctness problems (if any)
-          3. **Suggestions** — improvements (max 3)
-
-          Be concise. No praise. Skip if changes are trivial. Use markdown."
-
-          PAYLOAD=$(jq -n \
-            --arg prompt "$PROMPT" \
+          jq -n \
+            --arg title "$TITLE" \
+            --arg files "$FILES" \
+            --arg diff "$DIFF" \
             '{
               anthropic_version: "bedrock-2023-05-31",
               max_tokens: 2048,
-              messages: [{role: "user", content: $prompt}]
-            }')
+              messages: [{
+                role: "user",
+                content: ("You are a senior code reviewer for MapsBridge, an AI-powered travel platform (TypeScript + Terraform + AWS). Review this PR concisely.\n\nPR Title: " + $title + "\n\nChanged files:\n" + $files + "\n\nDiff:\n```\n" + $diff + "\n```\n\nProvide a brief review with:\n1. **Summary** - what this PR does (1-2 sentences)\n2. **Issues** - bugs, security issues, or correctness problems (if any)\n3. **Suggestions** - improvements (max 3)\n\nBe concise. No praise. Skip if changes are trivial. Use markdown.")
+              }]
+            }' > /tmp/payload.json
 
-          RESPONSE=$(aws bedrock-runtime invoke-model \
+          aws bedrock-runtime invoke-model \
             --model-id "eu.anthropic.claude-sonnet-4-20250514-v1:0" \
             --content-type "application/json" \
             --accept "application/json" \
-            --body "$PAYLOAD" \
-            /tmp/response.json 2>&1 || true)
+            --body file:///tmp/payload.json \
+            /tmp/response.json 2>&1 || true
 
-          if [ -f /tmp/response.json ]; then
-            jq -r '.content[0].text // "Review could not be generated."' /tmp/response.json > /tmp/review.md
+          if [ -f /tmp/response.json ] && jq -e '.content[0].text' /tmp/response.json > /dev/null 2>&1; then
+            jq -r '.content[0].text' /tmp/response.json > /tmp/review.md
           else
-            echo "Bedrock invocation failed: $RESPONSE" > /tmp/review.md
+            echo "AI review unavailable for this PR." > /tmp/review.md
           fi
 
       - name: Post Review Comment
