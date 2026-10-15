@@ -50,9 +50,17 @@ jobs:
         working-directory: apps/mobile
         run: npm install
 
-      - name: Build & Submit
+      - name: Build Android
         if: steps.check.outputs.skip == 'false'
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
-        run: eas build --platform android --profile production --non-interactive --auto-submit
+        run: eas build --platform android --profile production --non-interactive
+
+      - name: Submit to Google Play
+        if: steps.check.outputs.skip == 'false' && secrets.GOOGLE_SERVICE_ACCOUNT_KEY != ''
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: eas submit --platform android --latest --non-interactive
+        continue-on-error: true

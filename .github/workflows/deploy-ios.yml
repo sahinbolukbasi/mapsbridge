@@ -50,9 +50,17 @@ jobs:
         working-directory: apps/mobile
         run: npm install
 
-      - name: Build & Submit
+      - name: Build iOS
         if: steps.check.outputs.skip == 'false'
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
-        run: eas build --platform ios --profile production --non-interactive --auto-submit
+        run: eas build --platform ios --profile production --non-interactive
+
+      - name: Submit to App Store
+        if: steps.check.outputs.skip == 'false'
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: eas submit --platform ios --latest --non-interactive
+        continue-on-error: true
