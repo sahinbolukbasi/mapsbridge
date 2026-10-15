@@ -253,7 +253,7 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
         }
       }
     }
-  } catch {}
+  } catch (e) { console.error("[auth] Cognito GetUser failed:", (e as Error).message) }
 
   return null;
 }

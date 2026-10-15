@@ -8,12 +8,13 @@ export function generatePasswordResetEmailHtml(params: {
   email?: string;
   code: string;
 }): string {
+  const appUrl = (process.env.APP_URL || "https://mapsbridge.com").replace(/\/$/, "");
   const recipientName = params.name && params.name.trim() ? params.name.trim() : "Gezgin";
   const recipientEmail = params.email && params.email.trim() ? params.email.trim() : "";
   const code = params.code || "{####}";
   const directResetUrl = recipientEmail
-    ? `https://mapsbridge.com/sifre-sifirla/?email=${encodeURIComponent(recipientEmail)}&code=${code}&step=confirm`
-    : `https://mapsbridge.com/sifre-sifirla/?step=confirm`;
+    ? `${appUrl}/sifre-sifirla/?email=${encodeURIComponent(recipientEmail)}&code=${code}&step=confirm`
+    : `${appUrl}/sifre-sifirla/?step=confirm`;
 
   return `<!DOCTYPE html>
 <html lang="tr">
@@ -104,9 +105,9 @@ export function generatePasswordResetEmailHtml(params: {
     <tr>
       <td style="padding: 24px 32px; background-color: #f8fafc; border-top: 1px solid #f1f5f9; text-align: center; font-size: 12px; color: #94a3b8;">
         <p style="margin: 0 0 8px 0;">
-          <a href="https://mapsbridge.com/destek" style="color: #64748b; text-decoration: none;">Yardım Merkezi</a> &nbsp;&bull;&nbsp; 
-          <a href="https://mapsbridge.com/gizlilik" style="color: #64748b; text-decoration: none;">Gizlilik İlkeleri</a> &nbsp;&bull;&nbsp; 
-          <a href="https://mapsbridge.com/kosullar" style="color: #64748b; text-decoration: none;">Kullanım Koşulları</a>
+          <a href="${appUrl}/destek" style="color: #64748b; text-decoration: none;">Yardım Merkezi</a> &nbsp;&bull;&nbsp;
+          <a href="${appUrl}/gizlilik" style="color: #64748b; text-decoration: none;">Gizlilik İlkeleri</a> &nbsp;&bull;&nbsp;
+          <a href="${appUrl}/kosullar" style="color: #64748b; text-decoration: none;">Kullanım Koşulları</a>
         </p>
         <p style="margin: 0; font-size: 11px; color: #cbd5e1;">
           &copy; 2026 MapsBridge Inc. Akıllı Seyahat &amp; Rota Platformu. Tüm hakları saklıdır.
@@ -123,12 +124,13 @@ export function generateSignUpEmailHtml(params: {
   email?: string;
   code: string;
 }): string {
+  const appUrl = (process.env.APP_URL || "https://mapsbridge.com").replace(/\/$/, "");
   const recipientName = params.name && params.name.trim() ? params.name.trim() : "Gezgin";
   const recipientEmail = params.email && params.email.trim() ? params.email.trim() : "";
   const code = params.code || "{####}";
   const directVerifyUrl = recipientEmail
-    ? `https://mapsbridge.com/dogrula/?email=${encodeURIComponent(recipientEmail)}&code=${code}`
-    : `https://mapsbridge.com/dogrula/`;
+    ? `${appUrl}/dogrula/?email=${encodeURIComponent(recipientEmail)}&code=${code}`
+    : `${appUrl}/dogrula/`;
 
   return `<!DOCTYPE html>
 <html lang="tr">

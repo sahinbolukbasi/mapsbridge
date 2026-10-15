@@ -18,6 +18,7 @@ import {
   parseBody,
 } from "../shared/http";
 import { Router } from "../shared/router";
+import { getDynamoClient } from "../shared/dynamo";
 
 const router = new Router();
 
@@ -146,9 +147,9 @@ async function handlePublishProfile(event: ApiGatewayEvent) {
   }
 
   // Store in DynamoDB (shared table from hosting.tf)
-  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   try {
     // Reserve username
@@ -216,9 +217,9 @@ async function handleUnpublishProfile(event: ApiGatewayEvent) {
   const body = parseBody<{ username?: string }>(event);
   if (!body?.username) return badRequest("Kullanıcı adı zorunludur.");
 
-  const { DynamoDBClient, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   try {
     await ddb.send(
@@ -245,9 +246,9 @@ async function handleGetProfile(event: ApiGatewayEvent) {
   const username = event.pathParameters?.username?.toLowerCase();
   if (!username) return badRequest("Kullanıcı adı gerekli.");
 
-  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await ddb.send(
     new GetItemCommand({

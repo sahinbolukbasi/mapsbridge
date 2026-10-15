@@ -1,6 +1,5 @@
 import { stripeClient } from "../billing/stripe-client";
 import {
-  DynamoDBClient,
   GetItemCommand,
   ScanCommand,
   QueryCommand,
@@ -8,6 +7,7 @@ import {
   PutItemCommand,
   type AttributeValue,
 } from "@aws-sdk/client-dynamodb";
+import { getDynamoClient } from "../shared/dynamo";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import {
   CognitoIdentityProviderClient,
@@ -32,7 +32,6 @@ export class AdminError extends Error {
     super(message);
   }
 }
-export const db = () => new DynamoDBClient({ region: process.env.AWS_REGION });
 export const table = () => process.env.DYNAMODB_TABLE!;
 const cognito = () => new CognitoIdentityProviderClient({ region: process.env.AWS_REGION });
 const pool = () => process.env.COGNITO_USER_POOL_ID!;
@@ -49,7 +48,7 @@ export function bodyOf(event: ApiGatewayEvent): Row {
   return body;
 }
 export async function get(PK: string, SK = "META"): Promise<Row | null> {
-  const result = await db().send(
+  const result = await getDynamoClient().send(
     new GetItemCommand({ TableName: table(), Key: marshall({ PK, SK }), ConsistentRead: true }),
   );
   return result.Item ? unmarshall(result.Item) : null;
@@ -62,7 +61,7 @@ export async function scan(
   const rows: Row[] = [];
   let cursor: Record<string, AttributeValue> | undefined;
   do {
-    const result = await db().send(
+    const result = await getDynamoClient().send(
       new ScanCommand({
         TableName: table(),
         FilterExpression: filter,
@@ -80,7 +79,7 @@ export async function userRows(id: string): Promise<Row[]> {
   const rows: Row[] = [];
   let cursor: Record<string, AttributeValue> | undefined;
   do {
-    const result = await db().send(
+    const result = await getDynamoClient().send(
       new QueryCommand({
         TableName: table(),
         KeyConditionExpression: "PK = :pk",
@@ -171,7 +170,7 @@ export async function commit(
         }
       : null;
   try {
-    await db().send(
+    await getDynamoClient().send(
       new TransactWriteItemsCommand({
         TransactItems: [
           patch || {
@@ -208,7 +207,7 @@ export async function commit(
   return next;
 }
 async function log(event: ApiGatewayEvent, action: string, targetId: string, reason: string) {
-  await db().send(
+  await getDynamoClient().send(
     new PutItemCommand({
       TableName: table(),
       Item: marshall(audit(event, action, targetId, reason)),
@@ -418,7 +417,7 @@ export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<an
     if (wallet?.frozen) throw new AdminError(409, "Dondurulmuş cüzdanın incelemesini tamamlayın.");
     if (balance + b.delta < 0) throw new AdminError(400, "Bakiye negatif olamaz.");
     try {
-      await db().send(
+      await getDynamoClient().send(
         new TransactWriteItemsCommand({
           TransactItems: [
             {
@@ -479,7 +478,7 @@ export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<an
     if (typeof b.frozen !== "boolean") throw new AdminError(400, "Cüzdan durumu gerekli.");
     await account(id);
     const previous = await get(`USER#${id}`, "CREDITS");
-    await db().send(
+    await getDynamoClient().send(
       new TransactWriteItemsCommand({
         TransactItems: [
           {

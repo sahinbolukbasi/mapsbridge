@@ -31,6 +31,7 @@ import {
   parseBody,
 } from "../shared/http";
 import { Router } from "../shared/router";
+import { getDynamoClient } from "../shared/dynamo";
 
 const router = new Router();
 
@@ -57,16 +58,11 @@ function getTableName(): string {
   return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT}-data`;
 }
 
-async function getDdb() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
-  return new DynamoDBClient({ region: process.env.AWS_REGION });
-}
-
 // ─── List Guides (public marketplace) ─────────────────────────────────────
 async function handleListGuides(event: ApiGatewayEvent) {
-  const { DynamoDBClient, ScanCommand } = await import("@aws-sdk/client-dynamodb");
+  const { ScanCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 20, 100);
   const category = event.queryStringParameters?.category;
@@ -99,9 +95,9 @@ async function handleGetGuide(event: ApiGatewayEvent) {
   const guideId = event.pathParameters?.id;
   if (!guideId) return badRequest("Rehber ID gerekli.");
 
-  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await ddb.send(
     new GetItemCommand({
@@ -139,9 +135,9 @@ async function handleCreateGuide(event: ApiGatewayEvent) {
   const guidesBucket = process.env.GUIDES_BUCKET || "";
   const fileKey = `guides/${userId}/${guideId}/${body.fileName || "guide.pdf"}`;
 
-  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   // Store guide metadata
   await ddb.send(
@@ -212,9 +208,9 @@ async function handleDownloadGuide(event: ApiGatewayEvent) {
   const guideId = event.pathParameters?.id;
   if (!guideId) return badRequest("Rehber ID gerekli.");
 
-  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall, unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   // 1. Verify purchase
   const purchaseResult = await ddb.send(
@@ -302,9 +298,9 @@ async function handleCreateBlog(event: ApiGatewayEvent) {
   const blogId = crypto.randomUUID();
   const now = new Date().toISOString();
 
-  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   await ddb.send(
     new PutItemCommand({
@@ -328,9 +324,9 @@ async function handleCreateBlog(event: ApiGatewayEvent) {
 }
 
 async function handleListBlogs(event: ApiGatewayEvent) {
-  const { DynamoDBClient, ScanCommand } = await import("@aws-sdk/client-dynamodb");
+  const { ScanCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 20, 100);
   const tag = event.queryStringParameters?.tag;
@@ -364,9 +360,9 @@ async function handleGetBlog(event: ApiGatewayEvent) {
   const blogId = event.pathParameters?.id;
   if (!blogId) return badRequest("Blog ID gerekli.");
 
-  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await ddb.send(
     new GetItemCommand({

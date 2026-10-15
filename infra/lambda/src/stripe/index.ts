@@ -1,9 +1,8 @@
 import { getVerifiedUser } from "../shared/auth";
-import { resolveEnvSecret } from "../shared/http";
+import { resolveEnvSecret, jsonResponse } from "../shared/http";
 import { stripeClient } from "../billing/stripe-client";
 import {
   BillingError,
-  db,
   table,
   read,
   wallet,
@@ -12,14 +11,9 @@ import {
   initializeTrial,
 } from "../billing/store";
 import { catalog } from "../billing/catalog";
+import { getDynamoClient } from "../shared/dynamo";
 import { UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-
-const reply = (statusCode: number, body: unknown) => ({
-  statusCode,
-  headers: { "content-type": "application/json", "cache-control": "no-store" },
-  body: JSON.stringify(body),
-});
 function appOrigin() {
   const url = new URL(process.env.APP_ORIGIN || "");
   if (
@@ -42,10 +36,10 @@ export async function handler(event: any) {
   try {
     const method = event.requestContext?.http?.method;
     const path = (event.rawPath || event.requestContext?.http?.path || "").replace(/\/$/, "");
-    if (method === "OPTIONS") return reply(200, {});
+    if (method === "OPTIONS") return jsonResponse(200, {});
     if (method === "POST" && path === "/stripe/webhook") return await webhook(event);
     if (method === "GET" && path === "/stripe/plans")
-      return reply(200, {
+      return jsonResponse(200, {
         enabled: process.env.BILLING_ENABLED === "true",
         products: catalog().map((p) => ({
           ...p,
@@ -60,24 +54,24 @@ export async function handler(event: any) {
     );
     const user = await getVerifiedUser(token);
     const userId = user?.sub;
-    if (!userId) return reply(401, { error: "Oturumunuz doğrulanamadı." });
-    if (method === "GET" && path === "/stripe/wallet") return reply(200, await wallet(userId));
+    if (!userId) return jsonResponse(401, { error: "Oturumunuz doğrulanamadı." });
+    if (method === "GET" && path === "/stripe/wallet") return jsonResponse(200, await wallet(userId));
     if (method === "GET" && path === "/stripe/subscription")
-      return reply(200, await subscription(userId));
+      return jsonResponse(200, await subscription(userId));
     if (method === "GET" && path === "/stripe/session") {
       const id = event.queryStringParameters?.session_id;
       if (typeof id !== "string" || !/^cs_[a-zA-Z0-9_]{8,200}$/.test(id))
-        return reply(400, { error: "Geçersiz ödeme kimliği." });
+        return jsonResponse(400, { error: "Geçersiz ödeme kimliği." });
       const session = await (await stripeClient()).checkout.sessions.retrieve(id);
       if (session.client_reference_id !== userId || session.metadata?.userId !== userId)
-        return reply(404, { error: "Ödeme bulunamadı." });
+        return jsonResponse(404, { error: "Ödeme bulunamadı." });
       let receipt = await read(`BILLING#CHECKOUT#${id}`, "RECEIPT");
       if (session.mode === "subscription" && session.invoice) {
         const invoiceId =
           typeof session.invoice === "string" ? session.invoice : session.invoice.id;
         receipt = await read(`BILLING#INVOICE#${invoiceId}`, "RECEIPT");
       }
-      return reply(200, {
+      return jsonResponse(200, {
         status:
           receipt?.userId === userId
             ? "credited"
@@ -95,18 +89,18 @@ export async function handler(event: any) {
           event.isBase64Encoded ? Buffer.from(event.body, "base64").toString("utf8") : event.body,
         );
       } catch {
-        return reply(400, { error: "Geçersiz istek." });
+        return jsonResponse(400, { error: "Geçersiz istek." });
       }
       if (!body || typeof body !== "object" || Array.isArray(body))
-        return reply(400, { error: "Geçersiz istek." });
+        return jsonResponse(400, { error: "Geçersiz istek." });
     }
     if (method === "POST" && path === "/stripe/checkout") {
       if (process.env.BILLING_ENABLED !== "true")
-        return reply(503, {
+        return jsonResponse(503, {
           error: "Kredi satışı ödeme hesabı bağlantısı tamamlandığında açılacak.",
         });
       if (!user?.emailVerified)
-        return reply(403, { error: "Satın almadan önce e-postanızı doğrulayın." });
+        return jsonResponse(403, { error: "Satın almadan önce e-postanızı doğrulayın." });
       await initializeTrial(userId);
       const product = catalog().find(
         (p) =>
@@ -115,9 +109,9 @@ export async function handler(event: any) {
             ? p.id === body.targetId && p.mode === body.mode
             : p.priceId === body.priceId),
       );
-      if (!product) return reply(400, { error: "Satışa açık bir paket seçin." });
+      if (!product) return jsonResponse(400, { error: "Satışa açık bir paket seçin." });
       if (body.cycle && body.cycle !== "monthly")
-        return reply(400, { error: "Yıllık ödeme henüz kullanıma açık değil." });
+        return jsonResponse(400, { error: "Yıllık ödeme henüz kullanıma açık değil." });
       const key = idempotency(event, userId);
       const stripe = await stripeClient();
       // Price amount, currency and recurrence are server-controlled, never client amounts or price metadata.
@@ -157,11 +151,11 @@ export async function handler(event: any) {
         },
         { idempotencyKey: key },
       );
-      return reply(201, { url: session.url, sessionId: session.id });
+      return jsonResponse(201, { url: session.url, sessionId: session.id });
     }
     if (method === "POST" && path === "/stripe/portal") {
       const customer = await read(`USER#${userId}`, "STRIPE_CUSTOMER");
-      if (!customer?.customerId) return reply(400, { error: "Abonelik bulunamadı." });
+      if (!customer?.customerId) return jsonResponse(400, { error: "Abonelik bulunamadı." });
       const session = await (
         await stripeClient()
       ).billingPortal.sessions.create({
@@ -171,17 +165,17 @@ export async function handler(event: any) {
           : {}),
         return_url: `${appOrigin()}/odeme/`,
       });
-      return reply(200, { url: session.url });
+      return jsonResponse(200, { url: session.url });
     }
     if (method === "POST" && path === "/stripe/balance/topup")
-      return reply(410, {
+      return jsonResponse(410, {
         error: "Tutarla bakiye yükleme kaldırıldı. Doğrulanmış kredi paketini kullanın.",
       });
-    return reply(404, { error: "Uç nokta bulunamadı." });
+    return jsonResponse(404, { error: "Uç nokta bulunamadı." });
   } catch (err) {
     if (err instanceof BillingError)
-      return reply(err.status, { error: err.message, code: err.code });
-    return reply(503, { error: "Ödeme veya kredi servisine şu anda erişilemiyor." });
+      return jsonResponse(err.status, { error: err.message, code: err.code });
+    return jsonResponse(503, { error: "Ödeme veya kredi servisine şu anda erişilemiyor." });
   }
 }
 async function webhook(event: any) {
@@ -189,7 +183,7 @@ async function webhook(event: any) {
     ([k]) => k.toLowerCase() === "stripe-signature",
   )?.[1];
   if (typeof signature !== "string" || !event.body)
-    return reply(400, { error: "Ödeme imzası gerekli." });
+    return jsonResponse(400, { error: "Ödeme imzası gerekli." });
   const secret = await resolveEnvSecret(process.env.STRIPE_WEBHOOK_SECRET);
   if (!secret.startsWith("whsec_"))
     throw new BillingError(503, "WEBHOOK_CONFIGURATION", "Ödeme doğrulaması yapılandırılmadı.");
@@ -202,10 +196,10 @@ async function webhook(event: any) {
       secret,
     );
   } catch {
-    return reply(400, { error: "Geçersiz ödeme imzası." });
+    return jsonResponse(400, { error: "Geçersiz ödeme imzası." });
   }
   if (!verified.id || !Number.isFinite(verified.created))
-    return reply(400, { error: "Geçersiz ödeme olayı." });
+    return jsonResponse(400, { error: "Geçersiz ödeme olayı." });
   const object = verified.data.object;
   switch (verified.type) {
     case "checkout.session.completed":
@@ -217,7 +211,7 @@ async function webhook(event: any) {
       const userId = session.client_reference_id;
       if (typeof userId !== "string" || userId !== session.metadata?.userId)
         throw new Error("Checkout identity mismatch");
-      if (session.payment_status !== "paid") return reply(200, { received: true, pending: true });
+      if (session.payment_status !== "paid") return jsonResponse(200, { received: true, pending: true });
       const customerId =
         typeof session.customer === "string" ? session.customer : session.customer?.id;
       if (customerId) await bindCustomer(userId, customerId);
@@ -313,7 +307,7 @@ async function webhook(event: any) {
       if (!userId || (await read(`USER#${userId}`, "STRIPE_CUSTOMER"))?.customerId !== customerId)
         throw new Error("Refund owner mismatch");
       // Fail closed pending financial reconciliation; do not allow refunded credits to be spent.
-      await db().send(
+      await getDynamoClient().send(
         new UpdateItemCommand({
           TableName: table(),
           Key: marshall({ PK: `USER#${userId}`, SK: "CREDITS" }),
@@ -327,10 +321,10 @@ async function webhook(event: any) {
     default:
       break;
   }
-  return reply(200, { received: true });
+  return jsonResponse(200, { received: true });
 }
 async function bindCustomer(userId: string, customerId: string) {
-  await db().send(
+  await getDynamoClient().send(
     new UpdateItemCommand({
       TableName: table(),
       Key: marshall({ PK: `USER#${userId}`, SK: "STRIPE_CUSTOMER" }),
@@ -351,7 +345,7 @@ async function syncSubscription(sub: any, eventTime: number) {
   if (!customerId) throw new Error("Missing customer");
   await bindCustomer(userId, customerId);
   try {
-    await db().send(
+    await getDynamoClient().send(
       new UpdateItemCommand({
         TableName: table(),
         Key: marshall({ PK: `USER#${userId}`, SK: "SUBSCRIPTION" }),
