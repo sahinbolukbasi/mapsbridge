@@ -184,7 +184,10 @@ resource "aws_lambda_function" "domain" {
   memory_size = each.key == "ai" ? 512 : var.lambda_memory
 
   dynamic "vpc_config" {
-    for_each = contains(["stripe", "ai", "routes", "admin"], each.key) ? [] : [1]
+    # stripe/ai/routes call external APIs (Stripe, Bedrock, OSRM) and have no NAT gateway,
+    # so they cannot be VPC-attached. admin only accesses DynamoDB/S3/Secrets (all have
+    # VPC endpoints), so it IS placed in the VPC for network isolation.
+    for_each = length(var.private_subnet_ids) > 0 && contains(["admin"], each.key) ? [1] : []
     content {
       subnet_ids         = var.private_subnet_ids
       security_group_ids = [var.lambda_security_group_id]
