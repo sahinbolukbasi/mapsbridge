@@ -1,0 +1,96 @@
+name: Failure Handler
+
+on:
+  workflow_run:
+    workflows: ["CI", "Deploy"]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  issues: write
+
+jobs:
+  analyze:
+    name: Analyze & Report
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_branch == 'main'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - uses: aws-actions/configure-aws-credentials@e3ef5a70f08b73a6ca7a8dca7ce5a5e4c816e4c6 # v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - name: Collect context
+        id: ctx
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN_ID=${{ github.event.workflow_run.id }}
+          JOBS=$(gh api repos/${{ github.repository }}/actions/runs/${RUN_ID}/jobs \
+            --jq '[.jobs[] | select(.conclusion == "failure") | {name: .name, step: (.steps[] | select(.conclusion == "failure") | .name)}]')
+          DIFF=$(git diff HEAD~1 HEAD -- '*.ts' '*.tsx' '*.tf' '*.yml' | head -c 10000)
+
+          jq -n \
+            --arg wf "${{ github.event.workflow_run.name }}" \
+            --arg branch "${{ github.event.workflow_run.head_branch }}" \
+            --arg sha "${{ github.event.workflow_run.head_sha }}" \
+            --argjson jobs "$JOBS" \
+            --arg diff "$DIFF" \
+            '{workflow: $wf, branch: $branch, commit: $sha, failed_jobs: $jobs, diff: $diff}' \
+            > /tmp/context.json
+
+      - name: Analyze with Claude
+        run: |
+          jq -n --arg ctx "$(cat /tmp/context.json)" '{
+            anthropic_version: "bedrock-2023-05-31",
+            max_tokens: 1024,
+            messages: [{
+              role: "user",
+              content: ("Analyze this CI/CD failure. Return JSON: {\"root_cause\": \"...\", \"classification\": \"transient|safe-fix|risky|infra\", \"confidence\": \"high|medium|low\", \"fix\": \"...\"}.\n\nContext:\n```json\n" + $ctx + "\n```")
+            }]
+          }' > /tmp/payload.json
+
+          if aws bedrock-runtime invoke-model \
+            --model-id "eu.anthropic.claude-haiku-4-5-20251001-v1:0" \
+            --content-type "application/json" --accept "application/json" \
+            --body fileb:///tmp/payload.json /tmp/response.json 2>/dev/null; then
+            jq -r '.content[0].text // "{}"' /tmp/response.json > /tmp/analysis.txt
+          else
+            echo '{"root_cause":"Analysis unavailable","classification":"infra","confidence":"low","fix":"Manual investigation required"}' > /tmp/analysis.txt
+          fi
+
+      - name: Create issue
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const raw = fs.readFileSync('/tmp/analysis.txt', 'utf8');
+            const run = context.payload.workflow_run;
+
+            let parsed;
+            try {
+              const m = raw.match(/\{[\s\S]*\}/);
+              parsed = m ? JSON.parse(m[0]) : { root_cause: raw, classification: 'unknown' };
+            } catch { parsed = { root_cause: raw, classification: 'unknown' }; }
+
+            const emoji = { transient: '🔄', 'safe-fix': '🔧', risky: '⚠️', infra: '🏗️' };
+            const title = `${emoji[parsed.classification] || '❓'} ${run.name} failure: ${(parsed.root_cause || '').substring(0, 60)}`;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'ci-failure', per_page: 10,
+            });
+            if (issues.find(i => i.title.includes(run.head_sha.substring(0, 7)))) return;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title,
+              body: `| Field | Value |\n|---|---|\n| Workflow | ${run.name} |\n| Branch | \`${run.head_branch}\` |\n| Commit | \`${run.head_sha.substring(0,7)}\` |\n| Classification | ${parsed.classification} |\n| Confidence | ${parsed.confidence || '?'} |\n| Run | [Logs](${run.html_url}) |\n\n### Root Cause\n${parsed.root_cause}\n\n### Fix\n${parsed.fix || 'Manual investigation required'}`,
+              labels: ['bug', 'ci-failure'],
+            });

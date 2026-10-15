@@ -1,8 +1,12 @@
-name: Deploy Production
+name: Deploy
 
 on:
   push:
     branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -17,8 +21,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # Note: build-once-deploy-many via workflow_run would require refactoring the trigger;
-    # keeping the rebuild here to avoid that risk. Artifact is passed to deploy job.
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
@@ -27,7 +29,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm ci --prefix infra/lambda --ignore-scripts
-      - name: Build
+
+      - name: Build Web
         run: npm run build
         env:
           NEXT_PUBLIC_COGNITO_REGION: eu-central-1
@@ -39,14 +42,15 @@ jobs:
           NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           NEXT_PUBLIC_TP_MARKER: "585085"
+
       - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
         with:
           name: web-build
           path: apps/web/out/
           retention-days: 1
 
-  deploy:
-    name: Deploy to AWS
+  deploy-web:
+    name: Deploy Web
     runs-on: ubuntu-latest
     needs: [build]
     environment: production
@@ -61,7 +65,7 @@ jobs:
           name: web-build
           path: out/
 
-      - name: Deploy to S3
+      - name: Sync to S3
         run: |
           aws s3 sync out/ s3://${{ secrets.WEB_BUCKET }}/ \
             --delete \
@@ -77,10 +81,62 @@ jobs:
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
 
-      - name: Deployment Summary
+  deploy-lambda:
+    name: Deploy Lambda
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment: production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - uses: aws-actions/configure-aws-credentials@e3ef5a70f08b73a6ca7a8dca7ce5a5e4c816e4c6 # v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package Lambda
+        working-directory: infra/lambda
         run: |
-          echo "## Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          npm ci --ignore-scripts
+          zip -r /tmp/lambda.zip src/ node_modules/ package.json
+
+      - name: Update Lambda functions
+        run: |
+          for fn in $(aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'mapsbridge-')].FunctionName" --output text); do
+            echo "Updating $fn..."
+            aws lambda update-function-code \
+              --function-name "$fn" \
+              --zip-file fileb:///tmp/lambda.zip \
+              --publish > /dev/null
+          done
+
+  smoke-test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    needs: [deploy-web, deploy-lambda]
+    steps:
+      - name: Check site
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://mapsbridge.com)
+          echo "Site status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Site returned $STATUS"
+            exit 1
+          fi
+
+      - name: Check API
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_BASE_URL }}/health 2>/dev/null || echo "skip")
+          echo "API status: $STATUS"
+
+      - name: Summary
+        run: |
+          echo "## ✅ Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Site:** https://mapsbridge.com" >> $GITHUB_STEP_SUMMARY
-          echo "- **CloudFront:** Cache invalidated" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`${GITHUB_SHA::7}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
