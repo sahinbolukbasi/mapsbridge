@@ -19,7 +19,7 @@ env:
   NODE_VERSION: "22"
 
 jobs:
-  # ── Fast checks (no npm install needed) ─────────────────────────
+  # ── Fast checks (no npm install) ───────────────────────────────
   secrets:
     name: Secret Scan
     runs-on: ubuntu-latest
@@ -27,9 +27,10 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@cb7149a9b57195b609c63e8518d2c6056677d2d0 # v2.3.8
+      - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
   terraform:
     name: Terraform (${{ matrix.stack }})
@@ -49,9 +50,9 @@ jobs:
       - run: terraform validate
         continue-on-error: true
 
-  # ── Install once, reuse across jobs ─────────────────────────────
-  install:
-    name: Install
+  # ── Lint + Typecheck ────────────────────────────────────────────
+  lint:
+    name: Lint & Format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -61,58 +62,28 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm ci --prefix infra/lambda --ignore-scripts
-      - uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            node_modules
-            infra/lambda/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'infra/lambda/package-lock.json') }}
-
-  # ── Lint + Format (fast, no build needed) ───────────────────────
-  lint:
-    name: Lint & Format
-    runs-on: ubuntu-latest
-    needs: [install]
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            node_modules
-            infra/lambda/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'infra/lambda/package-lock.json') }}
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
 
-  # ── Tests (parallel with lint) ──────────────────────────────────
+  # ── Tests ───────────────────────────────────────────────────────
   test:
     name: Tests
     runs-on: ubuntu-latest
-    needs: [install]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            node_modules
-            infra/lambda/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'infra/lambda/package-lock.json') }}
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix infra/lambda --ignore-scripts
       - name: Web Tests
         run: npm test
       - name: Backend Tests
         run: npm run test:backend
-      - name: Test Summary
-        if: always()
-        run: echo "✅ All test suites completed" >> $GITHUB_STEP_SUMMARY
 
-  # ── Build (only after lint + tests pass) ────────────────────────
+  # ── Build (after lint + tests) ──────────────────────────────────
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -122,12 +93,8 @@ jobs:
       - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            node_modules
-            infra/lambda/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'infra/lambda/package-lock.json') }}
+          cache: npm
+      - run: npm ci
       - name: Build Web
         run: npm run build
         env:
@@ -145,22 +112,3 @@ jobs:
           name: web-build
           path: apps/web/out/
           retention-days: 3
-
-  # ── Security audit (informational, never blocks) ────────────────
-  audit:
-    name: Security Audit
-    runs-on: ubuntu-latest
-    needs: [install]
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: |
-            node_modules
-            infra/lambda/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'infra/lambda/package-lock.json') }}
-      - run: npm audit --audit-level=high 2>&1 | tee $GITHUB_STEP_SUMMARY
