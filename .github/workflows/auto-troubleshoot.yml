@@ -1,0 +1,270 @@
+name: Auto Troubleshoot
+
+on:
+  workflow_run:
+    workflows: [Deploy, CI]
+    types: [completed]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+jobs:
+  diagnose:
+    name: Diagnose & Suggest Fixes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Analyze Failed Workflow
+        id: analysis
+        run: |
+          RUN_ID=${{ github.event.workflow_run.id }}
+          WORKFLOW="${{ github.event.workflow_run.name }}"
+          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+
+          if [ "$CONCLUSION" != "failure" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "status=failure" >> $GITHUB_OUTPUT
+          echo "workflow=$WORKFLOW" >> $GITHUB_OUTPUT
+
+          # Get job failures
+          FAILURES=$(gh run view $RUN_ID --json jobs --jq '.jobs[] | select(.conclusion=="failure") | .name' 2>/dev/null || echo "")
+          echo "failures=$FAILURES" >> $GITHUB_OUTPUT
+
+          # Common issues detection
+          LOGS=$(gh run view $RUN_ID --log 2>/dev/null | tail -500 || echo "")
+
+          if echo "$LOGS" | grep -q "ENOENT\|no such file"; then
+            echo "issue=missing-file" >> $GITHUB_OUTPUT
+          elif echo "$LOGS" | grep -q "Permission denied"; then
+            echo "issue=permission-denied" >> $GITHUB_OUTPUT
+          elif echo "$LOGS" | grep -q "npm error\|ERR!"; then
+            echo "issue=npm-error" >> $GITHUB_OUTPUT
+          elif echo "$LOGS" | grep -q "unable to resolve action"; then
+            echo "issue=action-error" >> $GITHUB_OUTPUT
+          elif echo "$LOGS" | grep -q "ECONNREFUSED\|ETIMEDOUT"; then
+            echo "issue=network-error" >> $GITHUB_OUTPUT
+          elif echo "$LOGS" | grep -q "terraform error\|Error:"; then
+            echo "issue=terraform-error" >> $GITHUB_OUTPUT
+          elif echo "$LOGS" | grep -q "test failed\|assertion"; then
+            echo "issue=test-failure" >> $GITHUB_OUTPUT
+          else
+            echo "issue=unknown" >> $GITHUB_OUTPUT
+          fi
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Fix Suggestions
+        if: steps.analysis.outputs.status == 'failure'
+        id: suggestions
+        run: |
+          ISSUE="${{ steps.analysis.outputs.issue }}"
+          SUGGESTIONS=""
+
+          case "$ISSUE" in
+            missing-file)
+              SUGGESTIONS="**Missing Files Detected**
+              \n• Check file paths in workflow
+              \n• Verify artifact uploads completed
+              \n• Run: git ls-files | grep missing_file"
+              ;;
+            permission-denied)
+              SUGGESTIONS="**Permission Issues**
+              \n• Check AWS credentials/role
+              \n• Verify GitHub token permissions
+              \n• Check file permissions in repo"
+              ;;
+            npm-error)
+              SUGGESTIONS="**NPM Issues**
+              \n• Run: npm ci --prefer-offline
+              \n• Clear cache: npm cache clean --force
+              \n• Regenerate lock: npm install --package-lock-only"
+              ;;
+            action-error)
+              SUGGESTIONS="**GitHub Action Issue**
+              \n• Verify action version/tag
+              \n• Check action exists in registry
+              \n• Update action to latest version"
+              ;;
+            network-error)
+              SUGGESTIONS="**Network Connectivity Issue**
+              \n• Check API/external service status
+              \n• Verify firewall/VPN rules
+              \n• Check GitHub Actions network access"
+              ;;
+            terraform-error)
+              SUGGESTIONS="**Terraform Issues**
+              \n• Run: terraform validate locally
+              \n• Check backend configuration
+              \n• Verify AWS credentials
+              \n• Review terraform logs"
+              ;;
+            test-failure)
+              SUGGESTIONS="**Test Failures**
+              \n• Review test output
+              \n• Run failing tests locally
+              \n• Check for race conditions
+              \n• Verify test data/mocks"
+              ;;
+            *)
+              SUGGESTIONS="**Unknown Issue**
+              \n• Review full workflow logs
+              \n• Check recent code changes
+              \n• Run workflow locally with act"
+              ;;
+          esac
+
+          echo "suggestions<<EOF" >> $GITHUB_OUTPUT
+          echo "$SUGGESTIONS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Diagnostic Issue
+        if: steps.analysis.outputs.status == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflow = '${{ steps.analysis.outputs.workflow }}';
+            const issue = '${{ steps.analysis.outputs.issue }}';
+            const suggestions = `${{ steps.analysis.outputs.suggestions }}`;
+            const runId = ${{ github.event.workflow_run.id }};
+
+            const title = `🔍 ${workflow} Failure: ${issue}`;
+            const body = `## Workflow Failure Analysis
+
+            **Workflow:** ${workflow}
+            **Run ID:** ${runId}
+            **Issue Type:** ${issue}
+            **Time:** ${new Date().toISOString()}
+
+            ### Diagnostics
+            ${suggestions}
+
+            ### Next Steps
+            1. Review the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${runId})
+            2. Check the error logs above
+            3. Try suggested fixes
+            4. If still failing, check:
+               - Recent commits
+               - External service status
+               - GitHub Actions status page
+
+            ### Debug Commands
+            \`\`\`bash
+            # Clone and test locally
+            git clone https://github.com/${{ github.repository }}.git
+            cd ${{ github.event.repository.name }}
+
+            # For CI issues
+            npm ci
+            npm run typecheck
+            npm run lint
+            npm test
+
+            # For Deploy issues
+            cd infra/terraform
+            terraform validate
+
+            # For Mobile issues
+            cd apps/mobile
+            npm ci
+            npx expo doctor
+            \`\`\`
+
+            ---
+            *This issue was automatically created by the Auto Troubleshoot workflow.*
+            `;
+
+            // Check if similar issue exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['auto-diagnosed', 'troubleshoot']
+            });
+
+            const similar = issues.data.find(i => i.title.includes(issue));
+            if (similar) {
+              console.log(`Similar issue already exists: #${similar.number}`);
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: similar.number,
+                body: body
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['auto-diagnosed', 'troubleshoot', 'urgent']
+              });
+            }
+
+      - name: Notify Slack - Failure
+        if: steps.analysis.outputs.status == 'failure'
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🔍 Workflow Failure Detected"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow:*\n${{ steps.analysis.outputs.workflow }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Issue:*\n${{ steps.analysis.outputs.issue }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Auto-Diagnosis:*\n${{ steps.analysis.outputs.status == 'failure' && 'Diagnostic issue created' || 'No issues found' }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Run"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Issues"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/issues?q=label%3Aauto-diagnosed"
+                    }
+                  ]
+                }
+              ]
+            }

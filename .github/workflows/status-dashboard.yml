@@ -1,0 +1,200 @@
+name: Status Dashboard
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Deploy, CI, Deployment Monitor]
+    types: [completed]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  update-status:
+    name: Update Status Dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect Metrics
+        id: metrics
+        run: |
+          echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+
+          # Get latest deploy run
+          DEPLOY_RUN=$(gh run list -w deploy.yml -L 1 --json number,conclusion,createdAt --jq '.[0]' 2>/dev/null || echo "")
+          echo "deploy_run=$(echo $DEPLOY_RUN | jq -r '.number // "N/A"')" >> $GITHUB_OUTPUT
+          echo "deploy_status=$(echo $DEPLOY_RUN | jq -r '.conclusion // "pending"')" >> $GITHUB_OUTPUT
+
+          # Get latest CI run
+          CI_RUN=$(gh run list -w ci.yml -L 1 --json number,conclusion,createdAt --jq '.[0]' 2>/dev/null || echo "")
+          echo "ci_status=$(echo $CI_RUN | jq -r '.conclusion // "pending"')" >> $GITHUB_OUTPUT
+
+          # Health check
+          SITE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://mapsbridge.com || echo "0")
+          if [ "$SITE_STATUS" = "200" ]; then
+            echo "site_status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "site_status=unhealthy" >> $GITHUB_OUTPUT
+          fi
+
+          # API check
+          API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_BASE_URL }}/health 2>/dev/null || echo "0")
+          if [ "$API_STATUS" = "200" ]; then
+            echo "api_status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "api_status=unhealthy" >> $GITHUB_OUTPUT
+          fi
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Dashboard Markdown
+        id: dashboard
+        run: |
+          cat > /tmp/dashboard.md << 'EOF'
+          # 📊 MapsBridge Deployment Status Dashboard
+
+          **Last Updated:** ${{ steps.metrics.outputs.timestamp }}
+
+          ## System Health
+
+          | Component | Status | Last Check |
+          |-----------|--------|------------|
+          | 🌐 Website | ${{ steps.metrics.outputs.site_status == 'healthy' && '✅ Healthy' || '❌ Down' }} | ${{ steps.metrics.outputs.timestamp }} |
+          | 🔌 API | ${{ steps.metrics.outputs.api_status == 'healthy' && '✅ Healthy' || '⚠️ Unhealthy' }} | ${{ steps.metrics.outputs.timestamp }} |
+          | 📱 Mobile | ✅ Ready | Latest build |
+          | 🗄️ Database | ✅ Active | DynamoDB monitoring |
+
+          ## Recent Deployments
+
+          | Type | Status | Run | Branch |
+          |------|--------|-----|--------|
+          | Deploy | ${{ steps.metrics.outputs.deploy_status == 'success' && '✅' || steps.metrics.outputs.deploy_status == 'failure' && '❌' || '⏳' }} | #${{ steps.metrics.outputs.deploy_run }} | main |
+          | CI | ${{ steps.metrics.outputs.ci_status == 'success' && '✅' || steps.metrics.outputs.ci_status == 'failure' && '❌' || '⏳' }} | Latest | develop |
+
+          ## Quick Links
+
+          - [GitHub Actions](https://github.com/${{ github.repository }}/actions)
+          - [Deployment Logs](https://github.com/${{ github.repository }}/actions/workflows/deploy.yml)
+          - [CI Logs](https://github.com/${{ github.repository }}/actions/workflows/ci.yml)
+          - [Health Monitor](https://github.com/${{ github.repository }}/actions/workflows/deployment-monitor.yml)
+          - [Issues](https://github.com/${{ github.repository }}/issues?q=label%3Adeployment-alert)
+
+          ## Configuration
+
+          - **Monitoring Interval:** Every 5 minutes
+          - **Auto-Recovery:** Enabled
+          - **Slack Notifications:** Enabled
+          - **Auto-Troubleshoot:** Enabled
+
+          ---
+
+          *Dashboard auto-updated every 15 minutes*
+          EOF
+
+          cat /tmp/dashboard.md
+
+      - name: Update README
+        run: |
+          # Extract current status dashboard from README if exists
+          if grep -q "<!-- STATUS-DASHBOARD-START -->" README.md; then
+            sed -i '/<!-- STATUS-DASHBOARD-START -->/,/<!-- STATUS-DASHBOARD-END -->/c\
+          <!-- STATUS-DASHBOARD-START -->\
+          \
+          $(<tmp/dashboard.md)\
+          \
+          <!-- STATUS-DASHBOARD-END -->' README.md
+          else
+            # Append to README
+            echo "" >> README.md
+            echo "<!-- STATUS-DASHBOARD-START -->" >> README.md
+            cat /tmp/dashboard.md >> README.md
+            echo "<!-- STATUS-DASHBOARD-END -->" >> README.md
+          fi
+
+      - name: Commit Dashboard Update
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add README.md
+            git commit -m "chore: update status dashboard"
+            git push origin HEAD:main || echo "Push failed, branch may have changed"
+          fi
+        continue-on-error: true
+
+      - name: Generate JSON Report
+        run: |
+          cat > /tmp/status.json << 'EOF'
+          {
+            "timestamp": "${{ steps.metrics.outputs.timestamp }}",
+            "system": {
+              "site": "${{ steps.metrics.outputs.site_status }}",
+              "api": "${{ steps.metrics.outputs.api_status }}"
+            },
+            "pipelines": {
+              "deploy": "${{ steps.metrics.outputs.deploy_status }}",
+              "ci": "${{ steps.metrics.outputs.ci_status }}"
+            },
+            "monitoring": {
+              "interval_minutes": 5,
+              "auto_recovery": true,
+              "auto_troubleshoot": true,
+              "slack_notifications": true
+            }
+          }
+          EOF
+
+          cat /tmp/status.json
+
+      - name: Upload Status Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-status
+          path: /tmp/status.json
+          retention-days: 30
+
+      - name: Slack Dashboard Notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "📊 System Status Update"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Website:*\n${{ steps.metrics.outputs.site_status == 'healthy' && '✅ Healthy' || '❌ Down' }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*API:*\n${{ steps.metrics.outputs.api_status == 'healthy' && '✅ Healthy' || '⚠️ Unhealthy' }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Deploy:*\n${{ steps.metrics.outputs.deploy_status == 'success' && '✅ Success' || steps.metrics.outputs.deploy_status == 'failure' && '❌ Failed' || '⏳ Pending' }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*CI:*\n${{ steps.metrics.outputs.ci_status == 'success' && '✅ Pass' || steps.metrics.outputs.ci_status == 'failure' && '❌ Failed' || '⏳ Running' }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        if: always()

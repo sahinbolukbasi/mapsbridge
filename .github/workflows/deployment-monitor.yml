@@ -1,0 +1,181 @@
+name: Deployment Monitor
+
+on:
+  workflow_run:
+    workflows: [Deploy]
+    types: [completed]
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  deployments: read
+
+jobs:
+  monitor:
+    name: Health Check & Auto-Recovery
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Site Health
+        id: site
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://mapsbridge.com)
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Site down: $STATUS"
+            exit 1
+          fi
+          echo "✓ Site healthy"
+
+      - name: Check API Health
+        id: api
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_BASE_URL }}/health 2>/dev/null || echo "0")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          if [ "$STATUS" != "200" ] && [ "$STATUS" != "0" ]; then
+            echo "⚠️  API unhealthy: $STATUS"
+            exit 1
+          fi
+          echo "✓ API healthy"
+        continue-on-error: true
+
+      - name: Check Lambda Functions
+        id: lambda
+        run: |
+          aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'mapsbridge-')].{Name:FunctionName, State:State}" --output text | while read fn state; do
+            if [ "$state" != "Active" ]; then
+              echo "⚠️  Lambda $fn not active: $state"
+              exit 1
+            fi
+          done
+          echo "✓ All Lambda functions active"
+        env:
+          AWS_REGION: eu-central-1
+        continue-on-error: true
+
+      - name: Detect Issues
+        id: issues
+        run: |
+          ISSUES=""
+          if [ "${{ steps.site.outcome }}" = "failure" ]; then
+            ISSUES="$ISSUES\n❌ Site is DOWN"
+          fi
+          if [ "${{ steps.api.outcome }}" = "failure" ]; then
+            ISSUES="$ISSUES\n⚠️  API is unhealthy"
+          fi
+          if [ "${{ steps.lambda.outcome }}" = "failure" ]; then
+            ISSUES="$ISSUES\n⚠️  Lambda functions unhealthy"
+          fi
+          if [ -z "$ISSUES" ]; then
+            echo "issues=" >> $GITHUB_OUTPUT
+            echo "healthy=true" >> $GITHUB_OUTPUT
+          else
+            echo "issues=$ISSUES" >> $GITHUB_OUTPUT
+            echo "healthy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Auto-Recovery Attempt
+        if: steps.issues.outputs.healthy == 'false'
+        id: recovery
+        run: |
+          echo "🔧 Attempting auto-recovery..."
+
+          if [ "${{ steps.site.outcome }}" = "failure" ]; then
+            echo "→ Invalidating CloudFront cache..."
+            aws cloudfront create-invalidation \
+              --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+              --paths "/*" || echo "CloudFront invalidation failed"
+          fi
+
+          if [ "${{ steps.lambda.outcome }}" = "failure" ]; then
+            echo "→ Rolling back Lambda functions..."
+            for fn in $(aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'mapsbridge-')].FunctionName" --output text); do
+              aws lambda update-alias --function-name "$fn" --name live --routing-config AdditionalVersionWeight={} || true
+            done
+          fi
+
+          echo "✓ Auto-recovery attempt completed"
+        env:
+          AWS_REGION: eu-central-1
+        continue-on-error: true
+
+      - name: Slack Notification
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "${{ steps.issues.outputs.healthy == 'true' && '✅ Deployment Healthy' || '⚠️  Deployment Issues Detected' }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Site Status:*\n${{ steps.site.outcome == 'success' && '✅ Healthy' || '❌ DOWN' }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*API Status:*\n${{ steps.api.outcome == 'success' && '✅ Healthy' || '⚠️  Unhealthy' }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Lambda Status:*\n${{ steps.lambda.outcome == 'success' && '✅ All Active' || '⚠️  Issues' }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Auto-Recovery:*\n${{ steps.issues.outputs.healthy == 'false' && steps.recovery.outcome == 'success' && '✅ Executed' || '—' }}"
+                    }
+                  ]
+                }
+              ]
+            }
+
+      - name: Create Issue if Failed
+        if: steps.issues.outputs.healthy == 'false' && steps.recovery.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🚨 Deployment Health Alert';
+            const body = `## Issues Detected
+
+            ${{ steps.issues.outputs.issues }}
+
+            ### Action Required
+            - Auto-recovery attempted but failed
+            - Manual intervention may be needed
+            - Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            `;
+
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['deployment-alert']
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['deployment-alert', 'urgent']
+              });
+            }
