@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 jobs:
   promote:
@@ -42,4 +43,6 @@ jobs:
               --body "Automated promotion — CI passed on develop." \
               | grep -oP '\d+$')
           fi
-          gh pr merge "$PR" --auto --merge
+          gh pr merge "$PR" --merge --admin
+          echo "Triggering deploy..."
+          gh workflow run deploy.yml --ref main
