@@ -95,6 +95,10 @@ function harness(options = {}) {
     },
     "node:crypto": require("node:crypto"),
     "node:async_hooks": require("node:async_hooks"),
+    jose: {
+      createRemoteJWKSet: () => () => ({}),
+      jwtVerify: async () => ({ payload: {}, protectedHeader: {} }),
+    },
   };
   const cache = new Map();
   function load(file) {

@@ -218,6 +218,10 @@ function harness(options = {}) {
         }
       },
     },
+    jose: {
+      createRemoteJWKSet: () => () => ({}),
+      jwtVerify: async () => ({ payload: {}, protectedHeader: {} }),
+    },
   };
 
   function load(relative) {
@@ -237,6 +241,7 @@ function harness(options = {}) {
         module,
         exports: module.exports,
         Buffer,
+        URL,
         AbortSignal,
         process: { env: { ...env, ...options.env } },
         crypto: require("node:crypto").webcrypto,

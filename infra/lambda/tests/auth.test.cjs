@@ -188,6 +188,10 @@ function harness(options = {}) {
         throw new Error("Unexpected Redis access");
       },
     },
+    jose: {
+      createRemoteJWKSet: () => () => ({}),
+      jwtVerify: async () => ({ payload: {}, protectedHeader: {} }),
+    },
   };
   function load(relative) {
     const filename = path.resolve(sourceRoot, relative);
@@ -206,6 +210,7 @@ function harness(options = {}) {
         module,
         exports: module.exports,
         Buffer,
+        URL,
         AbortSignal,
         process: { env: { ...env, ...options.env } },
         crypto: require("node:crypto").webcrypto,

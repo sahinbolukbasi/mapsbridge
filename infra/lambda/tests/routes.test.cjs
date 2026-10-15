@@ -181,6 +181,10 @@ function harness(options = {}) {
         throw new Error("Unexpected Redis access");
       },
     },
+    jose: {
+      createRemoteJWKSet: () => () => ({}),
+      jwtVerify: async () => ({ payload: {}, protectedHeader: {} }),
+    },
   };
   function load(relative) {
     const filename = path.resolve(sourceRoot, relative);
@@ -199,6 +203,7 @@ function harness(options = {}) {
         module,
         exports: module.exports,
         Buffer,
+        URL,
         AbortSignal,
         process: { env: { ...env, ...options.env } },
         crypto: require("node:crypto").webcrypto,
@@ -324,9 +329,13 @@ test("POST /routes/{id}/share creates a share record owned by the verified user"
 
 test("POST /routes/telemetry logs events for the authenticated user", async () => {
   const h = harness();
+  const now = Date.now();
   const result = await h.load("routes/index.ts").handler(
     event("POST", "/routes/telemetry", token(), {
-      events: [{ type: "click" }, { type: "view" }],
+      events: [
+        { type: "click", ts: now },
+        { type: "view", ts: now },
+      ],
     }),
   );
   assert.equal(result.statusCode, 200);
@@ -339,15 +348,10 @@ test("POST /routes/telemetry logs events for the authenticated user", async () =
   assert.equal(put.input.Item.count, 2);
 });
 
-test("POST /routes/telemetry accepts anonymous events when no token is provided", async () => {
+test("POST /routes/telemetry rejects anonymous events when no token is provided", async () => {
   const h = harness();
   const result = await h
     .load("routes/index.ts")
     .handler(event("POST", "/routes/telemetry", null, { events: [{ type: "pageview" }] }));
-  assert.equal(result.statusCode, 200);
-  const body = JSON.parse(result.body);
-  assert.equal(body.received, 1);
-  const put = h.calls.data.find((c) => c.name === "PutItemCommand");
-  assert.ok(put);
-  assert.equal(put.input.Item.userId, "ANONYMOUS");
+  assert.equal(result.statusCode, 401);
 });
