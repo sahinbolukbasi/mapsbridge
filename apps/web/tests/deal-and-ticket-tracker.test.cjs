@@ -142,7 +142,7 @@ test("Hotel Deal Finder Agent analyzes budget lodging when requested", async () 
 test("Deal models and system capacity contracts conform to requirements", () => {
   const fullPath = path.resolve(__dirname, "../app/lib/tracker/deal-models.ts");
   const code = fs.readFileSync(fullPath, "utf8");
-  assert.ok(code.includes("export type TrackerType = 'flight' | 'hotel'"));
+  assert.ok(code.includes('export type TrackerType = "flight" | "hotel"'));
   assert.ok(code.includes("export interface TrackerJob"));
   assert.ok(code.includes("supportedConcurrentUsers: number"));
 });
