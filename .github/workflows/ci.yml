@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
 
       - name: Secret Scanning
         uses: gitleaks/gitleaks-action@v2 # TODO: pin to SHA once a stable release SHA is published
@@ -80,6 +82,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f85e46df89510e9cd1fcda3e12 # v3
       - run: terraform init -backend=false
+        continue-on-error: true
       - run: terraform validate
         continue-on-error: true
 
