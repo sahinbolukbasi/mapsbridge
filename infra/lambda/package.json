@@ -5,6 +5,7 @@
   "description": "Shared dependencies for MapsBridge Lambda functions",
   "dependencies": {
     "@aws-sdk/client-apigatewaymanagementapi": "^3.1127.0",
+    "jose": "^5.9.0",
     "@aws-sdk/client-bedrock": "^3.1151.0",
     "@aws-sdk/client-bedrock-agent": "^3.1150.0",
     "@aws-sdk/client-bedrock-agentcore-control": "^3.1151.0",

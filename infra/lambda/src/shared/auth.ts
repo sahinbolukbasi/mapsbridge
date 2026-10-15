@@ -1,3 +1,9 @@
+import { createRemoteJWKSet, jwtVerify } from "jose";
+
+// Cached at module scope — reused across warm Lambda invocations
+const googleJWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
+const appleJWKS  = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
+
 export interface VerifiedUser {
   sub: string;
   originalSub?: string;
@@ -89,6 +95,18 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
   const isApple = rawIss.includes("appleid.apple.com");
 
   if (isGoogle || isApple) {
+    // Cryptographically verify the signature before trusting any claim
+    const jwks = isGoogle ? googleJWKS : appleJWKS;
+    try {
+      const verifyOpts: { issuer: string; audience?: string } = { issuer: rawIss };
+      if (isGoogle && process.env.GOOGLE_CLIENT_ID) {
+        verifyOpts.audience = process.env.GOOGLE_CLIENT_ID;
+      }
+      await jwtVerify(token, jwks, verifyOpts);
+    } catch {
+      return null;
+    }
+
     if (typeof claims.email === "string" && claims.email.includes("@")) {
       const cleanEmail = claims.email.trim().toLowerCase();
       const socialEmailVerified = claims.email_verified === true || claims.email_verified === "true";

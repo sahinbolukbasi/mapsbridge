@@ -36,7 +36,7 @@ export interface ApiResponse {
 const CORS_HEADERS: Record<string, string> = {
   "content-type": "application/json",
   "cache-control": "no-store",
-  "access-control-allow-origin": "*",
+  "access-control-allow-origin": process.env.ALLOWED_ORIGIN || "*",
   "access-control-allow-headers": "authorization,content-type,idempotency-key,x-api-key",
   "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
 };
