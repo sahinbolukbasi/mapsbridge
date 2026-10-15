@@ -355,17 +355,36 @@ async function handlePresignUpload(event: ApiGatewayEvent) {
 // ─── Interaction Telemetry Logger (Behavioral Analytics) ───────────────────
 async function handleTelemetry(event: ApiGatewayEvent) {
   try {
+    // Require authentication — anonymous writes are not accepted
+    const token = extractBearerToken(event);
+    if (!token) return unauthorized();
+    const userId = await verifiedUserId(token);
+    if (!userId) return unauthorized();
+
+    // Payload size guard (raw body must not exceed 32 KB)
+    const rawBody = event.body || "";
+    if (rawBody.length > 32768) return badRequest("Telemetry payload too large.");
+
     const body = parseBody<{ events?: any[] }>(event);
     if (!body?.events || !Array.isArray(body.events) || body.events.length === 0) {
       return ok({ received: 0 });
     }
 
-    const userId = (event as any).verifiedUser?.sub || "ANONYMOUS";
+    // Size limit: accept at most 10 events per request
+    if (body.events.length > 10) return badRequest("Too many events; maximum is 10 per request.");
+
+    // Schema validation: each event must have type (string ≤50) and ts (number)
+    for (const ev of body.events) {
+      if (!ev || typeof ev !== "object") return badRequest("Each event must be an object.");
+      if (typeof ev.type !== "string" || ev.type.length === 0 || ev.type.length > 50) return badRequest("Each event must have a valid 'type' string (max 50 chars).");
+      if (typeof ev.ts !== "number" || !Number.isFinite(ev.ts)) return badRequest("Each event must have a valid numeric 'ts' timestamp.");
+    }
+
     const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
     const { marshall } = await import("@aws-sdk/util-dynamodb");
     const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-    const batch = body.events.slice(-30);
+    const batch = body.events.slice(0, 10);
     const now = new Date().toISOString();
     const batchId = crypto.randomUUID().slice(0, 8);
 

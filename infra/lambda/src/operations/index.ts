@@ -1,6 +1,7 @@
 import { getVerifiedUser } from "../shared/auth";
 import { Router } from "../shared/router";
 import { ok, created, unauthorized, jsonResponse, extractBearerToken, type ApiGatewayEvent } from "../shared/http";
+import type { AuthorizedEvent } from "../shared/types";
 import { AdminError, bodyOf, text, get, scan, commit } from "../admin/management";
 const router = new Router();
 const safeTicket = (r: any) => ({ id: r.id, subject: r.subject, category: r.category, status: r.status, createdAt: r.createdAt, updatedAt: r.updatedAt, messages: r.messages, version: r.version || 0 });
@@ -12,12 +13,12 @@ router.add("GET /system/status", async () => {
   return ok({ maintenanceMode: !!config?.maintenanceMode, maintenanceMessage: config?.maintenanceMessage || "", routeCreationEnabled: config?.routeCreationEnabled !== false, sharesEnabled: config?.sharesEnabled !== false, announcements });
 });
 router.add("GET /support/tickets", async e => {
-  const userId = (e as any).verifiedUser.sub;
+  const userId = (e as AuthorizedEvent).verifiedUser.sub;
   const rows = await scan("begins_with(PK, :pk) AND userId = :user", { ":pk": "TICKET#", ":user": userId });
   return ok({ tickets: rows.map(safeTicket).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
 });
 router.add("POST /support/tickets", async e => {
-  const userId = (e as any).verifiedUser.sub; const b = bodyOf(e);
+  const userId = (e as AuthorizedEvent).verifiedUser.sub; const b = bodyOf(e);
   const rows = await scan("begins_with(PK, :pk) AND userId = :user", { ":pk": "TICKET#", ":user": userId });
   if (rows.filter(r => ["open", "in_progress"].includes(r.status)).length >= 10) throw new AdminError(429, "En fazla 10 açık destek talebiniz olabilir.");
   if (!["account", "payment", "route", "other"].includes(b.category)) throw new AdminError(400, "Kategori seçin.");
@@ -28,7 +29,7 @@ router.add("POST /support/tickets", async e => {
   return created({ ticket: safeTicket(ticket) });
 });
 router.add("POST /support/tickets/{id}/reply", async e => {
-  const userId = (e as any).verifiedUser.sub; const b = bodyOf(e); const previous = await get(`TICKET#${e.pathParameters!.id}`);
+  const userId = (e as AuthorizedEvent).verifiedUser.sub; const b = bodyOf(e); const previous = await get(`TICKET#${e.pathParameters!.id}`);
   if (!previous || previous.userId !== userId) throw new AdminError(404, "Talep bulunamadı.");
   if (previous.status === "closed") throw new AdminError(409, "Kapatılmış talep için yeni bir talep oluşturun.");
   if ((previous.version || 0) !== b.version) throw new AdminError(409, "Talep değişti; yenileyin.");
@@ -51,14 +52,14 @@ router.add("GET /tracker/metrics", async () => {
 
 router.add("GET /tracker/jobs", async e => {
   const { listUserTrackerJobs } = await import("./tracker-worker");
-  const userId = (e as any).verifiedUser.sub;
+  const userId = (e as AuthorizedEvent).verifiedUser.sub;
   const jobs = await listUserTrackerJobs(userId);
   return ok({ jobs });
 });
 
 router.add("POST /tracker/jobs", async e => {
   const { createTrackerJob } = await import("./tracker-worker");
-  const user = (e as any).verifiedUser;
+  const user = (e as AuthorizedEvent).verifiedUser;
   const b = bodyOf(e);
   if (!b.type || !["flight", "hotel"].includes(b.type)) throw new AdminError(400, "Geçerli bir takip türü seçin ('flight' veya 'hotel').");
   if (!b.destination?.trim()) throw new AdminError(400, "Hedef şehir veya bölge zorunludur.");
@@ -78,7 +79,7 @@ router.add("POST /tracker/jobs", async e => {
 
 router.add("DELETE /tracker/jobs/{id}", async e => {
   const { deleteTrackerJob } = await import("./tracker-worker");
-  const userId = (e as any).verifiedUser.sub;
+  const userId = (e as AuthorizedEvent).verifiedUser.sub;
   const jobId = e.pathParameters?.id;
   if (!jobId) throw new AdminError(400, "İş kimliği zorunludur.");
   await deleteTrackerJob(userId, jobId);
@@ -87,7 +88,7 @@ router.add("DELETE /tracker/jobs/{id}", async e => {
 
 router.add("POST /tracker/jobs/{id}/check", async e => {
   const { executeTrackerCheck } = await import("./tracker-worker");
-  const userId = (e as any).verifiedUser.sub;
+  const userId = (e as AuthorizedEvent).verifiedUser.sub;
   const jobId = e.pathParameters?.id;
   if (!jobId) throw new AdminError(400, "İş kimliği zorunludur.");
   const updated = await executeTrackerCheck(userId, jobId);
