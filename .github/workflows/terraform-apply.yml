@@ -40,10 +40,11 @@ jobs:
 
       - name: Create Lambda zip placeholders
         run: |
-          mkdir -p infra/terraform/.build/lambdas
-          for name in cognito-custom-message kb-ingest; do
+          mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
+          for name in auth routes chat marketplace ai stripe admin cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
             echo "placeholder" | zip -q infra/terraform/.build/lambdas/${name}.zip -
           done
+          echo "placeholder" | zip -q infra/terraform/.build/layer/shared.zip -
 
       - name: Terraform Init
         working-directory: ${{ env.TF_DIR }}

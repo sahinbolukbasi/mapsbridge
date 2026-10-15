@@ -4,8 +4,6 @@ on:
   workflow_run:
     workflows: [Deploy]
     types: [completed]
-  schedule:
-    - cron: "0 * * * *" # hourly — every 5 min created too much noise
   workflow_dispatch:
 
 permissions:
@@ -15,19 +13,17 @@ permissions:
 
 jobs:
   monitor:
-    name: Health Check & Auto-Recovery
+    name: Health Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - name: Check Site Health
         id: site
-        continue-on-error: true # job must not fail just because site is down
+        continue-on-error: true
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://mapsbridge.com || echo "0")
           echo "status=$STATUS" >> $GITHUB_OUTPUT
           if [ "$STATUS" != "200" ]; then
-            echo "❌ Site down: $STATUS"
+            echo "❌ Site returned: $STATUS"
             exit 1
           fi
           echo "✓ Site healthy ($STATUS)"
@@ -48,108 +44,13 @@ jobs:
           fi
           echo "✓ API healthy ($STATUS)"
 
-      - name: Check Lambda Functions
-        id: lambda
-        continue-on-error: true
-        env:
-          AWS_REGION: eu-central-1
+      - name: Health Summary
         run: |
-          if [ -z "${{ secrets.AWS_DEPLOY_ROLE_ARN }}" ]; then
-            echo "AWS credentials not configured — skipping Lambda check"
-            exit 0
-          fi
-          aws lambda list-functions \
-            --query "Functions[?starts_with(FunctionName, 'mapsbridge-')].{Name:FunctionName, State:State}" \
-            --output text | while read fn state; do
-            if [ "$state" != "Active" ]; then
-              echo "⚠️  Lambda $fn not active: $state"
-              exit 1
-            fi
-          done
-          echo "✓ All Lambda functions active"
-
-      - name: Detect Issues
-        id: issues
-        run: |
-          ISSUES=""
-          [ "${{ steps.site.outcome }}" = "failure" ]   && ISSUES="${ISSUES}\n❌ Site is DOWN"
-          [ "${{ steps.api.outcome }}" = "failure" ]    && ISSUES="${ISSUES}\n⚠️  API is unhealthy"
-          [ "${{ steps.lambda.outcome }}" = "failure" ] && ISSUES="${ISSUES}\n⚠️  Lambda functions unhealthy"
-          if [ -z "$ISSUES" ]; then
-            echo "healthy=true"  >> $GITHUB_OUTPUT
-            echo "issues="       >> $GITHUB_OUTPUT
-          else
-            echo "healthy=false" >> $GITHUB_OUTPUT
-            printf "issues=%s\n" "$ISSUES" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Auto-Recovery Attempt
-        if: steps.issues.outputs.healthy == 'false'
-        id: recovery
-        continue-on-error: true
-        env:
-          AWS_REGION: eu-central-1
-        run: |
-          echo "🔧 Attempting auto-recovery..."
-          if [ "${{ steps.site.outcome }}" = "failure" ] && [ -n "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" ]; then
-            echo "→ Invalidating CloudFront cache..."
-            aws cloudfront create-invalidation \
-              --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
-              --paths "/*" || echo "CloudFront invalidation failed"
-          fi
-          echo "✓ Auto-recovery attempt completed"
-
-      - name: Slack Notification - Issues Detected
-        if: steps.issues.outputs.healthy == 'false'
-        uses: slackapi/slack-github-action@v1.27.0
-        continue-on-error: true
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_ALERTS }}
-        with:
-          payload: |
-            {
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": { "type": "plain_text", "text": "⚠️  Deployment Issues Detected" }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    { "type": "mrkdwn", "text": "*Site:*\n${{ steps.site.outcome == 'success' && '✅ Healthy' || '❌ DOWN' }}" },
-                    { "type": "mrkdwn", "text": "*API:*\n${{ steps.api.outcome == 'success' && '✅ Healthy' || '⚠️  Unhealthy' }}" },
-                    { "type": "mrkdwn", "text": "*Lambda:*\n${{ steps.lambda.outcome == 'success' && '✅ Active' || '⚠️  Issues' }}" },
-                    { "type": "mrkdwn", "text": "*Recovery:*\n${{ steps.recovery.outcome == 'success' && '✅ Executed' || '⏭️ Skipped' }}" }
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": { "type": "plain_text", "text": "View Monitor" },
-                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                    }
-                  ]
-                }
-              ]
-            }
-
-      - name: Create Issue if Failed
-        if: steps.issues.outputs.healthy == 'false'
-        uses: actions/github-script@v7
-        continue-on-error: true
-        with:
-          script: |
-            const title = '🚨 Deployment Health Alert';
-            const body = `## Issues Detected\n\n${{ steps.issues.outputs.issues }}\n\n### Action Required\n- Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner, repo: context.repo.repo,
-              state: 'open', labels: ['deployment-alert']
-            });
-            if (issues.length === 0) {
-              await github.rest.issues.create({
-                owner: context.repo.owner, repo: context.repo.repo,
-                title, body, labels: ['deployment-alert', 'urgent']
-              });
-            }
+          echo "## Health Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Site | ${{ steps.site.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| API | ${{ steps.api.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
