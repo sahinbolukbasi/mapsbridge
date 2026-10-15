@@ -152,7 +152,10 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
               );
               if (acct.Item && unmarshall(acct.Item).suspended === true) return null;
             }
-            const isAdmin = !process.env.ADMIN_GROUP_NAME && role === "admin";
+            const groups: string[] = Array.isArray(claims["cognito:groups"]) ? claims["cognito:groups"] : [];
+            const isAdmin = process.env.ADMIN_GROUP_NAME
+              ? groups.includes(process.env.ADMIN_GROUP_NAME)
+              : role === "admin";
             return {
               sub,
               originalSub: claims.sub,
@@ -238,8 +241,11 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
             if (account.Item && unmarshall(account.Item).suspended === true) return null;
           }
 
-          let isAdmin = !process.env.ADMIN_GROUP_NAME && role === "admin";
-          let staffRole: "admin" | "moderator" | "support" | undefined = isAdmin
+          const groups: string[] = Array.isArray(claims["cognito:groups"]) ? claims["cognito:groups"] : [];
+          const isAdmin = process.env.ADMIN_GROUP_NAME
+            ? groups.includes(process.env.ADMIN_GROUP_NAME)
+            : role === "admin";
+          const staffRole: "admin" | "moderator" | "support" | undefined = isAdmin
             ? "admin"
             : undefined;
 

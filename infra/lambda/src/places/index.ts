@@ -12,7 +12,7 @@
  *   POST /places/batch-discover    — Batch discover multiple cities
  */
 
-import { verifiedUserId } from "../shared/auth";
+import { verifiedUserId, getVerifiedUser } from "../shared/auth";
 import type { ApiGatewayEvent } from "../shared/http";
 import {
   ok,
@@ -52,10 +52,10 @@ async function requireAuth(event: ApiGatewayEvent): Promise<string | null> {
 }
 
 async function requireAdmin(event: ApiGatewayEvent): Promise<boolean> {
-  const userId = await requireAuth(event);
-  if (!userId) return false;
-  const user = await read(`USER#${userId}`, "PROFILE");
-  return user?.role === "admin" || user?.role === "super_admin";
+  const token = extractBearerToken(event);
+  if (!token) return false;
+  const user = await getVerifiedUser(token);
+  return user?.isAdmin === true;
 }
 
 // ─── Discover Places in a City ───────────────────────────────────────────
