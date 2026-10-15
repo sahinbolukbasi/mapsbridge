@@ -214,7 +214,7 @@ jobs:
         if: steps.analysis.outputs.status == 'failure'
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_INCIDENTS }}
           payload: |
             {
               "blocks": [
@@ -222,7 +222,7 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "🔍 Workflow Failure Detected"
+                    "text": "🚨 Workflow Failure - Auto-Diagnostic"
                   }
                 },
                 {
@@ -234,7 +234,7 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Issue:*\n${{ steps.analysis.outputs.issue }}"
+                      "text": "*Issue Type:*\n${{ steps.analysis.outputs.issue }}"
                     }
                   ]
                 },
@@ -242,7 +242,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Auto-Diagnosis:*\n${{ steps.analysis.outputs.status == 'failure' && 'Diagnostic issue created' || 'No issues found' }}"
+                    "text": "${{ steps.analysis.outputs.suggestions }}"
                   }
                 },
                 {
@@ -252,7 +252,7 @@ jobs:
                       "type": "button",
                       "text": {
                         "type": "plain_text",
-                        "text": "View Run"
+                        "text": "View Failure"
                       },
                       "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
                     },
@@ -260,7 +260,7 @@ jobs:
                       "type": "button",
                       "text": {
                         "type": "plain_text",
-                        "text": "View Issues"
+                        "text": "View Diagnostic"
                       },
                       "url": "${{ github.server_url }}/${{ github.repository }}/issues?q=label%3Aauto-diagnosed"
                     }

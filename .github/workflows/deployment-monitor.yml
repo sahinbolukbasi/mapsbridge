@@ -103,11 +103,11 @@ jobs:
           AWS_REGION: eu-central-1
         continue-on-error: true
 
-      - name: Slack Notification
-        if: always()
+      - name: Slack Notification - Healthy
+        if: steps.issues.outputs.healthy == 'true'
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_DEPLOYMENTS }}
           payload: |
             {
               "blocks": [
@@ -115,7 +115,46 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "${{ steps.issues.outputs.healthy == 'true' && '✅ Deployment Healthy' || '⚠️  Deployment Issues Detected' }}"
+                    "text": "✅ All Systems Healthy"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Site:*\n✅ Healthy"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*API:*\n✅ Healthy"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Lambda:*\n✅ Active"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Time:*\n$(date -u +%H:%M:%S)"
+                    }
+                  ]
+                }
+              ]
+            }
+
+      - name: Slack Notification - Issues
+        if: steps.issues.outputs.healthy == 'false'
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_ALERTS }}
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "⚠️  Deployment Issues Detected"
                   }
                 },
                 {
@@ -128,19 +167,27 @@ jobs:
                     {
                       "type": "mrkdwn",
                       "text": "*API Status:*\n${{ steps.api.outcome == 'success' && '✅ Healthy' || '⚠️  Unhealthy' }}"
-                    }
-                  ]
-                },
-                {
-                  "type": "section",
-                  "fields": [
+                    },
                     {
                       "type": "mrkdwn",
                       "text": "*Lambda Status:*\n${{ steps.lambda.outcome == 'success' && '✅ All Active' || '⚠️  Issues' }}"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Auto-Recovery:*\n${{ steps.issues.outputs.healthy == 'false' && steps.recovery.outcome == 'success' && '✅ Executed' || '—' }}"
+                      "text": "*Auto-Recovery:*\n${{ steps.recovery.outcome == 'success' && '✅ Executed' || '❌ Failed' }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Monitor"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                     }
                   ]
                 }

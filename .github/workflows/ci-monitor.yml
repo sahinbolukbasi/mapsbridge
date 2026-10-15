@@ -88,10 +88,11 @@ jobs:
           fi
           cat /tmp/report.md
 
-      - name: Slack Notification - CI Status
+      - name: Slack Notification - CI Success
+        if: github.event.workflow_run.conclusion == 'success'
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_CI }}
           payload: |
             {
               "blocks": [
@@ -99,7 +100,7 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "${{ github.event.workflow_run.conclusion == 'success' && '✅ CI Passed' || '❌ CI Failed' }}"
+                    "text": "✅ CI Passed - Ready to Deploy"
                   }
                 },
                 {
@@ -111,17 +112,74 @@ jobs:
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Status:*\n${{ github.event.workflow_run.conclusion }}"
+                      "text": "*Status:*\n✅ Success"
                     }
                   ]
                 },
                 {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Test Failures:* ${{ steps.test-status.outputs.failed_count }}\n*Auto-Fix:* ${{ steps.test-status.outputs.has_failures == 'true' && 'Applied' || 'N/A' }}"
-                  }
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View CI Logs"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
+                    }
+                  ]
                 }
               ]
             }
-        if: always()
+
+      - name: Slack Notification - CI Failed
+        if: github.event.workflow_run.conclusion == 'failure'
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_CI }}
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ CI Failed"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\ndevelop"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status:*\n❌ Failed"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Test Failures:*\n${{ steps.test-status.outputs.failed_count }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Auto-Fix:*\n${{ steps.test-status.outputs.has_failures == 'true' && '✅ Applied' || '—' }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Logs"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}"
+                    }
+                  ]
+                }
+              ]
+            }
