@@ -35,6 +35,6 @@
     "@types/react": "^19",
     "esbuild": "^0.28.2",
     "leaflet": "^1.9.4",
-    "typescript": "^5"
+    "typescript": "^7"
   }
 }
