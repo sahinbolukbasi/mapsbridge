@@ -201,3 +201,33 @@ variable "foursquare_api_key" {
   sensitive   = true
   description = "Foursquare Places API v3 key for place intelligence pipeline"
 }
+
+variable "rc_secret_api_key_ssm" {
+  type        = string
+  description = "SSM parameter path for RevenueCat secret API key"
+  default     = "/mapsbridge/prod/revenuecat/secret-api-key"
+}
+
+variable "rc_webhook_auth_secret_ssm" {
+  type        = string
+  description = "SSM parameter path for RevenueCat webhook auth secret"
+  default     = "/mapsbridge/prod/revenuecat/webhook-auth-secret"
+}
+
+variable "rc_billing_checkout_url" {
+  type        = string
+  description = "RevenueCat Billing web checkout base URL"
+  default     = ""
+}
+
+variable "billing_enabled" {
+  type        = string
+  description = "Enable billing features (true/false)"
+  default     = "false"
+}
+
+variable "app_origin" {
+  type        = string
+  description = "App origin URL for redirect URLs"
+  default     = "https://mapsbridge.com"
+}

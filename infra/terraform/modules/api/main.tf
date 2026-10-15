@@ -58,6 +58,14 @@ locals {
       GOOGLE_PLACES_API_KEY = var.google_places_api_key
       FOURSQUARE_API_KEY    = var.foursquare_api_key
     })
+
+    revenuecat = merge(local._base, {
+      RC_SECRET_API_KEY     = "secret:${var.rc_secret_api_key_ssm}"
+      RC_WEBHOOK_AUTH_SECRET = "secret:${var.rc_webhook_auth_secret_ssm}"
+      RC_BILLING_CHECKOUT_URL = var.rc_billing_checkout_url
+      BILLING_ENABLED       = var.billing_enabled
+      APP_ORIGIN            = var.app_origin
+    })
   }
 }
 
@@ -309,7 +317,7 @@ resource "aws_lambda_permission" "stripe_sqs" {
   source_arn    = var.stripe_queue_arn
 }
 resource "aws_iam_role_policy" "billing_data" {
-  for_each = toset([for name in ["stripe", "ai", "routes", "admin"] : name if contains(keys(var.lambda_domains), name)])
+  for_each = toset([for name in ["stripe", "revenuecat", "ai", "routes", "admin"] : name if contains(keys(var.lambda_domains), name)])
   name     = "billing-data"
   role     = aws_iam_role.lambda[each.key].id
   policy = jsonencode({
@@ -333,6 +341,23 @@ resource "aws_iam_role_policy" "stripe_secrets" {
     ]
   })
 }
+resource "aws_iam_role_policy" "rc_secrets" {
+  count = contains(keys(var.lambda_domains), "revenuecat") ? 1 : 0
+  name  = "revenuecat-secrets"
+  role  = aws_iam_role.lambda["revenuecat"].id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["ssm:GetParameter"]
+      Resource = [
+        "arn:aws:ssm:${var.aws_region}:*:parameter${var.rc_secret_api_key_ssm}",
+        "arn:aws:ssm:${var.aws_region}:*:parameter${var.rc_webhook_auth_secret_ssm}",
+      ]
+    }]
+  })
+}
+
 resource "aws_iam_role_policy" "ai_model" {
   name = "canonical-ai-model"
   role = aws_iam_role.lambda["ai"].id

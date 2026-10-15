@@ -6,7 +6,7 @@ import { HeaderNav } from "../components/header-nav";
 import { billingService } from "../lib/billing/billing-service";
 import { apiFetch } from "../lib/api-client";
 import { getStoredSession } from "../lib/cognito";
-import { openStripeBillingPortal } from "../lib/billing/stripe-client";
+import { verifyRevenueCatPurchase } from "../lib/billing/revenuecat-client";
 import { BillingCycle } from "../lib/billing/billing-types";
 import {
   SUBSCRIPTION_PLAN_DEFS,
@@ -76,7 +76,7 @@ export default function CheckoutPage() {
     if (params.get("tab") === "plans") setTab("subscription");
     if (params.has("canceled")) setMessage("Ödeme iptal edildi. Kredi eklenmedi.");
 
-    void apiFetch<Catalog>("/stripe/plans", { skipAuth: true })
+    void apiFetch<Catalog>("/revenuecat/plans", { skipAuth: true })
       .then((x) => {
         if (!stopped) setCatalog(x);
       })
@@ -92,23 +92,17 @@ export default function CheckoutPage() {
       if (!stopped) setMessage("Kredi bilgisi alınamadı. Tekrar deneyin.");
     });
 
-    const sessionId = params.get("session_id");
     let timer: ReturnType<typeof setTimeout>;
-    if (params.has("success") && sessionId) {
+    if (params.has("success")) {
       let attempts = 0;
       const check = async () => {
         try {
-          const result = await apiFetch<{ status: string }>(
-            "/stripe/session?session_id=" + encodeURIComponent(sessionId),
-          );
+          // RevenueCat webhook arrives async; poll wallet until credits appear
+          await verifyRevenueCatPurchase().catch(() => null);
+          const updated = await billingService.refreshWallet();
           if (stopped) return;
-          if (result.status === "credited") {
+          if (updated.credits > 0) {
             setMessage("✓ Ödemen doğrulandı, kredilerin hesabına anında eklendi!");
-            await refresh();
-            return;
-          }
-          if (result.status === "expired") {
-            setMessage("Ödeme oturumunun süresi doldu. Yeni bir ödeme başlatabilirsin.");
             return;
           }
           setMessage("Ödemen kontrol ediliyor. Doğrulandığında kredilerin otomatik eklenecek.");
@@ -136,7 +130,7 @@ export default function CheckoutPage() {
       return;
     }
     setBusy(true);
-    setMessage("Güvenli Stripe ödeme sayfası hazırlanıyor…");
+    setMessage("Güvenli ödeme sayfası hazırlanıyor…");
     const result = await billingService.processCheckout({
       mode: product.mode,
       targetId: product.id,
@@ -171,7 +165,7 @@ export default function CheckoutPage() {
         <h1>Kredi &amp; Üyelik Masası</h1>
         <p>
           Yapay zeka asistanı ve harita masası için ihtiyacın olan planı seç. İstediğin zaman iptal
-          et veya paketini yükselt, Stripe ile güvenli ve anında aktif.
+          et veya paketini yükselt, RevenueCat ile güvenli ve anında aktif.
         </p>
 
         {/* ── Kredi Takibi & Cüzdan Özeti ── */}
@@ -402,17 +396,8 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {wallet.subscriptionTier !== "free" && (
-          <button
-            className="billing-manage"
-            onClick={() => void openStripeBillingPortal().catch((e) => setMessage(e.message))}
-          >
-            Aboneliğimi Stripe Üzerinden Yönet
-          </button>
-        )}
-
         <p className="billing-explain">
-          Ödemeler Stripe üzerinden 256-bit SSL ve 3D Secure korumasıyla gerçekleşir. Krediler
+          Ödemeler RevenueCat üzerinden güvenli biçimde gerçekleşir. Krediler
           yalnızca ödeme sunucuda doğrulandıktan sonra anında hesabınıza yüklenir.
         </p>
       </main>

@@ -101,4 +101,24 @@ resource "aws_ssm_parameter" "stripe_webhook_secret" {
   tags  = var.tags
 }
 
+
+# ─── RevenueCat SSM Parameters ────────────────────────────────────────────
+resource "aws_ssm_parameter" "rc_secret_api_key" {
+  name  = "/mapsbridge/${var.environment}/revenuecat/secret-api-key"
+  type  = "SecureString"
+  value = "placeholder-set-via-console"
+  tags  = var.tags
+
+  lifecycle { ignore_changes = [value] }
+}
+
+resource "aws_ssm_parameter" "rc_webhook_auth_secret" {
+  name  = "/mapsbridge/${var.environment}/revenuecat/webhook-auth-secret"
+  type  = "SecureString"
+  value = "placeholder-set-via-console"
+  tags  = var.tags
+
+  lifecycle { ignore_changes = [value] }
+}
+
 data "aws_caller_identity" "current" {}
