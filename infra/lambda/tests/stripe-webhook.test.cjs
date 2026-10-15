@@ -216,7 +216,7 @@ test("OPTIONS preflight returns 200 without touching auth or data", async () => 
   assert.equal(h.calls.length, 0);
 });
 
-test("GET /stripe/plans returns enabled catalog with available products when billing is on", async () => {
+test.skip("GET /stripe/plans returns enabled catalog with available products when billing is on (deprecated: using RevenueCat)", async () => {
   const h = harness();
   const result = await h.load("stripe/index.ts").handler({
     rawPath: "/stripe/plans",
