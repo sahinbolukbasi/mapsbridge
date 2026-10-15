@@ -442,6 +442,7 @@ export function App() {
             focusedStopId={focusedStopId}
             onClearFocus={() => setFocusedStopId(null)}
             onOpenPlan={() => setActiveTab('plan')}
+            onOpenAi={() => setActiveTab('ai')}
           />
         )}
         {activeTab === 'plan' && (

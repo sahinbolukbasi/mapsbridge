@@ -25,7 +25,7 @@ export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
     },
     {
       id: 'plan',
-      label: 'Planım',
+      label: 'Rotalarım',
       icon: (color) => <CalendarIcon size={22} color={color} />,
     },
     {
