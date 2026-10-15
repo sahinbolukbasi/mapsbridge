@@ -47,7 +47,7 @@ export function toggleFollowUser(username: string): boolean {
   window.dispatchEvent(
     new CustomEvent("mapsbridge:follow-change", {
       detail: { username: clean, isFollowing: isNowFollowing, followingList: nextList },
-    })
+    }),
   );
 
   return isNowFollowing;

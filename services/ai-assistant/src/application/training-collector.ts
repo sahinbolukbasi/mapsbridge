@@ -32,7 +32,7 @@ export class TrainingDataCollector {
       destination?: string;
       agentsInvolved: string[];
       isGrounded?: boolean;
-    }
+    },
   ): TrainingDialogueEntry | null {
     // 1. Guard against empty or ultra-short turns
     if (!userPrompt || userPrompt.length < 5 || !assistantReply || assistantReply.length < 15) {
@@ -53,7 +53,8 @@ export class TrainingDataCollector {
       source: "live_curated",
       reviewed: false,
       containsPersonalData: false,
-      system: "Sen MapsBridge uzman seyahat danışmanısın. Yalnızca seyahat rotaları, konaklama, yerel lezzetler ve şehir keşfi konularında doğru ve güvenilir rehberlik sağlarsın.",
+      system:
+        "Sen MapsBridge uzman seyahat danışmanısın. Yalnızca seyahat rotaları, konaklama, yerel lezzetler ve şehir keşfi konularında doğru ve güvenilir rehberlik sağlarsın.",
       messages: [
         {
           role: "user",

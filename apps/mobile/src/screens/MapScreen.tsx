@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -19,10 +19,10 @@ import {
   PanResponder,
   LayoutAnimation,
   UIManager,
-} from 'react-native';
-import { WebView } from 'react-native-webview';
-import { tripStore, TripStop, ActiveRoute } from '../services/tripStore';
-import { trainingService } from '../services/api';
+} from "react-native";
+import { WebView } from "react-native-webview";
+import { tripStore, TripStop, ActiveRoute } from "../services/tripStore";
+import { trainingService } from "../services/api";
 import {
   SunIcon,
   MoonIcon,
@@ -44,24 +44,24 @@ import {
   TrainIcon,
   RobotIcon,
   SparkIcon,
-} from '../components/Icons';
-import { ScreenTourModal } from '../components/ScreenTourModal';
+} from "../components/Icons";
+import { ScreenTourModal } from "../components/ScreenTourModal";
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 const CARD_WIDTH = Math.min(SCREEN_W - 44, 340);
 const CARD_GAP = 12;
-const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
+const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 
 const CATEGORY_FILTERS = [
-  { id: 'TÜMÜ', label: 'TÜMÜ' },
-  { id: 'TARİHİ YER', label: 'TARİHİ YER' },
-  { id: 'MÜZE', label: 'MÜZE' },
-  { id: 'KAHVE & MOLA', label: 'KAHVE & MOLA' },
-  { id: 'YEME-İÇME', label: 'YEME-İÇME' },
+  { id: "TÜMÜ", label: "TÜMÜ" },
+  { id: "TARİHİ YER", label: "TARİHİ YER" },
+  { id: "MÜZE", label: "MÜZE" },
+  { id: "KAHVE & MOLA", label: "KAHVE & MOLA" },
+  { id: "YEME-İÇME", label: "YEME-İÇME" },
 ];
 
 interface MapScreenProps {
@@ -102,12 +102,12 @@ export function MapScreen({
 }: MapScreenProps) {
   const [activeRoute, setActiveRoute] = useState<ActiveRoute>(tripStore.getActiveRoute());
   const [allRoutes, setAllRoutes] = useState<ActiveRoute[]>(tripStore.getAllRoutes());
-  const [selectedCategory, setSelectedCategory] = useState('TÜMÜ');
+  const [selectedCategory, setSelectedCategory] = useState("TÜMÜ");
   const [currentStopIdx, setCurrentStopIdx] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [activeTileLayer, setActiveTileLayer] = useState<'light' | 'dark' | 'satellite'>('light');
+  const [activeTileLayer, setActiveTileLayer] = useState<"light" | "dark" | "satellite">("light");
 
   // Route line display settings
   const [showRouteLines, setShowRouteLines] = useState<boolean>(true);
@@ -147,11 +147,16 @@ export function MapScreen({
       onStartShouldSetPanResponderCapture: () => false,
       onMoveShouldSetPanResponder: (_, gestureState) => {
         // Intercept vertical drag when movement is distinctly vertical
-        return Math.abs(gestureState.dy) > 8 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+        return (
+          Math.abs(gestureState.dy) > 8 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx)
+        );
       },
       onMoveShouldSetPanResponderCapture: (_, gestureState) => {
         // Intercept strong vertical drags even if child views are present
-        return Math.abs(gestureState.dy) > 16 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx) * 1.5;
+        return (
+          Math.abs(gestureState.dy) > 16 &&
+          Math.abs(gestureState.dy) > Math.abs(gestureState.dx) * 1.5
+        );
       },
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dy > 18) {
@@ -162,7 +167,7 @@ export function MapScreen({
           setIsPopupExpanded(true);
         }
       },
-    })
+    }),
   ).current;
 
   const webViewRef = useRef<WebView>(null);
@@ -220,7 +225,7 @@ export function MapScreen({
 
   // Filter stops by selected category
   const filteredStops = activeRoute.stops.filter((s) => {
-    if (selectedCategory === 'TÜMÜ') return true;
+    if (selectedCategory === "TÜMÜ") return true;
     return s.category?.toUpperCase() === selectedCategory.toUpperCase();
   });
 
@@ -235,7 +240,10 @@ export function MapScreen({
         flyToStop(activeRoute.stops[idx]);
         setClickedPlace(null);
         setIsPopupExpanded(true);
-        stopsCarouselRef.current?.scrollToOffset({ offset: idx * (CARD_WIDTH + CARD_GAP), animated: true });
+        stopsCarouselRef.current?.scrollToOffset({
+          offset: idx * (CARD_WIDTH + CARD_GAP),
+          animated: true,
+        });
       }
       if (onClearFocus) onClearFocus();
     }
@@ -278,12 +286,13 @@ export function MapScreen({
 
     try {
       // 1. Google Places (New) searchNearby API for venue/POI with detailed editorial summary and user reviews
-      const placesRes = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
-        method: 'POST',
+      const placesRes = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
-          'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.types,places.primaryTypeDisplayName,places.photos,places.editorialSummary,places.reviews',
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
+          "X-Goog-FieldMask":
+            "places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.types,places.primaryTypeDisplayName,places.photos,places.editorialSummary,places.reviews",
         },
         body: JSON.stringify({
           locationRestriction: {
@@ -292,7 +301,7 @@ export function MapScreen({
               radius: 60.0,
             },
           },
-          languageCode: 'tr',
+          languageCode: "tr",
         }),
       });
 
@@ -305,7 +314,7 @@ export function MapScreen({
         if (topPoi.photos?.[0]?.name) {
           try {
             const photoRes = await fetch(
-              `https://places.googleapis.com/v1/${topPoi.photos[0].name}/media?maxHeightPx=400&maxWidthPx=400&skipHttpRedirect=true&key=${GOOGLE_MAPS_API_KEY}`
+              `https://places.googleapis.com/v1/${topPoi.photos[0].name}/media?maxHeightPx=400&maxWidthPx=400&skipHttpRedirect=true&key=${GOOGLE_MAPS_API_KEY}`,
             );
             const photoData = await photoRes.json();
             photoUrl = photoData.photoUri;
@@ -313,14 +322,14 @@ export function MapScreen({
         }
 
         const reviews: PlaceReview[] = (topPoi.reviews || []).slice(0, 4).map((r: any) => ({
-          author: r.authorAttribution?.displayName || 'Gezgin',
+          author: r.authorAttribution?.displayName || "Gezgin",
           rating: r.rating || 5,
-          text: r.text?.text || r.originalText?.text || '',
-          relativeTime: r.relativePublishTimeDescription || '',
+          text: r.text?.text || r.originalText?.text || "",
+          relativeTime: r.relativePublishTimeDescription || "",
         }));
 
         const info: ClickedPlaceInfo = {
-          name: topPoi.displayName?.text || 'Seçilen Mekan',
+          name: topPoi.displayName?.text || "Seçilen Mekan",
           address: topPoi.formattedAddress || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
           category,
           lat: topPoi.location?.latitude || lat,
@@ -340,12 +349,12 @@ export function MapScreen({
           lng: info.lng,
           name: info.name,
           category: info.category,
-          action: 'map_click',
+          action: "map_click",
         });
 
         webViewRef.current?.injectJavaScript(`
           if (window.addTemporaryPin) {
-            window.addTemporaryPin(${lat}, ${lng}, "${(topPoi.displayName?.text || 'Mekan').replace(/"/g, '')}");
+            window.addTemporaryPin(${lat}, ${lng}, "${(topPoi.displayName?.text || "Mekan").replace(/"/g, "")}");
           }
           true;
         `);
@@ -359,12 +368,15 @@ export function MapScreen({
 
       if (geoData.results && geoData.results.length > 0) {
         const first = geoData.results[0];
-        const name = first.address_components?.[1]?.long_name || first.address_components?.[0]?.long_name || 'İşaretlenen Konum';
+        const name =
+          first.address_components?.[1]?.long_name ||
+          first.address_components?.[0]?.long_name ||
+          "İşaretlenen Konum";
 
         const info: ClickedPlaceInfo = {
           name,
           address: first.formatted_address,
-          category: 'MEKAN',
+          category: "MEKAN",
           lat,
           lng,
           rating: 4.8,
@@ -376,15 +388,15 @@ export function MapScreen({
 
         webViewRef.current?.injectJavaScript(`
           if (window.addTemporaryPin) {
-            window.addTemporaryPin(${lat}, ${lng}, "${name.replace(/"/g, '')}");
+            window.addTemporaryPin(${lat}, ${lng}, "${name.replace(/"/g, "")}");
           }
           true;
         `);
       } else {
         setClickedPlace({
-          name: 'Seçilen Nokta',
+          name: "Seçilen Nokta",
           address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-          category: 'MEKAN',
+          category: "MEKAN",
           lat,
           lng,
           isPoi: false,
@@ -392,11 +404,11 @@ export function MapScreen({
         setIsPopupExpanded(true);
       }
     } catch (err) {
-      console.warn('Maps API click lookup error:', err);
+      console.warn("Maps API click lookup error:", err);
       setClickedPlace({
-        name: 'Seçilen Nokta',
+        name: "Seçilen Nokta",
         address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-        category: 'MEKAN',
+        category: "MEKAN",
         lat,
         lng,
         isPoi: false,
@@ -412,7 +424,7 @@ export function MapScreen({
     try {
       const data = JSON.parse(event.nativeEvent.data);
 
-      if (data.type === 'PIN_SELECT' && data.id) {
+      if (data.type === "PIN_SELECT" && data.id) {
         const idx = filteredStops.findIndex((s) => s.id === data.id);
         if (idx >= 0) {
           const stop = filteredStops[idx];
@@ -420,18 +432,21 @@ export function MapScreen({
           setClickedPlace(null);
           setIsPopupExpanded(true);
           stopsTrackScrollRef.current?.scrollTo({ x: idx * 48, animated: true });
-          stopsCarouselRef.current?.scrollToOffset({ offset: idx * (CARD_WIDTH + CARD_GAP), animated: true });
+          stopsCarouselRef.current?.scrollToOffset({
+            offset: idx * (CARD_WIDTH + CARD_GAP),
+            animated: true,
+          });
           trainingService.recordMapInteraction({
             lat: stop.lat,
             lng: stop.lng,
             name: stop.name,
             category: stop.category,
-            action: 'pin_select',
+            action: "pin_select",
           });
         }
       }
 
-      if (data.type === 'PIN_FOCUS' && data.id) {
+      if (data.type === "PIN_FOCUS" && data.id) {
         const idx = filteredStops.findIndex((s) => s.id === data.id);
         if (idx >= 0) {
           const stop = filteredStops[idx];
@@ -440,15 +455,18 @@ export function MapScreen({
           setIsPopupExpanded(true);
           flyToStop(stop, 18);
           stopsTrackScrollRef.current?.scrollTo({ x: idx * 48, animated: true });
-          stopsCarouselRef.current?.scrollToOffset({ offset: idx * (CARD_WIDTH + CARD_GAP), animated: true });
+          stopsCarouselRef.current?.scrollToOffset({
+            offset: idx * (CARD_WIDTH + CARD_GAP),
+            animated: true,
+          });
         }
       }
 
-      if (data.type === 'MAP_CLICK') {
+      if (data.type === "MAP_CLICK") {
         handleMapLocationClick(data.lat, data.lng);
       }
 
-      if (data.type === 'MAP_READY') {
+      if (data.type === "MAP_READY") {
         const stopsPayload = activeRoute.stops.map((s, idx) => ({
           id: s.id,
           name: s.name,
@@ -465,14 +483,14 @@ export function MapScreen({
         `);
       }
 
-      if (data.type === 'LOCATION_FOUND') {
+      if (data.type === "LOCATION_FOUND") {
         setMyLocation({ lat: data.lat, lng: data.lng });
       }
 
-      if (data.type === 'LOCATION_ERROR') {
+      if (data.type === "LOCATION_ERROR") {
         Alert.alert(
-          'Konum İzni Gerekli',
-          'Konumunuzu haritada gösterebilmek ve en yakın noktaları listelemek için lütfen Ayarlar\'dan konum erişimine izin verin.'
+          "Konum İzni Gerekli",
+          "Konumunuzu haritada gösterebilmek ve en yakın noktaları listelemek için lütfen Ayarlar'dan konum erişimine izin verin.",
         );
         setShowMyLocation(false);
       }
@@ -485,23 +503,24 @@ export function MapScreen({
     if (!q) return;
 
     try {
-      const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
-        method: 'POST',
+      const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
-          'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location,places.rating,places.types,places.primaryTypeDisplayName,places.photos',
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
+          "X-Goog-FieldMask":
+            "places.displayName,places.formattedAddress,places.location,places.rating,places.types,places.primaryTypeDisplayName,places.photos",
         },
         body: JSON.stringify({
           textQuery: q,
-          languageCode: 'tr',
+          languageCode: "tr",
         }),
       });
       const data = await res.json();
 
       if (data.places && data.places.length > 0) {
         const mapped = data.places.map((p: any) => ({
-          name: p.displayName?.text || 'Mekan',
+          name: p.displayName?.text || "Mekan",
           formatted_address: p.formattedAddress,
           geometry: { location: { lat: p.location.latitude, lng: p.location.longitude } },
           rating: p.rating,
@@ -515,24 +534,24 @@ export function MapScreen({
         return;
       }
     } catch {}
-      // Fallback preset places
-      const presets: Record<string, { lat: number; lng: number; name: string }> = {
-        ayasofya: { lat: 41.0086, lng: 28.9802, name: 'Ayasofya' },
-        sultanahmet: { lat: 41.0054, lng: 28.9768, name: 'Sultanahmet' },
-        galata: { lat: 41.0256, lng: 28.9741, name: 'Galata Kulesi' },
-        kapalıçarşı: { lat: 41.0108, lng: 28.968, name: 'Kapalıçarşı' },
-        topkapı: { lat: 41.0115, lng: 28.9833, name: 'Topkapı Sarayı' },
-      };
-      const key = Object.keys(presets).find((k) => q.toLowerCase().includes(k));
-      if (key) {
-        const p = presets[key];
-        webViewRef.current?.injectJavaScript(`
+    // Fallback preset places
+    const presets: Record<string, { lat: number; lng: number; name: string }> = {
+      ayasofya: { lat: 41.0086, lng: 28.9802, name: "Ayasofya" },
+      sultanahmet: { lat: 41.0054, lng: 28.9768, name: "Sultanahmet" },
+      galata: { lat: 41.0256, lng: 28.9741, name: "Galata Kulesi" },
+      kapalıçarşı: { lat: 41.0108, lng: 28.968, name: "Kapalıçarşı" },
+      topkapı: { lat: 41.0115, lng: 28.9833, name: "Topkapı Sarayı" },
+    };
+    const key = Object.keys(presets).find((k) => q.toLowerCase().includes(k));
+    if (key) {
+      const p = presets[key];
+      webViewRef.current?.injectJavaScript(`
           if (window.map) window.map.flyTo([${p.lat}, ${p.lng}], 16, { animate: true, duration: 1.0 });
           true;
         `);
-      } else {
-        Alert.alert('Arama', `"${q}" konumuna odaklanıldı.`);
-      }
+    } else {
+      Alert.alert("Arama", `"${q}" konumuna odaklanıldı.`);
+    }
   };
 
   // Add search result to active route
@@ -541,7 +560,7 @@ export function MapScreen({
     if (!loc) return;
 
     setShowSearchResults(false);
-    setSearchQuery('');
+    setSearchQuery("");
 
     webViewRef.current?.injectJavaScript(`
       if (window.map) window.map.flyTo([${loc.lat}, ${loc.lng}], 17, { animate: true, duration: 1.0 });
@@ -553,28 +572,24 @@ export function MapScreen({
       id: `stop-${Date.now()}`,
       name: place.name,
       category: getCategoryFromTypes(place.types),
-      time: '15:00',
-      duration: '45 dk',
+      time: "15:00",
+      duration: "45 dk",
       address: place.formatted_address || place.name,
       lat: loc.lat,
       lng: loc.lng,
       rating: place.rating || 4.8,
       photoUrl: place.photoUrl,
-      walkTimeFromPrev: '~8 dk yürüyüş',
-      distanceFromPrev: '500m',
+      walkTimeFromPrev: "~8 dk yürüyüş",
+      distanceFromPrev: "500m",
     };
 
-    Alert.alert(
-      place.name,
-      place.formatted_address || 'Rotanıza eklemek ister misiniz?',
-      [
-        { text: 'Vazgeç', style: 'cancel' },
-        {
-          text: 'Rotaya Ekle',
-          onPress: () => tripStore.addStop(newStop),
-        },
-      ]
-    );
+    Alert.alert(place.name, place.formatted_address || "Rotanıza eklemek ister misiniz?", [
+      { text: "Vazgeç", style: "cancel" },
+      {
+        text: "Rotaya Ekle",
+        onPress: () => tripStore.addStop(newStop),
+      },
+    ]);
   };
 
   // Add clicked place to active route
@@ -584,15 +599,15 @@ export function MapScreen({
       id: `stop-${Date.now()}`,
       name: clickedPlace.name,
       category: clickedPlace.category,
-      time: '15:30',
-      duration: '45 dk',
+      time: "15:30",
+      duration: "45 dk",
       address: clickedPlace.address,
       lat: clickedPlace.lat,
       lng: clickedPlace.lng,
       rating: clickedPlace.rating || 4.8,
       photoUrl: clickedPlace.photoUrl,
-      walkTimeFromPrev: '~6 dk yürüyüş',
-      distanceFromPrev: '400m',
+      walkTimeFromPrev: "~6 dk yürüyüş",
+      distanceFromPrev: "400m",
     };
     const wasPending = tripStore.getPendingAddStop();
     tripStore.addStop(newStop);
@@ -601,23 +616,19 @@ export function MapScreen({
       lng: newStop.lng,
       name: newStop.name,
       category: newStop.category,
-      action: 'route_add',
+      action: "route_add",
     });
     tripStore.clearPendingAddStop();
     setIsPendingAddStop(false);
     setClickedPlace(null);
 
     if (wasPending) {
-      Alert.alert(
-        'Durak Eklendi',
-        `"${newStop.name}" seyahat rotanıza eklendi!`,
-        [
-          { text: 'Haritada Kal', style: 'cancel' },
-          { text: 'Plana Dön', onPress: onOpenPlan },
-        ]
-      );
+      Alert.alert("Durak Eklendi", `"${newStop.name}" seyahat rotanıza eklendi!`, [
+        { text: "Haritada Kal", style: "cancel" },
+        { text: "Plana Dön", onPress: onOpenPlan },
+      ]);
     } else {
-      Alert.alert('Başarılı', `"${newStop.name}" aktif rotanıza eklendi!`);
+      Alert.alert("Başarılı", `"${newStop.name}" aktif rotanıza eklendi!`);
     }
   };
 
@@ -629,7 +640,10 @@ export function MapScreen({
     flyToStop(filteredStops[nextIdx]);
     setClickedPlace(null);
     stopsTrackScrollRef.current?.scrollTo({ x: nextIdx * 48, animated: true });
-    stopsCarouselRef.current?.scrollToOffset({ offset: nextIdx * (CARD_WIDTH + CARD_GAP), animated: true });
+    stopsCarouselRef.current?.scrollToOffset({
+      offset: nextIdx * (CARD_WIDTH + CARD_GAP),
+      animated: true,
+    });
   };
 
   const handlePrevStop = () => {
@@ -639,7 +653,10 @@ export function MapScreen({
     flyToStop(filteredStops[prevIdx]);
     setClickedPlace(null);
     stopsTrackScrollRef.current?.scrollTo({ x: prevIdx * 48, animated: true });
-    stopsCarouselRef.current?.scrollToOffset({ offset: prevIdx * (CARD_WIDTH + CARD_GAP), animated: true });
+    stopsCarouselRef.current?.scrollToOffset({
+      offset: prevIdx * (CARD_WIDTH + CARD_GAP),
+      animated: true,
+    });
   };
 
   const lastStopTapTime = useRef<{ [stopId: string]: number }>({});
@@ -686,29 +703,29 @@ export function MapScreen({
   const handleStartDirections = (lat?: number, lng?: number, name?: string) => {
     const targetLat = lat || currentStop?.lat;
     const targetLng = lng || currentStop?.lng;
-    const targetName = name || currentStop?.name || 'Seçilen Durak';
+    const targetName = name || currentStop?.name || "Seçilen Durak";
     if (!targetLat || !targetLng) return;
 
     Alert.alert(
-      'Yol Tarifi - Harita Seçin',
+      "Yol Tarifi - Harita Seçin",
       `"${targetName}" konumuna gitmek için hangi haritayı kullanmak istersiniz?`,
       [
         {
-          text: 'Google Haritalar',
+          text: "Google Haritalar",
           onPress: () => {
             const url = `https://www.google.com/maps/dir/?api=1&destination=${targetLat},${targetLng}&travelmode=walking`;
-            Linking.openURL(url).catch(() => Alert.alert('Hata', 'Google Haritalar açılamadı.'));
+            Linking.openURL(url).catch(() => Alert.alert("Hata", "Google Haritalar açılamadı."));
           },
         },
         {
-          text: 'Apple Haritalar',
+          text: "Apple Haritalar",
           onPress: () => {
             const url = `http://maps.apple.com/?daddr=${targetLat},${targetLng}&q=${encodeURIComponent(targetName)}`;
-            Linking.openURL(url).catch(() => Alert.alert('Hata', 'Apple Haritalar açılamadı.'));
+            Linking.openURL(url).catch(() => Alert.alert("Hata", "Apple Haritalar açılamadı."));
           },
         },
         {
-          text: 'Yandex Haritalar',
+          text: "Yandex Haritalar",
           onPress: () => {
             const naviUrl = `yandexnavi://build_route_on_map?lat_to=${targetLat}&lon_to=${targetLng}`;
             Linking.openURL(naviUrl).catch(() => {
@@ -717,7 +734,7 @@ export function MapScreen({
           },
         },
         {
-          text: 'Uygulama İçi Canlı Rota',
+          text: "Uygulama İçi Canlı Rota",
           onPress: () => {
             webViewRef.current?.injectJavaScript(`
               if (window.map) {
@@ -727,26 +744,30 @@ export function MapScreen({
             `);
           },
         },
-        { text: 'Vazgeç', style: 'cancel' },
-      ]
+        { text: "Vazgeç", style: "cancel" },
+      ],
     );
   };
 
   // Share Modal Opener for QR, Transit and Navigation
   const handleShare = (target?: { name: string; address: string; lat: number; lng: number }) => {
-    const toShare = target || (currentStop ? {
-      name: currentStop.name,
-      address: currentStop.address,
-      lat: currentStop.lat,
-      lng: currentStop.lng,
-    } : null);
+    const toShare =
+      target ||
+      (currentStop
+        ? {
+            name: currentStop.name,
+            address: currentStop.address,
+            lat: currentStop.lat,
+            lng: currentStop.lng,
+          }
+        : null);
     if (toShare) {
       setShareTarget(toShare);
     }
   };
 
   // Select map tiles directly (light, dark, satellite)
-  const handleSelectTileLayer = (layerKey: 'light' | 'dark' | 'satellite') => {
+  const handleSelectTileLayer = (layerKey: "light" | "dark" | "satellite") => {
     setActiveTileLayer(layerKey);
     webViewRef.current?.injectJavaScript(`
       if (window.switchLayer) window.switchLayer("${layerKey}");
@@ -756,7 +777,8 @@ export function MapScreen({
 
   // Toggle map tiles (light, dark, satellite)
   const handleToggleLayers = () => {
-    const next = activeTileLayer === 'light' ? 'dark' : activeTileLayer === 'dark' ? 'satellite' : 'light';
+    const next =
+      activeTileLayer === "light" ? "dark" : activeTileLayer === "dark" ? "satellite" : "light";
     handleSelectTileLayer(next);
   };
 
@@ -783,7 +805,7 @@ export function MapScreen({
       index: idx + 1,
       isSelected: s.id === currentStop?.id,
       visited: s.visited || false,
-    }))
+    })),
   );
 
   // High-performance Leaflet HTML with click-to-query integration
@@ -1136,8 +1158,8 @@ export function MapScreen({
       {/* Full-Screen Map Canvas */}
       <WebView
         ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ html: leafletHtml, baseUrl: 'https://unpkg.com' }}
+        originWhitelist={["*"]}
+        source={{ html: leafletHtml, baseUrl: "https://unpkg.com" }}
         style={styles.fullMap}
         onMessage={handleWebViewMessage}
         scrollEnabled={false}
@@ -1167,11 +1189,11 @@ export function MapScreen({
               <TouchableOpacity
                 style={{ padding: 6 }}
                 onPress={() => {
-                  setSearchQuery('');
+                  setSearchQuery("");
                   setShowSearchResults(false);
                 }}
               >
-                <Text style={{ fontSize: 13, color: '#717974' }}>✕</Text>
+                <Text style={{ fontSize: 13, color: "#717974" }}>✕</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1180,7 +1202,7 @@ export function MapScreen({
         {/* Durak Seçim Modu Floating Banner (Plan ekranından 'Durak Ekle' tıklandığında görünür) */}
         {isPendingAddStop && (
           <View style={styles.pendingAddStopBanner}>
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
               <View style={styles.pulsingDot} />
               <Text style={styles.pendingAddStopText} numberOfLines={1}>
                 📍 Haritada eklemek istediğiniz mekana dokunun
@@ -1216,9 +1238,7 @@ export function MapScreen({
                     {item.formatted_address}
                   </Text>
                 </View>
-                {item.rating && (
-                  <Text style={styles.searchResultRating}>★ {item.rating}</Text>
-                )}
+                {item.rating && <Text style={styles.searchResultRating}>★ {item.rating}</Text>}
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -1231,7 +1251,10 @@ export function MapScreen({
       <View style={styles.rightFloatingControls}>
         {/* Map Settings Button */}
         <TouchableOpacity
-          style={[styles.floatingControlBtn, showMapSettingsModal && styles.floatingControlBtnActive]}
+          style={[
+            styles.floatingControlBtn,
+            showMapSettingsModal && styles.floatingControlBtnActive,
+          ]}
           onPress={() => setShowMapSettingsModal(true)}
           activeOpacity={0.8}
         >
@@ -1245,7 +1268,14 @@ export function MapScreen({
           activeOpacity={0.8}
         >
           {showMyLocation && <View style={styles.gpsPulseDot} />}
-          <Text style={[styles.floatingControlIcon, showMyLocation && { color: '#013628', fontWeight: '900' }]}>⌖</Text>
+          <Text
+            style={[
+              styles.floatingControlIcon,
+              showMyLocation && { color: "#013628", fontWeight: "900" },
+            ]}
+          >
+            ⌖
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -1260,7 +1290,10 @@ export function MapScreen({
       {/* Bottom Sheet: Draggable from ANY point to smoothly expand / collapse */}
       <View
         {...panResponder.panHandlers}
-        style={[styles.bottomSheetContainer, !isPopupExpanded && styles.bottomSheetContainerCollapsed]}
+        style={[
+          styles.bottomSheetContainer,
+          !isPopupExpanded && styles.bottomSheetContainerCollapsed,
+        ]}
       >
         {/* Drag Handle Bar (Aşağı/Yukarı Kaydırarak Büyüt/Küçült ya da Dokunarak Aç/Kapa) */}
         <TouchableOpacity
@@ -1276,10 +1309,20 @@ export function MapScreen({
           !isPopupExpanded ? (
             /* Collapsed Clicked Place Capsule */
             <View style={styles.collapsedRow} {...panResponder.panHandlers}>
-              <View style={{ flex: 1, marginRight: 8, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View
+                style={{
+                  flex: 1,
+                  marginRight: 8,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
                 <MapPinIcon size={15} color="#059669" />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.collapsedTitle} numberOfLines={1}>{clickedPlace.name}</Text>
+                  <Text style={styles.collapsedTitle} numberOfLines={1}>
+                    {clickedPlace.name}
+                  </Text>
                   <Text style={styles.collapsedSub} numberOfLines={1}>
                     {clickedPlace.category} • ★ {clickedPlace.rating || 4.8}
                   </Text>
@@ -1289,18 +1332,18 @@ export function MapScreen({
                 style={styles.collapsedActionPill}
                 onPress={handleAddClickedPlaceToRoute}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                   <PlusIcon size={12} color="#ffffff" />
                   <Text style={styles.collapsedActionPillText}>Ekle</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.collapsedActionPill, { backgroundColor: '#ecfdf5' }]}
+                style={[styles.collapsedActionPill, { backgroundColor: "#ecfdf5" }]}
                 onPress={() => setShareTarget(clickedPlace)}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                   <Share2Icon size={12} color="#013628" />
-                  <Text style={[styles.collapsedActionPillText, { color: '#013628' }]}>Paylaş</Text>
+                  <Text style={[styles.collapsedActionPillText, { color: "#013628" }]}>Paylaş</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -1344,19 +1387,31 @@ export function MapScreen({
                       <Text style={styles.categoryPillText}>{clickedPlace.category}</Text>
                     </View>
                     {clickedPlace.rating && (
-                      <Text style={styles.ratingBadge}>★ {clickedPlace.rating} ({clickedPlace.userRatingsTotal || 120})</Text>
+                      <Text style={styles.ratingBadge}>
+                        ★ {clickedPlace.rating} ({clickedPlace.userRatingsTotal || 120})
+                      </Text>
                     )}
                   </View>
 
-                  <Text style={styles.stopTitle} numberOfLines={1}>{clickedPlace.name}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                  <Text style={styles.stopTitle} numberOfLines={1}>
+                    {clickedPlace.name}
+                  </Text>
+                  <View
+                    style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 }}
+                  >
                     <PinIcon size={12} color="#10B981" />
-                    <Text style={styles.stopAddress} numberOfLines={2}>{clickedPlace.address}</Text>
+                    <Text style={styles.stopAddress} numberOfLines={2}>
+                      {clickedPlace.address}
+                    </Text>
                   </View>
                 </View>
 
                 {clickedPlace.photoUrl ? (
-                  <Image source={{ uri: clickedPlace.photoUrl }} style={styles.stopThumb} resizeMode="cover" />
+                  <Image
+                    source={{ uri: clickedPlace.photoUrl }}
+                    style={styles.stopThumb}
+                    resizeMode="cover"
+                  />
                 ) : (
                   <View style={[styles.stopThumb, styles.stopThumbFallback]}>
                     <PinIcon size={24} color="#10B981" />
@@ -1386,16 +1441,23 @@ export function MapScreen({
                     </View>
                     <Text style={styles.reviewsBoxHeader}>GEZGİN YORUMLARI</Text>
                   </View>
-                  <ScrollView style={styles.reviewsScroll} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+                  <ScrollView
+                    style={styles.reviewsScroll}
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}
+                  >
                     {clickedPlace.reviews.map((rev, rIdx) => (
                       <View key={rIdx} style={styles.reviewItem}>
                         <View style={styles.reviewItemHeader}>
                           <Text style={styles.reviewAuthor}>{rev.author}</Text>
                           <Text style={styles.reviewRating}>
-                            {'★'.repeat(Math.min(5, Math.max(1, Math.round(rev.rating))))} {rev.relativeTime}
+                            {"★".repeat(Math.min(5, Math.max(1, Math.round(rev.rating))))}{" "}
+                            {rev.relativeTime}
                           </Text>
                         </View>
-                        <Text style={styles.reviewText} numberOfLines={3}>{rev.text}</Text>
+                        <Text style={styles.reviewText} numberOfLines={3}>
+                          {rev.text}
+                        </Text>
                       </View>
                     ))}
                   </ScrollView>
@@ -1409,7 +1471,7 @@ export function MapScreen({
                   onPress={handleAddClickedPlaceToRoute}
                   activeOpacity={0.85}
                 >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                     <PlusIcon size={15} color="#ffffff" />
                     <Text style={styles.primaryActionBtnText}>Bu Mekanı Rotaya Ekle</Text>
                   </View>
@@ -1420,7 +1482,7 @@ export function MapScreen({
                   onPress={() => setShareTarget(clickedPlace)}
                   activeOpacity={0.85}
                 >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                     <QrCodeIcon size={15} color="#013628" />
                     <Text style={styles.shareActionBtnText}>QR Kod & Yol Tarifi Paylaş</Text>
                   </View>
@@ -1432,13 +1494,25 @@ export function MapScreen({
           /* NO ROUTE EMPTY STATE (Hemen Rotanı Planla CTA) */
           !isPopupExpanded ? (
             <View style={styles.collapsedRow}>
-              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, marginRight: 8 }}>
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 10,
+                  marginRight: 8,
+                }}
+              >
                 <View style={styles.emptyCollapsedIconWrap}>
                   <PlanIcon size={18} color="#10B981" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.collapsedTitle} numberOfLines={1}>Henüz Rota Bulunmuyor</Text>
-                  <Text style={styles.collapsedSub} numberOfLines={1}>Yeni seyahat rotanı hemen oluştur</Text>
+                  <Text style={styles.collapsedTitle} numberOfLines={1}>
+                    Henüz Rota Bulunmuyor
+                  </Text>
+                  <Text style={styles.collapsedSub} numberOfLines={1}>
+                    Yeni seyahat rotanı hemen oluştur
+                  </Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -1447,7 +1521,7 @@ export function MapScreen({
                 activeOpacity={0.8}
               >
                 <Text style={styles.emptyPlanCtaBtnText}>Hemen Rotanı Planla</Text>
-                <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '800' }}>➔</Text>
+                <Text style={{ color: "#ffffff", fontSize: 13, fontWeight: "800" }}>➔</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -1461,7 +1535,8 @@ export function MapScreen({
               </View>
               <Text style={styles.emptyRouteExpandedTitle}>Seyahat Rotanı Başlat</Text>
               <Text style={styles.emptyRouteExpandedSubtitle}>
-                Haritada henüz aktif bir rota bulunmuyor. İster AI asistan ile ister adım adım duraklarını ekleyerek mükemmel seyahatini planla.
+                Haritada henüz aktif bir rota bulunmuyor. İster AI asistan ile ister adım adım
+                duraklarını ekleyerek mükemmel seyahatini planla.
               </Text>
               <TouchableOpacity
                 style={styles.emptyRouteExpandedPrimaryBtn}
@@ -1470,7 +1545,7 @@ export function MapScreen({
               >
                 <SparkIcon size={18} color="#ffffff" />
                 <Text style={styles.emptyRouteExpandedPrimaryBtnText}>Hemen Rotanı Planla</Text>
-                <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '900' }}>➔</Text>
+                <Text style={{ color: "#ffffff", fontSize: 15, fontWeight: "900" }}>➔</Text>
               </TouchableOpacity>
               <View style={styles.emptyRouteHintRow}>
                 <LightbulbIcon size={14} color="#d97706" />
@@ -1480,255 +1555,289 @@ export function MapScreen({
               </View>
             </View>
           )
-        ) : (
-          /* Active Route Stops */
-          !isPopupExpanded ? (
-            /* Collapsed Route Stop Capsule */
-            <View style={styles.collapsedRow}>
-              <View style={styles.collapsedStopBadge}>
-                <Text style={styles.collapsedStopBadgeText}>{currentStopIdx + 1}</Text>
-              </View>
-              <View style={{ flex: 1, marginHorizontal: 8 }}>
-                <Text style={styles.collapsedTitle} numberOfLines={1}>{currentStop?.name || 'Durak'}</Text>
-                <Text style={styles.collapsedSub} numberOfLines={1}>
-                  {currentStop?.walkTimeFromPrev || '~4 dk'} • {currentStop?.distanceFromPrev || '320m'}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.collapsedNavPill}
-                onPress={() => handleStartDirections()}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  <DirectionsIcon size={13} color="#ffffff" />
-                  <Text style={styles.collapsedNavPillText}>Yol Tarifi</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.collapsedArrowBtn}
-                onPress={handleNextStop}
-              >
-                <Text style={styles.collapsedArrowBtnText}>›</Text>
-              </TouchableOpacity>
+        ) : /* Active Route Stops */
+        !isPopupExpanded ? (
+          /* Collapsed Route Stop Capsule */
+          <View style={styles.collapsedRow}>
+            <View style={styles.collapsedStopBadge}>
+              <Text style={styles.collapsedStopBadgeText}>{currentStopIdx + 1}</Text>
             </View>
-          ) : (
-            /* Expanded Route Stop Card with Horizontal Swipeable Carousel */
-            <View style={styles.cardContent}>
-              {/* Route Header Status Banner & Route Selector Dropdown */}
-              <View style={styles.routeHeaderBanner}>
-                <TouchableOpacity
-                  style={styles.routeSelectorBtn}
-                  onPress={() => setShowRouteModal(true)}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.pulsingDot} />
-                  <Text style={styles.routeHeaderTitle} numberOfLines={1}>
-                    {activeRoute.name} • 1. Gün
-                  </Text>
-                  <Text style={{ fontSize: 12, color: '#286954' }}>▼</Text>
-                </TouchableOpacity>
-
-                <View style={styles.stopsCountBadge}>
-                  <Text style={styles.stopsCountText}>{activeRoute.stops.length} Durak</Text>
-                </View>
+            <View style={{ flex: 1, marginHorizontal: 8 }}>
+              <Text style={styles.collapsedTitle} numberOfLines={1}>
+                {currentStop?.name || "Durak"}
+              </Text>
+              <Text style={styles.collapsedSub} numberOfLines={1}>
+                {currentStop?.walkTimeFromPrev || "~4 dk"} •{" "}
+                {currentStop?.distanceFromPrev || "320m"}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.collapsedNavPill}
+              onPress={() => handleStartDirections()}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <DirectionsIcon size={13} color="#ffffff" />
+                <Text style={styles.collapsedNavPillText}>Yol Tarifi</Text>
               </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.collapsedArrowBtn} onPress={handleNextStop}>
+              <Text style={styles.collapsedArrowBtnText}>›</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          /* Expanded Route Stop Card with Horizontal Swipeable Carousel */
+          <View style={styles.cardContent}>
+            {/* Route Header Status Banner & Route Selector Dropdown */}
+            <View style={styles.routeHeaderBanner}>
+              <TouchableOpacity
+                style={styles.routeSelectorBtn}
+                onPress={() => setShowRouteModal(true)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.pulsingDot} />
+                <Text style={styles.routeHeaderTitle} numberOfLines={1}>
+                  {activeRoute.name} • 1. Gün
+                </Text>
+                <Text style={{ fontSize: 12, color: "#286954" }}>▼</Text>
+              </TouchableOpacity>
 
-              {/* Route Stepper Track: 1 - 2 - 3 - 4 - 5 with Prev / Next Buttons */}
-              <View style={styles.routeStepperRow}>
-                <TouchableOpacity
-                  style={styles.stepperArrowBtn}
-                  onPress={handlePrevStop}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.stepperArrowText}>◀</Text>
-                </TouchableOpacity>
-
-                <ScrollView
-                  ref={stopsTrackScrollRef}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.stepperScrollTrack}
-                >
-                  {filteredStops.map((stop, sIdx) => {
-                    const isCurrent = sIdx === currentStopIdx;
-                    return (
-                      <TouchableOpacity
-                        key={stop.id}
-                        style={[styles.stepCirclePill, isCurrent && styles.stepCirclePillActive]}
-                        onPress={() => {
-                          handleStopPress(stop, sIdx);
-                          stopsCarouselRef.current?.scrollToOffset({
-                            offset: sIdx * (CARD_WIDTH + CARD_GAP),
-                            animated: true,
-                          });
-                        }}
-                      >
-                        <Text style={[styles.stepCircleText, isCurrent && styles.stepCircleTextActive]}>
-                          {sIdx + 1}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-
-                <TouchableOpacity
-                  style={styles.stepperArrowBtn}
-                  onPress={handleNextStop}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.stepperArrowText}>▶</Text>
-                </TouchableOpacity>
+              <View style={styles.stopsCountBadge}>
+                <Text style={styles.stopsCountText}>{activeRoute.stops.length} Durak</Text>
               </View>
+            </View>
 
-              {/* Horizontal Swipeable Stop Cards Carousel (Sağa Sola Kaydırmalı) */}
-              <FlatList
-                ref={stopsCarouselRef}
-                data={filteredStops}
-                keyExtractor={(item) => item.id}
+            {/* Route Stepper Track: 1 - 2 - 3 - 4 - 5 with Prev / Next Buttons */}
+            <View style={styles.routeStepperRow}>
+              <TouchableOpacity
+                style={styles.stepperArrowBtn}
+                onPress={handlePrevStop}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.stepperArrowText}>◀</Text>
+              </TouchableOpacity>
+
+              <ScrollView
+                ref={stopsTrackScrollRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                snapToInterval={CARD_WIDTH + CARD_GAP}
-                decelerationRate="fast"
-                contentContainerStyle={styles.carouselContainer}
-                getItemLayout={(_, index) => ({
-                  length: CARD_WIDTH + CARD_GAP,
-                  offset: (CARD_WIDTH + CARD_GAP) * index,
-                  index,
-                })}
-                onMomentumScrollEnd={(e) => {
-                  const offsetX = e.nativeEvent.contentOffset.x;
-                  const newIdx = Math.max(
-                    0,
-                    Math.min(filteredStops.length - 1, Math.round(offsetX / (CARD_WIDTH + CARD_GAP)))
-                  );
-                  if (newIdx !== currentStopIdx) {
-                    setCurrentStopIdx(newIdx);
-                    flyToStop(filteredStops[newIdx]);
-                    stopsTrackScrollRef.current?.scrollTo({ x: newIdx * 48, animated: true });
-                  }
-                }}
-                renderItem={({ item: stop, index: sIdx }) => {
+                contentContainerStyle={styles.stepperScrollTrack}
+              >
+                {filteredStops.map((stop, sIdx) => {
+                  const isCurrent = sIdx === currentStopIdx;
                   return (
                     <TouchableOpacity
-                      activeOpacity={0.96}
-                      onPress={() => handleStopPress(stop, sIdx)}
-                      style={[styles.stopCarouselCard, { width: CARD_WIDTH, marginRight: CARD_GAP }]}
+                      key={stop.id}
+                      style={[styles.stepCirclePill, isCurrent && styles.stepCirclePillActive]}
+                      onPress={() => {
+                        handleStopPress(stop, sIdx);
+                        stopsCarouselRef.current?.scrollToOffset({
+                          offset: sIdx * (CARD_WIDTH + CARD_GAP),
+                          animated: true,
+                        });
+                      }}
                     >
-                      {/* Stop Card Main */}
-                      <View style={styles.stopCardMain}>
-                        <View style={{ flex: 1 }}>
-                          <View style={styles.categoryRatingRow}>
-                            <View style={styles.categoryPill}>
-                              <Text style={styles.categoryPillText}>
-                                {sIdx + 1}. DURAK • {stop.category}
-                              </Text>
-                            </View>
-                            <Text style={styles.ratingBadge}>★ {stop.rating || 4.8}</Text>
-                          </View>
+                      <Text
+                        style={[styles.stepCircleText, isCurrent && styles.stepCircleTextActive]}
+                      >
+                        {sIdx + 1}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
 
-                          <Text style={styles.stopTitle} numberOfLines={1}>{stop.name}</Text>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 }}>
-                            <MapPinIcon size={12} color="#059669" />
-                            <Text style={styles.stopAddress} numberOfLines={1}>{stop.address}</Text>
+              <TouchableOpacity
+                style={styles.stepperArrowBtn}
+                onPress={handleNextStop}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.stepperArrowText}>▶</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Horizontal Swipeable Stop Cards Carousel (Sağa Sola Kaydırmalı) */}
+            <FlatList
+              ref={stopsCarouselRef}
+              data={filteredStops}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              snapToInterval={CARD_WIDTH + CARD_GAP}
+              decelerationRate="fast"
+              contentContainerStyle={styles.carouselContainer}
+              getItemLayout={(_, index) => ({
+                length: CARD_WIDTH + CARD_GAP,
+                offset: (CARD_WIDTH + CARD_GAP) * index,
+                index,
+              })}
+              onMomentumScrollEnd={(e) => {
+                const offsetX = e.nativeEvent.contentOffset.x;
+                const newIdx = Math.max(
+                  0,
+                  Math.min(filteredStops.length - 1, Math.round(offsetX / (CARD_WIDTH + CARD_GAP))),
+                );
+                if (newIdx !== currentStopIdx) {
+                  setCurrentStopIdx(newIdx);
+                  flyToStop(filteredStops[newIdx]);
+                  stopsTrackScrollRef.current?.scrollTo({ x: newIdx * 48, animated: true });
+                }
+              }}
+              renderItem={({ item: stop, index: sIdx }) => {
+                return (
+                  <TouchableOpacity
+                    activeOpacity={0.96}
+                    onPress={() => handleStopPress(stop, sIdx)}
+                    style={[styles.stopCarouselCard, { width: CARD_WIDTH, marginRight: CARD_GAP }]}
+                  >
+                    {/* Stop Card Main */}
+                    <View style={styles.stopCardMain}>
+                      <View style={{ flex: 1 }}>
+                        <View style={styles.categoryRatingRow}>
+                          <View style={styles.categoryPill}>
+                            <Text style={styles.categoryPillText}>
+                              {sIdx + 1}. DURAK • {stop.category}
+                            </Text>
                           </View>
+                          <Text style={styles.ratingBadge}>★ {stop.rating || 4.8}</Text>
                         </View>
 
-                        {stop.photoUrl ? (
-                          <Image source={{ uri: stop.photoUrl }} style={styles.stopThumb} resizeMode="cover" />
-                        ) : (
-                          <View style={[styles.stopThumb, styles.stopThumbFallback]}>
-                            <MonumentIcon size={24} color="#059669" />
-                          </View>
-                        )}
+                        <Text style={styles.stopTitle} numberOfLines={1}>
+                          {stop.name}
+                        </Text>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 4,
+                            marginTop: 3,
+                          }}
+                        >
+                          <MapPinIcon size={12} color="#059669" />
+                          <Text style={styles.stopAddress} numberOfLines={1}>
+                            {stop.address}
+                          </Text>
+                        </View>
                       </View>
 
-                      {/* Walking & Timing Micro-stats */}
-                      <View style={styles.microStatsCard}>
-                        <View style={styles.microStatItem}>
-                          <View style={styles.microStatIconBox}>
-                            <WalkIcon size={14} color="#059669" />
-                          </View>
-                          <View>
-                            <Text style={styles.microStatTitle}>{stop.walkTimeFromPrev || '~4 dk yürüyüş'}</Text>
-                            <Text style={styles.microStatSub}>{stop.distanceFromPrev || '320m'} mesafe</Text>
-                          </View>
-                        </View>
-
-                        <View style={styles.microStatDivider} />
-
-                        <View style={styles.microStatItem}>
-                          <View style={styles.microStatIconBox}>
-                            <ClockIcon size={14} color="#059669" />
-                          </View>
-                          <View>
-                            <Text style={styles.microStatTitle}>Tahmini süre: {stop.duration}</Text>
-                            <Text style={styles.microStatSub}>İdeal gezi payı</Text>
-                          </View>
-                        </View>
-                      </View>
-
-                      {/* Traveler Pro-Tip Delight Note */}
-                      {stop.notes && (
-                        <View style={styles.travelerNoteBox}>
-                          <View style={{ marginRight: 6, marginTop: 2 }}>
-                            <LightbulbIcon size={14} color="#d97706" />
-                          </View>
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.travelerNoteLabel}>GEZGİN NOTU</Text>
-                            <Text style={styles.travelerNoteText} numberOfLines={2}>{stop.notes}</Text>
-                          </View>
+                      {stop.photoUrl ? (
+                        <Image
+                          source={{ uri: stop.photoUrl }}
+                          style={styles.stopThumb}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View style={[styles.stopThumb, styles.stopThumbFallback]}>
+                          <MonumentIcon size={24} color="#059669" />
                         </View>
                       )}
+                    </View>
 
-                      {/* Action CTAs */}
-                      <View style={styles.actionsRow}>
+                    {/* Walking & Timing Micro-stats */}
+                    <View style={styles.microStatsCard}>
+                      <View style={styles.microStatItem}>
+                        <View style={styles.microStatIconBox}>
+                          <WalkIcon size={14} color="#059669" />
+                        </View>
+                        <View>
+                          <Text style={styles.microStatTitle}>
+                            {stop.walkTimeFromPrev || "~4 dk yürüyüş"}
+                          </Text>
+                          <Text style={styles.microStatSub}>
+                            {stop.distanceFromPrev || "320m"} mesafe
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.microStatDivider} />
+
+                      <View style={styles.microStatItem}>
+                        <View style={styles.microStatIconBox}>
+                          <ClockIcon size={14} color="#059669" />
+                        </View>
+                        <View>
+                          <Text style={styles.microStatTitle}>Tahmini süre: {stop.duration}</Text>
+                          <Text style={styles.microStatSub}>İdeal gezi payı</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Traveler Pro-Tip Delight Note */}
+                    {stop.notes && (
+                      <View style={styles.travelerNoteBox}>
+                        <View style={{ marginRight: 6, marginTop: 2 }}>
+                          <LightbulbIcon size={14} color="#d97706" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.travelerNoteLabel}>GEZGİN NOTU</Text>
+                          <Text style={styles.travelerNoteText} numberOfLines={2}>
+                            {stop.notes}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Action CTAs */}
+                    <View style={styles.actionsRow}>
+                      <TouchableOpacity
+                        style={styles.primaryActionBtn}
+                        onPress={() => handleStartDirections(stop.lat, stop.lng, stop.name)}
+                        activeOpacity={0.88}
+                      >
+                        <DirectionsIcon size={14} color="#ffffff" />
+                        <Text style={styles.primaryActionBtnText}>Yol Tarifi Başlat</Text>
+                        <Text style={{ fontSize: 14, color: "#ffffff" }}>➔</Text>
+                      </TouchableOpacity>
+
+                      <View style={styles.secondaryActionsSplit}>
                         <TouchableOpacity
-                          style={styles.primaryActionBtn}
-                          onPress={() => handleStartDirections(stop.lat, stop.lng, stop.name)}
-                          activeOpacity={0.88}
+                          style={[styles.secondaryBtn, stop.visited && styles.visitedBtnActive]}
+                          onPress={() => tripStore.toggleVisited(stop.id)}
                         >
-                          <DirectionsIcon size={14} color="#ffffff" />
-                          <Text style={styles.primaryActionBtnText}>Yol Tarifi Başlat</Text>
-                          <Text style={{ fontSize: 14, color: '#ffffff' }}>➔</Text>
+                          <Text
+                            style={[
+                              styles.secondaryBtnText,
+                              stop.visited && { color: "#013628", fontWeight: "800" },
+                            ]}
+                          >
+                            {stop.visited ? "✓ Tamamlandı" : "○ Ziyaret Edildi"}
+                          </Text>
                         </TouchableOpacity>
 
-                        <View style={styles.secondaryActionsSplit}>
-                          <TouchableOpacity
-                            style={[styles.secondaryBtn, stop.visited && styles.visitedBtnActive]}
-                            onPress={() => tripStore.toggleVisited(stop.id)}
-                          >
-                            <Text style={[styles.secondaryBtnText, stop.visited && { color: '#013628', fontWeight: '800' }]}>
-                              {stop.visited ? '✓ Tamamlandı' : '○ Ziyaret Edildi'}
-                            </Text>
-                          </TouchableOpacity>
-
-                          <TouchableOpacity
-                            style={[styles.secondaryBtn, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}
-                            onPress={() => handleShare({
+                        <TouchableOpacity
+                          style={[
+                            styles.secondaryBtn,
+                            { flexDirection: "row", alignItems: "center", gap: 4 },
+                          ]}
+                          onPress={() =>
+                            handleShare({
                               name: stop.name,
                               address: stop.address,
                               lat: stop.lat,
                               lng: stop.lng,
-                            })}
-                          >
-                            <Share2Icon size={12} color="#0f766e" />
-                            <Text style={styles.secondaryBtnText}>Paylaş & QR</Text>
-                          </TouchableOpacity>
+                            })
+                          }
+                        >
+                          <Share2Icon size={12} color="#0f766e" />
+                          <Text style={styles.secondaryBtnText}>Paylaş & QR</Text>
+                        </TouchableOpacity>
 
-                          <TouchableOpacity
-                            style={[styles.secondaryBtn, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}
-                            onPress={onOpenPlan}
-                          >
-                            <PlanIcon size={12} color="#0f766e" />
-                            <Text style={styles.secondaryBtnText}>Plan</Text>
-                          </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                          style={[
+                            styles.secondaryBtn,
+                            { flexDirection: "row", alignItems: "center", gap: 4 },
+                          ]}
+                          onPress={onOpenPlan}
+                        >
+                          <PlanIcon size={12} color="#0f766e" />
+                          <Text style={styles.secondaryBtnText}>Plan</Text>
+                        </TouchableOpacity>
                       </View>
-                    </TouchableOpacity>
-                  );
-                }}
-              />
-            </View>
-          )
+                    </View>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
         )}
       </View>
 
@@ -1753,21 +1862,27 @@ export function MapScreen({
                     }}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.routeModalName, isActive && { color: '#013628', fontWeight: '800' }]}>
+                      <Text
+                        style={[
+                          styles.routeModalName,
+                          isActive && { color: "#013628", fontWeight: "800" },
+                        ]}
+                      >
                         {r.name}
                       </Text>
-                      <Text style={styles.routeModalStopsCount}>{r.stops.length} Durak • Akıcı Sıralı</Text>
+                      <Text style={styles.routeModalStopsCount}>
+                        {r.stops.length} Durak • Akıcı Sıralı
+                      </Text>
                     </View>
-                    {isActive && <Text style={{ color: '#10b981', fontWeight: '900', fontSize: 16 }}>✓</Text>}
+                    {isActive && (
+                      <Text style={{ color: "#10b981", fontWeight: "900", fontSize: 16 }}>✓</Text>
+                    )}
                   </TouchableOpacity>
                 );
               })}
             </ScrollView>
 
-            <TouchableOpacity
-              style={styles.modalCloseBtn}
-              onPress={() => setShowRouteModal(false)}
-            >
+            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowRouteModal(false)}>
               <Text style={styles.modalCloseBtnText}>Kapat</Text>
             </TouchableOpacity>
           </View>
@@ -1786,13 +1901,14 @@ export function MapScreen({
             <View style={styles.shareModalHeader}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.shareModalSubtitle}>YOL TARİFİ & PAYLAŞIM</Text>
-                <Text style={styles.shareModalTitle} numberOfLines={1}>{shareTarget?.name}</Text>
-                <Text style={styles.shareModalAddress} numberOfLines={1}>{shareTarget?.address}</Text>
+                <Text style={styles.shareModalTitle} numberOfLines={1}>
+                  {shareTarget?.name}
+                </Text>
+                <Text style={styles.shareModalAddress} numberOfLines={1}>
+                  {shareTarget?.address}
+                </Text>
               </View>
-              <TouchableOpacity
-                style={styles.shareCloseBtn}
-                onPress={() => setShareTarget(null)}
-              >
+              <TouchableOpacity style={styles.shareCloseBtn} onPress={() => setShareTarget(null)}>
                 <Text style={styles.shareCloseText}>✕</Text>
               </TouchableOpacity>
             </View>
@@ -1803,7 +1919,7 @@ export function MapScreen({
                 <Image
                   source={{
                     uri: `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=${encodeURIComponent(
-                      `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}&travelmode=transit`
+                      `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}&travelmode=transit`,
                     )}`,
                   }}
                   style={styles.qrImage}
@@ -1831,14 +1947,16 @@ export function MapScreen({
                   Linking.openURL(transitUrl);
                 }}
               >
-                <View style={[styles.shareOptionIconBox, { backgroundColor: '#e0f2fe' }]}>
+                <View style={[styles.shareOptionIconBox, { backgroundColor: "#e0f2fe" }]}>
                   <TrainIcon size={18} color="#0284c7" />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.shareOptionTitle}>Toplu Taşıma Yol Tarifi</Text>
-                  <Text style={styles.shareOptionSub}>Metro, otobüs, marmaray ve vapur hatları</Text>
+                  <Text style={styles.shareOptionSub}>
+                    Metro, otobüs, marmaray ve vapur hatları
+                  </Text>
                 </View>
-                <Text style={{ fontSize: 16, color: '#0284c7' }}>➔</Text>
+                <Text style={{ fontSize: 16, color: "#0284c7" }}>➔</Text>
               </TouchableOpacity>
 
               {/* Araç ve Yürüyüş Yol Tarifi */}
@@ -1853,14 +1971,14 @@ export function MapScreen({
                   Linking.openURL(url);
                 }}
               >
-                <View style={[styles.shareOptionIconBox, { backgroundColor: '#fef3c7' }]}>
+                <View style={[styles.shareOptionIconBox, { backgroundColor: "#fef3c7" }]}>
                   <DirectionsIcon size={18} color="#d97706" />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.shareOptionTitle}>Yol Tarifi & Navigasyon</Text>
                   <Text style={styles.shareOptionSub}>Bulunduğun konumdan anlık yönlendirme</Text>
                 </View>
-                <Text style={{ fontSize: 16, color: '#d97706' }}>➔</Text>
+                <Text style={{ fontSize: 16, color: "#d97706" }}>➔</Text>
               </TouchableOpacity>
 
               {/* Sistem Paylaşımı (WhatsApp, Mesajlar, Link) */}
@@ -1876,14 +1994,14 @@ export function MapScreen({
                   });
                 }}
               >
-                <View style={[styles.shareOptionIconBox, { backgroundColor: '#dcfce7' }]}>
+                <View style={[styles.shareOptionIconBox, { backgroundColor: "#dcfce7" }]}>
                   <Share2Icon size={18} color="#16a34a" />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.shareOptionTitle}>WhatsApp & Mesajla Paylaş</Text>
                   <Text style={styles.shareOptionSub}>Bağlantı ve konum koordinatlarını ilet</Text>
                 </View>
-                <Text style={{ fontSize: 16, color: '#16a34a' }}>➔</Text>
+                <Text style={{ fontSize: 16, color: "#16a34a" }}>➔</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1900,14 +2018,11 @@ export function MapScreen({
         <View style={styles.mapSettingsBackdrop}>
           <View style={styles.mapSettingsCard}>
             <View style={styles.mapSettingsHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <SettingsIcon size={16} color="#013628" />
                 <Text style={styles.mapSettingsTitle}>Harita Ayarları</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => setShowMapSettingsModal(false)}
-                activeOpacity={0.7}
-              >
+              <TouchableOpacity onPress={() => setShowMapSettingsModal(false)} activeOpacity={0.7}>
                 <Text style={styles.mapSettingsClose}>✕</Text>
               </TouchableOpacity>
             </View>
@@ -1934,7 +2049,12 @@ export function MapScreen({
                   `);
                 }}
               >
-                <View style={[styles.mapSettingToggleKnob, showRouteLines && styles.mapSettingToggleKnobActive]} />
+                <View
+                  style={[
+                    styles.mapSettingToggleKnob,
+                    showRouteLines && styles.mapSettingToggleKnobActive,
+                  ]}
+                />
               </TouchableOpacity>
             </View>
 
@@ -1960,7 +2080,12 @@ export function MapScreen({
                   `);
                 }}
               >
-                <View style={[styles.mapSettingToggleKnob, useRoadRouting && styles.mapSettingToggleKnobActive]} />
+                <View
+                  style={[
+                    styles.mapSettingToggleKnob,
+                    useRoadRouting && styles.mapSettingToggleKnobActive,
+                  ]}
+                />
               </TouchableOpacity>
             </View>
 
@@ -1969,27 +2094,34 @@ export function MapScreen({
               <Text style={styles.mapSettingSectionTitle}>Harita Görünümü</Text>
               <View style={styles.mapLayerOptions}>
                 {[
-                  { key: 'light', label: 'Standart', iconType: 'sun' },
-                  { key: 'dark', label: 'Koyu', iconType: 'moon' },
-                  { key: 'satellite', label: 'Uydu', iconType: 'satellite' },
+                  { key: "light", label: "Standart", iconType: "sun" },
+                  { key: "dark", label: "Koyu", iconType: "moon" },
+                  { key: "satellite", label: "Uydu", iconType: "satellite" },
                 ].map((layer) => {
                   const isActive = activeTileLayer === layer.key;
                   return (
                     <TouchableOpacity
                       key={layer.key}
                       style={[styles.mapLayerOption, isActive && styles.mapLayerOptionActive]}
-                      onPress={() => handleSelectTileLayer(layer.key as 'light' | 'dark' | 'satellite')}
+                      onPress={() =>
+                        handleSelectTileLayer(layer.key as "light" | "dark" | "satellite")
+                      }
                     >
-                      {layer.iconType === 'sun' && (
-                        <SunIcon size={18} color={isActive ? '#ffffff' : '#d97706'} />
+                      {layer.iconType === "sun" && (
+                        <SunIcon size={18} color={isActive ? "#ffffff" : "#d97706"} />
                       )}
-                      {layer.iconType === 'moon' && (
-                        <MoonIcon size={18} color={isActive ? '#ffffff' : '#6366f1'} />
+                      {layer.iconType === "moon" && (
+                        <MoonIcon size={18} color={isActive ? "#ffffff" : "#6366f1"} />
                       )}
-                      {layer.iconType === 'satellite' && (
-                        <SatelliteIcon size={18} color={isActive ? '#ffffff' : '#059669'} />
+                      {layer.iconType === "satellite" && (
+                        <SatelliteIcon size={18} color={isActive ? "#ffffff" : "#059669"} />
                       )}
-                      <Text style={[styles.mapLayerOptionText, isActive && styles.mapLayerOptionTextActive]}>
+                      <Text
+                        style={[
+                          styles.mapLayerOptionText,
+                          isActive && styles.mapLayerOptionTextActive,
+                        ]}
+                      >
                         {layer.label}
                       </Text>
                     </TouchableOpacity>
@@ -2006,55 +2138,57 @@ export function MapScreen({
 }
 
 function getCategoryFromTypes(types?: string[]): string {
-  if (!types) return 'MEKAN';
-  if (types.includes('museum')) return 'MÜZE';
-  if (types.includes('cafe') || types.includes('bakery')) return 'KAHVE & MOLA';
-  if (types.includes('restaurant') || types.includes('food')) return 'YEME-İÇME';
-  if (types.includes('church') || types.includes('mosque') || types.includes('place_of_worship')) return 'TARİHİ YER';
-  if (types.includes('tourist_attraction') || types.includes('point_of_interest')) return 'TARİHİ YER';
-  return 'MEKAN';
+  if (!types) return "MEKAN";
+  if (types.includes("museum")) return "MÜZE";
+  if (types.includes("cafe") || types.includes("bakery")) return "KAHVE & MOLA";
+  if (types.includes("restaurant") || types.includes("food")) return "YEME-İÇME";
+  if (types.includes("church") || types.includes("mosque") || types.includes("place_of_worship"))
+    return "TARİHİ YER";
+  if (types.includes("tourist_attraction") || types.includes("point_of_interest"))
+    return "TARİHİ YER";
+  return "MEKAN";
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#faf8ff',
+    backgroundColor: "#faf8ff",
   },
   fullMap: {
-    ...StyleSheet.absoluteFill as any,
-    backgroundColor: '#eaf1ec',
+    ...(StyleSheet.absoluteFill as any),
+    backgroundColor: "#eaf1ec",
   },
   liveIndicatorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   cardHeaderTitle: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     letterSpacing: 0.3,
   },
   topFloatingArea: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 8 : 36,
+    paddingTop: Platform.OS === "ios" ? 8 : 36,
     zIndex: 20,
   },
   searchRow: {
     marginBottom: 8,
   },
   searchPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
     borderRadius: 999,
     paddingHorizontal: 14,
     height: 44,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -2063,19 +2197,19 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    color: '#131b2e',
-    height: '100%',
+    color: "#131b2e",
+    height: "100%",
   },
   voiceMicBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#ecfdf5',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#ecfdf5",
+    alignItems: "center",
+    justifyContent: "center",
   },
   filterPillsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
     paddingBottom: 4,
   },
@@ -2083,78 +2217,78 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
+    backgroundColor: "#ffffff",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   filterPillActive: {
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
   },
   filterPillText: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#404945',
+    fontWeight: "800",
+    color: "#404945",
     letterSpacing: 0.3,
   },
   filterPillTextActive: {
-    color: '#ffffff',
+    color: "#ffffff",
   },
   searchResultsOverlay: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 110 : 130,
+    position: "absolute",
+    top: Platform.OS === "ios" ? 110 : 130,
     left: 16,
     right: 16,
     maxHeight: 260,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderRadius: 18,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
     zIndex: 30,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   searchResultsScroll: {
     maxHeight: 240,
   },
   searchResultItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#f2f3ff',
+    borderBottomColor: "#f2f3ff",
   },
   searchResultName: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#013628',
+    fontWeight: "700",
+    color: "#013628",
   },
   searchResultAddr: {
     fontSize: 11,
-    color: '#717974',
+    color: "#717974",
     marginTop: 1,
   },
   searchResultRating: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#10B981',
+    fontWeight: "700",
+    color: "#10B981",
   },
   routeOverviewPill: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 115 : 135,
+    position: "absolute",
+    top: Platform.OS === "ios" ? 115 : 135,
     left: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -2163,12 +2297,12 @@ const styles = StyleSheet.create({
   },
   routeOverviewText: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   rightFloatingControls: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 115 : 135,
+    position: "absolute",
+    top: Platform.OS === "ios" ? 115 : 135,
     right: 16,
     gap: 8,
     zIndex: 10,
@@ -2177,36 +2311,36 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: 'rgba(255, 255, 255, 0.96)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 4,
   },
   gpsPulseDot: {
-    position: 'absolute',
+    position: "absolute",
     top: 9,
     right: 9,
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   poiLoadingPill: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 160 : 180,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
+    position: "absolute",
+    top: Platform.OS === "ios" ? 160 : 180,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 999,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -2215,26 +2349,26 @@ const styles = StyleSheet.create({
   },
   poiLoadingText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#013628',
+    fontWeight: "700",
+    color: "#013628",
   },
   bottomSheetContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: SCREEN_H * 0.80,
-    backgroundColor: '#ffffff',
+    maxHeight: SCREEN_H * 0.8,
+    backgroundColor: "#ffffff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
+    borderTopColor: "#e2e8f0",
     paddingTop: 6,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 10,
+    paddingBottom: Platform.OS === "ios" ? 24 : 10,
     paddingHorizontal: 16,
-    shadowColor: '#013628',
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.14,
     shadowRadius: 16,
@@ -2251,43 +2385,43 @@ const styles = StyleSheet.create({
   dragHandleTouchArea: {
     paddingTop: 4,
     paddingBottom: 4,
-    alignItems: 'center',
+    alignItems: "center",
   },
   dragHandle: {
     width: 44,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: '#c0c8c3',
-    alignSelf: 'center',
+    backgroundColor: "#c0c8c3",
+    alignSelf: "center",
     marginBottom: 4,
   },
   expandCollapseRow: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 2,
   },
   expandCollapseText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#286954',
+    fontWeight: "700",
+    color: "#286954",
     letterSpacing: 0.2,
   },
   collapsedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 4,
   },
   collapsedTitle: {
     fontSize: 14,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   collapsedSub: {
     fontSize: 11,
-    color: '#717974',
+    color: "#717974",
     marginTop: 1,
   },
   collapsedActionPill: {
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 999,
@@ -2295,34 +2429,34 @@ const styles = StyleSheet.create({
   },
   collapsedActionPillText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#ffffff',
+    fontWeight: "800",
+    color: "#ffffff",
   },
   collapsedCloseBtn: {
     padding: 6,
   },
   collapsedCloseBtnText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#717974',
+    fontWeight: "700",
+    color: "#717974",
   },
   collapsedStopBadge: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#013628',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#013628",
+    alignItems: "center",
+    justifyContent: "center",
   },
   collapsedStopBadgeText: {
     fontSize: 12,
-    fontWeight: '900',
-    color: '#ffffff',
+    fontWeight: "900",
+    color: "#ffffff",
   },
   collapsedNavPill: {
-    backgroundColor: '#ecfdf5',
+    backgroundColor: "#ecfdf5",
     borderWidth: 1,
-    borderColor: '#a7f3d0',
+    borderColor: "#a7f3d0",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
@@ -2330,36 +2464,36 @@ const styles = StyleSheet.create({
   },
   collapsedNavPillText: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   collapsedArrowBtn: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#f2f3ff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f2f3ff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   collapsedArrowBtnText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   carouselContainer: {
     paddingVertical: 4,
   },
   stopCarouselCard: {
     borderRadius: 18,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   cardContent: {
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   clickedPlaceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 6,
   },
   closeCardBtn: {
@@ -2367,18 +2501,18 @@ const styles = StyleSheet.create({
   },
   closeCardText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#717974',
+    fontWeight: "700",
+    color: "#717974",
   },
   routeHeaderBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 6,
   },
   routeSelectorBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     flex: 1,
     marginRight: 8,
@@ -2387,46 +2521,46 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   routeHeaderTitle: {
     fontSize: 13,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     flexShrink: 1,
   },
   stopsCountBadge: {
-    backgroundColor: '#eaedff',
+    backgroundColor: "#eaedff",
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
   },
   stopsCountText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#404945',
+    fontWeight: "700",
+    color: "#404945",
   },
   routeStepperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginVertical: 4,
   },
   stepperArrowBtn: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#f2f3ff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f2f3ff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   stepperArrowText: {
     fontSize: 11,
-    color: '#013628',
-    fontWeight: '800',
+    color: "#013628",
+    fontWeight: "800",
   },
   stepperScrollTrack: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
     paddingHorizontal: 6,
   },
@@ -2434,66 +2568,66 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#f2f3ff',
+    backgroundColor: "#f2f3ff",
     borderWidth: 1,
-    borderColor: '#e2e7ff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#e2e7ff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   stepCirclePillActive: {
-    backgroundColor: '#013628',
-    borderColor: '#34D399',
+    backgroundColor: "#013628",
+    borderColor: "#34D399",
     transform: [{ scale: 1.15 }],
   },
   stepCircleText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#404945',
+    fontWeight: "700",
+    color: "#404945",
   },
   stepCircleTextActive: {
-    color: '#ffffff',
-    fontWeight: '900',
+    color: "#ffffff",
+    fontWeight: "900",
   },
   stopCardMain: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     gap: 10,
     marginTop: 6,
     marginBottom: 8,
   },
   categoryRatingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     marginBottom: 4,
   },
   categoryPill: {
-    backgroundColor: '#ecfdf5',
+    backgroundColor: "#ecfdf5",
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
   },
   categoryPillText: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     letterSpacing: 0.2,
   },
   ratingBadge: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#286954',
+    fontWeight: "700",
+    color: "#286954",
   },
   stopTitle: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     letterSpacing: -0.2,
   },
   stopAddress: {
     fontSize: 11,
-    color: '#717974',
+    color: "#717974",
     marginTop: 2,
   },
   stopThumb: {
@@ -2502,122 +2636,122 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   stopThumbFallback: {
-    backgroundColor: '#ecfdf5',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#ecfdf5",
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: '#bbedd8',
+    borderColor: "#bbedd8",
   },
   microStatsCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#f8fafc',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#f8fafc",
     borderRadius: 12,
     paddingVertical: 6,
     paddingHorizontal: 10,
     marginBottom: 6,
   },
   microStatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   microStatIconBox: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#e2e8f0',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#e2e8f0",
+    alignItems: "center",
+    justifyContent: "center",
   },
   microStatTitle: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#013628',
+    fontWeight: "700",
+    color: "#013628",
   },
   microStatSub: {
     fontSize: 9,
-    color: '#64748b',
+    color: "#64748b",
   },
   microStatDivider: {
     width: 1,
     height: 20,
-    backgroundColor: '#e2e8f0',
+    backgroundColor: "#e2e8f0",
   },
   travelerNoteBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#ecfdf5',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#ecfdf5",
     padding: 8,
     borderRadius: 12,
     marginBottom: 8,
   },
   travelerNoteLabel: {
     fontSize: 9,
-    fontWeight: '800',
-    color: '#286954',
+    fontWeight: "800",
+    color: "#286954",
     marginBottom: 1,
   },
   travelerNoteText: {
     fontSize: 11,
-    color: '#013628',
+    color: "#013628",
     lineHeight: 15,
   },
   actionsRow: {
-    flexDirection: 'column',
+    flexDirection: "column",
     gap: 6,
   },
   primaryActionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    backgroundColor: '#1e4d3e',
+    backgroundColor: "#1e4d3e",
     paddingVertical: 11,
     borderRadius: 999,
-    shadowColor: '#013628',
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.18,
     shadowRadius: 6,
     elevation: 3,
   },
   primaryActionBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   secondaryActionsSplit: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 6,
   },
   secondaryBtn: {
     flex: 1,
-    backgroundColor: '#f2f3ff',
+    backgroundColor: "#f2f3ff",
     paddingVertical: 8,
     borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   visitedBtnActive: {
-    backgroundColor: '#abedd3',
+    backgroundColor: "#abedd3",
   },
   secondaryBtnText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#404945',
+    fontWeight: "700",
+    color: "#404945",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
     paddingHorizontal: 20,
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderRadius: 24,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
     shadowRadius: 20,
@@ -2625,224 +2759,224 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     marginBottom: 4,
   },
   modalSub: {
     fontSize: 12,
-    color: '#717974',
+    color: "#717974",
     marginBottom: 12,
   },
   routeModalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: '#f8fafc',
+    backgroundColor: "#f8fafc",
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
   },
   routeModalItemActive: {
-    backgroundColor: '#ecfdf5',
-    borderColor: '#10b981',
+    backgroundColor: "#ecfdf5",
+    borderColor: "#10b981",
   },
   routeModalName: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#334155',
+    fontWeight: "700",
+    color: "#334155",
   },
   routeModalStopsCount: {
     fontSize: 11,
-    color: '#64748b',
+    color: "#64748b",
     marginTop: 2,
   },
   modalCloseBtn: {
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
     paddingVertical: 12,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 6,
   },
   modalCloseBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   shareActionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ecfdf5',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ecfdf5",
     paddingVertical: 11,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#a7f3d0',
+    borderColor: "#a7f3d0",
   },
   shareActionBtnText: {
-    color: '#013628',
+    color: "#013628",
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   placeDescBox: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: "#f8fafc",
     borderRadius: 12,
     padding: 10,
     marginTop: 8,
     marginBottom: 6,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
   },
   placeDescTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 4,
   },
   placeDescLabel: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     letterSpacing: 0.5,
   },
   placeDescText: {
     fontSize: 11.5,
-    color: '#334155',
+    color: "#334155",
     lineHeight: 16,
   },
   reviewsBox: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderRadius: 12,
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#f1f5f9',
+    borderColor: "#f1f5f9",
   },
   reviewsBoxTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 6,
   },
   reviewsBoxHeader: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#286954',
+    fontWeight: "800",
+    color: "#286954",
     letterSpacing: 0.5,
   },
   reviewsScroll: {
     maxHeight: 120,
   },
   reviewItem: {
-    backgroundColor: '#fafaf9',
+    backgroundColor: "#fafaf9",
     borderRadius: 8,
     padding: 8,
     marginBottom: 6,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e7e5e4',
+    borderColor: "#e7e5e4",
   },
   reviewItemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 3,
   },
   reviewAuthor: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#1c1917',
+    fontWeight: "700",
+    color: "#1c1917",
   },
   reviewRating: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#f59e0b',
+    fontWeight: "700",
+    color: "#f59e0b",
   },
   reviewText: {
     fontSize: 10.5,
-    color: '#44403c',
+    color: "#44403c",
     lineHeight: 14,
   },
   shareModalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-end",
   },
   shareModalCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
-    shadowColor: '#000',
+    paddingBottom: Platform.OS === "ios" ? 36 : 24,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
     elevation: 20,
   },
   shareModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     marginBottom: 14,
   },
   shareModalSubtitle: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#10b981',
+    fontWeight: "800",
+    color: "#10b981",
     letterSpacing: 0.8,
     marginBottom: 2,
   },
   shareModalTitle: {
     fontSize: 17,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   shareModalAddress: {
     fontSize: 12,
-    color: '#64748b',
+    color: "#64748b",
     marginTop: 2,
   },
   shareCloseBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#f1f5f9',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
   },
   shareCloseText: {
     fontSize: 14,
-    color: '#64748b',
-    fontWeight: '700',
+    color: "#64748b",
+    fontWeight: "700",
   },
   qrCodeBox: {
-    alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
     borderRadius: 20,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
     marginBottom: 14,
   },
   qrImage: {
     width: 170,
     height: 170,
     borderRadius: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   qrHintRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 10,
     paddingHorizontal: 8,
   },
   qrHintText: {
     fontSize: 11,
-    color: '#475569',
-    textAlign: 'center',
+    color: "#475569",
+    textAlign: "center",
     flex: 1,
     lineHeight: 15,
   },
@@ -2850,55 +2984,55 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   shareOptionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
     borderRadius: 14,
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
     gap: 12,
   },
   shareOptionIconBox: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   shareOptionTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontWeight: "700",
+    color: "#0f172a",
   },
   shareOptionSub: {
     fontSize: 11,
-    color: '#64748b',
+    color: "#64748b",
     marginTop: 1,
   },
   // Clicked Place Top Header & Action styles
   clickedPlaceTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 4,
     marginBottom: 8,
   },
   clickedPlaceHeaderRightActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   aiAskButtonPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 5,
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
     borderRadius: 999,
     paddingHorizontal: 11,
     paddingVertical: 6,
-    shadowColor: '#013628',
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -2906,73 +3040,73 @@ const styles = StyleSheet.create({
   },
   aiAskButtonText: {
     fontSize: 12,
-    color: '#ffffff',
-    fontWeight: '800',
+    color: "#ffffff",
+    fontWeight: "800",
   },
   closeCircleBtn: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#f1f5f9',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
   },
   closeCircleBtnText: {
     fontSize: 15,
-    color: '#64748b',
-    fontWeight: '800',
+    color: "#64748b",
+    fontWeight: "800",
   },
   // Active button state
   floatingControlBtnActive: {
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
   },
   // Map Settings Modal styles
   mapSettingsBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   mapSettingsCard: {
-    width: '100%',
+    width: "100%",
     maxWidth: 340,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 24,
     elevation: 16,
   },
   mapSettingsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   mapSettingsTitle: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#0f172a',
+    fontWeight: "800",
+    color: "#0f172a",
   },
   mapSettingsClose: {
     fontSize: 18,
-    color: '#64748b',
+    color: "#64748b",
     padding: 4,
   },
   mapSettingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: "#f1f5f9",
   },
   mapSettingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   mapSettingIcon: {
@@ -2980,29 +3114,29 @@ const styles = StyleSheet.create({
   },
   mapSettingLabel: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontWeight: "700",
+    color: "#0f172a",
   },
   mapSettingSub: {
     fontSize: 11,
-    color: '#64748b',
+    color: "#64748b",
     marginTop: 2,
   },
   mapSettingToggle: {
     width: 48,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#e2e8f0',
+    backgroundColor: "#e2e8f0",
     padding: 2,
   },
   mapSettingToggleActive: {
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   mapSettingToggleKnob: {
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     transform: [{ translateX: 0 }],
   },
   mapSettingToggleKnobActive: {
@@ -3013,118 +3147,118 @@ const styles = StyleSheet.create({
   },
   mapSettingSectionTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#64748b',
+    fontWeight: "700",
+    color: "#64748b",
     marginBottom: 12,
   },
   mapLayerOptions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
   },
   mapLayerOption: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: '#f8fafc',
+    backgroundColor: "#f8fafc",
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
   },
   mapLayerOptionActive: {
-    backgroundColor: '#013628',
-    borderColor: '#013628',
+    backgroundColor: "#013628",
+    borderColor: "#013628",
   },
   mapLayerOptionText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#64748b',
+    fontWeight: "700",
+    color: "#64748b",
     marginTop: 6,
   },
   mapLayerOptionTextActive: {
-    color: '#ffffff',
+    color: "#ffffff",
   },
   softIconBox: {
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: '#f1f5f9',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
   },
   softIconText: {
     fontSize: 16,
-    color: '#013628',
-    fontWeight: '700',
+    color: "#013628",
+    fontWeight: "700",
   },
   floatingControlIcon: {
     fontSize: 18,
-    color: '#013628',
-    fontWeight: '700',
+    color: "#013628",
+    fontWeight: "700",
   },
   pendingAddStopBanner: {
     marginTop: 8,
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 6,
     elevation: 5,
     borderWidth: 1,
-    borderColor: '#10B981',
+    borderColor: "#10B981",
   },
   pendingAddStopText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   pendingAddStopCancelBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
     marginLeft: 8,
   },
   pendingAddStopCancelText: {
-    color: '#fef3c7',
+    color: "#fef3c7",
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   emptyCollapsedIconWrap: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#ecfdf5',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#ecfdf5",
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyPlanCtaBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
-    backgroundColor: '#059669',
+    backgroundColor: "#059669",
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderRadius: 999,
-    shadowColor: '#059669',
+    shadowColor: "#059669",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 3,
   },
   emptyPlanCtaBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 0.2,
   },
   emptyRouteExpandedCard: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 18,
     paddingVertical: 20,
   },
@@ -3132,56 +3266,56 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#ecfdf5',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#ecfdf5",
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1.5,
-    borderColor: '#a7f3d0',
+    borderColor: "#a7f3d0",
     marginBottom: 12,
   },
   emptyRouteBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
-    backgroundColor: '#f0fdf4',
+    backgroundColor: "#f0fdf4",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#bbf7d0',
+    borderColor: "#bbf7d0",
     marginBottom: 10,
   },
   emptyRouteBadgeText: {
-    color: '#059669',
+    color: "#059669",
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 0.8,
   },
   emptyRouteExpandedTitle: {
     fontSize: 19,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     marginBottom: 6,
-    textAlign: 'center',
+    textAlign: "center",
   },
   emptyRouteExpandedSubtitle: {
     fontSize: 13,
-    color: '#52605b',
+    color: "#52605b",
     lineHeight: 18,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 18,
     paddingHorizontal: 8,
   },
   emptyRouteExpandedPrimaryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    backgroundColor: '#013628',
-    width: '100%',
+    backgroundColor: "#013628",
+    width: "100%",
     paddingVertical: 14,
     borderRadius: 14,
-    shadowColor: '#013628',
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.28,
     shadowRadius: 8,
@@ -3189,27 +3323,27 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   emptyRouteExpandedPrimaryBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 0.3,
   },
   emptyRouteHintRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
-    backgroundColor: '#fefce8',
+    backgroundColor: "#fefce8",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#fef08a',
-    width: '100%',
+    borderColor: "#fef08a",
+    width: "100%",
   },
   emptyRouteHintText: {
     fontSize: 11,
-    color: '#854d0e',
-    fontWeight: '600',
+    color: "#854d0e",
+    fontWeight: "600",
     flex: 1,
   },
 });

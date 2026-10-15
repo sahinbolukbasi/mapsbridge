@@ -7,7 +7,7 @@ export interface MCPToolDefinition {
   name: string;
   description: string;
   inputSchema: {
-    type: 'object';
+    type: "object";
     properties: Record<string, any>;
     required?: string[];
   };
@@ -15,55 +15,60 @@ export interface MCPToolDefinition {
 
 export const GATEWAY_TOOLS: Record<string, MCPToolDefinition> = {
   search_places: {
-    name: 'search_places',
-    description: 'Şehir içindeki ilgi noktalarını, müzeleri, restoran ve kafeleri arar.',
+    name: "search_places",
+    description: "Şehir içindeki ilgi noktalarını, müzeleri, restoran ve kafeleri arar.",
     inputSchema: {
-      type: 'object',
+      type: "object",
       properties: {
-        city: { type: 'string', description: 'Aranacak şehir' },
-        category: { type: 'string', enum: ['cafe', 'restaurant', 'museum', 'park', 'viewpoint', 'hotel'] },
-        query: { type: 'string', description: 'Arama terimi veya mekan adı' },
+        city: { type: "string", description: "Aranacak şehir" },
+        category: {
+          type: "string",
+          enum: ["cafe", "restaurant", "museum", "park", "viewpoint", "hotel"],
+        },
+        query: { type: "string", description: "Arama terimi veya mekan adı" },
       },
-      required: ['city', 'category'],
+      required: ["city", "category"],
     },
   },
   calculate_transit: {
-    name: 'calculate_transit',
-    description: 'İki nokta arasındaki mesafe ve ulaşım süresini hesaplar (yürüme, toplu taşıma, taksi).',
+    name: "calculate_transit",
+    description:
+      "İki nokta arasındaki mesafe ve ulaşım süresini hesaplar (yürüme, toplu taşıma, taksi).",
     inputSchema: {
-      type: 'object',
+      type: "object",
       properties: {
         origin: {
-          type: 'object',
-          properties: { lat: { type: 'number' }, lng: { type: 'number' } },
-          required: ['lat', 'lng'],
+          type: "object",
+          properties: { lat: { type: "number" }, lng: { type: "number" } },
+          required: ["lat", "lng"],
         },
         destination: {
-          type: 'object',
-          properties: { lat: { type: 'number' }, lng: { type: 'number' } },
-          required: ['lat', 'lng'],
+          type: "object",
+          properties: { lat: { type: "number" }, lng: { type: "number" } },
+          required: ["lat", "lng"],
         },
-        mode: { type: 'string', enum: ['walking', 'subway', 'bus', 'taxi'] },
+        mode: { type: "string", enum: ["walking", "subway", "bus", "taxi"] },
       },
-      required: ['origin', 'destination'],
+      required: ["origin", "destination"],
     },
   },
   weather_lookup: {
-    name: 'weather_lookup',
-    description: 'Hedef şehrin seyahat tarihleri için hava durumu tahminini ve yağış riskini döner.',
+    name: "weather_lookup",
+    description:
+      "Hedef şehrin seyahat tarihleri için hava durumu tahminini ve yağış riskini döner.",
     inputSchema: {
-      type: 'object',
+      type: "object",
       properties: {
-        city: { type: 'string', description: 'Hedef şehir' },
-        date: { type: 'string', description: 'Tarih (YYYY-MM-DD)' },
+        city: { type: "string", description: "Hedef şehir" },
+        date: { type: "string", description: "Tarih (YYYY-MM-DD)" },
       },
-      required: ['city'],
+      required: ["city"],
     },
   },
 };
 
 export interface TransitCalculationResult {
-  mode: 'walking' | 'subway' | 'bus' | 'taxi';
+  mode: "walking" | "subway" | "bus" | "taxi";
   distanceKm: number;
   durationMinutes: number;
 }
@@ -71,7 +76,7 @@ export interface TransitCalculationResult {
 export function executeTransitCalculation(
   origin: { lat: number; lng: number },
   destination: { lat: number; lng: number },
-  requestedMode: 'walking' | 'subway' | 'bus' | 'taxi' = 'subway'
+  requestedMode: "walking" | "subway" | "bus" | "taxi" = "subway",
 ): TransitCalculationResult {
   // Haversine formula for distance
   const R = 6371; // km
@@ -87,12 +92,12 @@ export function executeTransitCalculation(
   const distanceKm = Math.round(R * c * 10) / 10;
 
   let speedKmH = 4.5; // walking default
-  if (requestedMode === 'subway') speedKmH = 25;
-  else if (requestedMode === 'bus') speedKmH = 15;
-  else if (requestedMode === 'taxi') speedKmH = 30;
+  if (requestedMode === "subway") speedKmH = 25;
+  else if (requestedMode === "bus") speedKmH = 15;
+  else if (requestedMode === "taxi") speedKmH = 30;
 
   // Transit overhead (wait time, station entry/exit)
-  const overheadMinutes = requestedMode === 'walking' ? 0 : 7;
+  const overheadMinutes = requestedMode === "walking" ? 0 : 7;
   const transitMinutes = Math.max(5, Math.round((distanceKm / speedKmH) * 60) + overheadMinutes);
 
   return {
@@ -102,19 +107,22 @@ export function executeTransitCalculation(
   };
 }
 
-export function executeWeatherLookup(city: string, date?: string): { forecast: string; isRainy: boolean } {
+export function executeWeatherLookup(
+  city: string,
+  date?: string,
+): { forecast: string; isRainy: boolean } {
   // Deterministic seasonal / regional weather simulation for planning
-  const normCity = city.toLocaleLowerCase('tr');
+  const normCity = city.toLocaleLowerCase("tr");
   const isNorthern = /londra|amsterdam|paris|berlin|new york/iu.test(normCity);
 
   if (isNorthern) {
     return {
-      forecast: 'Parçalı bulutlu, ara sıra serpiştiren yağmur ihtimali, serin hava.',
+      forecast: "Parçalı bulutlu, ara sıra serpiştiren yağmur ihtimali, serin hava.",
       isRainy: true,
     };
   }
   return {
-    forecast: 'Açık ve güneşli, seyahat ve açık hava yürüyüşleri için uygun sıcaklık.',
+    forecast: "Açık ve güneşli, seyahat ve açık hava yürüyüşleri için uygun sıcaklık.",
     isRainy: false,
   };
 }

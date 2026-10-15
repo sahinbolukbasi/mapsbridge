@@ -1,5 +1,5 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface CarRentalAdvice {
   isCarRecommendedInCity: boolean;
@@ -40,8 +40,8 @@ JSON formatı:
 export async function runCarRentalAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: CarRentalAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: CarRentalAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
 
   const userQuery = `Hedef Şehir: "${destination}". Bu şehirde araç kiralamak mantıklı mı? Otopark, ücretli köprü/tünel ve kiralama tavsiyeleri hazırla.`;
@@ -59,10 +59,10 @@ export async function runCarRentalAgent(
         destination: bedrockRes.data.destination || destination,
         advice: bedrockRes.data.advice,
       },
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
-  throw new Error('Araç kiralama uzmanı tavsiyesi oluşturulamadı.');
+  throw new Error("Araç kiralama uzmanı tavsiyesi oluşturulamadı.");
 }

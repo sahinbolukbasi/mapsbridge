@@ -5,37 +5,37 @@
  * No polling — events propagate changes instantly.
  */
 
-import type { TripState, TripStateEvent } from './trip-state';
+import type { TripState, TripStateEvent } from "./trip-state";
 
 // ---------------------------------------------------------------------------
 // Events
 // ---------------------------------------------------------------------------
 
 export type MapSyncEventType =
-  | 'place.focused'
-  | 'place.added'
-  | 'place.removed'
-  | 'place.rejected'
-  | 'route.reordered'
-  | 'day.split'
-  | 'day.merged'
-  | 'note.added'
-  | 'note.updated'
-  | 'optimization.proposed'
-  | 'optimization.accepted'
-  | 'optimization.rejected';
+  | "place.focused"
+  | "place.added"
+  | "place.removed"
+  | "place.rejected"
+  | "route.reordered"
+  | "day.split"
+  | "day.merged"
+  | "note.added"
+  | "note.updated"
+  | "optimization.proposed"
+  | "optimization.accepted"
+  | "optimization.rejected";
 
 export interface MapSyncEvent {
   type: MapSyncEventType;
-  source: 'chat' | 'map' | 'system';
+  source: "chat" | "map" | "system";
   payload: Record<string, unknown>;
   timestamp: string;
 }
 
 export function createSyncEvent(
   type: MapSyncEventType,
-  source: 'chat' | 'map' | 'system',
-  payload: Record<string, unknown>
+  source: "chat" | "map" | "system",
+  payload: Record<string, unknown>,
 ): MapSyncEvent {
   return { type, source, payload, timestamp: new Date().toISOString() };
 }
@@ -119,7 +119,7 @@ export function createOptimizationProposal(
   proposed: OptimizationPlanSummary,
   improvements: string[],
   warnings: string[],
-  pinnedStopIds: string[]
+  pinnedStopIds: string[],
 ): OptimizationProposal {
   return {
     id: crypto.randomUUID(),
@@ -142,20 +142,20 @@ export interface PlaceSelection {
   name: string;
   selected: boolean;
   targetDay?: number;
-  targetTimeSlot?: 'morning' | 'afternoon' | 'evening' | 'night';
+  targetTimeSlot?: "morning" | "afternoon" | "evening" | "night";
 }
 
 export interface SelectToAddRequest {
   threadId: string;
   selections: PlaceSelection[];
-  source: 'chat' | 'map';
+  source: "chat" | "map";
 }
 
 export function validateSelectToAdd(request: SelectToAddRequest): string | null {
-  if (!request.selections.length) return 'En az bir mekan seçmelisin.';
-  const selected = request.selections.filter(s => s.selected);
-  if (!selected.length) return 'Hiçbir mekan seçilmedi.';
-  if (selected.length > 10) return 'Tek seferde en fazla 10 mekan eklenebilir.';
+  if (!request.selections.length) return "En az bir mekan seçmelisin.";
+  const selected = request.selections.filter((s) => s.selected);
+  if (!selected.length) return "Hiçbir mekan seçilmedi.";
+  if (selected.length > 10) return "Tek seferde en fazla 10 mekan eklenebilir.";
   return null;
 }
 
@@ -171,7 +171,7 @@ export interface PlaceCardEntity {
   lng: number;
   address?: string;
   openingHours?: string;
-  priceLevel?: '$' | '$$' | '$$$' | '$$$$';
+  priceLevel?: "$" | "$$" | "$$$" | "$$$$";
   rating?: number;
   reviewSummary?: {
     positiveThemes: string[];

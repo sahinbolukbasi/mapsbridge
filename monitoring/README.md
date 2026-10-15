@@ -20,6 +20,7 @@ monitoring/
 ---
 
 ## 1. Backend İzleme (`monitoring/backend/`)
+
 - **API Gateway:** HTTP API v2 ve WebSocket API için 4xx/5xx hata oranları, entegrasyon gecikmeleri ve aktif WebSocket bağlantı sayıları.
 - **AI Assistant:** `monitoring/alarms/ai-assistant.json`, `MapsBridge/TravelAI` EMF metrikleri için hata oranı, p95 latency ve provider/research timeout alarm eşiklerini tanımlar. Bu dosya alarm dağıtım şablonudur; SNS hedefi ortamın on-call politikasına göre eklenmelidir.
 - **AWS Lambda:** Soğuk başlatma (Cold Start) süreleri, yürütme süreleri (P50, P90, P99), eşzamanlı çalışma (Concurrency) ve bellek tüketimi.
@@ -29,6 +30,7 @@ monitoring/
 ---
 
 ## 2. Frontend & İstemci İzleme (`monitoring/frontend/`)
+
 - **Core Web Vitals:** Next.js SPA için Google standartlarında LCP (Largest Contentful Paint), FID (First Input Delay), CLS (Cumulative Layout Shift) ve INP (Interaction to Next Paint) ölçümleri.
 - **Client Error Tracker:** İstemcide meydana gelen yakalanmamış JavaScript hataları (`window.onerror`), reddedilen Promise'lar (`unhandledrejection`) ve ağ zaman aşımları.
 - **CloudFront CDN:** Önbellek isabet oranı (Cache Hit Ratio), origin gecikmesi ve 4xx/5xx oranı.
@@ -36,7 +38,9 @@ monitoring/
 ---
 
 ## 3. Servis Seviyesi İzleme (`monitoring/services/`)
+
 Her mikroservis kendi SLA/SLO taahhütlerine göre izlenir:
+
 1. **`ai-assistant`:** Bedrock Nova Micro / Claude Haiku API gecikmesi, harcanan token maliyeti, RAG vektör arama başarısı, günlük kullanıcı/servis kotası.
 2. **`identity-billing`:** Stripe Webhook teslimat gecikmesi, idempotent kredi ekleme/çıkarma makbuzları, ödeme dönüşüm oranları.
 3. **`map-trip`:** Rota optimizasyon süresi, `/k/:code` süreli paylaşım TTL doğrulama ve harita karo (tile) yükleme performansı.
@@ -47,7 +51,9 @@ Her mikroservis kendi SLA/SLO taahhütlerine göre izlenir:
 ---
 
 ## 4. Sentetik Testler (Canary Synthetics)
+
 Her 5 dakikada bir otomatik çalışan canary testi (`npm run monitor:synthetics`):
+
 - `/system/status` (Genel sistem sağlığı)
 - `/marketplace/blogs` (Herkese açık içerik akışı)
 - `/admin/session` (401 Auth gate denetimi)
@@ -56,6 +62,7 @@ Her 5 dakikada bir otomatik çalışan canary testi (`npm run monitor:synthetics
 ---
 
 ## 5. Dağıtık İzleme (Distributed Tracing: `x-correlation-id`)
+
 İstemciden başlayan her işlem benzersiz bir `x-correlation-id` alır:
 `Client ➔ CloudFront ➔ API Gateway ➔ Lambda ➔ DynamoDB / Bedrock ➔ EventBridge`
 Tüm loglar ve AWS X-Ray subsegmentleri bu kimlikle indekslenir.

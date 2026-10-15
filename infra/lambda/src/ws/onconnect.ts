@@ -44,7 +44,7 @@ export const handler = async (event: any) => {
         expiresAt,
         authVersion: 1,
       }),
-    })
+    }),
   );
 
   return { statusCode: 200, body: "Connected" };

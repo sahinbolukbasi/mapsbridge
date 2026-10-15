@@ -51,7 +51,8 @@ export const MAP_STYLES: MapStyleOption[] = [
     icon: "🏙️",
     url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
     subdomains: "abc",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
   },
   {
@@ -62,7 +63,7 @@ export const MAP_STYLES: MapStyleOption[] = [
     icon: "🚇",
     url: "https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=tr",
     subdomains: "0123",
-    attribution: '&copy; Google Maps',
+    attribution: "&copy; Google Maps",
     maxZoom: 20,
   },
   {
@@ -73,7 +74,7 @@ export const MAP_STYLES: MapStyleOption[] = [
     icon: "🌙",
     url: "https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=tr",
     subdomains: "0123",
-    attribution: '&copy; Google Maps',
+    attribution: "&copy; Google Maps",
     maxZoom: 20,
   },
   {

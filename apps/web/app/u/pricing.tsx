@@ -102,7 +102,10 @@ export default function PricingPage() {
     if (tier.monthly === 0) {
       // Ücretsiz plan — localStorage'a yaz
       try {
-        localStorage.setItem("mapsbridge.subscription", JSON.stringify({ plan: "free", cycle: billingCycle }));
+        localStorage.setItem(
+          "mapsbridge.subscription",
+          JSON.stringify({ plan: "free", cycle: billingCycle }),
+        );
       } catch {}
       showToast("✓ Başlangıç planı aktive edildi!");
       return;
@@ -116,11 +119,21 @@ export default function PricingPage() {
     if (!tier) return;
     const price = billingCycle === "yearly" ? tier.yearly : tier.monthly;
     try {
-      localStorage.setItem("mapsbridge.subscription", JSON.stringify({ plan: tier.id, cycle: billingCycle, price, startDate: new Date().toISOString() }));
+      localStorage.setItem(
+        "mapsbridge.subscription",
+        JSON.stringify({
+          plan: tier.id,
+          cycle: billingCycle,
+          price,
+          startDate: new Date().toISOString(),
+        }),
+      );
     } catch {}
     setShowCheckout(false);
     setSelectedTier(null);
-    showToast(`🎉 ${tier.name} planınız aktive edildi! (${billingCycle === "yearly" ? "Yıllık" : "Aylık"})`);
+    showToast(
+      `🎉 ${tier.name} planınız aktive edildi! (${billingCycle === "yearly" ? "Yıllık" : "Aylık"})`,
+    );
   }
 
   const formatPrice = (cents: number) => {
@@ -147,7 +160,8 @@ export default function PricingPage() {
             Seyahatin <span className="pricing-gradient">gücünü aç</span>
           </h1>
           <p className="pricing-sub">
-            AI rota kotaları, büyük grup gezileri ve rota pazarı — seyahatlerinizi bir üst seviyeye taşıyın.
+            AI rota kotaları, büyük grup gezileri ve rota pazarı — seyahatlerinizi bir üst seviyeye
+            taşıyın.
           </p>
 
           {/* Fatura Dönemi Toggle */}
@@ -184,7 +198,14 @@ export default function PricingPage() {
 
                 <div className="pricing-price-row">
                   <span className="pricing-price">
-                    {price === 0 ? "Ücretsiz" : <>{formatPrice(price)}<small>/ay</small></>}
+                    {price === 0 ? (
+                      "Ücretsiz"
+                    ) : (
+                      <>
+                        {formatPrice(price)}
+                        <small>/ay</small>
+                      </>
+                    )}
                   </span>
                   {billingCycle === "yearly" && price > 0 && (
                     <span className="pricing-monthly-note">
@@ -232,47 +253,55 @@ export default function PricingPage() {
                 <h3>Planını Onayla</h3>
                 <p>Sipariş özetini kontrol et ve devam et</p>
               </div>
-              <button type="button" className="pricing-close-btn" onClick={() => setShowCheckout(false)}>✕</button>
+              <button
+                type="button"
+                className="pricing-close-btn"
+                onClick={() => setShowCheckout(false)}
+              >
+                ✕
+              </button>
             </div>
 
-            {selectedTier && (() => {
-              const tier = TIERS.find((t) => t.id === selectedTier)!;
-              const price = billingCycle === "yearly" ? tier.yearly : tier.monthly;
-              return (
-                <div className="checkout-details">
-                  <div className="checkout-plan-row">
-                    <span className="checkout-plan-emoji">{tier.emoji}</span>
-                    <div>
-                      <strong>{tier.name} Planı</strong>
-                      <span>{billingCycle === "yearly" ? "Yıllık fatura" : "Aylık fatura"}</span>
+            {selectedTier &&
+              (() => {
+                const tier = TIERS.find((t) => t.id === selectedTier)!;
+                const price = billingCycle === "yearly" ? tier.yearly : tier.monthly;
+                return (
+                  <div className="checkout-details">
+                    <div className="checkout-plan-row">
+                      <span className="checkout-plan-emoji">{tier.emoji}</span>
+                      <div>
+                        <strong>{tier.name} Planı</strong>
+                        <span>{billingCycle === "yearly" ? "Yıllık fatura" : "Aylık fatura"}</span>
+                      </div>
+                      <span className="checkout-plan-price">{formatPrice(price)}/ay</span>
                     </div>
-                    <span className="checkout-plan-price">{formatPrice(price)}/ay</span>
+
+                    <div className="checkout-divider" />
+
+                    <div className="checkout-total-row">
+                      <span>Toplam</span>
+                      <strong>
+                        {price === 0 ? "Ücretsiz" : formatPrice(price)}
+                        {price > 0 && <small> / {billingCycle === "yearly" ? "yıl" : "ay"}</small>}
+                      </strong>
+                    </div>
+
+                    <div className="checkout-note">
+                      💡 Bu bir demo akıştır. Gerçek Stripe ödeme entegrasyonu Faz 2 kapsamında
+                      eklenecektir.
+                    </div>
+
+                    <button
+                      type="button"
+                      className="checkout-confirm-btn"
+                      onClick={handleConfirmCheckout}
+                    >
+                      Ödemeyi Onayla & Aktive Et
+                    </button>
                   </div>
-
-                  <div className="checkout-divider" />
-
-                  <div className="checkout-total-row">
-                    <span>Toplam</span>
-                    <strong>
-                      {price === 0 ? "Ücretsiz" : formatPrice(price)}
-                      {price > 0 && <small> / {billingCycle === "yearly" ? "yıl" : "ay"}</small>}
-                    </strong>
-                  </div>
-
-                  <div className="checkout-note">
-                    💡 Bu bir demo akıştır. Gerçek Stripe ödeme entegrasyonu Faz 2 kapsamında eklenecektir.
-                  </div>
-
-                  <button
-                    type="button"
-                    className="checkout-confirm-btn"
-                    onClick={handleConfirmCheckout}
-                  >
-                    Ödemeyi Onayla & Aktive Et
-                  </button>
-                </div>
-              );
-            })()}
+                );
+              })()}
           </div>
         </div>
       )}

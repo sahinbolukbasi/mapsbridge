@@ -1,8 +1,8 @@
-import { storage } from './storage';
+import { storage } from "./storage";
 
-export const API_BASE = 'https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com';
-const COGNITO_REGION = 'eu-central-1';
-const COGNITO_CLIENT_ID = '62t35qsehl3o9cdc6i4mg01tqt';
+export const API_BASE = "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com";
+const COGNITO_REGION = "eu-central-1";
+const COGNITO_CLIENT_ID = "62t35qsehl3o9cdc6i4mg01tqt";
 const COGNITO_ENDPOINT = `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/`;
 
 export interface UserSession {
@@ -41,28 +41,31 @@ export interface ChatMessage {
 // ─── Cognito Low-Level Requester ─────────────────────────────────────────────
 async function cognitoRequest(target: string, body: Record<string, unknown>) {
   const response = await fetch(COGNITO_ENDPOINT, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'content-type': 'application/x-amz-json-1.1',
-      'x-amz-target': `AWSCognitoIdentityProviderService.${target}`,
+      "content-type": "application/x-amz-json-1.1",
+      "x-amz-target": `AWSCognitoIdentityProviderService.${target}`,
     },
     body: JSON.stringify({ ClientId: COGNITO_CLIENT_ID, ...body }),
   });
   const data = await response.json();
   if (!response.ok) {
-    const errorType = data.__type || '';
-    const msg = data.message || 'İşlem tamamlanamadı.';
-    if (errorType.includes('NotAuthorizedException') || msg.includes('Incorrect username or password')) {
-      throw new Error('E-posta veya şifre hatalı. Lütfen tekrar deneyin.');
+    const errorType = data.__type || "";
+    const msg = data.message || "İşlem tamamlanamadı.";
+    if (
+      errorType.includes("NotAuthorizedException") ||
+      msg.includes("Incorrect username or password")
+    ) {
+      throw new Error("E-posta veya şifre hatalı. Lütfen tekrar deneyin.");
     }
-    if (errorType.includes('UserNotFoundException')) {
-      throw new Error('Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı.');
+    if (errorType.includes("UserNotFoundException")) {
+      throw new Error("Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı.");
     }
-    if (errorType.includes('CodeMismatchException')) {
-      throw new Error('Doğrulama kodu hatalı.');
+    if (errorType.includes("CodeMismatchException")) {
+      throw new Error("Doğrulama kodu hatalı.");
     }
-    if (errorType.includes('ExpiredCodeException')) {
-      throw new Error('Doğrulama kodunun süresi dolmuş. Lütfen yeniden talep edin.');
+    if (errorType.includes("ExpiredCodeException")) {
+      throw new Error("Doğrulama kodunun süresi dolmuş. Lütfen yeniden talep edin.");
     }
     throw new Error(msg);
   }
@@ -70,12 +73,12 @@ async function cognitoRequest(target: string, body: Record<string, unknown>) {
 }
 
 export function generateUUID(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -84,58 +87,58 @@ export function generateUUID(): string {
 export const authService = {
   async signIn(email: string, pass: string): Promise<UserSession> {
     const cleanEmail = email.trim().toLowerCase();
-    const data = await cognitoRequest('InitiateAuth', {
-      AuthFlow: 'USER_PASSWORD_AUTH',
+    const data = await cognitoRequest("InitiateAuth", {
+      AuthFlow: "USER_PASSWORD_AUTH",
       AuthParameters: { USERNAME: cleanEmail, PASSWORD: pass },
     });
     const result = data.AuthenticationResult;
     if (!result?.AccessToken) {
-      throw new Error('Giriş başarısız. Oturum anahtarı alınamadı.');
+      throw new Error("Giriş başarısız. Oturum anahtarı alınamadı.");
     }
     const session: UserSession = {
       token: result.AccessToken,
       email: cleanEmail,
-      name: cleanEmail.split('@')[0],
+      name: cleanEmail.split("@")[0],
     };
-    await storage.setItem('mb_token', session.token);
-    await storage.setItem('mb_email', session.email);
-    await storage.setItem('mb_last_activity', Date.now().toString());
-    if (session.name) await storage.setItem('mb_name', session.name);
+    await storage.setItem("mb_token", session.token);
+    await storage.setItem("mb_email", session.email);
+    await storage.setItem("mb_last_activity", Date.now().toString());
+    if (session.name) await storage.setItem("mb_name", session.name);
     // Persist refresh token for silent re-auth (never expires unless revoked)
     if (result.RefreshToken) {
-      await storage.setItem('mb_refresh_token', result.RefreshToken);
+      await storage.setItem("mb_refresh_token", result.RefreshToken);
     }
     return session;
   },
 
-  async signUp(email: string, pass: string, name: string, phone: string = '+905550000000') {
+  async signUp(email: string, pass: string, name: string, phone: string = "+905550000000") {
     const cleanEmail = email.trim().toLowerCase();
-    return cognitoRequest('SignUp', {
+    return cognitoRequest("SignUp", {
       Username: cleanEmail,
       Password: pass,
       UserAttributes: [
-        { Name: 'email', Value: cleanEmail },
-        { Name: 'name', Value: name.trim() },
-        { Name: 'phone_number', Value: phone.trim() },
+        { Name: "email", Value: cleanEmail },
+        { Name: "name", Value: name.trim() },
+        { Name: "phone_number", Value: phone.trim() },
       ],
     });
   },
 
   async confirmSignUp(email: string, code: string) {
-    return cognitoRequest('ConfirmSignUp', {
+    return cognitoRequest("ConfirmSignUp", {
       Username: email.trim().toLowerCase(),
       ConfirmationCode: code.trim(),
     });
   },
 
   async forgotPassword(email: string) {
-    return cognitoRequest('ForgotPassword', {
+    return cognitoRequest("ForgotPassword", {
       Username: email.trim().toLowerCase(),
     });
   },
 
   async confirmForgotPassword(email: string, code: string, newPass: string) {
-    return cognitoRequest('ConfirmForgotPassword', {
+    return cognitoRequest("ConfirmForgotPassword", {
       Username: email.trim().toLowerCase(),
       ConfirmationCode: code.trim(),
       Password: newPass,
@@ -143,55 +146,55 @@ export const authService = {
   },
 
   async getSession(): Promise<UserSession | null> {
-    const token = await storage.getItem('mb_token');
-    const email = await storage.getItem('mb_email');
-    const name = await storage.getItem('mb_name');
+    const token = await storage.getItem("mb_token");
+    const email = await storage.getItem("mb_email");
+    const name = await storage.getItem("mb_name");
     if (!token || !email) return null;
-    return { token, email, name: name || email.split('@')[0] };
+    return { token, email, name: name || email.split("@")[0] };
   },
 
   async refreshToken(): Promise<string | null> {
-    const refreshToken = await storage.getItem('mb_refresh_token');
+    const refreshToken = await storage.getItem("mb_refresh_token");
     if (!refreshToken) return null;
 
     try {
       const response = await fetch(COGNITO_ENDPOINT, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'content-type': 'application/x-amz-json-1.1',
-          'x-amz-target': 'AWSCognitoIdentityProviderService.InitiateAuth',
+          "content-type": "application/x-amz-json-1.1",
+          "x-amz-target": "AWSCognitoIdentityProviderService.InitiateAuth",
         },
         body: JSON.stringify({
-          AuthFlow: 'REFRESH_TOKEN_AUTH',
+          AuthFlow: "REFRESH_TOKEN_AUTH",
           ClientId: COGNITO_CLIENT_ID,
           AuthParameters: { REFRESH_TOKEN: refreshToken },
         }),
       });
 
       if (!response.ok) {
-        console.warn('[authService] Refresh token request rejected with status:', response.status);
+        console.warn("[authService] Refresh token request rejected with status:", response.status);
         return null;
       }
 
       const data = await response.json();
       const newToken = data.AuthenticationResult?.AccessToken;
       if (newToken) {
-        await storage.setItem('mb_token', newToken);
-        await storage.setItem('mb_last_activity', Date.now().toString());
+        await storage.setItem("mb_token", newToken);
+        await storage.setItem("mb_last_activity", Date.now().toString());
         return newToken;
       }
     } catch (e) {
-      console.warn('[authService] Refresh token failed:', e);
+      console.warn("[authService] Refresh token failed:", e);
     }
     return null;
   },
 
   async signOut(): Promise<void> {
-    await storage.removeItem('mb_token');
-    await storage.removeItem('mb_email');
-    await storage.removeItem('mb_name');
-    await storage.removeItem('mb_refresh_token');
-    await storage.removeItem('mb_last_activity');
+    await storage.removeItem("mb_token");
+    await storage.removeItem("mb_email");
+    await storage.removeItem("mb_name");
+    await storage.removeItem("mb_refresh_token");
+    await storage.removeItem("mb_last_activity");
   },
 };
 
@@ -199,7 +202,7 @@ export const authService = {
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   let session = await authService.getSession();
   const headers: Record<string, string> = {
-    'content-type': 'application/json',
+    "content-type": "application/json",
     ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
     ...((options.headers as Record<string, string>) || {}),
   };
@@ -214,23 +217,27 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
       // Attempt silent token refresh once
       const refreshedToken = await authService.refreshToken();
       if (refreshedToken) {
-        headers['Authorization'] = `Bearer ${refreshedToken}`;
+        headers["Authorization"] = `Bearer ${refreshedToken}`;
         response = await fetch(`${API_BASE}${endpoint}`, {
           ...options,
           headers,
         });
       } else {
-        console.warn('[apiRequest] 401 response and token refresh unavailable. Preserving local session.');
-        throw new Error('Oturum anahtarınız güncellenemedi. Lütfen internet bağlantınızı kontrol edin.');
+        console.warn(
+          "[apiRequest] 401 response and token refresh unavailable. Preserving local session.",
+        );
+        throw new Error(
+          "Oturum anahtarınız güncellenemedi. Lütfen internet bağlantınızı kontrol edin.",
+        );
       }
     }
 
     if (!response.ok) {
       if (response.status === 403) {
-        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+        throw new Error("Bu işlem için yetkiniz bulunmuyor.");
       }
       if (response.status === 429) {
-        throw new Error('Çok fazla istek gönderildi. Lütfen biraz bekleyin.');
+        throw new Error("Çok fazla istek gönderildi. Lütfen biraz bekleyin.");
       }
 
       const err = await response.json().catch(() => ({ error: response.statusText }));
@@ -239,8 +246,8 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 
     return response.json();
   } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.');
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new Error("İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.");
     }
     throw error;
   }
@@ -250,14 +257,14 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 export const routeService = {
   async listRoutes(): Promise<RouteEntity[]> {
     try {
-      const data = await apiRequest<{ routes: RouteEntity[] }>('/routes');
+      const data = await apiRequest<{ routes: RouteEntity[] }>("/routes");
       if (data?.routes) {
-        await storage.setItem('cached_routes', JSON.stringify(data.routes));
+        await storage.setItem("cached_routes", JSON.stringify(data.routes));
         return data.routes;
       }
     } catch {
       // Offline fallback: load from cached routes
-      const cached = await storage.getItem('cached_routes');
+      const cached = await storage.getItem("cached_routes");
       if (cached) return JSON.parse(cached);
     }
     return [];
@@ -271,13 +278,13 @@ export const routeService = {
         name: s.name,
         lat: s.lat,
         lng: s.lng,
-        category: s.category || 'Gezi',
-        address: s.address || '',
+        category: s.category || "Gezi",
+        address: s.address || "",
       })),
       isPublic: true,
     };
-    const res = await apiRequest<{ routeId: string; name: string }>('/routes', {
-      method: 'POST',
+    const res = await apiRequest<{ routeId: string; name: string }>("/routes", {
+      method: "POST",
       body: JSON.stringify(payload),
     });
     return {
@@ -292,16 +299,20 @@ export const routeService = {
     return apiRequest<RouteEntity>(`/routes/${encodeURIComponent(id)}`);
   },
 
-  async updateRoute(id: string, name: string, stops: RouteStop[]): Promise<{ routeId: string; status: string }> {
+  async updateRoute(
+    id: string,
+    name: string,
+    stops: RouteStop[],
+  ): Promise<{ routeId: string; status: string }> {
     return apiRequest<{ routeId: string; status: string }>(`/routes/${encodeURIComponent(id)}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify({ name, stops }),
     });
   },
 
   async deleteRoute(id: string): Promise<{ status: string }> {
     return apiRequest<{ status: string }>(`/routes/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };
@@ -311,7 +322,7 @@ export interface AISubAgentExecution {
   agentId: string;
   agentName: string;
   icon: string;
-  status: 'completed' | 'skipped' | 'failed';
+  status: "completed" | "skipped" | "failed";
   durationMs?: number;
 }
 
@@ -321,12 +332,12 @@ export interface AIContextChip {
   label: string;
   prompt: string;
   icon?: string;
-  scope?: 'trip' | 'day' | 'place' | 'topic';
+  scope?: "trip" | "day" | "place" | "topic";
 }
 
 // Subset of apps/web/app/lib/ai/types.ts FeasibilityIssue
 export interface AIFeasibilityIssue {
-  severity: 'error' | 'warning';
+  severity: "error" | "warning";
   code: string;
   message: string;
   day?: number;
@@ -341,7 +352,7 @@ export interface AIFeasibilityReport {
 
 // Mirrors apps/web/app/lib/ai/itinerary-actions.ts ItineraryActionPayload
 export interface AIItineraryAction {
-  action: 'add' | 'remove' | 'reorder' | 'move_to_day' | 'pin' | 'unpin';
+  action: "add" | "remove" | "reorder" | "move_to_day" | "pin" | "unpin";
   placeId?: string;
   placeName?: string;
   day?: number;
@@ -351,7 +362,7 @@ export interface AIItineraryAction {
 
 // Mirrors apps/web/app/lib/ai/focus-manager.ts ThreadFocus
 export interface AIThreadFocus {
-  scope: 'trip' | 'day' | 'place' | 'topic';
+  scope: "trip" | "day" | "place" | "topic";
   dayNumber?: number;
   placeId?: string;
   placeLabel?: string;
@@ -373,7 +384,7 @@ export interface AIAskContext {
   requestId?: string;
   trainingConsent?: boolean;
   conversationId?: string;
-  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  history?: Array<{ role: "user" | "assistant"; content: string }>;
   /** Full conversation state from previous turn — enables slot tracking and focus continuity */
   conversationState?: MobileConversationState;
   city?: string;
@@ -383,7 +394,7 @@ export interface AIAskContext {
 
 export interface AIAskResponse {
   answer: string;
-  responseMode?: 'clarify' | 'chat' | 'route';
+  responseMode?: "clarify" | "chat" | "route";
   provider?: string;
   modelUsed?: string;
   stops?: RouteStop[];
@@ -398,20 +409,30 @@ export interface AIAskResponse {
   flightPrices?: {
     destination: string;
     deals: Array<{
-      origin: string; destination: string; price: number; currency: string;
-      departureMonth?: string; affiliateLink: string; expiresAt: string;
+      origin: string;
+      destination: string;
+      price: number;
+      currency: string;
+      departureMonth?: string;
+      affiliateLink: string;
+      expiresAt: string;
     }>;
     cheapestPrice?: number;
     cheapestCurrency?: string;
     note: string;
-    source: 'travelpayouts_cache' | 'unavailable';
+    source: "travelpayouts_cache" | "unavailable";
     checkedAt: string;
   };
   travelAdvisory?: {
-    country: string; countrySlug: string;
-    level: 'normal' | 'some_risk' | 'avoid_non_essential' | 'avoid';
-    levelLabel: string; summary: string; lastChecked: string;
-    changeNote?: string; sourceUrl: string; disclaimer: string;
+    country: string;
+    countrySlug: string;
+    level: "normal" | "some_risk" | "avoid_non_essential" | "avoid";
+    levelLabel: string;
+    summary: string;
+    lastChecked: string;
+    changeNote?: string;
+    sourceUrl: string;
+    disclaimer: string;
   };
   clarification?: {
     isUnderspecified?: boolean;
@@ -447,7 +468,9 @@ export const aiService = {
     // Prepare history conforming to backend requirements (max 6 items, valid role & string content)
     const history = (context?.history || [])
       .slice(-6)
-      .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+      .filter(
+        (m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string",
+      )
       .map((m) => ({ role: m.role, content: m.content.slice(0, 1500) }));
 
     const body: Record<string, unknown> = {
@@ -463,13 +486,13 @@ export const aiService = {
 
     let session = await authService.getSession();
     const headers: Record<string, string> = {
-      'content-type': 'application/json',
+      "content-type": "application/json",
       ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
     };
 
     try {
       let res = await fetch(`${API_BASE}/ai/route-planner`, {
-        method: 'POST',
+        method: "POST",
         headers,
         body: JSON.stringify(body),
       });
@@ -478,9 +501,9 @@ export const aiService = {
       if (res.status === 401) {
         const refreshedToken = await authService.refreshToken();
         if (refreshedToken) {
-          headers['Authorization'] = `Bearer ${refreshedToken}`;
+          headers["Authorization"] = `Bearer ${refreshedToken}`;
           res = await fetch(`${API_BASE}/ai/route-planner`, {
-            method: 'POST',
+            method: "POST",
             headers,
             body: JSON.stringify(body),
           });
@@ -493,29 +516,41 @@ export const aiService = {
         const stops: RouteStop[] = (routeData?.stops || []).map((s: any, idx: number) => ({
           id: s.id || `stop-${idx}`,
           name: s.name,
-          category: s.category || 'Gezi',
+          category: s.category || "Gezi",
           lat: s.lat,
           lng: s.lng,
-          address: s.address || '',
+          address: s.address || "",
           duration: s.suggestedDuration || s.duration,
           day: s.day,
           timeSlot: s.timeSlot,
         }));
 
-        const isRoute = json.responseMode === 'route';
-        if (isRoute && (!stops.length || stops.some(s => !Number.isFinite(s.lat) || Math.abs(s.lat) > 90 || !Number.isFinite(s.lng) || Math.abs(s.lng) > 180))) {
-          throw new Error('Rota koordinatları doğrulanamadı.');
+        const isRoute = json.responseMode === "route";
+        if (
+          isRoute &&
+          (!stops.length ||
+            stops.some(
+              (s) =>
+                !Number.isFinite(s.lat) ||
+                Math.abs(s.lat) > 90 ||
+                !Number.isFinite(s.lng) ||
+                Math.abs(s.lng) > 180,
+            ))
+        ) {
+          throw new Error("Rota koordinatları doğrulanamadı.");
         }
-        const orchestratorAnswer = json.orchestratorSummary || json.answer || json.text || 'Seyahat planınız oluşturuldu.';
+        const orchestratorAnswer =
+          json.orchestratorSummary || json.answer || json.text || "Seyahat planınız oluşturuldu.";
 
         return {
           answer: orchestratorAnswer,
-          responseMode: json.responseMode || (isRoute ? 'route' : 'chat'),
-          provider: json.provider || 'aws_bedrock',
+          responseMode: json.responseMode || (isRoute ? "route" : "chat"),
+          provider: json.provider || "aws_bedrock",
           modelUsed: json.modelUsed,
           stops,
           isRoutePlan: isRoute,
-          routeTitle: routeData?.title || `${routeData?.destination || context?.city || 'Seyahat'} Rotası`,
+          routeTitle:
+            routeData?.title || `${routeData?.destination || context?.city || "Seyahat"} Rotası`,
           estimatedDays: routeData?.estimatedDays || 1,
           totalDistanceKm: routeData?.totalDistanceKm,
           agentsInvolved: json.agentsInvolved || [],
@@ -532,7 +567,10 @@ export const aiService = {
         };
       } else {
         const errJson = await res.json().catch(() => ({}));
-        throw Object.assign(new Error(errJson.error || 'AI yanıtı alınamadı.'), { status: res.status, code: errJson.code });
+        throw Object.assign(new Error(errJson.error || "AI yanıtı alınamadı."), {
+          status: res.status,
+          code: errJson.code,
+        });
       }
     } catch (error) {
       // Preserve failures and the request ID; never invent a successful route.
@@ -542,9 +580,9 @@ export const aiService = {
 
   async getLatestSession(): Promise<any> {
     try {
-      return await apiRequest('/ai/route-planner');
+      return await apiRequest("/ai/route-planner");
     } catch (e) {
-      console.warn('[aiService] getLatestSession error:', e);
+      console.warn("[aiService] getLatestSession error:", e);
       return null;
     }
   },
@@ -553,24 +591,23 @@ export const aiService = {
     try {
       return await apiRequest(`/ai/route-planner?conversationId=${encodeURIComponent(convId)}`);
     } catch (e) {
-      console.warn('[aiService] getSession error:', e);
+      console.warn("[aiService] getSession error:", e);
       return null;
     }
   },
 };
 
-
 // ─── Messaging / Chat Service ───────────────────────────────────────────────
 export const chatService = {
   async getMessages(): Promise<ChatMessage[]> {
     try {
-      const data = await apiRequest<{ messages: any[] }>('/chat/threads/default/messages');
+      const data = await apiRequest<{ messages: any[] }>("/chat/threads/default/messages");
       if (data?.messages?.length) {
         return data.messages.map((m: any) => ({
           id: m.id || m.messageId || `msg-${Math.random()}`,
-          senderId: m.senderId || 'user',
-          senderName: m.senderName || 'Gezgin',
-          content: m.content || '',
+          senderId: m.senderId || "user",
+          senderName: m.senderName || "Gezgin",
+          content: m.content || "",
           timestamp: m.timestamp || new Date().toISOString(),
         }));
       }
@@ -579,18 +616,19 @@ export const chatService = {
     // Local cached or default messages
     return [
       {
-        id: '1',
-        senderId: 'support',
-        senderName: 'MapsBridge Ekibi',
-        content: 'Hoş geldiniz! Rotalarınızı arkadaşlarınızla paylaşabilir veya birlikte seyahat planlayabilirsiniz.',
-        timestamp: '14:30',
+        id: "1",
+        senderId: "support",
+        senderName: "MapsBridge Ekibi",
+        content:
+          "Hoş geldiniz! Rotalarınızı arkadaşlarınızla paylaşabilir veya birlikte seyahat planlayabilirsiniz.",
+        timestamp: "14:30",
       },
       {
-        id: '2',
-        senderId: 'arda',
-        senderName: 'Arda (Gezgin)',
-        content: 'Karaköy ve Galata rotasını denedim, gün batımında kule manzarası harika!',
-        timestamp: '15:10',
+        id: "2",
+        senderId: "arda",
+        senderName: "Arda (Gezgin)",
+        content: "Karaköy ve Galata rotasını denedim, gün batımında kule manzarası harika!",
+        timestamp: "15:10",
       },
     ];
   },
@@ -599,15 +637,15 @@ export const chatService = {
     const session = await authService.getSession();
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
-      senderId: session?.email || 'user',
-      senderName: session?.name || 'Ben',
+      senderId: session?.email || "user",
+      senderName: session?.name || "Ben",
       content,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
     try {
-      await apiRequest('/chat/threads/default/messages', {
-        method: 'POST',
+      await apiRequest("/chat/threads/default/messages", {
+        method: "POST",
         body: JSON.stringify({ content }),
       });
     } catch {}
@@ -623,13 +661,13 @@ export interface MapInteractionEvent {
   lng: number;
   name?: string;
   category?: string;
-  action: 'map_click' | 'pin_select' | 'route_add' | 'search';
+  action: "map_click" | "pin_select" | "route_add" | "search";
   timestamp: string;
   metadata?: Record<string, any>;
 }
 
 export const trainingService = {
-  async recordMapInteraction(event: Omit<MapInteractionEvent, 'id' | 'timestamp'>): Promise<void> {
+  async recordMapInteraction(event: Omit<MapInteractionEvent, "id" | "timestamp">): Promise<void> {
     const payload: MapInteractionEvent = {
       id: generateUUID(),
       timestamp: new Date().toISOString(),
@@ -638,24 +676,24 @@ export const trainingService = {
 
     // 1. Locally persist dataset for model training buffer
     try {
-      const stored = await storage.getItem('mb_training_interactions');
+      const stored = await storage.getItem("mb_training_interactions");
       const list: MapInteractionEvent[] = stored ? JSON.parse(stored) : [];
       list.push(payload);
       if (list.length > 1000) list.shift();
-      await storage.setItem('mb_training_interactions', JSON.stringify(list));
+      await storage.setItem("mb_training_interactions", JSON.stringify(list));
     } catch {}
 
     // 2. Dispatch to backend AI telemetry pipeline only if user has given consent
-    const telemetryConsent = await storage.getItem('mb_telemetry_consent');
-    if (telemetryConsent !== 'true') return;
+    const telemetryConsent = await storage.getItem("mb_telemetry_consent");
+    if (telemetryConsent !== "true") return;
 
     try {
       fetch(`${API_BASE}/ai/telemetry`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          eventType: 'point_interaction',
-          datasetVersion: 'v2.4',
+          eventType: "point_interaction",
+          datasetVersion: "v2.4",
           payload,
         }),
       }).catch(() => {});
@@ -664,11 +702,10 @@ export const trainingService = {
 
   async getRecordedInteractions(): Promise<MapInteractionEvent[]> {
     try {
-      const stored = await storage.getItem('mb_training_interactions');
+      const stored = await storage.getItem("mb_training_interactions");
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
     }
   },
 };
-

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,19 +7,12 @@ import {
   Animated,
   SafeAreaView,
   StatusBar,
-} from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
+} from "react-native";
+import Svg, { Path, Circle } from "react-native-svg";
 
-import {
-  ExploreIcon,
-  MapIcon,
-  LeafIcon,
-  TreesIcon,
-  SparkIcon,
-  ShieldIcon,
-} from './Icons';
+import { ExploreIcon, MapIcon, LeafIcon, TreesIcon, SparkIcon, ShieldIcon } from "./Icons";
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 interface SplashScreenProps {
   onFinish?: () => void;
@@ -27,10 +20,10 @@ interface SplashScreenProps {
 }
 
 const SPLASH_STEPS = [
-  { text: 'Gezgin rotaları ve düğümler taranıyor...', percent: 28 },
-  { text: 'Harita katmanları ve patikalar yükleniyor...', percent: 62 },
-  { text: 'Topluluk rotaları ve GPS optimize ediliyor...', percent: 88 },
-  { text: 'Keşif atlası hazır!', percent: 100 },
+  { text: "Gezgin rotaları ve düğümler taranıyor...", percent: 28 },
+  { text: "Harita katmanları ve patikalar yükleniyor...", percent: 62 },
+  { text: "Topluluk rotaları ve GPS optimize ediliyor...", percent: 88 },
+  { text: "Keşif atlası hazır!", percent: 100 },
 ];
 
 export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenProps) {
@@ -54,7 +47,7 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
           duration: 900,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
     pulse.start();
     return () => pulse.stop();
@@ -199,7 +192,7 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
                   {
                     width: progressAnim.interpolate({
                       inputRange: [0, 1],
-                      outputRange: ['0%', '100%'],
+                      outputRange: ["0%", "100%"],
                     }),
                   },
                 ]}
@@ -208,11 +201,11 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
 
             {/* Bottom info indicators */}
             <View style={styles.progressInfoRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <ExploreIcon size={12} color="#286954" />
                 <Text style={styles.progressInfoLeft}>Topoğrafya Katmanı</Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <SparkIcon size={12} color="#10B981" />
                 <Text style={styles.progressInfoRight}>Çevrimdışı Düğümler</Text>
               </View>
@@ -236,43 +229,43 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#faf8ff',
+    backgroundColor: "#faf8ff",
     zIndex: 9999,
   },
   safeArea: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
   glowTopRight: {
-    position: 'absolute',
+    position: "absolute",
     top: -40,
     right: -40,
     width: 240,
     height: 240,
     borderRadius: 120,
-    backgroundColor: 'rgba(52, 211, 153, 0.18)',
+    backgroundColor: "rgba(52, 211, 153, 0.18)",
   },
   glowBottomLeft: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -50,
     left: -50,
     width: 260,
     height: 260,
     borderRadius: 130,
-    backgroundColor: 'rgba(1, 54, 40, 0.08)',
+    backgroundColor: "rgba(1, 54, 40, 0.08)",
   },
   topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingTop: 8,
   },
   liveBridgePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(234, 237, 255, 0.85)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(234, 237, 255, 0.85)",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
@@ -282,18 +275,18 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   liveBridgeText: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#404945',
+    fontWeight: "800",
+    color: "#404945",
     letterSpacing: 0.5,
   },
   ecoPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(236, 253, 245, 0.9)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(236, 253, 245, 0.9)",
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 999,
@@ -304,27 +297,27 @@ const styles = StyleSheet.create({
   },
   ecoPillText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#286954',
+    fontWeight: "700",
+    color: "#286954",
   },
   centerHero: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 20,
   },
   logoWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
   },
   logoOuterRing: {
     width: 106,
     height: 106,
     borderRadius: 53,
-    backgroundColor: '#013628',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#013628',
+    backgroundColor: "#013628",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.28,
     shadowRadius: 18,
@@ -334,43 +327,43 @@ const styles = StyleSheet.create({
     width: 82,
     height: 82,
     borderRadius: 41,
-    backgroundColor: '#1e4d3e',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#1e4d3e",
+    alignItems: "center",
+    justifyContent: "center",
   },
   routeOsBadge: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -10,
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
     paddingVertical: 3,
     paddingHorizontal: 10,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#34D399',
-    shadowColor: '#000',
+    borderColor: "#34D399",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
   },
   routeOsBadgeText: {
     fontSize: 9,
-    fontWeight: '800',
-    color: '#aef0d5',
+    fontWeight: "800",
+    color: "#aef0d5",
     letterSpacing: 1,
   },
   titleBox: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
   },
   appNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   appName: {
     fontSize: 32,
-    fontWeight: '900',
-    color: '#013628',
+    fontWeight: "900",
+    color: "#013628",
     letterSpacing: -0.5,
   },
   appIconCompass: {
@@ -378,26 +371,26 @@ const styles = StyleSheet.create({
   },
   appTagline: {
     fontSize: 14,
-    color: '#717974',
+    color: "#717974",
     marginTop: 4,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
     marginTop: 24,
-    width: '100%',
+    width: "100%",
     maxWidth: 320,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   statBadge: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     paddingVertical: 10,
     paddingHorizontal: 8,
     borderRadius: 14,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -409,37 +402,37 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 9,
-    fontWeight: '800',
-    color: '#404945',
+    fontWeight: "800",
+    color: "#404945",
     letterSpacing: 0.3,
   },
   bottomSection: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     gap: 14,
     paddingBottom: 10,
   },
   progressCard: {
-    width: '100%',
+    width: "100%",
     maxWidth: 360,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 16,
-    shadowColor: '#013628',
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
     elevation: 4,
   },
   progressHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 10,
   },
   progressStatusLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     flex: 1,
     marginRight: 8,
@@ -448,52 +441,52 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   progressStatusText: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#131b2e',
+    fontWeight: "600",
+    color: "#131b2e",
   },
   progressPercentText: {
     fontSize: 14,
-    fontWeight: '800',
-    color: '#286954',
+    fontWeight: "800",
+    color: "#286954",
   },
   progressTrack: {
-    width: '100%',
+    width: "100%",
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: '#e2e7ff',
-    overflow: 'hidden',
+    backgroundColor: "#e2e7ff",
+    overflow: "hidden",
   },
   progressFill: {
-    height: '100%',
+    height: "100%",
     borderRadius: 3.5,
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   progressInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 8,
   },
   progressInfoLeft: {
     fontSize: 10,
-    fontWeight: '600',
-    color: '#286954',
+    fontWeight: "600",
+    color: "#286954",
   },
   progressInfoRight: {
     fontSize: 10,
-    fontWeight: '600',
-    color: '#10B981',
+    fontWeight: "600",
+    color: "#10B981",
   },
   footerNoteBox: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 4,
   },
   securityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 5,
   },
   securityShield: {
@@ -501,13 +494,13 @@ const styles = StyleSheet.create({
   },
   securityText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#286954',
+    fontWeight: "700",
+    color: "#286954",
   },
   versionText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#717974',
+    fontWeight: "700",
+    color: "#717974",
     letterSpacing: 0.8,
   },
 });

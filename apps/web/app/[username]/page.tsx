@@ -22,5 +22,10 @@ export default async function PublicProfilePage({
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  return publicMetadata(`@${username} — Gezgin profili`, `@${username} tarafından paylaşılan seyahat rotalarını ve ziyaret edilen yerleri keşfet.`, `/${encodeURIComponent(username)}/`, "tr");
+  return publicMetadata(
+    `@${username} — Gezgin profili`,
+    `@${username} tarafından paylaşılan seyahat rotalarını ve ziyaret edilen yerleri keşfet.`,
+    `/${encodeURIComponent(username)}/`,
+    "tr",
+  );
 }

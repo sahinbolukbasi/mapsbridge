@@ -12,9 +12,7 @@
 import type { AffiliateCard, AffiliatePrice } from "./types";
 
 const TP_MARKER =
-  typeof process !== "undefined"
-    ? (process.env.NEXT_PUBLIC_TP_MARKER ?? "585085")
-    : "585085";
+  typeof process !== "undefined" ? (process.env.NEXT_PUBLIC_TP_MARKER ?? "585085") : "585085";
 
 function tpId(): string {
   return `tp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -73,7 +71,7 @@ export function buildFlightCard(opts: FlightCardOptions): AffiliateCard {
   if (destIata && originIata && opts.departDate) {
     const ddmm = toAviasalesDDMM(opts.departDate);
     href = appendMarker(
-      `https://www.aviasales.com/search/${originIata}${ddmm}${destIata}${opts.adults ?? 1}`
+      `https://www.aviasales.com/search/${originIata}${ddmm}${destIata}${opts.adults ?? 1}`,
     );
   } else if (destIata) {
     href = appendMarker(`https://www.aviasales.com/search/${destIata}`);
@@ -144,7 +142,8 @@ export function buildCarRentalCard(opts: CarRentalCardOptions): AffiliateCard {
   url.searchParams.set("promo_id", "4132");
   url.searchParams.set("source", "mapsbridge");
   if (opts.pickupDate) url.searchParams.set("pickup", opts.pickupDate.toISOString().slice(0, 10));
-  if (opts.dropoffDate) url.searchParams.set("dropoff", opts.dropoffDate.toISOString().slice(0, 10));
+  if (opts.dropoffDate)
+    url.searchParams.set("dropoff", opts.dropoffDate.toISOString().slice(0, 10));
 
   return {
     id: tpId(),

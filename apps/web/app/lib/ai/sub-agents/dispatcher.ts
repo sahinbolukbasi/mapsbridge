@@ -1,10 +1,10 @@
-import type { TripProfile } from '../types';
-import { runFoodAgent, type FoodAgentOutput } from './food-agent';
-import { runCarRentalAgent, type CarRentalAgentOutput } from './car-rental-agent';
-import { runCityTransitAgent, type CityTransitAgentOutput } from './city-transit-agent';
-import { runCityIntelAgent, type CityIntelAgentOutput } from './city-intel-agent';
-import { runHotelDealAgent, type HotelDealOutput } from './hotel-deal-agent';
-import { runFlightAgent, type FlightAgentOutput } from './flight-agent';
+import type { TripProfile } from "../types";
+import { runFoodAgent, type FoodAgentOutput } from "./food-agent";
+import { runCarRentalAgent, type CarRentalAgentOutput } from "./car-rental-agent";
+import { runCityTransitAgent, type CityTransitAgentOutput } from "./city-transit-agent";
+import { runCityIntelAgent, type CityIntelAgentOutput } from "./city-intel-agent";
+import { runHotelDealAgent, type HotelDealOutput } from "./hotel-deal-agent";
+import { runFlightAgent, type FlightAgentOutput } from "./flight-agent";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,7 +14,7 @@ export interface AgentDispatchResult {
   agentId: string;
   agentName: string;
   icon: string;
-  status: 'completed' | 'failed' | 'timeout' | 'skipped';
+  status: "completed" | "failed" | "timeout" | "skipped";
   durationMs: number;
   data?: unknown;
   summaryNote?: string;
@@ -24,7 +24,7 @@ export interface DispatchOptions {
   request: string;
   destination: string;
   profile: TripProfile;
-  mode: 'chat' | 'route';
+  mode: "chat" | "route";
   enabledAgents: Set<string>;
   timeoutMs: number;
   startedAt: number;
@@ -45,44 +45,45 @@ interface AgentEntry {
 
 const AGENT_REGISTRY: AgentEntry[] = [
   {
-    id: 'food',
-    name: 'Gastronomi Uzmanı',
-    icon: '🍽️',
-    pattern: /yemek|restoran|kahve|lezzet|mutfak|nerede yiyelim|açlık|breakfast|lunch|dinner|cafe/iu,
+    id: "food",
+    name: "Gastronomi Uzmanı",
+    icon: "🍽️",
+    pattern:
+      /yemek|restoran|kahve|lezzet|mutfak|nerede yiyelim|açlık|breakfast|lunch|dinner|cafe/iu,
     alwaysInRoute: true,
   },
   {
-    id: 'car-rental',
-    name: 'Araç Kiralama Uzmanı',
-    icon: '🚗',
+    id: "car-rental",
+    name: "Araç Kiralama Uzmanı",
+    icon: "🚗",
     pattern: /araç|araba|kiralama|kiralık|ehliyet|sürüş|rent.*car|driving/iu,
     alwaysInRoute: false,
   },
   {
-    id: 'city-transit',
-    name: 'Şehir İçi Ulaşım Uzmanı',
-    icon: '🚇',
+    id: "city-transit",
+    name: "Şehir İçi Ulaşım Uzmanı",
+    icon: "🚇",
     pattern: /metro|otobüs|tramvay|toplu taşıma|ulaşım kartı|bilet|tren|bus|subway/iu,
     alwaysInRoute: true,
   },
   {
-    id: 'city-intel',
-    name: 'Şehir İstihbaratı',
-    icon: '🌐',
+    id: "city-intel",
+    name: "Şehir İstihbaratı",
+    icon: "🌐",
     pattern: /güvenlik|hava durumu|sezon|ne zaman gidilir|nasıl bir şehir|genel bilgi|overview/iu,
     alwaysInRoute: false,
   },
   {
-    id: 'hotel-deal',
-    name: 'Otel Fırsat Takipçisi',
-    icon: '🏨',
+    id: "hotel-deal",
+    name: "Otel Fırsat Takipçisi",
+    icon: "🏨",
     pattern: /otel|konaklama|hotel|nerede kal|airbnb|hostel|booking/iu,
     alwaysInRoute: false,
   },
   {
-    id: 'flight',
-    name: 'Uçuş ve Havalimanı Uzmanı',
-    icon: '✈️',
+    id: "flight",
+    name: "Uçuş ve Havalimanı Uzmanı",
+    icon: "✈️",
     pattern: /uçuş|uçak|bilet|havayolu|flight|nasıl giderim/iu,
     alwaysInRoute: false,
   },
@@ -112,7 +113,7 @@ function isSimpleQuery(request: string): boolean {
 
 function detectRelevantAgents(
   request: string,
-  mode: 'chat' | 'route',
+  mode: "chat" | "route",
   enabledAgents: Set<string>,
 ): AgentEntry[] {
   const simple = isSimpleQuery(request);
@@ -123,7 +124,7 @@ function detectRelevantAgents(
 
     // In route mode, always include agents marked alwaysInRoute —
     // but skip them when the request is a simple/trivial query to avoid fan-out.
-    if (mode === 'route' && entry.alwaysInRoute && !simple) return true;
+    if (mode === "route" && entry.alwaysInRoute && !simple) return true;
 
     // Otherwise check if the request text matches the agent's pattern
     return entry.pattern.test(request);
@@ -188,10 +189,10 @@ function wrapFlight(destination: string, profile: TripProfile, timeoutMs: number
 
 const RUNNERS: Record<string, AgentRunner> = {
   food: wrapFood,
-  'car-rental': wrapCarRental,
-  'city-transit': wrapCityTransit,
-  'city-intel': wrapCityIntel,
-  'hotel-deal': wrapHotelDeal,
+  "car-rental": wrapCarRental,
+  "city-transit": wrapCityTransit,
+  "city-intel": wrapCityIntel,
+  "hotel-deal": wrapHotelDeal,
   flight: wrapFlight,
 };
 
@@ -202,8 +203,8 @@ const RUNNERS: Record<string, AgentRunner> = {
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => {
-      const err = new Error('Agent timeout');
-      err.name = 'TimeoutError';
+      const err = new Error("Agent timeout");
+      err.name = "TimeoutError";
       reject(err);
     }, ms);
 
@@ -243,9 +244,9 @@ export async function dispatchSubAgents(opts: DispatchOptions): Promise<AgentDis
       agentId: entry.id,
       agentName: entry.name,
       icon: entry.icon,
-      status: 'skipped' as const,
+      status: "skipped" as const,
       durationMs: 0,
-      summaryNote: 'Zaman butcesi yetersiz, agent atlandı.',
+      summaryNote: "Zaman butcesi yetersiz, agent atlandı.",
     }));
   }
 
@@ -260,36 +261,38 @@ export async function dispatchSubAgents(opts: DispatchOptions): Promise<AgentDis
         agentId: entry.id,
         agentName: entry.name,
         icon: entry.icon,
-        status: 'skipped',
+        status: "skipped",
         durationMs: 0,
-        summaryNote: 'Runner bulunamadı.',
+        summaryNote: "Runner bulunamadı.",
       };
     }
 
     const agentStart = Date.now();
     try {
-      const result = await withTimeout(runner(destination, profile, perAgentTimeout), perAgentTimeout);
+      const result = await withTimeout(
+        runner(destination, profile, perAgentTimeout),
+        perAgentTimeout,
+      );
       return {
         agentId: entry.id,
         agentName: entry.name,
         icon: entry.icon,
-        status: 'completed',
+        status: "completed",
         durationMs: result.durationMs,
         data: result.data,
       };
     } catch (error) {
       const isTimeout =
-        error instanceof Error &&
-        (error.name === 'TimeoutError' || error.name === 'AbortError');
+        error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
       return {
         agentId: entry.id,
         agentName: entry.name,
         icon: entry.icon,
-        status: isTimeout ? 'timeout' : 'failed',
+        status: isTimeout ? "timeout" : "failed",
         durationMs: Date.now() - agentStart,
         summaryNote: isTimeout
-          ? 'Agent zaman aşımına uğradı.'
-          : `Agent hatası: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`,
+          ? "Agent zaman aşımına uğradı."
+          : `Agent hatası: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`,
       };
     }
   });
@@ -297,16 +300,16 @@ export async function dispatchSubAgents(opts: DispatchOptions): Promise<AgentDis
   const results = await Promise.allSettled(promises);
 
   return results.map((r, i) => {
-    if (r.status === 'fulfilled') return r.value;
+    if (r.status === "fulfilled") return r.value;
     // Should not happen since individual promises handle their own errors,
     // but guard defensively.
     return {
       agentId: relevant[i].id,
       agentName: relevant[i].name,
       icon: relevant[i].icon,
-      status: 'failed' as const,
+      status: "failed" as const,
       durationMs: Date.now() - startedAt,
-      summaryNote: 'Beklenmeyen dispatch hatası.',
+      summaryNote: "Beklenmeyen dispatch hatası.",
     };
   });
 }

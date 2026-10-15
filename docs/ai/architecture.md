@@ -50,11 +50,11 @@ MapsBridge processes every user message through a two-phase LLM pipeline. Each p
 
 The intake model receives the raw user prompt along with conversation history and classifies the user's intent into one of three categories:
 
-| Intent | Description |
-|--------|-------------|
+| Intent    | Description                                                     |
+| --------- | --------------------------------------------------------------- |
 | `clarify` | Insufficient information to plan; generate clarifying questions |
-| `chat` | General conversation, not a planning request |
-| `plan` | Actionable travel planning request with enough context |
+| `chat`    | General conversation, not a planning request                    |
+| `plan`    | Actionable travel planning request with enough context          |
 
 Beyond classification, the intake model extracts structured trip context: destination, number of days, interests, travel style, dietary constraints, and companion information. This context feeds into the planning state machine (see `planning.ts`).
 
@@ -106,11 +106,11 @@ Manages the progressive building of a traveler's trip profile across multiple co
 
 Defines four core artifacts:
 
-| Artifact | Purpose |
-|----------|---------|
-| `INTAKE_PROMPT` | System prompt for the intake classification model |
-| `ANSWER_PROMPT` | System prompt for the answer generation model |
-| `INTAKE_SCHEMA` | JSON schema for structured intake output |
+| Artifact         | Purpose                                                          |
+| ---------------- | ---------------------------------------------------------------- |
+| `INTAKE_PROMPT`  | System prompt for the intake classification model                |
+| `ANSWER_PROMPT`  | System prompt for the answer generation model                    |
+| `INTAKE_SCHEMA`  | JSON schema for structured intake output                         |
 | `answerSchema()` | Dynamic JSON schema builder for answer output (varies by intent) |
 
 ### `agent-router.ts` -- Sub-Agent Routing
@@ -157,12 +157,12 @@ A custom or fine-tuned model handles the intake classification phase. If the int
 
 The AI service layer defines four model tiers used across the system. Sub-agents and auxiliary calls select the appropriate tier based on task complexity:
 
-| Tier | Model | Typical Use |
-|------|-------|-------------|
-| 1 | Nova Micro | Simple classification, keyword extraction |
-| 2 | Nova Lite | Moderate generation, short responses |
-| 3 | Claude Haiku 4.5 | Primary planning and conversation |
-| 4 | Claude 3.5 Sonnet | Complex reasoning, route generation |
+| Tier | Model             | Typical Use                               |
+| ---- | ----------------- | ----------------------------------------- |
+| 1    | Nova Micro        | Simple classification, keyword extraction |
+| 2    | Nova Lite         | Moderate generation, short responses      |
+| 3    | Claude Haiku 4.5  | Primary planning and conversation         |
+| 4    | Claude 3.5 Sonnet | Complex reasoning, route generation       |
 
 ---
 

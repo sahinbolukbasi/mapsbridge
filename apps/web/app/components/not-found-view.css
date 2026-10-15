@@ -6,7 +6,7 @@
   flex-direction: column;
   background-color: var(--bg, #faf8ff);
   color: var(--text, #131b2e);
-  font-family: 'Plus Jakarta Sans', var(--font-sans), sans-serif;
+  font-family: "Plus Jakarta Sans", var(--font-sans), sans-serif;
   position: relative;
   overflow-x: hidden;
 }
@@ -14,16 +14,24 @@
 /* Subtle Topographic Background Pattern */
 .not-found-topography {
   background-color: #faf8ff;
-  background-image: radial-gradient(#abedd3 0.75px, transparent 0.75px), radial-gradient(#abedd3 0.75px, #faf8ff 0.75px);
+  background-image:
+    radial-gradient(#abedd3 0.75px, transparent 0.75px),
+    radial-gradient(#abedd3 0.75px, #faf8ff 0.75px);
   background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
+  background-position:
+    0 0,
+    15px 15px;
 }
 
 [data-theme="dark"] .not-found-topography {
   background-color: #0d1512;
-  background-image: radial-gradient(rgba(52, 211, 153, 0.18) 0.75px, transparent 0.75px), radial-gradient(rgba(52, 211, 153, 0.18) 0.75px, #0d1512 0.75px);
+  background-image:
+    radial-gradient(rgba(52, 211, 153, 0.18) 0.75px, transparent 0.75px),
+    radial-gradient(rgba(52, 211, 153, 0.18) 0.75px, #0d1512 0.75px);
   background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
+  background-position:
+    0 0,
+    15px 15px;
 }
 
 /* Main Container */
@@ -58,7 +66,7 @@
   background: rgba(171, 237, 211, 0.45);
   border: 1px solid #93d4ba;
   color: #013628;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -100,7 +108,7 @@
 }
 
 .not-found-giant-number {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-weight: 800;
   letter-spacing: -0.05em;
   line-height: 0.9;
@@ -162,7 +170,8 @@
 }
 
 @keyframes pulseBeacon {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.8;
   }
@@ -186,7 +195,9 @@
   -webkit-backdrop-filter: blur(12px);
   border-radius: 14px;
   border: 1px solid #93d4ba;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.08),
+    0 8px 10px -6px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
 }
 
@@ -222,7 +233,7 @@
 }
 
 .not-found-coord-label {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -592,6 +603,13 @@
 }
 
 @keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
 }

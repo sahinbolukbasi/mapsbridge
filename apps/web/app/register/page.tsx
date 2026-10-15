@@ -31,7 +31,11 @@ export default function SignUpPage() {
     { id: "rule-lower", label: "En az bir küçük harf", valid: /[a-zğüşıöç]/.test(password) },
     { id: "rule-upper", label: "En az bir büyük harf", valid: /[A-ZĞÜŞİÖÇ]/.test(password) },
     { id: "rule-number", label: "En az bir rakam", valid: /[0-9]/.test(password) },
-    { id: "rule-symbol", label: "En az bir sembol (ör. !, ?, #)", valid: /[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ]/.test(password) },
+    {
+      id: "rule-symbol",
+      label: "En az bir sembol (ör. !, ?, #)",
+      valid: /[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ]/.test(password),
+    },
   ];
 
   const isPasswordValid = rules.every((r) => r.valid);
@@ -79,7 +83,7 @@ export default function SignUpPage() {
         setIsGoogleLoading(false);
       }
     },
-    [redirectToNext]
+    [redirectToNext],
   );
 
   useEffect(() => {
@@ -214,7 +218,9 @@ export default function SignUpPage() {
   const handleFallbackGmailSubmit = (e: FormEvent) => {
     e.preventDefault();
     setShowGoogleFallbackModal(false);
-    setMessage("Google ile kayıt şu anda gerçekleştirilemedi. Lütfen aşağıdaki formu kullanarak e-posta ve şifre ile kayıt olun.");
+    setMessage(
+      "Google ile kayıt şu anda gerçekleştirilemedi. Lütfen aşağıdaki formu kullanarak e-posta ve şifre ile kayıt olun.",
+    );
   };
 
   const triggerAppleSignUp = () => {
@@ -232,7 +238,10 @@ export default function SignUpPage() {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
     const cleanName = fullname.trim();
-    const cleanUser = (username || cleanEmail.split("@")[0]).trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    const cleanUser = (username || cleanEmail.split("@")[0])
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "");
 
     // Save profile details locally
     try {
@@ -246,15 +255,17 @@ export default function SignUpPage() {
           lastName,
           username: cleanUser || "gezgin",
           phone: cleanPhone,
-        })
+        }),
       );
     } catch {}
 
     try {
       await signUp(cleanEmail, password, cleanName, cleanPhone);
-      const nextParam = params?.get("next") ? `&next=${encodeURIComponent(params.get("next")!)}` : "";
+      const nextParam = params?.get("next")
+        ? `&next=${encodeURIComponent(params.get("next")!)}`
+        : "";
       window.location.assign(
-        `/dogrula/?email=${encodeURIComponent(cleanEmail)}&phone=${encodeURIComponent(cleanPhone)}${nextParam}`
+        `/dogrula/?email=${encodeURIComponent(cleanEmail)}&phone=${encodeURIComponent(cleanPhone)}${nextParam}`,
       );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kayıt tamamlanamadı.");
@@ -281,7 +292,8 @@ export default function SignUpPage() {
 
               <h1 className="signup-title">Hesabını oluştur.</h1>
               <p className="signup-subtitle">
-                Adreslerini kaydetmek ve rotalarını seyahat arkadaşlarınla güvenle paylaşmak için birkaç bilgi yeterli.
+                Adreslerini kaydetmek ve rotalarını seyahat arkadaşlarınla güvenle paylaşmak için
+                birkaç bilgi yeterli.
               </p>
 
               {/* Social Sign-Up Buttons (Google + Apple) */}
@@ -319,7 +331,10 @@ export default function SignUpPage() {
                   onClick={triggerAppleSignUp}
                   disabled={isAppleLoading}
                 >
-                  <svg style={{ width: "18px", height: "18px", fill: "currentColor" }} viewBox="0 0 170 170">
+                  <svg
+                    style={{ width: "18px", height: "18px", fill: "currentColor" }}
+                    viewBox="0 0 170 170"
+                  >
                     <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.69-7.85-12-14.42-6-9.13-10.74-19.55-14.22-31.26-3.48-11.71-5.22-22.95-5.22-33.72 0-14.13 3.59-26.06 10.76-35.79 7.18-9.73 16.2-14.65 27.08-14.77 5.22 0 10.79 1.39 16.71 4.17 5.92 2.78 9.78 4.22 11.58 4.31 1.41 0 5.48-1.57 12.21-4.71 6.74-3.14 12.63-4.52 17.68-4.14 13.48.87 23.97 5.86 31.47 14.97-12.06 7.28-17.98 17.26-17.76 29.95.22 9.89 3.96 18.06 11.22 24.51 7.26 6.45 15.82 10.12 25.68 11.01-2.17 6.74-4.78 13.32-7.84 19.74zM119.22 31.81c0-7.39 2.66-14.39 7.99-20.99 5.33-6.61 11.85-10.55 19.57-11.82.22 1.3.33 2.39.33 3.26 0 7.39-2.83 14.45-8.49 21.18-5.65 6.74-12.28 10.59-19.89 11.56-.11-1.09-.17-2.17-.17-3.19z" />
                   </svg>
                   <span>{isAppleLoading ? "Bağlanıyor..." : "Apple ile Kayıt Ol"}</span>
@@ -355,28 +370,62 @@ export default function SignUpPage() {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: "0.75rem",
+                      }}
+                    >
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <svg style={{ width: "20px", height: "20px", fill: "#000" }} viewBox="0 0 170 170">
+                        <svg
+                          style={{ width: "20px", height: "20px", fill: "#000" }}
+                          viewBox="0 0 170 170"
+                        >
                           <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.69-7.85-12-14.42-6-9.13-10.74-19.55-14.22-31.26-3.48-11.71-5.22-22.95-5.22-33.72 0-14.13 3.59-26.06 10.76-35.79 7.18-9.73 16.2-14.65 27.08-14.77 5.22 0 10.79 1.39 16.71 4.17 5.92 2.78 9.78 4.22 11.58 4.31 1.41 0 5.48-1.57 12.21-4.71 6.74-3.14 12.63-4.52 17.68-4.14 13.48.87 23.97 5.86 31.47 14.97-12.06 7.28-17.98 17.26-17.76 29.95.22 9.89 3.96 18.06 11.22 24.51 7.26 6.45 15.82 10.12 25.68 11.01-2.17 6.74-4.78 13.32-7.84 19.74zM119.22 31.81c0-7.39 2.66-14.39 7.99-20.99 5.33-6.61 11.85-10.55 19.57-11.82.22 1.3.33 2.39.33 3.26 0 7.39-2.83 14.45-8.49 21.18-5.65 6.74-12.28 10.59-19.89 11.56-.11-1.09-.17-2.17-.17-3.19z" />
                         </svg>
-                        <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#131b2e" }}>
+                        <h3
+                          style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#131b2e" }}
+                        >
                           Apple ile Kayıt
                         </h3>
                       </div>
                       <button
                         type="button"
                         onClick={() => setShowAppleFallbackModal(false)}
-                        style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", fontSize: "18px", fontWeight: 700 }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#64748b",
+                          fontSize: "18px",
+                          fontWeight: 700,
+                        }}
                       >
                         ✕
                       </button>
                     </div>
-                    <p style={{ fontSize: "13.5px", color: "#475569", marginBottom: "1rem", lineHeight: 1.6 }}>
+                    <p
+                      style={{
+                        fontSize: "13.5px",
+                        color: "#475569",
+                        marginBottom: "1rem",
+                        lineHeight: 1.6,
+                      }}
+                    >
                       Apple ile kayıt özelliği yakında kullanıma sunulacaktır.
                     </p>
-                    <p style={{ fontSize: "13px", color: "#475569", marginBottom: "1.25rem", lineHeight: 1.6 }}>
-                      Şimdilik aşağıdaki formu kullanarak e-posta ve şifre ile hızlıca hesap oluşturabilirsiniz.
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#475569",
+                        marginBottom: "1.25rem",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      Şimdilik aşağıdaki formu kullanarak e-posta ve şifre ile hızlıca hesap
+                      oluşturabilirsiniz.
                     </p>
                     <button
                       type="button"
@@ -417,30 +466,74 @@ export default function SignUpPage() {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: "0.75rem",
+                      }}
+                    >
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                         <svg style={{ width: "22px", height: "22px" }} viewBox="0 0 24 24">
-                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                          <path
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                            fill="#4285F4"
+                          />
+                          <path
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                            fill="#34A853"
+                          />
+                          <path
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                            fill="#FBBC05"
+                          />
+                          <path
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                            fill="#EA4335"
+                          />
                         </svg>
-                        <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#131b2e" }}>
+                        <h3
+                          style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#131b2e" }}
+                        >
                           Google ile Kayıt
                         </h3>
                       </div>
                       <button
                         type="button"
                         onClick={() => setShowGoogleFallbackModal(false)}
-                        style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", fontSize: "18px", fontWeight: 700 }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#64748b",
+                          fontSize: "18px",
+                          fontWeight: 700,
+                        }}
                       >
                         ✕
                       </button>
                     </div>
-                    <p style={{ fontSize: "13.5px", color: "#475569", marginBottom: "1rem", lineHeight: 1.6 }}>
-                      Google ile kayıt şu anda gerçekleştirilemedi. Bu durum genellikle tarayıcınızın pop-up engelleyicisinden kaynaklanır.
+                    <p
+                      style={{
+                        fontSize: "13.5px",
+                        color: "#475569",
+                        marginBottom: "1rem",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      Google ile kayıt şu anda gerçekleştirilemedi. Bu durum genellikle
+                      tarayıcınızın pop-up engelleyicisinden kaynaklanır.
                     </p>
-                    <ul style={{ fontSize: "13px", color: "#475569", margin: "0 0 1.25rem 0", paddingLeft: "1.25rem", lineHeight: 1.7 }}>
+                    <ul
+                      style={{
+                        fontSize: "13px",
+                        color: "#475569",
+                        margin: "0 0 1.25rem 0",
+                        paddingLeft: "1.25rem",
+                        lineHeight: 1.7,
+                      }}
+                    >
                       <li>Tarayıcınızda pop-up engelleyicisini kapatıp tekrar deneyin</li>
                       <li>Farklı bir tarayıcı kullanın (Chrome önerilir)</li>
                       <li>Veya aşağıdan e-posta ve şifre ile kayıt olun</li>
@@ -487,7 +580,10 @@ export default function SignUpPage() {
                     />
                   </div>
                   <p className="signup-help-text">
-                    <span className="material-symbols-outlined text-[15px]" style={{ color: "var(--mb-secondary)" }}>
+                    <span
+                      className="material-symbols-outlined text-[15px]"
+                      style={{ color: "var(--mb-secondary)" }}
+                    >
                       link
                     </span>
                     Herkese açık profil adresin:{" "}
@@ -498,7 +594,13 @@ export default function SignUpPage() {
                 </div>
 
                 {/* Ad Soyad & E-posta Grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: "1rem",
+                  }}
+                >
                   <div className="signup-form-group">
                     <label className="signup-label" htmlFor="fullname">
                       Ad Soyad
@@ -552,7 +654,10 @@ export default function SignUpPage() {
                     />
                   </div>
                   <p className="signup-help-text">
-                    <span className="material-symbols-outlined text-[14px]" style={{ color: "var(--mb-outline)" }}>
+                    <span
+                      className="material-symbols-outlined text-[14px]"
+                      style={{ color: "var(--mb-outline)" }}
+                    >
                       info
                     </span>
                     Başında + ve ülke kodu ile yazmalısın. Örn: +905551234567
@@ -610,7 +715,9 @@ export default function SignUpPage() {
                       <li key={r.id} className={`signup-rule-item ${r.valid ? "valid" : ""}`}>
                         <span
                           className="material-symbols-outlined text-[16px]"
-                          style={{ color: r.valid ? "var(--mb-emerald-accent)" : "var(--mb-outline)" }}
+                          style={{
+                            color: r.valid ? "var(--mb-emerald-accent)" : "var(--mb-outline)",
+                          }}
                         >
                           {r.valid ? "check_circle" : "radio_button_unchecked"}
                         </span>
@@ -654,8 +761,23 @@ export default function SignUpPage() {
               </form>
 
               {/* Alt Bağlantılar & Yasal Bilgilendirme */}
-              <div style={{ marginTop: "1.5rem", paddingTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "14px" }}>
+              <div
+                style={{
+                  marginTop: "1.5rem",
+                  paddingTop: "1rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    fontSize: "14px",
+                  }}
+                >
                   <span>Zaten hesabın var mı?</span>
                   <a
                     style={{
@@ -669,15 +791,26 @@ export default function SignUpPage() {
                       marginLeft: "0.25rem",
                     }}
                     data-path="giris"
-                    href={nextUrl !== "/desk/" ? `/login/?next=${encodeURIComponent(nextUrl)}` : "/login/"}
+                    href={
+                      nextUrl !== "/desk/"
+                        ? `/login/?next=${encodeURIComponent(nextUrl)}`
+                        : "/login/"
+                    }
                   >
                     <span>Giriş yap</span>
                     <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                   </a>
                 </div>
                 <p style={{ margin: 0, fontSize: "12px", color: "rgba(64, 73, 69, 0.8)" }}>
-                  Devam ederek <a href="/privacy/" style={{ textDecoration: "underline", color: "inherit" }}>Gizlilik Politikası</a> ve{" "}
-                  <a href="/terms/" style={{ textDecoration: "underline", color: "inherit" }}>Kullanım Koşullarını</a> kabul edersin.
+                  Devam ederek{" "}
+                  <a href="/privacy/" style={{ textDecoration: "underline", color: "inherit" }}>
+                    Gizlilik Politikası
+                  </a>{" "}
+                  ve{" "}
+                  <a href="/terms/" style={{ textDecoration: "underline", color: "inherit" }}>
+                    Kullanım Koşullarını
+                  </a>{" "}
+                  kabul edersin.
                 </p>
               </div>
             </div>
@@ -696,7 +829,10 @@ export default function SignUpPage() {
               {/* Üst Katman: Rozet & Konum Göstergesi */}
               <div className="signup-top-layer">
                 <div className="signup-city-pill">
-                  <span className="material-symbols-outlined text-[16px]" style={{ color: "var(--mb-mint-glow)" }}>
+                  <span
+                    className="material-symbols-outlined text-[16px]"
+                    style={{ color: "var(--mb-mint-glow)" }}
+                  >
                     explore
                   </span>
                   <span>SHINJUKU • TOKYO</span>
@@ -719,14 +855,27 @@ export default function SignUpPage() {
               <div className="signup-feature-cards">
                 {/* Kart 1: Kod Eşitleme */}
                 <div className="signup-feature-card">
-                  <div className="signup-card-icon" style={{ backgroundColor: "rgba(52, 211, 153, 0.2)", color: "var(--mb-mint-glow)" }}>
+                  <div
+                    className="signup-card-icon"
+                    style={{
+                      backgroundColor: "rgba(52, 211, 153, 0.2)",
+                      color: "var(--mb-mint-glow)",
+                    }}
+                  >
                     <span className="material-symbols-outlined text-[22px]">pin</span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <span style={{ fontSize: "15px", fontWeight: 700, color: "#ffffff" }}>
                       6 Haneli Kod ile Anında Eşitleme
                     </span>
-                    <p style={{ margin: "0.25rem 0 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.8)", lineHeight: "1.4" }}>
+                    <p
+                      style={{
+                        margin: "0.25rem 0 0",
+                        fontSize: "13px",
+                        color: "rgba(255, 255, 255, 0.8)",
+                        lineHeight: "1.4",
+                      }}
+                    >
                       Arkadaş grubunla rotalarını cihaz fark etmeksizin saniyeler içinde paylaş.
                     </p>
                   </div>
@@ -734,14 +883,27 @@ export default function SignUpPage() {
 
                 {/* Kart 2: AI Destekli Optimizasyon */}
                 <div className="signup-feature-card">
-                  <div className="signup-card-icon" style={{ backgroundColor: "rgba(171, 237, 211, 0.2)", color: "var(--mb-secondary-container)" }}>
+                  <div
+                    className="signup-card-icon"
+                    style={{
+                      backgroundColor: "rgba(171, 237, 211, 0.2)",
+                      color: "var(--mb-secondary-container)",
+                    }}
+                  >
                     <span className="material-symbols-outlined text-[22px]">auto_awesome</span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <span style={{ fontSize: "15px", fontWeight: 700, color: "#ffffff" }}>
                       AI Destekli Rota Optimizasyonu
                     </span>
-                    <p style={{ margin: "0.25rem 0 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.8)", lineHeight: "1.4" }}>
+                    <p
+                      style={{
+                        margin: "0.25rem 0 0",
+                        fontSize: "13px",
+                        color: "rgba(255, 255, 255, 0.8)",
+                        lineHeight: "1.4",
+                      }}
+                    >
                       Trafik, yürüme süreleri ve açılış saatlerine göre en verimli gezi sırası.
                     </p>
                   </div>
@@ -749,15 +911,26 @@ export default function SignUpPage() {
 
                 {/* Kart 3: Gezgin Topluluğu */}
                 <div className="signup-feature-card">
-                  <div className="signup-card-icon" style={{ backgroundColor: "rgba(111, 251, 190, 0.2)", color: "#6ffbbe" }}>
+                  <div
+                    className="signup-card-icon"
+                    style={{ backgroundColor: "rgba(111, 251, 190, 0.2)", color: "#6ffbbe" }}
+                  >
                     <span className="material-symbols-outlined text-[22px]">group</span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <span style={{ fontSize: "15px", fontWeight: 700, color: "#ffffff" }}>
                       Gezgin Topluluğunda Deneyim Paylaşımı
                     </span>
-                    <p style={{ margin: "0.25rem 0 0", fontSize: "13px", color: "rgba(255, 255, 255, 0.8)", lineHeight: "1.4" }}>
-                      Turistik tuzaklardan uzak, yerellerin onayladığı gizli cevherler parmaklarının ucunda.
+                    <p
+                      style={{
+                        margin: "0.25rem 0 0",
+                        fontSize: "13px",
+                        color: "rgba(255, 255, 255, 0.8)",
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      Turistik tuzaklardan uzak, yerellerin onayladığı gizli cevherler parmaklarının
+                      ucunda.
                     </p>
                   </div>
                 </div>
@@ -780,7 +953,15 @@ export default function SignUpPage() {
                 >
                   <span className="material-symbols-outlined text-[20px]">offline_pin</span>
                 </div>
-                <p style={{ margin: 0, fontSize: "13px", color: "var(--mb-mint-subtle)", fontWeight: 500, lineHeight: "1.5" }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "13px",
+                    color: "var(--mb-mint-subtle)",
+                    fontWeight: 500,
+                    lineHeight: "1.5",
+                  }}
+                >
                   Tek bir hesapla hem web'de hem cebinde tüm rotaların çevrimdışı hazır.
                 </p>
               </div>

@@ -12,7 +12,11 @@ import { getStoredSession, refreshSession, signOut } from "../lib/cognito";
 import { AuthActionModal, PanelGuestBanner } from "../components/auth-gate";
 import { AuthGuard } from "../components/auth-guard";
 import { AIPromoLanding } from "../ai/ai-promo-landing";
-import { GooglePlannerMap, type GoogleMapHandle, type GooglePoint } from "../components/trip/google-planner-map";
+import {
+  GooglePlannerMap,
+  type GoogleMapHandle,
+  type GooglePoint,
+} from "../components/trip/google-planner-map";
 import { googleMapsEnabled } from "../lib/google/maps-client";
 import { MobilePinSheet } from "../components/trip/mobile-pin-sheet";
 import type { Pin } from "../lib/trip/models";
@@ -151,10 +155,6 @@ export interface SavedAddress {
   photo?: string; // Durak / Mekan Fotoğrafı (URL veya Base64)
 }
 
-
-
-
-
 export default function Panel() {
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
   const [mapAttempt, setMapAttempt] = useState(0);
@@ -224,7 +224,9 @@ export default function Panel() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [isCreated, setIsCreated] = useState(false);
-  const [recentShares, setRecentShares] = useState<Array<{ code: string; expiresAt: number; url: string }>>([]);
+  const [recentShares, setRecentShares] = useState<
+    Array<{ code: string; expiresAt: number; url: string }>
+  >([]);
   const [isSharing, setIsSharing] = useState(false);
   const [shareError, setShareError] = useState("");
   const sharePending = useRef(false);
@@ -300,8 +302,6 @@ export default function Panel() {
     };
   }, [isMapHubOpen]);
 
-
-
   // Kodla Konum Bulma (Pop-up) State'leri
   const [showCodeLookupModal, setShowCodeLookupModal] = useState<boolean>(false);
   const [lookupCodeInput, setLookupCodeInput] = useState<string>("");
@@ -321,12 +321,17 @@ export default function Panel() {
     }
   }
 
-  function focusMapPin(lat:number,lng:number) {
-    if(googleMapsEnabled){googleMapRef.current?.focus(lat,lng);return;}
-    const map=mapInstanceRef.current;
-    if(!map)return;
-    const center=window.matchMedia('(max-width: 767px)').matches ? map.unproject(map.project([lat,lng],16).add([0,map.getSize().y*0.22]),16) : [lat,lng];
-    map.flyTo(center,16,{duration:0.6});
+  function focusMapPin(lat: number, lng: number) {
+    if (googleMapsEnabled) {
+      googleMapRef.current?.focus(lat, lng);
+      return;
+    }
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const center = window.matchMedia("(max-width: 767px)").matches
+      ? map.unproject(map.project([lat, lng], 16).add([0, map.getSize().y * 0.22]), 16)
+      : [lat, lng];
+    map.flyTo(center, 16, { duration: 0.6 });
   }
   function openSavedPin(id: string) {
     pointRequest.current++;
@@ -372,7 +377,11 @@ export default function Panel() {
 
   // Authentication & Gate Modal State
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authModalConfig, setAuthModalConfig] = useState<{ title: string; subtitle: string; featureName: string }>({
+  const [authModalConfig, setAuthModalConfig] = useState<{
+    title: string;
+    subtitle: string;
+    featureName: string;
+  }>({
     title: "MapsBridge Üyeliği Gereklidir",
     subtitle: "Bu işlemi gerçekleştirmek için lütfen ücretsiz üye olun veya giriş yapın.",
     featureName: "Gezgin Özelliği",
@@ -398,7 +407,8 @@ export default function Panel() {
     const session = getStoredSession();
     const fallbackEmail =
       typeof window !== "undefined"
-        ? localStorage.getItem("mapsbridge.userEmail") || localStorage.getItem("adreskopru.userEmail")
+        ? localStorage.getItem("mapsbridge.userEmail") ||
+          localStorage.getItem("adreskopru.userEmail")
         : null;
     const activeEmail = session?.email || fallbackEmail;
     if (activeEmail) {
@@ -428,14 +438,17 @@ export default function Panel() {
       if (rawMsg) {
         const parsed = JSON.parse(rawMsg);
         if (Array.isArray(parsed)) {
-          setUnreadMessagesCount(parsed.filter((m: any) => m.status === "unread" || !m.read).length);
+          setUnreadMessagesCount(
+            parsed.filter((m: any) => m.status === "unread" || !m.read).length,
+          );
         }
       }
     } catch {}
 
     try {
       const recent = JSON.parse(userStorage.getItem("mapsbridge.shares") || "[]");
-      if (Array.isArray(recent)) setRecentShares(recent.filter(item => item.expiresAt * 1000 > Date.now()));
+      if (Array.isArray(recent))
+        setRecentShares(recent.filter((item) => item.expiresAt * 1000 > Date.now()));
     } catch {}
     refreshSession();
 
@@ -488,7 +501,11 @@ export default function Panel() {
 
       // Load map style & customizations
       const savedMapStyle = localStorage.getItem("mapsbridge.mapStyle") as MapStyleId;
-      if (savedMapStyle && savedMapStyle !== "sade" && MAP_STYLES.some((s) => s.id === savedMapStyle)) {
+      if (
+        savedMapStyle &&
+        savedMapStyle !== "sade" &&
+        MAP_STYLES.some((s) => s.id === savedMapStyle)
+      ) {
         setCurrentMapStyle(savedMapStyle);
       } else {
         setCurrentMapStyle("standart");
@@ -575,7 +592,11 @@ export default function Panel() {
   }
 
   // Create custom Pin Icon for Leaflet (Minimalist & Modern)
-  function createCustomRoutePin(category: PlaceCategory = "genel", visited: boolean = false, label: string = "") {
+  function createCustomRoutePin(
+    category: PlaceCategory = "genel",
+    visited: boolean = false,
+    label: string = "",
+  ) {
     const L = (window as any).L;
     if (!L) return null;
     const meta = CATEGORIES[category] || CATEGORIES.genel;
@@ -608,7 +629,7 @@ export default function Panel() {
     groupName: string,
     addresses: SavedAddress[],
     currentLoc?: LocationState,
-    shouldFitBounds: boolean = false
+    shouldFitBounds: boolean = false,
   ) {
     const L = (window as any).L;
     if (!L || !mapInstanceRef.current) return;
@@ -628,9 +649,7 @@ export default function Panel() {
     if (isPlannerOpen || groupName === "none") return;
 
     const groupItems =
-      groupName === "all"
-        ? addresses
-        : addresses.filter((a) => (a.group || "Genel") === groupName);
+      groupName === "all" ? addresses : addresses.filter((a) => (a.group || "Genel") === groupName);
 
     if (groupItems.length === 0) return;
 
@@ -643,9 +662,7 @@ export default function Panel() {
       const distKm = calculateDistanceKm(loc.lat, loc.lng, item.lat, item.lng);
       const distFormatted = formatDistance(distKm);
 
-      const pinLabel = item.visited
-        ? `${item.label} ✓`
-        : `${item.label} · ${distFormatted}`;
+      const pinLabel = item.visited ? `${item.label} ✓` : `${item.label} · ${distFormatted}`;
 
       const icon = createCustomRoutePin(item.category || "genel", !!item.visited, pinLabel);
       if (!icon) return;
@@ -656,7 +673,7 @@ export default function Panel() {
         openSavedPin(item.id);
         setIsPlannerOpen(true);
         if (mapInstanceRef.current) {
-          focusMapPin(item.lat,item.lng);
+          focusMapPin(item.lat, item.lng);
         }
       });
 
@@ -675,7 +692,10 @@ export default function Panel() {
         activeGroupPoints = [lastVisited, ...unvisitedGroup];
       }
       if (activeGroupPoints.length > 1) {
-        const routePoints: [number, number][] = activeGroupPoints.map((item) => [item.lat, item.lng]);
+        const routePoints: [number, number][] = activeGroupPoints.map((item) => [
+          item.lat,
+          item.lng,
+        ]);
         const itineraryLine = L.polyline(routePoints, {
           color: lineColor,
           weight: 3.5,
@@ -721,8 +741,11 @@ export default function Panel() {
       return a;
     });
     if (typeof window !== "undefined") {
-      try { userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated)); }
-      catch { return; }
+      try {
+        userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+      } catch {
+        return;
+      }
     }
     setSavedAddresses(updated);
   }
@@ -730,11 +753,14 @@ export default function Panel() {
   // Reverse Geocoding via Multi-tier Service (Nominatim + Photon + BigDataCloud)
   async function fetchAddress(lat: number, lng: number, select = true) {
     const request = ++pointRequest.current;
-    if(select){planner.setSelectedPinId(null);setQuickAddPoint({lat,lng,address:"Konum sorgulanıyor..."});}
+    if (select) {
+      planner.setSelectedPinId(null);
+      setQuickAddPoint({ lat, lng, address: "Konum sorgulanıyor..." });
+    }
 
     try {
       const geocoded = await reverseGeocodeLocation(lat, lng);
-      if(request !== pointRequest.current)return;
+      if (request !== pointRequest.current) return;
       setLocation({
         lat,
         lng,
@@ -742,17 +768,17 @@ export default function Panel() {
         district: geocoded.district,
         city: geocoded.city,
       });
-      if(select)setQuickAddPoint({ lat, lng, address: geocoded.address });
+      if (select) setQuickAddPoint({ lat, lng, address: geocoded.address });
       setIsPlannerOpen(true);
     } catch {
-      if(request !== pointRequest.current)return;
+      if (request !== pointRequest.current) return;
       const fallbackAddr = `Enlem: ${lat.toFixed(5)}, Boylam: ${lng.toFixed(5)}`;
       setLocation({
         lat,
         lng,
         address: fallbackAddr,
       });
-      if(select)setQuickAddPoint({ lat, lng, address: fallbackAddr });
+      if (select) setQuickAddPoint({ lat, lng, address: fallbackAddr });
       setIsPlannerOpen(true);
     }
   }
@@ -783,11 +809,15 @@ export default function Panel() {
         setIsPlannerOpen(true);
         showPanelToast(`✓ "${top.label || top.address}" haritada bulundu!`);
       } else {
-        showPanelToast("⚠️ Aradığınız adres veya mekan bulunamadı. Lütfen ilçe, şehir veya farklı bir terim deneyin.");
+        showPanelToast(
+          "⚠️ Aradığınız adres veya mekan bulunamadı. Lütfen ilçe, şehir veya farklı bir terim deneyin.",
+        );
       }
     } catch (err) {
       console.error(err);
-      showPanelToast("⚠️ Arama servisine ulaşılamadı. Lütfen bağlantınızı kontrol edip tekrar deneyin.");
+      showPanelToast(
+        "⚠️ Arama servisine ulaşılamadı. Lütfen bağlantınızı kontrol edip tekrar deneyin.",
+      );
     } finally {
       setIsSearching(false);
     }
@@ -810,13 +840,13 @@ export default function Panel() {
       () => {
         setIsLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 8000 },
     );
   }
 
   // Initialize Leaflet only while Google configuration is absent.
   useEffect(() => {
-    if(googleMapsEnabled)return;
+    if (googleMapsEnabled) return;
     let isMounted = true;
     let resizeObserver: ResizeObserver | undefined;
     setMapStatus("loading");
@@ -834,7 +864,10 @@ export default function Panel() {
       mapInstanceRef.current = map;
 
       // 1. Harita Taban Modu Katmanı
-      const savedStyleId = (typeof window !== "undefined" && localStorage.getItem("mapsbridge.mapStyle")) || currentMapStyle || "standart";
+      const savedStyleId =
+        (typeof window !== "undefined" && localStorage.getItem("mapsbridge.mapStyle")) ||
+        currentMapStyle ||
+        "standart";
       const styleConfig = MAP_STYLES.find((s) => s.id === savedStyleId) || MAP_STYLES[0];
       const tileOpts: any = {
         attribution: styleConfig.attribution,
@@ -846,21 +879,35 @@ export default function Panel() {
       const baseTile = L.tileLayer(styleConfig.url, tileOpts).addTo(map);
       tileLayerRef.current = baseTile;
       let hasVisibleTiles = false;
-      baseTile.on("tileload", () => { hasVisibleTiles = true; if (isMounted) setMapStatus("ready"); });
-      baseTile.on("tileerror", () => { if (isMounted && !hasVisibleTiles) setMapStatus("error"); });
+      baseTile.on("tileload", () => {
+        hasVisibleTiles = true;
+        if (isMounted) setMapStatus("ready");
+      });
+      baseTile.on("tileerror", () => {
+        if (isMounted && !hasVisibleTiles) setMapStatus("error");
+      });
 
       // 2. Toplu Taşıma / Raylı Sistem Katmanı
-      const savedOverlay = (typeof window !== "undefined" && localStorage.getItem("mapsbridge.transitOverlay") === "true") || showTransitOverlay;
+      const savedOverlay =
+        (typeof window !== "undefined" &&
+          localStorage.getItem("mapsbridge.transitOverlay") === "true") ||
+        showTransitOverlay;
       if (savedOverlay) {
-        transitOverlayRef.current = L.tileLayer("https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-          opacity: 0.85,
-          attribution: '&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
-        }).addTo(map);
+        transitOverlayRef.current = L.tileLayer(
+          "https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+          {
+            maxZoom: 19,
+            opacity: 0.85,
+            attribution: '&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
+          },
+        ).addTo(map);
       }
 
       // 3. Özelleştirilmiş Pin
-      const activeColor = (typeof window !== "undefined" && localStorage.getItem("mapsbridge.pinColor")) || pinColor || "#2563eb";
+      const activeColor =
+        (typeof window !== "undefined" && localStorage.getItem("mapsbridge.pinColor")) ||
+        pinColor ||
+        "#2563eb";
       const customPin = L.divIcon({
         className: "custom-map-pin",
         html: `<div class="pin-pulse" style="background:${activeColor}55;"></div><div class="pin-marker"><svg width="28" height="36" viewBox="0 0 28 36" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 22 14 22s14-11.5 14-22c0-7.732-6.268-14-14-14z" fill="${activeColor}"/><circle cx="14" cy="14" r="5" fill="#ffffff"/></svg></div>`,
@@ -877,14 +924,20 @@ export default function Panel() {
       mapInstanceRef.current = map;
       resizeObserver = new ResizeObserver(() => map.invalidateSize({ pan: false }));
       resizeObserver.observe(mapContainerRef.current!);
-      map.whenReady(() => { if (isMounted) { map.invalidateSize(); setMapStatus("ready"); } });
+      map.whenReady(() => {
+        if (isMounted) {
+          map.invalidateSize();
+          setMapStatus("ready");
+        }
+      });
 
       map.on("click", async (e: any) => {
         const session = getStoredSession();
         if (!session?.email || !session?.token) {
           setAuthModalConfig({
             title: "Haritada İşlem Yapmak İçin Üye Olun",
-            subtitle: "Harita üzerinde yeni keşif durakları ve gezi rotaları işaretlemek için lütfen ücretsiz üye olun veya giriş yapın.",
+            subtitle:
+              "Harita üzerinde yeni keşif durakları ve gezi rotaları işaretlemek için lütfen ücretsiz üye olun veya giriş yapın.",
             featureName: "Harita İşlemleri",
           });
           setShowAuthModal(true);
@@ -911,7 +964,7 @@ export default function Panel() {
                 visited: false,
                 durationMinutes: 60,
               },
-              targetDay
+              targetDay,
             );
             setIsAddingPinMode(false);
           } catch {
@@ -928,7 +981,7 @@ export default function Panel() {
                 visited: false,
                 durationMinutes: 60,
               },
-              targetDay
+              targetDay,
             );
             setIsAddingPinMode(false);
           }
@@ -940,8 +993,8 @@ export default function Panel() {
       });
 
       marker.on("click", () => {
-        const {lat,lng}=marker.getLatLng();
-        void fetchAddress(lat,lng);
+        const { lat, lng } = marker.getLatLng();
+        void fetchAddress(lat, lng);
       });
 
       marker.on("dragend", () => {
@@ -953,7 +1006,8 @@ export default function Panel() {
 
       setTimeout(() => {
         if (isMounted) {
-          const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+          const urlParams =
+            typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
           const tripIdParam = urlParams?.get("tripId");
           if (tripIdParam) {
             planner.switchTrip(tripIdParam);
@@ -969,7 +1023,7 @@ export default function Panel() {
 
             // Match trip in planner
             const matchedTrip = planner.trips.find(
-              (t) => t.id === targetGrp || t.title.toLowerCase() === targetGrp.toLowerCase()
+              (t) => t.id === targetGrp || t.title.toLowerCase() === targetGrp.toLowerCase(),
             );
             if (matchedTrip) {
               planner.switchTrip(matchedTrip.id);
@@ -988,11 +1042,16 @@ export default function Panel() {
               } catch {}
             }
 
-            renderGroupOnMap(targetGrp, activeStops, {
-              lat: initialLat,
-              lng: initialLng,
-              address: "",
-            }, true);
+            renderGroupOnMap(
+              targetGrp,
+              activeStops,
+              {
+                lat: initialLat,
+                lng: initialLng,
+                address: "",
+              },
+              true,
+            );
           }
         }
       }, 350);
@@ -1000,9 +1059,18 @@ export default function Panel() {
 
     const initialize = () => {
       if (!isMounted) return;
-      try { initLeafletMap(); } catch (error) { console.error("Map initialization failed", error); mapInstanceRef.current?.remove(); mapInstanceRef.current = null; setMapStatus("error"); }
+      try {
+        initLeafletMap();
+      } catch (error) {
+        console.error("Map initialization failed", error);
+        mapInstanceRef.current?.remove();
+        mapInstanceRef.current = null;
+        setMapStatus("error");
+      }
     };
-    const failed = () => { if (isMounted) setMapStatus("error"); };
+    const failed = () => {
+      if (isMounted) setMapStatus("error");
+    };
     let script = document.getElementById("leaflet-js") as HTMLScriptElement | null;
     if (!document.getElementById("leaflet-css")) {
       const link = document.createElement("link");
@@ -1013,7 +1081,10 @@ export default function Panel() {
     }
     if ((window as any).L) initialize();
     else {
-      if (mapAttempt > 0 && script) { script.remove(); script = null; }
+      if (mapAttempt > 0 && script) {
+        script.remove();
+        script = null;
+      }
       const isNew = !script;
       script ||= document.createElement("script");
       script.id = "leaflet-js";
@@ -1023,7 +1094,9 @@ export default function Panel() {
       script.addEventListener("error", failed);
       if (isNew) document.body.appendChild(script);
     }
-    const timeout = window.setTimeout(() => { if (!mapInstanceRef.current) failed(); }, 15000);
+    const timeout = window.setTimeout(() => {
+      if (!mapInstanceRef.current) failed();
+    }, 15000);
     return () => {
       isMounted = false;
       clearTimeout(timeout);
@@ -1086,7 +1159,7 @@ export default function Panel() {
             maxZoom: 19,
             opacity: 0.85,
             attribution: '&copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
-          }
+          },
         ).addTo(map);
       }
     } else {
@@ -1168,12 +1241,13 @@ export default function Panel() {
       planner.activeRoadGeometry && planner.activeRoadGeometry.coordinates.length > 1
         ? planner.activeRoadGeometry.coordinates
         : pinsToRender.length > 1
-        ? pinsToRender.map((p) => [p.lat, p.lng])
-        : [];
+          ? pinsToRender.map((p) => [p.lat, p.lng])
+          : [];
 
     if (routeCoordinates.length > 1) {
       const roadGroup = L.featureGroup();
-      const isRoad = planner.activeRoadGeometry && planner.activeRoadGeometry.coordinates.length > 1;
+      const isRoad =
+        planner.activeRoadGeometry && planner.activeRoadGeometry.coordinates.length > 1;
 
       // Outer glow / contrast
       const glowLine = L.polyline(routeCoordinates, {
@@ -1215,10 +1289,12 @@ export default function Panel() {
             <span class="stitch-pin-pill-title">${pin.order}. ${escapeHtml(pin.label)}</span>
           </div>
 
-          ${isSelected ? `
+          ${
+            isSelected
+              ? `
             <div class="stitch-pin-active-popup">
               <div class="popup-photo-wrap">
-                <img src="${pin.photo || 'https://lh3.googleusercontent.com/aida-public/AB6AXuCxbi1qXu9TAhdNilaAgPco1Z6TCH-Db2WPP9T6rf83eTb1bjB1J9lL1dUOqKX88FwPONdy8f-XROCuNQo0lYJ3sDAu2EUh6Rbuhg9Y01UwoaJgYvLrUsq7yOKEIiTX9KtHh-C8T-DGBEM_WeefmrXyUgfVX5Ci0DdThglRCJbbhUpbSb74_a1fiIZZGl1qvPYy6YyaxbGv0H141oCfmm8dwnBQbvi4HP5kwOgm7UQN-G76o7cnikVF4g'}" alt="${escapeHtml(pin.label)}" class="popup-photo-img"/>
+                <img src="${pin.photo || "https://lh3.googleusercontent.com/aida-public/AB6AXuCxbi1qXu9TAhdNilaAgPco1Z6TCH-Db2WPP9T6rf83eTb1bjB1J9lL1dUOqKX88FwPONdy8f-XROCuNQo0lYJ3sDAu2EUh6Rbuhg9Y01UwoaJgYvLrUsq7yOKEIiTX9KtHh-C8T-DGBEM_WeefmrXyUgfVX5Ci0DdThglRCJbbhUpbSb74_a1fiIZZGl1qvPYy6YyaxbGv0H141oCfmm8dwnBQbvi4HP5kwOgm7UQN-G76o7cnikVF4g"}" alt="${escapeHtml(pin.label)}" class="popup-photo-img"/>
                 <span class="popup-active-badge">Seçili Durak</span>
               </div>
               <div class="popup-title-row">
@@ -1234,7 +1310,9 @@ export default function Panel() {
                 <button class="popup-btn-detail" type="button" onclick="window.dispatchEvent(new CustomEvent('mapsbridge:open_inspect_drawer', { detail: { pinId: '${pin.id}' } }))">Detay</button>
               </div>
             </div>
-          ` : ""}
+          `
+              : ""
+          }
         </div>
       `;
 
@@ -1251,7 +1329,7 @@ export default function Panel() {
         openSavedPin(pin.id);
         setIsPlannerOpen(true);
         setIsPlannerCollapsed(false);
-        focusMapPin(pin.lat,pin.lng);
+        focusMapPin(pin.lat, pin.lng);
       });
 
       marker.addTo(featureGroup);
@@ -1285,7 +1363,7 @@ export default function Panel() {
         openSavedPin(pin.id);
         setIsPlannerOpen(true);
         setIsPlannerCollapsed(false);
-        focusMapPin(pin.lat,pin.lng);
+        focusMapPin(pin.lat, pin.lng);
       });
 
       marker.addTo(featureGroup);
@@ -1302,9 +1380,9 @@ export default function Panel() {
         map.fitBounds(featureGroup.getBounds().pad(0.18), { maxZoom: 16 });
       } catch {}
     }
-    if(planner.selectedPin && lastFocusedPin.current !== planner.selectedPin.id) {
+    if (planner.selectedPin && lastFocusedPin.current !== planner.selectedPin.id) {
       lastFocusedPin.current = planner.selectedPin.id;
-      focusMapPin(planner.selectedPin.lat,planner.selectedPin.lng);
+      focusMapPin(planner.selectedPin.lat, planner.selectedPin.lng);
     }
   }, [
     planner.pinsWithTime,
@@ -1320,9 +1398,8 @@ export default function Panel() {
   // Özellik 4: Detaylı Konum Kaydetme / Düzenleme (Not, Kategori, Tarih vb.)
   function handleSaveCurrentAddress() {
     if (!newLabelInput.trim()) return;
-    const finalGroup = isCreatingNewGroup && customNewGroup.trim()
-      ? customNewGroup.trim()
-      : selectedGroupInput;
+    const finalGroup =
+      isCreatingNewGroup && customNewGroup.trim() ? customNewGroup.trim() : selectedGroupInput;
 
     let updated: SavedAddress[];
 
@@ -1361,13 +1438,20 @@ export default function Panel() {
     }
 
     if (typeof window !== "undefined") {
-      try { userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated)); }
-      catch { return; }
+      try {
+        userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+      } catch {
+        return;
+      }
     }
     setSavedAddresses(updated);
 
     // Yeni sekme oluşturulduysa sekmelere ekle
-    if (isCreatingNewGroup && customNewGroup.trim() && !customTabs.includes(customNewGroup.trim())) {
+    if (
+      isCreatingNewGroup &&
+      customNewGroup.trim() &&
+      !customTabs.includes(customNewGroup.trim())
+    ) {
       const updatedTabs = [...customTabs, customNewGroup.trim()];
       setCustomTabs(updatedTabs);
       userStorage.setItem("adreskopru.customTabs", JSON.stringify(updatedTabs));
@@ -1386,13 +1470,16 @@ export default function Panel() {
   function handleDeleteGroup(groupName: string) {
     if (!groupName) return;
     if (groupName === "Genel") {
-      showPanelToast("Varsayılan 'Genel' grubu silinemez. Ancak içerisindeki durakları silebilirsiniz.");
+      showPanelToast(
+        "Varsayılan 'Genel' grubu silinemez. Ancak içerisindeki durakları silebilirsiniz.",
+      );
       return;
     }
     const count = savedAddresses.filter((a) => (a.group || "Genel") === groupName).length;
-    const msg = count > 0
-      ? `"${groupName}" grubunu ve bu gruba ait ${count} durağı tamamen silmek istediğinize emin misiniz?`
-      : `"${groupName}" grubunu silmek istediğinize emin misiniz?`;
+    const msg =
+      count > 0
+        ? `"${groupName}" grubunu ve bu gruba ait ${count} durağı tamamen silmek istediğinize emin misiniz?`
+        : `"${groupName}" grubunu silmek istediğinize emin misiniz?`;
     if (!window.confirm(msg)) return;
 
     // Durakları temizle
@@ -1499,10 +1586,14 @@ export default function Panel() {
   }, [showTripManager, selectedGroup]);
 
   // Delete address
-  function handleDeleteSavedAddress(id: string) {    const updated = savedAddresses.filter((a) => a.id !== id);
+  function handleDeleteSavedAddress(id: string) {
+    const updated = savedAddresses.filter((a) => a.id !== id);
     if (typeof window !== "undefined") {
-      try { userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated)); }
-      catch { return; }
+      try {
+        userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+      } catch {
+        return;
+      }
     }
     setSavedAddresses(updated);
   }
@@ -1715,7 +1806,10 @@ export default function Panel() {
   async function handleCreateShare() {
     if (sharePending.current) return;
     const session = getStoredSession();
-    if (!session?.token) { window.location.assign("/login/?next=/desk/"); return; }
+    if (!session?.token) {
+      window.location.assign("/login/?next=/desk/");
+      return;
+    }
     sharePending.current = true;
     setIsSharing(true);
     setShareError("");
@@ -1723,15 +1817,28 @@ export default function Panel() {
       const response = await fetch(`${API_ENDPOINT}/shares`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.token}` },
-        body: JSON.stringify({ lat: location.lat, lng: location.lng, address: location.address, hours }),
+        body: JSON.stringify({
+          lat: location.lat,
+          lng: location.lng,
+          address: location.address,
+          hours,
+        }),
         signal: AbortSignal.timeout(15000),
       });
       const data = await response.json();
-      if (!response.ok || !data.code || !data.token) throw new Error(data.error || "Paylaşım kaydedilemedi.");
+      if (!response.ok || !data.code || !data.token)
+        throw new Error(data.error || "Paylaşım kaydedilemedi.");
       const url = `${window.location.origin}/k/?kod=${encodeURIComponent(data.token)}`;
-      const updatedShares = [...recentShares.filter(item => item.expiresAt * 1000 > Date.now()), { code: data.code, expiresAt: data.expiresAt, url }];
+      const updatedShares = [
+        ...recentShares.filter((item) => item.expiresAt * 1000 > Date.now()),
+        { code: data.code, expiresAt: data.expiresAt, url },
+      ];
       setRecentShares(updatedShares);
-      try { userStorage.setItem("mapsbridge.shares", JSON.stringify(updatedShares)); } catch { setShareError("Paylaşım oluşturuldu, ancak bu cihazda geçmişe kaydedilemedi."); }
+      try {
+        userStorage.setItem("mapsbridge.shares", JSON.stringify(updatedShares));
+      } catch {
+        setShareError("Paylaşım oluşturuldu, ancak bu cihazda geçmişe kaydedilemedi.");
+      }
       setShareCode(data.code);
       setShareUrl(`${window.location.origin}/k/?kod=${encodeURIComponent(data.token)}`);
       setIsCreated(true);
@@ -1739,7 +1846,9 @@ export default function Panel() {
       setCopiedCode(false);
       setCopiedLink(false);
     } catch (error) {
-      setShareError(error instanceof Error ? error.message : "Bağlantı kurulamadı. Tekrar deneyin.");
+      setShareError(
+        error instanceof Error ? error.message : "Bağlantı kurulamadı. Tekrar deneyin.",
+      );
     } finally {
       setIsSharing(false);
       sharePending.current = false;
@@ -1754,16 +1863,25 @@ export default function Panel() {
     setShareError("");
     try {
       const response = await fetch(`${API_ENDPOINT}/shares/${code}/revoke`, {
-        method: "POST", headers: { Authorization: `Bearer ${session.token}` }, signal: AbortSignal.timeout(10000),
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.token}` },
+        signal: AbortSignal.timeout(10000),
       });
       if (!response.ok) throw new Error("Paylaşım iptal edilemedi. Tekrar deneyin.");
-      const updated = recentShares.filter(item => item.code !== code);
+      const updated = recentShares.filter((item) => item.code !== code);
       setRecentShares(updated);
       userStorage.setItem("mapsbridge.shares", JSON.stringify(updated));
-      if (code === shareCode) { setIsCreated(false); setShareCode(""); setShareUrl(""); }
+      if (code === shareCode) {
+        setIsCreated(false);
+        setShareCode("");
+        setShareUrl("");
+      }
     } catch (error) {
       setShareError(error instanceof Error ? error.message : "İptal başarısız.");
-    } finally { setIsSharing(false); sharePending.current = false; }
+    } finally {
+      setIsSharing(false);
+      sharePending.current = false;
+    }
   }
 
   function handleCopyCode() {
@@ -1804,7 +1922,7 @@ export default function Panel() {
       "Genel",
       ...customTabs,
       ...savedAddresses.map((a) => a.group || "Genel").filter(Boolean),
-    ])
+    ]),
   );
 
   // Aktif grup durakları
@@ -1832,14 +1950,44 @@ export default function Panel() {
     );
   });
 
-  const googlePins: Pin[] = [...planner.pinsWithTime,...planner.generalPins,...savedAddresses.filter(p=>!planner.allPins.some(existing=>existing.id===p.id)&&(selectedGroup==='all'||p.group===selectedGroup)).map(p=>({...p,category:p.category||'genel',dayIndex:p.day||0,order:p.order||1,group:p.group||'Genel',visited:!!p.visited}))];
-  const legacyPin = savedAddresses.find(p => p.id === planner.selectedPinId);
-  const sheetPin: Pin | null = planner.selectedPin || (legacyPin ? {...legacyPin,category:legacyPin.category||'genel',dayIndex:legacyPin.day||0,order:legacyPin.order||1,group:legacyPin.group||'Genel',visited:!!legacyPin.visited} : null);
-  function updateSheetPin(id:string, updates:Partial<Pin>) {
-    if(planner.allPins.some(p=>p.id===id))planner.updatePinAnywhere(id,updates);
+  const googlePins: Pin[] = [
+    ...planner.pinsWithTime,
+    ...planner.generalPins,
+    ...savedAddresses
+      .filter(
+        (p) =>
+          !planner.allPins.some((existing) => existing.id === p.id) &&
+          (selectedGroup === "all" || p.group === selectedGroup),
+      )
+      .map((p) => ({
+        ...p,
+        category: p.category || "genel",
+        dayIndex: p.day || 0,
+        order: p.order || 1,
+        group: p.group || "Genel",
+        visited: !!p.visited,
+      })),
+  ];
+  const legacyPin = savedAddresses.find((p) => p.id === planner.selectedPinId);
+  const sheetPin: Pin | null =
+    planner.selectedPin ||
+    (legacyPin
+      ? {
+          ...legacyPin,
+          category: legacyPin.category || "genel",
+          dayIndex: legacyPin.day || 0,
+          order: legacyPin.order || 1,
+          group: legacyPin.group || "Genel",
+          visited: !!legacyPin.visited,
+        }
+      : null);
+  function updateSheetPin(id: string, updates: Partial<Pin>) {
+    if (planner.allPins.some((p) => p.id === id)) planner.updatePinAnywhere(id, updates);
     else {
-      const next=savedAddresses.map(p=>p.id===id?{...p,...updates} as SavedAddress:p);
-      userStorage.setItem("adreskopru.savedAddresses",JSON.stringify(next));
+      const next = savedAddresses.map((p) =>
+        p.id === id ? ({ ...p, ...updates } as SavedAddress) : p,
+      );
+      userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(next));
       setSavedAddresses(next);
     }
   }
@@ -1850,655 +1998,775 @@ export default function Panel() {
       subtitle="Kişisel gezi rotalarınızı oluşturmak, duraklarınızı coğrafi sıraya dizmek ve AI seyahat asistanınızı kullanmak için giriş yapmalısınız."
       fallback={<AIPromoLanding />}
     >
-      <main className={`map-page ${googleMapsEnabled?"google-map-page":""}`}>
-      <HeaderNav savedCount={savedAddresses.length} />
+      <main className={`map-page ${googleMapsEnabled ? "google-map-page" : ""}`}>
+        <HeaderNav savedCount={savedAddresses.length} />
 
-      {/* Ziyaretçi Tanıtım Banner'ı */}
-      {!userEmail && <PanelGuestBanner nextUrl="/desk/" />}
+        {/* Ziyaretçi Tanıtım Banner'ı */}
+        {!userEmail && <PanelGuestBanner nextUrl="/desk/" />}
 
-      {mapStatus !== "ready" && <div className="map-load-status" role={mapStatus === "error" ? "alert" : "status"}><p>{mapStatus === "loading" ? "Harita yükleniyor…" : "Harita yüklenemedi. Bağlantını kontrol edip tekrar dene."}</p>{mapStatus === "error" && <button className="ui-button" type="button" onClick={() => setMapAttempt(value => value + 1)}>Haritayı tekrar yükle</button>}</div>}
-      {(sheetPin || quickAddPoint) && <MobilePinSheet key={sheetPin?.id || `${quickAddPoint?.lat}:${quickAddPoint?.lng}:${quickAddPoint?.googlePlaceId||""}`} planner={planner} point={quickAddPoint} pin={sheetPin} onClose={closePinSheet} onClearPoint={()=>setQuickAddPoint(null)} onUpdate={updateSheetPin} onLinkPlace={id=>setQuickAddPoint(p=>p?{...p,googlePlaceId:id}:p)}/>}
-      {/* ── Docked Split View: Left Travel Planner + Interactive Map ── */}
-      <div className={`panel-screen-body ${isPlannerCollapsed ? "sidebar-collapsed" : "sidebar-expanded"}`}>
-        <TravelPlannerSidebar
-          planner={planner}
-          isCollapsed={isPlannerCollapsed}
-          onToggleCollapse={() => setIsPlannerCollapsed(!isPlannerCollapsed)}
-          selectedMapPoint={quickAddPoint}
-          onClearSelectedMapPoint={() => setQuickAddPoint(null)}
-          isAddingPinMode={isAddingPinMode}
-          onToggleAddPinMode={() => {
-            if (!userEmail) {
-              requireAuth("Haritaya Pin Ekleme", "Harita üzerinde yeni keşif noktaları ve pinler eklemek", () => {});
-              return;
+        {mapStatus !== "ready" && (
+          <div className="map-load-status" role={mapStatus === "error" ? "alert" : "status"}>
+            <p>
+              {mapStatus === "loading"
+                ? "Harita yükleniyor…"
+                : "Harita yüklenemedi. Bağlantını kontrol edip tekrar dene."}
+            </p>
+            {mapStatus === "error" && (
+              <button
+                className="ui-button"
+                type="button"
+                onClick={() => setMapAttempt((value) => value + 1)}
+              >
+                Haritayı tekrar yükle
+              </button>
+            )}
+          </div>
+        )}
+        {(sheetPin || quickAddPoint) && (
+          <MobilePinSheet
+            key={
+              sheetPin?.id ||
+              `${quickAddPoint?.lat}:${quickAddPoint?.lng}:${quickAddPoint?.googlePlaceId || ""}`
             }
-            setIsAddingPinMode((prev) => !prev);
-          }}
-          isGuest={!userEmail}
-          onRequireAuth={(featureName, actionDesc) => {
-            requireAuth(featureName, actionDesc, () => {});
-          }}
-          onFlyToPin={(pin) => focusMapPin(pin.lat,pin.lng)}
-          onFlyToCoords={(lat,lng,label) => {
-            focusMapPin(lat,lng);
-            markerRef.current?.setLatLng([lat,lng]);
-            pointRequest.current++;
-            planner.setSelectedPinId(null);
-            setQuickAddPoint({lat,lng,address:label});
-          }}
-          onRunOptimize={() => handleRunContextualAI("optimize")}
-        />
-
-        {googleMapsEnabled ? <GooglePlannerMap key={mapAttempt} pins={googlePins} selectedId={planner.selectedPinId} point={quickAddPoint} path={(planner.activeRoadGeometry?.coordinates||[]) as [number,number][]} onPoint={point=>{pointRequest.current++;planner.setSelectedPinId(null);setQuickAddPoint(point);}} onPin={openSavedPin} onReady={handle=>{googleMapRef.current=handle;setMapStatus("ready");}} onError={()=>setMapStatus("error")} onAddPlaceToTrip={place => {
-          const targetTripId = planner.activeTrip?.id || planner.trips[0]?.id || 'trip-1';
-          const targetDay = planner.activeDayIndex || 1;
-          planner.addPinDirectlyToTrip(targetTripId, {
-            label: place.label,
-            address: place.address,
-            lat: place.lat,
-            lng: place.lng,
-            category: (place.category || 'genel') as any,
-            dayIndex: targetDay,
-            group: 'Genel',
-            visited: false,
-            durationMinutes: 60,
-            googlePlaceId: place.googlePlaceId,
-          }, targetDay);
-          interactionTracker.logPinAddToRoute({
-            label: place.label,
-            category: place.category,
-            tripId: targetTripId,
-            dayIndex: targetDay,
-            source: "map_search",
-          });
-          setQuickAddPoint(null);
-          showPanelToast(`✓ "${place.label}" ${targetDay}. güne eklendi!`);
-        }} /> : <div
-          ref={mapContainerRef}
-          className="map-container"
-          aria-label="Seyahat planlama haritası"
-          data-map-style={currentMapStyle}
-        />}
-
-        {/* Unified Map Control Hub (Tek Noktada Toplanan Harita Kontrolleri) */}
+            planner={planner}
+            point={quickAddPoint}
+            pin={sheetPin}
+            onClose={closePinSheet}
+            onClearPoint={() => setQuickAddPoint(null)}
+            onUpdate={updateSheetPin}
+            onLinkPlace={(id) => setQuickAddPoint((p) => (p ? { ...p, googlePlaceId: id } : p))}
+          />
+        )}
+        {/* ── Docked Split View: Left Travel Planner + Interactive Map ── */}
         <div
-          ref={mapHubRef}
-          className={`stitch-map-hub-container ${planner.selectedPin ? "has-drawer-open" : ""}`}
+          className={`panel-screen-body ${isPlannerCollapsed ? "sidebar-collapsed" : "sidebar-expanded"}`}
         >
-          {!isMapHubOpen ? (
-            <button
-              type="button"
-              className="stitch-map-hub-trigger"
-              onClick={() => setIsMapHubOpen(true)}
-              title="Harita Görünümü ve Kontrolleri"
-              aria-label="Harita Kontrol Menüsünü Aç"
-            >
-              <div className="stitch-hub-trigger-icon-box">
-                <span className="material-symbols-outlined text-[17px]">
-                  {currentMapStyle === "uydu"
-                    ? "satellite_alt"
-                    : currentMapStyle === "koyu"
-                    ? "dark_mode"
-                    : currentMapStyle === "doga"
-                    ? "terrain"
-                    : "layers"}
-                </span>
-              </div>
-              <span className="stitch-hub-trigger-label">
-                {currentMapStyle === "uydu"
-                  ? "Uydu"
-                  : currentMapStyle === "koyu"
-                  ? "Koyu Gece"
-                  : currentMapStyle === "doga"
-                  ? "Doğa / Arazi"
-                  : "Standart Harita"}
-              </span>
-              <span className="material-symbols-outlined stitch-hub-trigger-chevron">expand_more</span>
-            </button>
+          <TravelPlannerSidebar
+            planner={planner}
+            isCollapsed={isPlannerCollapsed}
+            onToggleCollapse={() => setIsPlannerCollapsed(!isPlannerCollapsed)}
+            selectedMapPoint={quickAddPoint}
+            onClearSelectedMapPoint={() => setQuickAddPoint(null)}
+            isAddingPinMode={isAddingPinMode}
+            onToggleAddPinMode={() => {
+              if (!userEmail) {
+                requireAuth(
+                  "Haritaya Pin Ekleme",
+                  "Harita üzerinde yeni keşif noktaları ve pinler eklemek",
+                  () => {},
+                );
+                return;
+              }
+              setIsAddingPinMode((prev) => !prev);
+            }}
+            isGuest={!userEmail}
+            onRequireAuth={(featureName, actionDesc) => {
+              requireAuth(featureName, actionDesc, () => {});
+            }}
+            onFlyToPin={(pin) => focusMapPin(pin.lat, pin.lng)}
+            onFlyToCoords={(lat, lng, label) => {
+              focusMapPin(lat, lng);
+              markerRef.current?.setLatLng([lat, lng]);
+              pointRequest.current++;
+              planner.setSelectedPinId(null);
+              setQuickAddPoint({ lat, lng, address: label });
+            }}
+            onRunOptimize={() => handleRunContextualAI("optimize")}
+          />
+
+          {googleMapsEnabled ? (
+            <GooglePlannerMap
+              key={mapAttempt}
+              pins={googlePins}
+              selectedId={planner.selectedPinId}
+              point={quickAddPoint}
+              path={(planner.activeRoadGeometry?.coordinates || []) as [number, number][]}
+              onPoint={(point) => {
+                pointRequest.current++;
+                planner.setSelectedPinId(null);
+                setQuickAddPoint(point);
+              }}
+              onPin={openSavedPin}
+              onReady={(handle) => {
+                googleMapRef.current = handle;
+                setMapStatus("ready");
+              }}
+              onError={() => setMapStatus("error")}
+              onAddPlaceToTrip={(place) => {
+                const targetTripId = planner.activeTrip?.id || planner.trips[0]?.id || "trip-1";
+                const targetDay = planner.activeDayIndex || 1;
+                planner.addPinDirectlyToTrip(
+                  targetTripId,
+                  {
+                    label: place.label,
+                    address: place.address,
+                    lat: place.lat,
+                    lng: place.lng,
+                    category: (place.category || "genel") as any,
+                    dayIndex: targetDay,
+                    group: "Genel",
+                    visited: false,
+                    durationMinutes: 60,
+                    googlePlaceId: place.googlePlaceId,
+                  },
+                  targetDay,
+                );
+                interactionTracker.logPinAddToRoute({
+                  label: place.label,
+                  category: place.category,
+                  tripId: targetTripId,
+                  dayIndex: targetDay,
+                  source: "map_search",
+                });
+                setQuickAddPoint(null);
+                showPanelToast(`✓ "${place.label}" ${targetDay}. güne eklendi!`);
+              }}
+            />
           ) : (
-            <div className="stitch-map-hub-card">
-              {/* Header */}
-              <div className="stitch-hub-card-header">
-                <div className="stitch-hub-header-left">
-                  <span className="material-symbols-outlined text-[17px] text-[#047857]">tune</span>
-                  <span>Harita Kontrolleri</span>
+            <div
+              ref={mapContainerRef}
+              className="map-container"
+              aria-label="Seyahat planlama haritası"
+              data-map-style={currentMapStyle}
+            />
+          )}
+
+          {/* Unified Map Control Hub (Tek Noktada Toplanan Harita Kontrolleri) */}
+          <div
+            ref={mapHubRef}
+            className={`stitch-map-hub-container ${planner.selectedPin ? "has-drawer-open" : ""}`}
+          >
+            {!isMapHubOpen ? (
+              <button
+                type="button"
+                className="stitch-map-hub-trigger"
+                onClick={() => setIsMapHubOpen(true)}
+                title="Harita Görünümü ve Kontrolleri"
+                aria-label="Harita Kontrol Menüsünü Aç"
+              >
+                <div className="stitch-hub-trigger-icon-box">
+                  <span className="material-symbols-outlined text-[17px]">
+                    {currentMapStyle === "uydu"
+                      ? "satellite_alt"
+                      : currentMapStyle === "koyu"
+                        ? "dark_mode"
+                        : currentMapStyle === "doga"
+                          ? "terrain"
+                          : "layers"}
+                  </span>
+                </div>
+                <span className="stitch-hub-trigger-label">
+                  {currentMapStyle === "uydu"
+                    ? "Uydu"
+                    : currentMapStyle === "koyu"
+                      ? "Koyu Gece"
+                      : currentMapStyle === "doga"
+                        ? "Doğa / Arazi"
+                        : "Standart Harita"}
+                </span>
+                <span className="material-symbols-outlined stitch-hub-trigger-chevron">
+                  expand_more
+                </span>
+              </button>
+            ) : (
+              <div className="stitch-map-hub-card">
+                {/* Header */}
+                <div className="stitch-hub-card-header">
+                  <div className="stitch-hub-header-left">
+                    <span className="material-symbols-outlined text-[17px] text-[#047857]">
+                      tune
+                    </span>
+                    <span>Harita Kontrolleri</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="stitch-hub-close-btn"
+                    onClick={() => setIsMapHubOpen(false)}
+                    title="Kapat"
+                    aria-label="Harita Kontrol Menüsünü Kapat"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                </div>
+
+                {/* Map Layer Section */}
+                <div className="stitch-hub-section">
+                  <span className="stitch-hub-section-label">Harita Katmanı</span>
+                  <div className="stitch-hub-styles-grid">
+                    {(
+                      [
+                        { id: "standart" as MapStyleId, label: "Standart", icon: "layers" },
+                        { id: "uydu" as MapStyleId, label: "Uydu", icon: "satellite_alt" },
+                        { id: "koyu" as MapStyleId, label: "Koyu", icon: "dark_mode" },
+                        { id: "doga" as MapStyleId, label: "Doğa", icon: "terrain" },
+                      ] as const
+                    ).map((st) => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        className={`stitch-hub-style-tile ${currentMapStyle === st.id ? "active" : ""}`}
+                        onClick={() => {
+                          setCurrentMapStyle(st.id);
+                          if (typeof window !== "undefined")
+                            localStorage.setItem("mapsbridge.mapStyle", st.id);
+                        }}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">{st.icon}</span>
+                        <span>{st.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Transit / Rail Toggle */}
+                  <div
+                    className="stitch-hub-toggle-row"
+                    onClick={() => {
+                      const next = !showTransitOverlay;
+                      setShowTransitOverlay(next);
+                      if (typeof window !== "undefined")
+                        localStorage.setItem("mapsbridge.transitOverlay", String(next));
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    title="Raylı Sistem & Ulaşım Katmanı"
+                  >
+                    <div className="stitch-hub-toggle-left">
+                      <span className="material-symbols-outlined text-[16px] text-emerald-600">
+                        traffic
+                      </span>
+                      <span>Raylı Sistem & Ulaşım</span>
+                    </div>
+                    <div className={`stitch-hub-toggle-pill ${showTransitOverlay ? "active" : ""}`}>
+                      <div className="stitch-hub-toggle-dot" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation & Zoom Section */}
+                <div className="stitch-hub-section">
+                  <span className="stitch-hub-section-label">Navigasyon & Büyütme</span>
+                  <div className="stitch-hub-nav-grid">
+                    <button
+                      type="button"
+                      className="stitch-hub-nav-btn"
+                      title="Büyüt (Yakınlaştır)"
+                      aria-label="Haritayı Büyüt"
+                      onClick={() => {
+                        if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
+                      }}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">add</span>
+                      <span>Büyüt</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="stitch-hub-nav-btn"
+                      title="Küçült (Uzaklaştır)"
+                      aria-label="Haritayı Küçült"
+                      onClick={() => {
+                        if (mapInstanceRef.current) mapInstanceRef.current.zoomOut();
+                      }}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">remove</span>
+                      <span>Küçült</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="stitch-hub-nav-btn"
+                      title="Kuzeye Hizala"
+                      aria-label="Kuzeye Hizala"
+                      onClick={() => {
+                        if (mapInstanceRef.current) {
+                          mapInstanceRef.current.setView(
+                            mapInstanceRef.current.getCenter(),
+                            mapInstanceRef.current.getZoom(),
+                            { animate: true },
+                          );
+                        }
+                      }}
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-sky-600">
+                        explore
+                      </span>
+                      <span>Kuzey</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="stitch-hub-nav-btn"
+                      title="Mevcut Konumum"
+                      aria-label="Mevcut Konumumu Bul"
+                      onClick={handleCurrentLocation}
+                      disabled={isLocating}
+                    >
+                      <span
+                        className={`material-symbols-outlined text-[18px] text-emerald-600 ${isLocating ? "animate-spin" : ""}`}
+                      >
+                        my_location
+                      </span>
+                      <span>Konum</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Advanced Modal Trigger Footer */}
+                <div className="stitch-hub-footer">
+                  <button
+                    type="button"
+                    className="stitch-hub-advanced-btn"
+                    onClick={() => {
+                      setIsMapHubOpen(false);
+                      setShowMapCustomizeModal(true);
+                    }}
+                    title="Detaylı Harita Özelleştirme"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">palette</span>
+                    <span>Daha Fazla Özelleştirme...</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT SIDE: Stitch 6-Digit Direct Instant Share Card (Floating Overlay) */}
+          {showShareCard && (
+            <div className="stitch-floating-share-card" id="share-modal-card">
+              <div className="share-card-head">
+                <div className="share-card-title-box">
+                  <span className="material-symbols-outlined text-[#286954] text-[20px]">
+                    share_location
+                  </span>
+                  <h3 className="share-card-title">Rotayı Anında Paylaş</h3>
                 </div>
                 <button
                   type="button"
-                  className="stitch-hub-close-btn"
-                  onClick={() => setIsMapHubOpen(false)}
+                  className="share-card-close-btn"
+                  id="close-share-btn"
+                  onClick={() => setShowShareCard(false)}
                   title="Kapat"
-                  aria-label="Harita Kontrol Menüsünü Kapat"
                 >
                   <span className="material-symbols-outlined text-[16px]">close</span>
                 </button>
               </div>
+              <p className="share-card-desc">
+                Bu kodu giren arkadaşlarınız haritayı gerçek zamanlı olarak masalarında açar.
+              </p>
 
-              {/* Map Layer Section */}
-              <div className="stitch-hub-section">
-                <span className="stitch-hub-section-label">Harita Katmanı</span>
-                <div className="stitch-hub-styles-grid">
-                  {(
-                    [
-                      { id: "standart" as MapStyleId, label: "Standart", icon: "layers" },
-                      { id: "uydu" as MapStyleId, label: "Uydu", icon: "satellite_alt" },
-                      { id: "koyu" as MapStyleId, label: "Koyu", icon: "dark_mode" },
-                      { id: "doga" as MapStyleId, label: "Doğa", icon: "terrain" },
-                    ] as const
-                  ).map((st) => (
-                    <button
-                      key={st.id}
-                      type="button"
-                      className={`stitch-hub-style-tile ${currentMapStyle === st.id ? "active" : ""}`}
-                      onClick={() => {
-                        setCurrentMapStyle(st.id);
-                        if (typeof window !== "undefined") localStorage.setItem("mapsbridge.mapStyle", st.id);
-                      }}
-                    >
-                      <span className="material-symbols-outlined text-[16px]">{st.icon}</span>
-                      <span>{st.label}</span>
-                    </button>
-                  ))}
+              {/* 6-Digit Code Display */}
+              <div className="share-code-display-box">
+                <div className="share-code-inner">
+                  <span className="share-code-label">BENZERSİZ ERİŞİM KODU</span>
+                  <span className="share-code-value">{shareCode || "MB-8492"}</span>
                 </div>
-
-                {/* Transit / Rail Toggle */}
-                <div
-                  className="stitch-hub-toggle-row"
-                  onClick={() => {
-                    const next = !showTransitOverlay;
-                    setShowTransitOverlay(next);
-                    if (typeof window !== "undefined") localStorage.setItem("mapsbridge.transitOverlay", String(next));
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  title="Raylı Sistem & Ulaşım Katmanı"
-                >
-                  <div className="stitch-hub-toggle-left">
-                    <span className="material-symbols-outlined text-[16px] text-emerald-600">traffic</span>
-                    <span>Raylı Sistem & Ulaşım</span>
-                  </div>
-                  <div className={`stitch-hub-toggle-pill ${showTransitOverlay ? "active" : ""}`}>
-                    <div className="stitch-hub-toggle-dot" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Navigation & Zoom Section */}
-              <div className="stitch-hub-section">
-                <span className="stitch-hub-section-label">Navigasyon & Büyütme</span>
-                <div className="stitch-hub-nav-grid">
-                  <button
-                    type="button"
-                    className="stitch-hub-nav-btn"
-                    title="Büyüt (Yakınlaştır)"
-                    aria-label="Haritayı Büyüt"
-                    onClick={() => {
-                      if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
-                    }}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">add</span>
-                    <span>Büyüt</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="stitch-hub-nav-btn"
-                    title="Küçült (Uzaklaştır)"
-                    aria-label="Haritayı Küçült"
-                    onClick={() => {
-                      if (mapInstanceRef.current) mapInstanceRef.current.zoomOut();
-                    }}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">remove</span>
-                    <span>Küçült</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="stitch-hub-nav-btn"
-                    title="Kuzeye Hizala"
-                    aria-label="Kuzeye Hizala"
-                    onClick={() => {
-                      if (mapInstanceRef.current) {
-                        mapInstanceRef.current.setView(mapInstanceRef.current.getCenter(), mapInstanceRef.current.getZoom(), { animate: true });
-                      }
-                    }}
-                  >
-                    <span className="material-symbols-outlined text-[18px] text-sky-600">explore</span>
-                    <span>Kuzey</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="stitch-hub-nav-btn"
-                    title="Mevcut Konumum"
-                    aria-label="Mevcut Konumumu Bul"
-                    onClick={handleCurrentLocation}
-                    disabled={isLocating}
-                  >
-                    <span className={`material-symbols-outlined text-[18px] text-emerald-600 ${isLocating ? "animate-spin" : ""}`}>my_location</span>
-                    <span>Konum</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Advanced Modal Trigger Footer */}
-              <div className="stitch-hub-footer">
                 <button
                   type="button"
-                  className="stitch-hub-advanced-btn"
-                  onClick={() => {
-                    setIsMapHubOpen(false);
-                    setShowMapCustomizeModal(true);
-                  }}
-                  title="Detaylı Harita Özelleştirme"
+                  className="share-code-copy-btn"
+                  id="btn-copy-code"
+                  title="Kodu Kopyala"
+                  onClick={handleCopyCode}
                 >
-                  <span className="material-symbols-outlined text-[15px]">palette</span>
-                  <span>Daha Fazla Özelleştirme...</span>
+                  <span className="material-symbols-outlined text-[17px] text-white">
+                    {copiedCode ? "check" : "content_copy"}
+                  </span>
+                </button>
+              </div>
+
+              {/* Dynamic QR Code Container */}
+              <div className="share-qr-container">
+                <div className="share-qr-box">
+                  <QRCodeSVG
+                    value={
+                      shareUrl ||
+                      (typeof window !== "undefined"
+                        ? `${window.location.origin}/desk/?code=${shareCode || "MB-8492"}`
+                        : "https://mapsbridge.com")
+                    }
+                    size={56}
+                    level="M"
+                  />
+                </div>
+                <div className="share-qr-meta">
+                  <span className="share-qr-title">Kamerayla Oku</span>
+                  <span className="share-qr-sub">
+                    Mobil MapsBridge uygulaması doğrudan rota seyrini başlatır.
+                  </span>
+                </div>
+              </div>
+
+              {/* Expiration Setting Dropdown */}
+              <div className="share-expiry-row">
+                <span className="share-expiry-label">Geçerlilik Süresi:</span>
+                <select
+                  className="share-expiry-select"
+                  value={hours}
+                  onChange={(e) => {
+                    setHours(Number(e.target.value));
+                    handleCreateShare();
+                  }}
+                >
+                  <option value={24}>24 Saat Geçerli</option>
+                  <option value={1}>1 Saat (Hızlı Oturum)</option>
+                  <option value={168}>7 Gün Geçerli</option>
+                  <option value={0}>Süresiz (Kalıcı Link)</option>
+                </select>
+              </div>
+
+              {/* Social Share Pills */}
+              <div className="share-social-grid">
+                <a
+                  className="share-social-btn whatsapp"
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                    `MapsBridge Rota Kodu: #${shareCode || "MB-8492"}\nHaritada incele: ${shareUrl || (typeof window !== "undefined" ? window.location.href : "")}`,
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span className="material-symbols-outlined text-[15px]">chat</span> WhatsApp
+                </a>
+                <a
+                  className="share-social-btn telegram"
+                  href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl || (typeof window !== "undefined" ? window.location.href : ""))}&text=${encodeURIComponent(`MapsBridge Rota Kodu: #${shareCode || "MB-8492"}`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span className="material-symbols-outlined text-[15px]">send</span> Telegram
+                </a>
+                <button type="button" className="share-social-btn link" onClick={handleCopyLink}>
+                  <span className="material-symbols-outlined text-[15px]">
+                    {copiedLink ? "check" : "link"}
+                  </span>{" "}
+                  {copiedLink ? "Kopyalandı" : "Link"}
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* RIGHT SIDE: Stitch 6-Digit Direct Instant Share Card (Floating Overlay) */}
-        {showShareCard && (
-          <div className="stitch-floating-share-card" id="share-modal-card">
-            <div className="share-card-head">
-              <div className="share-card-title-box">
-                <span className="material-symbols-outlined text-[#286954] text-[20px]">share_location</span>
-                <h3 className="share-card-title">Rotayı Anında Paylaş</h3>
+        {/* Paylaşım Sonucu Modalı (Minimal & Modern) */}
+        {isCreated && (
+          <div className="share-modal-overlay" onClick={() => setIsCreated(false)}>
+            <div className="share-modal minimal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setIsCreated(false)}>
+                ✕
+              </button>
+              <button
+                type="button"
+                className="cancel-btn"
+                disabled={isSharing}
+                onClick={() => handleRevokeShare()}
+              >
+                Paylaşımı iptal et
+              </button>
+              {shareError && <p role="alert">{shareError}</p>}
+              <div className="modal-badge">PAYLAŞIMA HAZIR</div>
+              <h2>Konum Doğrulama Kodun</h2>
+              <p className="modal-desc">
+                Bu kodla{" "}
+                <strong>
+                  {hours === 0 ? "Süresiz" : `${hours === 168 ? "7 gün" : `${hours} saat`}`}
+                </strong>{" "}
+                boyunca konumunuza erişilebilir.
+              </p>
+
+              <div className="big-code-box">
+                <span className="code-hint">6 HANELİ DOĞRULAMA KODU</span>
+                <div className="code-display">
+                  {shareCode.slice(0, 3)} {shareCode.slice(3)}
+                </div>
+                <button className="copy-code-button" onClick={handleCopyCode}>
+                  <IconCopy className="mini-icon-svg" />
+                  <span>{copiedCode ? "Kod Kopyalandı!" : "Kodu Kopyala"}</span>
+                </button>
+                <small className="code-info">
+                  Karşı taraf <strong>"Kodla Bul"</strong> butonuna bu kodu girerek haritada
+                  konumunuzu görebilir.
+                </small>
+              </div>
+
+              <div className="qr-wrapper">
+                <QRCodeSVG value={shareUrl} size={130} level="M" includeMargin />
+              </div>
+
+              <div className="url-box">
+                <code>{shareUrl}</code>
+                <button className="copy-btn" onClick={handleCopyLink}>
+                  {copiedLink ? "Kopyalandı" : "Kopyala"}
+                </button>
+              </div>
+
+              <div className="modal-actions">
+                <a
+                  className="share-btn whatsapp"
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                    `MapsBridge konumum: ${location.address}\nDoğrulama Kodu: ${shareCode}\nSüre: ${
+                      hours === 0 ? "Sınırsız" : `${hours} saat`
+                    }\nKonumu Gör: ${shareUrl}`,
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  WhatsApp ile Paylaş
+                </a>
+                <button className="share-btn primary" onClick={handleShareNative}>
+                  Bağlantıyı Paylaş
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Harita Ayarları Popover Menüsü (Sağ Alt Köşede Butonun Hemen Üstünde Açılır) */}
+        {/* Harita Düzenleme & Katman Ayarları Pop-up (Stitch 1:1 Floating Card) */}
+        {showMapCustomizeModal && (
+          <div
+            className="stitch-floating-layer-card"
+            id="layer-selector-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Harita Görünümü"
+          >
+            <div className="layer-card-head flex items-center justify-between pb-1">
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[#286954] text-[20px]">map</span>
+                <h3 className="text-[16px] font-bold text-[#013628]">Harita Görünümü</h3>
               </div>
               <button
                 type="button"
-                className="share-card-close-btn"
-                id="close-share-btn"
-                onClick={() => setShowShareCard(false)}
+                className="w-7 h-7 rounded-full bg-[#F1F5F9] hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+                id="close-layer-btn"
+                onClick={() => setShowMapCustomizeModal(false)}
                 title="Kapat"
               >
                 <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
-            <p className="share-card-desc">Bu kodu giren arkadaşlarınız haritayı gerçek zamanlı olarak masalarında açar.</p>
 
-            {/* 6-Digit Code Display */}
-            <div className="share-code-display-box">
-              <div className="share-code-inner">
-                <span className="share-code-label">BENZERSİZ ERİŞİM KODU</span>
-                <span className="share-code-value">{shareCode || "MB-8492"}</span>
-              </div>
-              <button
-                type="button"
-                className="share-code-copy-btn"
-                id="btn-copy-code"
-                title="Kodu Kopyala"
-                onClick={handleCopyCode}
-              >
-                <span className="material-symbols-outlined text-[17px] text-white">
-                  {copiedCode ? "check" : "content_copy"}
+            {/* 6 Map Style Grid (3x2) */}
+            <div className="grid grid-cols-3 gap-2 my-2">
+              {MAP_STYLES.map((style) => {
+                const isSelected = currentMapStyle === style.id;
+                return (
+                  <div
+                    key={style.id}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-xl cursor-pointer transition-all ${
+                      isSelected
+                        ? "bg-[#ECFDF5] ring-1 ring-[#10B981] shadow-sm"
+                        : "bg-white hover:bg-[#F1F5F9] border border-slate-200/70"
+                    }`}
+                    onClick={() => {
+                      setCurrentMapStyle(style.id);
+                      if (typeof window !== "undefined")
+                        localStorage.setItem("mapsbridge.mapStyle", style.id);
+                    }}
+                  >
+                    <div
+                      className={`w-full h-9 rounded-lg flex items-center justify-center text-[18px] ${
+                        isSelected ? "bg-[#abedd3] text-[#013628]" : "bg-[#F1F5F9] text-[#404945]"
+                      }`}
+                    >
+                      <span className="text-[17px]">{style.icon}</span>
+                    </div>
+                    <span
+                      className={`text-[10px] text-center font-bold truncate max-w-full ${
+                        isSelected ? "text-[#013628]" : "text-[#404945]"
+                      }`}
+                    >
+                      {style.label.split("&")[0].trim()}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Overlays */}
+            <div className="flex flex-col gap-2 pt-1 border-t border-slate-200/70">
+              <label className="flex items-center justify-between cursor-pointer text-[12px] font-medium text-[#131b2e]">
+                <span className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#286954]">
+                    subway
+                  </span>
+                  <span>Metro & Raylı Hatlar</span>
                 </span>
-              </button>
-            </div>
-
-            {/* Dynamic QR Code Container */}
-            <div className="share-qr-container">
-              <div className="share-qr-box">
-                <QRCodeSVG
-                  value={shareUrl || (typeof window !== "undefined" ? `${window.location.origin}/desk/?code=${shareCode || "MB-8492"}` : "https://mapsbridge.com")}
-                  size={56}
-                  level="M"
+                <input
+                  type="checkbox"
+                  checked={showTransitOverlay}
+                  onChange={(e) => {
+                    setShowTransitOverlay(e.target.checked);
+                    if (typeof window !== "undefined")
+                      localStorage.setItem("mapsbridge.transitOverlay", String(e.target.checked));
+                  }}
+                  className="accent-[#10B981] w-4 h-4 cursor-pointer"
                 />
-              </div>
-              <div className="share-qr-meta">
-                <span className="share-qr-title">Kamerayla Oku</span>
-                <span className="share-qr-sub">Mobil MapsBridge uygulaması doğrudan rota seyrini başlatır.</span>
-              </div>
+              </label>
+
+              <label className="flex items-center justify-between cursor-pointer text-[12px] font-medium text-[#131b2e]">
+                <span className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#286954]">
+                    apartment
+                  </span>
+                  <span>3D Bina Gölgelendirmesi</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={mapVisualFilter === "contrast"}
+                  onChange={(e) => {
+                    const nextFilter = e.target.checked ? "contrast" : "none";
+                    setMapVisualFilter(nextFilter);
+                    if (typeof window !== "undefined")
+                      localStorage.setItem("mapsbridge.mapVisualFilter", nextFilter);
+                  }}
+                  className="accent-[#10B981] w-4 h-4 cursor-pointer"
+                />
+              </label>
             </div>
 
-            {/* Expiration Setting Dropdown */}
-            <div className="share-expiry-row">
-              <span className="share-expiry-label">Geçerlilik Süresi:</span>
-              <select
-                className="share-expiry-select"
-                value={hours}
-                onChange={(e) => {
-                  setHours(Number(e.target.value));
-                  handleCreateShare();
-                }}
-              >
-                <option value={24}>24 Saat Geçerli</option>
-                <option value={1}>1 Saat (Hızlı Oturum)</option>
-                <option value={168}>7 Gün Geçerli</option>
-                <option value={0}>Süresiz (Kalıcı Link)</option>
-              </select>
-            </div>
-
-            {/* Social Share Pills */}
-            <div className="share-social-grid">
-              <a
-                className="share-social-btn whatsapp"
-                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                  `MapsBridge Rota Kodu: #${shareCode || "MB-8492"}\nHaritada incele: ${shareUrl || (typeof window !== "undefined" ? window.location.href : "")}`
-                )}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <span className="material-symbols-outlined text-[15px]">chat</span> WhatsApp
-              </a>
-              <a
-                className="share-social-btn telegram"
-                href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl || (typeof window !== "undefined" ? window.location.href : ""))}&text=${encodeURIComponent(`MapsBridge Rota Kodu: #${shareCode || "MB-8492"}`)}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <span className="material-symbols-outlined text-[15px]">send</span> Telegram
-              </a>
-              <button type="button" className="share-social-btn link" onClick={handleCopyLink}>
-                <span className="material-symbols-outlined text-[15px]">{copiedLink ? "check" : "link"}</span> {copiedLink ? "Kopyalandı" : "Link"}
-              </button>
+            {/* Route Color Picker */}
+            <div className="flex flex-col gap-1.5 pt-2 border-t border-slate-200/70">
+              <span className="text-[10px] text-[#404945] font-bold uppercase tracking-wider">
+                Rota Vurgu Rengi
+              </span>
+              <div className="flex items-center justify-between pt-0.5">
+                {PIN_COLORS.map((c) => {
+                  const isSelected = pinColor === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      className={`w-6 h-6 rounded-full transition-transform ${
+                        isSelected ? "ring-2 ring-[#013628] scale-110" : "hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: c.color }}
+                      title={c.name}
+                      onClick={() => {
+                        setPinColor(c.id);
+                        if (typeof window !== "undefined")
+                          localStorage.setItem("mapsbridge.pinColor", c.id);
+                      }}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
 
-      </div>
-
-
-
-
-
-
-
-      {/* Paylaşım Sonucu Modalı (Minimal & Modern) */}
-      {isCreated && (
-        <div className="share-modal-overlay" onClick={() => setIsCreated(false)}>
-          <div className="share-modal minimal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setIsCreated(false)}>
-              ✕
-            </button>
-            <button type="button" className="cancel-btn" disabled={isSharing} onClick={() => handleRevokeShare()}>Paylaşımı iptal et</button>
-            {shareError && <p role="alert">{shareError}</p>}
-            <div className="modal-badge">PAYLAŞIMA HAZIR</div>
-            <h2>Konum Doğrulama Kodun</h2>
-            <p className="modal-desc">
-              Bu kodla{" "}
-              <strong>
-                {hours === 0 ? "Süresiz" : `${hours === 168 ? "7 gün" : `${hours} saat`}`}
-              </strong>{" "}
-              boyunca konumunuza erişilebilir.
-            </p>
-
-            <div className="big-code-box">
-              <span className="code-hint">6 HANELİ DOĞRULAMA KODU</span>
-              <div className="code-display">
-                {shareCode.slice(0, 3)} {shareCode.slice(3)}
-              </div>
-              <button className="copy-code-button" onClick={handleCopyCode}>
-                <IconCopy className="mini-icon-svg" />
-                <span>{copiedCode ? "Kod Kopyalandı!" : "Kodu Kopyala"}</span>
-              </button>
-              <small className="code-info">
-                Karşı taraf <strong>"Kodla Bul"</strong> butonuna bu kodu girerek haritada konumunuzu görebilir.
-              </small>
-            </div>
-
-            <div className="qr-wrapper">
-              <QRCodeSVG value={shareUrl} size={130} level="M" includeMargin />
-            </div>
-
-            <div className="url-box">
-              <code>{shareUrl}</code>
-              <button className="copy-btn" onClick={handleCopyLink}>
-                {copiedLink ? "Kopyalandı" : "Kopyala"}
-              </button>
-            </div>
-
-            <div className="modal-actions">
-              <a
-                className="share-btn whatsapp"
-                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                  `MapsBridge konumum: ${location.address}\nDoğrulama Kodu: ${shareCode}\nSüre: ${
-                    hours === 0 ? "Sınırsız" : `${hours} saat`
-                  }\nKonumu Gör: ${shareUrl}`
-                )}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                WhatsApp ile Paylaş
-              </a>
-              <button className="share-btn primary" onClick={handleShareNative}>
-                Bağlantıyı Paylaş
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Harita Ayarları Popover Menüsü (Sağ Alt Köşede Butonun Hemen Üstünde Açılır) */}
-      {/* Harita Düzenleme & Katman Ayarları Pop-up (Stitch 1:1 Floating Card) */}
-      {showMapCustomizeModal && (
-        <div
-          className="stitch-floating-layer-card"
-          id="layer-selector-card"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Harita Görünümü"
-        >
-          <div className="layer-card-head flex items-center justify-between pb-1">
-            <div className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[#286954] text-[20px]">map</span>
-              <h3 className="text-[16px] font-bold text-[#013628]">Harita Görünümü</h3>
-            </div>
-            <button
-              type="button"
-              className="w-7 h-7 rounded-full bg-[#F1F5F9] hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
-              id="close-layer-btn"
-              onClick={() => setShowMapCustomizeModal(false)}
-              title="Kapat"
-            >
-              <span className="material-symbols-outlined text-[16px]">close</span>
-            </button>
-          </div>
-
-          {/* 6 Map Style Grid (3x2) */}
-          <div className="grid grid-cols-3 gap-2 my-2">
-            {MAP_STYLES.map((style) => {
-              const isSelected = currentMapStyle === style.id;
-              return (
-                <div
-                  key={style.id}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-xl cursor-pointer transition-all ${
-                    isSelected ? "bg-[#ECFDF5] ring-1 ring-[#10B981] shadow-sm" : "bg-white hover:bg-[#F1F5F9] border border-slate-200/70"
-                  }`}
-                  onClick={() => {
-                    setCurrentMapStyle(style.id);
-                    if (typeof window !== "undefined") localStorage.setItem("mapsbridge.mapStyle", style.id);
-                  }}
-                >
-                  <div className={`w-full h-9 rounded-lg flex items-center justify-center text-[18px] ${
-                    isSelected ? "bg-[#abedd3] text-[#013628]" : "bg-[#F1F5F9] text-[#404945]"
-                  }`}>
-                    <span className="text-[17px]">{style.icon}</span>
-                  </div>
-                  <span className={`text-[10px] text-center font-bold truncate max-w-full ${
-                    isSelected ? "text-[#013628]" : "text-[#404945]"
-                  }`}>
-                    {style.label.split("&")[0].trim()}
+        {/* Seyahat Manifestosu (.md) Modalı */}
+        {showTripManifestoModal && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+            <div className="bg-[#111927] border border-slate-700/80 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#0d1424]">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sky-400 text-xl">
+                    description
                   </span>
+                  <h3 className="text-base font-bold text-slate-100">Seyahat Manifestosu (.md)</h3>
                 </div>
-              );
-            })}
-          </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTripManifestoModal(false)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+                  title="Kapat"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
 
-          {/* Overlays */}
-          <div className="flex flex-col gap-2 pt-1 border-t border-slate-200/70">
-            <label className="flex items-center justify-between cursor-pointer text-[12px] font-medium text-[#131b2e]">
-              <span className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-[#286954]">subway</span>
-                <span>Metro & Raylı Hatlar</span>
-              </span>
-              <input
-                type="checkbox"
-                checked={showTransitOverlay}
-                onChange={(e) => {
-                  setShowTransitOverlay(e.target.checked);
-                  if (typeof window !== "undefined") localStorage.setItem("mapsbridge.transitOverlay", String(e.target.checked));
-                }}
-                className="accent-[#10B981] w-4 h-4 cursor-pointer"
-              />
-            </label>
+              <div className="p-4 flex-1 overflow-y-auto">
+                <p className="text-xs text-slate-400 mb-3">
+                  Bu markdown dosyası seyahatinizin tüm duraklarını, konaklamalarını ve notlarını
+                  içerir. AI Asistanı (
+                  <a href="/ai/" className="text-emerald-400 underline hover:text-emerald-300">
+                    /ai
+                  </a>
+                  ) sorularınızı yanıtlarken bu dosyayı okuyarak rota ve otellerinizi tam olarak
+                  bilir.
+                </p>
+                <pre className="bg-[#0b101c] p-4 rounded-xl border border-slate-800/80 text-xs font-mono text-slate-200 overflow-x-auto whitespace-pre-wrap max-h-[50vh] leading-relaxed select-all">
+                  {planner.activeTrip
+                    ? tripToMarkdown(planner.activeTrip)
+                    : "# Henüz aktif seyahat yok."}
+                </pre>
+              </div>
 
-            <label className="flex items-center justify-between cursor-pointer text-[12px] font-medium text-[#131b2e]">
-              <span className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-[#286954]">apartment</span>
-                <span>3D Bina Gölgelendirmesi</span>
-              </span>
-              <input
-                type="checkbox"
-                checked={mapVisualFilter === "contrast"}
-                onChange={(e) => {
-                  const nextFilter = e.target.checked ? "contrast" : "none";
-                  setMapVisualFilter(nextFilter);
-                  if (typeof window !== "undefined") localStorage.setItem("mapsbridge.mapVisualFilter", nextFilter);
-                }}
-                className="accent-[#10B981] w-4 h-4 cursor-pointer"
-              />
-            </label>
-          </div>
-
-          {/* Route Color Picker */}
-          <div className="flex flex-col gap-1.5 pt-2 border-t border-slate-200/70">
-            <span className="text-[10px] text-[#404945] font-bold uppercase tracking-wider">
-              Rota Vurgu Rengi
-            </span>
-            <div className="flex items-center justify-between pt-0.5">
-              {PIN_COLORS.map((c) => {
-                const isSelected = pinColor === c.id;
-                return (
+              <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-800 bg-[#0d1424] gap-2 flex-wrap">
+                <a
+                  href={planner.activeTrip ? `/ai/?tripId=${planner.activeTrip.id}` : "/ai/"}
+                  className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-base">smart_toy</span>
+                  <span>AI Asistanda Bu Rota ile Konuş</span>
+                </a>
+                <div className="flex items-center gap-2">
                   <button
-                    key={c.id}
                     type="button"
-                    className={`w-6 h-6 rounded-full transition-transform ${
-                      isSelected ? "ring-2 ring-[#013628] scale-110" : "hover:scale-105"
-                    }`}
-                    style={{ backgroundColor: c.color }}
-                    title={c.name}
-                    onClick={() => {
-                      setPinColor(c.id);
-                      if (typeof window !== "undefined") localStorage.setItem("mapsbridge.pinColor", c.id);
+                    onClick={async () => {
+                      if (!planner.activeTrip) return;
+                      await navigator.clipboard.writeText(tripToMarkdown(planner.activeTrip));
+                      showPanelToast("✓ Markdown panoya kopyalandı!");
                     }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-
-
-      {/* Seyahat Manifestosu (.md) Modalı */}
-      {showTripManifestoModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-[#111927] border border-slate-700/80 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#0d1424]">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-sky-400 text-xl">description</span>
-                <h3 className="text-base font-bold text-slate-100">Seyahat Manifestosu (.md)</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowTripManifestoModal(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
-                title="Kapat"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
-
-            <div className="p-4 flex-1 overflow-y-auto">
-              <p className="text-xs text-slate-400 mb-3">
-                Bu markdown dosyası seyahatinizin tüm duraklarını, konaklamalarını ve notlarını içerir. AI Asistanı (<a href="/ai/" className="text-emerald-400 underline hover:text-emerald-300">/ai</a>) sorularınızı yanıtlarken bu dosyayı okuyarak rota ve otellerinizi tam olarak bilir.
-              </p>
-              <pre className="bg-[#0b101c] p-4 rounded-xl border border-slate-800/80 text-xs font-mono text-slate-200 overflow-x-auto whitespace-pre-wrap max-h-[50vh] leading-relaxed select-all">
-                {planner.activeTrip ? tripToMarkdown(planner.activeTrip) : "# Henüz aktif seyahat yok."}
-              </pre>
-            </div>
-
-            <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-800 bg-[#0d1424] gap-2 flex-wrap">
-              <a
-                href={planner.activeTrip ? `/ai/?tripId=${planner.activeTrip.id}` : "/ai/"}
-                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5"
-              >
-                <span className="material-symbols-outlined text-base">smart_toy</span>
-                <span>AI Asistanda Bu Rota ile Konuş</span>
-              </a>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!planner.activeTrip) return;
-                    await navigator.clipboard.writeText(tripToMarkdown(planner.activeTrip));
-                    showPanelToast("✓ Markdown panoya kopyalandı!");
-                  }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors flex items-center gap-1.5"
-                >
-                  <span className="material-symbols-outlined text-sm">content_copy</span>
-                  <span>Kopyala</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!planner.activeTrip) return;
-                    const content = tripToMarkdown(planner.activeTrip);
-                    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `${(planner.activeTrip.title || "seyahat").toLowerCase().replace(/[^a-z0-9]/gi, "_")}_manifesto.md`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    showPanelToast("✓ Markdown dosyası indirildi!");
-                  }}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-1.5 shadow-lg shadow-emerald-950/40"
-                >
-                  <span className="material-symbols-outlined text-sm">download</span>
-                  <span>İndir (.md)</span>
-                </button>
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-sm">content_copy</span>
+                    <span>Kopyala</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!planner.activeTrip) return;
+                      const content = tripToMarkdown(planner.activeTrip);
+                      const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${(planner.activeTrip.title || "seyahat").toLowerCase().replace(/[^a-z0-9]/gi, "_")}_manifesto.md`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      showPanelToast("✓ Markdown dosyası indirildi!");
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-1.5 shadow-lg shadow-emerald-950/40"
+                  >
+                    <span className="material-symbols-outlined text-sm">download</span>
+                    <span>İndir (.md)</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Fiyat Takip & Ucuz Bilet/Otel Botu Modalı */}
-      {showDealTrackerModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DealTrackerPanel
-              initialDestination={planner.activeTrip?.destination || planner.activeTrip?.title || ""}
-              onClose={() => setShowDealTrackerModal(false)}
-            />
+        {/* Fiyat Takip & Ucuz Bilet/Otel Botu Modalı */}
+        {showDealTrackerModal && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DealTrackerPanel
+                initialDestination={
+                  planner.activeTrip?.destination || planner.activeTrip?.title || ""
+                }
+                onClose={() => setShowDealTrackerModal(false)}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Panel Bilgilendirme Bildirimi */}
-      {panelToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full border border-emerald-500/30 shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
-          <span className="material-symbols-outlined text-[16px] text-emerald-400">info</span>
-          <span>{panelToast}</span>
-        </div>
-      )}
+        {/* Panel Bilgilendirme Bildirimi */}
+        {panelToast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full border border-emerald-500/30 shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+            <span className="material-symbols-outlined text-[16px] text-emerald-400">info</span>
+            <span>{panelToast}</span>
+          </div>
+        )}
 
-      {/* Oturum & İşlem Koruması Tanıtım Modalı */}
-      <AuthActionModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        title={authModalConfig.title}
-        subtitle={authModalConfig.subtitle}
-        featureName={authModalConfig.featureName}
-        nextUrl="/desk/"
-      />
+        {/* Oturum & İşlem Koruması Tanıtım Modalı */}
+        <AuthActionModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          title={authModalConfig.title}
+          subtitle={authModalConfig.subtitle}
+          featureName={authModalConfig.featureName}
+          nextUrl="/desk/"
+        />
       </main>
     </AuthGuard>
   );

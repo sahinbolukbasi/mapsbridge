@@ -138,7 +138,9 @@
   letter-spacing: 0.25em;
   color: #102a43;
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 
 .code-input:focus {
@@ -256,7 +258,9 @@
   font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
-  transition: transform 0.15s, background 0.15s;
+  transition:
+    transform 0.15s,
+    background 0.15s;
   text-align: center;
   white-space: nowrap;
 }
@@ -365,5 +369,3 @@
 [data-theme="dark"] .leaflet-control-attribution a {
   color: #38bdf8 !important;
 }
-
-

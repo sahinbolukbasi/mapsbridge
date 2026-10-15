@@ -30,12 +30,14 @@ export function NotFoundView({
           const lon = pos.coords.longitude.toFixed(4);
           const latDir = pos.coords.latitude >= 0 ? "N" : "S";
           const lonDir = pos.coords.longitude >= 0 ? "E" : "W";
-          setCurrentCoords(`LAT: ${Math.abs(Number(lat))}° ${latDir} • LON: ${Math.abs(Number(lon))}° ${lonDir}`);
+          setCurrentCoords(
+            `LAT: ${Math.abs(Number(lat))}° ${latDir} • LON: ${Math.abs(Number(lon))}° ${lonDir}`,
+          );
         },
         () => {
           // Fallback coordinate remains Istanbul / default
         },
-        { timeout: 4000 }
+        { timeout: 4000 },
       );
     }
   }, []);
@@ -50,9 +52,7 @@ export function NotFoundView({
         <div className="not-found-content-box">
           {/* Status Badge */}
           <div className="not-found-badge">
-            <span className="material-symbols-outlined">
-              {isError ? "warning" : "explore_off"}
-            </span>
+            <span className="material-symbols-outlined">{isError ? "warning" : "explore_off"}</span>
             <span>
               {isError ? "SİSTEM UYARISI • BAĞLANTI KESİNTİSİ" : "404 • ROTA DIŞINA ÇIKILDI"}
             </span>
@@ -109,7 +109,10 @@ export function NotFoundView({
             {/* Floating Coordinate Pill Card */}
             <div className="not-found-coord-card">
               <div className="not-found-coord-icon-box">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
                   explore
                 </span>
               </div>
@@ -143,11 +146,7 @@ export function NotFoundView({
           {/* Primary Action Buttons */}
           <div className="not-found-actions">
             {isError && onRetry ? (
-              <button
-                type="button"
-                className="not-found-btn-primary"
-                onClick={onRetry}
-              >
+              <button type="button" className="not-found-btn-primary" onClick={onRetry}>
                 <span className="material-symbols-outlined">refresh</span>
                 <span>Tekrar Dene</span>
               </button>
@@ -173,7 +172,10 @@ export function NotFoundView({
           <div className="not-found-destinations">
             <div className="not-found-destinations-header">
               <div className="not-found-destinations-title-wrap">
-                <span className="material-symbols-outlined" style={{ color: "#10b981", fontSize: "22px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ color: "#10b981", fontSize: "22px" }}
+                >
                   near_me
                 </span>
                 <h2 className="not-found-destinations-title">Popüler Koordinatlara Göz Atın</h2>
@@ -210,7 +212,10 @@ export function NotFoundView({
               <Link href="/ai/" className="not-found-card" prefetch={false}>
                 <div>
                   <div className="not-found-card-icon">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
                       smart_toy
                     </span>
                   </div>

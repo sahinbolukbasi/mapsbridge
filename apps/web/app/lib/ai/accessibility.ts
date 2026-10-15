@@ -6,14 +6,14 @@
  */
 
 export type AccessibilityNeed =
-  | 'wheelchair'
-  | 'stroller'
-  | 'low_mobility'
-  | 'visual_impairment'
-  | 'hearing_impairment'
-  | 'elderly'
-  | 'children_under_5'
-  | 'children_5_12';
+  | "wheelchair"
+  | "stroller"
+  | "low_mobility"
+  | "visual_impairment"
+  | "hearing_impairment"
+  | "elderly"
+  | "children_under_5"
+  | "children_5_12";
 
 export interface AccessibilityProfile {
   needs: AccessibilityNeed[];
@@ -26,7 +26,7 @@ export interface AccessibilityCheck {
   placeId: string;
   placeName: string;
   issue?: string;
-  severity: 'info' | 'warning' | 'blocking';
+  severity: "info" | "warning" | "blocking";
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -42,39 +42,33 @@ type PlaceInput = {
 
 /** Categories that inherently involve stairs / uneven surfaces */
 const MULTI_LEVEL_CATEGORIES = new Set([
-  'museum',
-  'historic_site',
-  'monument',
-  'palace',
-  'castle',
-  'cathedral',
-  'basilica',
-  'viewpoint',
-  'tower',
+  "museum",
+  "historic_site",
+  "monument",
+  "palace",
+  "castle",
+  "cathedral",
+  "basilica",
+  "viewpoint",
+  "tower",
 ]);
 
 /** Categories that tend to have rough surfaces */
 const ROUGH_SURFACE_CATEGORIES = new Set([
-  'archaeological_site',
-  'old_town',
-  'bazaar',
-  'market',
-  'historic_site',
-  'cobblestone_street',
+  "archaeological_site",
+  "old_town",
+  "bazaar",
+  "market",
+  "historic_site",
+  "cobblestone_street",
 ]);
 
 function needsWheelchairAccess(profile: AccessibilityProfile): boolean {
-  return (
-    profile.needs.includes('wheelchair') ||
-    profile.needs.includes('low_mobility')
-  );
+  return profile.needs.includes("wheelchair") || profile.needs.includes("low_mobility");
 }
 
 function needsStrollerAccess(profile: AccessibilityProfile): boolean {
-  return (
-    profile.needs.includes('stroller') ||
-    profile.needs.includes('children_under_5')
-  );
+  return profile.needs.includes("stroller") || profile.needs.includes("children_under_5");
 }
 
 function isHighMobilityDemand(profile: AccessibilityProfile): boolean {
@@ -97,7 +91,7 @@ export function checkPlanAccessibility(
   if (profile.needs.length === 0) return checks;
 
   for (const place of places) {
-    const issues: { message: string; severity: 'info' | 'warning' | 'blocking' }[] = [];
+    const issues: { message: string; severity: "info" | "warning" | "blocking" }[] = [];
 
     // ── Wheelchair / low mobility ──────────────────────────────────────────
 
@@ -105,21 +99,21 @@ export function checkPlanAccessibility(
       if (place.hasElevator === false && MULTI_LEVEL_CATEGORIES.has(place.category)) {
         issues.push({
           message: `Asansör yok — tekerlekli sandalye ile çok katlı yapıya erişim sınırlı`,
-          severity: 'blocking',
+          severity: "blocking",
         });
       }
 
       if (profile.requiresRamp && place.hasRamp === false) {
         issues.push({
           message: `Rampa bulunmuyor`,
-          severity: profile.needs.includes('wheelchair') ? 'blocking' : 'warning',
+          severity: profile.needs.includes("wheelchair") ? "blocking" : "warning",
         });
       }
 
       if (place.cobblestone) {
         issues.push({
           message: `Arnavut kaldırımı — tekerlekli sandalye veya düşük mobilite için zorlu`,
-          severity: 'warning',
+          severity: "warning",
         });
       }
     }
@@ -130,43 +124,43 @@ export function checkPlanAccessibility(
       if (place.hasRamp === false && MULTI_LEVEL_CATEGORIES.has(place.category)) {
         issues.push({
           message: `Bebek arabası için rampa/asansör bilgisi eksik veya yok`,
-          severity: 'warning',
+          severity: "warning",
         });
       }
 
       if (place.cobblestone) {
         issues.push({
           message: `Arnavut kaldırımı — bebek arabası için zorlayıcı`,
-          severity: 'info',
+          severity: "info",
         });
       }
     }
 
     // ── Elderly ───────────────────────────────────────────────────────────
 
-    if (profile.needs.includes('elderly')) {
+    if (profile.needs.includes("elderly")) {
       if (place.cobblestone) {
         issues.push({
           message: `Arnavut kaldırımı — yaşlı bireyler için düşme riski`,
-          severity: 'warning',
+          severity: "warning",
         });
       }
 
       if (place.hasElevator === false && MULTI_LEVEL_CATEGORIES.has(place.category)) {
         issues.push({
           message: `Asansör yok — merdiven çıkışı gerekebilir`,
-          severity: 'warning',
+          severity: "warning",
         });
       }
     }
 
     // ── Visual impairment ─────────────────────────────────────────────────
 
-    if (profile.needs.includes('visual_impairment')) {
+    if (profile.needs.includes("visual_impairment")) {
       if (ROUGH_SURFACE_CATEGORIES.has(place.category) || place.cobblestone) {
         issues.push({
           message: `Düzensiz zemin — görme engelli bireyler için rehber gerekebilir`,
-          severity: 'info',
+          severity: "info",
         });
       }
     }
@@ -182,7 +176,7 @@ export function checkPlanAccessibility(
       checks.push({
         placeId: place.id,
         placeName: place.name,
-        issue: issues.map(i => i.message).join('; '),
+        issue: issues.map((i) => i.message).join("; "),
         severity: worst.severity,
       });
     }
@@ -196,11 +190,11 @@ export function checkPlanAccessibility(
  * constraints so the model can tailor its plan output accordingly.
  */
 export function buildAccessibilityPromptSnippet(profile: AccessibilityProfile): string {
-  if (profile.needs.length === 0) return '';
+  if (profile.needs.length === 0) return "";
 
   const lines: string[] = [
     `## Erişilebilirlik Kısıtlamaları`,
-    `Grup ihtiyaçları: ${profile.needs.join(', ')}`,
+    `Grup ihtiyaçları: ${profile.needs.join(", ")}`,
   ];
 
   if (profile.maxWalkingMinutes !== undefined) {
@@ -216,9 +210,9 @@ export function buildAccessibilityPromptSnippet(profile: AccessibilityProfile): 
   }
 
   if (
-    profile.needs.includes('wheelchair') ||
-    profile.needs.includes('stroller') ||
-    profile.needs.includes('low_mobility')
+    profile.needs.includes("wheelchair") ||
+    profile.needs.includes("stroller") ||
+    profile.needs.includes("low_mobility")
   ) {
     lines.push(`Arnavut kaldırımı veya düzensiz yüzeyler olan güzergahlardan kaçın`);
   }
@@ -227,33 +221,31 @@ export function buildAccessibilityPromptSnippet(profile: AccessibilityProfile): 
     `Planı bu kısıtlamalara göre optimize et; erişilebilirlik sorunları tespit edilen duraklar için alternatif öner.`,
   );
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Recommends a pace (tempo) given the group's accessibility profile.
  * Called by the scheduler when the user hasn't specified a tempo.
  */
-export function getTempoForProfile(
-  profile: AccessibilityProfile,
-): 'relaxed' | 'moderate' | 'fast' {
+export function getTempoForProfile(profile: AccessibilityProfile): "relaxed" | "moderate" | "fast" {
   if (
-    profile.needs.includes('wheelchair') ||
-    profile.needs.includes('low_mobility') ||
-    profile.needs.includes('elderly') ||
-    profile.needs.includes('stroller') ||
-    profile.needs.includes('children_under_5')
+    profile.needs.includes("wheelchair") ||
+    profile.needs.includes("low_mobility") ||
+    profile.needs.includes("elderly") ||
+    profile.needs.includes("stroller") ||
+    profile.needs.includes("children_under_5")
   ) {
-    return 'relaxed';
+    return "relaxed";
   }
 
   if (
-    profile.needs.includes('children_5_12') ||
-    profile.needs.includes('visual_impairment') ||
-    profile.needs.includes('hearing_impairment')
+    profile.needs.includes("children_5_12") ||
+    profile.needs.includes("visual_impairment") ||
+    profile.needs.includes("hearing_impairment")
   ) {
-    return 'moderate';
+    return "moderate";
   }
 
-  return 'fast';
+  return "fast";
 }

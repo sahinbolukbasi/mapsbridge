@@ -53,7 +53,7 @@ export class CommunityService {
 
     if (options.category && options.category !== "all") {
       result = result.filter(
-        (g) => (g as any).category?.toLowerCase() === options.category?.toLowerCase()
+        (g) => (g as any).category?.toLowerCase() === options.category?.toLowerCase(),
       );
     }
 
@@ -63,7 +63,7 @@ export class CommunityService {
         (g) =>
           g.city.toLowerCase().includes(destQuery) ||
           g.country.toLowerCase().includes(destQuery) ||
-          g.title.toLowerCase().includes(destQuery)
+          g.title.toLowerCase().includes(destQuery),
       );
     }
 
@@ -90,7 +90,7 @@ export class CommunityService {
    */
   public matchTravelBuddies(
     criteria: TravelBuddyMatchCriteria,
-    candidates: TravelBuddyCandidate[]
+    candidates: TravelBuddyCandidate[],
   ): MatchedBuddyResult[] {
     const results: MatchedBuddyResult[] = [];
 
@@ -101,9 +101,7 @@ export class CommunityService {
       // Destinasyon eşleşmesi (+30 puan)
       if (
         criteria.targetDestination &&
-        candidate.targetDestination
-          .toLowerCase()
-          .includes(criteria.targetDestination.toLowerCase())
+        candidate.targetDestination.toLowerCase().includes(criteria.targetDestination.toLowerCase())
       ) {
         score += 30;
       }
@@ -111,7 +109,7 @@ export class CommunityService {
       // İlgi alanı kesişimi (Her ortak ilgi +10 puan, max +30)
       for (const interest of criteria.interests) {
         const found = candidate.interests.some(
-          (candInt) => candInt.toLowerCase() === interest.toLowerCase()
+          (candInt) => candInt.toLowerCase() === interest.toLowerCase(),
         );
         if (found) {
           matchedInterests.push(interest);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -8,8 +8,8 @@ import {
   Dimensions,
   ScrollView,
   Platform,
-} from 'react-native';
-import { storage } from '../services/storage';
+} from "react-native";
+import { storage } from "../services/storage";
 import {
   MapIcon,
   PlanIcon,
@@ -22,11 +22,11 @@ import {
   WalkIcon,
   Share2Icon,
   LightbulbIcon,
-} from './Icons';
+} from "./Icons";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-export type TourScreenType = 'map' | 'plan' | 'ai' | 'community' | 'profile';
+export type TourScreenType = "map" | "plan" | "ai" | "community" | "profile";
 
 interface TourStep {
   icon: (color: string) => React.ReactNode;
@@ -44,109 +44,112 @@ interface TourContent {
 
 const TOURS: Record<TourScreenType, TourContent> = {
   map: {
-    badge: 'HARİTA MASASI',
-    title: 'Canlı Harita ve Keşif Alanı',
-    subtitle: 'Dünyanın dört bir yanındaki durakları canlı harita üzerinde milimetrik olarak yönetin.',
+    badge: "HARİTA MASASI",
+    title: "Canlı Harita ve Keşif Alanı",
+    subtitle:
+      "Dünyanın dört bir yanındaki durakları canlı harita üzerinde milimetrik olarak yönetin.",
     steps: [
       {
         icon: (c) => <PinIcon size={20} color={c} />,
-        title: 'Mekanlara Dokun ve Ekle',
-        desc: 'Haritadaki herhangi bir mekana veya konuma dokunarak anında rota havuzunuza ekleyebilirsiniz.',
+        title: "Mekanlara Dokun ve Ekle",
+        desc: "Haritadaki herhangi bir mekana veya konuma dokunarak anında rota havuzunuza ekleyebilirsiniz.",
       },
       {
         icon: (c) => <DirectionsIcon size={20} color={c} />,
-        title: 'Akıllı Yürüme ve Ulaşım Takibi',
-        desc: 'Duraklar arası yürüyüş süresi, mesafe ve yükseklik eğimi otomatik hesaplanır.',
+        title: "Akıllı Yürüme ve Ulaşım Takibi",
+        desc: "Duraklar arası yürüyüş süresi, mesafe ve yükseklik eğimi otomatik hesaplanır.",
       },
       {
         icon: (c) => <Share2Icon size={20} color={c} />,
-        title: '6 Haneli Canlı Paylaşım Kodu',
-        desc: 'Rotanızı tek tıkla arkadaşlarınızla veya web harita masasıyla senkronize edin.',
+        title: "6 Haneli Canlı Paylaşım Kodu",
+        desc: "Rotanızı tek tıkla arkadaşlarınızla veya web harita masasıyla senkronize edin.",
       },
     ],
-    tip: 'İpucu: Alttaki kartı yukarı kaydırarak tüm durakları liste halinde inceleyebilirsiniz.',
+    tip: "İpucu: Alttaki kartı yukarı kaydırarak tüm durakları liste halinde inceleyebilirsiniz.",
   },
   plan: {
-    badge: 'ROTA PLANI',
-    title: 'Gün Gün Seyahat Mimariniz',
-    subtitle: 'Duraklarınızı düzenleyin, sıralayın ve tek tıkla rotanızı optimize edin.',
+    badge: "ROTA PLANI",
+    title: "Gün Gün Seyahat Mimariniz",
+    subtitle: "Duraklarınızı düzenleyin, sıralayın ve tek tıkla rotanızı optimize edin.",
     steps: [
       {
         icon: (c) => <PlanIcon size={20} color={c} />,
-        title: 'Zahmetsiz Rota Oluşturma',
-        desc: 'Hiç rotanız yoksa hazır şablonlarla başlayabilir veya haritadan adım adım ekleyebilirsiniz.',
+        title: "Zahmetsiz Rota Oluşturma",
+        desc: "Hiç rotanız yoksa hazır şablonlarla başlayabilir veya haritadan adım adım ekleyebilirsiniz.",
       },
       {
         icon: (c) => <MapIcon size={20} color={c} />,
-        title: 'Haritadan Doğrudan Seçim',
+        title: "Haritadan Doğrudan Seçim",
         desc: '"Durak Ekle" butonuna bastığınızda harita açılır ve yer seçmeniz sağlanır.',
       },
       {
         icon: (c) => <SparkIcon size={20} color={c} />,
-        title: 'Yol Optimizasyonu',
+        title: "Yol Optimizasyonu",
         desc: '"Rotayı Optimize Et" ile çapraz geçişleri sıfırlayarak %38 zaman tasarrufu yapın.',
       },
     ],
-    tip: 'İpucu: Ziyaret ettiğiniz durakların yanındaki onay kutusuna dokunarak durumu güncelleyin.',
+    tip: "İpucu: Ziyaret ettiğiniz durakların yanındaki onay kutusuna dokunarak durumu güncelleyin.",
   },
   ai: {
-    badge: 'AI ASİSTAN',
-    title: 'Akıllı Seyahat Yol Arkadaşınız',
-    subtitle: 'Hayalinizdeki geziyi anlatın, MapsBridge AI size doğrulanmış duraklarla rota çizsin.',
+    badge: "AI ASİSTAN",
+    title: "Akıllı Seyahat Yol Arkadaşınız",
+    subtitle:
+      "Hayalinizdeki geziyi anlatın, MapsBridge AI size doğrulanmış duraklarla rota çizsin.",
     steps: [
       {
         icon: (c) => <RobotIcon size={20} color={c} />,
-        title: 'Doğal Dilde Rota Talebi',
+        title: "Doğal Dilde Rota Talebi",
         desc: '"Roma\'da 3 gün sanat ve kahve" gibi dilediğiniz tempoda istek yazabilirsiniz.',
       },
       {
         icon: (c) => <SparkIcon size={20} color={c} />,
-        title: 'Sıfır Halüsinasyon Mekanlar',
-        desc: 'Tüm öneriler coğrafi koordinat ve güncel açılış saatleriyle haritaya yerleşir.',
+        title: "Sıfır Halüsinasyon Mekanlar",
+        desc: "Tüm öneriler coğrafi koordinat ve güncel açılış saatleriyle haritaya yerleşir.",
       },
       {
         icon: (c) => <PlanIcon size={20} color={c} />,
-        title: 'Tek Tıkla Plana Aktarma',
-        desc: 'Beğendiğiniz AI planını tek butonla ana harita ve planınıza aktarabilirsiniz.',
+        title: "Tek Tıkla Plana Aktarma",
+        desc: "Beğendiğiniz AI planını tek butonla ana harita ve planınıza aktarabilirsiniz.",
       },
     ],
-    tip: 'İpucu: Bütçenizi ve yürüyüş temponuzu belirterek daha hassas rotalar alabilirsiniz.',
+    tip: "İpucu: Bütçenizi ve yürüyüş temponuzu belirterek daha hassas rotalar alabilirsiniz.",
   },
   community: {
-    badge: 'TOPLULUK',
-    title: 'Gezginlerden Gerçek Deneyimler',
-    subtitle: 'Dünyanın dört bir yanından gezginlerin paylaştığı keşifleri ve saha fotoğraflarını inceleyin.',
+    badge: "TOPLULUK",
+    title: "Gezginlerden Gerçek Deneyimler",
+    subtitle:
+      "Dünyanın dört bir yanından gezginlerin paylaştığı keşifleri ve saha fotoğraflarını inceleyin.",
     steps: [
       {
         icon: (c) => <ExploreIcon size={20} color={c} />,
-        title: 'Özgün Seyahat Gönderileri',
-        desc: 'Diğer gezginlerin durak notlarını, fotoğraflarını ve önerilerini keşfedin.',
+        title: "Özgün Seyahat Gönderileri",
+        desc: "Diğer gezginlerin durak notlarını, fotoğraflarını ve önerilerini keşfedin.",
       },
       {
         icon: (c) => <PinIcon size={20} color={c} />,
-        title: 'Rotaları Kendi Planına Al',
-        desc: 'Beğendiğiniz rotaları tek dokunuşla kendi seyahat havuzunuza kopyalayabilirsiniz.',
+        title: "Rotaları Kendi Planına Al",
+        desc: "Beğendiğiniz rotaları tek dokunuşla kendi seyahat havuzunuza kopyalayabilirsiniz.",
       },
     ],
-    tip: 'İpucu: Kendi keşiflerinizi de toplulukla paylaşarak diğer gezginlere ilham verebilirsiniz.',
+    tip: "İpucu: Kendi keşiflerinizi de toplulukla paylaşarak diğer gezginlere ilham verebilirsiniz.",
   },
   profile: {
-    badge: 'PROFİL & AYARLAR',
-    title: 'Kişisel Seyahat Kontrol Merkezi',
-    subtitle: 'Kayıtlı rotalarınız, çevrimdışı arşiviniz ve hesap ayarlarınız tek yerde.',
+    badge: "PROFİL & AYARLAR",
+    title: "Kişisel Seyahat Kontrol Merkezi",
+    subtitle: "Kayıtlı rotalarınız, çevrimdışı arşiviniz ve hesap ayarlarınız tek yerde.",
     steps: [
       {
         icon: (c) => <UserIcon size={20} color={c} />,
-        title: 'Çoklu Cihaz Senkronizasyonu',
-        desc: 'Web ve mobil hesaplarınız tek kullanıcı kimliği altında eşzamanlı çalışır.',
+        title: "Çoklu Cihaz Senkronizasyonu",
+        desc: "Web ve mobil hesaplarınız tek kullanıcı kimliği altında eşzamanlı çalışır.",
       },
       {
         icon: (c) => <Share2Icon size={20} color={c} />,
-        title: 'Çevrimdışı Rota Erişimi',
-        desc: 'İnternetiniz olmasa bile kayıtlı rotalarınıza ve durak detaylarınıza erişin.',
+        title: "Çevrimdışı Rota Erişimi",
+        desc: "İnternetiniz olmasa bile kayıtlı rotalarınıza ve durak detaylarınıza erişin.",
       },
     ],
-    tip: 'İpucu: Profilinizi güncelleyerek seyahat ilgi alanlarınızı belirleyebilirsiniz.',
+    tip: "İpucu: Profilinizi güncelleyerek seyahat ilgi alanlarınızı belirleyebilirsiniz.",
   },
 };
 
@@ -193,7 +196,7 @@ export function ScreenTourModal({
   const handleDismiss = async () => {
     setInternalVisible(false);
     try {
-      await storage.setItem(`mb_tour_seen_${screen}`, 'true');
+      await storage.setItem(`mb_tour_seen_${screen}`, "true");
     } catch {}
     onClose?.();
   };
@@ -238,9 +241,7 @@ export function ScreenTourModal({
             <View style={styles.stepsContainer}>
               {content.steps.map((step, idx) => (
                 <View key={idx} style={styles.stepCard}>
-                  <View style={styles.stepIconWrap}>
-                    {step.icon('#10B981')}
-                  </View>
+                  <View style={styles.stepIconWrap}>{step.icon("#10B981")}</View>
                   <View style={styles.stepTextContainer}>
                     <Text style={styles.stepTitle}>{step.title}</Text>
                     <Text style={styles.stepDesc}>{step.desc}</Text>
@@ -268,11 +269,7 @@ export function ScreenTourModal({
             </TouchableOpacity>
 
             {/* Dismiss without seeing again */}
-            <TouchableOpacity
-              style={styles.skipBtn}
-              onPress={handleDismiss}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity style={styles.skipBtn} onPress={handleDismiss} activeOpacity={0.7}>
               <Text style={styles.skipBtnText}>Tanıtımı Kapat</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -285,43 +282,43 @@ export function ScreenTourModal({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(2, 14, 10, 0.78)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(2, 14, 10, 0.78)",
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 36,
   },
   container: {
     width: Math.min(SCREEN_WIDTH - 36, 420),
-    maxHeight: '88%',
-    backgroundColor: '#0a1f18',
+    maxHeight: "88%",
+    backgroundColor: "#0a1f18",
     borderRadius: 24,
     borderWidth: 1.5,
-    borderColor: '#1e4d3e',
-    overflow: 'hidden',
-    shadowColor: '#000',
+    borderColor: "#1e4d3e",
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.5,
     shadowRadius: 28,
     elevation: 20,
-    position: 'relative',
+    position: "relative",
   },
   closeBtn: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     right: 16,
     zIndex: 10,
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeBtnText: {
-    color: '#94a3b8',
+    color: "#94a3b8",
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     lineHeight: 18,
   },
   scrollContent: {
@@ -330,41 +327,41 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
     gap: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 9999,
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    backgroundColor: "rgba(16, 185, 129, 0.12)",
     borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.3)',
+    borderColor: "rgba(16, 185, 129, 0.3)",
     marginBottom: 12,
   },
   pulsingDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   badgeText: {
-    color: '#34D399',
+    color: "#34D399",
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 0.8,
   },
   title: {
     fontSize: 22,
-    fontWeight: '800',
-    color: '#ffffff',
+    fontWeight: "800",
+    color: "#ffffff",
     letterSpacing: -0.4,
     marginBottom: 6,
     paddingRight: 24,
   },
   subtitle: {
     fontSize: 13.5,
-    color: '#94a3b8',
+    color: "#94a3b8",
     lineHeight: 20,
     marginBottom: 20,
   },
@@ -373,24 +370,24 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   stepCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: 12,
     padding: 12,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.035)',
+    backgroundColor: "rgba(255, 255, 255, 0.035)",
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: "rgba(255, 255, 255, 0.06)",
   },
   stepIconWrap: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    backgroundColor: "rgba(16, 185, 129, 0.12)",
     borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.25)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "rgba(16, 185, 129, 0.25)",
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 2,
   },
   stepTextContainer: {
@@ -398,24 +395,24 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#e2e8f0',
+    fontWeight: "700",
+    color: "#e2e8f0",
     marginBottom: 2,
   },
   stepDesc: {
     fontSize: 12.5,
-    color: '#94a3b8',
+    color: "#94a3b8",
     lineHeight: 18,
   },
   tipBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: 'rgba(217, 119, 6, 0.1)',
+    backgroundColor: "rgba(217, 119, 6, 0.1)",
     borderWidth: 1,
-    borderColor: 'rgba(217, 119, 6, 0.25)',
+    borderColor: "rgba(217, 119, 6, 0.25)",
     marginBottom: 22,
   },
   tipIconWrap: {
@@ -424,19 +421,19 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 12,
-    color: '#fde68a',
+    color: "#fde68a",
     lineHeight: 17,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   primaryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: '#10B981',
-    shadowColor: '#10B981',
+    backgroundColor: "#10B981",
+    shadowColor: "#10B981",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,
@@ -444,23 +441,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   primaryBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 0.2,
   },
   primaryBtnArrow: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   skipBtn: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 8,
   },
   skipBtnText: {
-    color: '#64748b',
+    color: "#64748b",
     fontSize: 12.5,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

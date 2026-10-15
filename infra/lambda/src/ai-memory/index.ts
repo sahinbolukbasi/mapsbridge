@@ -1,1 +1,1 @@
-export { handler } from '../../../../apps/web/server/ai-memory-handler';
+export { handler } from "../../../../apps/web/server/ai-memory-handler";

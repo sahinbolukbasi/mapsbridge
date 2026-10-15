@@ -69,7 +69,11 @@ export function SoftIcon({
       return (
         <svg {...props}>
           <circle cx="12" cy="12" r="10" />
-          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill={color} fillOpacity="0.15" />
+          <polygon
+            points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"
+            fill={color}
+            fillOpacity="0.15"
+          />
         </svg>
       );
     case "map-pin":
@@ -90,7 +94,11 @@ export function SoftIcon({
     case "sparkles":
       return (
         <svg {...props}>
-          <path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4L12 3Z" fill={color} fillOpacity="0.15" />
+          <path
+            d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4L12 3Z"
+            fill={color}
+            fillOpacity="0.15"
+          />
         </svg>
       );
     case "chat":

@@ -1,4 +1,15 @@
-import { aiOverview, updateAIControl, aiTrainingQueue, reviewAITraining, aiReleaseOverview, proposeAIRelease, publishAIRelease, rollbackAIRelease, listFineTuneJobs, triggerFineTune } from "./ai-operations";
+import {
+  aiOverview,
+  updateAIControl,
+  aiTrainingQueue,
+  reviewAITraining,
+  aiReleaseOverview,
+  proposeAIRelease,
+  publishAIRelease,
+  rollbackAIRelease,
+  listFineTuneJobs,
+  triggerFineTune,
+} from "./ai-operations";
 import { aiAgentCatalog, updateAIAgent } from "./agent-catalog";
 import { managementRoutes, AdminError, protectAccount, commit, get, scan } from "./management";
 import { can, routePermission } from "./permissions";
@@ -26,9 +37,21 @@ import { getVerifiedUser } from "../shared/auth";
  */
 
 import type { ApiGatewayEvent } from "../shared/http";
-import { ok, badRequest, unauthorized, forbidden, notFound, serverError, handlePreflight, extractBearerToken, parseBody } from "../shared/http";
+import {
+  ok,
+  badRequest,
+  unauthorized,
+  forbidden,
+  notFound,
+  serverError,
+  handlePreflight,
+  extractBearerToken,
+  parseBody,
+} from "../shared/http";
 
-type Handler = (event: ApiGatewayEvent) => Promise<{ statusCode: number; headers: Record<string, string>; body: string }>;
+type Handler = (
+  event: ApiGatewayEvent,
+) => Promise<{ statusCode: number; headers: Record<string, string>; body: string }>;
 
 const routes: Record<string, Handler> = {
   "GET /admin/ai-operations": aiOverview,
@@ -92,18 +115,36 @@ export const handler = async (event: ApiGatewayEvent) => {
   if (!user) return unauthorized();
 
   let role: "admin" | "moderator" | "support" | undefined;
-  if (process.env.ADMIN_GROUP_NAME || process.env.MODERATOR_GROUP_NAME || process.env.SUPPORT_GROUP_NAME) {
-    const { CognitoIdentityProviderClient, AdminListGroupsForUserCommand } = await import("@aws-sdk/client-cognito-identity-provider");
-    const cognito = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION || "eu-central-1" });
+  if (
+    process.env.ADMIN_GROUP_NAME ||
+    process.env.MODERATOR_GROUP_NAME ||
+    process.env.SUPPORT_GROUP_NAME
+  ) {
+    const { CognitoIdentityProviderClient, AdminListGroupsForUserCommand } =
+      await import("@aws-sdk/client-cognito-identity-provider");
+    const cognito = new CognitoIdentityProviderClient({
+      region: process.env.AWS_REGION || "eu-central-1",
+    });
     const poolId = process.env.COGNITO_USER_POOL_ID || "";
     try {
-      const groupRes = await cognito.send(new AdminListGroupsForUserCommand({ UserPoolId: poolId, Username: user.originalSub || user.sub }));
+      const groupRes = await cognito.send(
+        new AdminListGroupsForUserCommand({
+          UserPoolId: poolId,
+          Username: user.originalSub || user.sub,
+        }),
+      );
       const groupNames = (groupRes.Groups || []).map((g: any) => g.GroupName);
       if (process.env.ADMIN_GROUP_NAME && groupNames.includes(process.env.ADMIN_GROUP_NAME)) {
         role = "admin";
-      } else if (process.env.MODERATOR_GROUP_NAME && groupNames.includes(process.env.MODERATOR_GROUP_NAME)) {
+      } else if (
+        process.env.MODERATOR_GROUP_NAME &&
+        groupNames.includes(process.env.MODERATOR_GROUP_NAME)
+      ) {
         role = "moderator";
-      } else if (process.env.SUPPORT_GROUP_NAME && groupNames.includes(process.env.SUPPORT_GROUP_NAME)) {
+      } else if (
+        process.env.SUPPORT_GROUP_NAME &&
+        groupNames.includes(process.env.SUPPORT_GROUP_NAME)
+      ) {
         role = "support";
       }
     } catch {
@@ -116,7 +157,10 @@ export const handler = async (event: ApiGatewayEvent) => {
   if (!role) return forbidden();
   user.staffRole = role;
   user.isAdmin = role === "admin";
-  const needed = routePermission(event.requestContext.http.path.replace(/\/$/, ""), event.requestContext.http.method);
+  const needed = routePermission(
+    event.requestContext.http.path.replace(/\/$/, ""),
+    event.requestContext.http.method,
+  );
   if (needed && !can(role, needed)) return forbidden("Bu bölüm için yetkiniz bulunmuyor.");
 
   (event as any).verifiedUser = user;
@@ -124,7 +168,12 @@ export const handler = async (event: ApiGatewayEvent) => {
   try {
     return await router.dispatch(event);
   } catch (err) {
-    if (err instanceof AdminError) return { statusCode: err.status, headers: ok({}).headers, body: JSON.stringify({ error: err.message }) };
+    if (err instanceof AdminError)
+      return {
+        statusCode: err.status,
+        headers: ok({}).headers,
+        body: JSON.stringify({ error: err.message }),
+      };
     console.error(`[Admin] Error:`, err);
     return serverError();
   }
@@ -153,35 +202,50 @@ async function findRoute(routeId: string) {
   const { DynamoDBClient, ScanCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "(PK = :route AND SK = :meta) OR (begins_with(PK, :user) AND SK = :route)",
-    ExpressionAttributeValues: { ":route": { S: `ROUTE#${routeId}` }, ":meta": { S: "META" }, ":user": { S: "USER#" } },
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "(PK = :route AND SK = :meta) OR (begins_with(PK, :user) AND SK = :route)",
+      ExpressionAttributeValues: {
+        ":route": { S: `ROUTE#${routeId}` },
+        ":meta": { S: "META" },
+        ":user": { S: "USER#" },
+      },
+    }),
+  );
   return result.Items.length === 1 ? unmarshall(result.Items[0]) : null;
 }
 
-async function recordAuditLog(actorSub: string, action: string, targetId: string, reason: string, details?: Record<string, unknown>) {
+async function recordAuditLog(
+  actorSub: string,
+  action: string,
+  targetId: string,
+  reason: string,
+  details?: Record<string, unknown>,
+) {
   try {
     const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
     const { marshall } = await import("@aws-sdk/util-dynamodb");
     const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
     const auditId = `aud_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const now = new Date().toISOString();
-    await ddb.send(new PutItemCommand({
-      TableName: getTableName(),
-      Item: marshall({
-        PK: `AUDIT#${auditId}`,
-        SK: "META",
-        auditId,
-        actorSub,
-        action,
-        targetId,
-        reason: reason || "Belirtilmedi",
-        details: details || {},
-        createdAt: now,
+    await ddb.send(
+      new PutItemCommand({
+        TableName: getTableName(),
+        Item: marshall({
+          PK: `AUDIT#${auditId}`,
+          SK: "META",
+          auditId,
+          actorSub,
+          action,
+          targetId,
+          reason: reason || "Belirtilmedi",
+          details: details || {},
+          createdAt: now,
+        }),
       }),
-    }));
+    );
     return auditId;
   } catch (err) {
     console.error("[Admin] Audit log recording failed:", err);
@@ -197,36 +261,45 @@ async function handleMetrics() {
   const now = new Date();
 
   // Count users via COUNT scan — avoids the 50-item list limit
-  const userCountResult = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "SK = :sk AND begins_with(PK, :pk)",
-    ExpressionAttributeValues: { ":sk": { S: "META" }, ":pk": { S: "USER#" } },
-    Select: "COUNT",
-  }));
+  const userCountResult = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "SK = :sk AND begins_with(PK, :pk)",
+      ExpressionAttributeValues: { ":sk": { S: "META" }, ":pk": { S: "USER#" } },
+      Select: "COUNT",
+    }),
+  );
   const totalUsers = userCountResult.Count || 0;
 
   // Count active subscriptions
-  const subCount = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "SK = :sk AND #status = :active",
-    ExpressionAttributeNames: { "#status": "status" },
-    ExpressionAttributeValues: { ":sk": { S: "SUBSCRIPTION" }, ":active": { S: "active" } },
-    Select: "COUNT",
-    Limit: 10000,
-  }));
+  const subCount = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "SK = :sk AND #status = :active",
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: { ":sk": { S: "SUBSCRIPTION" }, ":active": { S: "active" } },
+      Select: "COUNT",
+      Limit: 10000,
+    }),
+  );
 
   // Count guides
-  const guideCount = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk)",
-    ExpressionAttributeValues: { ":pk": { S: "GUIDE#" } },
-    Select: "COUNT",
-    Limit: 10000,
-  }));
+  const guideCount = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk)",
+      ExpressionAttributeValues: { ":pk": { S: "GUIDE#" } },
+      Select: "COUNT",
+      Limit: 10000,
+    }),
+  );
 
   // Today's revenue (from payments)
   const todayStart = `${now.toISOString().slice(0, 10)}T00:00:00.000Z`;
-  const payments = (await paymentRecords()).filter(p => p.createdAt && p.createdAt >= todayStart);
+  const payments = (await paymentRecords()).filter((p) => p.createdAt && p.createdAt >= todayStart);
 
   return ok({
     metrics: {
@@ -247,14 +320,15 @@ async function handleListUsers(event: ApiGatewayEvent) {
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 50, 200);
 
-
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk)",
-    ExpressionAttributeValues: { ":pk": { S: "USER#" } },
-    Limit: limit,
-
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk)",
+      ExpressionAttributeValues: { ":pk": { S: "USER#" } },
+      Limit: limit,
+    }),
+  );
 
   const grouped = new Map<string, any>();
   for (const item of result.Items) {
@@ -272,18 +346,33 @@ async function handleListUsers(event: ApiGatewayEvent) {
     grouped.set(userId, user);
   }
   if (process.env.COGNITO_USER_MANAGEMENT === "true") {
-    const { CognitoIdentityProviderClient, ListUsersCommand } = await import("@aws-sdk/client-cognito-identity-provider");
+    const { CognitoIdentityProviderClient, ListUsersCommand } =
+      await import("@aws-sdk/client-cognito-identity-provider");
     const cognito = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION });
     let token: string | undefined;
     do {
-      const page = await cognito.send(new ListUsersCommand({ UserPoolId: process.env.COGNITO_USER_POOL_ID, PaginationToken: token, Limit: 60 }));
+      const page = await cognito.send(
+        new ListUsersCommand({
+          UserPoolId: process.env.COGNITO_USER_POOL_ID,
+          PaginationToken: token,
+          Limit: 60,
+        }),
+      );
       for (const account of page.Users || []) {
-        const attributes = Object.fromEntries((account.Attributes || []).map(a => [a.Name, a.Value]));
+        const attributes = Object.fromEntries(
+          (account.Attributes || []).map((a) => [a.Name, a.Value]),
+        );
         const id = attributes.sub;
         if (!id) continue;
-        grouped.set(id, { ...grouped.get(id), userId: id, username: account.Username, email: attributes.email,
-          name: attributes.name, suspended: account.Enabled === false || grouped.get(id)?.suspended === true,
-          createdAt: account.UserCreateDate?.toISOString() });
+        grouped.set(id, {
+          ...grouped.get(id),
+          userId: id,
+          username: account.Username,
+          email: attributes.email,
+          name: attributes.name,
+          suspended: account.Enabled === false || grouped.get(id)?.suspended === true,
+          createdAt: account.UserCreateDate?.toISOString(),
+        });
       }
       token = page.PaginationToken;
     } while (token);
@@ -297,10 +386,10 @@ async function handleFinance() {
   const payments = await paymentRecords();
 
   const totalRevenue = payments
-    .filter(p => p.status === "succeeded")
+    .filter((p) => p.status === "succeeded")
     .reduce((sum, p) => sum + (p.amount || 0), 0);
 
-  const failedCount = payments.filter(p => p.status === "failed").length;
+  const failedCount = payments.filter((p) => p.status === "failed").length;
 
   // Group by month
   const monthly: Record<string, number> = {};
@@ -316,7 +405,10 @@ async function handleFinance() {
       totalRevenueTRY: totalRevenue / 100, // convert from cents
       totalTransactions: payments.length,
       failedTransactions: failedCount,
-      monthlyRevenue: Object.entries(monthly).map(([month, amount]) => ({ month, amount: amount / 100 })),
+      monthlyRevenue: Object.entries(monthly).map(([month, amount]) => ({
+        month,
+        amount: amount / 100,
+      })),
       currency: "TRY",
     },
   });
@@ -324,7 +416,15 @@ async function handleFinance() {
 
 // ─── Token Usage (Admin view) ─────────────────────────────────────────────
 async function handleTokenUsageAdmin() {
-  return ok({ usage: { note: "Token ölçüm kaynağı henüz bağlanmadı.", totalInvocations: null, estimatedTokensMonth: null, activeModels: [], quotaUtilizationPct: null } });
+  return ok({
+    usage: {
+      note: "Token ölçüm kaynağı henüz bağlanmadı.",
+      totalInvocations: null,
+      estimatedTokensMonth: null,
+      activeModels: [],
+      quotaUtilizationPct: null,
+    },
+  });
 }
 
 // ─── Suspend User ─────────────────────────────────────────────────────────
@@ -332,7 +432,8 @@ async function handleSuspendUser(event: ApiGatewayEvent) {
   const userId = event.pathParameters?.id;
   if (!userId) return badRequest("Kullanıcı ID gerekli.");
 
-  if (userId === (event as any).verifiedUser?.sub) return badRequest("Kendi hesabınızın durumunu değiştiremezsiniz.");
+  if (userId === (event as any).verifiedUser?.sub)
+    return badRequest("Kendi hesabınızın durumunu değiştiremezsiniz.");
   await protectAccount(event, userId);
   const body = parseBody<{ reason?: string }>(event);
   const reason = body?.reason?.trim() || "Yönetici tarafından askıya alındı.";
@@ -342,18 +443,24 @@ async function handleSuspendUser(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   const now = new Date().toISOString();
-  await ddb.send(new UpdateItemCommand({
-    TableName: getTableName(),
-    Key: marshall({ PK: `USER#${userId}`, SK: "META" }),
-    UpdateExpression: "SET suspended = :true, suspendedAt = :now, suspendReason = :reason",
-    ExpressionAttributeValues: marshall({ ":true": true, ":now": now, ":reason": reason }),
-  }));
+  await ddb.send(
+    new UpdateItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: `USER#${userId}`, SK: "META" }),
+      UpdateExpression: "SET suspended = :true, suspendedAt = :now, suspendReason = :reason",
+      ExpressionAttributeValues: marshall({ ":true": true, ":now": now, ":reason": reason }),
+    }),
+  );
 
   if (process.env.COGNITO_USER_MANAGEMENT === "true") {
-    const { CognitoIdentityProviderClient, AdminDisableUserCommand } = await import("@aws-sdk/client-cognito-identity-provider");
-    await new CognitoIdentityProviderClient({ region: process.env.AWS_REGION }).send(new AdminDisableUserCommand({
-      UserPoolId: process.env.COGNITO_USER_POOL_ID, Username: userId,
-    }));
+    const { CognitoIdentityProviderClient, AdminDisableUserCommand } =
+      await import("@aws-sdk/client-cognito-identity-provider");
+    await new CognitoIdentityProviderClient({ region: process.env.AWS_REGION }).send(
+      new AdminDisableUserCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID,
+        Username: userId,
+      }),
+    );
   }
 
   const actorSub = (event as any).verifiedUser?.sub || "admin";
@@ -367,7 +474,8 @@ async function handleUnsuspendUser(event: ApiGatewayEvent) {
   const userId = event.pathParameters?.id;
   if (!userId) return badRequest("Kullanıcı ID gerekli.");
 
-  if (userId === (event as any).verifiedUser?.sub) return badRequest("Kendi hesabınızın durumunu değiştiremezsiniz.");
+  if (userId === (event as any).verifiedUser?.sub)
+    return badRequest("Kendi hesabınızın durumunu değiştiremezsiniz.");
   const body = parseBody<{ reason?: string }>(event);
   const reason = body?.reason?.trim() || "Yönetici tarafından askı kaldırıldı.";
 
@@ -376,18 +484,24 @@ async function handleUnsuspendUser(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   const now = new Date().toISOString();
-  await ddb.send(new UpdateItemCommand({
-    TableName: getTableName(),
-    Key: marshall({ PK: `USER#${userId}`, SK: "META" }),
-    UpdateExpression: "SET suspended = :false, unsuspendedAt = :now REMOVE suspendReason",
-    ExpressionAttributeValues: marshall({ ":false": false, ":now": now }),
-  }));
+  await ddb.send(
+    new UpdateItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: `USER#${userId}`, SK: "META" }),
+      UpdateExpression: "SET suspended = :false, unsuspendedAt = :now REMOVE suspendReason",
+      ExpressionAttributeValues: marshall({ ":false": false, ":now": now }),
+    }),
+  );
 
   if (process.env.COGNITO_USER_MANAGEMENT === "true") {
-    const { CognitoIdentityProviderClient, AdminEnableUserCommand } = await import("@aws-sdk/client-cognito-identity-provider");
-    await new CognitoIdentityProviderClient({ region: process.env.AWS_REGION }).send(new AdminEnableUserCommand({
-      UserPoolId: process.env.COGNITO_USER_POOL_ID, Username: userId,
-    }));
+    const { CognitoIdentityProviderClient, AdminEnableUserCommand } =
+      await import("@aws-sdk/client-cognito-identity-provider");
+    await new CognitoIdentityProviderClient({ region: process.env.AWS_REGION }).send(
+      new AdminEnableUserCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID,
+        Username: userId,
+      }),
+    );
   }
 
   const actorSub = (event as any).verifiedUser?.sub || "admin";
@@ -409,36 +523,51 @@ async function handleRefund(event: ApiGatewayEvent) {
     const stripe = await stripeClient();
     const customer = await read(`USER#${userId}`, "STRIPE_CUSTOMER");
     const payment = await stripe.paymentIntents.retrieve(body.paymentIntentId);
-    const customerId = typeof payment.customer === "string" ? payment.customer : payment.customer?.id;
-    if (!customer?.customerId || customerId !== customer.customerId) return badRequest("Ödeme bu kullanıcıya ait değil.");
-    const refund = await stripe.refunds.create({
-      payment_intent: body.paymentIntentId,
-      metadata: { refundedBy: "admin", userId, reason },
-    }, { idempotencyKey: `full-refund:${body.paymentIntentId}` });
+    const customerId =
+      typeof payment.customer === "string" ? payment.customer : payment.customer?.id;
+    if (!customer?.customerId || customerId !== customer.customerId)
+      return badRequest("Ödeme bu kullanıcıya ait değil.");
+    const refund = await stripe.refunds.create(
+      {
+        payment_intent: body.paymentIntentId,
+        metadata: { refundedBy: "admin", userId, reason },
+      },
+      { idempotencyKey: `full-refund:${body.paymentIntentId}` },
+    );
 
     // Record refund in DynamoDB
     const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
     const { marshall } = await import("@aws-sdk/util-dynamodb");
     const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-    await ddb.send(new PutItemCommand({
-      TableName: getTableName(),
-      Item: marshall({
-        PK: `REFUND#${refund.id}`,
-        SK: "META",
-        paymentIntentId: body.paymentIntentId,
-        userId,
-        amount: refund.amount,
-        status: refund.status,
-        reason,
-        createdAt: new Date().toISOString(),
+    await ddb.send(
+      new PutItemCommand({
+        TableName: getTableName(),
+        Item: marshall({
+          PK: `REFUND#${refund.id}`,
+          SK: "META",
+          paymentIntentId: body.paymentIntentId,
+          userId,
+          amount: refund.amount,
+          status: refund.status,
+          reason,
+          createdAt: new Date().toISOString(),
+        }),
       }),
-    }));
+    );
 
     const actorSub = (event as any).verifiedUser?.sub || "admin";
-    await recordAuditLog(actorSub, "payment_refunded", body.paymentIntentId, reason, { userId, amount: refund.amount });
+    await recordAuditLog(actorSub, "payment_refunded", body.paymentIntentId, reason, {
+      userId,
+      amount: refund.amount,
+    });
 
-    return ok({ status: refund.status === "succeeded" ? "refunded" : refund.status, refundId: refund.id, amount: refund.amount, reason });
+    return ok({
+      status: refund.status === "succeeded" ? "refunded" : refund.status,
+      refundId: refund.id,
+      amount: refund.amount,
+      reason,
+    });
   } catch (err: any) {
     return serverError("İade durumu doğrulanamadı. İşlem kimliğiyle tekrar kontrol edin.");
   }
@@ -449,26 +578,49 @@ async function paymentRecords() {
   const { DynamoDBClient, ScanCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "(begins_with(PK, :payment) AND SK = :meta) OR (begins_with(PK, :billing) AND SK = :receipt) OR begins_with(PK, :refund)",
-    ExpressionAttributeValues: { ":payment": { S: "PAYMENT#" }, ":meta": { S: "META" }, ":billing": { S: "BILLING#" }, ":receipt": { S: "RECEIPT" }, ":refund": { S: "REFUND#" } },
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression:
+        "(begins_with(PK, :payment) AND SK = :meta) OR (begins_with(PK, :billing) AND SK = :receipt) OR begins_with(PK, :refund)",
+      ExpressionAttributeValues: {
+        ":payment": { S: "PAYMENT#" },
+        ":meta": { S: "META" },
+        ":billing": { S: "BILLING#" },
+        ":receipt": { S: "RECEIPT" },
+        ":refund": { S: "REFUND#" },
+      },
+    }),
+  );
   const records = result.Items.map((item: any) => unmarshall(item));
-  const refunded = new Set(records.filter((r: any) => r.PK?.startsWith("REFUND#") && r.status === "succeeded").map((r: any) => r.paymentIntentId));
+  const refunded = new Set(
+    records
+      .filter((r: any) => r.PK?.startsWith("REFUND#") && r.status === "succeeded")
+      .map((r: any) => r.paymentIntentId),
+  );
   const payments = new Map<string, any>();
   for (const row of records) {
-    if (row.PK?.startsWith("REFUND#") || (row.currency && row.currency.toLowerCase() !== "try")) continue;
+    if (row.PK?.startsWith("REFUND#") || (row.currency && row.currency.toLowerCase() !== "try"))
+      continue;
     const id = row.paymentIntentId || row.id || row.PK;
-    payments.set(id, { ...row, id, status: refunded.has(row.paymentIntentId) ? "refunded" : row.status || (row.SK === "RECEIPT" ? "succeeded" : "pending") });
+    payments.set(id, {
+      ...row,
+      id,
+      status: refunded.has(row.paymentIntentId)
+        ? "refunded"
+        : row.status || (row.SK === "RECEIPT" ? "succeeded" : "pending"),
+    });
   }
-  return [...payments.values()].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  return [...payments.values()].sort((a, b) =>
+    (b.createdAt || "").localeCompare(a.createdAt || ""),
+  );
 }
 
 async function handlePayments(event: ApiGatewayEvent) {
   const records = await paymentRecords();
   const status = event.queryStringParameters?.status;
-  const payments = status ? records.filter(p => p.status === status) : records;
+  const payments = status ? records.filter((p) => p.status === status) : records;
   return ok({ payments, count: payments.length });
 }
 
@@ -499,7 +651,10 @@ async function handleSystemHealth() {
       region,
       services: {
         dynamodb: { status: ddbStatus, latencyMs: ddbLatencyMs, table: getTableName() },
-        cognito: { status: "healthy", poolId: process.env.COGNITO_USER_POOL_ID || "eu-central-1_TKABiLn5f" },
+        cognito: {
+          status: "healthy",
+          poolId: process.env.COGNITO_USER_POOL_ID || "eu-central-1_TKABiLn5f",
+        },
         bedrock: { status: "unknown", model: bedrockModel },
         apiGateway: { status: "healthy", protocol: "HTTP API v2" },
         stripe: { status: process.env.STRIPE_SECRET_KEY ? "configured" : "offline" },
@@ -512,69 +667,132 @@ async function handleSystemHealth() {
 
 // ─── AgentCore Status ─────────────────────────────────────────────────────
 async function handleAgentCoreStatus() {
-  const region = process.env.AWS_REGION || 'eu-central-1';
+  const region = process.env.AWS_REGION || "eu-central-1";
   const memoryId = process.env.AGENTCORE_MEMORY_ID;
   const gatewayId = process.env.AGENTCORE_GATEWAY_ID;
-  const workerName = `${process.env.ENVIRONMENT === 'prod' ? 'adreskopru-prod' : 'adreskopru-dev'}-ai-memory-worker`;
+  const workerName = `${process.env.ENVIRONMENT === "prod" ? "adreskopru-prod" : "adreskopru-dev"}-ai-memory-worker`;
   const dlqUrl = process.env.MEMORY_DLQ_URL;
   const result: Record<string, any> = { observedAt: new Date().toISOString(), region };
 
   // Gateway status
   if (gatewayId) {
     try {
-      const { BedrockAgentCoreControlClient, GetGatewayCommand, ListGatewayTargetsCommand } = await import('@aws-sdk/client-bedrock-agentcore-control');
+      const { BedrockAgentCoreControlClient, GetGatewayCommand, ListGatewayTargetsCommand } =
+        await import("@aws-sdk/client-bedrock-agentcore-control");
       const client = new BedrockAgentCoreControlClient({ region, maxAttempts: 1 });
       const [gw, targets] = await Promise.all([
         client.send(new GetGatewayCommand({ gatewayIdentifier: gatewayId })),
         client.send(new ListGatewayTargetsCommand({ gatewayIdentifier: gatewayId })),
       ]);
-      result.gateway = { id: gw.gatewayId, name: gw.name, status: gw.status, url: gw.gatewayUrl, protocol: gw.protocolType,
-        targets: (targets.items || []).map(t => ({ id: t.targetId, name: t.name, status: t.status, type: t.targetType })) };
+      result.gateway = {
+        id: gw.gatewayId,
+        name: gw.name,
+        status: gw.status,
+        url: gw.gatewayUrl,
+        protocol: gw.protocolType,
+        targets: (targets.items || []).map((t) => ({
+          id: t.targetId,
+          name: t.name,
+          status: t.status,
+          type: t.targetType,
+        })),
+      };
       client.destroy();
-    } catch (e) { result.gateway = { status: 'unknown', error: (e as Error).name }; }
+    } catch (e) {
+      result.gateway = { status: "unknown", error: (e as Error).name };
+    }
   } else {
-    result.gateway = { status: 'not_configured' };
+    result.gateway = { status: "not_configured" };
   }
 
   // Memory stats
   if (memoryId) {
     try {
-      const { BedrockAgentCoreControlClient, GetMemoryCommand } = await import('@aws-sdk/client-bedrock-agentcore-control');
+      const { BedrockAgentCoreControlClient, GetMemoryCommand } =
+        await import("@aws-sdk/client-bedrock-agentcore-control");
       const client = new BedrockAgentCoreControlClient({ region, maxAttempts: 1 });
       const mem = await client.send(new GetMemoryCommand({ memoryId }));
-      result.memory = { id: memoryId, name: mem.memory?.name, status: mem.memory?.status,
-        strategies: (mem.memory?.strategies || []).map(s => ({ name: s.name, type: s.type, status: s.status })) };
+      result.memory = {
+        id: memoryId,
+        name: mem.memory?.name,
+        status: mem.memory?.status,
+        strategies: (mem.memory?.strategies || []).map((s) => ({
+          name: s.name,
+          type: s.type,
+          status: s.status,
+        })),
+      };
       client.destroy();
-    } catch (e) { result.memory = { id: memoryId, status: 'unknown', error: (e as Error).name }; }
+    } catch (e) {
+      result.memory = { id: memoryId, status: "unknown", error: (e as Error).name };
+    }
   } else {
-    result.memory = { status: 'not_configured' };
+    result.memory = { status: "not_configured" };
   }
 
   // Memory worker Lambda health + DLQ
   try {
     const [lambdaSdk, cwSdk, sqsSdk] = await Promise.all([
-      import('@aws-sdk/client-lambda'),
-      import('@aws-sdk/client-cloudwatch'),
-      import('@aws-sdk/client-sqs'),
+      import("@aws-sdk/client-lambda"),
+      import("@aws-sdk/client-cloudwatch"),
+      import("@aws-sdk/client-sqs"),
     ]);
     const lambda = new lambdaSdk.LambdaClient({ region, maxAttempts: 1 });
     const cw = new cwSdk.CloudWatchClient({ region, maxAttempts: 1 });
-    const since = new Date(Date.now() - 3600000); const now = new Date();
+    const since = new Date(Date.now() - 3600000);
+    const now = new Date();
     const [fn, errors, invocations] = await Promise.all([
       lambda.send(new lambdaSdk.GetFunctionConfigurationCommand({ FunctionName: workerName })),
-      cw.send(new cwSdk.GetMetricStatisticsCommand({ Namespace: 'AWS/Lambda', MetricName: 'Errors', Dimensions: [{ Name: 'FunctionName', Value: workerName }], StartTime: since, EndTime: now, Period: 3600, Statistics: ['Sum'] })),
-      cw.send(new cwSdk.GetMetricStatisticsCommand({ Namespace: 'AWS/Lambda', MetricName: 'Invocations', Dimensions: [{ Name: 'FunctionName', Value: workerName }], StartTime: since, EndTime: now, Period: 3600, Statistics: ['Sum'] })),
+      cw.send(
+        new cwSdk.GetMetricStatisticsCommand({
+          Namespace: "AWS/Lambda",
+          MetricName: "Errors",
+          Dimensions: [{ Name: "FunctionName", Value: workerName }],
+          StartTime: since,
+          EndTime: now,
+          Period: 3600,
+          Statistics: ["Sum"],
+        }),
+      ),
+      cw.send(
+        new cwSdk.GetMetricStatisticsCommand({
+          Namespace: "AWS/Lambda",
+          MetricName: "Invocations",
+          Dimensions: [{ Name: "FunctionName", Value: workerName }],
+          StartTime: since,
+          EndTime: now,
+          Period: 3600,
+          Statistics: ["Sum"],
+        }),
+      ),
     ]);
-    let dlqMessages: string | number = 'unknown';
+    let dlqMessages: string | number = "unknown";
     if (dlqUrl) {
       const sqs = new sqsSdk.SQSClient({ region, maxAttempts: 1 });
-      const dlqResult = await sqs.send(new sqsSdk.GetQueueAttributesCommand({ QueueUrl: dlqUrl, AttributeNames: ['ApproximateNumberOfMessages'] })).catch(() => null);
-      dlqMessages = dlqResult?.Attributes?.ApproximateNumberOfMessages ?? 'unknown';
+      const dlqResult = await sqs
+        .send(
+          new sqsSdk.GetQueueAttributesCommand({
+            QueueUrl: dlqUrl,
+            AttributeNames: ["ApproximateNumberOfMessages"],
+          }),
+        )
+        .catch(() => null);
+      dlqMessages = dlqResult?.Attributes?.ApproximateNumberOfMessages ?? "unknown";
       sqs.destroy();
     }
-    result.worker = { name: workerName, state: fn.State, lastUpdate: fn.LastUpdateStatus, errorsLastHour: errors.Datapoints?.[0]?.Sum ?? 0, invocationsLastHour: invocations.Datapoints?.[0]?.Sum ?? 0, dlqMessages };
-    lambda.destroy(); cw.destroy();
-  } catch (e) { result.worker = { name: workerName, status: 'unknown', error: (e as Error).name }; }
+    result.worker = {
+      name: workerName,
+      state: fn.State,
+      lastUpdate: fn.LastUpdateStatus,
+      errorsLastHour: errors.Datapoints?.[0]?.Sum ?? 0,
+      invocationsLastHour: invocations.Datapoints?.[0]?.Sum ?? 0,
+      dlqMessages,
+    };
+    lambda.destroy();
+    cw.destroy();
+  } catch (e) {
+    result.worker = { name: workerName, status: "unknown", error: (e as Error).name };
+  }
 
   return ok(result);
 }
@@ -588,19 +806,22 @@ async function handleListReports(event: ApiGatewayEvent) {
   const status = event.queryStringParameters?.status;
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 50, 100);
 
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: status
-      ? "begins_with(PK, :pk) AND SK = :sk AND #status = :status"
-      : "begins_with(PK, :pk) AND SK = :sk",
-    ExpressionAttributeNames: status ? { "#status": "status" } : undefined,
-    ExpressionAttributeValues: status
-      ? { ":pk": { S: "REPORT#" }, ":sk": { S: "META" }, ":status": { S: status } }
-      : { ":pk": { S: "REPORT#" }, ":sk": { S: "META" } },
-    Limit: limit,
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: status
+        ? "begins_with(PK, :pk) AND SK = :sk AND #status = :status"
+        : "begins_with(PK, :pk) AND SK = :sk",
+      ExpressionAttributeNames: status ? { "#status": "status" } : undefined,
+      ExpressionAttributeValues: status
+        ? { ":pk": { S: "REPORT#" }, ":sk": { S: "META" }, ":status": { S: status } }
+        : { ":pk": { S: "REPORT#" }, ":sk": { S: "META" } },
+      Limit: limit,
+    }),
+  );
 
-  const reports = (result.Items || []).map(i => unmarshall(i));
+  const reports = (result.Items || []).map((i) => unmarshall(i));
   return ok({ reports, count: reports.length });
 }
 
@@ -608,14 +829,19 @@ async function handleResolveReport(event: ApiGatewayEvent) {
   const reportId = event.pathParameters?.id;
   if (!reportId) return badRequest("Şikâyet ID gerekli.");
 
-  const body = parseBody<{ action?: "dismiss" | "hide_content" | "suspend_user"; notes?: string }>(event);
+  const body = parseBody<{ action?: "dismiss" | "hide_content" | "suspend_user"; notes?: string }>(
+    event,
+  );
   const action = body?.action;
-  if (!action || !["dismiss", "hide_content", "suspend_user"].includes(action)) return badRequest("Geçerli şikâyet işlemi gerekli.");
+  if (!action || !["dismiss", "hide_content", "suspend_user"].includes(action))
+    return badRequest("Geçerli şikâyet işlemi gerekli.");
   const report = await read(`REPORT#${reportId}`, "META");
   if (!report) return notFound("Şikâyet bulunamadı.");
   if (report.status !== "pending") return badRequest("Şikâyet zaten karara bağlanmış.");
-  if (action === "hide_content" && report.contentType !== "route") return badRequest("Bu içerik türü için gizleme desteklenmiyor.");
-  if (action === "suspend_user" && report.contentType !== "user") return badRequest("Şikâyet bir kullanıcıyı hedeflemiyor.");
+  if (action === "hide_content" && report.contentType !== "route")
+    return badRequest("Bu içerik türü için gizleme desteklenmiyor.");
+  if (action === "suspend_user" && report.contentType !== "user")
+    return badRequest("Şikâyet bir kullanıcıyı hedeflemiyor.");
   const notes = body?.notes?.trim() || "Şikâyet yönetici tarafından incelendi.";
 
   const { DynamoDBClient, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
@@ -623,28 +849,44 @@ async function handleResolveReport(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   if (action !== "dismiss") {
-    const targetEvent = { ...event, pathParameters: { id: report.contentId }, body: JSON.stringify({ action: "suspend", reason: notes }), isBase64Encoded: false };
-    const outcome = action === "hide_content" ? await handleAdminRouteAction(targetEvent) : await handleSuspendUser(targetEvent);
+    const targetEvent = {
+      ...event,
+      pathParameters: { id: report.contentId },
+      body: JSON.stringify({ action: "suspend", reason: notes }),
+      isBase64Encoded: false,
+    };
+    const outcome =
+      action === "hide_content"
+        ? await handleAdminRouteAction(targetEvent)
+        : await handleSuspendUser(targetEvent);
     if (outcome.statusCode !== 200) return outcome;
   }
   const now = new Date().toISOString();
-  await ddb.send(new UpdateItemCommand({
-    TableName: getTableName(),
-    Key: marshall({ PK: `REPORT#${reportId}`, SK: "META" }),
-    UpdateExpression: "SET #status = :status, resolvedAt = :now, resolutionAction = :action, resolutionNotes = :notes",
-    ExpressionAttributeNames: { "#status": "status" },
-    ExpressionAttributeValues: marshall({
-      ":status": action === "dismiss" ? "dismissed" : "resolved",
-      ":now": now,
-      ":action": action,
-      ":notes": notes,
+  await ddb.send(
+    new UpdateItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: `REPORT#${reportId}`, SK: "META" }),
+      UpdateExpression:
+        "SET #status = :status, resolvedAt = :now, resolutionAction = :action, resolutionNotes = :notes",
+      ExpressionAttributeNames: { "#status": "status" },
+      ExpressionAttributeValues: marshall({
+        ":status": action === "dismiss" ? "dismissed" : "resolved",
+        ":now": now,
+        ":action": action,
+        ":notes": notes,
+      }),
     }),
-  }));
+  );
 
   const actorSub = (event as any).verifiedUser?.sub || "admin";
   await recordAuditLog(actorSub, `report_${action}`, reportId, notes);
 
-  return ok({ status: action === "dismiss" ? "dismissed" : "resolved", reportId, action, resolvedAt: now });
+  return ok({
+    status: action === "dismiss" ? "dismissed" : "resolved",
+    reportId,
+    action,
+    resolvedAt: now,
+  });
 }
 
 // ─── Audit Logs ───────────────────────────────────────────────────────────
@@ -655,17 +897,20 @@ async function handleAuditLogs(event: ApiGatewayEvent) {
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 50, 100);
 
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
-    ExpressionAttributeValues: {
-      ":pk": { S: "AUDIT#" },
-      ":sk": { S: "META" },
-    },
-    Limit: limit,
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
+      ExpressionAttributeValues: {
+        ":pk": { S: "AUDIT#" },
+        ":sk": { S: "META" },
+      },
+      Limit: limit,
+    }),
+  );
 
-  const logs = (result.Items || []).map(i => unmarshall(i));
+  const logs = (result.Items || []).map((i) => unmarshall(i));
   logs.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
   return ok({ logs, count: logs.length });
 }
@@ -673,11 +918,25 @@ async function handleAuditLogs(event: ApiGatewayEvent) {
 // ─── Realtime Telemetry & Live Map/Social Sync ────────────────────────────
 async function handleRealtimeTelemetry() {
   const metrics = JSON.parse((await handleMetrics()).body).metrics;
-  return ok({ realtime: { timestamp: metrics.timestamp, registeredUsers: metrics.totalUsers,
-    activeExplorers: null, currentMapUsers: null, aiQueriesToday: null,
-    grossMarketplaceTRY: null, netCommissionTRY: null, mapClusters: [],
-    telemetry: { topoLoadPercent: null, waypointsPerSec: null, geocodingLatencyMs: null, liveSyncRooms: null },
-    note: "Canlı konum ve performans ölçümleri henüz bağlanmadı." } });
+  return ok({
+    realtime: {
+      timestamp: metrics.timestamp,
+      registeredUsers: metrics.totalUsers,
+      activeExplorers: null,
+      currentMapUsers: null,
+      aiQueriesToday: null,
+      grossMarketplaceTRY: null,
+      netCommissionTRY: null,
+      mapClusters: [],
+      telemetry: {
+        topoLoadPercent: null,
+        waypointsPerSec: null,
+        geocodingLatencyMs: null,
+        liveSyncRooms: null,
+      },
+      note: "Canlı konum ve performans ölçümleri henüz bağlanmadı.",
+    },
+  });
 }
 
 // ─── Routes List & Moderation ─────────────────────────────────────────────
@@ -688,17 +947,20 @@ async function handleAdminListRoutes(event: ApiGatewayEvent) {
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 50, 100);
 
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk) OR begins_with(SK, :sk)",
-    ExpressionAttributeValues: {
-      ":pk": { S: "ROUTE#" },
-      ":sk": { S: "ROUTE#" },
-    },
-    Limit: limit,
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk) OR begins_with(SK, :sk)",
+      ExpressionAttributeValues: {
+        ":pk": { S: "ROUTE#" },
+        ":sk": { S: "ROUTE#" },
+      },
+      Limit: limit,
+    }),
+  );
 
-  const routes = (result.Items || []).map(i => unmarshall(i));
+  const routes = (result.Items || []).map((i) => unmarshall(i));
   return ok({ routes, count: routes.length });
 }
 
@@ -708,7 +970,8 @@ async function handleAdminRouteAction(event: ApiGatewayEvent) {
 
   const body = parseBody<{ action?: "approve" | "feature" | "suspend"; reason?: string }>(event);
   const action = body?.action;
-  if (!action || !["approve", "feature", "suspend"].includes(action)) return badRequest("Geçerli rota işlemi gerekli.");
+  if (!action || !["approve", "feature", "suspend"].includes(action))
+    return badRequest("Geçerli rota işlemi gerekli.");
   const route = await findRoute(routeId);
   if (!route) return notFound("Rota bulunamadı.");
   const reason = body?.reason?.trim() || `Yönetici rota işlemi: ${action}`;
@@ -718,18 +981,23 @@ async function handleAdminRouteAction(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   const now = new Date().toISOString();
-  await ddb.send(new UpdateItemCommand({
-    TableName: getTableName(),
-    Key: marshall({ PK: route.PK, SK: route.SK }),
-    ConditionExpression: "attribute_exists(PK) AND attribute_exists(SK)",
-    UpdateExpression: "SET adminStatus = :status, adminActionAt = :now, adminReason = :reason" + (action === "suspend" ? ", isPublic = :public" : ""),
-    ExpressionAttributeValues: marshall({
-      ...(action === "suspend" ? { ":public": false } : {}),
-      ":status": action === "suspend" ? "suspended" : action === "feature" ? "featured" : "approved",
-      ":now": now,
-      ":reason": reason,
+  await ddb.send(
+    new UpdateItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: route.PK, SK: route.SK }),
+      ConditionExpression: "attribute_exists(PK) AND attribute_exists(SK)",
+      UpdateExpression:
+        "SET adminStatus = :status, adminActionAt = :now, adminReason = :reason" +
+        (action === "suspend" ? ", isPublic = :public" : ""),
+      ExpressionAttributeValues: marshall({
+        ...(action === "suspend" ? { ":public": false } : {}),
+        ":status":
+          action === "suspend" ? "suspended" : action === "feature" ? "featured" : "approved",
+        ":now": now,
+        ":reason": reason,
+      }),
     }),
-  }));
+  );
 
   const actorSub = (event as any).verifiedUser?.sub || "admin";
   await recordAuditLog(actorSub, `route_${action}`, routeId, reason);
@@ -743,34 +1011,62 @@ async function handleGetSystemConfig() {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const result = await ddb.send(new GetItemCommand({
-    TableName: getTableName(),
-    Key: {
-      PK: { S: "SYSTEM#CONFIG" },
-      SK: { S: "META" },
-    },
-  }));
+  const result = await ddb.send(
+    new GetItemCommand({
+      TableName: getTableName(),
+      Key: {
+        PK: { S: "SYSTEM#CONFIG" },
+        SK: { S: "META" },
+      },
+    }),
+  );
 
-  const config = result.Item ? unmarshall(result.Item) : { maintenanceMode: false, updatedAt: new Date().toISOString() };
+  const config = result.Item
+    ? unmarshall(result.Item)
+    : { maintenanceMode: false, updatedAt: new Date().toISOString() };
   return ok({ config });
 }
 
 async function handleUpdateSystemConfig(event: ApiGatewayEvent) {
   const body = parseBody<Record<string, any>>(event);
-  if (!body || typeof body.maintenanceMode !== "boolean") return badRequest("Bakım modu boolean olmalıdır.");
+  if (!body || typeof body.maintenanceMode !== "boolean")
+    return badRequest("Bakım modu boolean olmalıdır.");
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
-  if (!reason || reason.length > 1000) return badRequest("En fazla 1000 karakterlik gerekçe gerekli.");
+  if (!reason || reason.length > 1000)
+    return badRequest("En fazla 1000 karakterlik gerekçe gerekli.");
   const previous = await get("SYSTEM#CONFIG");
-  if (body.version !== undefined && body.version !== (previous?.version || 0)) return { statusCode: 409, headers: ok({}).headers, body: JSON.stringify({ error: "Ayarlar değişti. Yenileyip tekrar deneyin." }) };
-  const next = { ...previous, PK: "SYSTEM#CONFIG", SK: "META", maintenanceMode: body.maintenanceMode,
-    maintenanceMessage: previous?.maintenanceMessage || "Kısa süreli bakım yapılıyor. Lütfen daha sonra tekrar deneyin.",
-    routeCreationEnabled: previous?.routeCreationEnabled ?? true, sharesEnabled: previous?.sharesEnabled ?? true,
-    reason, updatedBy: (event as any).verifiedUser.sub };
+  if (body.version !== undefined && body.version !== (previous?.version || 0))
+    return {
+      statusCode: 409,
+      headers: ok({}).headers,
+      body: JSON.stringify({ error: "Ayarlar değişti. Yenileyip tekrar deneyin." }),
+    };
+  const next = {
+    ...previous,
+    PK: "SYSTEM#CONFIG",
+    SK: "META",
+    maintenanceMode: body.maintenanceMode,
+    maintenanceMessage:
+      previous?.maintenanceMessage ||
+      "Kısa süreli bakım yapılıyor. Lütfen daha sonra tekrar deneyin.",
+    routeCreationEnabled: previous?.routeCreationEnabled ?? true,
+    sharesEnabled: previous?.sharesEnabled ?? true,
+    reason,
+    updatedBy: (event as any).verifiedUser.sub,
+  };
   for (const flag of ["routeCreationEnabled", "sharesEnabled"] as const) {
-    if (body[flag] !== undefined) { if (typeof body[flag] !== "boolean") return badRequest("Geçersiz özellik ayarı."); next[flag] = body[flag]; }
+    if (body[flag] !== undefined) {
+      if (typeof body[flag] !== "boolean") return badRequest("Geçersiz özellik ayarı.");
+      next[flag] = body[flag];
+    }
   }
   if (body.maintenanceMessage !== undefined) {
-    if (typeof body.maintenanceMessage !== "string" || !body.maintenanceMessage.trim() || body.maintenanceMessage.length > 500) return badRequest("Bakım mesajı 1–500 karakter olmalıdır.");
+    if (
+      typeof body.maintenanceMessage !== "string" ||
+      !body.maintenanceMessage.trim() ||
+      body.maintenanceMessage.length > 500
+    )
+      return badRequest("Bakım mesajı 1–500 karakter olmalıdır.");
     next.maintenanceMessage = body.maintenanceMessage.trim();
   }
   const config = await commit(event, next, "system_config_updated", reason, previous);
@@ -780,7 +1076,12 @@ async function handleUpdateSystemConfig(event: ApiGatewayEvent) {
 // ─── Module Config ───────────────────────────────────────────────────────
 async function handleGetModuleConfig() {
   const row = await get("SYSTEM#MODULES");
-  const moduleConfig = row || { mapEnabled: true, aiEnabled: true, communityEnabled: true, messagingEnabled: true };
+  const moduleConfig = row || {
+    mapEnabled: true,
+    aiEnabled: true,
+    communityEnabled: true,
+    messagingEnabled: true,
+  };
   return ok({ moduleConfig });
 }
 
@@ -788,10 +1089,18 @@ async function handleUpdateModuleConfig(event: ApiGatewayEvent) {
   const body = parseBody<Record<string, any>>(event);
   if (!body) return badRequest("Geçerli istek verisi gerekli.");
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
-  if (!reason || reason.length > 1000) return badRequest("En fazla 1000 karakterlik gerekçe gerekli.");
+  if (!reason || reason.length > 1000)
+    return badRequest("En fazla 1000 karakterlik gerekçe gerekli.");
 
   const previous = await get("SYSTEM#MODULES");
-  const current = previous || { PK: "SYSTEM#MODULES", SK: "META", mapEnabled: true, aiEnabled: true, communityEnabled: true, messagingEnabled: true };
+  const current = previous || {
+    PK: "SYSTEM#MODULES",
+    SK: "META",
+    mapEnabled: true,
+    aiEnabled: true,
+    communityEnabled: true,
+    messagingEnabled: true,
+  };
 
   for (const key of ["mapEnabled", "aiEnabled", "communityEnabled", "messagingEnabled"] as const) {
     if (body[key] !== undefined) {
@@ -813,31 +1122,45 @@ async function handleGetCreditStats() {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const walletResult = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
-    ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "CREDITS" } },
-  }));
+  const walletResult = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
+      ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "CREDITS" } },
+    }),
+  );
   const wallets = walletResult.Items.map((item: any) => unmarshall(item));
 
-  const subResult = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
-    ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "SUBSCRIPTION" } },
-  }));
-  const subs = new Map(subResult.Items.map((item: any) => { const r = unmarshall(item); return [r.PK, r]; }));
+  const subResult = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
+      ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "SUBSCRIPTION" } },
+    }),
+  );
+  const subs = new Map(
+    subResult.Items.map((item: any) => {
+      const r = unmarshall(item);
+      return [r.PK, r];
+    }),
+  );
 
-  const usageResult = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk) AND begins_with(SK, :sk)",
-    ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "AI#" } },
-  }));
+  const usageResult = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk) AND begins_with(SK, :sk)",
+      ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "AI#" } },
+    }),
+  );
   const usageRows = usageResult.Items.map((item: any) => unmarshall(item));
 
   let totalGranted = 0;
   let totalConsumed = 0;
   let totalRemaining = 0;
-  const activeWallets = wallets.filter(w => (w.credits || 0) > 0).length;
+  const activeWallets = wallets.filter((w) => (w.credits || 0) > 0).length;
 
   for (const w of wallets) {
     const credits = w.credits || 0;
@@ -873,13 +1196,15 @@ async function handleGetCreditStats() {
   }));
 
   const topConsumers = wallets
-    .map(w => {
+    .map((w) => {
       const userId = w.PK?.replace(/^USER#/, "") || "";
       const sub = subs.get(w.PK);
-      const consumed = usageRows.filter(u => u.PK === w.PK).reduce((sum, u) => sum + (u.cost || 0), 0);
+      const consumed = usageRows
+        .filter((u) => u.PK === w.PK)
+        .reduce((sum, u) => sum + (u.cost || 0), 0);
       return { userId, email: w.email, tier: sub?.tier || "free", consumed };
     })
-    .filter(c => c.consumed > 0)
+    .filter((c) => c.consumed > 0)
     .sort((a, b) => b.consumed - a.consumed)
     .slice(0, 20);
 
@@ -887,14 +1212,18 @@ async function handleGetCreditStats() {
   const now30 = new Date();
   const dailyMap: Record<string, number> = {};
   for (let i = 29; i >= 0; i--) {
-    const d = new Date(now30); d.setDate(d.getDate() - i);
+    const d = new Date(now30);
+    d.setDate(d.getDate() - i);
     dailyMap[d.toISOString().slice(0, 10)] = 0;
   }
   for (const u of usageRows) {
     const day = (u.createdAt || u.SK || "").slice(0, 10);
     if (day in dailyMap) dailyMap[day] += u.cost || 0;
   }
-  const dailyConsumption = Object.entries(dailyMap).map(([date, credits]) => ({ date, credits: Math.round(credits * 100) / 100 }));
+  const dailyConsumption = Object.entries(dailyMap).map(([date, credits]) => ({
+    date,
+    credits: Math.round(credits * 100) / 100,
+  }));
 
   return ok({
     stats: {
@@ -902,7 +1231,8 @@ async function handleGetCreditStats() {
       totalCreditsConsumed: totalConsumed,
       totalCreditsRemaining: totalRemaining,
       activeWallets,
-      averageBalancePerUser: wallets.length > 0 ? Math.round((totalRemaining / wallets.length) * 10) / 10 : 0,
+      averageBalancePerUser:
+        wallets.length > 0 ? Math.round((totalRemaining / wallets.length) * 10) / 10 : 0,
       byModule,
       dailyConsumption,
       planDistribution,
@@ -915,7 +1245,11 @@ async function handleGetCreditStats() {
 async function handleGetStripeConfig() {
   const config = await get("STRIPE#CONFIG");
   const envConnected = !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PUBLISHABLE_KEY);
-  const envMode = process.env.STRIPE_SECRET_KEY?.startsWith("sk_live_") ? "live" : process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_") ? "test" : "unconfigured";
+  const envMode = process.env.STRIPE_SECRET_KEY?.startsWith("sk_live_")
+    ? "live"
+    : process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_")
+      ? "test"
+      : "unconfigured";
 
   const stripe = {
     connected: config ? !!(config.publishableKey && config.secretKeyHash) : envConnected,
@@ -938,11 +1272,17 @@ async function handleUpdateStripeConfig(event: ApiGatewayEvent) {
   const body = parseBody<Record<string, any>>(event);
   if (!body) return badRequest("Geçerli yapılandırma verisi gerekli.");
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
-  if (!reason || reason.length > 1000) return badRequest("Gerekçe zorunludur (en fazla 1000 karakter).");
+  if (!reason || reason.length > 1000)
+    return badRequest("Gerekçe zorunludur (en fazla 1000 karakter).");
 
   const previous = await get("STRIPE#CONFIG");
   let mode = body.mode || previous?.mode || "unconfigured";
-  if (body.publishableKey) mode = body.publishableKey.startsWith("pk_live_") ? "live" : body.publishableKey.startsWith("pk_test_") ? "test" : mode;
+  if (body.publishableKey)
+    mode = body.publishableKey.startsWith("pk_live_")
+      ? "live"
+      : body.publishableKey.startsWith("pk_test_")
+        ? "test"
+        : mode;
 
   const next: Record<string, any> = {
     PK: "STRIPE#CONFIG",
@@ -950,15 +1290,19 @@ async function handleUpdateStripeConfig(event: ApiGatewayEvent) {
     ...(previous || {}),
     mode,
     defaultCurrency: body.defaultCurrency || previous?.defaultCurrency || "try",
-    taxEnabled: body.taxEnabled !== undefined ? !!body.taxEnabled : (previous?.taxEnabled || false),
-    webhookUrl: body.webhookUrl || previous?.webhookUrl || "https://api.mapsbridge.com/stripe/webhook",
+    taxEnabled: body.taxEnabled !== undefined ? !!body.taxEnabled : previous?.taxEnabled || false,
+    webhookUrl:
+      body.webhookUrl || previous?.webhookUrl || "https://api.mapsbridge.com/stripe/webhook",
     supportedCurrencies: previous?.supportedCurrencies || ["try"],
   };
   if (body.publishableKey) next.publishableKey = body.publishableKey;
   if (body.secretKey) next.secretKeyHash = `configured:${Date.now()}`;
   if (body.webhookSecret) next.webhookSecret = `configured:${Date.now()}`;
 
-  const saved = await commit(event, next, "stripe_config_updated", reason, previous) as Record<string, any>;
+  const saved = (await commit(event, next, "stripe_config_updated", reason, previous)) as Record<
+    string,
+    any
+  >;
   return ok({
     status: "updated",
     stripe: {
@@ -979,23 +1323,80 @@ async function handleUpdateStripeConfig(event: ApiGatewayEvent) {
 
 // ─── Plans ───────────────────────────────────────────────────────────────────
 const DEFAULT_PLANS = [
-  { id: "free", name: "Gezgin", tagline: "Temel seyahat planlama", badge: "ÜCRETSİZ", monthlyPriceTry: 0, yearlyPriceTry: 0, monthlyCredits: 10, color: "#64748b", highlight: false, enabled: true },
-  { id: "explorer", name: "Kaşif", tagline: "Aktif seyahat planlamacılar için", badge: "KAŞİF", monthlyPriceTry: 14900, yearlyPriceTry: 9900, monthlyCredits: 100, color: "#0d9488", highlight: false, enabled: true },
-  { id: "pro", name: "Pro Kaşif", tagline: "Sık seyahat edenler için", badge: "PRO", monthlyPriceTry: 29900, yearlyPriceTry: 24900, monthlyCredits: 300, color: "#7c3aed", highlight: true, enabled: true },
-  { id: "agency", name: "Tur Lideri", tagline: "Tur operatörleri ve profesyoneller", badge: "LİDER", monthlyPriceTry: 79900, yearlyPriceTry: 64900, monthlyCredits: 1000, color: "#c2410c", highlight: false, enabled: true },
+  {
+    id: "free",
+    name: "Gezgin",
+    tagline: "Temel seyahat planlama",
+    badge: "ÜCRETSİZ",
+    monthlyPriceTry: 0,
+    yearlyPriceTry: 0,
+    monthlyCredits: 10,
+    color: "#64748b",
+    highlight: false,
+    enabled: true,
+  },
+  {
+    id: "explorer",
+    name: "Kaşif",
+    tagline: "Aktif seyahat planlamacılar için",
+    badge: "KAŞİF",
+    monthlyPriceTry: 14900,
+    yearlyPriceTry: 9900,
+    monthlyCredits: 100,
+    color: "#0d9488",
+    highlight: false,
+    enabled: true,
+  },
+  {
+    id: "pro",
+    name: "Pro Kaşif",
+    tagline: "Sık seyahat edenler için",
+    badge: "PRO",
+    monthlyPriceTry: 29900,
+    yearlyPriceTry: 24900,
+    monthlyCredits: 300,
+    color: "#7c3aed",
+    highlight: true,
+    enabled: true,
+  },
+  {
+    id: "agency",
+    name: "Tur Lideri",
+    tagline: "Tur operatörleri ve profesyoneller",
+    badge: "LİDER",
+    monthlyPriceTry: 79900,
+    yearlyPriceTry: 64900,
+    monthlyCredits: 1000,
+    color: "#c2410c",
+    highlight: false,
+    enabled: true,
+  },
 ];
 
 async function handleGetPlans() {
   const rows = await scan("begins_with(PK, :pk) AND SK = :sk", { ":pk": "PLAN#", ":sk": "META" });
-  const subRows = await scan("begins_with(PK, :pk) AND SK = :sk", { ":pk": "USER#", ":sk": "SUBSCRIPTION" });
+  const subRows = await scan("begins_with(PK, :pk) AND SK = :sk", {
+    ":pk": "USER#",
+    ":sk": "SUBSCRIPTION",
+  });
   const tierCounts: Record<string, number> = {};
   for (const sub of subRows) {
     if (sub.status === "active" && sub.tier) tierCounts[sub.tier] = (tierCounts[sub.tier] || 0) + 1;
   }
 
-  const plans = rows.length > 0
-    ? rows.map(r => ({ ...r, id: r.planId || r.id || r.PK?.replace(/^PLAN#/, ""), activeSubscribers: tierCounts[r.planId || r.id] || 0 }))
-    : DEFAULT_PLANS.map(p => ({ ...p, activeSubscribers: tierCounts[p.id] || 0, stripePriceIdMonthly: "", stripePriceIdYearly: "" }));
+  const plans =
+    rows.length > 0
+      ? rows.map((r) => ({
+          ...r,
+          id: r.planId || r.id || r.PK?.replace(/^PLAN#/, ""),
+          activeSubscribers: tierCounts[r.planId || r.id] || 0,
+        }))
+      : DEFAULT_PLANS.map((p) => ({
+          ...p,
+          activeSubscribers: tierCounts[p.id] || 0,
+          stripePriceIdMonthly: "",
+          stripePriceIdYearly: "",
+        }));
 
   return ok({ plans });
 }
@@ -1010,7 +1411,13 @@ async function handleUpdatePlan(event: ApiGatewayEvent) {
   if (!reason || reason.length > 1000) return badRequest("Gerekçe zorunludur.");
 
   const previous = await get(`PLAN#${planId}`);
-  const defaults: Record<string, any> = DEFAULT_PLANS.find(p => p.id === planId) || { monthlyPriceTry: 0, yearlyPriceTry: 0, monthlyCredits: 0, color: "#64748b", highlight: false };
+  const defaults: Record<string, any> = DEFAULT_PLANS.find((p) => p.id === planId) || {
+    monthlyPriceTry: 0,
+    yearlyPriceTry: 0,
+    monthlyCredits: 0,
+    color: "#64748b",
+    highlight: false,
+  };
 
   const next: Record<string, any> = {
     PK: `PLAN#${planId}`,
@@ -1018,45 +1425,110 @@ async function handleUpdatePlan(event: ApiGatewayEvent) {
     planId,
     id: planId,
     name: body.name || previous?.name || defaults.id,
-    tagline: body.tagline !== undefined ? body.tagline : (previous?.tagline || ""),
+    tagline: body.tagline !== undefined ? body.tagline : previous?.tagline || "",
     badge: body.badge || previous?.badge || planId.toUpperCase(),
-    monthlyPriceTry: Number(body.monthlyPriceTry ?? previous?.monthlyPriceTry ?? defaults.monthlyPriceTry),
-    yearlyPriceTry: Number(body.yearlyPriceTry ?? previous?.yearlyPriceTry ?? defaults.yearlyPriceTry),
-    monthlyCredits: Number(body.monthlyCredits ?? previous?.monthlyCredits ?? defaults.monthlyCredits),
+    monthlyPriceTry: Number(
+      body.monthlyPriceTry ?? previous?.monthlyPriceTry ?? defaults.monthlyPriceTry,
+    ),
+    yearlyPriceTry: Number(
+      body.yearlyPriceTry ?? previous?.yearlyPriceTry ?? defaults.yearlyPriceTry,
+    ),
+    monthlyCredits: Number(
+      body.monthlyCredits ?? previous?.monthlyCredits ?? defaults.monthlyCredits,
+    ),
     color: previous?.color || defaults.color,
     highlight: previous?.highlight ?? defaults.highlight,
-    enabled: body.enabled !== undefined ? !!body.enabled : (previous?.enabled !== false),
-    stripePriceIdMonthly: body.stripePriceIdMonthly !== undefined ? body.stripePriceIdMonthly : (previous?.stripePriceIdMonthly || ""),
-    stripePriceIdYearly: body.stripePriceIdYearly !== undefined ? body.stripePriceIdYearly : (previous?.stripePriceIdYearly || ""),
+    enabled: body.enabled !== undefined ? !!body.enabled : previous?.enabled !== false,
+    stripePriceIdMonthly:
+      body.stripePriceIdMonthly !== undefined
+        ? body.stripePriceIdMonthly
+        : previous?.stripePriceIdMonthly || "",
+    stripePriceIdYearly:
+      body.stripePriceIdYearly !== undefined
+        ? body.stripePriceIdYearly
+        : previous?.stripePriceIdYearly || "",
   };
 
-  const saved = await commit(event, next, "plan_updated", reason, previous ? { ...previous } : null) as Record<string, any>;
+  const saved = (await commit(
+    event,
+    next,
+    "plan_updated",
+    reason,
+    previous ? { ...previous } : null,
+  )) as Record<string, any>;
   return ok({ status: "updated", plan: saved });
 }
 
 // ─── Credit Packs ─────────────────────────────────────────────────────────────
 const DEFAULT_CREDIT_PACKS = [
-  { id: "starter", title: "Başlangıç Paketi", description: "Seyahat planlamaya başlamak için", credits: 50, bonusCredits: 0, priceTry: 4900, unitPriceTry: 98, popular: false, enabled: true },
-  { id: "explorer", title: "Kaşif Paketi", description: "Aktif seyahat planlamacılar için", credits: 150, bonusCredits: 15, priceTry: 12900, unitPriceTry: 86, popular: true, enabled: true },
-  { id: "pro", title: "Pro Paket", description: "En iyi değer — sık seyahat edenler için", credits: 400, bonusCredits: 60, priceTry: 29900, unitPriceTry: 74, popular: false, enabled: true },
+  {
+    id: "starter",
+    title: "Başlangıç Paketi",
+    description: "Seyahat planlamaya başlamak için",
+    credits: 50,
+    bonusCredits: 0,
+    priceTry: 4900,
+    unitPriceTry: 98,
+    popular: false,
+    enabled: true,
+  },
+  {
+    id: "explorer",
+    title: "Kaşif Paketi",
+    description: "Aktif seyahat planlamacılar için",
+    credits: 150,
+    bonusCredits: 15,
+    priceTry: 12900,
+    unitPriceTry: 86,
+    popular: true,
+    enabled: true,
+  },
+  {
+    id: "pro",
+    title: "Pro Paket",
+    description: "En iyi değer — sık seyahat edenler için",
+    credits: 400,
+    bonusCredits: 60,
+    priceTry: 29900,
+    unitPriceTry: 74,
+    popular: false,
+    enabled: true,
+  },
 ];
 
 async function handleGetCreditPacks() {
-  const rows = await scan("begins_with(PK, :pk) AND SK = :sk", { ":pk": "CREDITPACK#", ":sk": "META" });
-  const paymentRows = await scan("begins_with(PK, :pk) AND SK = :sk", { ":pk": "PAYMENT#", ":sk": "META" });
+  const rows = await scan("begins_with(PK, :pk) AND SK = :sk", {
+    ":pk": "CREDITPACK#",
+    ":sk": "META",
+  });
+  const paymentRows = await scan("begins_with(PK, :pk) AND SK = :sk", {
+    ":pk": "PAYMENT#",
+    ":sk": "META",
+  });
   const packCounts: Record<string, number> = {};
   for (const p of paymentRows) {
-    if (p.packId && p.status === "succeeded") packCounts[p.packId] = (packCounts[p.packId] || 0) + 1;
+    if (p.packId && p.status === "succeeded")
+      packCounts[p.packId] = (packCounts[p.packId] || 0) + 1;
   }
 
-  const packs = rows.length > 0
-    ? rows.map(r => {
-        const id = r.packId || r.id || r.PK?.replace(/^CREDITPACK#/, "");
-        const credits = r.credits || 0;
-        const priceTry = r.priceTry || 0;
-        return { ...r, id, totalPurchases: packCounts[id] || r.totalPurchases || 0, unitPriceTry: credits > 0 ? Math.round(priceTry / credits) : 0 };
-      })
-    : DEFAULT_CREDIT_PACKS.map(p => ({ ...p, totalPurchases: packCounts[p.id] || 0, stripeProductId: "" }));
+  const packs =
+    rows.length > 0
+      ? rows.map((r) => {
+          const id = r.packId || r.id || r.PK?.replace(/^CREDITPACK#/, "");
+          const credits = r.credits || 0;
+          const priceTry = r.priceTry || 0;
+          return {
+            ...r,
+            id,
+            totalPurchases: packCounts[id] || r.totalPurchases || 0,
+            unitPriceTry: credits > 0 ? Math.round(priceTry / credits) : 0,
+          };
+        })
+      : DEFAULT_CREDIT_PACKS.map((p) => ({
+          ...p,
+          totalPurchases: packCounts[p.id] || 0,
+          stripeProductId: "",
+        }));
 
   return ok({ packs });
 }
@@ -1071,7 +1543,12 @@ async function handleUpdateCreditPack(event: ApiGatewayEvent) {
   if (!reason || reason.length > 1000) return badRequest("Gerekçe zorunludur.");
 
   const previous = await get(`CREDITPACK#${packId}`);
-  const defaults: Record<string, any> = DEFAULT_CREDIT_PACKS.find(p => p.id === packId) || { credits: 0, bonusCredits: 0, priceTry: 0, popular: false };
+  const defaults: Record<string, any> = DEFAULT_CREDIT_PACKS.find((p) => p.id === packId) || {
+    credits: 0,
+    bonusCredits: 0,
+    priceTry: 0,
+    popular: false,
+  };
 
   const credits = Number(body.credits ?? previous?.credits ?? defaults.credits);
   const priceTry = Number(body.priceTry ?? previous?.priceTry ?? defaults.priceTry);
@@ -1082,18 +1559,28 @@ async function handleUpdateCreditPack(event: ApiGatewayEvent) {
     packId,
     id: packId,
     title: body.title || previous?.title || packId,
-    description: body.description !== undefined ? body.description : (previous?.description || ""),
+    description: body.description !== undefined ? body.description : previous?.description || "",
     credits,
     bonusCredits: Number(body.bonusCredits ?? previous?.bonusCredits ?? defaults.bonusCredits),
     priceTry,
     unitPriceTry: credits > 0 ? Math.round(priceTry / credits) : 0,
     popular: body.popular !== undefined ? !!body.popular : (previous?.popular ?? defaults.popular),
-    enabled: body.enabled !== undefined ? !!body.enabled : (previous?.enabled !== false),
-    stripeProductId: body.stripeProductId !== undefined ? body.stripeProductId : (previous?.stripeProductId || ""),
+    enabled: body.enabled !== undefined ? !!body.enabled : previous?.enabled !== false,
+    stripeProductId:
+      body.stripeProductId !== undefined ? body.stripeProductId : previous?.stripeProductId || "",
   };
 
-  const saved = await commit(event, next, "creditpack_updated", reason, previous ? { ...previous } : null) as Record<string, any>;
-  return ok({ status: "updated", pack: { ...saved, totalPurchases: previous?.totalPurchases || 0 } });
+  const saved = (await commit(
+    event,
+    next,
+    "creditpack_updated",
+    reason,
+    previous ? { ...previous } : null,
+  )) as Record<string, any>;
+  return ok({
+    status: "updated",
+    pack: { ...saved, totalPurchases: previous?.totalPurchases || 0 },
+  });
 }
 
 // ─── Analytics: Device Breakdown (mobile vs web) ─────────────────────────
@@ -1102,14 +1589,19 @@ async function handleDeviceAnalytics() {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
-    ExpressionAttributeValues: { ":pk": { S: "SESSION#" }, ":sk": { S: "META" } },
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
+      ExpressionAttributeValues: { ":pk": { S: "SESSION#" }, ":sk": { S: "META" } },
+    }),
+  );
   const sessions = result.Items.map((i: any) => unmarshall(i));
 
-  let mobile = 0; let web = 0; let tablet = 0;
+  let mobile = 0;
+  let web = 0;
+  let tablet = 0;
   const byDay: Record<string, { mobile: number; web: number }> = {};
 
   for (const s of sessions) {
@@ -1127,7 +1619,10 @@ async function handleDeviceAnalytics() {
   }
 
   const total = mobile + web + tablet;
-  const trend = Object.entries(byDay).sort(([a], [b]) => a.localeCompare(b)).slice(-30).map(([date, counts]) => ({ date, ...counts }));
+  const trend = Object.entries(byDay)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-30)
+    .map(([date, counts]) => ({ date, ...counts }));
 
   return ok({
     devices: {
@@ -1135,8 +1630,8 @@ async function handleDeviceAnalytics() {
       mobile,
       web,
       tablet,
-      mobilePercent: total > 0 ? Math.round((mobile + tablet) * 100 / total) : 0,
-      webPercent: total > 0 ? Math.round(web * 100 / total) : 0,
+      mobilePercent: total > 0 ? Math.round(((mobile + tablet) * 100) / total) : 0,
+      webPercent: total > 0 ? Math.round((web * 100) / total) : 0,
       trend,
     },
   });
@@ -1147,26 +1642,33 @@ async function handleTrackSession(event: ApiGatewayEvent) {
   const body = parseBody<{ deviceType?: string; page?: string; sessionId?: string }>(event);
   if (!body) return badRequest("Geçersiz istek.");
 
-  const deviceType = ["mobile", "tablet", "web"].includes(body.deviceType || "") ? body.deviceType : "web";
+  const deviceType = ["mobile", "tablet", "web"].includes(body.deviceType || "")
+    ? body.deviceType
+    : "web";
   const page = typeof body.page === "string" ? body.page.slice(0, 200) : "/";
-  const sessionId = typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : `s_${Date.now()}`;
+  const sessionId =
+    typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : `s_${Date.now()}`;
   const user = (event as any).verifiedUser;
 
   const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  await ddb.send(new PutItemCommand({
-    TableName: getTableName(),
-    Item: marshall({
-      PK: `SESSION#${sessionId}`,
-      SK: "META",
-      sessionId, deviceType, page,
-      userId: user?.sub || "anonymous",
-      createdAt: new Date().toISOString(),
-      ttl: Math.floor(Date.now() / 1000) + 90 * 24 * 3600, // 90 days
+  await ddb.send(
+    new PutItemCommand({
+      TableName: getTableName(),
+      Item: marshall({
+        PK: `SESSION#${sessionId}`,
+        SK: "META",
+        sessionId,
+        deviceType,
+        page,
+        userId: user?.sub || "anonymous",
+        createdAt: new Date().toISOString(),
+        ttl: Math.floor(Date.now() / 1000) + 90 * 24 * 3600, // 90 days
+      }),
     }),
-  }));
+  );
 
   return ok({ tracked: true });
 }
@@ -1177,29 +1679,33 @@ async function handleAITopicAnalytics() {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
   const cutoffStr = cutoff.toISOString();
 
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(SK, :sk) AND createdAt >= :cutoff",
-    ExpressionAttributeValues: { ":sk": { S: "AI#" }, ":cutoff": { S: cutoffStr } },
-    ProjectionExpression: "PK, SK, #prompt, createdAt, cost",
-    ExpressionAttributeNames: { "#prompt": "prompt" },
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(SK, :sk) AND createdAt >= :cutoff",
+      ExpressionAttributeValues: { ":sk": { S: "AI#" }, ":cutoff": { S: cutoffStr } },
+      ProjectionExpression: "PK, SK, #prompt, createdAt, cost",
+      ExpressionAttributeNames: { "#prompt": "prompt" },
+    }),
+  );
 
   const rows = result.Items.map((i: any) => unmarshall(i));
 
   // Topic classification by keyword patterns
   const topicKeywords: Record<string, string[]> = {
-    "Uçuş": ["uçuş", "bilet", "havalimanı", "uçak", "flight"],
-    "Otel": ["otel", "konaklama", "hotel", "kal", "rezervasyon"],
+    Uçuş: ["uçuş", "bilet", "havalimanı", "uçak", "flight"],
+    Otel: ["otel", "konaklama", "hotel", "kal", "rezervasyon"],
     "Gezi Rotası": ["rota", "plan", "gün", "tur", "seyahat"],
-    "Vize": ["vize", "pasaport", "giriş", "belge", "visa"],
+    Vize: ["vize", "pasaport", "giriş", "belge", "visa"],
     "Yeme-İçme": ["restoran", "yemek", "kafe", "lokanta", "food"],
-    "Aktivite": ["müze", "gezil", "ziyaret", "aktivite", "attraction"],
-    "Ulaşım": ["toplu", "metro", "taksi", "transfer", "ulaşım"],
-    "Bütçe": ["fiyat", "bütçe", "ucuz", "para", "maliyet"],
+    Aktivite: ["müze", "gezil", "ziyaret", "aktivite", "attraction"],
+    Ulaşım: ["toplu", "metro", "taksi", "transfer", "ulaşım"],
+    Bütçe: ["fiyat", "bütçe", "ucuz", "para", "maliyet"],
   };
 
   const topicCounts: Record<string, number> = {};
@@ -1216,27 +1722,51 @@ async function handleAITopicAnalytics() {
 
     // Classify topic
     for (const [topic, keywords] of Object.entries(topicKeywords)) {
-      if (keywords.some(k => prompt.includes(k))) {
+      if (keywords.some((k) => prompt.includes(k))) {
         topicCounts[topic] = (topicCounts[topic] || 0) + 1;
       }
     }
 
     // Extract destination mentions
-    const destPatterns = ["istanbul", "barcelona", "paris", "londra", "roma", "amsterdam", "berlin", "madrid", "atina", "dubai"];
+    const destPatterns = [
+      "istanbul",
+      "barcelona",
+      "paris",
+      "londra",
+      "roma",
+      "amsterdam",
+      "berlin",
+      "madrid",
+      "atina",
+      "dubai",
+    ];
     for (const dest of destPatterns) {
       if (prompt.includes(dest)) destCounts[dest] = (destCounts[dest] || 0) + 1;
     }
   }
 
-  const topTopics = Object.entries(topicCounts).sort(([, a], [, b]) => b - a).map(([topic, count]) => ({ topic, count, percent: totalRequests > 0 ? Math.round(count * 100 / totalRequests) : 0 }));
-  const topDestinations = Object.entries(destCounts).sort(([, a], [, b]) => b - a).slice(0, 10).map(([destination, count]) => ({ destination, count }));
-  const dailyActivity = Object.entries(dailyMap).sort(([a], [b]) => a.localeCompare(b)).slice(-30).map(([date, requests]) => ({ date, requests }));
+  const topTopics = Object.entries(topicCounts)
+    .sort(([, a], [, b]) => b - a)
+    .map(([topic, count]) => ({
+      topic,
+      count,
+      percent: totalRequests > 0 ? Math.round((count * 100) / totalRequests) : 0,
+    }));
+  const topDestinations = Object.entries(destCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([destination, count]) => ({ destination, count }));
+  const dailyActivity = Object.entries(dailyMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-30)
+    .map(([date, requests]) => ({ date, requests }));
 
   return ok({
     aiAnalytics: {
       totalRequests,
       totalCost: Math.round(totalCost * 100) / 100,
-      avgCostPerRequest: totalRequests > 0 ? Math.round(totalCost / totalRequests * 100) / 100 : 0,
+      avgCostPerRequest:
+        totalRequests > 0 ? Math.round((totalCost / totalRequests) * 100) / 100 : 0,
       topTopics,
       topDestinations,
       dailyActivity,
@@ -1251,33 +1781,44 @@ async function handleCommunityAnalytics() {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk)",
-    ExpressionAttributeValues: { ":pk": { S: "POST#" } },
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "begins_with(PK, :pk)",
+      ExpressionAttributeValues: { ":pk": { S: "POST#" } },
+    }),
+  );
   const posts = result.Items.map((i: any) => unmarshall(i));
 
   const now = new Date();
   const last24h = new Date(now.getTime() - 24 * 3600_000).toISOString();
   const last7d = new Date(now.getTime() - 7 * 24 * 3600_000).toISOString();
 
-  const recentPosts = posts.filter(p => p.createdAt >= last24h).length;
-  const weekPosts = posts.filter(p => p.createdAt >= last7d).length;
+  const recentPosts = posts.filter((p) => p.createdAt >= last24h).length;
+  const weekPosts = posts.filter((p) => p.createdAt >= last7d).length;
   const totalLikes = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
   const totalComments = posts.reduce((sum, p) => sum + (p.comments || 0), 0);
 
   // Top posts (last 7 days)
   const topPosts = posts
-    .filter(p => p.createdAt >= last7d)
-    .sort((a, b) => ((b.likes || 0) + (b.comments || 0)) - ((a.likes || 0) + (a.comments || 0)))
+    .filter((p) => p.createdAt >= last7d)
+    .sort((a, b) => (b.likes || 0) + (b.comments || 0) - ((a.likes || 0) + (a.comments || 0)))
     .slice(0, 10)
-    .map(p => ({ id: p.postId || p.PK, title: (p.content || "").slice(0, 80), author: p.authorEmail || "—", likes: p.likes || 0, comments: p.comments || 0, createdAt: p.createdAt }));
+    .map((p) => ({
+      id: p.postId || p.PK,
+      title: (p.content || "").slice(0, 80),
+      author: p.authorEmail || "—",
+      likes: p.likes || 0,
+      comments: p.comments || 0,
+      createdAt: p.createdAt,
+    }));
 
   // Daily post trend
   const dailyMap: Record<string, number> = {};
   for (let i = 29; i >= 0; i--) {
-    const d = new Date(now); d.setDate(d.getDate() - i);
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
     dailyMap[d.toISOString().slice(0, 10)] = 0;
   }
   for (const p of posts) {
@@ -1293,7 +1834,8 @@ async function handleCommunityAnalytics() {
       postsLast7d: weekPosts,
       totalLikes,
       totalComments,
-      engagementRate: posts.length > 0 ? Math.round((totalLikes + totalComments) / posts.length * 10) / 10 : 0,
+      engagementRate:
+        posts.length > 0 ? Math.round(((totalLikes + totalComments) / posts.length) * 10) / 10 : 0,
       topPosts,
       dailyTrend,
     },
@@ -1306,18 +1848,22 @@ async function handleSubscriptionAnalytics() {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const result = await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "SK = :sk",
-    ExpressionAttributeValues: { ":sk": { S: "SUBSCRIPTION" } },
-  }));
+  const result = await scanAll(
+    ddb,
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: "SK = :sk",
+      ExpressionAttributeValues: { ":sk": { S: "SUBSCRIPTION" } },
+    }),
+  );
   const subs = result.Items.map((i: any) => unmarshall(i));
 
   const payments = await paymentRecords();
 
   const tierCount: Record<string, number> = {};
   const tierRevenue: Record<string, number> = {};
-  let activeCount = 0; let cancelledCount = 0;
+  let activeCount = 0;
+  let cancelledCount = 0;
 
   for (const s of subs) {
     const tier = s.tier || "free";
@@ -1333,30 +1879,45 @@ async function handleSubscriptionAnalytics() {
   }
 
   const now = new Date();
-  const last30Start = new Date(now); last30Start.setDate(last30Start.getDate() - 30);
-  const newSubscribers30d = subs.filter(s => s.createdAt >= last30Start.toISOString()).length;
-  const churnedLast30d = subs.filter(s => s.cancelledAt && s.cancelledAt >= last30Start.toISOString()).length;
+  const last30Start = new Date(now);
+  last30Start.setDate(last30Start.getDate() - 30);
+  const newSubscribers30d = subs.filter((s) => s.createdAt >= last30Start.toISOString()).length;
+  const churnedLast30d = subs.filter(
+    (s) => s.cancelledAt && s.cancelledAt >= last30Start.toISOString(),
+  ).length;
 
-  const planBreakdown = Object.entries(tierCount).map(([plan, count]) => ({
-    plan,
-    count,
-    revenue: tierRevenue[plan] || 0,
-    percent: subs.length > 0 ? Math.round(count * 100 / subs.length) : 0,
-  })).sort((a, b) => b.count - a.count);
+  const planBreakdown = Object.entries(tierCount)
+    .map(([plan, count]) => ({
+      plan,
+      count,
+      revenue: tierRevenue[plan] || 0,
+      percent: subs.length > 0 ? Math.round((count * 100) / subs.length) : 0,
+    }))
+    .sort((a, b) => b.count - a.count);
 
   // MRR estimate
   const PLAN_MONTHLY_TRY: Record<string, number> = { explorer: 49, pro: 99, agency: 299, free: 0 };
-  const mrr = Object.entries(tierCount).reduce((sum, [tier, count]) => sum + (PLAN_MONTHLY_TRY[tier] || 0) * count, 0);
+  const mrr = Object.entries(tierCount).reduce(
+    (sum, [tier, count]) => sum + (PLAN_MONTHLY_TRY[tier] || 0) * count,
+    0,
+  );
 
   // Conversion funnel (registrations → paid)
-  const totalUsers = (await scanAll(ddb, new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: "SK = :sk AND begins_with(PK, :pk)",
-    ExpressionAttributeValues: { ":sk": { S: "META" }, ":pk": { S: "USER#" } },
-    Select: "COUNT",
-  }))).Count || 0;
-  const paidUsers = subs.filter(s => s.tier !== "free" && s.status === "active").length;
-  const conversionRate = totalUsers > 0 ? Math.round(paidUsers * 100 / totalUsers * 10) / 10 : 0;
+  const totalUsers =
+    (
+      await scanAll(
+        ddb,
+        new ScanCommand({
+          TableName: getTableName(),
+          FilterExpression: "SK = :sk AND begins_with(PK, :pk)",
+          ExpressionAttributeValues: { ":sk": { S: "META" }, ":pk": { S: "USER#" } },
+          Select: "COUNT",
+        }),
+      )
+    ).Count || 0;
+  const paidUsers = subs.filter((s) => s.tier !== "free" && s.status === "active").length;
+  const conversionRate =
+    totalUsers > 0 ? Math.round(((paidUsers * 100) / totalUsers) * 10) / 10 : 0;
 
   return ok({
     subscriptions: {
@@ -1365,7 +1926,7 @@ async function handleSubscriptionAnalytics() {
       cancelled: cancelledCount,
       newLast30d: newSubscribers30d,
       churnLast30d: churnedLast30d,
-      churnRate: activeCount > 0 ? Math.round(churnedLast30d * 100 / activeCount * 10) / 10 : 0,
+      churnRate: activeCount > 0 ? Math.round(((churnedLast30d * 100) / activeCount) * 10) / 10 : 0,
       mrrTry: mrr,
       paidUsers,
       conversionRate,

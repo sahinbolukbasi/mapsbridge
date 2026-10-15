@@ -1,9 +1,7 @@
 import type { UserSuspensionCommand, SystemMaintenanceConfig } from "../domain/types.js";
 
 export class AdminGovernanceService {
-  private static readonly PROTECTED_ADMIN_EMAILS = [
-    "sahinbolukbasii@gmail.com",
-  ];
+  private static readonly PROTECTED_ADMIN_EMAILS = ["sahinbolukbasii@gmail.com"];
 
   /**
    * Enforces that root/protected platform administrators cannot be accidentally suspended or demoted.

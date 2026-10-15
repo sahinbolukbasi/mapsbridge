@@ -29,30 +29,34 @@ type Catalog = {
 };
 
 // Derive display metadata from the single source of truth in @mapsbridge/contracts
-const PLAN_NAMES: Record<string, { title: string; desc: string; badge?: string; highlight?: boolean }> =
-  Object.fromEntries(
-    SUBSCRIPTION_PLAN_DEFS.filter((p) => p.id !== "free").map((p) => [
-      p.id,
-      { title: p.name, desc: p.tagline, badge: p.badge, highlight: p.highlight },
-    ])
-  );
+const PLAN_NAMES: Record<
+  string,
+  { title: string; desc: string; badge?: string; highlight?: boolean }
+> = Object.fromEntries(
+  SUBSCRIPTION_PLAN_DEFS.filter((p) => p.id !== "free").map((p) => [
+    p.id,
+    { title: p.name, desc: p.tagline, badge: p.badge, highlight: p.highlight },
+  ]),
+);
 
-const PACK_NAMES: Record<string, { title: string; desc: string; badge?: string; popular?: boolean }> =
-  Object.fromEntries(
-    CREDIT_PACKAGE_DEFS.map((p) => [
-      p.id,
-      {
-        title: `${p.title} (${p.credits.toLocaleString("tr-TR")} Kredi)`,
-        desc: p.description,
-        badge: p.popular ? "AVANTAJLI" : undefined,
-        popular: p.popular,
-      },
-    ])
-  );
+const PACK_NAMES: Record<
+  string,
+  { title: string; desc: string; badge?: string; popular?: boolean }
+> = Object.fromEntries(
+  CREDIT_PACKAGE_DEFS.map((p) => [
+    p.id,
+    {
+      title: `${p.title} (${p.credits.toLocaleString("tr-TR")} Kredi)`,
+      desc: p.description,
+      badge: p.popular ? "AVANTAJLI" : undefined,
+      popular: p.popular,
+    },
+  ]),
+);
 
 // Yearly discounted prices from contracts (TRY)
 const YEARLY_RATES: Record<string, number> = Object.fromEntries(
-  SUBSCRIPTION_PLAN_DEFS.filter((p) => p.id !== "free").map((p) => [p.id, p.yearlyPriceTry])
+  SUBSCRIPTION_PLAN_DEFS.filter((p) => p.id !== "free").map((p) => [p.id, p.yearlyPriceTry]),
 );
 
 export default function CheckoutPage() {
@@ -95,7 +99,7 @@ export default function CheckoutPage() {
       const check = async () => {
         try {
           const result = await apiFetch<{ status: string }>(
-            "/stripe/session?session_id=" + encodeURIComponent(sessionId)
+            "/stripe/session?session_id=" + encodeURIComponent(sessionId),
           );
           if (stopped) return;
           if (result.status === "credited") {
@@ -111,7 +115,7 @@ export default function CheckoutPage() {
           if (++attempts < 10) timer = setTimeout(check, 3000);
           else
             setMessage(
-              "Ödeme doğrulaması devam ediyor. Daha sonra bakiyeni tekrar kontrol et; yeniden ödeme yapmana gerek yok."
+              "Ödeme doğrulaması devam ediyor. Daha sonra bakiyeni tekrar kontrol et; yeniden ödeme yapmana gerek yok.",
             );
         } catch {
           if (!stopped)
@@ -166,8 +170,8 @@ export default function CheckoutPage() {
 
         <h1>Kredi &amp; Üyelik Masası</h1>
         <p>
-          Yapay zeka asistanı ve harita masası için ihtiyacın olan planı seç. İstediğin zaman iptal et veya paketini yükselt,
-          Stripe ile güvenli ve anında aktif.
+          Yapay zeka asistanı ve harita masası için ihtiyacın olan planı seç. İstediğin zaman iptal
+          et veya paketini yükselt, Stripe ile güvenli ve anında aktif.
         </p>
 
         {/* ── Kredi Takibi & Cüzdan Özeti ── */}
@@ -181,10 +185,10 @@ export default function CheckoutPage() {
               {wallet.subscriptionTier === "agency"
                 ? "Tur Lideri Planı"
                 : wallet.subscriptionTier === "pro"
-                ? "Pro Kaşif Planı"
-                : wallet.subscriptionTier === "explorer"
-                ? "Kaşif Planı"
-                : "Gezgin (Ücretsiz Plan)"}
+                  ? "Pro Kaşif Planı"
+                  : wallet.subscriptionTier === "explorer"
+                    ? "Kaşif Planı"
+                    : "Gezgin (Ücretsiz Plan)"}
             </span>
             <Link href={signedIn ? "/ai/" : "/login/"}>
               {signedIn ? "Rotamı Planla" : "Giriş Yap"}
@@ -233,16 +237,10 @@ export default function CheckoutPage() {
 
         {/* ── Paket Türü Sekmeleri ── */}
         <div className="billing-tabs" aria-label="Paket türü">
-          <button
-            aria-pressed={tab === "subscription"}
-            onClick={() => setTab("subscription")}
-          >
+          <button aria-pressed={tab === "subscription"} onClick={() => setTab("subscription")}>
             ⭐ 3 Abonelik Paketi
           </button>
-          <button
-            aria-pressed={tab === "credit_pack"}
-            onClick={() => setTab("credit_pack")}
-          >
+          <button aria-pressed={tab === "credit_pack"} onClick={() => setTab("credit_pack")}>
             ⚡ Ek Kredi Paketleri (Kredi Bitince)
           </button>
         </div>
@@ -389,14 +387,14 @@ export default function CheckoutPage() {
                     {!product.available
                       ? "Satış yakında"
                       : isCurrent
-                      ? "Mevcut Planınız"
-                      : busy
-                      ? "Hazırlanıyor…"
-                      : signedIn
-                      ? tab === "subscription"
-                        ? `${meta.title}'e Yükselt`
-                        : "Hemen Kredi Yükle"
-                      : "Giriş yap ve satın al"}
+                        ? "Mevcut Planınız"
+                        : busy
+                          ? "Hazırlanıyor…"
+                          : signedIn
+                            ? tab === "subscription"
+                              ? `${meta.title}'e Yükselt`
+                              : "Hemen Kredi Yükle"
+                            : "Giriş yap ve satın al"}
                   </button>
                 </article>
               );

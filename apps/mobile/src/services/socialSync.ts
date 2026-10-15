@@ -1,6 +1,6 @@
-import { Platform } from 'react-native';
-import { storage } from './storage';
-import { authService, RouteStop } from './api';
+import { Platform } from "react-native";
+import { storage } from "./storage";
+import { authService, RouteStop } from "./api";
 
 export interface MobileUserProfile {
   fullName: string;
@@ -54,54 +54,56 @@ export interface MobileCommunityPost {
   createdAtMs: number;
 }
 
-const STORAGE_KEY_PROFILE = 'mb_user_profile';
-const STORAGE_KEY_POSTS = 'mb_community_posts';
+const STORAGE_KEY_PROFILE = "mb_user_profile";
+const STORAGE_KEY_POSTS = "mb_community_posts";
 
 const DEFAULT_AVATAR =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuCQdOMegHKRlkwubsFEMHDlXU8mVoZKUlXw7A0Quos1oSmZCSZEg30fAB4aMRnCI9q8UEUkdzonH9DUfJ3dTRjIPGpEsvmdB7q2Hrn_b98XcVBeB1CNFBlpaQM33IpQEZ9Bj2TQCR_rWOyCdeIsnX_hZXhb7z1nrWj53EXbHiVov_Hx5WO-_ikQRe6lEE_jnkFjZlEF1WXEue5BMqYbUXVJqoHBc--0mvHvT89fTCsu0mllchVOc6h24A';
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuCQdOMegHKRlkwubsFEMHDlXU8mVoZKUlXw7A0Quos1oSmZCSZEg30fAB4aMRnCI9q8UEUkdzonH9DUfJ3dTRjIPGpEsvmdB7q2Hrn_b98XcVBeB1CNFBlpaQM33IpQEZ9Bj2TQCR_rWOyCdeIsnX_hZXhb7z1nrWj53EXbHiVov_Hx5WO-_ikQRe6lEE_jnkFjZlEF1WXEue5BMqYbUXVJqoHBc--0mvHvT89fTCsu0mllchVOc6h24A";
 
 // Base URL for sync backend
 const COMMUNITY_API_BASE =
   process.env.EXPO_PUBLIC_COMMUNITY_API ||
-  (Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000');
+  (Platform.OS === "android" ? "http://10.0.2.2:3000" : "http://localhost:3000");
 
 type PostListener = (posts: MobileCommunityPost[]) => void;
 type ProfileListener = (profile: MobileUserProfile) => void;
 
 function sanitizeText(val?: string | null): string {
-  if (!val) return '';
+  if (!val) return "";
   return val
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<[^>]+>/g, '')
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<[^>]+>/g, "")
     .trim();
 }
 
 function mapServerPostToMobile(post: any): MobileCommunityPost {
   return {
     id: post.id,
-    authorName: post.authorDisplayName || post.authorUsername || 'Gezgin',
-    authorHandle: post.authorUsername.startsWith('@') ? post.authorUsername : `@${post.authorUsername}`,
+    authorName: post.authorDisplayName || post.authorUsername || "Gezgin",
+    authorHandle: post.authorUsername.startsWith("@")
+      ? post.authorUsername
+      : `@${post.authorUsername}`,
     authorAvatar: post.authorAvatar || DEFAULT_AVATAR,
     authorEmail: post.authorEmail,
     verified: post.verified ?? true,
-    timeAgo: post.createdAt || 'Az önce',
-    content: post.content || '',
+    timeAgo: post.createdAt || "Az önce",
+    content: post.content || "",
     hashtags: post.hashtags || post.tags || [],
     locationTag: post.locationTag,
     mediaImage: post.image || post.mediaImage,
     routeAttachment: post.linkedRoute
       ? {
           id: post.linkedRoute.id || `rt-${post.id}`,
-          title: post.linkedRoute.title || 'Ekli Rota',
+          title: post.linkedRoute.title || "Ekli Rota",
           stats: `${post.linkedRoute.stopCount || post.linkedRoute.stops?.length || 0} Durak`,
-          icon: '🗺️',
+          icon: "🗺️",
           stops: (post.linkedRoute.stops || []).map((s: any, idx: number) => ({
             id: s.id || `stop-${idx}`,
             name: s.label || s.name || `Durak ${idx + 1}`,
             lat: s.lat || 0,
             lng: s.lng || 0,
-            category: s.category || 'Gezi',
-            address: s.address || '',
+            category: s.category || "Gezi",
+            address: s.address || "",
           })),
         }
       : undefined,
@@ -113,10 +115,10 @@ function mapServerPostToMobile(post: any): MobileCommunityPost {
     isBookmarked: !!post.savedByMe,
     comments: (post.comments || []).map((c: any) => ({
       id: c.id,
-      user: c.username?.startsWith('@') ? c.username : `@${c.username || 'gezgin'}`,
+      user: c.username?.startsWith("@") ? c.username : `@${c.username || "gezgin"}`,
       displayName: c.displayName,
-      text: c.text || c.content || '',
-      time: c.createdAt || c.time || 'Az önce',
+      text: c.text || c.content || "",
+      time: c.createdAt || c.time || "Az önce",
     })),
     createdAtMs: post.createdAtMs || Date.now(),
   };
@@ -147,17 +149,17 @@ class SocialSyncService {
     } catch {}
 
     const session = await authService.getSession();
-    const email = session?.email || 'kullanici@mapsbridge.com';
-    const emailPrefix = email.split('@')[0];
+    const email = session?.email || "kullanici@mapsbridge.com";
+    const emailPrefix = email.split("@")[0];
     const name = session?.name || emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
 
     const defaultProfile: MobileUserProfile = {
       fullName: name,
-      username: emailPrefix.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+      username: emailPrefix.toLowerCase().replace(/[^a-z0-9_]/g, ""),
       email,
-      travelTitle: 'Doğa & Rota Kaşifi',
-      bio: 'Sırt çantalı gezgin. Kültürel duraklar, gizli patikalar ve çevre dostu seyahatler tasarlar.',
-      location: 'İstanbul, Türkiye',
+      travelTitle: "Doğa & Rota Kaşifi",
+      bio: "Sırt çantalı gezgin. Kültürel duraklar, gizli patikalar ve çevre dostu seyahatler tasarlar.",
+      location: "İstanbul, Türkiye",
       avatarUrl: DEFAULT_AVATAR,
       followersCount: 1420,
       followingCount: 284,
@@ -221,9 +223,9 @@ class SocialSyncService {
         `${COMMUNITY_API_BASE}/api/community/posts?username=${encodeURIComponent(profile.username)}`,
         {
           headers: {
-            'X-User-Identity': profile.username,
+            "X-User-Identity": profile.username,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -236,7 +238,7 @@ class SocialSyncService {
         }
       }
     } catch (e) {
-      console.warn('[socialSyncService] Backend fetch failed, falling back to local storage:', e);
+      console.warn("[socialSyncService] Backend fetch failed, falling back to local storage:", e);
     }
 
     // 2. Offline fallback: load from local storage (Zero dummy data fallback)
@@ -258,16 +260,16 @@ class SocialSyncService {
     hashtags?: string[];
     locationTag?: string;
     mediaImage?: string;
-    routeAttachment?: MobileCommunityPost['routeAttachment'];
+    routeAttachment?: MobileCommunityPost["routeAttachment"];
   }): Promise<MobileCommunityPost> {
     const profile = await this.getUserProfile();
     const posts = await this.getPosts();
 
     const cleanContent = sanitizeText(data.content);
     const cleanLocation = sanitizeText(data.locationTag) || profile.location;
-    const cleanHashtags = (data.hashtags && data.hashtags.length > 0 ? data.hashtags : ['#MapsBridge', '#Keşif']).map(
-      (h) => sanitizeText(h)
-    );
+    const cleanHashtags = (
+      data.hashtags && data.hashtags.length > 0 ? data.hashtags : ["#MapsBridge", "#Keşif"]
+    ).map((h) => sanitizeText(h));
 
     const newPost: MobileCommunityPost = {
       id: `post-${Date.now()}`,
@@ -276,7 +278,7 @@ class SocialSyncService {
       authorAvatar: profile.avatarUrl || DEFAULT_AVATAR,
       authorEmail: profile.email,
       verified: profile.verified,
-      timeAgo: 'Az önce',
+      timeAgo: "Az önce",
       content: cleanContent,
       hashtags: cleanHashtags,
       locationTag: cleanLocation,
@@ -300,10 +302,10 @@ class SocialSyncService {
     // Backend sync
     try {
       await fetch(`${COMMUNITY_API_BASE}/api/community/posts`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-User-Identity': profile.username,
+          "Content-Type": "application/json",
+          "X-User-Identity": profile.username,
         },
         body: JSON.stringify({
           content: cleanContent,
@@ -324,7 +326,7 @@ class SocialSyncService {
         }),
       });
     } catch (e) {
-      console.warn('[socialSyncService] Backend createPost sync failed:', e);
+      console.warn("[socialSyncService] Backend createPost sync failed:", e);
     }
 
     return newPost;
@@ -337,8 +339,8 @@ class SocialSyncService {
       hashtags?: string[];
       locationTag?: string;
       mediaImage?: string;
-      routeAttachment?: MobileCommunityPost['routeAttachment'];
-    }
+      routeAttachment?: MobileCommunityPost["routeAttachment"];
+    },
   ): Promise<MobileCommunityPost | null> {
     const posts = await this.getPosts();
     const profile = await this.getUserProfile();
@@ -348,8 +350,8 @@ class SocialSyncService {
     const isOwner =
       target.authorHandle === `@${profile.username}` ||
       target.authorName.toLowerCase() === profile.fullName.toLowerCase() ||
-      target.authorHandle === '@canberk' ||
-      target.authorHandle === '@gezgin';
+      target.authorHandle === "@canberk" ||
+      target.authorHandle === "@gezgin";
     if (!isOwner) return null;
 
     let updatedPost: MobileCommunityPost | null = null;
@@ -359,10 +361,16 @@ class SocialSyncService {
         updatedPost = {
           ...post,
           ...(updates.content !== undefined ? { content: sanitizeText(updates.content) } : {}),
-          ...(updates.hashtags !== undefined ? { hashtags: updates.hashtags.map((h) => sanitizeText(h)) } : {}),
-          ...(updates.locationTag !== undefined ? { locationTag: sanitizeText(updates.locationTag) } : {}),
+          ...(updates.hashtags !== undefined
+            ? { hashtags: updates.hashtags.map((h) => sanitizeText(h)) }
+            : {}),
+          ...(updates.locationTag !== undefined
+            ? { locationTag: sanitizeText(updates.locationTag) }
+            : {}),
           ...(updates.mediaImage !== undefined ? { mediaImage: updates.mediaImage } : {}),
-          ...(updates.routeAttachment !== undefined ? { routeAttachment: updates.routeAttachment } : {}),
+          ...(updates.routeAttachment !== undefined
+            ? { routeAttachment: updates.routeAttachment }
+            : {}),
         };
         return updatedPost;
       }
@@ -375,12 +383,12 @@ class SocialSyncService {
 
       try {
         await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'X-User-Identity': profile.username },
+          method: "PUT",
+          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
           body: JSON.stringify(updates),
         });
       } catch (e) {
-        console.warn('[socialSyncService] Backend editPost sync failed:', e);
+        console.warn("[socialSyncService] Backend editPost sync failed:", e);
       }
     }
     return updatedPost;
@@ -395,8 +403,8 @@ class SocialSyncService {
     const isOwner =
       target.authorHandle === `@${profile.username}` ||
       target.authorName.toLowerCase() === profile.fullName.toLowerCase() ||
-      target.authorHandle === '@canberk' ||
-      target.authorHandle === '@gezgin';
+      target.authorHandle === "@canberk" ||
+      target.authorHandle === "@gezgin";
     if (!isOwner) return false;
 
     const nextPosts = posts.filter((p) => p.id !== postId);
@@ -405,11 +413,11 @@ class SocialSyncService {
 
     try {
       await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}`, {
-        method: 'DELETE',
-        headers: { 'X-User-Identity': profile.username },
+        method: "DELETE",
+        headers: { "X-User-Identity": profile.username },
       });
     } catch (e) {
-      console.warn('[socialSyncService] Backend deletePost sync failed:', e);
+      console.warn("[socialSyncService] Backend deletePost sync failed:", e);
     }
 
     return true;
@@ -438,12 +446,12 @@ class SocialSyncService {
 
     try {
       await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/like`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Identity': profile.username },
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
         body: JSON.stringify({ username: profile.username }),
       });
     } catch (e) {
-      console.warn('[socialSyncService] Backend toggleLike sync failed:', e);
+      console.warn("[socialSyncService] Backend toggleLike sync failed:", e);
     }
 
     return updatedPost;
@@ -460,7 +468,9 @@ class SocialSyncService {
         updatedPost = {
           ...post,
           isBookmarked: nextBookmarked,
-          bookmarksCount: nextBookmarked ? post.bookmarksCount + 1 : Math.max(0, post.bookmarksCount - 1),
+          bookmarksCount: nextBookmarked
+            ? post.bookmarksCount + 1
+            : Math.max(0, post.bookmarksCount - 1),
         };
         return updatedPost;
       }
@@ -471,13 +481,16 @@ class SocialSyncService {
     this.postListeners.forEach((fn) => fn(nextPosts));
 
     try {
-      await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/bookmark`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Identity': profile.username },
-        body: JSON.stringify({ username: profile.username }),
-      });
+      await fetch(
+        `${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/bookmark`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
+          body: JSON.stringify({ username: profile.username }),
+        },
+      );
     } catch (e) {
-      console.warn('[socialSyncService] Backend toggleBookmark sync failed:', e);
+      console.warn("[socialSyncService] Backend toggleBookmark sync failed:", e);
     }
 
     return updatedPost;
@@ -503,13 +516,16 @@ class SocialSyncService {
     this.postListeners.forEach((fn) => fn(nextPosts));
 
     try {
-      await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/retweet`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Identity': profile.username },
-        body: JSON.stringify({ username: profile.username }),
-      });
+      await fetch(
+        `${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/retweet`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
+          body: JSON.stringify({ username: profile.username }),
+        },
+      );
     } catch (e) {
-      console.warn('[socialSyncService] Backend retweet sync failed:', e);
+      console.warn("[socialSyncService] Backend retweet sync failed:", e);
     }
 
     return updatedPost;
@@ -524,7 +540,7 @@ class SocialSyncService {
       user: `@${profile.username}`,
       displayName: profile.fullName,
       text: text.trim(),
-      time: 'Az önce',
+      time: "Az önce",
     };
 
     const nextPosts = posts.map((post) => {
@@ -543,17 +559,20 @@ class SocialSyncService {
     this.postListeners.forEach((fn) => fn(nextPosts));
 
     try {
-      await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/comment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Identity': profile.username },
-        body: JSON.stringify({
-          username: profile.username,
-          displayName: profile.fullName,
-          text: text.trim(),
-        }),
-      });
+      await fetch(
+        `${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/comment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
+          body: JSON.stringify({
+            username: profile.username,
+            displayName: profile.fullName,
+            text: text.trim(),
+          }),
+        },
+      );
     } catch (e) {
-      console.warn('[socialSyncService] Backend addComment sync failed:', e);
+      console.warn("[socialSyncService] Backend addComment sync failed:", e);
     }
 
     return newComment;

@@ -275,9 +275,15 @@
   border-radius: 9999px;
 }
 
-.dot-red { background: #ba1a1a; }
-.dot-amber { background: #f59e0b; }
-.dot-green { background: #10b981; }
+.dot-red {
+  background: #ba1a1a;
+}
+.dot-amber {
+  background: #f59e0b;
+}
+.dot-green {
+  background: #10b981;
+}
 
 .window-url {
   font-size: 12px;
@@ -689,7 +695,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .cap-card:hover {
@@ -1025,7 +1033,16 @@
 }
 
 @keyframes pulse-dot {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
 }

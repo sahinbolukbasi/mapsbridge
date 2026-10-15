@@ -1,12 +1,12 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface SportsActivity {
   title: string;
-  type: 'running' | 'walking' | 'cycling' | 'rowing' | 'court' | 'outdoor_gym';
+  type: "running" | "walking" | "cycling" | "rowing" | "court" | "outdoor_gym";
   location: string;
   distanceOrDuration: string;
-  difficulty: 'easy' | 'moderate' | 'challenging';
+  difficulty: "easy" | "moderate" | "challenging";
   highlight: string;
 }
 
@@ -44,11 +44,11 @@ JSON formatı:
 export async function runSportsAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: SportsAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: SportsAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const sportsInterests = profile?.interests?.sports?.join(', ') || 'koşu, yürüyüş';
-  const pace = profile?.pace || 'moderate';
+  const sportsInterests = profile?.interests?.sports?.join(", ") || "koşu, yürüyüş";
+  const pace = profile?.pace || "moderate";
 
   const userQuery = `Hedef Şehir: "${destination}".
 Spor ve Açık Hava İlgileri: ${sportsInterests}.
@@ -67,12 +67,14 @@ Bu profile en uygun 2-4 açık hava spor rotası ve pratik ipuçları hazırla.`
       output: {
         destination: bedrockRes.data.destination || destination,
         activities: bedrockRes.data.activities,
-        generalSportsTips: Array.isArray(bedrockRes.data.generalSportsTips) ? bedrockRes.data.generalSportsTips : [],
+        generalSportsTips: Array.isArray(bedrockRes.data.generalSportsTips)
+          ? bedrockRes.data.generalSportsTips
+          : [],
       },
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
-  throw new Error('Spor uzmanı tavsiyesi oluşturulamadı.');
+  throw new Error("Spor uzmanı tavsiyesi oluşturulamadı.");
 }

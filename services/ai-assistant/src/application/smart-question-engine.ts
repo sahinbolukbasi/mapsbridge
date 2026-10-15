@@ -50,7 +50,7 @@ export class SmartQuestionEngine {
    */
   public static formulateNextInquiry(
     context: QuestionContext,
-    currentCity?: string
+    currentCity?: string,
   ): GeneratedQuestion | null {
     const city = context.destination || currentCity;
 
@@ -91,10 +91,22 @@ export class SmartQuestionEngine {
         category: "style",
         hint: "Birden fazla seçenek yazabilirsiniz, kombine de olur.",
         quickOptions: [
-          { label: "🏛️ Tarih & Kültür", prompt: `${city} tarihi yerler, müzeler ve mimari odaklı olsun.` },
-          { label: "🍕 Gastronomi & Kahve", prompt: `${city} yerel lezzetler, sokak yemekleri ve özel kahveciler ağırlıklı olsun.` },
-          { label: "🌿 Gizli Köşeler & Doğa", prompt: `${city} turist kalabalığından uzak gizli noktalar ve doğal alanlar olsun.` },
-          { label: "🛍️ Alışveriş & Modern", prompt: `${city} alışveriş, modern mimari ve canlı mahalleler olsun.` },
+          {
+            label: "🏛️ Tarih & Kültür",
+            prompt: `${city} tarihi yerler, müzeler ve mimari odaklı olsun.`,
+          },
+          {
+            label: "🍕 Gastronomi & Kahve",
+            prompt: `${city} yerel lezzetler, sokak yemekleri ve özel kahveciler ağırlıklı olsun.`,
+          },
+          {
+            label: "🌿 Gizli Köşeler & Doğa",
+            prompt: `${city} turist kalabalığından uzak gizli noktalar ve doğal alanlar olsun.`,
+          },
+          {
+            label: "🛍️ Alışveriş & Modern",
+            prompt: `${city} alışveriş, modern mimari ve canlı mahalleler olsun.`,
+          },
         ],
       };
     }
@@ -106,9 +118,18 @@ export class SmartQuestionEngine {
         category: "budget",
         hint: "Giriş ücretleri, yemek ve ulaşım dahil kişi başı tahmini.",
         quickOptions: [
-          { label: "💚 Ekonomik (kişi/gün €30-60)", prompt: `${city} için bütçe dostu, ücretsiz ve uygun fiyatlı yerler öner.` },
-          { label: "💛 Orta Segment (€60-120)", prompt: `${city} için orta bütçeli kaliteli deneyimler planla.` },
-          { label: "💎 Premium (€120+)", prompt: `${city} için konforlu, özel deneyimli ve premium rotalar oluştur.` },
+          {
+            label: "💚 Ekonomik (kişi/gün €30-60)",
+            prompt: `${city} için bütçe dostu, ücretsiz ve uygun fiyatlı yerler öner.`,
+          },
+          {
+            label: "💛 Orta Segment (€60-120)",
+            prompt: `${city} için orta bütçeli kaliteli deneyimler planla.`,
+          },
+          {
+            label: "💎 Premium (€120+)",
+            prompt: `${city} için konforlu, özel deneyimli ve premium rotalar oluştur.`,
+          },
         ],
       };
     }
@@ -120,9 +141,18 @@ export class SmartQuestionEngine {
         category: "pace",
         hint: "Bu tercih günde kaç durak önereceğimizi belirler.",
         quickOptions: [
-          { label: "🔥 Yoğun (5-7 durak/gün)", prompt: "Günde 10-15 bin adım yürüyebilirim, çok yoğun plan olsun." },
-          { label: "⚖️ Dengeli (3-4 durak/gün)", prompt: "Orta tempolu, kafe molalı dengeli bir plan olsun." },
-          { label: "☕ Sakin (2-3 durak/gün)", prompt: "Rahat, uzun duraklar ve bol mola içeren sakin plan olsun." },
+          {
+            label: "🔥 Yoğun (5-7 durak/gün)",
+            prompt: "Günde 10-15 bin adım yürüyebilirim, çok yoğun plan olsun.",
+          },
+          {
+            label: "⚖️ Dengeli (3-4 durak/gün)",
+            prompt: "Orta tempolu, kafe molalı dengeli bir plan olsun.",
+          },
+          {
+            label: "☕ Sakin (2-3 durak/gün)",
+            prompt: "Rahat, uzun duraklar ve bol mola içeren sakin plan olsun.",
+          },
         ],
       };
     }
@@ -134,8 +164,14 @@ export class SmartQuestionEngine {
         category: "food",
         hint: "Diyet kısıtlamalarınıza göre öneriler filtreleriz.",
         quickOptions: [
-          { label: "🥩 Fark etmez, her şey", prompt: "Yemek konusunda kısıtımım yok, yerel spesiyaliteleri öner." },
-          { label: "🥗 Vejetaryen / Vegan", prompt: "Vejetaryen veya vegan dostu restoranlar öner." },
+          {
+            label: "🥩 Fark etmez, her şey",
+            prompt: "Yemek konusunda kısıtımım yok, yerel spesiyaliteleri öner.",
+          },
+          {
+            label: "🥗 Vejetaryen / Vegan",
+            prompt: "Vejetaryen veya vegan dostu restoranlar öner.",
+          },
           { label: "🕌 Helal Ürünler", prompt: "Helal onaylı veya helal dostu mekanlar öner." },
           { label: "🦐 Deniz ürünsüz", prompt: "Deniz ürünü ve balık içermeyen öneriler sun." },
         ],
@@ -149,10 +185,22 @@ export class SmartQuestionEngine {
         category: "companions",
         hint: "Gruba göre uygun mekanlar ve tempoyu ayarlarız.",
         quickOptions: [
-          { label: "🧳 Yalnız Gezgin", prompt: "Yalnız seyahat ediyorum, güvenli ve sosyalleşme fırsatlı yerler öner." },
-          { label: "💑 Çift", prompt: "Partnerimle seyahat ediyoruz, romantik ve özel anlar içeren rota olsun." },
-          { label: "👨‍👩‍👧 Aile & Çocuk", prompt: "Aile olarak gidiyoruz, çocuk dostu ve eğlenceli mekanlar önce gelsin." },
-          { label: "👫 Arkadaş Grubu", prompt: "Arkadaş grubuyla gidiyoruz, sosyal ve eğlenceli rotalar olsun." },
+          {
+            label: "🧳 Yalnız Gezgin",
+            prompt: "Yalnız seyahat ediyorum, güvenli ve sosyalleşme fırsatlı yerler öner.",
+          },
+          {
+            label: "💑 Çift",
+            prompt: "Partnerimle seyahat ediyoruz, romantik ve özel anlar içeren rota olsun.",
+          },
+          {
+            label: "👨‍👩‍👧 Aile & Çocuk",
+            prompt: "Aile olarak gidiyoruz, çocuk dostu ve eğlenceli mekanlar önce gelsin.",
+          },
+          {
+            label: "👫 Arkadaş Grubu",
+            prompt: "Arkadaş grubuyla gidiyoruz, sosyal ve eğlenceli rotalar olsun.",
+          },
         ],
       };
     }
@@ -167,7 +215,7 @@ export class SmartQuestionEngine {
    */
   public static extractContextFromMessage(
     message: string,
-    currentContext: QuestionContext
+    currentContext: QuestionContext,
   ): Partial<QuestionContext> {
     const norm = (message || "").toLocaleLowerCase("tr");
     const updates: Partial<QuestionContext> = {};
@@ -237,11 +285,7 @@ export class SmartQuestionEngine {
    * Recommended: also budget or pace
    */
   public static isReadyToGenerate(context: QuestionContext): boolean {
-    return !!(
-      context.destination &&
-      context.durationDays &&
-      context.styleSpecified
-    );
+    return !!(context.destination && context.durationDays && context.styleSpecified);
   }
 
   /**

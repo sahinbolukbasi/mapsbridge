@@ -120,7 +120,9 @@ export const communityStore = {
     };
   },
 
-  create(postData: Partial<ServerCommunityPost> & { content: string; authorUsername: string }): ServerCommunityPost {
+  create(
+    postData: Partial<ServerCommunityPost> & { content: string; authorUsername: string },
+  ): ServerCommunityPost {
     if (!memoryPosts) {
       memoryPosts = loadPostsFromDisk();
     }
@@ -131,7 +133,8 @@ export const communityStore = {
     const newPost: ServerCommunityPost = {
       id: `post-${now}-${Math.random().toString(36).substring(2, 7)}`,
       authorUsername: cleanUser,
-      authorDisplayName: postData.authorDisplayName || cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1),
+      authorDisplayName:
+        postData.authorDisplayName || cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1),
       authorAvatar: postData.authorAvatar || "",
       authorEmail: postData.authorEmail || "",
       authorBio: postData.authorBio || "",
@@ -272,7 +275,10 @@ export const communityStore = {
     return post;
   },
 
-  addComment(id: string, commentData: { username: string; displayName?: string; text: string }): ServerCommunityComment | null {
+  addComment(
+    id: string,
+    commentData: { username: string; displayName?: string; text: string },
+  ): ServerCommunityComment | null {
     if (!memoryPosts) {
       memoryPosts = loadPostsFromDisk();
     }
@@ -284,7 +290,8 @@ export const communityStore = {
     const newComment: ServerCommunityComment = {
       id: `comment-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       username: cleanUser,
-      displayName: commentData.displayName || cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1),
+      displayName:
+        commentData.displayName || cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1),
       text: commentData.text.trim(),
       createdAt: "Şimdi",
     };

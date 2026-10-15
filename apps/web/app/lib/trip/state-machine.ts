@@ -12,13 +12,13 @@ interface TransitionResult {
 }
 
 const VALID_TRANSITIONS: Record<TripPhase, TripPhase[]> = {
-  orient:     ["constrain", "draft"],   // shortcut to draft if enough info
-  constrain:  ["draft"],
-  draft:      ["refine", "prepare"],
-  refine:     ["draft", "prepare"],    // re-draft allowed after major edits
-  prepare:    ["in_trip"],
-  in_trip:    ["post_trip"],
-  post_trip:  [],
+  orient: ["constrain", "draft"], // shortcut to draft if enough info
+  constrain: ["draft"],
+  draft: ["refine", "prepare"],
+  refine: ["draft", "prepare"], // re-draft allowed after major edits
+  prepare: ["in_trip"],
+  in_trip: ["post_trip"],
+  post_trip: [],
 };
 
 export function canTransition(from: TripPhase, to: TripPhase): TransitionResult {
@@ -55,12 +55,12 @@ export function isPlanOverloaded(trip: Trip): boolean {
     fast: 8,
   };
   const max = maxByTempo[trip.tempo] ?? 6;
-  return trip.days.some(d => d.stops.length > max);
+  return trip.days.some((d) => d.stops.length > max);
 }
 
 /** Proactive trigger: geo spread too wide for a single day */
 export function hasDayGeographyIssue(trip: Trip): boolean {
-  return trip.days.some(d => (d.geoBoundingBoxKm ?? 0) > 10);
+  return trip.days.some((d) => (d.geoBoundingBoxKm ?? 0) > 10);
 }
 
 // ── Private ───────────────────────────────────────────────────────────────────

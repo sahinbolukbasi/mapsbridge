@@ -10,7 +10,9 @@ export interface TracingContext {
   timestamp: number;
 }
 
-export function extractOrGenerateCorrelationId(headers?: Record<string, string | undefined>): string {
+export function extractOrGenerateCorrelationId(
+  headers?: Record<string, string | undefined>,
+): string {
   if (headers) {
     const existing =
       headers["x-correlation-id"] ||

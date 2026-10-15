@@ -1,6 +1,6 @@
-export type MobileTab = 'map' | 'plan' | 'ai' | 'community' | 'profile';
+export type MobileTab = "map" | "plan" | "ai" | "community" | "profile";
 
-export type PlatformMode = 'ios' | 'android';
+export type PlatformMode = "ios" | "android";
 
 export interface TripStop {
   id: string;

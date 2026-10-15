@@ -72,8 +72,8 @@ export function checkNeutrality(recommendations: Recommendation[]): NeutralityCh
 
   // ── Violation 1: partner outranks more-relevant non-partner ───────────────
 
-  const partners = sorted.filter(r => r.hasPartnerLink);
-  const nonPartners = sorted.filter(r => !r.hasPartnerLink);
+  const partners = sorted.filter((r) => r.hasPartnerLink);
+  const nonPartners = sorted.filter((r) => !r.hasPartnerLink);
 
   for (const partner of partners) {
     for (const nonPartner of nonPartners) {
@@ -92,14 +92,12 @@ export function checkNeutrality(recommendations: Recommendation[]): NeutralityCh
 
   // ── Violation 2: commission correlates with rank more than relevance does ──
 
-  const partnersWithCommission = partners.filter(
-    r => typeof r.partnerCommission === 'number',
-  );
+  const partnersWithCommission = partners.filter((r) => typeof r.partnerCommission === "number");
 
   if (partnersWithCommission.length >= 2) {
-    const ranks = partnersWithCommission.map(r => r.rank);
-    const commissions = partnersWithCommission.map(r => r.partnerCommission as number);
-    const relevances = partnersWithCommission.map(r => r.userRelevanceScore);
+    const ranks = partnersWithCommission.map((r) => r.rank);
+    const commissions = partnersWithCommission.map((r) => r.partnerCommission as number);
+    const relevances = partnersWithCommission.map((r) => r.userRelevanceScore);
 
     // Lower rank = better: negative correlation between rank and score is "good"
     const corrCommission = pearsonCorrelation(ranks, commissions);
@@ -134,9 +132,9 @@ export function checkNeutrality(recommendations: Recommendation[]): NeutralityCh
  */
 export function buildNeutralityWarning(): string {
   return (
-    'MapsBridge bazı önerilerde ortak bağlantılar içerebilir. ' +
-    'Tüm öneriler kullanıcı alaka skoruna göre sıralanır; ' +
-    'komisyon veya ortak ilişkisi sıralamayı etkilemez. ' +
-    'Ortaklı bağlantılar ⭐ işareti ile gösterilir.'
+    "MapsBridge bazı önerilerde ortak bağlantılar içerebilir. " +
+    "Tüm öneriler kullanıcı alaka skoruna göre sıralanır; " +
+    "komisyon veya ortak ilişkisi sıralamayı etkilemez. " +
+    "Ortaklı bağlantılar ⭐ işareti ile gösterilir."
   );
 }

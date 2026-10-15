@@ -93,7 +93,7 @@ export class DynamoDBOperations {
         TableName: this.tableName,
         Key: { PK, SK },
         ConsistentRead: options?.consistentRead || true,
-      })
+      }),
     );
     return result.Item;
   }
@@ -101,7 +101,14 @@ export class DynamoDBOperations {
   /**
    * Put item with optional condition
    */
-  async put(item: Record<string, any>, options?: { condition?: string; attributeNames?: Record<string, string>; attributeValues?: Record<string, any> }) {
+  async put(
+    item: Record<string, any>,
+    options?: {
+      condition?: string;
+      attributeNames?: Record<string, string>;
+      attributeValues?: Record<string, any>;
+    },
+  ) {
     const command = new (await import("@aws-sdk/lib-dynamodb")).PutCommand({
       TableName: this.tableName,
       Item: item,
@@ -111,7 +118,7 @@ export class DynamoDBOperations {
         ExpressionAttributeValues: options.attributeValues,
       }),
     });
-    
+
     await this.client.send(command);
     return item;
   }
@@ -119,12 +126,15 @@ export class DynamoDBOperations {
   /**
    * Query items by partition key
    */
-  async query(PK: string, options?: {
-    skBeginsWith?: string;
-    limit?: number;
-    consistentRead?: boolean;
-    projectionExpression?: string;
-  }) {
+  async query(
+    PK: string,
+    options?: {
+      skBeginsWith?: string;
+      limit?: number;
+      consistentRead?: boolean;
+      projectionExpression?: string;
+    },
+  ) {
     const keyConditionExpression = options?.skBeginsWith
       ? "PK = :pk AND begins_with(SK, :sk)"
       : "PK = :pk";
@@ -145,7 +155,7 @@ export class DynamoDBOperations {
         Limit: options?.limit,
         ConsistentRead: options?.consistentRead,
         ProjectionExpression: options?.projectionExpression,
-      })
+      }),
     );
 
     return result.Items || [];
@@ -161,7 +171,7 @@ export class DynamoDBOperations {
     options?: {
       condition?: string;
       attributeNames?: Record<string, string>;
-    }
+    },
   ) {
     const updateExpressionParts: string[] = [];
     const expressionAttributeNames: Record<string, string> = { ...(options?.attributeNames || {}) };
@@ -170,7 +180,7 @@ export class DynamoDBOperations {
     Object.entries(updates).forEach(([key, value], index) => {
       const attrName = `#attr${index}`;
       const attrValue = `:val${index}`;
-      
+
       updateExpressionParts.push(`${attrName} = ${attrValue}`);
       expressionAttributeNames[attrName] = key;
       expressionAttributeValues[attrValue] = value;
@@ -186,7 +196,7 @@ export class DynamoDBOperations {
         ExpressionAttributeNames: expressionAttributeNames,
         ExpressionAttributeValues: expressionAttributeValues,
         ConditionExpression: options?.condition,
-      })
+      }),
     );
 
     return { PK, SK, ...updates };
@@ -201,7 +211,7 @@ export class DynamoDBOperations {
         TableName: this.tableName,
         Key: { PK, SK },
         ConditionExpression: options?.condition,
-      })
+      }),
     );
     return true;
   }
@@ -213,7 +223,7 @@ export class DynamoDBOperations {
     const result = await this.client.send(
       new (await import("@aws-sdk/client-dynamodb")).TransactWriteItemsCommand({
         TransactItems: operations,
-      })
+      }),
     );
     return result;
   }

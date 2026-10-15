@@ -1,5 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView } from "react-native";
 
 interface Props {
   children: ReactNode;
@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.warn('[ErrorBoundary] Caught runtime exception:', error, errorInfo);
+    console.warn("[ErrorBoundary] Caught runtime exception:", error, errorInfo);
   }
 
   private handleReset = () => {
@@ -60,71 +60,71 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#020e0a',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#020e0a",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 24,
   },
   card: {
-    backgroundColor: '#0d281e',
+    backgroundColor: "#0d281e",
     borderRadius: 20,
     padding: 24,
-    width: '100%',
+    width: "100%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: '#1e4d3e',
-    alignItems: 'center',
+    borderColor: "#1e4d3e",
+    alignItems: "center",
   },
   badge: {
-    backgroundColor: 'rgba(52, 211, 153, 0.15)',
+    backgroundColor: "rgba(52, 211, 153, 0.15)",
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#34d399',
+    borderColor: "#34d399",
     marginBottom: 16,
   },
   badgeText: {
-    color: '#34d399',
+    color: "#34d399",
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 0.8,
   },
   title: {
     fontSize: 20,
-    fontWeight: '800',
-    color: '#ffffff',
-    textAlign: 'center',
+    fontWeight: "800",
+    color: "#ffffff",
+    textAlign: "center",
     marginBottom: 10,
   },
   message: {
     fontSize: 13,
-    color: '#94a3b8',
-    textAlign: 'center',
+    color: "#94a3b8",
+    textAlign: "center",
     lineHeight: 20,
     marginBottom: 16,
   },
   detail: {
     fontSize: 11,
-    fontFamily: 'monospace',
-    color: '#f87171',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    fontFamily: "monospace",
+    color: "#f87171",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
     padding: 10,
     borderRadius: 8,
-    width: '100%',
+    width: "100%",
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#10b981',
+    backgroundColor: "#10b981",
     paddingVertical: 13,
     paddingHorizontal: 28,
     borderRadius: 999,
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
   },
   buttonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: "800",
   },
 });

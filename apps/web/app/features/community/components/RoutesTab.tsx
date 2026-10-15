@@ -117,11 +117,7 @@ export function RoutesTab({
             </button>
           </div>
 
-          <button
-            type="button"
-            className="btn-list-route-action"
-            onClick={onOpenListRouteModal}
-          >
+          <button type="button" className="btn-list-route-action" onClick={onOpenListRouteModal}>
             <span>+</span>
             <span>Rotanı Paylaş</span>
           </button>
@@ -141,13 +137,17 @@ export function RoutesTab({
               border: "1px dashed var(--card-border, rgba(1,54,40,0.2))",
             }}
           >
-            <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>
-              🗺️
-            </span>
+            <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>🗺️</span>
             <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, #0d281e)" }}>
               Aramanıza uygun rota bulunamadı
             </h3>
-            <p style={{ margin: "0 0 1rem", color: "var(--text-muted, #4b5563)", fontSize: "0.9rem" }}>
+            <p
+              style={{
+                margin: "0 0 1rem",
+                color: "var(--text-muted, #4b5563)",
+                fontSize: "0.9rem",
+              }}
+            >
               Farklı bir arama terimi veya filtre deneyebilirsiniz.
             </p>
             <button
@@ -198,7 +198,9 @@ export function RoutesTab({
                   {/* Highlights / Stops Pill */}
                   <div className="route-stops-preview">
                     <span className="stops-count-tag">📍 {route.stopCount} Durak</span>
-                    <span className="stops-rating-tag">⭐ {route.rating.toFixed(1)} ({route.reviewCount})</span>
+                    <span className="stops-rating-tag">
+                      ⭐ {route.rating.toFixed(1)} ({route.reviewCount})
+                    </span>
                     <span className="stops-sales-tag">💾 {route.salesCount * 18} Klonlama</span>
                   </div>
 
@@ -212,9 +214,7 @@ export function RoutesTab({
                           className="seller-avatar"
                         />
                       ) : (
-                        <div className="seller-avatar-fallback">
-                          {route.sellerName.charAt(0)}
-                        </div>
+                        <div className="seller-avatar-fallback">{route.sellerName.charAt(0)}</div>
                       )}
                       <div>
                         <span className="seller-name">{route.sellerName}</span>

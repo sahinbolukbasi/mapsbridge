@@ -8,10 +8,19 @@
  * API to forward messages to the recipient.
  */
 
-import { DynamoDBClient, GetItemCommand, QueryCommand, PutItemCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  GetItemCommand,
+  QueryCommand,
+  PutItemCommand,
+  DeleteItemCommand,
+} from "@aws-sdk/client-dynamodb";
 import { threadParticipants } from "../shared/thread-access";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { ApiGatewayManagementApiClient, PostToConnectionCommand } from "@aws-sdk/client-apigatewaymanagementapi";
+import {
+  ApiGatewayManagementApiClient,
+  PostToConnectionCommand,
+} from "@aws-sdk/client-apigatewaymanagementapi";
 
 export const handler = async (event: any) => {
   try {
@@ -39,10 +48,15 @@ async function handleEvent(event: any) {
     return { statusCode: 400, body: "Invalid JSON" };
   }
 
-  if (!body || typeof body !== "object" || Array.isArray(body)) return { statusCode: 400, body: "Invalid message" };
+  if (!body || typeof body !== "object" || Array.isArray(body))
+    return { statusCode: 400, body: "Invalid message" };
   const { action, threadId, content } = body;
-  if (!["send_message", "typing", "mark_read"].includes(action) ||
-      typeof threadId !== "string" || !threadId.trim() || threadId.length > 128) {
+  if (
+    !["send_message", "typing", "mark_read"].includes(action) ||
+    typeof threadId !== "string" ||
+    !threadId.trim() ||
+    threadId.length > 128
+  ) {
     return { statusCode: 400, body: "Invalid action or threadId" };
   }
 
@@ -54,7 +68,7 @@ async function handleEvent(event: any) {
       TableName: connectionsTable,
       Key: marshall({ connectionId }),
       ConsistentRead: true,
-    })
+    }),
   );
 
   if (!senderResult.Item) {
@@ -62,28 +76,48 @@ async function handleEvent(event: any) {
   }
 
   const sender = unmarshall(senderResult.Item);
-  if (sender.authVersion !== 1 || typeof sender.userId !== "string" || !sender.userId ||
-      !Number.isFinite(sender.expiresAt) || sender.expiresAt <= Date.now() / 1000) {
+  if (
+    sender.authVersion !== 1 ||
+    typeof sender.userId !== "string" ||
+    !sender.userId ||
+    !Number.isFinite(sender.expiresAt) ||
+    sender.expiresAt <= Date.now() / 1000
+  ) {
     return { statusCode: 401, body: "Session expired; reconnect" };
   }
   const senderId = sender.userId;
-  const account = await ddb.send(new GetItemCommand({
-    TableName: messagesTable, Key: marshall({ PK: `USER#${senderId}`, SK: "META" }),
-    ProjectionExpression: "suspended", ConsistentRead: true,
-  }));
-  if (account.Item && unmarshall(account.Item).suspended === true) return { statusCode: 403, body: "Account suspended" };
+  const account = await ddb.send(
+    new GetItemCommand({
+      TableName: messagesTable,
+      Key: marshall({ PK: `USER#${senderId}`, SK: "META" }),
+      ProjectionExpression: "suspended",
+      ConsistentRead: true,
+    }),
+  );
+  if (account.Item && unmarshall(account.Item).suspended === true)
+    return { statusCode: 403, body: "Account suspended" };
   const participants = await threadParticipants(ddb, messagesTable, threadId, senderId);
   if (!participants) return { statusCode: 404, body: "Conversation unavailable" };
   // This API currently supports direct conversations only. Never forward to an arbitrary client recipient.
   if (participants.length !== 2) return { statusCode: 400, body: "Unsupported conversation" };
-  const recipientId = participants.find(id => id !== senderId)!;
+  const recipientId = participants.find((id) => id !== senderId)!;
   if (body.recipientId !== undefined && body.recipientId !== recipientId) {
     return { statusCode: 403, body: "Invalid recipient" };
   }
 
   switch (action) {
     case "send_message":
-      return handleSendMessage(ddb, connectionsTable, messagesTable, domain, stage, senderId, threadId, content, recipientId);
+      return handleSendMessage(
+        ddb,
+        connectionsTable,
+        messagesTable,
+        domain,
+        stage,
+        senderId,
+        threadId,
+        content,
+        recipientId,
+      );
     case "typing":
       return handleTyping(ddb, connectionsTable, domain, stage, senderId, threadId, recipientId);
     case "mark_read":
@@ -103,7 +137,7 @@ async function handleSendMessage(
   senderId: string,
   threadId: string,
   content: string,
-  recipientId: string
+  recipientId: string,
 ) {
   if (typeof content !== "string" || !content.trim()) {
     return { statusCode: 400, body: "Message content required" };
@@ -123,7 +157,7 @@ async function handleSendMessage(
         content: content.trim().slice(0, 2000),
         timestamp,
       }),
-    })
+    }),
   );
 
   // Forward to recipient if connected
@@ -151,7 +185,7 @@ async function handleTyping(
   stage: string,
   senderId: string,
   threadId: string,
-  recipientId: string
+  recipientId: string,
 ) {
   if (recipientId) {
     await forwardToRecipient(ddb, connectionsTable, domain, stage, recipientId, {
@@ -169,7 +203,7 @@ async function handleMarkRead(
   ddb: DynamoDBClient,
   messagesTable: string,
   senderId: string,
-  threadId: string
+  threadId: string,
 ) {
   // Update the last read timestamp for the user
   await ddb.send(
@@ -181,7 +215,7 @@ async function handleMarkRead(
         userId: senderId,
         lastReadAt: new Date().toISOString(),
       }),
-    })
+    }),
   );
 
   return { statusCode: 200, body: "OK" };
@@ -194,7 +228,7 @@ async function forwardToRecipient(
   domain: string,
   stage: string,
   recipientId: string,
-  payload: any
+  payload: any,
 ) {
   // Find all connections for the recipient
   const result = await ddb.send(
@@ -203,7 +237,7 @@ async function forwardToRecipient(
       IndexName: "userId-index",
       KeyConditionExpression: "userId = :userId",
       ExpressionAttributeValues: marshall({ ":userId": recipientId }),
-    })
+    }),
   );
 
   if (!result.Items?.length) return;
@@ -217,14 +251,19 @@ async function forwardToRecipient(
 
   for (const item of result.Items) {
     const conn = unmarshall(item);
-    if (conn.authVersion !== 1 || conn.userId !== recipientId ||
-        !Number.isFinite(conn.expiresAt) || conn.expiresAt <= Date.now() / 1000) continue;
+    if (
+      conn.authVersion !== 1 ||
+      conn.userId !== recipientId ||
+      !Number.isFinite(conn.expiresAt) ||
+      conn.expiresAt <= Date.now() / 1000
+    )
+      continue;
     try {
       await apiClient.send(
         new PostToConnectionCommand({
           ConnectionId: conn.connectionId,
           Data: Buffer.from(message),
-        })
+        }),
       );
     } catch (err: any) {
       // Connection might be stale — remove it
@@ -233,7 +272,7 @@ async function forwardToRecipient(
           new DeleteItemCommand({
             TableName: connectionsTable,
             Key: marshall({ connectionId: conn.connectionId }),
-          })
+          }),
         );
       }
     }

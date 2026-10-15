@@ -25,7 +25,12 @@
   transform: translateX(-50%);
   width: 900px;
   height: 450px;
-  background: radial-gradient(circle, rgba(174, 240, 213, 0.4) 0%, rgba(236, 253, 245, 0.2) 60%, transparent 80%);
+  background: radial-gradient(
+    circle,
+    rgba(174, 240, 213, 0.4) 0%,
+    rgba(236, 253, 245, 0.2) 60%,
+    transparent 80%
+  );
   filter: blur(80px);
   pointer-events: none;
   z-index: 0;
@@ -112,7 +117,9 @@
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.9);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   min-width: 250px;
   text-align: left;
 }
@@ -365,7 +372,16 @@
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
 }

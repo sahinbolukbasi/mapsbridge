@@ -55,6 +55,7 @@ apps/web/
 ```
 
 **Key files**:
+
 - `app/layout.tsx` -- Root layout with providers, locale detection, analytics
 - `app/lib/ai/orchestrator.ts` -- Main AI orchestration entry point
 - `app/lib/ai/agents/` -- 19 sub-agent definitions (e.g., route-planner, restaurant-finder, budget-optimizer)
@@ -114,6 +115,7 @@ infra/lambda/src/
 ```
 
 **Key files**:
+
 - Each `handler.ts` is the Lambda entry point (exports `handler` function)
 - `shared/dynamo.ts` is the centralized DynamoDB access layer used by all domains
 
@@ -206,6 +208,7 @@ services/
 ```
 
 **Key files**:
+
 - Each service has a `ports/` directory defining TypeScript interfaces
 - Adapters in `adapters/` implement those interfaces for specific infrastructure
 

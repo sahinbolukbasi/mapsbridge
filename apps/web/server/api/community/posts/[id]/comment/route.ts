@@ -11,10 +11,7 @@ export async function OPTIONS(request: NextRequest) {
   });
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const corsHeaders = getCorsHeaders(request);
   const auth = await authenticateRequest(request, corsHeaders);
   if (auth instanceof NextResponse) return auth;
@@ -25,14 +22,14 @@ export async function POST(
     if (!body || !body.text || !body.text.trim()) {
       return NextResponse.json(
         { error: "Yorum metni zorunludur." },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders },
       );
     }
 
     if (body.text.length > 500) {
       return NextResponse.json(
         { error: "Yorum metni en fazla 500 karakter olabilir." },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders },
       );
     }
 
@@ -47,18 +44,15 @@ export async function POST(
     if (!comment) {
       return NextResponse.json(
         { error: "Gönderi bulunamadı." },
-        { status: 404, headers: corsHeaders }
+        { status: 404, headers: corsHeaders },
       );
     }
 
-    return NextResponse.json(
-      { success: true, comment },
-      { status: 201, headers: corsHeaders }
-    );
+    return NextResponse.json({ success: true, comment }, { status: 201, headers: corsHeaders });
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message || "Sunucu hatası" },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders },
     );
   }
 }

@@ -3,7 +3,7 @@ export interface UserMemoryEntry {
   userId: string;
   key: string;
   value: unknown;
-  source: 'stated' | 'confirmed' | 'derived';
+  source: "stated" | "confirmed" | "derived";
   confidence: number;
   visible: boolean;
   createdAt: string;
@@ -13,12 +13,12 @@ export interface UserMemoryEntry {
 export interface UserMemoryProfile {
   cuisinePreferences: string[];
   dietaryRestrictions: string[];
-  walkingTolerance?: 'low' | 'medium' | 'high';
-  crowdPreference?: 'avoid' | 'neutral' | 'enjoy';
-  morningPreference?: 'early_bird' | 'late_riser' | 'flexible';
-  budgetHabit?: 'budget' | 'mid' | 'luxury';
+  walkingTolerance?: "low" | "medium" | "high";
+  crowdPreference?: "avoid" | "neutral" | "enjoy";
+  morningPreference?: "early_bird" | "late_riser" | "flexible";
+  budgetHabit?: "budget" | "mid" | "luxury";
   lodgingHabit?: string;
-  transportPreference?: 'public_transit' | 'car' | 'walking' | 'mixed';
+  transportPreference?: "public_transit" | "car" | "walking" | "mixed";
   interests: string[];
   visitedCountries: string[];
   languages: string[];
@@ -35,8 +35,8 @@ export function shouldPromoteToProfile(
   explicitRemember: boolean,
 ): boolean {
   if (explicitRemember) return true;
-  if (entry.source === 'stated' && occurrenceCount >= 2) return true;
-  if (entry.source === 'derived' && occurrenceCount >= 3) return true;
+  if (entry.source === "stated" && occurrenceCount >= 2) return true;
+  if (entry.source === "derived" && occurrenceCount >= 3) return true;
   return false;
 }
 
@@ -53,6 +53,9 @@ export function isExplicitRememberRequest(text: string): boolean {
  * that requires explicit user consent before storage.
  */
 export function isSensitiveData(key: string, value: unknown): boolean {
-  const sensitivePatterns = /sağlık|engellilik|disabled|health|din|religion|helal|halal|kosher|allerg/iu;
-  return sensitivePatterns.test(key) || (typeof value === 'string' && sensitivePatterns.test(value));
+  const sensitivePatterns =
+    /sağlık|engellilik|disabled|health|din|religion|helal|halal|kosher|allerg/iu;
+  return (
+    sensitivePatterns.test(key) || (typeof value === "string" && sensitivePatterns.test(value))
+  );
 }

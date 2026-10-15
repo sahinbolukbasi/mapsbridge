@@ -1,6 +1,6 @@
 /**
  * MapsBridge Email Notification Service (AWS SES & Resilient Notification Store)
- * 
+ *
  * Delivers price alert emails to users when ticket or hotel deals are discovered.
  * Designed for high concurrency (10k+ users) with batching and error-isolation.
  */
@@ -8,7 +8,7 @@
 export interface DealNotificationPayload {
   toEmail: string;
   userId?: string;
-  dealType: 'flight' | 'hotel' | 'transit';
+  dealType: "flight" | "hotel" | "transit";
   title: string;
   origin?: string;
   destination: string;
@@ -30,16 +30,18 @@ export interface EmailDispatchResult {
 }
 
 export async function sendDealNotificationEmail(
-  payload: DealNotificationPayload
+  payload: DealNotificationPayload,
 ): Promise<EmailDispatchResult> {
-  const currency = payload.currency || '₺';
-  const discountPercent = payload.originalPrice && payload.originalPrice > payload.currentPrice
-    ? Math.round(((payload.originalPrice - payload.currentPrice) / payload.originalPrice) * 100)
-    : null;
+  const currency = payload.currency || "₺";
+  const discountPercent =
+    payload.originalPrice && payload.originalPrice > payload.currentPrice
+      ? Math.round(((payload.originalPrice - payload.currentPrice) / payload.originalPrice) * 100)
+      : null;
 
-  const subject = payload.dealType === 'flight'
-    ? `✈️ Ucuz Bilet Alarmı: ${payload.destination} için ${payload.currentPrice.toLocaleString('tr-TR')} ${currency} fırsatı!`
-    : `🏨 Fırsat Otel Alarmı: ${payload.destination} için ${payload.currentPrice.toLocaleString('tr-TR')} ${currency}/gece!`;
+  const subject =
+    payload.dealType === "flight"
+      ? `✈️ Ucuz Bilet Alarmı: ${payload.destination} için ${payload.currentPrice.toLocaleString("tr-TR")} ${currency} fırsatı!`
+      : `🏨 Fırsat Otel Alarmı: ${payload.destination} için ${payload.currentPrice.toLocaleString("tr-TR")} ${currency}/gece!`;
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -70,36 +72,44 @@ export async function sendDealNotificationEmail(
       <p>Seyahatin için aradığın uygun fiyat bulundu!</p>
     </div>
     <div class="content">
-      <span class="badge">${payload.dealType === 'flight' ? 'Uçak / Ulaşım Fırsatı' : 'Otel / Konaklama Fırsatı'}</span>
+      <span class="badge">${payload.dealType === "flight" ? "Uçak / Ulaşım Fırsatı" : "Otel / Konaklama Fırsatı"}</span>
       <h2>${payload.title}</h2>
       
       <div class="deal-card">
-        <div><strong>Hedef:</strong> ${payload.destination} ${payload.origin ? `(${payload.origin} kalkışlı)` : ''}</div>
-        ${payload.dates ? `<div><strong>Tarihler:</strong> ${payload.dates}</div>` : ''}
-        ${payload.provider ? `<div><strong>Sağlayıcı:</strong> ${payload.provider}</div>` : ''}
+        <div><strong>Hedef:</strong> ${payload.destination} ${payload.origin ? `(${payload.origin} kalkışlı)` : ""}</div>
+        ${payload.dates ? `<div><strong>Tarihler:</strong> ${payload.dates}</div>` : ""}
+        ${payload.provider ? `<div><strong>Sağlayıcı:</strong> ${payload.provider}</div>` : ""}
         <div class="price-tag">
-          ${payload.currentPrice.toLocaleString('tr-TR')} ${currency}
-          ${payload.originalPrice ? `<span class="old-price">${payload.originalPrice.toLocaleString('tr-TR')} ${currency}</span>` : ''}
-          ${discountPercent ? `<span class="savings">▼ %${discountPercent} İndirim</span>` : ''}
+          ${payload.currentPrice.toLocaleString("tr-TR")} ${currency}
+          ${payload.originalPrice ? `<span class="old-price">${payload.originalPrice.toLocaleString("tr-TR")} ${currency}</span>` : ""}
+          ${discountPercent ? `<span class="savings">▼ %${discountPercent} İndirim</span>` : ""}
         </div>
       </div>
 
-      ${payload.details && payload.details.length > 0 ? `
+      ${
+        payload.details && payload.details.length > 0
+          ? `
         <h4>Öne Çıkan Detaylar:</h4>
         <ul class="details-list">
-          ${payload.details.map(d => `<li>${d}</li>`).join('')}
+          ${payload.details.map((d) => `<li>${d}</li>`).join("")}
         </ul>
-      ` : ''}
+      `
+          : ""
+      }
 
-      ${payload.bookingUrl ? `
+      ${
+        payload.bookingUrl
+          ? `
         <div style="text-align: center;">
           <a href="${payload.bookingUrl}" class="cta-btn" target="_blank" rel="noopener noreferrer">Fırsatı İncele & Rezervasyon Yap</a>
         </div>
-      ` : `
+      `
+          : `
         <div style="text-align: center;">
           <a href="https://mapsbridge.com/panel/" class="cta-btn" target="_blank" rel="noopener noreferrer">Seyahat Paneline Git</a>
         </div>
-      `}
+      `
+      }
     </div>
     <div class="footer">
       Bu e-posta, MapsBridge yapay zeka asistanı üzerinden oluşturduğun fiyat takip alarmı kapsamında gönderilmiştir.<br>
@@ -140,7 +150,9 @@ export async function sendDealNotificationEmail(
       sesSuccess = true;
     }
   } catch (err: any) {
-    console.warn(`[EmailNotifier] SES send warning: ${err?.message || err}. Saving notification to user store.`);
+    console.warn(
+      `[EmailNotifier] SES send warning: ${err?.message || err}. Saving notification to user store.`,
+    );
   }
 
   // 2. Persist notification into DynamoDB for in-app alert inbox
@@ -154,28 +166,30 @@ export async function sendDealNotificationEmail(
     const notifId = `notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const pk = payload.userId ? `USER#${payload.userId}` : `EMAIL#${payload.toEmail.toLowerCase()}`;
 
-    await ddb.send(new PutItemCommand({
-      TableName: tableName,
-      Item: marshall({
-        PK: pk,
-        SK: `DEAL_ALERT#${Date.now()}`,
-        id: notifId,
-        type: payload.dealType,
-        title: payload.title,
-        subject,
-        toEmail: payload.toEmail,
-        currentPrice: payload.currentPrice,
-        originalPrice: payload.originalPrice,
-        currency,
-        destination: payload.destination,
-        bookingUrl: payload.bookingUrl,
-        sentViaSes: sesSuccess,
-        sesMessageId: messageId,
-        read: false,
-        createdAt: new Date().toISOString(),
-        ttl: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+    await ddb.send(
+      new PutItemCommand({
+        TableName: tableName,
+        Item: marshall({
+          PK: pk,
+          SK: `DEAL_ALERT#${Date.now()}`,
+          id: notifId,
+          type: payload.dealType,
+          title: payload.title,
+          subject,
+          toEmail: payload.toEmail,
+          currentPrice: payload.currentPrice,
+          originalPrice: payload.originalPrice,
+          currency,
+          destination: payload.destination,
+          bookingUrl: payload.bookingUrl,
+          sentViaSes: sesSuccess,
+          sesMessageId: messageId,
+          read: false,
+          createdAt: new Date().toISOString(),
+          ttl: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // 30 days
+        }),
       }),
-    }));
+    );
     fallbackStored = true;
   } catch (err) {
     console.error("[EmailNotifier] Failed to persist deal notification:", err);

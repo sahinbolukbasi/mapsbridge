@@ -28,7 +28,7 @@ export class DynamicReplanner {
       delayedHours?: number;
       closedStopId?: string;
       indoorAlternatives?: RouteStopDto[];
-    }
+    },
   ): ReplanResult {
     if (!currentStops || currentStops.length === 0) {
       return {
@@ -42,16 +42,30 @@ export class DynamicReplanner {
     // 1. Durum: Yağmur / Kötü Hava Değişimi
     if (reason === "rain_weather") {
       let swappedCount = 0;
-      const outdoorKeywords = ["park", "manzara", "seyir", "bahçe", "sahil", "plaj", "yürüyüş", "tepe"];
-      
+      const outdoorKeywords = [
+        "park",
+        "manzara",
+        "seyir",
+        "bahçe",
+        "sahil",
+        "plaj",
+        "yürüyüş",
+        "tepe",
+      ];
+
       const newStops = currentStops.map((stop) => {
-        const isOutdoor = outdoorKeywords.some((k) =>
-          (stop.category || "").toLowerCase().includes(k) ||
-          (stop.description || "").toLowerCase().includes(k) ||
-          stop.name.toLowerCase().includes(k)
+        const isOutdoor = outdoorKeywords.some(
+          (k) =>
+            (stop.category || "").toLowerCase().includes(k) ||
+            (stop.description || "").toLowerCase().includes(k) ||
+            stop.name.toLowerCase().includes(k),
         );
 
-        if (isOutdoor && options?.indoorAlternatives && options.indoorAlternatives.length > swappedCount) {
+        if (
+          isOutdoor &&
+          options?.indoorAlternatives &&
+          options.indoorAlternatives.length > swappedCount
+        ) {
           const replacement = options.indoorAlternatives[swappedCount];
           swappedCount++;
           return {
@@ -66,9 +80,10 @@ export class DynamicReplanner {
 
       return {
         updatedStops: newStops,
-        replanningSummary: swappedCount > 0
-          ? `Hava yağmurlu olduğu için ${swappedCount} açık hava durağı kapalı müze ve sergi alternatifleriyle değiştirildi.`
-          : "Rotadaki mevcut duraklar yağmurlu havaya uygundur.",
+        replanningSummary:
+          swappedCount > 0
+            ? `Hava yağmurlu olduğu için ${swappedCount} açık hava durağı kapalı müze ve sergi alternatifleriyle değiştirildi.`
+            : "Rotadaki mevcut duraklar yağmurlu havaya uygundur.",
         swappedStopsCount: swappedCount,
         reason,
       };

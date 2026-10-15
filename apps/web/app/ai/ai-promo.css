@@ -41,7 +41,11 @@
   color: var(--promo-on-surface);
   min-height: 100vh;
   width: 100%;
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Plus Jakarta Sans",
+    system-ui,
+    -apple-system,
+    sans-serif;
   overflow-x: hidden;
 }
 
@@ -76,7 +80,7 @@
   background: var(--promo-mint-subtle);
   border: 1px solid rgba(16, 185, 129, 0.25);
   color: var(--promo-primary);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -94,9 +98,18 @@
 }
 
 @keyframes promoPulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 .ai-promo-hero-title {
@@ -294,7 +307,7 @@
   justify-content: center;
   flex-shrink: 0;
   margin-top: 4px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .ai-promo-avatar-mini.user-avatar {
@@ -526,7 +539,12 @@
 .ai-promo-map-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, var(--promo-surface-card) 0%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.2) 100%);
+  background: linear-gradient(
+    0deg,
+    var(--promo-surface-card) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
 }
 
 .ai-promo-map-floating-pill {
@@ -537,7 +555,7 @@
   backdrop-filter: blur(8px);
   padding: 0.4rem 0.85rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -596,7 +614,13 @@
   top: 24px;
   bottom: -20px;
   width: 2px;
-  background: repeating-linear-gradient(to bottom, var(--promo-secondary-container), var(--promo-secondary-container) 4px, transparent 4px, transparent 8px);
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--promo-secondary-container),
+    var(--promo-secondary-container) 4px,
+    transparent 4px,
+    transparent 8px
+  );
 }
 
 .ai-promo-stop-number {
@@ -941,7 +965,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 0.75rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .ai-promo-template-title {

@@ -80,8 +80,24 @@ export function AIRouteModifier({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "16px",
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "1.1rem",
+              fontWeight: 700,
+              margin: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <span>🤖</span> AI ile Rotayı Yeniden Düzenle
           </h3>
           <button
@@ -101,7 +117,14 @@ export function AIRouteModifier({
         {/* Version History Selector */}
         {versions.length > 1 && (
           <div style={{ marginBottom: "16px" }}>
-            <span style={{ fontSize: "0.75rem", color: "#94a3b8", display: "block", marginBottom: "6px" }}>
+            <span
+              style={{
+                fontSize: "0.75rem",
+                color: "#94a3b8",
+                display: "block",
+                marginBottom: "6px",
+              }}
+            >
               Rota Versiyonları (Geçmişe Dön):
             </span>
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -116,7 +139,8 @@ export function AIRouteModifier({
                     fontSize: "0.75rem",
                     border: "none",
                     cursor: "pointer",
-                    backgroundColor: ver.versionNum === activeVersionNum ? "#3b82f6" : "rgba(255,255,255,0.08)",
+                    backgroundColor:
+                      ver.versionNum === activeVersionNum ? "#3b82f6" : "rgba(255,255,255,0.08)",
                     color: ver.versionNum === activeVersionNum ? "#fff" : "#cbd5e1",
                     fontWeight: ver.versionNum === activeVersionNum ? 600 : 400,
                   }}
@@ -128,9 +152,19 @@ export function AIRouteModifier({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+        >
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "6px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "0.8rem",
+                color: "#94a3b8",
+                marginBottom: "6px",
+              }}
+            >
               AI Asistanına Ne Değiştirmesini İstediğinizi Yazın:
             </label>
             <textarea
@@ -154,7 +188,14 @@ export function AIRouteModifier({
 
           {/* Quick prompt suggestions */}
           <div>
-            <span style={{ fontSize: "0.75rem", color: "#64748b", display: "block", marginBottom: "6px" }}>
+            <span
+              style={{
+                fontSize: "0.75rem",
+                color: "#64748b",
+                display: "block",
+                marginBottom: "6px",
+              }}
+            >
               Hızlı İstekler:
             </span>
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -179,7 +220,9 @@ export function AIRouteModifier({
             </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "12px" }}>
+          <div
+            style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "12px" }}
+          >
             <button
               type="button"
               onClick={onClose}

@@ -1,11 +1,11 @@
-import { invokeBedrockJSON } from '../bedrock-client';
+import { invokeBedrockJSON } from "../bedrock-client";
 
 export interface BudgetOrLuxuryOutput {
-  tier: 'budget' | 'standard' | 'luxury';
+  tier: "budget" | "standard" | "luxury";
   destination: string;
   estimatedDailyCost: string;
   recommendations: Array<{
-    category: 'stay' | 'dining' | 'experience' | 'transport';
+    category: "stay" | "dining" | "experience" | "transport";
     title: string;
     description: string;
     costEstimate: string;
@@ -39,9 +39,9 @@ JSON formatı:
 
 export async function runBudgetLuxuryAgent(
   destination: string,
-  tier: 'budget' | 'standard' | 'luxury' = 'standard',
-  timeoutMs = 4500
-): Promise<{ output: BudgetOrLuxuryOutput; source: 'bedrock'; durationMs: number }> {
+  tier: "budget" | "standard" | "luxury" = "standard",
+  timeoutMs = 4500,
+): Promise<{ output: BudgetOrLuxuryOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
   const userQuery = `Hedef Şehir: "${destination}". Seviye: "${tier}". Bu bütçe/deneyim profiline uygun maliyet kırılımı ve özel öneriler hazırla.`;
 
@@ -55,32 +55,36 @@ export async function runBudgetLuxuryAgent(
   if (bedrockRes.success && bedrockRes.data && Array.isArray(bedrockRes.data.recommendations)) {
     return {
       output: bedrockRes.data,
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
-  const isLuxury = tier === 'luxury';
+  const isLuxury = tier === "luxury";
   return {
     output: {
       tier,
       destination,
-      estimatedDailyCost: isLuxury ? 'Günlük ~€300 - €500' : 'Günlük ~€40 - €70',
+      estimatedDailyCost: isLuxury ? "Günlük ~€300 - €500" : "Günlük ~€40 - €70",
       recommendations: [
         {
-          category: 'experience',
-          title: isLuxury ? `${destination} Özel Rehberli VIP Keşif` : `${destination} Ücretsiz Yürüyüş ve Şehir Kartı`,
-          description: isLuxury ? 'Sıra beklemeden doğrudan giriş ve özel uzman tarihçi eşliğinde gezi.' : 'Tüm toplu taşımayı ve müze girişlerini kapsayan ekonomik 48 saatlik şehir kartı.',
-          costEstimate: isLuxury ? 'Kişi başı ~€180' : 'Kişi başı ~€28',
+          category: "experience",
+          title: isLuxury
+            ? `${destination} Özel Rehberli VIP Keşif`
+            : `${destination} Ücretsiz Yürüyüş ve Şehir Kartı`,
+          description: isLuxury
+            ? "Sıra beklemeden doğrudan giriş ve özel uzman tarihçi eşliğinde gezi."
+            : "Tüm toplu taşımayı ve müze girişlerini kapsayan ekonomik 48 saatlik şehir kartı.",
+          costEstimate: isLuxury ? "Kişi başı ~€180" : "Kişi başı ~€28",
         },
       ],
       insiderSavingOrVipTips: [
         isLuxury
-          ? 'Popüler Michelin restoranları için rezervasyonunuzu en az 3 hafta öncesinden yapın.'
-          : 'Pazar günleri birçok devlet müzesi ücretsiz veya indirimli giriş imkanı sunar.',
+          ? "Popüler Michelin restoranları için rezervasyonunuzu en az 3 hafta öncesinden yapın."
+          : "Pazar günleri birçok devlet müzesi ücretsiz veya indirimli giriş imkanı sunar.",
       ],
     },
-    source: 'bedrock',
+    source: "bedrock",
     durationMs: Date.now() - startTime,
   };
 }

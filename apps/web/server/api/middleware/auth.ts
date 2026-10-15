@@ -32,14 +32,10 @@ export function getCorsHeaders(request: NextRequest): Record<string, string> {
 // ---------------------------------------------------------------------------
 
 const COGNITO_REGION =
-  process.env.COGNITO_REGION ||
-  process.env.NEXT_PUBLIC_COGNITO_REGION ||
-  "eu-central-1";
+  process.env.COGNITO_REGION || process.env.NEXT_PUBLIC_COGNITO_REGION || "eu-central-1";
 
 const COGNITO_USER_POOL_ID =
-  process.env.COGNITO_USER_POOL_ID ||
-  process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID ||
-  "";
+  process.env.COGNITO_USER_POOL_ID || process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || "";
 
 const JWKS_URI = COGNITO_USER_POOL_ID
   ? `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${COGNITO_USER_POOL_ID}/.well-known/jwks.json`
@@ -89,7 +85,7 @@ function decodeJwtPayloadUnsafe(token: string): Record<string, unknown> | null {
     const parts = token.split(".");
     if (parts.length < 2) return null;
     const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = b64.padEnd(b64.length + (4 - (b64.length % 4)) % 4, "=");
+    const padded = b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), "=");
     const json = atob(padded);
     return JSON.parse(json);
   } catch {
@@ -110,13 +106,13 @@ export interface AuthResult {
  */
 export async function authenticateRequest(
   request: NextRequest,
-  corsHeaders: Record<string, string>
+  corsHeaders: Record<string, string>,
 ): Promise<AuthResult | NextResponse> {
   const authHeader = request.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return NextResponse.json(
       { error: "Yetkilendirme gerekli. Authorization: Bearer <token> header eksik." },
-      { status: 401, headers: corsHeaders }
+      { status: 401, headers: corsHeaders },
     );
   }
 
@@ -126,7 +122,7 @@ export async function authenticateRequest(
   if (!payload) {
     return NextResponse.json(
       { error: "Geçersiz veya süresi dolmuş token." },
-      { status: 401, headers: corsHeaders }
+      { status: 401, headers: corsHeaders },
     );
   }
 
@@ -135,7 +131,7 @@ export async function authenticateRequest(
   if (typeof payload.exp === "number" && payload.exp * 1000 <= Date.now()) {
     return NextResponse.json(
       { error: "Token süresi dolmuş. Lütfen tekrar giriş yapın." },
-      { status: 401, headers: corsHeaders }
+      { status: 401, headers: corsHeaders },
     );
   }
 
@@ -149,7 +145,7 @@ export async function authenticateRequest(
   if (!email && !sub) {
     return NextResponse.json(
       { error: "Token geçersiz: kullanıcı bilgisi bulunamadı." },
-      { status: 401, headers: corsHeaders }
+      { status: 401, headers: corsHeaders },
     );
   }
 

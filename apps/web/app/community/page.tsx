@@ -65,7 +65,10 @@ export default function CommunityPage() {
   useEffect(() => {
     const session = getStoredSession();
     if (session?.email) {
-      const uname = session.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
+      const uname = session.email
+        .split("@")[0]
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, "");
       setActiveUsername(uname || "gezgin");
     }
 
@@ -104,10 +107,18 @@ export default function CommunityPage() {
       const trips = raw ? JSON.parse(raw) : [];
 
       const newTripId = "clone-" + Date.now();
-      const stopsData = route.stops && route.stops.length > 0 ? route.stops : [
-        { label: "1. Durak - Keşif Noktası", lat: 41.8902, lng: 12.4922, category: "tarih" },
-        { label: "2. Durak - Manzara Seyir", lat: 41.8986, lng: 12.4769, category: "manzara" },
-      ];
+      const stopsData =
+        route.stops && route.stops.length > 0
+          ? route.stops
+          : [
+              { label: "1. Durak - Keşif Noktası", lat: 41.8902, lng: 12.4922, category: "tarih" },
+              {
+                label: "2. Durak - Manzara Seyir",
+                lat: 41.8986,
+                lng: 12.4769,
+                category: "manzara",
+              },
+            ];
 
       const clonedPins = stopsData.map((s: any, idx: number) => ({
         id: "pin-" + Date.now() + "-" + idx,
@@ -130,8 +141,24 @@ export default function CommunityPage() {
         destination: route.destination || "Seyahat Rotası",
         transportMode: "walking",
         isPublic: false,
-        days: [{ dayIndex: 1, label: "1. Gün", color: "#059669", subtitle: "Topluluk Rotası", pins: clonedPins }],
-        groups: [{ id: "genel", name: "Genel", color: "#059669", emoji: "📍", pinCount: clonedPins.length }],
+        days: [
+          {
+            dayIndex: 1,
+            label: "1. Gün",
+            color: "#059669",
+            subtitle: "Topluluk Rotası",
+            pins: clonedPins,
+          },
+        ],
+        groups: [
+          {
+            id: "genel",
+            name: "Genel",
+            color: "#059669",
+            emoji: "📍",
+            pinCount: clonedPins.length,
+          },
+        ],
         pins: clonedPins,
       };
 
@@ -139,7 +166,9 @@ export default function CommunityPage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
       trackEvent("route_add_to_trip", { targetTitle: route.title });
 
-      showToast(`🗺️ "${route.title}" seyahat planınıza aktarıldı! Harita sekmesinden inceleyebilirsiniz.`);
+      showToast(
+        `🗺️ "${route.title}" seyahat planınıza aktarıldı! Harita sekmesinden inceleyebilirsiniz.`,
+      );
     } catch {
       showToast("Rota seyahat planına eklenemedi.");
     }
@@ -174,7 +203,10 @@ export default function CommunityPage() {
       linkedRoute: linkedRouteObj,
     });
 
-    trackEvent("post_view", { targetId: newPost.id, targetTitle: newPost.content.substring(0, 30) });
+    trackEvent("post_view", {
+      targetId: newPost.id,
+      targetTitle: newPost.content.substring(0, 30),
+    });
     setShowNewPostModal(false);
     showToast("✓ Seyahat deneyiminiz topluluk akışında yayınlandı!");
   };
@@ -221,7 +253,7 @@ export default function CommunityPage() {
       category?: string;
       locationTag?: string;
       hashtags?: string[];
-    }
+    },
   ) => {
     if (!requireAuth("Düzenleme", "Paylaşımınızı düzenlemek için")) return;
     const res = webSocialSync.editPost(postId, updates);
@@ -258,192 +290,219 @@ export default function CommunityPage() {
   };
 
   return (
-      <div className="community-page-root">
-        <HeaderNav />
+    <div className="community-page-root">
+      <HeaderNav />
 
-        {/* ── HERO BANNER ── */}
-        <section className="community-hero">
-          <div className="community-hero-inner">
-            {/* Top badge row */}
-            <div className="hero-top-row">
-              <div className="hero-badge">
-                <span className="hero-badge-text">MapsBridge Gezginler Topluluğu</span>
-                <span className="hero-badge-sep" />
-                <span className="hero-badge-live">
-                  <span className="hero-live-ping" />
-                  Canlı Seyahat Ağı
-                </span>
-              </div>
-              <span className="hero-active-count">2.400+ Gezgin şu an rotalarda aktif</span>
+      {/* ── HERO BANNER ── */}
+      <section className="community-hero">
+        <div className="community-hero-inner">
+          {/* Top badge row */}
+          <div className="hero-top-row">
+            <div className="hero-badge">
+              <span className="hero-badge-text">MapsBridge Gezginler Topluluğu</span>
+              <span className="hero-badge-sep" />
+              <span className="hero-badge-live">
+                <span className="hero-live-ping" />
+                Canlı Seyahat Ağı
+              </span>
             </div>
-
-            {/* Headline + CTA */}
-            <div className="hero-headline-row">
-              <div className="hero-headline-text">
-                <h1 className="hero-title">Keşfet, Rota Paylaş &amp; Gezi Arkadaşı Bul</h1>
-                <p className="hero-subtitle">
-                  Gezgin deneyimlerini keşfedin, onaylı seyahat rotalarını paylaşın,
-                  grup seyahatleri organize edin ve seyahat arkadaşı bulun.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="hero-share-btn"
-                onClick={() => {
-                  requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
-                    setShowNewPostModal(true);
-                  });
-                }}
-              >
-                ✍️ Seyahat Deneyimi Paylaş
-              </button>
-            </div>
-
-            {/* Filter tabs */}
-            <div className="hero-tabs-bar">
-              {[
-                { key: "güncel", label: "Güncel", badge: "Canlı", live: true },
-                { key: "popüler", label: "Popüler", badge: "Trend", live: false },
-                { key: "yakınımda", label: "Yakınımda", badge: null, live: false },
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={`hero-tab${activeTab === tab.key ? " active" : ""}`}
-                  onClick={() => setActiveTab(tab.key)}
-                >
-                  {tab.label}
-                  {tab.badge && (
-                    <span className={`hero-tab-badge${tab.live ? " live" : ""}`}>
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
+            <span className="hero-active-count">2.400+ Gezgin şu an rotalarda aktif</span>
           </div>
-        </section>
 
-        <div className="community-layout">
-          {/* ── MAIN FEED ── */}
-          <main className="community-feed-col">
-            <DiscoverTab
-              posts={posts}
-              filter="all"
-              activeUsername={activeUsername}
-              userSavedRoutes={userSavedRoutes}
-              followedUsernames={followedTravelerUsernames}
-              onToggleLike={handleToggleLike}
-              onToggleBookmark={handleToggleBookmark}
-              onRetweet={handleRetweet}
-              onAddToMyTrip={handleAddToMyTrip}
-              onOpenNewPost={() => {
+          {/* Headline + CTA */}
+          <div className="hero-headline-row">
+            <div className="hero-headline-text">
+              <h1 className="hero-title">Keşfet, Rota Paylaş &amp; Gezi Arkadaşı Bul</h1>
+              <p className="hero-subtitle">
+                Gezgin deneyimlerini keşfedin, onaylı seyahat rotalarını paylaşın, grup seyahatleri
+                organize edin ve seyahat arkadaşı bulun.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="hero-share-btn"
+              onClick={() => {
                 requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
                   setShowNewPostModal(true);
                 });
               }}
-              onToggleFollow={toggleFollowUser}
-              onAddComment={handleAddComment}
-              onFastTweet={handleFastTweet}
-              onEditPost={handleEditPost}
-              onDeletePost={handleDeletePost}
-              showToast={showToast}
-            />
-          </main>
-
-          {/* ── SIDEBAR ── */}
-          <aside className="community-sidebar-col">
-            <div className="community-sidebar-card">
-              <h3 className="community-sidebar-title">
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>explore</span>
-                Kategoriler
-              </h3>
-              <div className="community-sidebar-cats">
-                {[
-                  { icon: "🏛️", label: "Tarih & Kültür" },
-                  { icon: "🍽️", label: "Gastronomi" },
-                  { icon: "🌲", label: "Doğa & Vadi" },
-                  { icon: "📷", label: "Fotoğrafçılık" },
-                  { icon: "🎒", label: "Sırt Çantalı" },
-                  { icon: "🏙️", label: "Şehir Keşfi" },
-                ].map((c) => (
-                  <span key={c.label} className="community-sidebar-cat-pill">
-                    {c.icon} {c.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="community-sidebar-card">
-              <h3 className="community-sidebar-title">
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>auto_awesome</span>
-                Hızlı Bağlantılar
-              </h3>
-              <nav className="community-sidebar-links">
-                <a href="/ai/" className="community-sidebar-link">
-                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>smart_toy</span>
-                  <span>AI Seyahat Asistanı</span>
-                </a>
-                <a href="/desk/" className="community-sidebar-link">
-                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>map</span>
-                  <span>Seyahat Masası</span>
-                </a>
-                <a href="/profile/" className="community-sidebar-link">
-                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person</span>
-                  <span>Profilim</span>
-                </a>
-              </nav>
-            </div>
-
-            <div className="community-sidebar-card community-sidebar-cta">
-              <span className="material-symbols-outlined community-sidebar-cta-icon">explore</span>
-              <strong>Rotanı Paylaş</strong>
-              <p>Kendi gezi rotalarını toplulukla paylaş, diğer gezginlere ilham ver.</p>
-              <button
-                type="button"
-                className="community-share-btn"
-                style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}
-                onClick={() => {
-                  requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
-                    setShowNewPostModal(true);
-                  });
-                }}
-              >
-                Paylaşım Yap
-              </button>
-            </div>
-          </aside>
-        </div>
-
-        <CommunityFooter />
-
-        {/* ── YENİ PAYLAŞIM MODALI ── */}
-        <NewPostModal
-          isOpen={showNewPostModal}
-          onClose={() => setShowNewPostModal(false)}
-          activeUsername={activeUsername}
-          userSavedRoutes={userSavedRoutes}
-          onSubmit={handleCreatePost}
-        />
-
-        {/* ── TOAST BİLDİRİMİ ── */}
-        {toast && (
-          <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 50, background: "rgba(15,23,42,0.92)", backdropFilter: "blur(8px)", color: "#fff", padding: "0.6rem 1.25rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 600, boxShadow: "0 4px 24px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span>{toast}</span>
+            >
+              ✍️ Seyahat Deneyimi Paylaş
+            </button>
           </div>
-        )}
 
-        {/* ── AUTH MODAL ── */}
-        {showAuthModal && (
-          <AuthActionModal
-            isOpen={showAuthModal}
-            title={authConfig.title}
-            subtitle={authConfig.subtitle}
-            featureName={authConfig.featureName}
-            nextUrl="/community/"
-            onClose={() => setShowAuthModal(false)}
+          {/* Filter tabs */}
+          <div className="hero-tabs-bar">
+            {[
+              { key: "güncel", label: "Güncel", badge: "Canlı", live: true },
+              { key: "popüler", label: "Popüler", badge: "Trend", live: false },
+              { key: "yakınımda", label: "Yakınımda", badge: null, live: false },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                className={`hero-tab${activeTab === tab.key ? " active" : ""}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+                {tab.badge && (
+                  <span className={`hero-tab-badge${tab.live ? " live" : ""}`}>{tab.badge}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="community-layout">
+        {/* ── MAIN FEED ── */}
+        <main className="community-feed-col">
+          <DiscoverTab
+            posts={posts}
+            filter="all"
+            activeUsername={activeUsername}
+            userSavedRoutes={userSavedRoutes}
+            followedUsernames={followedTravelerUsernames}
+            onToggleLike={handleToggleLike}
+            onToggleBookmark={handleToggleBookmark}
+            onRetweet={handleRetweet}
+            onAddToMyTrip={handleAddToMyTrip}
+            onOpenNewPost={() => {
+              requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
+                setShowNewPostModal(true);
+              });
+            }}
+            onToggleFollow={toggleFollowUser}
+            onAddComment={handleAddComment}
+            onFastTweet={handleFastTweet}
+            onEditPost={handleEditPost}
+            onDeletePost={handleDeletePost}
+            showToast={showToast}
           />
-        )}
+        </main>
+
+        {/* ── SIDEBAR ── */}
+        <aside className="community-sidebar-col">
+          <div className="community-sidebar-card">
+            <h3 className="community-sidebar-title">
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                explore
+              </span>
+              Kategoriler
+            </h3>
+            <div className="community-sidebar-cats">
+              {[
+                { icon: "🏛️", label: "Tarih & Kültür" },
+                { icon: "🍽️", label: "Gastronomi" },
+                { icon: "🌲", label: "Doğa & Vadi" },
+                { icon: "📷", label: "Fotoğrafçılık" },
+                { icon: "🎒", label: "Sırt Çantalı" },
+                { icon: "🏙️", label: "Şehir Keşfi" },
+              ].map((c) => (
+                <span key={c.label} className="community-sidebar-cat-pill">
+                  {c.icon} {c.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="community-sidebar-card">
+            <h3 className="community-sidebar-title">
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                auto_awesome
+              </span>
+              Hızlı Bağlantılar
+            </h3>
+            <nav className="community-sidebar-links">
+              <a href="/ai/" className="community-sidebar-link">
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                  smart_toy
+                </span>
+                <span>AI Seyahat Asistanı</span>
+              </a>
+              <a href="/desk/" className="community-sidebar-link">
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                  map
+                </span>
+                <span>Seyahat Masası</span>
+              </a>
+              <a href="/profile/" className="community-sidebar-link">
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                  person
+                </span>
+                <span>Profilim</span>
+              </a>
+            </nav>
+          </div>
+
+          <div className="community-sidebar-card community-sidebar-cta">
+            <span className="material-symbols-outlined community-sidebar-cta-icon">explore</span>
+            <strong>Rotanı Paylaş</strong>
+            <p>Kendi gezi rotalarını toplulukla paylaş, diğer gezginlere ilham ver.</p>
+            <button
+              type="button"
+              className="community-share-btn"
+              style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}
+              onClick={() => {
+                requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
+                  setShowNewPostModal(true);
+                });
+              }}
+            >
+              Paylaşım Yap
+            </button>
+          </div>
+        </aside>
       </div>
+
+      <CommunityFooter />
+
+      {/* ── YENİ PAYLAŞIM MODALI ── */}
+      <NewPostModal
+        isOpen={showNewPostModal}
+        onClose={() => setShowNewPostModal(false)}
+        activeUsername={activeUsername}
+        userSavedRoutes={userSavedRoutes}
+        onSubmit={handleCreatePost}
+      />
+
+      {/* ── TOAST BİLDİRİMİ ── */}
+      {toast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 24,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 50,
+            background: "rgba(15,23,42,0.92)",
+            backdropFilter: "blur(8px)",
+            color: "#fff",
+            padding: "0.6rem 1.25rem",
+            borderRadius: "9999px",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span>{toast}</span>
+        </div>
+      )}
+
+      {/* ── AUTH MODAL ── */}
+      {showAuthModal && (
+        <AuthActionModal
+          isOpen={showAuthModal}
+          title={authConfig.title}
+          subtitle={authConfig.subtitle}
+          featureName={authConfig.featureName}
+          nextUrl="/community/"
+          onClose={() => setShowAuthModal(false)}
+        />
+      )}
+    </div>
   );
 }

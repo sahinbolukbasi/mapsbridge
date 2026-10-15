@@ -15,7 +15,7 @@ export type TempoPreference = "relaxed" | "moderate" | "fast";
 
 /** Every stop must come from a tool result. Bare IDs are not allowed. */
 export interface PlaceRef {
-  id: string;          // "overture:place/abc" | "fsq:abc" | "google:ChIJ..." — prefix required
+  id: string; // "overture:place/abc" | "fsq:abc" | "google:ChIJ..." — prefix required
   source: "overture" | "foursquare" | "google_places" | "manual";
   name: string;
   lat: number;
@@ -27,17 +27,17 @@ export interface PlaceRef {
 // ── Stop ──────────────────────────────────────────────────────────────────────
 
 export interface StopDuration {
-  p50Minutes: number;   // typical visitor
-  p90Minutes?: number;  // slow visitor / queue included
+  p50Minutes: number; // typical visitor
+  p90Minutes?: number; // slow visitor / queue included
   source: "category_default" | "poi_specific" | "user_feedback";
 }
 
 export interface TripStop {
-  id: string;          // nanoid, immutable
+  id: string; // nanoid, immutable
   placeRef: PlaceRef;
-  day: number;         // 1-indexed
-  order: number;       // within-day order, set by scheduler
-  startTime?: string;  // "HH:MM" — set by scheduler
+  day: number; // 1-indexed
+  order: number; // within-day order, set by scheduler
+  startTime?: string; // "HH:MM" — set by scheduler
   duration: StopDuration;
   travelFromPrevious?: {
     mode: TravelMode;
@@ -47,11 +47,11 @@ export interface TripStop {
   };
   /** Personalized one-liner. Model-generated; not a tool result, not in plan data. */
   why: string;
-  category?: string;   // overture taxonomy.primary
+  category?: string; // overture taxonomy.primary
   openingHours?: {
-    closedDays: string[];  // ["monday"]
-    lastEntry?: string;    // "HH:MM" — differs from closing time
-    peakHours?: string[];  // ["10:00-12:00", "14:00-16:00"]
+    closedDays: string[]; // ["monday"]
+    lastEntry?: string; // "HH:MM" — differs from closing time
+    peakHours?: string[]; // ["10:00-12:00", "14:00-16:00"]
     source: string;
     retrievedAt: string;
   };
@@ -66,8 +66,8 @@ export interface TripStop {
 
 export interface TripDay {
   day: number;
-  date?: string;              // ISO date — set if user gave dates
-  theme?: string;             // "Antik Merkez", set by scheduler or AI
+  date?: string; // ISO date — set if user gave dates
+  theme?: string; // "Antik Merkez", set by scheduler or AI
   stops: TripStop[];
   totalDurationMinutes?: number;
   totalDistanceKm?: number;
@@ -93,21 +93,21 @@ export interface TripBooking {
   priceCurrency?: string;
   retrievedAt: string;
   expiresAt?: string;
-  isBookable: boolean;     // false when price is expired or indicative-only
+  isBookable: boolean; // false when price is expired or indicative-only
   source: string;
-  attribution?: string;   // displayed to user, required for affiliate transparency
+  attribution?: string; // displayed to user, required for affiliate transparency
 }
 
 // ── Conversation state (drives assistant behaviour) ──────────────────────────
 
 export type TripPhase =
-  | "orient"      // destination known, constraints unknown
-  | "constrain"   // dates/travelers/tempo clarifying
-  | "draft"       // first plan produced
-  | "refine"      // edit loop
-  | "prepare"     // pre-trip checklist
-  | "in_trip"     // user is travelling
-  | "post_trip";  // feedback collection
+  | "orient" // destination known, constraints unknown
+  | "constrain" // dates/travelers/tempo clarifying
+  | "draft" // first plan produced
+  | "refine" // edit loop
+  | "prepare" // pre-trip checklist
+  | "in_trip" // user is travelling
+  | "post_trip"; // feedback collection
 
 export interface TripConversationState {
   phase: TripPhase;
@@ -128,8 +128,8 @@ export interface TripDestination {
 }
 
 export interface TripDates {
-  start: string;   // ISO date
-  end: string;     // ISO date
+  start: string; // ISO date
+  end: string; // ISO date
   flexible: boolean;
 }
 
@@ -150,14 +150,14 @@ export interface Trip {
   tempo: TempoPreference;
   budget: TripBudgetDef;
   interests: string[];
-  constraints?: string[];   // "wheelchair" | "stroller" | "no_stairs" | "no_crowds"
+  constraints?: string[]; // "wheelchair" | "stroller" | "no_stairs" | "no_crowds"
   days: TripDay[];
   bookings: TripBooking[];
   conversationState: TripConversationState;
   metadata: {
     createdAt: string;
     updatedAt: string;
-    version: number;         // optimistic locking — increment on every mutation
+    version: number; // optimistic locking — increment on every mutation
     schemaVersion: "1.0";
     destinationBriefId?: string; // link to DestinationBrief used
   };
@@ -167,16 +167,16 @@ export interface Trip {
 // The only way to change a Trip. Every mutation is logged with a source.
 
 export type TripMutation =
-  | { type: "addStop";       payload: { placeRef: PlaceRef; day: number; insertAfter?: string } }
-  | { type: "removeStop";    payload: { stopId: string } }
-  | { type: "moveStop";      payload: { stopId: string; toDay: number; toOrder: number } }
-  | { type: "replaceStop";   payload: { stopId: string; newPlaceRef: PlaceRef } }
-  | { type: "setDates";      payload: TripDates }
-  | { type: "setTempo";      payload: { tempo: TempoPreference } }
-  | { type: "setTheme";      payload: { day: number; theme: string } }
+  | { type: "addStop"; payload: { placeRef: PlaceRef; day: number; insertAfter?: string } }
+  | { type: "removeStop"; payload: { stopId: string } }
+  | { type: "moveStop"; payload: { stopId: string; toDay: number; toOrder: number } }
+  | { type: "replaceStop"; payload: { stopId: string; newPlaceRef: PlaceRef } }
+  | { type: "setDates"; payload: TripDates }
+  | { type: "setTempo"; payload: { tempo: TempoPreference } }
+  | { type: "setTheme"; payload: { day: number; theme: string } }
   | { type: "attachBooking"; payload: { booking: TripBooking } }
   | { type: "removeBooking"; payload: { bookingId: string } }
-  | { type: "advancePhase";  payload: { to: TripPhase; assumption?: string } };
+  | { type: "advancePhase"; payload: { to: TripPhase; assumption?: string } };
 
 export interface TripMutationEvent {
   tripId: string;
@@ -191,17 +191,18 @@ export function isValidPlaceRef(v: unknown): v is PlaceRef {
   if (!v || typeof v !== "object") return false;
   const p = v as PlaceRef;
   return (
-    typeof p.id === "string" && /^(overture|fsq|google|manual):/.test(p.id) &&
-    typeof p.name === "string" && p.name.trim().length > 0 &&
-    Number.isFinite(p.lat) && Math.abs(p.lat) <= 90 &&
-    Number.isFinite(p.lng) && Math.abs(p.lng) <= 180 &&
+    typeof p.id === "string" &&
+    /^(overture|fsq|google|manual):/.test(p.id) &&
+    typeof p.name === "string" &&
+    p.name.trim().length > 0 &&
+    Number.isFinite(p.lat) &&
+    Math.abs(p.lat) <= 90 &&
+    Number.isFinite(p.lng) &&
+    Math.abs(p.lng) <= 180 &&
     typeof p.retrievedAt === "string"
   );
 }
 
 export function countSourcelessStops(trip: Trip): number {
-  return trip.days
-    .flatMap(d => d.stops)
-    .filter(s => !isValidPlaceRef(s.placeRef))
-    .length;
+  return trip.days.flatMap((d) => d.stops).filter((s) => !isValidPlaceRef(s.placeRef)).length;
 }

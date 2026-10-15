@@ -5,17 +5,36 @@
  * (Overpass/OSM, Google Places, Foursquare, Amazon Location).
  */
 
-export type PlaceSource = 'osm' | 'google' | 'foursquare' | 'amazon_location';
+export type PlaceSource = "osm" | "google" | "foursquare" | "amazon_location";
 export type PlaceCategory =
-  | 'restaurant' | 'cafe' | 'bar' | 'nightlife'
-  | 'museum' | 'gallery' | 'monument' | 'historical'
-  | 'park' | 'garden' | 'beach' | 'nature'
-  | 'hotel' | 'hostel' | 'lodge'
-  | 'shop' | 'market' | 'mall'
-  | 'temple' | 'mosque' | 'church'
-  | 'viewpoint' | 'landmark' | 'attraction'
-  | 'transport' | 'pharmacy' | 'hospital'
-  | 'other';
+  | "restaurant"
+  | "cafe"
+  | "bar"
+  | "nightlife"
+  | "museum"
+  | "gallery"
+  | "monument"
+  | "historical"
+  | "park"
+  | "garden"
+  | "beach"
+  | "nature"
+  | "hotel"
+  | "hostel"
+  | "lodge"
+  | "shop"
+  | "market"
+  | "mall"
+  | "temple"
+  | "mosque"
+  | "church"
+  | "viewpoint"
+  | "landmark"
+  | "attraction"
+  | "transport"
+  | "pharmacy"
+  | "hospital"
+  | "other";
 
 export interface NormalizedPlace {
   id: string;
@@ -39,7 +58,7 @@ export interface NormalizedPlace {
   photos?: PlacePhoto[];
   tags: string[];
   typicalDurationMins: number;
-  recommendedSlot: 'morning' | 'afternoon' | 'evening' | 'any';
+  recommendedSlot: "morning" | "afternoon" | "evening" | "any";
   description?: string;
   osmTags?: Record<string, string>;
   collectedAt: string;

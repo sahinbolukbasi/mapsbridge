@@ -6,7 +6,7 @@
  * place collection (OSM, Google Places, Foursquare) and external APIs.
  */
 
-import type { NormalizedPlace } from '../../../place-intelligence/src/domain/types.js';
+import type { NormalizedPlace } from "../../../place-intelligence/src/domain/types.js";
 
 export interface ToolExecutionRequest {
   toolName: string;
@@ -57,7 +57,11 @@ export class ToolExecutor {
           return {
             success: true,
             toolName,
-            data: { acknowledged: true, parameters, message: `${toolName} aracı başarıyla yürütüldü.` },
+            data: {
+              acknowledged: true,
+              parameters,
+              message: `${toolName} aracı başarıyla yürütüldü.`,
+            },
             source: "fallback",
             durationMs: Date.now() - started,
           };
@@ -67,7 +71,7 @@ export class ToolExecutor {
       return {
         success: false,
         toolName,
-        data: { error: err?.message || 'Bilinmeyen hata' },
+        data: { error: err?.message || "Bilinmeyen hata" },
         source: "fallback",
         durationMs: Date.now() - started,
       };
@@ -81,44 +85,49 @@ export class ToolExecutor {
     const city = params.city || params.destination;
     if (!city) {
       return {
-        success: false, toolName: 'find_restaurants',
-        data: { error: 'Şehir parametresi gerekli.' }, source: 'fallback',
+        success: false,
+        toolName: "find_restaurants",
+        data: { error: "Şehir parametresi gerekli." },
+        source: "fallback",
         durationMs: Date.now() - started,
       };
     }
 
-    const { getPlacesForCity } = await import(
-      '../../../place-intelligence/src/infrastructure/place-store.js'
-    );
+    const { getPlacesForCity } =
+      await import("../../../place-intelligence/src/infrastructure/place-store.js");
 
-    let places = await getPlacesForCity(city, 'restaurant', 20);
+    let places = await getPlacesForCity(city, "restaurant", 20);
 
     if (places.length === 0) {
-      const { discoverCityByCategory } = await import(
-        '../../../place-intelligence/src/application/discovery-service.js'
-      );
-      const result = await discoverCityByCategory(city, params.country || '', ['restaurant', 'cafe']);
-      places = result.places.filter((p: NormalizedPlace) => p.category === 'restaurant');
+      const { discoverCityByCategory } =
+        await import("../../../place-intelligence/src/application/discovery-service.js");
+      const result = await discoverCityByCategory(city, params.country || "", [
+        "restaurant",
+        "cafe",
+      ]);
+      places = result.places.filter((p: NormalizedPlace) => p.category === "restaurant");
 
-      const { storePlaces } = await import('../../../place-intelligence/src/infrastructure/place-store.js');
+      const { storePlaces } =
+        await import("../../../place-intelligence/src/infrastructure/place-store.js");
       await storePlaces(result.places).catch(() => {});
     }
 
     const cuisine = params.cuisine?.toLowerCase();
     if (cuisine) {
-      const filtered = places.filter((p: NormalizedPlace) =>
-        p.tags.some((t: string) => t.toLowerCase().includes(cuisine)) ||
-        p.subcategories.some((s: string) => s.toLowerCase().includes(cuisine)) ||
-        p.name.toLowerCase().includes(cuisine)
+      const filtered = places.filter(
+        (p: NormalizedPlace) =>
+          p.tags.some((t: string) => t.toLowerCase().includes(cuisine)) ||
+          p.subcategories.some((s: string) => s.toLowerCase().includes(cuisine)) ||
+          p.name.toLowerCase().includes(cuisine),
       );
       if (filtered.length > 0) places = filtered;
     }
 
     return {
       success: true,
-      toolName: 'find_restaurants',
+      toolName: "find_restaurants",
       data: places.slice(0, 10).map(formatPlaceForAgent),
-      source: places.length > 0 ? 'live_api' : 'fallback',
+      source: places.length > 0 ? "live_api" : "fallback",
       durationMs: Date.now() - started,
     };
   }
@@ -132,35 +141,38 @@ export class ToolExecutor {
 
     if (!city) {
       return {
-        success: false, toolName: 'find_places',
-        data: { error: 'Şehir parametresi gerekli.' }, source: 'fallback',
+        success: false,
+        toolName: "find_places",
+        data: { error: "Şehir parametresi gerekli." },
+        source: "fallback",
         durationMs: Date.now() - started,
       };
     }
 
-    const { getPlacesForCity } = await import(
-      '../../../place-intelligence/src/infrastructure/place-store.js'
-    );
+    const { getPlacesForCity } =
+      await import("../../../place-intelligence/src/infrastructure/place-store.js");
 
     let places = await getPlacesForCity(city, category, 30);
 
     if (places.length === 0) {
-      const { discoverCityByCategory } = await import(
-        '../../../place-intelligence/src/application/discovery-service.js'
-      );
-      const cats = category ? [category] : ['attraction', 'museum', 'park', 'monument', 'viewpoint'];
-      const result = await discoverCityByCategory(city, params.country || '', cats as any);
+      const { discoverCityByCategory } =
+        await import("../../../place-intelligence/src/application/discovery-service.js");
+      const cats = category
+        ? [category]
+        : ["attraction", "museum", "park", "monument", "viewpoint"];
+      const result = await discoverCityByCategory(city, params.country || "", cats as any);
       places = result.places;
 
-      const { storePlaces } = await import('../../../place-intelligence/src/infrastructure/place-store.js');
+      const { storePlaces } =
+        await import("../../../place-intelligence/src/infrastructure/place-store.js");
       await storePlaces(result.places).catch(() => {});
     }
 
     return {
       success: true,
-      toolName: 'find_places',
+      toolName: "find_places",
       data: places.slice(0, 15).map(formatPlaceForAgent),
-      source: places.length > 0 ? 'live_api' : 'fallback',
+      source: places.length > 0 ? "live_api" : "fallback",
       durationMs: Date.now() - started,
     };
   }
@@ -169,7 +181,7 @@ export class ToolExecutor {
     params: Record<string, any>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const city = params.city || 'Istanbul';
+    const city = params.city || "Istanbul";
     const apiKey = process.env.OPENWEATHERMAP_API_KEY;
 
     if (apiKey) {
@@ -177,33 +189,39 @@ export class ToolExecutor {
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
         const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
         if (response.ok) {
-          const data = await response.json() as {
+          const data = (await response.json()) as {
             main: { temp: number; humidity: number };
             weather: Array<{ description: string; main: string }>;
             wind: { speed: number };
           };
           return {
-            success: true, toolName: 'get_weather',
+            success: true,
+            toolName: "get_weather",
             data: {
               city,
               temperatureC: Math.round(data.main.temp),
-              condition: data.weather[0]?.description || 'Bilinmiyor',
+              condition: data.weather[0]?.description || "Bilinmiyor",
               humidity: data.main.humidity,
               windSpeedMs: data.wind.speed,
-              isOutdoorSafe: !['Thunderstorm', 'Snow', 'Tornado'].includes(data.weather[0]?.main),
+              isOutdoorSafe: !["Thunderstorm", "Snow", "Tornado"].includes(data.weather[0]?.main),
             },
-            source: 'live_api', durationMs: Date.now() - started,
+            source: "live_api",
+            durationMs: Date.now() - started,
           };
         }
-      } catch { /* fall through to heuristic */ }
+      } catch {
+        /* fall through to heuristic */
+      }
     }
 
     const month = new Date().getMonth();
     const seasonal = getSeasonalWeather(city, month);
     return {
-      success: true, toolName: 'get_weather',
-      data: { city, ...seasonal, note: 'Tahmini mevsimsel veri — gerçek zamanlı değil' },
-      source: 'fallback', durationMs: Date.now() - started,
+      success: true,
+      toolName: "get_weather",
+      data: { city, ...seasonal, note: "Tahmini mevsimsel veri — gerçek zamanlı değil" },
+      source: "fallback",
+      durationMs: Date.now() - started,
     };
   }
 
@@ -211,16 +229,16 @@ export class ToolExecutor {
     params: Record<string, any>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const city = params.city || 'Istanbul';
+    const city = params.city || "Istanbul";
     return {
       success: true,
-      toolName: 'find_events',
+      toolName: "find_events",
       data: {
         city,
         events: [],
-        note: 'Etkinlik API entegrasyonu yapılandırılmadı. Yerel etkinlikler için şehrin turizm ofisine başvurun.',
+        note: "Etkinlik API entegrasyonu yapılandırılmadı. Yerel etkinlikler için şehrin turizm ofisine başvurun.",
       },
-      source: 'fallback',
+      source: "fallback",
       durationMs: Date.now() - started,
     };
   }
@@ -236,27 +254,37 @@ export class ToolExecutor {
 
     if (fromLat && fromLng && toLat && toLng) {
       const dist = haversineKm(fromLat, fromLng, toLat, toLng);
-      const walkingMin = Math.round(dist / 4.5 * 60);
-      const transitMin = Math.round(dist / 25 * 60) + 5;
-      const taxiMin = Math.round(dist / 30 * 60) + 3;
+      const walkingMin = Math.round((dist / 4.5) * 60);
+      const transitMin = Math.round((dist / 25) * 60) + 5;
+      const taxiMin = Math.round((dist / 30) * 60) + 3;
 
       return {
-        success: true, toolName: 'get_public_transport',
+        success: true,
+        toolName: "get_public_transport",
         data: {
           distanceKm: Math.round(dist * 10) / 10,
-          walking: { durationMinutes: walkingMin, note: walkingMin <= 20 ? 'Yürüyerek uygun' : 'Toplu taşıma önerilir' },
-          transit: { durationMinutes: transitMin, estimatedCost: '€1.50 - €3.00' },
-          taxi: { durationMinutes: taxiMin, estimatedCost: `€${Math.round(dist * 2 + 3)} - €${Math.round(dist * 3 + 5)}` },
-          recommendation: dist < 1 ? 'walking' : dist < 10 ? 'transit' : 'taxi',
+          walking: {
+            durationMinutes: walkingMin,
+            note: walkingMin <= 20 ? "Yürüyerek uygun" : "Toplu taşıma önerilir",
+          },
+          transit: { durationMinutes: transitMin, estimatedCost: "€1.50 - €3.00" },
+          taxi: {
+            durationMinutes: taxiMin,
+            estimatedCost: `€${Math.round(dist * 2 + 3)} - €${Math.round(dist * 3 + 5)}`,
+          },
+          recommendation: dist < 1 ? "walking" : dist < 10 ? "transit" : "taxi",
         },
-        source: 'internal_verified', durationMs: Date.now() - started,
+        source: "internal_verified",
+        durationMs: Date.now() - started,
       };
     }
 
     return {
-      success: true, toolName: 'get_public_transport',
-      data: { note: 'Koordinat bilgisi verilmedi. Mesafe hesabı yapılamadı.' },
-      source: 'fallback', durationMs: Date.now() - started,
+      success: true,
+      toolName: "get_public_transport",
+      data: { note: "Koordinat bilgisi verilmedi. Mesafe hesabı yapılamadı." },
+      source: "fallback",
+      durationMs: Date.now() - started,
     };
   }
 
@@ -268,25 +296,31 @@ export class ToolExecutor {
     const city = params.city;
 
     if (placeId && city) {
-      const { getPlacesForCity } = await import(
-        '../../../place-intelligence/src/infrastructure/place-store.js'
-      );
+      const { getPlacesForCity } =
+        await import("../../../place-intelligence/src/infrastructure/place-store.js");
       const places = await getPlacesForCity(city, undefined, 500);
       const place = places.find((p: NormalizedPlace) => p.id === placeId || p.sourceId === placeId);
 
       if (place?.openingHours) {
         return {
-          success: true, toolName: 'get_opening_hours',
+          success: true,
+          toolName: "get_opening_hours",
           data: { placeId, name: place.name, hours: place.openingHours },
-          source: 'live_api', durationMs: Date.now() - started,
+          source: "live_api",
+          durationMs: Date.now() - started,
         };
       }
     }
 
     return {
-      success: true, toolName: 'get_opening_hours',
-      data: { placeId, note: 'Çalışma saati bilgisi mevcut değil. Mekanın web sitesinden doğrulayın.' },
-      source: 'fallback', durationMs: Date.now() - started,
+      success: true,
+      toolName: "get_opening_hours",
+      data: {
+        placeId,
+        note: "Çalışma saati bilgisi mevcut değil. Mekanın web sitesinden doğrulayın.",
+      },
+      source: "fallback",
+      durationMs: Date.now() - started,
     };
   }
 
@@ -297,18 +331,18 @@ export class ToolExecutor {
     const city = params.city;
     if (!city) {
       return {
-        success: false, toolName: 'discover_city',
-        data: { error: 'Şehir parametresi gerekli.' }, source: 'fallback',
+        success: false,
+        toolName: "discover_city",
+        data: { error: "Şehir parametresi gerekli." },
+        source: "fallback",
         durationMs: Date.now() - started,
       };
     }
 
-    const { discoverCity: discover } = await import(
-      '../../../place-intelligence/src/application/discovery-service.js'
-    );
-    const { placeSummaryForAgent } = await import(
-      '../../../place-intelligence/src/application/discovery-service.js'
-    );
+    const { discoverCity: discover } =
+      await import("../../../place-intelligence/src/application/discovery-service.js");
+    const { placeSummaryForAgent } =
+      await import("../../../place-intelligence/src/application/discovery-service.js");
 
     const result = await discover({
       city,
@@ -318,7 +352,8 @@ export class ToolExecutor {
     });
 
     return {
-      success: true, toolName: 'discover_city',
+      success: true,
+      toolName: "discover_city",
       data: {
         city: result.city,
         placeCount: result.places.length,
@@ -326,7 +361,8 @@ export class ToolExecutor {
         summary: placeSummaryForAgent(result.places),
         topPlaces: result.places.slice(0, 20).map(formatPlaceForAgent),
       },
-      source: 'live_api', durationMs: Date.now() - started,
+      source: "live_api",
+      durationMs: Date.now() - started,
     };
   }
 
@@ -337,29 +373,34 @@ export class ToolExecutor {
     const { placeId, city } = params;
     if (!placeId || !city) {
       return {
-        success: false, toolName: 'get_place_details',
-        data: { error: 'placeId ve city parametreleri gerekli.' }, source: 'fallback',
+        success: false,
+        toolName: "get_place_details",
+        data: { error: "placeId ve city parametreleri gerekli." },
+        source: "fallback",
         durationMs: Date.now() - started,
       };
     }
 
-    const { getPlacesForCity } = await import(
-      '../../../place-intelligence/src/infrastructure/place-store.js'
-    );
+    const { getPlacesForCity } =
+      await import("../../../place-intelligence/src/infrastructure/place-store.js");
     const places = await getPlacesForCity(city, undefined, 500);
     const place = places.find((p: NormalizedPlace) => p.id === placeId || p.sourceId === placeId);
 
     if (place) {
       return {
-        success: true, toolName: 'get_place_details',
+        success: true,
+        toolName: "get_place_details",
         data: formatPlaceForAgent(place),
-        source: 'live_api', durationMs: Date.now() - started,
+        source: "live_api",
+        durationMs: Date.now() - started,
       };
     }
 
     return {
-      success: false, toolName: 'get_place_details',
-      data: { error: 'Mekan bulunamadı.' }, source: 'fallback',
+      success: false,
+      toolName: "get_place_details",
+      data: { error: "Mekan bulunamadı." },
+      source: "fallback",
       durationMs: Date.now() - started,
     };
   }
@@ -388,25 +429,45 @@ function formatPlaceForAgent(p: NormalizedPlace) {
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function getSeasonalWeather(city: string, month: number) {
   const cityLower = city.toLowerCase();
-  const isMediterranean = ['istanbul', 'rome', 'barcelona', 'athens', 'antalya', 'lisbon'].some(c => cityLower.includes(c));
-  const isTropical = ['bangkok', 'bali', 'singapore', 'mumbai', 'rio'].some(c => cityLower.includes(c));
+  const isMediterranean = ["istanbul", "rome", "barcelona", "athens", "antalya", "lisbon"].some(
+    (c) => cityLower.includes(c),
+  );
+  const isTropical = ["bangkok", "bali", "singapore", "mumbai", "rio"].some((c) =>
+    cityLower.includes(c),
+  );
 
   if (isTropical) {
-    return { temperatureC: 30, condition: 'Sıcak ve nemli', precipitationProb: month >= 5 && month <= 10 ? 60 : 20, isOutdoorSafe: true };
+    return {
+      temperatureC: 30,
+      condition: "Sıcak ve nemli",
+      precipitationProb: month >= 5 && month <= 10 ? 60 : 20,
+      isOutdoorSafe: true,
+    };
   }
   if (isMediterranean) {
     const temps = [8, 9, 12, 16, 21, 26, 29, 29, 25, 19, 14, 10];
-    return { temperatureC: temps[month], condition: month >= 5 && month <= 8 ? 'Güneşli' : 'Parçalı Bulutlu', precipitationProb: month >= 10 || month <= 2 ? 40 : 10, isOutdoorSafe: true };
+    return {
+      temperatureC: temps[month],
+      condition: month >= 5 && month <= 8 ? "Güneşli" : "Parçalı Bulutlu",
+      precipitationProb: month >= 10 || month <= 2 ? 40 : 10,
+      isOutdoorSafe: true,
+    };
   }
   const temps = [2, 3, 8, 13, 18, 22, 25, 24, 19, 13, 7, 3];
-  return { temperatureC: temps[month], condition: 'Değişken', precipitationProb: 30, isOutdoorSafe: temps[month] > 0 };
+  return {
+    temperatureC: temps[month],
+    condition: "Değişken",
+    precipitationProb: 30,
+    isOutdoorSafe: temps[month] > 0,
+  };
 }

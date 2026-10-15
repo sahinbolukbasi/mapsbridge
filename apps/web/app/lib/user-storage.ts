@@ -4,8 +4,11 @@ let boundOwner: string | undefined;
 
 function scopedKey(key: string): string | null {
   if (typeof window === "undefined") return null;
-  const email = localStorage.getItem("mapsbridge.userEmail") || localStorage.getItem("adreskopru.userEmail");
-  const token = localStorage.getItem("mapsbridge.accessToken") || localStorage.getItem("adreskopru.accessToken");
+  const email =
+    localStorage.getItem("mapsbridge.userEmail") || localStorage.getItem("adreskopru.userEmail");
+  const token =
+    localStorage.getItem("mapsbridge.accessToken") ||
+    localStorage.getItem("adreskopru.accessToken");
   if (!email || !token) return null;
   const owner = email.trim().toLowerCase();
   if (boundOwner === undefined) boundOwner = owner;
@@ -21,8 +24,9 @@ export const userStorage = {
   setItem(key: string, value: string) {
     const scoped = scopedKey(key);
     if (!scoped) throw new Error("Kaydetmek için giriş yapın.");
-    try { localStorage.setItem(scoped, value); }
-    catch {
+    try {
+      localStorage.setItem(scoped, value);
+    } catch {
       window.dispatchEvent(new CustomEvent("mapsbridge:storage-error"));
       throw new Error("Değişiklik kaydedilemedi. Depolama alanını kontrol edin.");
     }

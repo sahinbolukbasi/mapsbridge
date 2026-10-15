@@ -90,7 +90,7 @@ test("heavy day is flagged when schedule exceeds 8.5 hours", () => {
   const longStops = [
     { id: "1", label: "Büyük Saray", lat: 41.008, lng: 28.978, durationMinutes: 240 },
     { id: "2", label: "Müze Kompleksi", lat: 41.035, lng: 28.985, durationMinutes: 240 },
-    { id: "3", label: "Şehir Turu", lat: 41.050, lng: 28.995, durationMinutes: 180 },
+    { id: "3", label: "Şehir Turu", lat: 41.05, lng: 28.995, durationMinutes: 180 },
   ];
 
   const result = calculateDayTimeline(longStops, "08:00", "walking");
@@ -99,8 +99,22 @@ test("heavy day is flagged when schedule exceeds 8.5 hours", () => {
 
 test("general pin pool supports rapid discovery and assignment to trip days", () => {
   let generalPins = [
-    { id: "gen-1", label: "Galata Kulesi", lat: 41.0256, lng: 28.9741, dayIndex: 0, group: "Genel" },
-    { id: "gen-2", label: "Karaköy Lokantası", lat: 41.0232, lng: 28.9772, dayIndex: 0, group: "Genel" },
+    {
+      id: "gen-1",
+      label: "Galata Kulesi",
+      lat: 41.0256,
+      lng: 28.9741,
+      dayIndex: 0,
+      group: "Genel",
+    },
+    {
+      id: "gen-2",
+      label: "Karaköy Lokantası",
+      lat: 41.0232,
+      lng: 28.9772,
+      dayIndex: 0,
+      group: "Genel",
+    },
   ];
 
   let trip = {
@@ -153,7 +167,10 @@ test("groups support mixed pins without days and flexible day assignments", () =
   let group = {
     id: "group-mixed",
     title: "Kapadokya Gezisi",
-    days: [{ dayIndex: 1, label: "1. Gün" }, { dayIndex: 2, label: "2. Gün" }],
+    days: [
+      { dayIndex: 1, label: "1. Gün" },
+      { dayIndex: 2, label: "2. Gün" },
+    ],
     pins: [
       { id: "p-1", label: "Göreme Açık Hava Müzesi", dayIndex: 0, order: 1 },
       { id: "p-2", label: "Uçhisar Kalesi", dayIndex: 0, order: 2 },
@@ -178,7 +195,13 @@ test("groups support mixed pins without days and flexible day assignments", () =
 test("tripToRoute converts trip to UnifiedRoutePlan and back with routeToTrip", () => {
   const { buildSync } = require("esbuild");
   const vm = require("node:vm");
-  const result = buildSync({ entryPoints: ["app/lib/trip/workspace-store.ts"], bundle: true, platform: "node", format: "cjs", write: false });
+  const result = buildSync({
+    entryPoints: ["app/lib/trip/workspace-store.ts"],
+    bundle: true,
+    platform: "node",
+    format: "cjs",
+    write: false,
+  });
   const context = { module: { exports: {} }, crypto };
   vm.runInNewContext(result.outputFiles[0].text, context);
   const { tripToRoute, routeToTrip } = context.module.exports;
@@ -190,9 +213,33 @@ test("tripToRoute converts trip to UnifiedRoutePlan and back with routeToTrip", 
     destination: "İstanbul",
     estimatedDays: 2,
     stops: [
-      { id: "s-1", name: "Ayasofya", lat: 41.0086, lng: 28.9802, day: 1, description: "Tarihi cami ve müze", suggestedDuration: "2 saat" },
-      { id: "s-2", name: "Topkapı Sarayı", lat: 41.0115, lng: 28.9833, day: 1, description: "Osmanlı sarayı", suggestedDuration: "3 saat" },
-      { id: "s-3", name: "Galata Kulesi", lat: 41.0256, lng: 28.9741, day: 2, description: "Panoramik kule", suggestedDuration: "1 saat" },
+      {
+        id: "s-1",
+        name: "Ayasofya",
+        lat: 41.0086,
+        lng: 28.9802,
+        day: 1,
+        description: "Tarihi cami ve müze",
+        suggestedDuration: "2 saat",
+      },
+      {
+        id: "s-2",
+        name: "Topkapı Sarayı",
+        lat: 41.0115,
+        lng: 28.9833,
+        day: 1,
+        description: "Osmanlı sarayı",
+        suggestedDuration: "3 saat",
+      },
+      {
+        id: "s-3",
+        name: "Galata Kulesi",
+        lat: 41.0256,
+        lng: 28.9741,
+        day: 2,
+        description: "Panoramik kule",
+        suggestedDuration: "1 saat",
+      },
     ],
   };
 
@@ -207,6 +254,3 @@ test("tripToRoute converts trip to UnifiedRoutePlan and back with routeToTrip", 
   assert.equal(converted.stops[2].name, "Galata Kulesi");
   assert.equal(converted.stops[2].day, 2);
 });
-
-
-

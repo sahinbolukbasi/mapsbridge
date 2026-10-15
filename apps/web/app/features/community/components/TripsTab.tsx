@@ -64,11 +64,7 @@ export function TripsTab({
           )}
         </div>
 
-        <button
-          type="button"
-          className="btn-list-route-action"
-          onClick={onOpenNewTripModal}
-        >
+        <button type="button" className="btn-list-route-action" onClick={onOpenNewTripModal}>
           <span>👥</span>
           <span>Grup Gezisi Başlat</span>
         </button>
@@ -87,13 +83,17 @@ export function TripsTab({
               border: "1px dashed var(--card-border, rgba(1,54,40,0.2))",
             }}
           >
-            <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>
-              👥
-            </span>
+            <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>👥</span>
             <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, #0d281e)" }}>
               Aktif grup gezisi bulunamadı
             </h3>
-            <p style={{ margin: "0 0 1rem", color: "var(--text-muted, #4b5563)", fontSize: "0.9rem" }}>
+            <p
+              style={{
+                margin: "0 0 1rem",
+                color: "var(--text-muted, #4b5563)",
+                fontSize: "0.9rem",
+              }}
+            >
               Yeni bir seyahat grubu başlatabilir ve gezginleri davet edebilirsiniz.
             </p>
             <button
@@ -134,7 +134,9 @@ export function TripsTab({
                   </div>
                   <div className="matrix-item">
                     <span>👥 Katılımcı</span>
-                    <strong>{approvedAttendees.length} / {trip.capacity}</strong>
+                    <strong>
+                      {approvedAttendees.length} / {trip.capacity}
+                    </strong>
                   </div>
                   <div className="matrix-item">
                     <span>💳 Ücret</span>
@@ -150,7 +152,11 @@ export function TripsTab({
                 <div className="trip-organizer-row">
                   <div className="organizer-profile">
                     {trip.organizerAvatar ? (
-                      <img src={trip.organizerAvatar} alt={trip.organizerName} className="org-avatar" />
+                      <img
+                        src={trip.organizerAvatar}
+                        alt={trip.organizerName}
+                        className="org-avatar"
+                      />
                     ) : (
                       <div className="org-avatar-fallback">{trip.organizerName.charAt(0)}</div>
                     )}
@@ -163,7 +169,9 @@ export function TripsTab({
                   <div className="attendee-mini-avatars">
                     {approvedAttendees.slice(0, 4).map((att) => (
                       <span key={att.id} className="mini-avatar-bubble">
-                        {att.displayName ? att.displayName.charAt(0).toUpperCase() : att.username.charAt(0).toUpperCase()}
+                        {att.displayName
+                          ? att.displayName.charAt(0).toUpperCase()
+                          : att.username.charAt(0).toUpperCase()}
                       </span>
                     ))}
                     {approvedAttendees.length > 4 && (

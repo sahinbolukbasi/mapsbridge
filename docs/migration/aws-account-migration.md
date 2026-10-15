@@ -6,6 +6,7 @@ Yeni hesap: `<NEW_ACCOUNT_ID>` (eu-central-1)
 ## Ön Koşullar (Yeni Hesapta Manuel)
 
 1. **AWS CLI profili ayarla**
+
    ```bash
    aws configure --profile mapsbridge-new
    # Access Key, Secret Key, Region: eu-central-1
@@ -18,6 +19,7 @@ Yeni hesap: `<NEW_ACCOUNT_ID>` (eu-central-1)
    - Cross-region inference profile: `eu.anthropic.claude-haiku-4-5-20251001-v1:0`
 
 3. **Terraform state backend** (opsiyonel ama önerilir)
+
    ```bash
    aws s3 mb s3://adreskopru-prod-tfstate-<NEW_ACCOUNT_ID> --region eu-central-1 --profile mapsbridge-new
    ```
@@ -62,6 +64,7 @@ terraform apply migration.tfplan
 ```
 
 **Çıktıları kaydet** — sonraki adımlarda lazım:
+
 ```bash
 terraform output -json > /tmp/tf-main-outputs.json
 ```
@@ -156,6 +159,7 @@ terraform apply update.tfplan
 ## Deploy Sonrası Manuel Adımlar
 
 ### Stripe
+
 - Stripe Dashboard → Webhooks → yeni endpoint ekle: `https://<yeni API URL>/stripe/webhook`
 - SSM Parameter Store'a ekle:
   ```bash
@@ -164,12 +168,14 @@ terraform apply update.tfplan
   ```
 
 ### Domain & SSL
+
 - ACM certificate oluştur (us-east-1): `*.mapsbridge.com` + `mapsbridge.com`
 - DNS validation tamamla
 - CloudFront distribution'a certificate ekle (terraform.tfvars → `acm_certificate_arn`)
 - Route53 A record → yeni CloudFront distribution
 
 ### Cognito Admin Kullanıcı
+
 ```bash
 # Admin kullanıcı oluştur
 aws cognito-idp admin-create-user \
@@ -187,6 +193,7 @@ aws cognito-idp admin-add-user-to-group \
 ```
 
 ### Frontend `.env` Güncelle
+
 ```env
 NEXT_PUBLIC_API_URL=https://<yeni API Gateway URL>
 NEXT_PUBLIC_WS_URL=wss://<yeni WebSocket URL>
@@ -197,6 +204,7 @@ NEXT_PUBLIC_CLOUDFRONT_URL=https://<yeni CloudFront domain>
 ```
 
 ### Bedrock Guardrail
+
 Mevcut guardrail (fbj50603sjh9) yeni hesapta yeniden oluşturulmalı. Console → Bedrock → Guardrails.
 
 ---

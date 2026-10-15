@@ -32,11 +32,7 @@ export function CreatorDashboardModal({
             <span className="space-eyebrow">GEZGİN PROFİLİ · ETKİLEŞİM &amp; TOPLULUK</span>
             <h3 className="space-title">Gezgin Analitikleri &amp; İlgi Uyumu</h3>
           </div>
-          <button
-            type="button"
-            className="btn-modal-close-icon"
-            onClick={onClose}
-          >
+          <button type="button" className="btn-modal-close-icon" onClick={onClose}>
             ✕
           </button>
         </div>

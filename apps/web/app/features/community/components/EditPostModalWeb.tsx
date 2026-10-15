@@ -10,12 +10,18 @@ interface EditPostModalWebProps {
   onClose: () => void;
   onSave: (
     postId: string,
-    updates: { content?: string; category?: string; locationTag?: string; hashtags?: string[] }
+    updates: { content?: string; category?: string; locationTag?: string; hashtags?: string[] },
   ) => void;
   onDelete: (postId: string) => void;
 }
 
-export function EditPostModalWeb({ post, isOpen = true, onClose, onSave, onDelete }: EditPostModalWebProps) {
+export function EditPostModalWeb({
+  post,
+  isOpen = true,
+  onClose,
+  onSave,
+  onDelete,
+}: EditPostModalWebProps) {
   if (isOpen === false) return null;
 
   const [content, setContent] = useState(post.content);
@@ -46,7 +52,9 @@ export function EditPostModalWeb({ post, isOpen = true, onClose, onSave, onDelet
   };
 
   const handleDelete = () => {
-    if (window.confirm("Bu seyahat paylaşımınızı kalıcı olarak silmek istediğinize emin misiniz?")) {
+    if (
+      window.confirm("Bu seyahat paylaşımınızı kalıcı olarak silmek istediğinize emin misiniz?")
+    ) {
       onDelete(post.id);
       onClose();
     }

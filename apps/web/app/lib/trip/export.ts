@@ -8,7 +8,7 @@
  *   - Travel Wallet (compact reservation/address card)
  */
 
-import type { StructuredTripPlan } from '../ai/types';
+import type { StructuredTripPlan } from "../ai/types";
 
 export interface ShareableExport {
   title: string;
@@ -54,14 +54,14 @@ function isoDateFromDayString(dateStr: string): string {
 
 /** Format ISO datetime for ICS: YYYYMMDDTHHmmss */
 function icsDate(isoDate: string, timeStr?: string): string {
-  const d = isoDate.replace(/-/g, '');
+  const d = isoDate.replace(/-/g, "");
   if (!timeStr) return `${d}T000000`;
-  const t = timeStr.replace(/:/g, '').padEnd(6, '0');
+  const t = timeStr.replace(/:/g, "").padEnd(6, "0");
   return `${d}T${t}`;
 }
 
 function escapeIcs(s: string): string {
-  return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
 
 function uid(): string {
@@ -74,13 +74,13 @@ export function buildShareableExport(
   plan: StructuredTripPlan,
   notes?: Record<string, string>,
 ): ShareableExport {
-  const reservations: ShareableExport['reservations'] = [];
+  const reservations: ShareableExport["reservations"] = [];
 
-  const days: ShareableExport['days'] = plan.days.map((day, idx) => {
-    const stops: ShareableExport['days'][0]['stops'] = [];
+  const days: ShareableExport["days"] = plan.days.map((day, idx) => {
+    const stops: ShareableExport["days"][0]["stops"] = [];
 
     for (const block of day.blocks || []) {
-      if (block.type === 'transit') continue;
+      if (block.type === "transit") continue;
 
       const timeRange = parseTimeRange(block.time);
       const stopNote = notes?.[block.place_id] ?? block.why;
@@ -92,7 +92,7 @@ export function buildShareableExport(
       });
 
       // Treat hotel/activity blocks with an alt as having a reservation code
-      if (block.type === 'hotel' || block.type === 'activity') {
+      if (block.type === "hotel" || block.type === "activity") {
         if (block.alt) {
           reservations.push({
             placeName: block.name,
@@ -102,7 +102,7 @@ export function buildShareableExport(
       }
     }
 
-    const dayLabel = `Gün ${idx + 1}${day.date ? ` — ${day.date}` : ''}`;
+    const dayLabel = `Gün ${idx + 1}${day.date ? ` — ${day.date}` : ""}`;
 
     return {
       dayIndex: idx + 1,
@@ -112,7 +112,7 @@ export function buildShareableExport(
     };
   });
 
-  const dates = plan.days.map(d => d.date).filter(Boolean);
+  const dates = plan.days.map((d) => d.date).filter(Boolean);
 
   return {
     title: `Seyahat Planı — ${plan.trip_id}`,
@@ -129,11 +129,11 @@ export function buildShareableExport(
 
 export function exportToICS(plan: ShareableExport): string {
   const lines: string[] = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//MapsBridge//Travel Plan//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//MapsBridge//Travel Plan//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
     `X-WR-CALNAME:${escapeIcs(plan.title)}`,
     `X-WR-CALDESC:${escapeIcs(plan.destination)}`,
   ];
@@ -143,7 +143,7 @@ export function exportToICS(plan: ShareableExport): string {
       const dtBase =
         plan.startDate && /^\d{4}-\d{2}-\d{2}$/.test(plan.startDate)
           ? isoDateFromDayString(plan.startDate)
-          : '20250101'; // fallback
+          : "20250101"; // fallback
 
       // Advance date by (dayIndex - 1) days
       const baseMs = new Date(dtBase).getTime();
@@ -154,7 +154,7 @@ export function exportToICS(plan: ShareableExport): string {
       const dtEnd = icsDate(dayStr, stop.startTime); // single-point event; duration not parsed
 
       lines.push(
-        'BEGIN:VEVENT',
+        "BEGIN:VEVENT",
         `UID:${uid()}`,
         `DTSTAMP:${icsDate(new Date().toISOString().slice(0, 10))}`,
         `DTSTART:${dtStart}`,
@@ -162,13 +162,13 @@ export function exportToICS(plan: ShareableExport): string {
         `SUMMARY:${escapeIcs(stop.name)}`,
         ...(stop.address ? [`LOCATION:${escapeIcs(stop.address)}`] : []),
         ...(stop.notes ? [`DESCRIPTION:${escapeIcs(stop.notes)}`] : []),
-        'END:VEVENT',
+        "END:VEVENT",
       );
     }
   }
 
-  lines.push('END:VCALENDAR');
-  return lines.join('\r\n');
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
 }
 
 // ── exportToMarkdown ──────────────────────────────────────────────────────────
@@ -180,11 +180,11 @@ export function exportToMarkdown(plan: ShareableExport): string {
   md.push(`**Destinasyon:** ${plan.destination}`);
 
   if (plan.startDate || plan.endDate) {
-    md.push(`**Tarihler:** ${plan.startDate ?? '?'} – ${plan.endDate ?? '?'}`);
+    md.push(`**Tarihler:** ${plan.startDate ?? "?"} – ${plan.endDate ?? "?"}`);
   }
 
-  md.push(`*Dışa aktarım: ${new Date(plan.exportedAt).toLocaleString('tr-TR')}*`);
-  md.push('');
+  md.push(`*Dışa aktarım: ${new Date(plan.exportedAt).toLocaleString("tr-TR")}*`);
+  md.push("");
 
   for (const day of plan.days) {
     md.push(`## ${day.label}`);
@@ -209,11 +209,11 @@ export function exportToMarkdown(plan: ShareableExport): string {
       }
     }
 
-    md.push('');
+    md.push("");
   }
 
   if (plan.reservations.length > 0) {
-    md.push('## Rezervasyonlar');
+    md.push("## Rezervasyonlar");
 
     for (const r of plan.reservations) {
       let line = `- **${r.placeName}**`;
@@ -225,11 +225,11 @@ export function exportToMarkdown(plan: ShareableExport): string {
   }
 
   if (plan.shareUrl) {
-    md.push('');
+    md.push("");
     md.push(`🔗 [Planı görüntüle](${plan.shareUrl})`);
   }
 
-  return md.join('\n');
+  return md.join("\n");
 }
 
 // ── buildTravelWallet ─────────────────────────────────────────────────────────
@@ -243,22 +243,22 @@ export function buildTravelWallet(plan: ShareableExport): string {
 
   wallet.push(`=== SEYAHAT CÜZDANI ===`);
   wallet.push(`${plan.title}`);
-  if (plan.startDate) wallet.push(`${plan.startDate} – ${plan.endDate ?? '?'}`);
-  wallet.push('');
+  if (plan.startDate) wallet.push(`${plan.startDate} – ${plan.endDate ?? "?"}`);
+  wallet.push("");
 
   if (plan.reservations.length > 0) {
-    wallet.push('--- REZERVASYONLAR ---');
+    wallet.push("--- REZERVASYONLAR ---");
     for (const r of plan.reservations) {
       const parts = [r.placeName];
       if (r.code) parts.push(`Kod: ${r.code}`);
       if (r.url) parts.push(`URL: ${r.url}`);
       if (r.cancellationDeadline) parts.push(`İptal: ${r.cancellationDeadline}`);
-      wallet.push(parts.join(' | '));
+      wallet.push(parts.join(" | "));
     }
-    wallet.push('');
+    wallet.push("");
   }
 
-  wallet.push('--- ADRESLER ---');
+  wallet.push("--- ADRESLER ---");
   for (const day of plan.days) {
     for (const stop of day.stops) {
       if (stop.address) {
@@ -267,8 +267,8 @@ export function buildTravelWallet(plan: ShareableExport): string {
     }
   }
 
-  wallet.push('');
+  wallet.push("");
   wallet.push(`Dışa aktarım: ${plan.exportedAt}`);
 
-  return wallet.join('\n');
+  return wallet.join("\n");
 }

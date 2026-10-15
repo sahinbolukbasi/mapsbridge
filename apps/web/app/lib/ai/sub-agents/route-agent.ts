@@ -32,7 +32,7 @@ Yalnızca geçerli JSON döndür.`;
 export async function runRouteAgent(
   prompt: string,
   profileContext?: TravelerProfileContext,
-  personaDirective?: string
+  personaDirective?: string,
 ): Promise<{ route: UnifiedRoutePlan; source: "bedrock" | "fallback"; durationMs: number }> {
   const startTime = Date.now();
 
@@ -69,7 +69,8 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
   if (p.includes("roma") || p.includes("italya") || p.includes("rome") || p.includes("italy")) {
     return {
       title: "3 Günlük Roma Rönesans ve Antik Miras Rotası",
-      summary: "Antik Kolezyum'dan Vatikan'ın büyüleyici sanat galerilerine, Trevi Çeşmesi'nden Trastevere'nin otantik akşam sokaklarına uzanan özel Roma keşfi.",
+      summary:
+        "Antik Kolezyum'dan Vatikan'ın büyüleyici sanat galerilerine, Trevi Çeşmesi'nden Trastevere'nin otantik akşam sokaklarına uzanan özel Roma keşfi.",
       estimatedDays: 3,
       theme: "Antik Tarih & İtalyan Gastronomisi",
       destination: "Roma, İtalya",
@@ -140,14 +141,15 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
           lat: 41.9142,
           lng: 12.4921,
           day: 3,
-          description: "Roma'nın en asil yeşil parkı ve Piazza del Popolo'ya tepeden bakan gün batımı terası.",
+          description:
+            "Roma'nın en asil yeşil parkı ve Piazza del Popolo'ya tepeden bakan gün batımı terası.",
           suggestedDuration: "2.5 saat",
           category: "manzara",
         },
         {
           id: "rome_8",
           name: "İspanyol Merdivenleri & Via Condotti",
-          lat: 41.9060,
+          lat: 41.906,
           lng: 12.4828,
           day: 3,
           description: "Tarihi meydan, çiçekli merdivenler ve Roma'nın en zarif butik caddesi.",
@@ -158,10 +160,16 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
     };
   }
 
-  if (p.includes("kapadokya") || p.includes("cappadocia") || p.includes("göreme") || p.includes("balon")) {
+  if (
+    p.includes("kapadokya") ||
+    p.includes("cappadocia") ||
+    p.includes("göreme") ||
+    p.includes("balon")
+  ) {
     return {
       title: "Kapadokya Büyülü Vadiler & Balon Rotası",
-      summary: "Peri bacalarının gölgesinde gün doğumu sıcak hava balon seyri, yeraltı şehirleri ve kaya oyma manastırlar.",
+      summary:
+        "Peri bacalarının gölgesinde gün doğumu sıcak hava balon seyri, yeraltı şehirleri ve kaya oyma manastırlar.",
       estimatedDays: 2,
       theme: "Doğa Harikası & Jeolojik Miras",
       destination: "Kapadokya, Nevşehir",
@@ -192,7 +200,8 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
           lat: 38.6301,
           lng: 34.8055,
           day: 1,
-          description: "Tüm Kapadokya coğrafyasına 360 derece hakim en yüksek volkanik kaya kalesi.",
+          description:
+            "Tüm Kapadokya coğrafyasına 360 derece hakim en yüksek volkanik kaya kalesi.",
           suggestedDuration: "1.5 saat",
           category: "manzara",
         },
@@ -202,7 +211,8 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
           lat: 38.6512,
           lng: 34.8344,
           day: 2,
-          description: "Sabahın ilk ışıklarıyla yüzlerce sıcak hava balonunun göğe yükseldiği eşsiz görsel şölen.",
+          description:
+            "Sabahın ilk ışıklarıyla yüzlerce sıcak hava balonunun göğe yükseldiği eşsiz görsel şölen.",
           suggestedDuration: "2 saat",
           category: "fotograf",
         },
@@ -212,7 +222,8 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
           lat: 38.3739,
           lng: 34.7348,
           day: 2,
-          description: "Sekiz kat derinliğe inen antik sığınak, havalandırma bacaları ve taş kapılar.",
+          description:
+            "Sekiz kat derinliğe inen antik sığınak, havalandırma bacaları ve taş kapılar.",
           suggestedDuration: "2 saat",
           category: "tarih",
         },
@@ -223,7 +234,8 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
   if (p.includes("tokyo") || p.includes("japonya") || p.includes("japan")) {
     return {
       title: "Tokyo Fütüristik Metropol ve Geleneksel Tapınaklar",
-      summary: "Asakusa'nın tütsü kokulu tapınaklarından Akihabara'nın neon ışıklarına, Shibuya kavşağından Meiji Tapınağı korusuna Tokyo macerası.",
+      summary:
+        "Asakusa'nın tütsü kokulu tapınaklarından Akihabara'nın neon ışıklarına, Shibuya kavşağından Meiji Tapınağı korusuna Tokyo macerası.",
       estimatedDays: 3,
       theme: "Fütürizm & Geleneksel Japon Kültürü",
       destination: "Tokyo, Japonya",
@@ -285,7 +297,8 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
   // Universal Default Route for other destinations
   return {
     title: "Seçkin Şehir Keşfi & Kültür Rotası",
-    summary: "Şehrin en gözde tarihi yapıları, panoramik manzaraları ve yerel gastronomi duraklarını kapsayan optimize gezi planı.",
+    summary:
+      "Şehrin en gözde tarihi yapıları, panoramik manzaraları ve yerel gastronomi duraklarını kapsayan optimize gezi planı.",
     estimatedDays: 2,
     theme: "Şehir Kültürü & Mimari",
     destination: prompt.slice(0, 40),
@@ -314,7 +327,7 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
         id: "gen_3",
         name: "Eski Çarşı & Yerel Lezzet Sokağı",
         lat: 41.0108,
-        lng: 28.9680,
+        lng: 28.968,
         day: 1,
         description: "Geleneksel el sanatları dükkanları ve yöresel tatların sunulduğu lokantalar.",
         suggestedDuration: "2 saat",
@@ -334,7 +347,7 @@ function generateSmartRouteFallback(prompt: string): UnifiedRoutePlan {
         id: "gen_5",
         name: "Kültür & Sanat Bulvarı",
         lat: 41.0369,
-        lng: 28.9850,
+        lng: 28.985,
         day: 2,
         description: "Canlı kafeler, kitapçılar ve akşam yürüyüşü için ideal atmosferik cadde.",
         suggestedDuration: "2 saat",

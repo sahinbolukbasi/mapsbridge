@@ -8,11 +8,11 @@
  */
 
 export type AffiliateProvider =
-  | "travelpayouts_aviasales"  // flights
-  | "travelpayouts_hotellook"  // hotels
-  | "travelpayouts_rental"     // car rental
-  | "travelpayouts_insurance"  // travel insurance
-  | "getyourguide";            // activities / tours
+  | "travelpayouts_aviasales" // flights
+  | "travelpayouts_hotellook" // hotels
+  | "travelpayouts_rental" // car rental
+  | "travelpayouts_insurance" // travel insurance
+  | "getyourguide"; // activities / tours
 
 export type AffiliateCardType = "flight" | "hotel" | "car" | "insurance" | "activity";
 

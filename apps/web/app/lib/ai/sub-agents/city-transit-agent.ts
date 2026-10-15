@@ -1,5 +1,5 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface TransitCardGuide {
   cardName: string;
@@ -42,8 +42,8 @@ JSON formatı:
 export async function runCityTransitAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: CityTransitAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: CityTransitAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
 
   const userQuery = `Hedef Şehir: "${destination}". Bu şehirde metro ve toplu taşıma nasıl kullanılır? Turistler için en pratik biletleme ve önemli hatlar rehberi hazırla.`;
@@ -61,10 +61,10 @@ export async function runCityTransitAgent(
         destination: bedrockRes.data.destination || destination,
         guide: bedrockRes.data.guide,
       },
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
-  throw new Error('Şehir içi ulaşım rehberi oluşturulamadı.');
+  throw new Error("Şehir içi ulaşım rehberi oluşturulamadı.");
 }

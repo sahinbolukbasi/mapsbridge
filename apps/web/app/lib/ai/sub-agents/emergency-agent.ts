@@ -11,7 +11,10 @@ export function getDeterministicEmergencyLine(destination: string): string {
   return `⚠️ ACİL DURUM: Hayati tehlike durumunda derhal ${localNumber}'i arayınız. Bu asistan tıbbi veya hukuki teşhis koyamaz.`;
 }
 
-export function runEmergencyAgent(destination: string, prompt: string): {
+export function runEmergencyAgent(
+  destination: string,
+  prompt: string,
+): {
   info: EmergencyInfo;
   durationMs: number;
   deterministicNotice: string;
@@ -22,14 +25,21 @@ export function runEmergencyAgent(destination: string, prompt: string): {
 
   let emergencyInfo: EmergencyInfo;
 
-  if (text.includes("new york") || text.includes("nyc") || text.includes("amerika") || text.includes("usa") || text.includes("abd")) {
+  if (
+    text.includes("new york") ||
+    text.includes("nyc") ||
+    text.includes("amerika") ||
+    text.includes("usa") ||
+    text.includes("abd")
+  ) {
     emergencyInfo = {
       destinationCountry: "Amerika Birleşik Devletleri (New York)",
       turkishEmbassyConsulate: {
         title: "T.C. New York Başkonsolosluğu (Türkevi / Turkish Center)",
         address: "825 3rd Ave, New York, NY 10022 (46. Cadde köşesi, Türkevi Binası)",
         phone: "+1 646 560 2100",
-        emergencyHotline: "+90 312 292 29 29 (T.C. Dışişleri Bakanlığı 7/24 Konsolosluk Çağrı Merkezi)",
+        emergencyHotline:
+          "+90 312 292 29 29 (T.C. Dışişleri Bakanlığı 7/24 Konsolosluk Çağrı Merkezi)",
         email: "consulate.newyork@mfa.gov.tr",
         workingHours: "Hafta içi 09:00 - 16:30 (Acil nöbetçi konsolosluk hattı 7/24)",
       },
@@ -44,21 +54,31 @@ export function runEmergencyAgent(destination: string, prompt: string): {
         "Sağlık Acili: Hayati tehlikede 911'i arayarak ambulans isteyin. Hafif yaralanma veya hastalıkta 'Urgent Care' kliniklerine başvurabilirsiniz. Seyahat sağlık sigortanızın acil numarasını hazır bulundurun.",
         "Hukuki Durum / Gözaltı: Polis gözaltısında sessiz kalma ve avukat talep etme (Miranda Rights) hakkınız vardır; derhal T.C. New York Başkonsolosluğu'na bilgi verilmesini talep ediniz.",
         ...(/(fırtına|kasırga|hava|afet|deprem)/iu.test(prompt)
-          ? ["Şiddetli Hava ve Afet Durumu: Açık alanlardan ve pencerelerden uzak durup kapalı ve güvenli bir binaya veya metro istasyonuna sığının. NYC Emergency Management yönergelerine uyun."]
+          ? [
+              "Şiddetli Hava ve Afet Durumu: Açık alanlardan ve pencerelerden uzak durup kapalı ve güvenli bir binaya veya metro istasyonuna sığının. NYC Emergency Management yönergelerine uyun.",
+            ]
           : []),
         ...(/(çocuk|kayıp|kaybettim)/iu.test(prompt)
-          ? ["Kayıp Kişi / Çocuk: Derhal 911'i arayarak polis ekiplerine ve alan güvenlik görevlilerine çocuğunuzun eşkal ve son görülen yer bilgisini bildirin."]
+          ? [
+              "Kayıp Kişi / Çocuk: Derhal 911'i arayarak polis ekiplerine ve alan güvenlik görevlilerine çocuğunuzun eşkal ve son görülen yer bilgisini bildirin.",
+            ]
           : []),
       ],
     };
-  } else if (text.includes("roma") || text.includes("italya") || text.includes("rome") || text.includes("italy")) {
+  } else if (
+    text.includes("roma") ||
+    text.includes("italya") ||
+    text.includes("rome") ||
+    text.includes("italy")
+  ) {
     emergencyInfo = {
       destinationCountry: "İtalya (Roma)",
       turkishEmbassyConsulate: {
         title: "T.C. Roma Büyükelçiliği & Konsolosluk Şubesi",
         address: "Via Palestro, 28, 00185 Roma RM, İtalya (Termini İstasyonu yakınında)",
         phone: "+39 06 445941 / +39 06 44594200",
-        emergencyHotline: "+90 312 292 29 29 (T.C. Dışişleri Bakanlığı 7/24 Konsolosluk Çağrı Merkezi)",
+        emergencyHotline:
+          "+90 312 292 29 29 (T.C. Dışişleri Bakanlığı 7/24 Konsolosluk Çağrı Merkezi)",
         email: "ambasciata.roma@mfa.gov.tr",
         workingHours: "Hafta içi 09:00 - 17:00 (Acil nöbetçi konsolosluk hattı 7/24)",
       },
@@ -81,7 +101,8 @@ export function runEmergencyAgent(destination: string, prompt: string): {
         title: "T.C. Tokyo Büyükelçiliği",
         address: "2-33-6 Jingumae, Shibuya-ku, Tokyo 150-0001, Japonya",
         phone: "+81 3 6439 5700",
-        emergencyHotline: "+90 312 292 29 29 (T.C. Dışişleri Bakanlığı 7/24 Konsolosluk Çağrı Merkezi)",
+        emergencyHotline:
+          "+90 312 292 29 29 (T.C. Dışişleri Bakanlığı 7/24 Konsolosluk Çağrı Merkezi)",
         email: "embassy.tokyo@mfa.gov.tr",
         workingHours: "Hafta içi 09:00 - 17:00",
       },
@@ -119,7 +140,13 @@ export function runEmergencyAgent(destination: string, prompt: string): {
         "Metro Güvenliği: Gare du Nord, Châtelet ve Eyfel Kulesi çevresinde imza toplama veya altın yüzük hilelerine karşı dikkatli olun.",
       ],
     };
-  } else if (text.includes("kapadokya") || text.includes("nevşehir") || text.includes("türkiye") || text.includes("ege") || text.includes("istanbul")) {
+  } else if (
+    text.includes("kapadokya") ||
+    text.includes("nevşehir") ||
+    text.includes("türkiye") ||
+    text.includes("ege") ||
+    text.includes("istanbul")
+  ) {
     emergencyInfo = {
       destinationCountry: "Türkiye",
       turkishEmbassyConsulate: {

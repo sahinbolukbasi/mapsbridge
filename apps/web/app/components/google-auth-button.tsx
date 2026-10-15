@@ -70,7 +70,7 @@ export function GoogleAuthButton({
         setIsLoading(false);
       }
     },
-    [onSuccess, onError, redirectToNext]
+    [onSuccess, onError, redirectToNext],
   );
 
   const initGoogleSignIn = useCallback(() => {
@@ -103,8 +103,7 @@ export function GoogleAuthButton({
       // Kullanıcı henüz giriş yapmamışsa One Tap kartını göster
       try {
         const currentToken =
-          localStorage.getItem("mapsbridge.idToken") ||
-          localStorage.getItem("adreskopru.idToken");
+          localStorage.getItem("mapsbridge.idToken") || localStorage.getItem("adreskopru.idToken");
         if (!currentToken) {
           google.accounts.id.prompt();
         }
@@ -182,8 +181,8 @@ export function GoogleAuthButton({
             {isLoading
               ? "Google'a Bağlanıyor..."
               : mode === "signup"
-              ? "Google ile Kayıt Ol"
-              : "Google ile Giriş Yap"}
+                ? "Google ile Kayıt Ol"
+                : "Google ile Giriş Yap"}
           </span>
         </button>
       </div>

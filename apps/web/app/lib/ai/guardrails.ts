@@ -10,8 +10,8 @@ export interface PIIMaskResult {
 }
 
 export function maskPII(text: string): PIIMaskResult {
-  if (!text || typeof text !== 'string') {
-    return { maskedText: '', hasPII: false, detectedTypes: [] };
+  if (!text || typeof text !== "string") {
+    return { maskedText: "", hasPII: false, detectedTypes: [] };
   }
 
   const detectedTypes: string[] = [];
@@ -21,10 +21,10 @@ export function maskPII(text: string): PIIMaskResult {
   const ccRegex = /\b(?:\d[ -]*?){13,19}\b/g;
   if (ccRegex.test(result)) {
     result = result.replace(ccRegex, (match) => {
-      const cleanDigits = match.replace(/[\s-]/g, '');
+      const cleanDigits = match.replace(/[\s-]/g, "");
       if (cleanDigits.length >= 13 && cleanDigits.length <= 19) {
-        if (!detectedTypes.includes('CREDIT_CARD')) detectedTypes.push('CREDIT_CARD');
-        return '[KART_NUMARASI_MASKEYLENDİ]';
+        if (!detectedTypes.includes("CREDIT_CARD")) detectedTypes.push("CREDIT_CARD");
+        return "[KART_NUMARASI_MASKEYLENDİ]";
       }
       return match;
     });
@@ -33,32 +33,32 @@ export function maskPII(text: string): PIIMaskResult {
   // 2. Email addresses
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/g;
   if (emailRegex.test(result)) {
-    detectedTypes.push('EMAIL');
-    result = result.replace(emailRegex, '[E-POSTA_MASKEYLENDİ]');
+    detectedTypes.push("EMAIL");
+    result = result.replace(emailRegex, "[E-POSTA_MASKEYLENDİ]");
   }
 
   // 3. Turkish TC Kimlik No (11 digits, first digit non-zero)
   const tcRegex = /\b[1-9]\d{10}\b/g;
   if (tcRegex.test(result)) {
-    detectedTypes.push('TC_KIMLIK');
-    result = result.replace(tcRegex, '[TCKN_MASKEYLENDİ]');
+    detectedTypes.push("TC_KIMLIK");
+    result = result.replace(tcRegex, "[TCKN_MASKEYLENDİ]");
   }
 
   // 4. US SSN (XXX-XX-XXXX)
   const ssnRegex = /\b\d{3}-\d{2}-\d{4}\b/g;
   if (ssnRegex.test(result)) {
-    detectedTypes.push('SSN');
-    result = result.replace(ssnRegex, '[SSN_MASKEYLENDİ]');
+    detectedTypes.push("SSN");
+    result = result.replace(ssnRegex, "[SSN_MASKEYLENDİ]");
   }
 
   // 5. Phone numbers
   const phoneRegex = /(?:\+?\d{1,3}[ -]?)?(?:\(?\d{3}\)?[ -]?)?\d{3}[ -]?\d{2}[ -]?\d{2}\b/g;
   if (phoneRegex.test(result)) {
     result = result.replace(phoneRegex, (match) => {
-      const digits = match.replace(/\D/g, '');
+      const digits = match.replace(/\D/g, "");
       if (digits.length >= 10 && digits.length <= 14) {
-        if (!detectedTypes.includes('PHONE')) detectedTypes.push('PHONE');
-        return '[TELEFON_MASKEYLENDİ]';
+        if (!detectedTypes.includes("PHONE")) detectedTypes.push("PHONE");
+        return "[TELEFON_MASKEYLENDİ]";
       }
       return match;
     });
@@ -77,7 +77,7 @@ export interface TopicSafetyResult {
 }
 
 export function validateTopicSafety(prompt: string): TopicSafetyResult {
-  if (!prompt || typeof prompt !== 'string') {
+  if (!prompt || typeof prompt !== "string") {
     return { isSafe: true };
   }
 
@@ -98,7 +98,8 @@ export function validateTopicSafety(prompt: string): TopicSafetyResult {
     if (pattern.test(prompt)) {
       return {
         isSafe: false,
-        reason: 'İstek güvenlik ve içerik politikalarını ihlal eden yönlendirme kalıpları içeriyor.',
+        reason:
+          "İstek güvenlik ve içerik politikalarını ihlal eden yönlendirme kalıpları içeriyor.",
       };
     }
   }
@@ -116,14 +117,17 @@ export interface TravelScopeResult {
  * Ensures the assistant only answers travel, itinerary, exploration, accommodation and dining queries.
  */
 export function validateTravelScope(prompt: string): TravelScopeResult {
-  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+  if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
     return { isTravelRelated: true };
   }
 
-  const normalized = prompt.toLocaleLowerCase('tr').trim();
+  const normalized = prompt.toLocaleLowerCase("tr").trim();
 
   // Greetings, courtesies and meta capabilities are always allowed
-  const isGreetingOrMeta = /^(merhaba|selam|selamlar|günaydın|iyi\s+(günler|akşamlar)|hey|hi|hello|nasılsın|kimsin|ne\s+yapabilirsin|yardım|baştan\s+başla|teşekkür|sağ\s*ol)[!.,?]?$/iu.test(normalized);
+  const isGreetingOrMeta =
+    /^(merhaba|selam|selamlar|günaydın|iyi\s+(günler|akşamlar)|hey|hi|hello|nasılsın|kimsin|ne\s+yapabilirsin|yardım|baştan\s+başla|teşekkür|sağ\s*ol)[!.,?]?$/iu.test(
+      normalized,
+    );
   if (isGreetingOrMeta) {
     return { isTravelRelated: true };
   }
@@ -139,13 +143,15 @@ export function validateTravelScope(prompt: string): TravelScopeResult {
   ];
 
   // Travel indicators that override technical terms (e.g. "Tokyo tech museum" or "gezi rotası")
-  const travelContextIndicators = /(?:gezi|seyahat|tatil|rota|otel|pansiyon|hostel|restoran|kafe|müze|tur|rehber|şehir|uçak|bilet|tren|plaj|manzara|konakla|gezilecek)/iu;
+  const travelContextIndicators =
+    /(?:gezi|seyahat|tatil|rota|otel|pansiyon|hostel|restoran|kafe|müze|tur|rehber|şehir|uçak|bilet|tren|plaj|manzara|konakla|gezilecek)/iu;
 
   for (const pattern of nonTravelPatterns) {
     if (pattern.test(normalized) && !travelContextIndicators.test(normalized)) {
       return {
         isTravelRelated: false,
-        refusalMessage: 'Ben MapsBridge seyahat asistanıyım. Yalnızca seyahat rotaları, konaklama, yerel lezzetler, ulaşım ve şehir keşifleri konularında size yardımcı olabilirim. Birlikte bir seyahat planlayalım mı?',
+        refusalMessage:
+          "Ben MapsBridge seyahat asistanıyım. Yalnızca seyahat rotaları, konaklama, yerel lezzetler, ulaşım ve şehir keşifleri konularında size yardımcı olabilirim. Birlikte bir seyahat planlayalım mı?",
       };
     }
   }
@@ -159,7 +165,10 @@ export interface GroundingCheckResult {
   ungroundedClaims: string[];
 }
 
-export function performGroundingCheck(answerText: string, evidencePassages: string[]): GroundingCheckResult {
+export function performGroundingCheck(
+  answerText: string,
+  evidencePassages: string[],
+): GroundingCheckResult {
   if (!answerText || !answerText.trim()) {
     return { isGrounded: true, confidenceScore: 1.0, ungroundedClaims: [] };
   }
@@ -168,15 +177,32 @@ export function performGroundingCheck(answerText: string, evidencePassages: stri
     return {
       isGrounded: false,
       confidenceScore: 0.2,
-      ungroundedClaims: ['Yanıtı destekleyen RAG kaynak pasajı bulunamadı.'],
+      ungroundedClaims: ["Yanıtı destekleyen RAG kaynak pasajı bulunamadı."],
     };
   }
 
-  const combinedEvidence = evidencePassages.join(' ').toLowerCase();
+  const combinedEvidence = evidencePassages.join(" ").toLowerCase();
 
   // Extract proper nouns / named claims (words starting with Capital or in quotes)
-  const candidateClaims = answerText.match(/(?:[A-ZÇĞİÖŞÜ][a-zçğıöşü]+(?:\s+[A-ZÇĞİÖŞÜ][a-zçğıöşü]+)*)/g) || [];
-  const commonExclusions = ['Ben', 'Sen', 'Biz', 'Bu', 'Şu', 'O', 'Gezgin', 'Harita', 'MapsBridge', 'Tur', 'Gün', 'Sabah', 'Öğle', 'Akşam', 'Gece'];
+  const candidateClaims =
+    answerText.match(/(?:[A-ZÇĞİÖŞÜ][a-zçğıöşü]+(?:\s+[A-ZÇĞİÖŞÜ][a-zçğıöşü]+)*)/g) || [];
+  const commonExclusions = [
+    "Ben",
+    "Sen",
+    "Biz",
+    "Bu",
+    "Şu",
+    "O",
+    "Gezgin",
+    "Harita",
+    "MapsBridge",
+    "Tur",
+    "Gün",
+    "Sabah",
+    "Öğle",
+    "Akşam",
+    "Gece",
+  ];
 
   const ungroundedClaims: string[] = [];
   let checkedCount = 0;
@@ -200,7 +226,7 @@ export function performGroundingCheck(answerText: string, evidencePassages: stri
 
   const ratio = groundedCount / checkedCount;
   const confidenceScore = Math.round(ratio * 100) / 100;
-  const isGrounded = confidenceScore >= 0.60;
+  const isGrounded = confidenceScore >= 0.6;
 
   return {
     isGrounded,

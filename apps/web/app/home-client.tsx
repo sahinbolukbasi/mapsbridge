@@ -78,9 +78,7 @@ export default function Home() {
               {/* Tag Badge */}
               <div className="hero-badge">
                 <span className="hero-badge-dot" />
-                <span className="hero-badge-text">
-                  {t("home.hero.badge")}
-                </span>
+                <span className="hero-badge-text">{t("home.hero.badge")}</span>
               </div>
 
               {/* Main Display Headline */}
@@ -93,22 +91,23 @@ export default function Home() {
               </h1>
 
               {/* Subheading Description */}
-              <p className="hero-sub">
-                {t("home.hero.sub")}
-              </p>
+              <p className="hero-sub">{t("home.hero.sub")}</p>
 
               {/* Dual Action Buttons */}
               <div className="hero-actions">
                 <a href={isLoggedIn ? "/desk/" : "/register/"} className="hero-btn-primary">
-                  <span>
-                    {isLoggedIn ? t("home.hero.goToDesk") : t("home.hero.startFree")}
-                  </span>
+                  <span>{isLoggedIn ? t("home.hero.goToDesk") : t("home.hero.startFree")}</span>
                   <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
                     {isLoggedIn ? "map" : "bolt"}
                   </span>
                 </a>
                 <a href="#nasil-calisir" className="hero-btn-secondary">
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.25rem", color: "#286954" }}>play_circle</span>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "1.25rem", color: "#286954" }}
+                  >
+                    play_circle
+                  </span>
                   <span>{t("home.hero.howItWorks")}</span>
                 </a>
               </div>
@@ -128,7 +127,9 @@ export default function Home() {
                 </div>
                 <button type="submit" className="hero-search-btn">
                   <span>{t("home.hero.generateRoute")}</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>arrow_forward</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+                    arrow_forward
+                  </span>
                 </button>
               </form>
 
@@ -154,7 +155,11 @@ export default function Home() {
               <div className="hero-mockup-glow" />
               <div className="hero-mockup">
                 {/* Interactive Top Tab Switcher */}
-                <div className="hero-mockup-tabs" role="tablist" aria-label={t("home.hero.tabs.label")}>
+                <div
+                  className="hero-mockup-tabs"
+                  role="tablist"
+                  aria-label={t("home.hero.tabs.label")}
+                >
                   <button
                     type="button"
                     role="tab"
@@ -190,21 +195,27 @@ export default function Home() {
                 {/* View 1: AI Seyahat Asistanı (AWS Bedrock) */}
                 {activeHeroTab === "ai" && (
                   <div className="mockup-chat-view">
-                    <div className="mockup-chat-bubble-user">
-                      {t("home.mockup.ai.userPrompt")}
-                    </div>
+                    <div className="mockup-chat-bubble-user">{t("home.mockup.ai.userPrompt")}</div>
 
                     <div className="mockup-chat-bubble-ai">
                       <div className="mockup-ai-head">
                         <span className="mockup-ai-badge">
-                          <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>auto_awesome</span>
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: "0.875rem" }}
+                          >
+                            auto_awesome
+                          </span>
                           {t("home.mockup.ai.bedrockBadge")}
                         </span>
                         <span className="mockup-sync-badge">
                           <span className="mockup-sync-dot" /> {t("home.mockup.ai.live")}
                         </span>
                       </div>
-                      <p className="mockup-ai-text" dangerouslySetInnerHTML={{ __html: t("home.mockup.ai.text") }} />
+                      <p
+                        className="mockup-ai-text"
+                        dangerouslySetInnerHTML={{ __html: t("home.mockup.ai.text") }}
+                      />
 
                       <div className="mockup-ai-features-row">
                         <span className="mockup-ai-feature-pill">
@@ -226,21 +237,30 @@ export default function Home() {
                           <div className="mockup-ai-plan-title">
                             {t("home.mockup.ai.planTitle")}
                           </div>
-                          <div className="mockup-ai-plan-meta">
-                            {t("home.mockup.ai.planMeta")}
-                          </div>
+                          <div className="mockup-ai-plan-meta">{t("home.mockup.ai.planMeta")}</div>
                         </div>
                         <span className="mockup-optimize-badge">{t("home.mockup.ai.ready")}</span>
                       </div>
                     </div>
 
                     <div className="mockup-actions">
-                      <a href="/ai/?q=Floransa%27da%203%20g%C3%BCn%20sanat%20ve%20kahve" className="mockup-action-btn primary">
-                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>auto_awesome</span>
+                      <a
+                        href="/ai/?q=Floransa%27da%203%20g%C3%BCn%20sanat%20ve%20kahve"
+                        className="mockup-action-btn primary"
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                          auto_awesome
+                        </span>
                         {t("home.mockup.ai.openInAssistant")}
                       </a>
-                      <button type="button" className="mockup-action-btn secondary" onClick={() => setActiveHeroTab("desk")}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>map</span>
+                      <button
+                        type="button"
+                        className="mockup-action-btn secondary"
+                        onClick={() => setActiveHeroTab("desk")}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                          map
+                        </span>
                         {t("home.mockup.ai.inspectOnMap")}
                       </button>
                     </div>
@@ -272,25 +292,55 @@ export default function Home() {
 
                     {/* High-End Route Map Canvas */}
                     <div className="mockup-map">
-                      <svg className="mockup-map-svg" viewBox="0 0 400 240" fill="none" preserveAspectRatio="none" aria-hidden="true">
-                        <path d="M120,-20 C180,60 80,140 220,260" fill="none" opacity="0.8" stroke="#dae2fd" strokeLinecap="round" strokeWidth="26" />
-                        <path d="M0,80 L400,120 M40,0 L120,240 M280,0 L200,240 M20,180 L380,60" opacity="0.6" stroke="#ffffff" strokeWidth="4" />
-                        <path d="M310,130 C260,80 230,40 160,50 C110,60 100,150 70,170" fill="none" stroke="#10B981" strokeDasharray="6 6" strokeWidth="3" />
+                      <svg
+                        className="mockup-map-svg"
+                        viewBox="0 0 400 240"
+                        fill="none"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M120,-20 C180,60 80,140 220,260"
+                          fill="none"
+                          opacity="0.8"
+                          stroke="#dae2fd"
+                          strokeLinecap="round"
+                          strokeWidth="26"
+                        />
+                        <path
+                          d="M0,80 L400,120 M40,0 L120,240 M280,0 L200,240 M20,180 L380,60"
+                          opacity="0.6"
+                          stroke="#ffffff"
+                          strokeWidth="4"
+                        />
+                        <path
+                          d="M310,130 C260,80 230,40 160,50 C110,60 100,150 70,170"
+                          fill="none"
+                          stroke="#10B981"
+                          strokeDasharray="6 6"
+                          strokeWidth="3"
+                        />
                       </svg>
                       <div className="mockup-map-label">
                         <span className="mockup-map-label-dot" />
                         <span>{t("home.mockup.desk.mapLabel")}</span>
                       </div>
                       <div className="mockup-share-badge">
-                        <span className="material-symbols-outlined">share</span> {t("home.mockup.desk.code")} <strong>RM-841</strong>
+                        <span className="material-symbols-outlined">share</span>{" "}
+                        {t("home.mockup.desk.code")} <strong>RM-841</strong>
                       </div>
 
                       {/* Waypoints */}
                       <div className="mockup-waypoint" style={{ top: "105px", right: "48px" }}>
                         <div className="mockup-waypoint-marker">1</div>
-                        <span className="mockup-waypoint-label">{t("home.mockup.desk.colosseum")}</span>
+                        <span className="mockup-waypoint-label">
+                          {t("home.mockup.desk.colosseum")}
+                        </span>
                       </div>
-                      <div className="mockup-waypoint" style={{ top: "28px", left: "50%", transform: "translateX(-50%)" }}>
+                      <div
+                        className="mockup-waypoint"
+                        style={{ top: "28px", left: "50%", transform: "translateX(-50%)" }}
+                      >
                         <div className="mockup-waypoint-marker">2</div>
                         <span className="mockup-waypoint-label">Pantheon</span>
                       </div>
@@ -304,7 +354,9 @@ export default function Home() {
                     <div className="mockup-itinerary">
                       <div className="mockup-itinerary-header">
                         <div>
-                          <h2 className="mockup-itinerary-title">{t("home.mockup.desk.itineraryTitle")}</h2>
+                          <h2 className="mockup-itinerary-title">
+                            {t("home.mockup.desk.itineraryTitle")}
+                          </h2>
                           <p className="mockup-itinerary-sub">
                             {t("home.mockup.desk.itinerarySub")}
                           </p>
@@ -317,7 +369,9 @@ export default function Home() {
                         <div className="mockup-stop">
                           <span className="mockup-stop-dot" />
                           <div className="mockup-stop-row">
-                            <span className="mockup-stop-name">{t("home.mockup.desk.stop1Name")}</span>
+                            <span className="mockup-stop-name">
+                              {t("home.mockup.desk.stop1Name")}
+                            </span>
                             <span className="mockup-stop-time">09:30</span>
                           </div>
                           <p className="mockup-stop-desc">{t("home.mockup.desk.stop1Desc")}</p>
@@ -325,7 +379,9 @@ export default function Home() {
                         <div className="mockup-stop">
                           <span className="mockup-stop-dot" />
                           <div className="mockup-stop-row">
-                            <span className="mockup-stop-name">{t("home.mockup.desk.stop2Name")}</span>
+                            <span className="mockup-stop-name">
+                              {t("home.mockup.desk.stop2Name")}
+                            </span>
                             <span className="mockup-stop-time">13:15</span>
                           </div>
                           <p className="mockup-stop-desc">{t("home.mockup.desk.stop2Desc")}</p>
@@ -333,7 +389,9 @@ export default function Home() {
                         <div className="mockup-stop">
                           <span className="mockup-stop-dot" />
                           <div className="mockup-stop-row">
-                            <span className="mockup-stop-name">{t("home.mockup.desk.stop3Name")}</span>
+                            <span className="mockup-stop-name">
+                              {t("home.mockup.desk.stop3Name")}
+                            </span>
                             <span className="mockup-stop-time">18:00</span>
                           </div>
                           <p className="mockup-stop-desc">{t("home.mockup.desk.stop3Desc")}</p>
@@ -341,12 +399,23 @@ export default function Home() {
                       </div>
 
                       <div className="mockup-actions">
-                        <button type="button" className="mockup-action-btn primary" onClick={openCodeModal}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>qr_code</span>
+                        <button
+                          type="button"
+                          className="mockup-action-btn primary"
+                          onClick={openCodeModal}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                            qr_code
+                          </span>
                           {t("home.mockup.desk.shareCode")}
                         </button>
-                        <a href={isLoggedIn ? "/desk/" : "/register/"} className="mockup-action-btn secondary">
-                          <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>map</span>
+                        <a
+                          href={isLoggedIn ? "/desk/" : "/register/"}
+                          className="mockup-action-btn secondary"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                            map
+                          </span>
                           {t("home.mockup.desk.openMap")}
                         </a>
                       </div>
@@ -359,45 +428,59 @@ export default function Home() {
                   <div className="mockup-share-view">
                     <div className="mockup-share-hero">
                       <div className="mockup-share-hero-badge">
-                        <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>bolt</span>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "0.875rem" }}
+                        >
+                          bolt
+                        </span>
                         {t("home.mockup.share.badge")}
                       </div>
                       <div className="mockup-share-code-display">
                         <span>RM-841</span>
                       </div>
-                      <p className="mockup-share-sub">
-                        {t("home.mockup.share.sub")}
-                      </p>
+                      <p className="mockup-share-sub">{t("home.mockup.share.sub")}</p>
                     </div>
 
                     <div className="mockup-share-benefits">
                       <div className="mockup-share-benefit-item">
                         <span className="material-symbols-outlined">send</span>
                         <span>
-                          <strong>{t("home.mockup.share.benefit1Title")}</strong> {t("home.mockup.share.benefit1Desc")}
+                          <strong>{t("home.mockup.share.benefit1Title")}</strong>{" "}
+                          {t("home.mockup.share.benefit1Desc")}
                         </span>
                       </div>
                       <div className="mockup-share-benefit-item">
                         <span className="material-symbols-outlined">shield</span>
                         <span>
-                          <strong>{t("home.mockup.share.benefit2Title")}</strong> {t("home.mockup.share.benefit2Desc")}
+                          <strong>{t("home.mockup.share.benefit2Title")}</strong>{" "}
+                          {t("home.mockup.share.benefit2Desc")}
                         </span>
                       </div>
                       <div className="mockup-share-benefit-item">
                         <span className="material-symbols-outlined">wifi_off</span>
                         <span>
-                          <strong>{t("home.mockup.share.benefit3Title")}</strong> {t("home.mockup.share.benefit3Desc")}
+                          <strong>{t("home.mockup.share.benefit3Title")}</strong>{" "}
+                          {t("home.mockup.share.benefit3Desc")}
                         </span>
                       </div>
                     </div>
 
                     <div className="mockup-actions">
-                      <button type="button" className="mockup-action-btn primary" onClick={openCodeModal}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>vpn_key</span>
+                      <button
+                        type="button"
+                        className="mockup-action-btn primary"
+                        onClick={openCodeModal}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                          vpn_key
+                        </span>
                         {t("home.mockup.share.tryCode")}
                       </button>
                       <a href="#nasil-calisir" className="mockup-action-btn secondary">
-                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>help</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                          help
+                        </span>
                         {t("home.mockup.share.howItWorks")}
                       </a>
                     </div>
@@ -415,9 +498,7 @@ export default function Home() {
           <div className="trust-strip-inner">
             <div className="trust-strip-text">
               <span className="trust-strip-eyebrow">{t("home.trust.eyebrow")}</span>
-              <h3 className="trust-strip-heading">
-                {t("home.trust.heading")}
-              </h3>
+              <h3 className="trust-strip-heading">{t("home.trust.heading")}</h3>
             </div>
             <div className="trust-metrics-grid">
               <div className="trust-metric">
@@ -429,7 +510,9 @@ export default function Home() {
                 <div className="trust-metric-label">{t("home.trust.countries")}</div>
               </div>
               <div className="trust-metric">
-                <div className="trust-metric-value emerald">60<span className="rating-frac">sn</span></div>
+                <div className="trust-metric-value emerald">
+                  60<span className="rating-frac">sn</span>
+                </div>
                 <div className="trust-metric-label">{t("home.trust.avgPlan")}</div>
               </div>
               <div className="trust-metric">
@@ -449,12 +532,8 @@ export default function Home() {
               <span className="material-symbols-outlined">widgets</span>
               <span>{t("home.features.eyebrow")}</span>
             </div>
-            <h2 className="section-title">
-              {t("home.features.title")}
-            </h2>
-            <p className="section-desc">
-              {t("home.features.desc")}
-            </p>
+            <h2 className="section-title">{t("home.features.title")}</h2>
+            <p className="section-desc">{t("home.features.desc")}</p>
           </div>
 
           <div className="bento-grid">
@@ -466,12 +545,8 @@ export default function Home() {
                   <span className="material-symbols-outlined">psychology</span>
                 </div>
                 <span className="bento-eyebrow">{t("home.feature1.eyebrow")}</span>
-                <h3 className="bento-title">
-                  {t("home.feature1.title")}
-                </h3>
-                <p className="bento-desc">
-                  {t("home.feature1.desc")}
-                </p>
+                <h3 className="bento-title">{t("home.feature1.title")}</h3>
+                <p className="bento-desc">{t("home.feature1.desc")}</p>
               </div>
               <div className="bento-demo-box ai">
                 <div className="bento-demo-badge">
@@ -493,15 +568,16 @@ export default function Home() {
                   <span className="material-symbols-outlined">map</span>
                 </div>
                 <span className="bento-eyebrow">{t("home.feature2.eyebrow")}</span>
-                <h3 className="bento-title">
-                  {t("home.feature2.title")}
-                </h3>
-                <p className="bento-desc">
-                  {t("home.feature2.desc")}
-                </p>
+                <h3 className="bento-title">{t("home.feature2.title")}</h3>
+                <p className="bento-desc">{t("home.feature2.desc")}</p>
               </div>
               <div className="bento-demo-box">
-                <span className="material-symbols-outlined" style={{ color: "#10b981", fontSize: "1.625rem" }}>route</span>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ color: "#10b981", fontSize: "1.625rem" }}
+                >
+                  route
+                </span>
                 <div className="bento-demo-text">
                   <strong>{t("home.feature2.demoTitle")}</strong>
                   <span>{t("home.feature2.demoDesc")}</span>
@@ -517,12 +593,8 @@ export default function Home() {
                   <span className="material-symbols-outlined">pin</span>
                 </div>
                 <span className="bento-eyebrow">{t("home.feature3.eyebrow")}</span>
-                <h3 className="bento-title">
-                  {t("home.feature3.title")}
-                </h3>
-                <p className="bento-desc">
-                  {t("home.feature3.desc")}
-                </p>
+                <h3 className="bento-title">{t("home.feature3.title")}</h3>
+                <p className="bento-desc">{t("home.feature3.desc")}</p>
               </div>
               <div className="bento-code-box">
                 <div className="bento-code-digits">
@@ -547,17 +619,15 @@ export default function Home() {
                   <span className="material-symbols-outlined">shield</span>
                 </div>
                 <span className="bento-eyebrow">{t("home.feature4.eyebrow")}</span>
-                <h3 className="bento-title">
-                  {t("home.feature4.title")}
-                </h3>
-                <p className="bento-desc">
-                  {t("home.feature4.desc")}
-                </p>
+                <h3 className="bento-title">{t("home.feature4.title")}</h3>
+                <p className="bento-desc">{t("home.feature4.desc")}</p>
               </div>
               <div className="bento-stats-grid">
                 <div className="bento-stat">
                   <span className="bento-stat-label">{t("home.feature4.consent")}</span>
-                  <span className="bento-stat-value emerald">{t("home.feature4.consentValue")}</span>
+                  <span className="bento-stat-value emerald">
+                    {t("home.feature4.consentValue")}
+                  </span>
                 </div>
                 <div className="bento-stat">
                   <span className="bento-stat-label">{t("home.feature4.ttl")}</span>
@@ -565,7 +635,9 @@ export default function Home() {
                 </div>
                 <div className="bento-stat">
                   <span className="bento-stat-label">{t("home.feature4.offline")}</span>
-                  <span className="bento-stat-value emerald">{t("home.feature4.offlineValue")}</span>
+                  <span className="bento-stat-value emerald">
+                    {t("home.feature4.offlineValue")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -582,12 +654,8 @@ export default function Home() {
                 <span className="material-symbols-outlined">timeline</span>
                 <span>{t("home.howItWorks.eyebrow")}</span>
               </div>
-              <h2 className="section-title">
-                {t("home.howItWorks.title")}
-              </h2>
-              <p className="section-desc">
-                {t("home.howItWorks.desc")}
-              </p>
+              <h2 className="section-title">{t("home.howItWorks.title")}</h2>
+              <p className="section-desc">{t("home.howItWorks.desc")}</p>
             </div>
 
             <div className="steps-grid-new">
@@ -597,13 +665,20 @@ export default function Home() {
                   <div className="step-card-head">
                     <div className="step-number">1</div>
                     <div className="step-icon-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>chat</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>
+                        chat
+                      </span>
                     </div>
                   </div>
                   <h3>{t("home.step1.title")}</h3>
                   <p>{t("home.step1.desc")}</p>
                   <div className="step-preview-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "1rem", color: "#10b981" }}>auto_awesome</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "1rem", color: "#10b981" }}
+                    >
+                      auto_awesome
+                    </span>
                     <span>
                       {t("home.step1.chip")} <em>{t("home.step1.chipValue")}</em>
                     </span>
@@ -624,15 +699,23 @@ export default function Home() {
                   <div className="step-card-head">
                     <div className="step-number">2</div>
                     <div className="step-icon-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>psychology</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>
+                        psychology
+                      </span>
                     </div>
                   </div>
                   <h3>{t("home.step2.title")}</h3>
                   <p>{t("home.step2.desc")}</p>
                   <div className="step-preview-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "1rem", color: "#10b981" }}>route</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "1rem", color: "#10b981" }}
+                    >
+                      route
+                    </span>
                     <span>
-                      {t("home.step2.chip")} <strong className="step-preview-code">{t("home.step2.chipValue")}</strong>
+                      {t("home.step2.chip")}{" "}
+                      <strong className="step-preview-code">{t("home.step2.chipValue")}</strong>
                     </span>
                   </div>
                 </div>
@@ -651,13 +734,20 @@ export default function Home() {
                   <div className="step-card-head">
                     <div className="step-number">3</div>
                     <div className="step-icon-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>drag_indicator</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>
+                        drag_indicator
+                      </span>
                     </div>
                   </div>
                   <h3>{t("home.step3.title")}</h3>
                   <p>{t("home.step3.desc")}</p>
                   <div className="step-preview-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "1rem", color: "#10b981" }}>touch_app</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "1rem", color: "#10b981" }}
+                    >
+                      touch_app
+                    </span>
                     <span>
                       {t("home.step3.chip")} <strong>{t("home.step3.chipValue")}</strong>
                     </span>
@@ -678,15 +768,23 @@ export default function Home() {
                   <div className="step-card-head">
                     <div className="step-number">4</div>
                     <div className="step-icon-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>qr_code_2</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>
+                        qr_code_2
+                      </span>
                     </div>
                   </div>
                   <h3>{t("home.step4.title")}</h3>
                   <p>{t("home.step4.desc")}</p>
                   <div className="step-preview-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "1rem", color: "#10b981" }}>pin</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "1rem", color: "#10b981" }}
+                    >
+                      pin
+                    </span>
                     <span>
-                      {t("home.step4.chip")} <strong className="step-preview-code">{t("home.step4.chipValue")}</strong>
+                      {t("home.step4.chip")}{" "}
+                      <strong className="step-preview-code">{t("home.step4.chipValue")}</strong>
                     </span>
                   </div>
                 </div>
@@ -702,9 +800,16 @@ export default function Home() {
 
             <div className="nasil-guide-link-wrap">
               <a href="/how-it-works/" className="nasil-guide-link-btn">
-                <span className="material-symbols-outlined" style={{ fontSize: "1.25rem", color: "#10b981" }}>menu_book</span>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "1.25rem", color: "#10b981" }}
+                >
+                  menu_book
+                </span>
                 <span>{t("home.howItWorks.guideLink")}</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>arrow_forward</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+                  arrow_forward
+                </span>
               </a>
             </div>
           </div>
@@ -720,9 +825,7 @@ export default function Home() {
               <span>{t("home.comparison.eyebrow")}</span>
             </div>
             <h2 className="section-title">{t("home.comparison.title")}</h2>
-            <p className="section-desc">
-              {t("home.comparison.desc")}
-            </p>
+            <p className="section-desc">{t("home.comparison.desc")}</p>
           </div>
 
           <div className="comparison-card">
@@ -734,9 +837,7 @@ export default function Home() {
                     <span className="comparison-badge error">✕</span>
                     <h3>{t("home.comparison.traditionalTitle")}</h3>
                   </div>
-                  <p className="comparison-desc">
-                    {t("home.comparison.traditionalDesc")}
-                  </p>
+                  <p className="comparison-desc">{t("home.comparison.traditionalDesc")}</p>
                   <ul className="comparison-list">
                     <li>
                       <span className="material-symbols-outlined error-icon">cancel</span>
@@ -757,7 +858,8 @@ export default function Home() {
                   </ul>
                 </div>
                 <div className="comparison-footer">
-                  {t("home.comparison.traditionalFooter")} <strong>{t("home.comparison.traditionalTime")}</strong>
+                  {t("home.comparison.traditionalFooter")}{" "}
+                  <strong>{t("home.comparison.traditionalTime")}</strong>
                 </div>
               </div>
 
@@ -768,9 +870,7 @@ export default function Home() {
                     <span className="comparison-badge success">✓</span>
                     <h3>{t("home.comparison.mbTitle")}</h3>
                   </div>
-                  <p className="comparison-desc">
-                    {t("home.comparison.mbDesc")}
-                  </p>
+                  <p className="comparison-desc">{t("home.comparison.mbDesc")}</p>
                   <ul className="comparison-list">
                     <li>
                       <span className="material-symbols-outlined success-icon">check_circle</span>
@@ -809,9 +909,7 @@ export default function Home() {
                 <span>{t("home.community.eyebrow")}</span>
               </div>
               <h2 className="section-title">{t("home.community.title")}</h2>
-              <p className="section-desc">
-                {t("home.community.desc")}
-              </p>
+              <p className="section-desc">{t("home.community.desc")}</p>
             </div>
 
             {/* Stories / Active Travel Avatars Bar */}
@@ -829,7 +927,9 @@ export default function Home() {
                 {/* Story Avatars */}
                 {COMMUNITY_STORIES.map((story) => (
                   <div key={story.initials} className="community-story-item">
-                    <div className={`community-story-ring ${story.gradient ? "gradient" : "plain"}`}>
+                    <div
+                      className={`community-story-ring ${story.gradient ? "gradient" : "plain"}`}
+                    >
                       <div className={`community-story-avatar ${story.live ? "has-live-dot" : ""}`}>
                         {story.initials}
                       </div>
@@ -860,7 +960,9 @@ export default function Home() {
                         <div>
                           <div className="community-post-name-row">
                             <h4 className="community-post-name">{post.name}</h4>
-                            <span className="material-symbols-outlined community-verified">verified</span>
+                            <span className="material-symbols-outlined community-verified">
+                              verified
+                            </span>
                           </div>
                           <div className="community-post-meta">
                             <span>{post.handle}</span>
@@ -869,7 +971,11 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
-                      <button className="community-post-more" type="button" aria-label={t("home.community.more")}>
+                      <button
+                        className="community-post-more"
+                        type="button"
+                        aria-label={t("home.community.more")}
+                      >
                         <span className="material-symbols-outlined">more_horiz</span>
                       </button>
                     </div>
@@ -886,10 +992,14 @@ export default function Home() {
                     {/* Attached Interactive Route Pill */}
                     <div className="community-route-pill">
                       <div className="community-route-pill-left">
-                        <span className="material-symbols-outlined community-route-icon">{post.routeIcon}</span>
+                        <span className="material-symbols-outlined community-route-icon">
+                          {post.routeIcon}
+                        </span>
                         <div className="community-route-text">
                           <div className="community-route-title">{post.routeTitle}</div>
-                          <div className={`community-route-sub ${post.routeSub.includes("%") ? "budget" : ""}`}>
+                          <div
+                            className={`community-route-sub ${post.routeSub.includes("%") ? "budget" : ""}`}
+                          >
                             {post.routeSub}
                           </div>
                         </div>
@@ -901,11 +1011,19 @@ export default function Home() {
                   {/* Post Footer: Engagement Counts & Action Buttons */}
                   <div className="community-post-footer">
                     <div className="community-post-engagement">
-                      <button type="button" className="community-engagement-btn like" aria-label="Like">
+                      <button
+                        type="button"
+                        className="community-engagement-btn like"
+                        aria-label="Like"
+                      >
                         <span className="material-symbols-outlined">favorite</span>
                         <span className="community-engagement-count">{post.likes}</span>
                       </button>
-                      <button type="button" className="community-engagement-btn" aria-label="Comment">
+                      <button
+                        type="button"
+                        className="community-engagement-btn"
+                        aria-label="Comment"
+                      >
                         <span className="material-symbols-outlined">chat_bubble</span>
                         <span>{post.comments}</span>
                       </button>
@@ -929,12 +1047,8 @@ export default function Home() {
                   <span className="community-stack-avatar stack-more">+8K</span>
                 </div>
                 <div>
-                  <div className="community-engagement-title">
-                    {t("home.community.joinTitle")}
-                  </div>
-                  <div className="community-engagement-sub">
-                    {t("home.community.joinSub")}
-                  </div>
+                  <div className="community-engagement-title">{t("home.community.joinTitle")}</div>
+                  <div className="community-engagement-sub">{t("home.community.joinSub")}</div>
                 </div>
               </div>
               <div className="community-engagement-actions">
@@ -961,9 +1075,7 @@ export default function Home() {
               <span>{t("home.faq.eyebrow")}</span>
             </div>
             <h2 className="section-title">{t("home.faq.title")}</h2>
-            <p className="section-desc">
-              {t("home.faq.desc")}
-            </p>
+            <p className="section-desc">{t("home.faq.desc")}</p>
           </div>
 
           <div className="faq-container">
@@ -992,19 +1104,15 @@ export default function Home() {
                   <span className="cta-badge-dot" />
                   <span>{t("home.cta.badge")}</span>
                 </div>
-                <h2 className="cta-title">
-                  {t("home.cta.title")}
-                </h2>
-                <p className="cta-desc">
-                  {t("home.cta.desc")}
-                </p>
+                <h2 className="cta-title">{t("home.cta.title")}</h2>
+                <p className="cta-desc">{t("home.cta.desc")}</p>
               </div>
               <div className="cta-actions">
                 <a href={isLoggedIn ? "/ai/" : "/register/"} className="cta-btn-primary">
-                  <span>
-                    {isLoggedIn ? t("home.cta.planWithAi") : t("home.cta.startRoute")}
+                  <span>{isLoggedIn ? t("home.cta.planWithAi") : t("home.cta.startRoute")}</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "1.25rem" }}>
+                    arrow_forward
                   </span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.25rem" }}>arrow_forward</span>
                 </a>
                 <button type="button" className="cta-btn-secondary" onClick={openCodeModal}>
                   <span>{t("home.cta.enterCode")}</span>
@@ -1018,7 +1126,13 @@ export default function Home() {
       {/* ========================================================= */}
       {/* 6-Digit Code Verification Floating Sheet / Modal            */}
       {/* ========================================================= */}
-      <div className={`code-modal-overlay ${codeModalOpen ? "open" : ""}`} id="code-modal" role="dialog" aria-modal="true" aria-label={t("home.codeModal.label")}>
+      <div
+        className={`code-modal-overlay ${codeModalOpen ? "open" : ""}`}
+        id="code-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("home.codeModal.label")}
+      >
         <div className="code-modal">
           <button
             className="code-modal-close"
@@ -1026,15 +1140,15 @@ export default function Home() {
             type="button"
             aria-label={t("home.codeModal.close")}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>close</span>
+            <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+              close
+            </span>
           </button>
           <div className="code-modal-icon">
             <span className="material-symbols-outlined">vpn_key</span>
           </div>
           <h3>{t("home.codeModal.title")}</h3>
-          <p>
-            {t("home.codeModal.desc")}
-          </p>
+          <p>{t("home.codeModal.desc")}</p>
           <form onSubmit={handleLookup}>
             <div className="code-inputs">
               {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -1050,13 +1164,15 @@ export default function Home() {
                     next[i] = val;
                     setCode(next.join(""));
                     if (val && i < 5) {
-                      const nextInput = document.querySelectorAll<HTMLInputElement>(".code-input")[i + 1];
+                      const nextInput =
+                        document.querySelectorAll<HTMLInputElement>(".code-input")[i + 1];
                       nextInput?.focus();
                     }
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Backspace" && !code[i] && i > 0) {
-                      const prevInput = document.querySelectorAll<HTMLInputElement>(".code-input")[i - 1];
+                      const prevInput =
+                        document.querySelectorAll<HTMLInputElement>(".code-input")[i - 1];
                       prevInput?.focus();
                     }
                   }}
@@ -1065,7 +1181,9 @@ export default function Home() {
               ))}
             </div>
             <button type="submit" className="code-modal-submit">
-              <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>map</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+                map
+              </span>
               <span>{t("home.codeModal.submit")}</span>
             </button>
           </form>

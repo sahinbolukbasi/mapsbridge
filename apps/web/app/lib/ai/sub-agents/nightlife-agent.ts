@@ -1,11 +1,11 @@
-import { invokeBedrockJSON } from '../bedrock-client';
+import { invokeBedrockJSON } from "../bedrock-client";
 
 export interface NightlifeVenueItem {
   name: string;
-  category: 'cocktail_bar' | 'jazz_club' | 'rooftop' | 'pub' | 'dance_club';
+  category: "cocktail_bar" | "jazz_club" | "rooftop" | "pub" | "dance_club";
   neighborhood: string;
   vibe: string;
-  priceLevel: '€' | '€€' | '€€€';
+  priceLevel: "€" | "€€" | "€€€";
   dressCodeOrEntryTip: string;
 }
 
@@ -42,8 +42,8 @@ JSON formatı:
 
 export async function runNightlifeAgent(
   destination: string,
-  timeoutMs = 4500
-): Promise<{ output: NightlifeAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: NightlifeAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
   const userQuery = `Hedef Şehir: "${destination}". En keyifli ve güvenli 2-4 gece mekanı, kokteyl barı veya rooftop terası hazırla.`;
 
@@ -57,7 +57,7 @@ export async function runNightlifeAgent(
   if (bedrockRes.success && bedrockRes.data && Array.isArray(bedrockRes.data.venues)) {
     return {
       output: bedrockRes.data,
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
@@ -68,16 +68,18 @@ export async function runNightlifeAgent(
       venues: [
         {
           name: `${destination} Panorama Rooftop Lounge`,
-          category: 'rooftop',
-          neighborhood: 'Şehir Merkezi',
-          vibe: 'Göz alıcı şehir silüeti ve imza kokteyller',
-          priceLevel: '€€',
-          dressCodeOrEntryTip: 'Akşam saatleri için önceden masa ayırtmanız önerilir.',
+          category: "rooftop",
+          neighborhood: "Şehir Merkezi",
+          vibe: "Göz alıcı şehir silüeti ve imza kokteyller",
+          priceLevel: "€€",
+          dressCodeOrEntryTip: "Akşam saatleri için önceden masa ayırtmanız önerilir.",
         },
       ],
-      safetyAndTransportTips: ['Gece geç saatlerde dönüş için resmi taksi duraklarını veya mobil ulaşım uygulamalarını tercih edin.'],
+      safetyAndTransportTips: [
+        "Gece geç saatlerde dönüş için resmi taksi duraklarını veya mobil ulaşım uygulamalarını tercih edin.",
+      ],
     },
-    source: 'bedrock',
+    source: "bedrock",
     durationMs: Date.now() - startTime,
   };
 }

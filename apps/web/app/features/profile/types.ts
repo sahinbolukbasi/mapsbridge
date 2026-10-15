@@ -5,12 +5,7 @@ export interface UserInterest {
 }
 
 export type ProfileSidebarTab =
-  | "genel"
-  | "guvenlik"
-  | "bildirimler"
-  | "entegrasyonlar"
-  | "odeme"
-  | "tehlike";
+  "genel" | "guvenlik" | "bildirimler" | "entegrasyonlar" | "odeme" | "tehlike";
 
 export type SidebarTab = ProfileSidebarTab;
 

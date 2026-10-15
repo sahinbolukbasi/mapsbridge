@@ -1,11 +1,7 @@
 export type TransportMode = "walking" | "driving" | "cycling";
 
 export type DrawerView =
-  | "day-list"
-  | "pin-detail"
-  | "pin-create"
-  | "trip-settings"
-  | "group-manage";
+  "day-list" | "pin-detail" | "pin-create" | "trip-settings" | "group-manage";
 
 export interface DrawerState {
   isOpen: boolean;

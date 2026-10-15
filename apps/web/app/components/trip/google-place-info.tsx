@@ -146,12 +146,8 @@ export function GooglePlaceInfo({
           {/* Rating & Status Row */}
           {place.rating != null && (
             <div className="gpi-rating-row">
-              <span className="gpi-rating-badge">
-                ★ {place.rating.toFixed(1)}
-              </span>
-              <span className="gpi-rating-count">
-                ({place.userRatingCount || 0} değerlendirme)
-              </span>
+              <span className="gpi-rating-badge">★ {place.rating.toFixed(1)}</span>
+              <span className="gpi-rating-count">({place.userRatingCount || 0} değerlendirme)</span>
               {place.businessStatus === "CLOSED_PERMANENTLY" && (
                 <span className="gpi-status-closed">Kalıcı Kapalı</span>
               )}
@@ -195,7 +191,10 @@ export function GooglePlaceInfo({
             </a>
 
             {place.nationalPhoneNumber && (
-              <a href={`tel:${place.nationalPhoneNumber}`} className="gpi-action-btn gpi-action-call">
+              <a
+                href={`tel:${place.nationalPhoneNumber}`}
+                className="gpi-action-btn gpi-action-call"
+              >
                 <span className="material-symbols-outlined">call</span>
                 <span>Ara</span>
               </a>
@@ -214,7 +213,12 @@ export function GooglePlaceInfo({
             )}
 
             {link && (
-              <a href={link} target="_blank" rel="noopener noreferrer" className="gpi-action-btn gpi-action-share">
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gpi-action-btn gpi-action-share"
+              >
                 <span className="material-symbols-outlined">share</span>
                 <span>Paylaş</span>
               </a>
@@ -234,14 +238,18 @@ export function GooglePlaceInfo({
                   <span className="material-symbols-outlined">schedule</span>
                   <span>Çalışma Saatleri</span>
                 </div>
-                <span className={`material-symbols-outlined gpi-chevron ${showHours ? "open" : ""}`}>
+                <span
+                  className={`material-symbols-outlined gpi-chevron ${showHours ? "open" : ""}`}
+                >
                   expand_more
                 </span>
               </button>
               {showHours && (
                 <div className="gpi-hours-list">
                   {place.regularOpeningHours.weekdayDescriptions.map((day) => (
-                    <p key={day} className="gpi-hour-row">{day}</p>
+                    <p key={day} className="gpi-hour-row">
+                      {day}
+                    </p>
                   ))}
                 </div>
               )}
@@ -257,7 +265,6 @@ export function GooglePlaceInfo({
               </a>
             </div>
           )}
-
         </div>
       )}
 

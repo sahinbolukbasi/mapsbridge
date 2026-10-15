@@ -129,11 +129,12 @@ export function AIPromoLanding() {
       if (active) setCheckingSession(false);
     };
     void openWorkspaceIfAuthenticated();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const loginUrl = (q?: string) =>
-    `/login/?redirect=/ai/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
+  const loginUrl = (q?: string) => `/login/?redirect=/ai/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
   const signupUrl = (q?: string) =>
     `/register/?redirect=/ai/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
 
@@ -170,7 +171,11 @@ export function AIPromoLanding() {
 
   if (checkingSession) {
     return (
-      <main className="ai-promo-wrapper" style={{ minHeight: "100vh", display: "grid", placeItems: "center" }} aria-live="polite">
+      <main
+        className="ai-promo-wrapper"
+        style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}
+        aria-live="polite"
+      >
         Oturum kontrol ediliyor...
       </main>
     );
@@ -194,20 +199,37 @@ export function AIPromoLanding() {
           </h1>
 
           <p className="ai-promo-hero-desc">
-            Yapay zeka asistanı bütçenize, ilgi alanlarınıza, tempo tercihinize ve seyahat tarihinize göre saniyeler içinde optimize edilmiş rota, durak saatleri ve canlı rota paylaşım bağlantısını üretir.
+            Yapay zeka asistanı bütçenize, ilgi alanlarınıza, tempo tercihinize ve seyahat
+            tarihinize göre saniyeler içinde optimize edilmiş rota, durak saatleri ve canlı rota
+            paylaşım bağlantısını üretir.
           </p>
 
           <div className="ai-promo-stats-strip">
             <span className="ai-promo-stat-pill">
-              <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#10b981" }}>bolt</span>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "16px", color: "#10b981" }}
+              >
+                bolt
+              </span>
               Saniyeler İçinde Rota
             </span>
             <span className="ai-promo-stat-pill">
-              <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#286954" }}>verified</span>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "16px", color: "#286954" }}
+              >
+                verified
+              </span>
               Doğrulanmış Mekan Bilgileri
             </span>
             <span className="ai-promo-stat-pill">
-              <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#013628" }}>sync</span>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "16px", color: "#013628" }}
+              >
+                sync
+              </span>
               Otomatik Çevrimdışı Senkronizasyon
             </span>
           </div>
@@ -223,7 +245,9 @@ export function AIPromoLanding() {
               <div className="ai-promo-bot-badge-group">
                 <div className="ai-promo-bot-icon-wrap">
                   <div className="ai-promo-bot-icon-box">
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>smart_toy</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                      smart_toy
+                    </span>
                   </div>
                   <span className="ai-promo-bot-status-dot"></span>
                 </div>
@@ -233,7 +257,14 @@ export function AIPromoLanding() {
                     <span className="ai-promo-bot-version">AI</span>
                   </div>
                   <span className="ai-promo-bot-subline">
-                    <span style={{ width: "6px", height: "6px", borderRadius: "9999px", background: "#10b981" }}></span>
+                    <span
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "9999px",
+                        background: "#10b981",
+                      }}
+                    ></span>
                     Çevrimiçi • Yanıt süresi &lt; 1sn
                   </span>
                 </div>
@@ -247,7 +278,9 @@ export function AIPromoLanding() {
                   title="Sohbeti Başlat"
                   style={{ padding: "0.45rem 0.85rem" }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>add</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    add
+                  </span>
                   <span>Yeni Sohbet</span>
                 </button>
               </div>
@@ -258,14 +291,28 @@ export function AIPromoLanding() {
               {/* Bot Welcome Bubble */}
               <div className="ai-promo-bubble-row">
                 <div className="ai-promo-avatar-mini">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>neurology</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    neurology
+                  </span>
                 </div>
                 <div className="ai-promo-bubble-content">
                   <p style={{ margin: 0 }}>
-                    Merhaba! Ben <strong style={{ color: "#013628", fontWeight: 700 }}>MapsBridge AI Seyahat Asistanı</strong>. Aklındaki şehri, gezi süreni ve zevklerini söyle; sana dinlenmeli, yürümeli ve gerçek yerel lezzetlerle dolu kusursuz bir gezi haritası hazırlayayım.
+                    Merhaba! Ben{" "}
+                    <strong style={{ color: "#013628", fontWeight: 700 }}>
+                      MapsBridge AI Seyahat Asistanı
+                    </strong>
+                    . Aklındaki şehri, gezi süreni ve zevklerini söyle; sana dinlenmeli, yürümeli ve
+                    gerçek yerel lezzetlerle dolu kusursuz bir gezi haritası hazırlayayım.
                   </p>
-                  <p style={{ margin: 0, fontSize: "12px", color: "var(--promo-on-surface-variant)" }}>
-                    Nereden başlamak istersin? Aşağıdaki örnek şablonlardan birine dokunabilir veya doğrudan yazabilirsin:
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "12px",
+                      color: "var(--promo-on-surface-variant)",
+                    }}
+                  >
+                    Nereden başlamak istersin? Aşağıdaki örnek şablonlardan birine dokunabilir veya
+                    doğrudan yazabilirsin:
                   </p>
                   <div className="ai-promo-starter-chips">
                     <button
@@ -285,7 +332,9 @@ export function AIPromoLanding() {
                     <button
                       type="button"
                       className="ai-promo-chip-btn"
-                      onClick={() => handleStarterClick("Tokyo 4 Günlük Metro ve Gece Hayatı Rotası")}
+                      onClick={() =>
+                        handleStarterClick("Tokyo 4 Günlük Metro ve Gece Hayatı Rotası")
+                      }
                     >
                       🗼 Tokyo 4 Günlük Metro ve Gece Hayatı Rotası
                     </button>
@@ -304,48 +353,95 @@ export function AIPromoLanding() {
               <div className="ai-promo-bubble-row user-row">
                 <div className="ai-promo-bubble-content user-bubble">
                   <p style={{ margin: 0 }}>
-                    Bana 3 günlük bir Roma seyahati planlar mısın? Yürümeyi severim, antik tarih ve gerçek İtalyan makarnaları önceliğim. Bütçem orta düzey.
+                    Bana 3 günlük bir Roma seyahati planlar mısın? Yürümeyi severim, antik tarih ve
+                    gerçek İtalyan makarnaları önceliğim. Bütçem orta düzey.
                   </p>
-                  <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "4px", fontSize: "11px", opacity: 0.85 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "11px",
+                      opacity: 0.85,
+                    }}
+                  >
                     <span>14:32</span>
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>done_all</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                      done_all
+                    </span>
                   </div>
                 </div>
                 <div className="ai-promo-avatar-mini user-avatar">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>person</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    person
+                  </span>
                 </div>
               </div>
 
               {/* Bot Response Bubble */}
               <div className="ai-promo-bubble-row">
                 <div className="ai-promo-avatar-mini">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>auto_awesome</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    auto_awesome
+                  </span>
                 </div>
                 <div className="ai-promo-bubble-content">
                   <p style={{ margin: 0 }}>
-                    Harika bir seçim! Kolezyum ve Forum'un sabah kalabalıksız saatlerini, Trastevere'nin en otantik trattoria'larını ve gün batımında Gianicolo Tepesi'ni kapsayan optimize bir rota çıkardım. Duraklar arasındaki yürüme mesafeleri ve önerilen kalış süreleri sağ panelde hazır!
+                    Harika bir seçim! Kolezyum ve Forum'un sabah kalabalıksız saatlerini,
+                    Trastevere'nin en otantik trattoria'larını ve gün batımında Gianicolo Tepesi'ni
+                    kapsayan optimize bir rota çıkardım. Duraklar arasındaki yürüme mesafeleri ve
+                    önerilen kalış süreleri sağ panelde hazır!
                   </p>
 
                   <div className="ai-promo-micro-card">
                     <div className="ai-promo-micro-header">
                       <div className="ai-promo-micro-title-group">
-                        <span style={{ width: "8px", height: "8px", borderRadius: "9999px", background: "#10b981", animation: "promoPulse 2s infinite" }}></span>
-                        <strong style={{ fontSize: "14px", color: "var(--promo-deep-forest)" }}>Roma Antik &amp; Lezzet Rotası</strong>
+                        <span
+                          style={{
+                            width: "8px",
+                            height: "8px",
+                            borderRadius: "9999px",
+                            background: "#10b981",
+                            animation: "promoPulse 2s infinite",
+                          }}
+                        ></span>
+                        <strong style={{ fontSize: "14px", color: "var(--promo-deep-forest)" }}>
+                          Roma Antik &amp; Lezzet Rotası
+                        </strong>
                       </div>
                       <span className="ai-promo-micro-badge">RM-841</span>
                     </div>
 
                     <div className="ai-promo-micro-stats">
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#286954" }}>calendar_today</span> 3 Gün
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "14px", color: "#286954" }}
+                        >
+                          calendar_today
+                        </span>{" "}
+                        3 Gün
                       </span>
                       <span>•</span>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#286954" }}>location_on</span> 9 Durak
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "14px", color: "#286954" }}
+                        >
+                          location_on
+                        </span>{" "}
+                        9 Durak
                       </span>
                       <span>•</span>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#286954" }}>directions_walk</span> ~7.4 km/gün
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "14px", color: "#286954" }}
+                        >
+                          directions_walk
+                        </span>{" "}
+                        ~7.4 km/gün
                       </span>
                     </div>
 
@@ -355,7 +451,9 @@ export function AIPromoLanding() {
                         className="ai-promo-sub-btn"
                         style={{ background: "#1e4d3e", color: "#ffffff", border: "none" }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>map</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                          map
+                        </span>
                         Haritada İncele
                       </Link>
                       <button
@@ -363,14 +461,17 @@ export function AIPromoLanding() {
                         onClick={() => setAuthModal(true)}
                         className="ai-promo-sub-btn"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>tune</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                          tune
+                        </span>
                         Kişiselleştir
                       </button>
                     </div>
                   </div>
 
                   <p style={{ margin: 0, fontSize: "12px", color: "var(--promo-outline)" }}>
-                    💡 İpucu: 2. Gün sabahı Vatikan Müzeleri için erken bilet almayı unutmayın, dilerseniz sizin için rezervasyon linkini ekleyebilirim.
+                    💡 İpucu: 2. Gün sabahı Vatikan Müzeleri için erken bilet almayı unutmayın,
+                    dilerseniz sizin için rezervasyon linkini ekleyebilirim.
                   </p>
                 </div>
               </div>
@@ -380,7 +481,9 @@ export function AIPromoLanding() {
             <div className="ai-promo-chat-dock">
               <div className="ai-promo-filter-row">
                 <div className="ai-promo-filter-pill">
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>speed</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    speed
+                  </span>
                   <span>Tempo:</span>
                   <select className="ai-promo-filter-select" defaultValue="Dengeli / Orta">
                     <option>Dengeli / Orta</option>
@@ -389,7 +492,9 @@ export function AIPromoLanding() {
                   </select>
                 </div>
                 <div className="ai-promo-filter-pill">
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>payments</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    payments
+                  </span>
                   <span>Bütçe:</span>
                   <select className="ai-promo-filter-select" defaultValue="Orta Düzey (€€)">
                     <option>Orta Düzey (€€)</option>
@@ -398,8 +503,12 @@ export function AIPromoLanding() {
                   </select>
                 </div>
                 <div className="ai-promo-filter-pill">
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>directions_walk</span>
-                  <span style={{ fontWeight: 600, color: "var(--promo-deep-forest)" }}>Yürüyüş &amp; Metro</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    directions_walk
+                  </span>
+                  <span style={{ fontWeight: 600, color: "var(--promo-deep-forest)" }}>
+                    Yürüyüş &amp; Metro
+                  </span>
                 </div>
               </div>
 
@@ -411,7 +520,9 @@ export function AIPromoLanding() {
                   style={{ border: "none", background: "transparent", padding: "6px" }}
                   title="Fotoğraf Ekle"
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>add_photo_alternate</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                    add_photo_alternate
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -420,7 +531,9 @@ export function AIPromoLanding() {
                   style={{ border: "none", background: "transparent", padding: "6px" }}
                   title="Sesli Komut"
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>mic</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                    mic
+                  </span>
                 </button>
                 <input
                   type="text"
@@ -431,7 +544,9 @@ export function AIPromoLanding() {
                 />
                 <button type="submit" className="ai-promo-send-btn">
                   <span>Gönder</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>send</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    send
+                  </span>
                 </button>
               </form>
             </div>
@@ -442,15 +557,35 @@ export function AIPromoLanding() {
             <div className="ai-promo-route-header">
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#286954" }}>map</span>
-                  <h2 style={{ fontSize: "15px", fontWeight: 700, margin: 0, color: "var(--promo-deep-forest)" }}>Canlı Rota Önizlemesi</h2>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "20px", color: "#286954" }}
+                  >
+                    map
+                  </span>
+                  <h2
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: 700,
+                      margin: 0,
+                      color: "var(--promo-deep-forest)",
+                    }}
+                  >
+                    Canlı Rota Önizlemesi
+                  </h2>
                 </div>
                 <span style={{ fontSize: "12px", color: "var(--promo-on-surface-variant)" }}>
-                  Kod: <strong style={{ color: "#013628", fontWeight: 700 }}>RM-841</strong> • Roma, İtalya
+                  Kod: <strong style={{ color: "#013628", fontWeight: 700 }}>RM-841</strong> • Roma,
+                  İtalya
                 </span>
               </div>
-              <span className="ai-promo-badge" style={{ padding: "0.25rem 0.65rem", fontSize: "10.5px" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>auto_awesome</span>
+              <span
+                className="ai-promo-badge"
+                style={{ padding: "0.25rem 0.65rem", fontSize: "10.5px" }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
+                  auto_awesome
+                </span>
                 AI OPTİMİZE EDİLDİ
               </span>
             </div>
@@ -464,9 +599,19 @@ export function AIPromoLanding() {
               />
               <div className="ai-promo-map-overlay"></div>
               <div className="ai-promo-map-floating-pill">
-                <span style={{ width: "7px", height: "7px", borderRadius: "9999px", background: "#10b981", animation: "promoPulse 2s infinite" }}></span>
+                <span
+                  style={{
+                    width: "7px",
+                    height: "7px",
+                    borderRadius: "9999px",
+                    background: "#10b981",
+                    animation: "promoPulse 2s infinite",
+                  }}
+                ></span>
                 <span>{selectedDay}. Gün Canlı Yol Haritası</span>
-                <span style={{ color: "var(--promo-outline)", fontWeight: 400 }}>{DAY_STOPS[selectedDay].length} Durak</span>
+                <span style={{ color: "var(--promo-outline)", fontWeight: 400 }}>
+                  {DAY_STOPS[selectedDay].length} Durak
+                </span>
               </div>
               <Link
                 href="/desk/?kod=RM-841"
@@ -474,7 +619,9 @@ export function AIPromoLanding() {
                 style={{ position: "absolute", top: "10px", right: "12px", padding: "6px" }}
                 title="Harita Masasını Aç"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>open_in_new</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  open_in_new
+                </span>
               </Link>
             </div>
 
@@ -507,13 +654,17 @@ export function AIPromoLanding() {
             <div className="ai-promo-timeline-feed">
               {DAY_STOPS[selectedDay].map((stop, idx) => (
                 <div className="ai-promo-stop-item" key={stop.num}>
-                  {idx < DAY_STOPS[selectedDay].length - 1 && <div className="ai-promo-stop-connector"></div>}
+                  {idx < DAY_STOPS[selectedDay].length - 1 && (
+                    <div className="ai-promo-stop-connector"></div>
+                  )}
                   <div className="ai-promo-stop-number">{stop.num}</div>
                   <div className="ai-promo-stop-content">
                     <div className="ai-promo-stop-topline">
                       <span className="ai-promo-stop-time">{stop.time}</span>
                       <span className="ai-promo-stop-slot">
-                        <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>{stop.icon}</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
+                          {stop.icon}
+                        </span>
                         {stop.slot}
                       </span>
                     </div>
@@ -528,18 +679,32 @@ export function AIPromoLanding() {
             {/* Bottom Actions Bar */}
             <div className="ai-promo-route-dock">
               <Link href="/desk/?kod=RM-841" className="ai-promo-main-action-btn">
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>explore</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                  explore
+                </span>
                 <span>Harita Panelinde Aç &amp; Düzenle</span>
               </Link>
               <div className="ai-promo-sub-actions-grid">
                 <button type="button" className="ai-promo-sub-btn" onClick={handleCopyCode}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#10b981" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "16px", color: "#10b981" }}
+                  >
                     {copiedCode ? "check" : "content_copy"}
                   </span>
                   <span>{copiedCode ? "Kopyalandı!" : "Kodu Kopyala (RM-841)"}</span>
                 </button>
-                <button type="button" className="ai-promo-sub-btn" onClick={() => setAuthModal(true)}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#286954" }}>download</span>
+                <button
+                  type="button"
+                  className="ai-promo-sub-btn"
+                  onClick={() => setAuthModal(true)}
+                >
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "16px", color: "#286954" }}
+                  >
+                    download
+                  </span>
                   <span>PDF / Çevrimdışı İndir</span>
                 </button>
               </div>
@@ -554,12 +719,15 @@ export function AIPromoLanding() {
           <div className="ai-promo-features-header">
             <div>
               <div className="ai-promo-features-badge">
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>psychology</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  psychology
+                </span>
                 Gelişmiş Harita Algoritmaları
               </div>
               <h2 className="ai-promo-features-title">MapsBridge AI Neler Yapabilir?</h2>
               <p className="ai-promo-features-sub">
-                Standart turistik listelerin ötesine geçin. Yapay zeka motorumuz milyonlarca seyahat verisini, yerel dinamikleri ve yürüyüş rotalarını anlık olarak harmanlar.
+                Standart turistik listelerin ötesine geçin. Yapay zeka motorumuz milyonlarca seyahat
+                verisini, yerel dinamikleri ve yürüyüş rotalarını anlık olarak harmanlar.
               </p>
             </div>
 
@@ -570,7 +738,9 @@ export function AIPromoLanding() {
               </div>
               <div className="ai-promo-metric-divider"></div>
               <div className="ai-promo-metric-item">
-                <span className="ai-promo-metric-number" style={{ color: "#10b981" }}>120+</span>
+                <span className="ai-promo-metric-number" style={{ color: "#10b981" }}>
+                  120+
+                </span>
                 <span className="ai-promo-metric-label">Desteklenen Ülke</span>
               </div>
             </div>
@@ -581,64 +751,84 @@ export function AIPromoLanding() {
             <div className="ai-promo-pillar-card">
               <div>
                 <div className="ai-promo-pillar-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>alt_route</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                    alt_route
+                  </span>
                 </div>
                 <h3 className="ai-promo-pillar-title">Akıllı Rota &amp; Mesafe Optimizasyonu</h3>
                 <p className="ai-promo-pillar-desc">
-                  Açılış saatleri, yoğunluk tahminleri ve yürüme sürelerini hesaba katarak en az yoran, en mantıklı durak sıralamasını kurar.
+                  Açılış saatleri, yoğunluk tahminleri ve yürüme sürelerini hesaba katarak en az
+                  yoran, en mantıklı durak sıralamasını kurar.
                 </p>
               </div>
               <span className="ai-promo-pillar-tagline">
                 <span>Sıfır Çapraz Geçiş</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>trending_flat</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  trending_flat
+                </span>
               </span>
             </div>
 
             <div className="ai-promo-pillar-card">
               <div>
                 <div className="ai-promo-pillar-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>account_balance_wallet</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                    account_balance_wallet
+                  </span>
                 </div>
                 <h3 className="ai-promo-pillar-title">Bütçe ve Harcama Tahmini</h3>
                 <p className="ai-promo-pillar-desc">
-                  Müze giriş ücretleri, ortalama yemek maliyetleri ve yerel toplu taşıma giderlerini güncel kur bazında anlık olarak hesaplar.
+                  Müze giriş ücretleri, ortalama yemek maliyetleri ve yerel toplu taşıma giderlerini
+                  güncel kur bazında anlık olarak hesaplar.
                 </p>
               </div>
               <span className="ai-promo-pillar-tagline">
                 <span>Şeffaf Kalem Listesi</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>trending_flat</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  trending_flat
+                </span>
               </span>
             </div>
 
             <div className="ai-promo-pillar-card">
               <div>
                 <div className="ai-promo-pillar-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>cloud_sync</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                    cloud_sync
+                  </span>
                 </div>
                 <h3 className="ai-promo-pillar-title">Canlı Rota ve Bulut Eşitleme</h3>
                 <p className="ai-promo-pillar-desc">
-                  Üretilen plan tek bir linkle tüm arkadaşlarınızın telefonuna, web paneline ve çevrimdışı haritasına anında yansır.
+                  Üretilen plan tek bir linkle tüm arkadaşlarınızın telefonuna, web paneline ve
+                  çevrimdışı haritasına anında yansır.
                 </p>
               </div>
               <span className="ai-promo-pillar-tagline">
                 <span>Anında Eşitleme</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>trending_flat</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  trending_flat
+                </span>
               </span>
             </div>
 
             <div className="ai-promo-pillar-card">
               <div>
                 <div className="ai-promo-pillar-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>cloud_sync</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                    cloud_sync
+                  </span>
                 </div>
                 <h3 className="ai-promo-pillar-title">Canlı Koşullara Uyum</h3>
                 <p className="ai-promo-pillar-desc">
-                  Beklenmeyen sağanak yağmur, tadilat veya kapalı mekan durumunda anında alternatif kapalı müze veya kafe durakları sunar.
+                  Beklenmeyen sağanak yağmur, tadilat veya kapalı mekan durumunda anında alternatif
+                  kapalı müze veya kafe durakları sunar.
                 </p>
               </div>
               <span className="ai-promo-pillar-tagline">
                 <span>Dinamik Yeniden Rotalama</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>trending_flat</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  trending_flat
+                </span>
               </span>
             </div>
           </div>
@@ -647,15 +837,38 @@ export function AIPromoLanding() {
           <div className="ai-promo-templates-sec">
             <div className="ai-promo-templates-header">
               <div>
-                <h3 style={{ fontSize: "18px", fontWeight: 700, margin: 0, color: "var(--promo-deep-forest)" }}>
+                <h3
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 700,
+                    margin: 0,
+                    color: "var(--promo-deep-forest)",
+                  }}
+                >
                   Popüler İlham Şablonları
                 </h3>
-                <p style={{ fontSize: "13px", color: "var(--promo-on-surface-variant)", margin: "4px 0 0" }}>
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "var(--promo-on-surface-variant)",
+                    margin: "4px 0 0",
+                  }}
+                >
                   Saniyeler içinde AI asistana göndermek için bir konsept seçin.
                 </p>
               </div>
-              <span style={{ fontSize: "12px", color: "var(--promo-outline)", display: "flex", alignItems: "center", gap: "4px" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>touch_app</span>
+              <span
+                style={{
+                  fontSize: "12px",
+                  color: "var(--promo-outline)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  touch_app
+                </span>
                 Tıklayarak sohbeti başlatın
               </span>
             </div>
@@ -663,65 +876,109 @@ export function AIPromoLanding() {
             <div className="ai-promo-templates-grid">
               <div
                 className="ai-promo-template-card"
-                onClick={() => handleStarterClick("Hostel konaklamaları, ücretsiz yürüyüş turları ve yerel pazarlarla bütçe dostu sırt çantalı rota")}
+                onClick={() =>
+                  handleStarterClick(
+                    "Hostel konaklamaları, ücretsiz yürüyüş turları ve yerel pazarlarla bütçe dostu sırt çantalı rota",
+                  )
+                }
               >
                 <div>
                   <div className="ai-promo-template-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>hiking</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      hiking
+                    </span>
                   </div>
                   <h4 className="ai-promo-template-title">Bütçe Dostu Sırt Çantalı</h4>
-                  <p className="ai-promo-template-desc">Hostel konaklamaları, ücretsiz yürüyüş turları ve yerel pazar durakları.</p>
+                  <p className="ai-promo-template-desc">
+                    Hostel konaklamaları, ücretsiz yürüyüş turları ve yerel pazar durakları.
+                  </p>
                 </div>
                 <span className="ai-promo-template-link">
-                  Dene <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>arrow_forward</span>
+                  Dene{" "}
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    arrow_forward
+                  </span>
                 </span>
               </div>
 
               <div
                 className="ai-promo-template-card"
-                onClick={() => handleStarterClick("Bebek arabasına uygun parkurlar, interaktif bilim müzeleri ve geniş parklarla çocuklu aile rotası")}
+                onClick={() =>
+                  handleStarterClick(
+                    "Bebek arabasına uygun parkurlar, interaktif bilim müzeleri ve geniş parklarla çocuklu aile rotası",
+                  )
+                }
               >
                 <div>
                   <div className="ai-promo-template-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>family_restroom</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      family_restroom
+                    </span>
                   </div>
                   <h4 className="ai-promo-template-title">Çocuklu Aile Gezisi</h4>
-                  <p className="ai-promo-template-desc">Bebek arabasına uygun parkurlar, interaktif bilim müzeleri ve geniş parklar.</p>
+                  <p className="ai-promo-template-desc">
+                    Bebek arabasına uygun parkurlar, interaktif bilim müzeleri ve geniş parklar.
+                  </p>
                 </div>
                 <span className="ai-promo-template-link">
-                  Dene <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>arrow_forward</span>
+                  Dene{" "}
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    arrow_forward
+                  </span>
                 </span>
               </div>
 
               <div
                 className="ai-promo-template-card"
-                onClick={() => handleStarterClick("Gizli manzara terasları, mum ışığında şarap evleri ve sakin sahil boylarıyla romantik hafta sonu")}
+                onClick={() =>
+                  handleStarterClick(
+                    "Gizli manzara terasları, mum ışığında şarap evleri ve sakin sahil boylarıyla romantik hafta sonu",
+                  )
+                }
               >
                 <div>
                   <div className="ai-promo-template-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>favorite</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      favorite
+                    </span>
                   </div>
                   <h4 className="ai-promo-template-title">Romantik Hafta Sonu</h4>
-                  <p className="ai-promo-template-desc">Gizli manzara terasları, mum ışığında şarap evleri ve sakin sahil boyları.</p>
+                  <p className="ai-promo-template-desc">
+                    Gizli manzara terasları, mum ışığında şarap evleri ve sakin sahil boyları.
+                  </p>
                 </div>
                 <span className="ai-promo-template-link">
-                  Dene <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>arrow_forward</span>
+                  Dene{" "}
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    arrow_forward
+                  </span>
                 </span>
               </div>
 
               <div
                 className="ai-promo-template-card"
-                onClick={() => handleStarterClick("Michelin rehberli lokantalar, yerel fırınlar ve sokak tezgâhlarıyla gurme lezzet rotası")}
+                onClick={() =>
+                  handleStarterClick(
+                    "Michelin rehberli lokantalar, yerel fırınlar ve sokak tezgâhlarıyla gurme lezzet rotası",
+                  )
+                }
               >
                 <div>
                   <div className="ai-promo-template-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>ramen_dining</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      ramen_dining
+                    </span>
                   </div>
                   <h4 className="ai-promo-template-title">Gurme &amp; Sokak Lezzetleri</h4>
-                  <p className="ai-promo-template-desc">Michelin rehberli küçük lokantalar, yerel fırınlar ve sokak tezgâhları.</p>
+                  <p className="ai-promo-template-desc">
+                    Michelin rehberli küçük lokantalar, yerel fırınlar ve sokak tezgâhları.
+                  </p>
                 </div>
                 <span className="ai-promo-template-link">
-                  Dene <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>arrow_forward</span>
+                  Dene{" "}
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    arrow_forward
+                  </span>
                 </span>
               </div>
             </div>
@@ -732,7 +989,14 @@ export function AIPromoLanding() {
       {/* ── 5. Bottom Call-to-Action Banner ── */}
       <section className="ai-promo-cta-banner">
         <div className="ai-promo-cta-inner">
-          <div className="ai-promo-badge" style={{ background: "rgba(255,255,255,0.15)", color: "#ffffff", borderColor: "rgba(255,255,255,0.3)" }}>
+          <div
+            className="ai-promo-badge"
+            style={{
+              background: "rgba(255,255,255,0.15)",
+              color: "#ffffff",
+              borderColor: "rgba(255,255,255,0.3)",
+            }}
+          >
             ✨ MapsBridge AI Seyahat Platformu
           </div>
           <h2 className="ai-promo-cta-title">
@@ -740,15 +1004,20 @@ export function AIPromoLanding() {
             AI Asistan ile Şimdi Başlayın.
           </h2>
           <p className="ai-promo-cta-desc">
-            Ücretsiz kayıt olun, hemen akıllı rota oluşturmaya başlayın veya paylaşılan rotaları anında keşfedin.
+            Ücretsiz kayıt olun, hemen akıllı rota oluşturmaya başlayın veya paylaşılan rotaları
+            anında keşfedin.
           </p>
           <div className="ai-promo-cta-buttons">
             <Link href={signupUrl(promptText)} className="ai-promo-cta-primary-btn">
-              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>rocket_launch</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                rocket_launch
+              </span>
               Ücretsiz Hesap Oluştur
             </Link>
             <Link href={loginUrl(promptText)} className="ai-promo-cta-secondary-btn">
-              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>login</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                login
+              </span>
               Mevcut Hesaba Giriş Yap
             </Link>
           </div>

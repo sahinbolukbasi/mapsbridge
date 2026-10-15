@@ -11,7 +11,11 @@ export function SessionKeepAlive() {
       const session = getStoredSession();
       if (!session?.token) return;
       if (willExpireSoon(session.token, REFRESH_INTERVAL_MS)) {
-        try { await refreshSession(); } catch { /* silent */ }
+        try {
+          await refreshSession();
+        } catch {
+          /* silent */
+        }
       }
     };
 

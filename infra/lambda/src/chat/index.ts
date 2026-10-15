@@ -16,9 +16,22 @@ import { verifiedUserId } from "../shared/auth";
  */
 
 import type { ApiGatewayEvent } from "../shared/http";
-import { ok, created, badRequest, unauthorized, notFound, serverError, handlePreflight, extractBearerToken, parseBody } from "../shared/http";
+import {
+  ok,
+  created,
+  badRequest,
+  unauthorized,
+  notFound,
+  serverError,
+  handlePreflight,
+  extractBearerToken,
+  parseBody,
+} from "../shared/http";
 import { Router } from "../shared/router";
-import { threadParticipants, ChatService } from "../../../../services/messaging/src/application/chat-service";
+import {
+  threadParticipants,
+  ChatService,
+} from "../../../../services/messaging/src/application/chat-service";
 
 const router = new Router();
 
@@ -41,8 +54,6 @@ function getTableName(): string {
   return process.env.DYNAMODB_TABLE || `adreskopru-${process.env.ENVIRONMENT}-data`;
 }
 
-
-
 async function getDdb() {
   const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   return new DynamoDBClient({ region: process.env.AWS_REGION });
@@ -61,16 +72,18 @@ async function handleListThreads(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   // Query GSI by participant
-  const result = await ddb.send(new QueryCommand({
-    TableName: getTableName(),
-    IndexName: "GSI1",
-    KeyConditionExpression: "GSI1PK = :pk",
-    ExpressionAttributeValues: marshall({ ":pk": `THREAD#${userId}` }),
-    ScanIndexForward: false,
-    Limit: ChatService.MAX_THREAD_LIST,
-  }));
+  const result = await ddb.send(
+    new QueryCommand({
+      TableName: getTableName(),
+      IndexName: "GSI1",
+      KeyConditionExpression: "GSI1PK = :pk",
+      ExpressionAttributeValues: marshall({ ":pk": `THREAD#${userId}` }),
+      ScanIndexForward: false,
+      Limit: ChatService.MAX_THREAD_LIST,
+    }),
+  );
 
-  const threads = (result.Items || []).map(i => unmarshall(i));
+  const threads = (result.Items || []).map((i) => unmarshall(i));
   return ok({ threads });
 }
 
@@ -110,7 +123,7 @@ async function handleCreateThread(event: ApiGatewayEvent) {
       },
     },
     // GSI entries for each participant
-    ...participants.map(p => ({
+    ...participants.map((p) => ({
       Put: {
         TableName: getTableName(),
         Item: marshall({
@@ -119,7 +132,7 @@ async function handleCreateThread(event: ApiGatewayEvent) {
           GSI1PK: `THREAD#${p}`,
           GSI1SK: now,
           threadId,
-          otherParticipant: participants.find(x => x !== p),
+          otherParticipant: participants.find((x) => x !== p),
         }),
       },
     })),
@@ -157,13 +170,17 @@ async function handleGetMessages(event: ApiGatewayEvent) {
   const threadId = event.pathParameters?.id;
   if (!threadId) return badRequest("Thread ID gerekli.");
 
-  if (!await threadParticipants(await getDdb(), getTableName(), threadId, userId)) return notFound();
+  if (!(await threadParticipants(await getDdb(), getTableName(), threadId, userId)))
+    return notFound();
 
   const { DynamoDBClient, QueryCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall, unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const limit = Math.min(Number(event.queryStringParameters?.limit) || ChatService.MAX_THREAD_LIST, ChatService.MAX_MESSAGE_HISTORY);
+  const limit = Math.min(
+    Number(event.queryStringParameters?.limit) || ChatService.MAX_THREAD_LIST,
+    ChatService.MAX_MESSAGE_HISTORY,
+  );
   const rawCursor = event.queryStringParameters?.cursor;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -180,16 +197,18 @@ async function handleGetMessages(event: ApiGatewayEvent) {
     }
   }
 
-  const result = await ddb.send(new QueryCommand({
-    TableName: getTableName(),
-    KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
-    ExpressionAttributeValues: marshall({ ":pk": `CHAT#${threadId}`, ":sk": "MSG#" }),
-    Limit: limit,
-    ScanIndexForward: false, // newest first
-    ExclusiveStartKey: parsedCursor,
-  }));
+  const result = await ddb.send(
+    new QueryCommand({
+      TableName: getTableName(),
+      KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
+      ExpressionAttributeValues: marshall({ ":pk": `CHAT#${threadId}`, ":sk": "MSG#" }),
+      Limit: limit,
+      ScanIndexForward: false, // newest first
+      ExclusiveStartKey: parsedCursor,
+    }),
+  );
 
-  const messages = (result.Items || []).map(i => unmarshall(i)).reverse();
+  const messages = (result.Items || []).map((i) => unmarshall(i)).reverse();
   const nextCursor = result.LastEvaluatedKey
     ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString("base64")
     : null;
@@ -208,36 +227,46 @@ async function handleSendMessage(event: ApiGatewayEvent) {
   const threadId = event.pathParameters?.id;
   if (!threadId) return badRequest("Thread ID gerekli.");
 
-  if (!await threadParticipants(await getDdb(), getTableName(), threadId, userId)) return notFound();
+  if (!(await threadParticipants(await getDdb(), getTableName(), threadId, userId)))
+    return notFound();
 
   const body = parseBody<{ content?: string }>(event);
-  if (typeof body?.content !== "string" || !body.content.trim()) return badRequest("Mesaj içeriği zorunludur.");
+  if (typeof body?.content !== "string" || !body.content.trim())
+    return badRequest("Mesaj içeriği zorunludur.");
 
   const now = new Date().toISOString();
 
-  const { DynamoDBClient, PutItemCommand, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { DynamoDBClient, PutItemCommand, UpdateItemCommand } =
+    await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   // Put message
-  await ddb.send(new PutItemCommand({
-    TableName: getTableName(),
-    Item: marshall({
-      PK: `CHAT#${threadId}`,
-      SK: `MSG#${now}`,
-      senderId: userId,
-      content: body.content.trim().slice(0, ChatService.MAX_MESSAGE_LENGTH),
-      timestamp: now,
+  await ddb.send(
+    new PutItemCommand({
+      TableName: getTableName(),
+      Item: marshall({
+        PK: `CHAT#${threadId}`,
+        SK: `MSG#${now}`,
+        senderId: userId,
+        content: body.content.trim().slice(0, ChatService.MAX_MESSAGE_LENGTH),
+        timestamp: now,
+      }),
     }),
-  }));
+  );
 
   // Update thread metadata
-  await ddb.send(new UpdateItemCommand({
-    TableName: getTableName(),
-    Key: marshall({ PK: `THREAD#${threadId}`, SK: "META" }),
-    UpdateExpression: "SET lastMessageAt = :now, lastMessage = :msg",
-    ExpressionAttributeValues: marshall({ ":now": now, ":msg": body.content.trim().slice(0, 200) }),
-  }));
+  await ddb.send(
+    new UpdateItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: `THREAD#${threadId}`, SK: "META" }),
+      UpdateExpression: "SET lastMessageAt = :now, lastMessage = :msg",
+      ExpressionAttributeValues: marshall({
+        ":now": now,
+        ":msg": body.content.trim().slice(0, 200),
+      }),
+    }),
+  );
 
   return created({ timestamp: now });
 }

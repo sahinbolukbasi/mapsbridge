@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   web:
@@ -46,7 +46,7 @@ services:
   # Mock Bedrock service for development
   bedrock-mock:
     image: node:22-alpine
-    command: sh -c "echo 'Bedrock mock service running'"  
+    command: sh -c "echo 'Bedrock mock service running'"
     ports:
       - "3001:3001"
 

@@ -1,12 +1,12 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
-const { transformSync } = require('esbuild');
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const { transformSync } = require("esbuild");
 
 function loadContracts() {
-  const contractsPath = path.resolve(__dirname, '../../../packages/contracts/src/index.ts');
+  const contractsPath = path.resolve(__dirname, "../../../packages/contracts/src/index.ts");
   const dir = path.dirname(contractsPath);
   const cache = new Map();
 
@@ -14,19 +14,22 @@ function loadContracts() {
     if (cache.has(filepath)) return cache.get(filepath).exports;
     const mod = { exports: {} };
     cache.set(filepath, mod);
-    const content = readFileSync(filepath, 'utf8');
-    const transformed = transformSync(content, { loader: 'ts', format: 'cjs' }).code;
+    const content = readFileSync(filepath, "utf8");
+    const transformed = transformSync(content, { loader: "ts", format: "cjs" }).code;
 
     vm.runInNewContext(transformed, {
       module: mod,
       exports: mod.exports,
       require(spec) {
-        if (spec.startsWith('.')) {
-          const resolved = path.resolve(path.dirname(filepath), spec.endsWith('.ts') ? spec : spec + '.ts');
+        if (spec.startsWith(".")) {
+          const resolved = path.resolve(
+            path.dirname(filepath),
+            spec.endsWith(".ts") ? spec : spec + ".ts",
+          );
           return loadFile(resolved);
         }
         return require(spec);
-      }
+      },
     });
 
     return mod.exports;
@@ -36,9 +39,18 @@ function loadContracts() {
 }
 
 const contracts = loadContracts();
-const { CreditWallet, Trip, RouteStop, Coordinate, Subscription, DomainException, InsufficientCreditsException, ValidationException } = contracts;
+const {
+  CreditWallet,
+  Trip,
+  RouteStop,
+  Coordinate,
+  Subscription,
+  DomainException,
+  InsufficientCreditsException,
+  ValidationException,
+} = contracts;
 
-test('Coordinate value object validates latitude and longitude boundaries', () => {
+test("Coordinate value object validates latitude and longitude boundaries", () => {
   const valid = new Coordinate(41.0082, 28.9784);
   assert.equal(valid.lat, 41.0082);
   assert.equal(valid.lng, 28.9784);
@@ -50,12 +62,12 @@ test('Coordinate value object validates latitude and longitude boundaries', () =
   assert.throws(() => new Coordinate(NaN, 28), ValidationException);
 });
 
-test('CreditWallet aggregate enforces invariants: balance, reservations, and refunds', () => {
+test("CreditWallet aggregate enforces invariants: balance, reservations, and refunds", () => {
   const wallet = new CreditWallet({
-    sub: 'user-test-123',
+    sub: "user-test-123",
     credits: 10,
     welcomeClaimed: false,
-    tier: 'free',
+    tier: "free",
   });
 
   assert.equal(wallet.credits, 10);
@@ -85,13 +97,13 @@ test('CreditWallet aggregate enforces invariants: balance, reservations, and ref
   assert.throws(() => wallet.deductCredits(20), InsufficientCreditsException);
 });
 
-test('Suspended wallet rejects credit reservations and deductions', () => {
+test("Suspended wallet rejects credit reservations and deductions", () => {
   const suspended = new CreditWallet({
-    sub: 'user-suspended',
+    sub: "user-suspended",
     credits: 100,
     welcomeClaimed: true,
-    tier: 'pro',
-    status: 'suspended',
+    tier: "pro",
+    status: "suspended",
   });
 
   assert.equal(suspended.isSuspended(), true);
@@ -100,31 +112,31 @@ test('Suspended wallet rejects credit reservations and deductions', () => {
   assert.throws(() => suspended.deductCredits(5));
 });
 
-test('Trip aggregate root manages stops, computes day durations and validates feasibility', () => {
+test("Trip aggregate root manages stops, computes day durations and validates feasibility", () => {
   const trip = new Trip({
-    id: 'trip-1',
-    title: 'Roma Kültür Gezisi',
-    destination: 'Roma, İtalya',
+    id: "trip-1",
+    title: "Roma Kültür Gezisi",
+    destination: "Roma, İtalya",
   });
 
   const stop1 = new RouteStop({
-    id: 'stop-1',
-    name: 'Kolezyum',
+    id: "stop-1",
+    name: "Kolezyum",
     lat: 41.8902,
     lng: 12.4922,
     day: 1,
     estimatedMinutes: 120,
-    timeSlot: 'morning',
+    timeSlot: "morning",
   });
 
   const stop2 = new RouteStop({
-    id: 'stop-2',
-    name: 'Roma Forumu',
+    id: "stop-2",
+    name: "Roma Forumu",
     lat: 41.8925,
     lng: 12.4853,
     day: 1,
     estimatedMinutes: 90,
-    timeSlot: 'afternoon',
+    timeSlot: "afternoon",
   });
 
   trip.addStop(stop1);
@@ -138,16 +150,16 @@ test('Trip aggregate root manages stops, computes day durations and validates fe
 
   // Converting to DTO
   const dto = trip.toDto();
-  assert.equal(dto.title, 'Roma Kültür Gezisi');
+  assert.equal(dto.title, "Roma Kültür Gezisi");
   assert.equal(dto.stops.length, 2);
-  assert.equal(dto.stops[0].name, 'Kolezyum');
+  assert.equal(dto.stops[0].name, "Kolezyum");
 });
 
-test('Subscription domain aggregate enforces free-tier route limits and credit allowances', () => {
+test("Subscription domain aggregate enforces free-tier route limits and credit allowances", () => {
   const freeSub = new Subscription({
-    userId: 'user-free',
-    tier: 'free',
-    status: 'active',
+    userId: "user-free",
+    tier: "free",
+    status: "active",
   });
 
   assert.equal(freeSub.canCreateRoute(2), true);
@@ -156,9 +168,9 @@ test('Subscription domain aggregate enforces free-tier route limits and credit a
   assert.equal(freeSub.hasPriorityModelAccess(), false);
 
   const proSub = new Subscription({
-    userId: 'user-pro',
-    tier: 'pro',
-    status: 'active',
+    userId: "user-pro",
+    tier: "pro",
+    status: "active",
   });
 
   assert.equal(proSub.canCreateRoute(100), true);

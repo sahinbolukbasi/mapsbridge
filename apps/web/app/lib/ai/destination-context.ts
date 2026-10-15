@@ -32,10 +32,7 @@ export function buildDestinationContext(opts: DestinationContextOptions): string
 
   // City rhythm (always include — shapes meal and timing decisions)
   const rhythm = brief.cityRhythm.value;
-  const rhythmLines: string[] = [
-    `Öğle: ${rhythm.lunchTime}`,
-    `Akşam yemeği: ${rhythm.dinnerTime}`,
-  ];
+  const rhythmLines: string[] = [`Öğle: ${rhythm.lunchTime}`, `Akşam yemeği: ${rhythm.dinnerTime}`];
   if (rhythm.siestaExists) rhythmLines.push("Öğle arası kapanma var.");
   if (rhythm.closingDayNote) rhythmLines.push(rhythm.closingDayNote);
   if (rhythm.additionalNotes) rhythmLines.push(...rhythm.additionalNotes.slice(0, 2));
@@ -43,13 +40,14 @@ export function buildDestinationContext(opts: DestinationContextOptions): string
 
   // Top timing rules (severity=blocks_visit first, max 5)
   const timingRules = brief.timingRules.value
-    .filter(r => r.severity !== "fyi")
-    .sort((a, b) => (a.severity === "blocks_visit" ? -1 : 1) - (b.severity === "blocks_visit" ? -1 : 1))
+    .filter((r) => r.severity !== "fyi")
+    .sort(
+      (a, b) => (a.severity === "blocks_visit" ? -1 : 1) - (b.severity === "blocks_visit" ? -1 : 1),
+    )
     .slice(0, 5);
   if (timingRules.length) {
     parts.push(
-      "Kritik zamanlama:\n" +
-        timingRules.map(r => `- ${r.subject}: ${r.rule}`).join("\n")
+      "Kritik zamanlama:\n" + timingRules.map((r) => `- ${r.subject}: ${r.rule}`).join("\n"),
     );
   }
 
@@ -58,7 +56,7 @@ export function buildDestinationContext(opts: DestinationContextOptions): string
   if (mistakes.length) {
     parts.push(
       "Acemi hataları:\n" +
-        mistakes.map(m => `- Hata: "${m.mistake}" → Doğrusu: "${m.correction}"`).join("\n")
+        mistakes.map((m) => `- Hata: "${m.mistake}" → Doğrusu: "${m.correction}"`).join("\n"),
     );
   }
 
@@ -67,7 +65,9 @@ export function buildDestinationContext(opts: DestinationContextOptions): string
   if (overrated.length) {
     parts.push(
       "Abartılanlar:\n" +
-        overrated.map(o => `- ${o.overrated}: ${o.why} → Alternatif: ${o.alternative}`).join("\n")
+        overrated
+          .map((o) => `- ${o.overrated}: ${o.why} → Alternatif: ${o.alternative}`)
+          .join("\n"),
     );
   }
 
@@ -89,16 +89,16 @@ export function buildDestinationContext(opts: DestinationContextOptions): string
       art_gallery: ["sanat", "galeri", "müze"],
       coworking: ["çalışma", "coworking", "dijital"],
     };
-    const nicheMatches = brief.nicheAngles.value.filter(n => {
+    const nicheMatches = brief.nicheAngles.value.filter((n) => {
       const keywords = categoryMap[n.category] ?? [];
-      return opts.interests!.some(i =>
-        keywords.some(k => i.toLowerCase().includes(k))
-      );
+      return opts.interests!.some((i) => keywords.some((k) => i.toLowerCase().includes(k)));
     });
     if (nicheMatches.length) {
       parts.push(
         "Niş açılar:\n" +
-          nicheMatches.map(n => `- ${n.description}: ${n.highlights.slice(0, 2).join(", ")}`).join("\n")
+          nicheMatches
+            .map((n) => `- ${n.description}: ${n.highlights.slice(0, 2).join(", ")}`)
+            .join("\n"),
       );
     }
   }
@@ -128,6 +128,6 @@ export function getDestinationConfidence(destinationId: string): "high" | "parti
     brief.timingRules,
     brief.gettingAround,
   ];
-  const verifiedCount = curatedFields.filter(f => f.confidence === "verified").length;
+  const verifiedCount = curatedFields.filter((f) => f.confidence === "verified").length;
   return verifiedCount >= 3 ? "high" : verifiedCount >= 1 ? "partial" : "none";
 }

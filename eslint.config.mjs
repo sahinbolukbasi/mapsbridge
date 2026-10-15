@@ -14,14 +14,7 @@ export default tseslint.config(
 
   // Global ignore patterns
   {
-    ignores: [
-      "node_modules/**",
-      "**/.next/**",
-      "**/out/**",
-      "**/.build/**",
-      "**/*.cjs",
-      "**/*.js",
-    ],
+    ignores: ["node_modules/**", "**/.next/**", "**/out/**", "**/.build/**", "**/*.cjs", "**/*.js"],
   },
 
   // Rules for TypeScript source files across the monorepo

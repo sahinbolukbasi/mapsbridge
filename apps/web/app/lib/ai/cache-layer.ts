@@ -3,12 +3,12 @@
  * Conforms to docs/plans/agentcore-architecture.md Section 10.2
  */
 
-export type CacheCategory = 'weather' | 'pricing' | 'places' | 'base_plan';
+export type CacheCategory = "weather" | "pricing" | "places" | "base_plan";
 
 export const CACHE_TTL_SECONDS: Record<CacheCategory, number> = {
-  weather: 15 * 60,         // ~15 minutes
-  pricing: 5 * 60,          // ~5 minutes
-  places: 24 * 60 * 60,     // ~24 hours (1 day)
+  weather: 15 * 60, // ~15 minutes
+  pricing: 5 * 60, // ~5 minutes
+  places: 24 * 60 * 60, // ~24 hours (1 day)
   base_plan: 7 * 24 * 60 * 60, // 7 days (long-term template, personalized later)
 };
 
@@ -22,8 +22,8 @@ class MemoryCacheStore {
   private store: Map<string, CacheEntry<any>> = new Map();
 
   generateCacheKey(category: CacheCategory, ...parts: string[]): string {
-    const cleanParts = parts.map(p => p.trim().toLowerCase().replace(/\s+/g, '_'));
-    return `${category}:${cleanParts.join(':')}`;
+    const cleanParts = parts.map((p) => p.trim().toLowerCase().replace(/\s+/g, "_"));
+    return `${category}:${cleanParts.join(":")}`;
   }
 
   get<T>(category: CacheCategory, ...keyParts: string[]): T | null {
@@ -40,9 +40,15 @@ class MemoryCacheStore {
     return entry.value as T;
   }
 
-  set<T>(category: CacheCategory, value: T, customTtlSeconds?: number, ...keyParts: string[]): void {
+  set<T>(
+    category: CacheCategory,
+    value: T,
+    customTtlSeconds?: number,
+    ...keyParts: string[]
+  ): void {
     const key = this.generateCacheKey(category, ...keyParts);
-    const ttlSeconds = customTtlSeconds !== undefined ? customTtlSeconds : CACHE_TTL_SECONDS[category];
+    const ttlSeconds =
+      customTtlSeconds !== undefined ? customTtlSeconds : CACHE_TTL_SECONDS[category];
     const expiresAt = Date.now() + ttlSeconds * 1000;
 
     this.store.set(key, {

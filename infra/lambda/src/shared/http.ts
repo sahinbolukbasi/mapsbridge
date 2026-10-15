@@ -53,11 +53,15 @@ export function jsonResponse(statusCode: number, body: unknown): ApiResponse {
 export const ok = (body: unknown) => jsonResponse(200, body);
 export const created = (body: unknown) => jsonResponse(201, body);
 export const badRequest = (msg: string = "Geçersiz istek.") => jsonResponse(400, { error: msg });
-export const unauthorized = (msg: string = "Oturum belirteci bulunamadı. Lütfen giriş yapın.") => jsonResponse(401, { error: msg });
-export const forbidden = (msg: string = "Bu işlemi yapmaya yetkiniz yok.") => jsonResponse(403, { error: msg });
+export const unauthorized = (msg: string = "Oturum belirteci bulunamadı. Lütfen giriş yapın.") =>
+  jsonResponse(401, { error: msg });
+export const forbidden = (msg: string = "Bu işlemi yapmaya yetkiniz yok.") =>
+  jsonResponse(403, { error: msg });
 export const notFound = (msg: string = "Kaynak bulunamadı.") => jsonResponse(404, { error: msg });
-export const tooManyRequests = (msg: string = "Günlük token limitiniz doldu.") => jsonResponse(429, { error: msg });
-export const serverError = (msg: string = "Sunucu hatası. Lütfen tekrar deneyin.") => jsonResponse(500, { error: msg });
+export const tooManyRequests = (msg: string = "Günlük token limitiniz doldu.") =>
+  jsonResponse(429, { error: msg });
+export const serverError = (msg: string = "Sunucu hatası. Lütfen tekrar deneyin.") =>
+  jsonResponse(500, { error: msg });
 
 /** OPTIONS preflight responder */
 export function handlePreflight(): ApiResponse {
@@ -76,7 +80,9 @@ export function extractBearerToken(event: ApiGatewayEvent): string | null {
 export function parseBody<T>(event: ApiGatewayEvent): T | null {
   if (!event.body) return null;
   try {
-    return JSON.parse(event.isBase64Encoded ? Buffer.from(event.body, "base64").toString("utf8") : event.body) as T;
+    return JSON.parse(
+      event.isBase64Encoded ? Buffer.from(event.body, "base64").toString("utf8") : event.body,
+    ) as T;
   } catch {
     return null;
   }
@@ -119,7 +125,11 @@ export const memoize = <T>(fn: () => Promise<T>) => {
   let inFlight: Promise<T> | null = null;
   return async (): Promise<T> => {
     if (cached) return cached;
-    if (!inFlight) inFlight = fn().then(v => { cached = v; return v; });
+    if (!inFlight)
+      inFlight = fn().then((v) => {
+        cached = v;
+        return v;
+      });
     return inFlight;
   };
 };

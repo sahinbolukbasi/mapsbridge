@@ -4,26 +4,22 @@
  */
 
 export type ReservationStatus =
-  | 'not_required'
-  | 'recommended'
-  | 'required'
-  | 'confirmed'
-  | 'not_booked';
+  "not_required" | "recommended" | "required" | "confirmed" | "not_booked";
 
 export interface ReservationItem {
   placeId: string;
   placeName: string;
-  dayIndex?: number;         // 0-based day in the trip
+  dayIndex?: number; // 0-based day in the trip
   status: ReservationStatus;
   bookingUrl?: string;
   confirmationCode?: string;
-  cancellationDeadline?: string;  // ISO date
+  cancellationDeadline?: string; // ISO date
   notes?: string;
 }
 
 export interface ReservationChecklist {
   items: ReservationItem[];
-  urgentCount: number;  // required | not_booked with visit in < 3 days from today
+  urgentCount: number; // required | not_booked with visit in < 3 days from today
   missingCount: number; // required + not yet confirmed
 }
 
@@ -34,7 +30,7 @@ export interface ReservationChecklist {
 const URGENT_DAY_THRESHOLD = 3;
 
 function needsBooking(status: ReservationStatus): boolean {
-  return status === 'required' || status === 'not_booked';
+  return status === "required" || status === "not_booked";
 }
 
 // ---------------------------------------------------------------------------
@@ -57,7 +53,7 @@ export function buildReservationChecklist(
 
   for (const item of items) {
     // missingCount: required but not yet confirmed
-    if (item.status === 'required') {
+    if (item.status === "required") {
       missingCount++;
     }
 
@@ -97,11 +93,11 @@ export function markReservationConfirmed(
   if (!target) return checklist;
 
   const wasUrgent = needsBooking(target.status);
-  const wasMissing = target.status === 'required';
+  const wasMissing = target.status === "required";
 
   const updatedItems = checklist.items.map((item) =>
     item.placeId === placeId
-      ? { ...item, status: 'confirmed' as ReservationStatus, confirmationCode: code }
+      ? { ...item, status: "confirmed" as ReservationStatus, confirmationCode: code }
       : item,
   );
 
@@ -153,19 +149,18 @@ export function getUrgentReservations(
 /** Render checklist as a Turkish text snippet for AI context injection. */
 export function reservationChecklistToPromptSnippet(checklist: ReservationChecklist): string {
   const lines: string[] = [
-    'Rezervasyon Durumu:',
+    "Rezervasyon Durumu:",
     `- Eksik rezervasyon: ${checklist.missingCount}`,
     `- Acil rezervasyon: ${checklist.urgentCount}`,
   ];
 
   const pending = checklist.items.filter((i) => needsBooking(i.status));
   if (pending.length > 0) {
-    lines.push('Rezervasyon Gerekli:');
+    lines.push("Rezervasyon Gerekli:");
     for (const item of pending) {
-      const day = item.dayIndex !== undefined ? ` (Gün ${item.dayIndex + 1})` : '';
-      const url = item.bookingUrl ? ` → ${item.bookingUrl}` : '';
-      const statusLabel =
-        item.status === 'required' ? 'zorunlu' : 'henüz alınmadı';
+      const day = item.dayIndex !== undefined ? ` (Gün ${item.dayIndex + 1})` : "";
+      const url = item.bookingUrl ? ` → ${item.bookingUrl}` : "";
+      const statusLabel = item.status === "required" ? "zorunlu" : "henüz alınmadı";
       lines.push(`  • ${item.placeName}${day} — ${statusLabel}${url}`);
       if (item.notes) {
         lines.push(`    Not: ${item.notes}`);
@@ -173,19 +168,19 @@ export function reservationChecklistToPromptSnippet(checklist: ReservationCheckl
     }
   }
 
-  const confirmed = checklist.items.filter((i) => i.status === 'confirmed');
+  const confirmed = checklist.items.filter((i) => i.status === "confirmed");
   if (confirmed.length > 0) {
-    lines.push('Onaylananlar:');
+    lines.push("Onaylananlar:");
     for (const item of confirmed) {
-      const code = item.confirmationCode ? ` [${item.confirmationCode}]` : '';
+      const code = item.confirmationCode ? ` [${item.confirmationCode}]` : "";
       lines.push(`  ✓ ${item.placeName}${code}`);
     }
   }
 
-  const notRequired = checklist.items.filter((i) => i.status === 'not_required');
+  const notRequired = checklist.items.filter((i) => i.status === "not_required");
   if (notRequired.length > 0) {
-    lines.push(`Rezervasyon Gerektirmeyen: ${notRequired.map((i) => i.placeName).join(', ')}`);
+    lines.push(`Rezervasyon Gerektirmeyen: ${notRequired.map((i) => i.placeName).join(", ")}`);
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

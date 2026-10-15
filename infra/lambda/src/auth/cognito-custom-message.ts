@@ -32,8 +32,12 @@ export interface CognitoCustomMessageEvent {
   };
 }
 
-export const handler = async (event: CognitoCustomMessageEvent): Promise<CognitoCustomMessageEvent> => {
-  console.log(`[CognitoCustomMessage] triggerSource: ${event.triggerSource}, user: ${event.userName}`);
+export const handler = async (
+  event: CognitoCustomMessageEvent,
+): Promise<CognitoCustomMessageEvent> => {
+  console.log(
+    `[CognitoCustomMessage] triggerSource: ${event.triggerSource}, user: ${event.userName}`,
+  );
 
   const email = event.request.userAttributes?.email || event.userName || "";
   const name = event.request.userAttributes?.name || "Gezgin";

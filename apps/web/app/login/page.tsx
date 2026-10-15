@@ -2,7 +2,12 @@
 
 import React, { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { signIn, handleGoogleCredentialResponse, handleAppleCredentialResponse, getStoredSession } from "../lib/cognito";
+import {
+  signIn,
+  handleGoogleCredentialResponse,
+  handleAppleCredentialResponse,
+  getStoredSession,
+} from "../lib/cognito";
 import { HeaderNav } from "../components/header-nav";
 import { SiteFooter } from "../components/site-footer";
 import "./login.css";
@@ -68,7 +73,7 @@ export default function LoginPage() {
         setIsGoogleLoading(false);
       }
     },
-    [redirectToNext]
+    [redirectToNext],
   );
 
   useEffect(() => {
@@ -206,14 +211,18 @@ export default function LoginPage() {
     e.preventDefault();
     // Google OAuth popup başarısız oldu — kullanıcıyı e-posta/şifre ile giriş yapmaya yönlendir
     setShowGoogleFallbackModal(false);
-    setMessage("Google ile giriş şu anda kullanılamıyor. Lütfen e-posta ve şifrenizle giriş yapın veya Google tarayıcı ayarlarınızda pop-up engelleyicisini kapatın.");
+    setMessage(
+      "Google ile giriş şu anda kullanılamıyor. Lütfen e-posta ve şifrenizle giriş yapın veya Google tarayıcı ayarlarınızda pop-up engelleyicisini kapatın.",
+    );
   };
 
   const triggerAppleSignIn = () => {
     setIsAppleLoading(true);
     setMessage("");
     // Apple Sign In — henüz web'de tam entegre değil
-    setMessage("Apple ile giriş özelliği yakında aktif olacak. Lütfen e-posta ve şifrenizle giriş yapın.");
+    setMessage(
+      "Apple ile giriş özelliği yakında aktif olacak. Lütfen e-posta ve şifrenizle giriş yapın.",
+    );
     setIsAppleLoading(false);
   };
 
@@ -262,7 +271,8 @@ export default function LoginPage() {
 
                 <h1 className="login-title">Giriş yap.</h1>
                 <p className="login-subtitle">
-                  Kişisel rotalarına, kayıtlı duraklarına ve seyahat arkadaşlarına kaldığın yerden devam et.
+                  Kişisel rotalarına, kayıtlı duraklarına ve seyahat arkadaşlarına kaldığın yerden
+                  devam et.
                 </p>
 
                 {/* Social Login Buttons (Google + Apple) */}
@@ -300,7 +310,10 @@ export default function LoginPage() {
                     onClick={triggerAppleSignIn}
                     disabled={isAppleLoading}
                   >
-                    <svg style={{ width: "18px", height: "18px", fill: "currentColor" }} viewBox="0 0 170 170">
+                    <svg
+                      style={{ width: "18px", height: "18px", fill: "currentColor" }}
+                      viewBox="0 0 170 170"
+                    >
                       <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.69-7.85-12-14.42-6-9.13-10.74-19.55-14.22-31.26-3.48-11.71-5.22-22.95-5.22-33.72 0-14.13 3.59-26.06 10.76-35.79 7.18-9.73 16.2-14.65 27.08-14.77 5.22 0 10.79 1.39 16.71 4.17 5.92 2.78 9.78 4.22 11.58 4.31 1.41 0 5.48-1.57 12.21-4.71 6.74-3.14 12.63-4.52 17.68-4.14 13.48.87 23.97 5.86 31.47 14.97-12.06 7.28-17.98 17.26-17.76 29.95.22 9.89 3.96 18.06 11.22 24.51 7.26 6.45 15.82 10.12 25.68 11.01-2.17 6.74-4.78 13.32-7.84 19.74zM119.22 31.81c0-7.39 2.66-14.39 7.99-20.99 5.33-6.61 11.85-10.55 19.57-11.82.22 1.3.33 2.39.33 3.26 0 7.39-2.83 14.45-8.49 21.18-5.65 6.74-12.28 10.59-19.89 11.56-.11-1.09-.17-2.17-.17-3.19z" />
                     </svg>
                     <span>{isAppleLoading ? "Bağlanıyor..." : "Apple ile Giriş Yap"}</span>
@@ -338,30 +351,79 @@ export default function LoginPage() {
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: "0.75rem",
+                        }}
+                      >
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           <svg style={{ width: "22px", height: "22px" }} viewBox="0 0 24 24">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                            <path
+                              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                              fill="#4285F4"
+                            />
+                            <path
+                              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                              fill="#34A853"
+                            />
+                            <path
+                              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                              fill="#FBBC05"
+                            />
+                            <path
+                              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                              fill="#EA4335"
+                            />
                           </svg>
-                          <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#131b2e" }}>
+                          <h3
+                            style={{
+                              margin: 0,
+                              fontSize: "17px",
+                              fontWeight: 700,
+                              color: "#131b2e",
+                            }}
+                          >
                             Google ile Giriş
                           </h3>
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowGoogleFallbackModal(false)}
-                          style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", fontSize: "18px", fontWeight: 700 }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#64748b",
+                            fontSize: "18px",
+                            fontWeight: 700,
+                          }}
                         >
                           ✕
                         </button>
                       </div>
-                      <p style={{ fontSize: "13.5px", color: "#475569", marginBottom: "1rem", lineHeight: 1.6 }}>
-                        Google ile giriş şu anda gerçekleştirilemedi. Bu durum genellikle tarayıcınızın pop-up engelleyicisinden kaynaklanır.
+                      <p
+                        style={{
+                          fontSize: "13.5px",
+                          color: "#475569",
+                          marginBottom: "1rem",
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        Google ile giriş şu anda gerçekleştirilemedi. Bu durum genellikle
+                        tarayıcınızın pop-up engelleyicisinden kaynaklanır.
                       </p>
-                      <ul style={{ fontSize: "13px", color: "#475569", margin: "0 0 1.25rem 0", paddingLeft: "1.25rem", lineHeight: 1.7 }}>
+                      <ul
+                        style={{
+                          fontSize: "13px",
+                          color: "#475569",
+                          margin: "0 0 1.25rem 0",
+                          paddingLeft: "1.25rem",
+                          lineHeight: 1.7,
+                        }}
+                      >
                         <li>Tarayıcınızda pop-up engelleyicisini kapatıp tekrar deneyin</li>
                         <li>Farklı bir tarayıcı kullanın (Chrome önerilir)</li>
                         <li>Veya aşağıdan e-posta ve şifre ile giriş yapın</li>
@@ -407,12 +469,28 @@ export default function LoginPage() {
                   </div>
 
                   <div className="login-form-group">
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.375rem" }}>
-                      <label className="login-label" htmlFor="passwordInput" style={{ marginBottom: 0 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: "0.375rem",
+                      }}
+                    >
+                      <label
+                        className="login-label"
+                        htmlFor="passwordInput"
+                        style={{ marginBottom: 0 }}
+                      >
                         Şifre
                       </label>
                       <Link
-                        style={{ fontSize: "12px", color: "var(--mb-secondary)", fontWeight: 600, textDecoration: "none" }}
+                        style={{
+                          fontSize: "12px",
+                          color: "var(--mb-secondary)",
+                          fontWeight: 600,
+                          textDecoration: "none",
+                        }}
                         href={`/sifre-sifirla/${email ? `?email=${encodeURIComponent(email)}` : ""}`}
                       >
                         Şifremi unuttum
@@ -443,17 +521,34 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      marginTop: "0.5rem",
+                    }}
+                  >
                     <input
                       id="rememberMe"
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      style={{ width: "16px", height: "16px", accentColor: "var(--mb-primary-container)", cursor: "pointer" }}
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        accentColor: "var(--mb-primary-container)",
+                        cursor: "pointer",
+                      }}
                     />
                     <label
                       htmlFor="rememberMe"
-                      style={{ fontSize: "13px", color: "var(--mb-on-surface-variant)", cursor: "pointer", userSelect: "none" }}
+                      style={{
+                        fontSize: "13px",
+                        color: "var(--mb-on-surface-variant)",
+                        cursor: "pointer",
+                        userSelect: "none",
+                      }}
                     >
                       Beni bu cihazda hatırla
                     </label>
@@ -484,7 +579,11 @@ export default function LoginPage() {
                             Şifrenizi hatırlamıyorsanız:{" "}
                             <Link
                               href={`/sifre-sifirla/?email=${encodeURIComponent(email)}`}
-                              style={{ textDecoration: "underline", fontWeight: 700, color: "inherit" }}
+                              style={{
+                                textDecoration: "underline",
+                                fontWeight: 700,
+                                color: "inherit",
+                              }}
                             >
                               Şifremi Sıfırla →
                             </Link>
@@ -503,8 +602,17 @@ export default function LoginPage() {
 
               {/* Alt Bilgilendirme Kartı */}
               <div className="login-callout-box" style={{ position: "relative", zIndex: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", color: "#2d6e58" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                >
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      color: "#2d6e58",
+                    }}
+                  >
                     HESABIN YOK MU?
                   </span>
                   <Link
@@ -517,20 +625,44 @@ export default function LoginPage() {
                       alignItems: "center",
                       gap: "0.25rem",
                     }}
-                    href={nextUrl !== "/desk/" ? `/register/?next=${encodeURIComponent(nextUrl)}` : "/register/"}
+                    href={
+                      nextUrl !== "/desk/"
+                        ? `/register/?next=${encodeURIComponent(nextUrl)}`
+                        : "/register/"
+                    }
                   >
                     <span>Ücretsiz üye ol</span>
                     <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                   </Link>
                 </div>
-                <p style={{ margin: "0.375rem 0 0", fontSize: "13px", color: "var(--mb-on-surface)", fontWeight: 500 }}>
+                <p
+                  style={{
+                    margin: "0.375rem 0 0",
+                    fontSize: "13px",
+                    color: "var(--mb-on-surface)",
+                    fontWeight: 500,
+                  }}
+                >
                   Adresini ve rotalarını birkaç saniyede güvenle paylaşmaya başla.
                 </p>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginTop: "0.5rem", color: "var(--mb-on-surface-variant)" }}>
-                  <span className="material-symbols-outlined text-[15px]" style={{ color: "var(--mb-emerald-accent)" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.375rem",
+                    marginTop: "0.5rem",
+                    color: "var(--mb-on-surface-variant)",
+                  }}
+                >
+                  <span
+                    className="material-symbols-outlined text-[15px]"
+                    style={{ color: "var(--mb-emerald-accent)" }}
+                  >
                     verified_user
                   </span>
-                  <span style={{ fontSize: "12px", opacity: 0.9 }}>Kayıt tamamen ücretsizdir. Gizli takip yoktur.</span>
+                  <span style={{ fontSize: "12px", opacity: 0.9 }}>
+                    Kayıt tamamen ücretsizdir. Gizli takip yoktur.
+                  </span>
                 </div>
               </div>
             </div>
@@ -547,7 +679,10 @@ export default function LoginPage() {
 
               {/* Üst Asılı Hap: Son Ziyaret Edilen Rota */}
               <div className="login-top-pill">
-                <span className="material-symbols-outlined text-[18px]" style={{ color: "var(--mb-secondary)" }}>
+                <span
+                  className="material-symbols-outlined text-[18px]"
+                  style={{ color: "var(--mb-secondary)" }}
+                >
                   explore
                 </span>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--mb-on-surface)" }}>
@@ -576,22 +711,48 @@ export default function LoginPage() {
                 {/* Canlı Metrik Kartı */}
                 <div className="login-metrics-box">
                   <div>
-                    <div style={{ fontSize: "28px", lineHeight: "36px", fontWeight: 700, color: "var(--mb-on-surface)" }}>
+                    <div
+                      style={{
+                        fontSize: "28px",
+                        lineHeight: "36px",
+                        fontWeight: 700,
+                        color: "var(--mb-on-surface)",
+                      }}
+                    >
                       140K+
                     </div>
-                    <div style={{ fontSize: "13px", color: "var(--mb-on-surface-variant)" }}>Kayıtlı Gezgin</div>
+                    <div style={{ fontSize: "13px", color: "var(--mb-on-surface-variant)" }}>
+                      Kayıtlı Gezgin
+                    </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: "28px", lineHeight: "36px", fontWeight: 700, color: "var(--mb-secondary)" }}>
+                    <div
+                      style={{
+                        fontSize: "28px",
+                        lineHeight: "36px",
+                        fontWeight: 700,
+                        color: "var(--mb-secondary)",
+                      }}
+                    >
                       500K+
                     </div>
-                    <div style={{ fontSize: "13px", color: "var(--mb-on-surface-variant)" }}>Canlı Keşif Noktası</div>
+                    <div style={{ fontSize: "13px", color: "var(--mb-on-surface-variant)" }}>
+                      Canlı Keşif Noktası
+                    </div>
                   </div>
                 </div>
 
                 {/* Yarı Saydam Gerçek Kullanıcı Deneyimi Kartı */}
                 <div className="login-testimonial-box">
-                  <div style={{ display: "flex", alignItems: "center", gap: "2px", color: "var(--mb-emerald-accent)", marginBottom: "0.5rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "2px",
+                      color: "var(--mb-emerald-accent)",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
                     <span className="material-symbols-outlined text-[16px]">star</span>
                     <span className="material-symbols-outlined text-[16px]">star</span>
                     <span className="material-symbols-outlined text-[16px]">star</span>
@@ -607,7 +768,8 @@ export default function LoginPage() {
                       color: "var(--mb-on-surface)",
                     }}
                   >
-                    “MapsBridge sayesinde İtalya seyahatimiz tek bir aksama olmadan tamamlandı. 6 haneli kodla tüm grup anında aynı haritadaydı.”
+                    “MapsBridge sayesinde İtalya seyahatimiz tek bir aksama olmadan tamamlandı. 6
+                    haneli kodla tüm grup anında aynı haritadaydı.”
                   </blockquote>
                   <div
                     style={{
@@ -617,7 +779,11 @@ export default function LoginPage() {
                       justifyContent: "space-between",
                     }}
                   >
-                    <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--mb-on-surface)" }}>— Elif D.</span>
+                    <span
+                      style={{ fontSize: "13px", fontWeight: 700, color: "var(--mb-on-surface)" }}
+                    >
+                      — Elif D.
+                    </span>
                     <span
                       style={{
                         fontSize: "12px",
@@ -627,7 +793,10 @@ export default function LoginPage() {
                         gap: "0.25rem",
                       }}
                     >
-                      <span className="material-symbols-outlined text-[14px]" style={{ color: "var(--mb-secondary)" }}>
+                      <span
+                        className="material-symbols-outlined text-[14px]"
+                        style={{ color: "var(--mb-secondary)" }}
+                      >
                         pin_drop
                       </span>{" "}
                       Toskana &amp; Roma Rotası

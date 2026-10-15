@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,10 +12,10 @@ import {
   KeyboardAvoidingView,
   Alert,
   StatusBar,
-} from 'react-native';
-import { tripStore } from '../services/tripStore';
-import { authService } from '../services/api';
-import { chatStore, ChatContact, ChatBubbleItem, RouteEmbedData } from '../services/chatStore';
+} from "react-native";
+import { tripStore } from "../services/tripStore";
+import { authService } from "../services/api";
+import { chatStore, ChatContact, ChatBubbleItem, RouteEmbedData } from "../services/chatStore";
 import {
   ChatIcon,
   SearchIcon,
@@ -25,14 +25,14 @@ import {
   CalendarIcon,
   BalloonIcon,
   MountainIcon,
-} from '../components/Icons';
+} from "../components/Icons";
 
 interface ChatScreenProps {
   onGoBack?: () => void;
   onOpenMap?: () => void;
   initialThreadId?: string;
   initialContact?: ChatContact;
-  initialViewMode?: 'list' | 'detail';
+  initialViewMode?: "list" | "detail";
 }
 
 export function ChatScreen({
@@ -40,20 +40,20 @@ export function ChatScreen({
   onOpenMap,
   initialThreadId,
   initialContact,
-  initialViewMode = 'list',
+  initialViewMode = "list",
 }: ChatScreenProps) {
-  const [viewMode, setViewMode] = useState<'list' | 'detail'>(
-    initialContact || initialThreadId || initialViewMode === 'detail' ? 'detail' : 'list'
+  const [viewMode, setViewMode] = useState<"list" | "detail">(
+    initialContact || initialThreadId || initialViewMode === "detail" ? "detail" : "list",
   );
   const [contacts, setContacts] = useState<ChatContact[]>(initialContact ? [initialContact] : []);
   const [activeContact, setActiveContact] = useState<ChatContact | null>(initialContact || null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilterTab, setActiveFilterTab] = useState<'all' | 'direct' | 'groups'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilterTab, setActiveFilterTab] = useState<"all" | "direct" | "groups">("all");
 
   // Active Thread Message State
   const [messages, setMessages] = useState<ChatBubbleItem[]>([]);
-  const [inputText, setInputText] = useState('');
-  const [activeUsername, setActiveUsername] = useState('gezgin');
+  const [inputText, setInputText] = useState("");
+  const [activeUsername, setActiveUsername] = useState("gezgin");
 
   const scrollRef = useRef<ScrollView>(null);
 
@@ -62,7 +62,7 @@ export function ChatScreen({
     async function init() {
       const session = await authService.getSession();
       if (session?.email) {
-        setActiveUsername(session.email.split('@')[0]);
+        setActiveUsername(session.email.split("@")[0]);
       }
 
       const threads = await chatStore.getThreads();
@@ -76,7 +76,7 @@ export function ChatScreen({
         const found = threads.find((t) => t.id === initialThreadId);
         if (found) {
           setActiveContact(found);
-          setViewMode('detail');
+          setViewMode("detail");
         }
       }
     }
@@ -113,17 +113,17 @@ export function ChatScreen({
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleOpenConversation = (contact: ChatContact) => {
     setActiveContact(contact);
-    setViewMode('detail');
+    setViewMode("detail");
   };
 
   const handleSendMessage = async () => {
     if (!inputText.trim() || !activeContact) return;
     const text = inputText.trim();
-    setInputText('');
+    setInputText("");
 
     await chatStore.sendMessage(activeContact.id, {
       text,
-      senderId: 'me',
+      senderId: "me",
       senderName: activeUsername,
     });
   };
@@ -131,8 +131,8 @@ export function ChatScreen({
   const handleCloneRouteToDesk = (route: RouteEmbedData) => {
     tripStore.loadRouteFromExternal(route.title, route.stopsData as any);
     Alert.alert(
-      '🗺️ Masama Klonlandı',
-      `"${route.title}" rotası ve ${route.stopsData.length} durak seyahat masanıza başarıyla aktarıldı!`
+      "🗺️ Masama Klonlandı",
+      `"${route.title}" rotası ve ${route.stopsData.length} durak seyahat masanıza başarıyla aktarıldı!`,
     );
   };
 
@@ -151,12 +151,12 @@ export function ChatScreen({
       );
     }
 
-    if (contact.id.includes('kpd')) {
+    if (contact.id.includes("kpd")) {
       return (
         <View
           style={[
             styles.avatarFallbackBase,
-            { width: size, height: size, borderRadius: size / 2, backgroundColor: '#059669' },
+            { width: size, height: size, borderRadius: size / 2, backgroundColor: "#059669" },
           ]}
         >
           <BalloonIcon size={size * 0.48} color="#ffffff" />
@@ -164,12 +164,12 @@ export function ChatScreen({
       );
     }
 
-    if (contact.id.includes('likya')) {
+    if (contact.id.includes("likya")) {
       return (
         <View
           style={[
             styles.avatarFallbackBase,
-            { width: size, height: size, borderRadius: size / 2, backgroundColor: '#0f766e' },
+            { width: size, height: size, borderRadius: size / 2, backgroundColor: "#0f766e" },
           ]}
         >
           <MountainIcon size={size * 0.48} color="#ffffff" />
@@ -181,7 +181,7 @@ export function ChatScreen({
       <View
         style={[
           styles.avatarFallbackBase,
-          { width: size, height: size, borderRadius: size / 2, backgroundColor: '#047857' },
+          { width: size, height: size, borderRadius: size / 2, backgroundColor: "#047857" },
         ]}
       >
         <Text style={[styles.avatarFallbackLetter, { fontSize: size * 0.38 }]}>
@@ -192,8 +192,8 @@ export function ChatScreen({
   };
 
   const filteredContacts = contacts.filter((c) => {
-    if (activeFilterTab === 'direct' && c.isGroup) return false;
-    if (activeFilterTab === 'groups' && !c.isGroup) return false;
+    if (activeFilterTab === "direct" && c.isGroup) return false;
+    if (activeFilterTab === "groups" && !c.isGroup) return false;
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -211,7 +211,7 @@ export function ChatScreen({
   // ==========================================
   // VIEW 1: SOHBETLER / GELEN KUTUSU LİSTESİ
   // ==========================================
-  if (viewMode === 'list') {
+  if (viewMode === "list") {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#faf8ff" />
@@ -220,18 +220,14 @@ export function ChatScreen({
         <View style={styles.inboxHeader}>
           <View style={styles.inboxHeaderLeft}>
             {onGoBack && (
-              <TouchableOpacity
-                style={styles.inboxBackBtn}
-                onPress={onGoBack}
-                activeOpacity={0.7}
-              >
+              <TouchableOpacity style={styles.inboxBackBtn} onPress={onGoBack} activeOpacity={0.7}>
                 <Text style={styles.inboxBackBtnIcon}>‹</Text>
                 <Text style={styles.inboxBackBtnLabel}>Geri</Text>
               </TouchableOpacity>
             )}
 
             <View style={{ marginLeft: onGoBack ? 4 : 0 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                 <Text style={styles.inboxHeaderTitle}>Gezgin Sohbetleri</Text>
                 <View style={styles.liveNetworkPill}>
                   <View style={styles.livePulseDot} />
@@ -239,7 +235,9 @@ export function ChatScreen({
                 </View>
               </View>
               <Text style={styles.inboxHeaderSub}>
-                {contacts.length > 0 ? `${contacts.length} Aktif Bağlantı` : 'Gezgin mesajlaşma ağı'}
+                {contacts.length > 0
+                  ? `${contacts.length} Aktif Bağlantı`
+                  : "Gezgin mesajlaşma ağı"}
               </Text>
             </View>
           </View>
@@ -260,8 +258,8 @@ export function ChatScreen({
               clearButtonMode="while-editing"
             />
             {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Text style={{ fontSize: 14, color: '#94a3b8', paddingHorizontal: 4 }}>✕</Text>
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <Text style={{ fontSize: 14, color: "#94a3b8", paddingHorizontal: 4 }}>✕</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -270,31 +268,46 @@ export function ChatScreen({
         {/* Segmented Filter Pills */}
         <View style={styles.filterPillsRow}>
           <TouchableOpacity
-            style={[styles.filterPill, activeFilterTab === 'all' && styles.filterPillActive]}
-            onPress={() => setActiveFilterTab('all')}
+            style={[styles.filterPill, activeFilterTab === "all" && styles.filterPillActive]}
+            onPress={() => setActiveFilterTab("all")}
             activeOpacity={0.8}
           >
-            <Text style={[styles.filterPillText, activeFilterTab === 'all' && styles.filterPillTextActive]}>
+            <Text
+              style={[
+                styles.filterPillText,
+                activeFilterTab === "all" && styles.filterPillTextActive,
+              ]}
+            >
               Tümü ({contacts.length})
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterPill, activeFilterTab === 'direct' && styles.filterPillActive]}
-            onPress={() => setActiveFilterTab('direct')}
+            style={[styles.filterPill, activeFilterTab === "direct" && styles.filterPillActive]}
+            onPress={() => setActiveFilterTab("direct")}
             activeOpacity={0.8}
           >
-            <Text style={[styles.filterPillText, activeFilterTab === 'direct' && styles.filterPillTextActive]}>
+            <Text
+              style={[
+                styles.filterPillText,
+                activeFilterTab === "direct" && styles.filterPillTextActive,
+              ]}
+            >
               Birebir ({directCount})
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.filterPill, activeFilterTab === 'groups' && styles.filterPillActive]}
-            onPress={() => setActiveFilterTab('groups')}
+            style={[styles.filterPill, activeFilterTab === "groups" && styles.filterPillActive]}
+            onPress={() => setActiveFilterTab("groups")}
             activeOpacity={0.8}
           >
-            <Text style={[styles.filterPillText, activeFilterTab === 'groups' && styles.filterPillTextActive]}>
+            <Text
+              style={[
+                styles.filterPillText,
+                activeFilterTab === "groups" && styles.filterPillTextActive,
+              ]}
+            >
               Gruplar ({groupsCount})
             </Text>
           </TouchableOpacity>
@@ -313,7 +326,8 @@ export function ChatScreen({
               </View>
               <Text style={styles.emptyInboxTitle}>Henüz mesajınız yok</Text>
               <Text style={styles.emptyInboxSub}>
-                Keşfet akışındaki gezginlerin veya rehberlerin profiline girip "Mesaj Gönder" butonuna basarak anında sohbet başlatabilirsiniz!
+                Keşfet akışındaki gezginlerin veya rehberlerin profiline girip "Mesaj Gönder"
+                butonuna basarak anında sohbet başlatabilirsiniz!
               </Text>
               {onGoBack && (
                 <TouchableOpacity style={styles.exploreLinkBtn} onPress={onGoBack}>
@@ -348,7 +362,10 @@ export function ChatScreen({
                       {contact.role}
                     </Text>
 
-                    <Text style={[styles.cardSnippet, hasUnread && styles.cardSnippetUnread]} numberOfLines={1}>
+                    <Text
+                      style={[styles.cardSnippet, hasUnread && styles.cardSnippetUnread]}
+                      numberOfLines={1}
+                    >
                       {contact.lastMessageSnippet}
                     </Text>
                   </View>
@@ -382,11 +399,11 @@ export function ChatScreen({
           style={styles.detailBackBtn}
           onPress={() => {
             if (contacts.length > 0) {
-              setViewMode('list');
+              setViewMode("list");
             } else if (onGoBack) {
               onGoBack();
             } else {
-              setViewMode('list');
+              setViewMode("list");
             }
           }}
           activeOpacity={0.7}
@@ -398,7 +415,7 @@ export function ChatScreen({
           <View style={styles.detailUserWrap}>
             {renderContactAvatar(activeContact, 38)}
             <View style={{ marginLeft: 10, flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <Text style={styles.detailUserName} numberOfLines={1}>
                   {activeContact.name}
                 </Text>
@@ -413,8 +430,8 @@ export function ChatScreen({
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
         style={{ flex: 1 }}
       >
         {/* Messages Stream */}
@@ -428,7 +445,8 @@ export function ChatScreen({
             <View style={styles.emptyMessagesWrap}>
               <Text style={styles.emptyMessagesTitle}>Sohbet Başladı 👋</Text>
               <Text style={styles.emptyMessagesSub}>
-                {activeContact?.name} kullanıcısına ilk mesajınızı gönderin ve seyahat rotalarınızı paylaşın!
+                {activeContact?.name} kullanıcısına ilk mesajınızı gönderin ve seyahat rotalarınızı
+                paylaşın!
               </Text>
             </View>
           ) : (
@@ -489,14 +507,24 @@ export function ChatScreen({
 
                     {/* Text Message */}
                     {item.text ? (
-                      <Text style={[styles.bubbleText, isMe ? styles.bubbleTextMe : styles.bubbleTextThem]}>
+                      <Text
+                        style={[
+                          styles.bubbleText,
+                          isMe ? styles.bubbleTextMe : styles.bubbleTextThem,
+                        ]}
+                      >
                         {item.text}
                       </Text>
                     ) : null}
 
                     {/* Message Meta (Time & Read status) */}
                     <View style={styles.bubbleMetaRow}>
-                      <Text style={[styles.bubbleTime, isMe ? styles.bubbleTimeMe : styles.bubbleTimeThem]}>
+                      <Text
+                        style={[
+                          styles.bubbleTime,
+                          isMe ? styles.bubbleTimeMe : styles.bubbleTimeThem,
+                        ]}
+                      >
                         {item.time}
                       </Text>
                       {isMe && <Text style={styles.readCheck}>✓✓</Text>}
@@ -537,71 +565,71 @@ export function ChatScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8faf9',
+    backgroundColor: "#f8faf9",
   },
   inboxHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: "#e2e8f0",
   },
   inboxHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   inboxBackBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingRight: 10,
     paddingVertical: 4,
   },
   inboxBackBtnIcon: {
     fontSize: 26,
-    color: '#0f172a',
+    color: "#0f172a",
     lineHeight: 28,
   },
   inboxBackBtnLabel: {
     fontSize: 14,
-    color: '#0f172a',
-    fontWeight: '600',
+    color: "#0f172a",
+    fontWeight: "600",
     marginLeft: 2,
   },
   inboxHeaderTitle: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#0f172a',
+    fontWeight: "800",
+    color: "#0f172a",
     letterSpacing: -0.3,
   },
   liveNetworkPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: "#ecfdf5",
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#a7f3d0',
+    borderColor: "#a7f3d0",
   },
   livePulseDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#10b981',
+    backgroundColor: "#10b981",
   },
   liveNetworkText: {
     fontSize: 9,
-    fontWeight: '800',
-    color: '#047857',
+    fontWeight: "800",
+    color: "#047857",
   },
   inboxHeaderSub: {
     fontSize: 12,
-    color: '#64748b',
+    color: "#64748b",
     marginTop: 2,
   },
   searchSection: {
@@ -610,22 +638,22 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
   },
   searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
     paddingHorizontal: 12,
     height: 40,
   },
   searchInput: {
     flex: 1,
     fontSize: 13,
-    color: '#0f172a',
+    color: "#0f172a",
   },
   filterPillsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -634,22 +662,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
   },
   filterPillActive: {
-    backgroundColor: '#059669',
-    borderColor: '#059669',
+    backgroundColor: "#059669",
+    borderColor: "#059669",
   },
   filterPillText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#64748b',
+    fontWeight: "600",
+    color: "#64748b",
   },
   filterPillTextActive: {
-    color: '#ffffff',
-    fontWeight: '700',
+    color: "#ffffff",
+    fontWeight: "700",
   },
   inboxList: {
     flex: 1,
@@ -659,88 +687,88 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   conversationCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
+    borderColor: "#e2e8f0",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
     shadowRadius: 3,
     elevation: 1,
   },
   conversationCardUnread: {
-    backgroundColor: '#f0fdf4',
-    borderColor: '#bbf7d0',
+    backgroundColor: "#f0fdf4",
+    borderColor: "#bbf7d0",
   },
   cardAvatarCol: {
-    position: 'relative',
+    position: "relative",
     marginRight: 12,
   },
   cardOnlineDot: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#10b981',
+    backgroundColor: "#10b981",
     borderWidth: 2,
-    borderColor: '#ffffff',
+    borderColor: "#ffffff",
   },
   cardCenterCol: {
     flex: 1,
   },
   cardTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 2,
   },
   cardName: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontWeight: "700",
+    color: "#0f172a",
   },
   cardTime: {
     fontSize: 11,
-    color: '#94a3b8',
+    color: "#94a3b8",
   },
   cardRole: {
     fontSize: 11,
-    color: '#059669',
-    fontWeight: '600',
+    color: "#059669",
+    fontWeight: "600",
     marginBottom: 2,
   },
   cardSnippet: {
     fontSize: 12,
-    color: '#64748b',
+    color: "#64748b",
   },
   cardSnippetUnread: {
-    color: '#0f172a',
-    fontWeight: '700',
+    color: "#0f172a",
+    fontWeight: "700",
   },
   cardBadgeWrap: {
     marginLeft: 8,
   },
   cardBadge: {
-    backgroundColor: '#059669',
+    backgroundColor: "#059669",
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
   cardBadgeText: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#ffffff',
+    fontWeight: "800",
+    color: "#ffffff",
   },
   emptyInboxContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 60,
     paddingHorizontal: 24,
   },
@@ -748,47 +776,47 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#ecfdf5',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#ecfdf5",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#a7f3d0',
+    borderColor: "#a7f3d0",
   },
   emptyInboxTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontWeight: "700",
+    color: "#0f172a",
     marginBottom: 6,
   },
   emptyInboxSub: {
     fontSize: 13,
-    color: '#64748b',
-    textAlign: 'center',
+    color: "#64748b",
+    textAlign: "center",
     lineHeight: 18,
     marginBottom: 20,
   },
   exploreLinkBtn: {
     paddingHorizontal: 18,
     paddingVertical: 8,
-    backgroundColor: '#059669',
+    backgroundColor: "#059669",
     borderRadius: 12,
   },
   exploreLinkBtnText: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#ffffff',
+    fontWeight: "700",
+    color: "#ffffff",
   },
 
   // ── Detail View Styles ──
   detailHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: "#e2e8f0",
   },
   detailBackBtn: {
     paddingHorizontal: 8,
@@ -796,29 +824,29 @@ const styles = StyleSheet.create({
   },
   detailBackIcon: {
     fontSize: 28,
-    color: '#0f172a',
+    color: "#0f172a",
     lineHeight: 30,
   },
   detailUserWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
     marginLeft: 4,
   },
   detailUserName: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontWeight: "700",
+    color: "#0f172a",
   },
   onlinePillDot: {
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: '#10b981',
+    backgroundColor: "#10b981",
   },
   detailUserSub: {
     fontSize: 11,
-    color: '#64748b',
+    color: "#64748b",
   },
   messagesScroll: {
     flex: 1,
@@ -828,37 +856,37 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   emptyMessagesWrap: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 50,
     paddingHorizontal: 20,
   },
   emptyMessagesTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontWeight: "700",
+    color: "#0f172a",
     marginBottom: 6,
   },
   emptyMessagesSub: {
     fontSize: 13,
-    color: '#64748b',
-    textAlign: 'center',
+    color: "#64748b",
+    textAlign: "center",
     lineHeight: 18,
   },
   bubbleRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 12,
-    maxWidth: '85%',
+    maxWidth: "85%",
   },
   bubbleRowMe: {
-    alignSelf: 'flex-end',
-    flexDirection: 'row-reverse',
+    alignSelf: "flex-end",
+    flexDirection: "row-reverse",
   },
   bubbleRowThem: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   bubbleAvatarCol: {
     marginRight: 8,
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
   },
   bubbleBox: {
     borderRadius: 18,
@@ -866,14 +894,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   bubbleBoxMe: {
-    backgroundColor: '#059669',
+    backgroundColor: "#059669",
     borderBottomRightRadius: 4,
   },
   bubbleBoxThem: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
   },
   bubbleBoxWithRoute: {
     paddingHorizontal: 10,
@@ -884,15 +912,15 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   bubbleTextMe: {
-    color: '#ffffff',
+    color: "#ffffff",
   },
   bubbleTextThem: {
-    color: '#0f172a',
+    color: "#0f172a",
   },
   bubbleMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
     gap: 4,
     marginTop: 4,
   },
@@ -900,27 +928,27 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   bubbleTimeMe: {
-    color: 'rgba(255,255,255,0.7)',
+    color: "rgba(255,255,255,0.7)",
   },
   bubbleTimeThem: {
-    color: '#94a3b8',
+    color: "#94a3b8",
   },
   readCheck: {
     fontSize: 9,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '800',
+    color: "rgba(255,255,255,0.8)",
+    fontWeight: "800",
   },
   embedRouteCard: {
-    backgroundColor: '#ecfdf5',
+    backgroundColor: "#ecfdf5",
     borderRadius: 12,
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#a7f3d0',
+    borderColor: "#a7f3d0",
   },
   embedRouteTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     marginBottom: 8,
   },
@@ -928,89 +956,89 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: '#a7f3d0',
+    borderColor: "#a7f3d0",
   },
   embedRouteTitle: {
     fontSize: 12.5,
-    fontWeight: '700',
-    color: '#065f46',
+    fontWeight: "700",
+    color: "#065f46",
   },
   embedRouteSub: {
     fontSize: 11,
-    color: '#047857',
+    color: "#047857",
   },
   embedRouteActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 6,
   },
   embedActionBtn: {
     flex: 1,
-    backgroundColor: '#059669',
+    backgroundColor: "#059669",
     borderRadius: 8,
     paddingVertical: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   embedActionBtnText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#ffffff',
+    fontWeight: "700",
+    color: "#ffffff",
   },
   embedActionBtnSecondary: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#a7f3d0',
+    borderColor: "#a7f3d0",
   },
   embedActionBtnTextSecondary: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#059669',
+    fontWeight: "700",
+    color: "#059669",
   },
   inputBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
+    borderTopColor: "#e2e8f0",
     gap: 8,
   },
   inputField: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: "#f1f5f9",
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 8,
     fontSize: 13,
-    color: '#0f172a',
+    color: "#0f172a",
     maxHeight: 90,
   },
   sendBtn: {
-    backgroundColor: '#059669',
+    backgroundColor: "#059669",
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   sendBtnDisabled: {
     opacity: 0.4,
   },
   sendBtnText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#ffffff',
+    fontWeight: "700",
+    color: "#ffffff",
   },
   avatarFallbackBase: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatarFallbackLetter: {
-    color: '#ffffff',
-    fontWeight: '800',
+    color: "#ffffff",
+    fontWeight: "800",
   },
 });

@@ -25,7 +25,6 @@ export interface RouteStop {
   distanceToNextKm?: number;
 }
 
-
 export interface UnifiedRoutePlan {
   title: string;
   summary: string;
@@ -287,7 +286,7 @@ export interface MultiAgentResponse {
 
 export interface MultiAgentRequestPayload {
   routeMode?: "calm" | "classic" | "explorer";
-  personalMemories?: Array<{id:string;text:string;kind:string}>;
+  personalMemories?: Array<{ id: string; text: string; kind: string }>;
   conversationState?: import("./planning").ConversationState;
   researchDestination?: string;
   preferences?: TravelPreferences;
@@ -298,7 +297,6 @@ export interface MultiAgentRequestPayload {
   conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;
   tripManifestoMarkdown?: string;
 }
-
 
 export interface FlightDeal {
   origin: string;
@@ -317,12 +315,12 @@ export interface FlightPriceInfo {
   cheapestCurrency?: string;
   /** e.g. "İstanbul'dan Paris'e €89'dan itibaren" */
   note: string;
-  source: 'travelpayouts_cache' | 'unavailable';
+  source: "travelpayouts_cache" | "unavailable";
   checkedAt: string;
   affiliateLinkBase?: string;
 }
 
-export type AdvisoryLevel = 'normal' | 'some_risk' | 'avoid_non_essential' | 'avoid';
+export type AdvisoryLevel = "normal" | "some_risk" | "avoid_non_essential" | "avoid";
 
 export interface TravelAdvisoryInfo {
   country: string;
@@ -339,10 +337,34 @@ export interface TravelAdvisoryInfo {
 export function isRoutePlan(value: unknown): value is UnifiedRoutePlan {
   if (!value || typeof value !== "object") return false;
   const route = value as UnifiedRoutePlan;
-  return typeof route.title === "string" && !!route.title.trim() && typeof route.summary === "string" && typeof route.theme === "string" && typeof route.destination === "string" && !!route.destination.trim() &&
-    Number.isInteger(route.estimatedDays) && route.estimatedDays > 0 && route.estimatedDays <= 30 &&
-    Array.isArray(route.stops) && route.stops.length > 0 && route.stops.length <= 100 &&
-    route.stops.every(stop => !!stop && typeof stop.id === "string" && !!stop.id.trim() && typeof stop.name === "string" && typeof stop.description === "string" && typeof stop.suggestedDuration === "string" &&
-      Number.isFinite(stop.lat) && Math.abs(stop.lat) <= 90 && Number.isFinite(stop.lng) && Math.abs(stop.lng) <= 180 &&
-      Number.isInteger(stop.day) && stop.day >= 1 && stop.day <= route.estimatedDays);
+  return (
+    typeof route.title === "string" &&
+    !!route.title.trim() &&
+    typeof route.summary === "string" &&
+    typeof route.theme === "string" &&
+    typeof route.destination === "string" &&
+    !!route.destination.trim() &&
+    Number.isInteger(route.estimatedDays) &&
+    route.estimatedDays > 0 &&
+    route.estimatedDays <= 30 &&
+    Array.isArray(route.stops) &&
+    route.stops.length > 0 &&
+    route.stops.length <= 100 &&
+    route.stops.every(
+      (stop) =>
+        !!stop &&
+        typeof stop.id === "string" &&
+        !!stop.id.trim() &&
+        typeof stop.name === "string" &&
+        typeof stop.description === "string" &&
+        typeof stop.suggestedDuration === "string" &&
+        Number.isFinite(stop.lat) &&
+        Math.abs(stop.lat) <= 90 &&
+        Number.isFinite(stop.lng) &&
+        Math.abs(stop.lng) <= 180 &&
+        Number.isInteger(stop.day) &&
+        stop.day >= 1 &&
+        stop.day <= route.estimatedDays,
+    )
+  );
 }

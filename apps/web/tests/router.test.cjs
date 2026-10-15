@@ -40,7 +40,8 @@ class Router {
 
   async dispatch(event) {
     const method = event.requestContext?.http?.method?.toUpperCase() || "GET";
-    const path = (event.requestContext?.http?.path || event.rawPath || "/").replace(/\/$/, "") || "/";
+    const path =
+      (event.requestContext?.http?.path || event.rawPath || "/").replace(/\/$/, "") || "/";
 
     if (method === "OPTIONS") {
       return { statusCode: 200, headers: { "access-control-allow-origin": "*" }, body: "" };
@@ -72,7 +73,10 @@ class Router {
 
 test("router matches exact static endpoints correctly", async () => {
   const router = new Router();
-  router.add("GET /routes", async (e) => ({ statusCode: 200, body: JSON.stringify({ ok: true, path: "list" }) }));
+  router.add("GET /routes", async (e) => ({
+    statusCode: 200,
+    body: JSON.stringify({ ok: true, path: "list" }),
+  }));
 
   const res = await router.dispatch({
     requestContext: { http: { method: "GET", path: "/routes" } },

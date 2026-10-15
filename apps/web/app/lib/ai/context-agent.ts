@@ -18,7 +18,8 @@ export function analyzeTravelerContext(context?: TravelerProfileContext): Contex
       personaSummary: "Standart keşif odaklı gezgin profili",
       inferredStyle: "balanced",
       preferredThemes: ["Genel Şehir Turu", "Tarih", "Popüler Cazibe Merkezleri"],
-      recommendationDirective: "Dengeli, hem ikonik noktaları hem de lezzet duraklarını barındıran zengin bir rota hazırla.",
+      recommendationDirective:
+        "Dengeli, hem ikonik noktaları hem de lezzet duraklarını barındıran zengin bir rota hazırla.",
     };
   }
 
@@ -48,7 +49,8 @@ export function analyzeTravelerContext(context?: TravelerProfileContext): Contex
   if (inferredStyle === "cultural") styleDesc = "tarihi ve kültürel derinliği önceleyen";
   if (inferredStyle === "foodie") styleDesc = "otantik mutfak ve sokak lezzetlerine tutkun";
   if (inferredStyle === "adventure") styleDesc = "dinamik, yürüyüşü ve keşfi seven";
-  if (inferredStyle === "budget") styleDesc = "bütçe dostu, toplu taşıma ve yerel alternatifleri kullanan";
+  if (inferredStyle === "budget")
+    styleDesc = "bütçe dostu, toplu taşıma ve yerel alternatifleri kullanan";
   if (inferredStyle === "luxury") styleDesc = "prestijli ve konfor odaklı";
 
   const savedCount = context.savedAddressesCount || 0;

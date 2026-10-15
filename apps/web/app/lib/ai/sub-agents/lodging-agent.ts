@@ -1,12 +1,12 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface LodgingOption {
   name: string;
-  type: 'hotel' | 'boutique' | 'apartment' | 'hostel' | 'resort';
+  type: "hotel" | "boutique" | "apartment" | "hostel" | "resort";
   neighborhood: string;
-  safetyScore: 'high' | 'moderate';
-  priceLevel: '$' | '$$' | '$$$' | '$$$$';
+  safetyScore: "high" | "moderate";
+  priceLevel: "$" | "$$" | "$$$" | "$$$$";
   description: string;
   suitability: string;
   pros: string[];
@@ -60,13 +60,15 @@ JSON formatı:
 export async function runLodgingAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: LodgingAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: LodgingAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const lodgingTypes = profile?.lodging_type?.join(', ') || 'hotel, boutique';
-  const travelers = profile?.travelers ? `${profile.travelers.adults || 1} yetişkin, ${profile.travelers.children || 0} çocuk` : 'Standart seyahat grubu';
-  const budget = profile?.budget?.level || 'mid';
-  const pace = profile?.pace || 'moderate';
+  const lodgingTypes = profile?.lodging_type?.join(", ") || "hotel, boutique";
+  const travelers = profile?.travelers
+    ? `${profile.travelers.adults || 1} yetişkin, ${profile.travelers.children || 0} çocuk`
+    : "Standart seyahat grubu";
+  const budget = profile?.budget?.level || "mid";
+  const pace = profile?.pace || "moderate";
 
   const userQuery = `Hedef Şehir: "${destination}".
 Konaklama Tipleri: ${lodgingTypes}.
@@ -82,18 +84,24 @@ Bu profile en uygun mahalleleri ve 2-4 konaklama tavsiyesini hazırla.`;
     timeoutMs,
   });
 
-  if (bedrockRes.success && bedrockRes.data && Array.isArray(bedrockRes.data.recommendedNeighborhoods)) {
+  if (
+    bedrockRes.success &&
+    bedrockRes.data &&
+    Array.isArray(bedrockRes.data.recommendedNeighborhoods)
+  ) {
     return {
       output: {
         destination: bedrockRes.data.destination || destination,
         recommendedNeighborhoods: bedrockRes.data.recommendedNeighborhoods,
         stays: Array.isArray(bedrockRes.data.stays) ? bedrockRes.data.stays : [],
-        bookingAdvice: Array.isArray(bedrockRes.data.bookingAdvice) ? bedrockRes.data.bookingAdvice : [],
+        bookingAdvice: Array.isArray(bedrockRes.data.bookingAdvice)
+          ? bedrockRes.data.bookingAdvice
+          : [],
       },
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
-  throw new Error('Konaklama uzmanı tavsiyesi oluşturulamadı.');
+  throw new Error("Konaklama uzmanı tavsiyesi oluşturulamadı.");
 }

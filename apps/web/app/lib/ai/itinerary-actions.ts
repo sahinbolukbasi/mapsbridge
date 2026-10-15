@@ -17,12 +17,12 @@
 // ---------------------------------------------------------------------------
 
 export type ItineraryActionType =
-  | 'itinerary.add'
-  | 'itinerary.remove'
-  | 'itinerary.reorder'
-  | 'itinerary.move_to_day'
-  | 'itinerary.pin'
-  | 'itinerary.unpin';
+  | "itinerary.add"
+  | "itinerary.remove"
+  | "itinerary.reorder"
+  | "itinerary.move_to_day"
+  | "itinerary.pin"
+  | "itinerary.unpin";
 
 export interface ItineraryAddPayload {
   placeId: string;
@@ -34,7 +34,7 @@ export interface ItineraryAddPayload {
   /** Estimated duration in minutes */
   durationMin?: number;
   /** Source: chat message or map interaction */
-  addedVia: 'chat' | 'map';
+  addedVia: "chat" | "map";
 }
 
 export interface ItineraryRemovePayload {
@@ -63,12 +63,12 @@ export interface ItineraryPinPayload {
 }
 
 export type ItineraryActionPayload =
-  | ({ type: 'itinerary.add' } & ItineraryAddPayload)
-  | ({ type: 'itinerary.remove' } & ItineraryRemovePayload)
-  | ({ type: 'itinerary.reorder' } & ItineraryReorderPayload)
-  | ({ type: 'itinerary.move_to_day' } & ItineraryMoveToDayPayload)
-  | ({ type: 'itinerary.pin' } & ItineraryPinPayload)
-  | ({ type: 'itinerary.unpin' } & ItineraryPinPayload);
+  | ({ type: "itinerary.add" } & ItineraryAddPayload)
+  | ({ type: "itinerary.remove" } & ItineraryRemovePayload)
+  | ({ type: "itinerary.reorder" } & ItineraryReorderPayload)
+  | ({ type: "itinerary.move_to_day" } & ItineraryMoveToDayPayload)
+  | ({ type: "itinerary.pin" } & ItineraryPinPayload)
+  | ({ type: "itinerary.unpin" } & ItineraryPinPayload);
 
 // ---------------------------------------------------------------------------
 // Action result
@@ -119,7 +119,7 @@ export function assertMutationConsistency(
   mutationApplied: boolean,
 ): string | null {
   if (detectMutationClaim(assistantText) && !mutationApplied) {
-    return 'MUTATION_CLAIM_WITHOUT_DB_WRITE: Model claimed to add/remove an item but no DB mutation was applied.';
+    return "MUTATION_CLAIM_WITHOUT_DB_WRITE: Model claimed to add/remove an item but no DB mutation was applied.";
   }
   return null;
 }
@@ -130,19 +130,19 @@ export function assertMutationConsistency(
 
 export function buildConfirmationMessage(action: ItineraryActionPayload): string {
   switch (action.type) {
-    case 'itinerary.add': {
-      const day = action.dayIndex ? `${action.dayIndex}. güne` : 'plana';
+    case "itinerary.add": {
+      const day = action.dayIndex ? `${action.dayIndex}. güne` : "plana";
       return `${action.placeName} ${day} eklendi — değiştir`;
     }
-    case 'itinerary.remove':
+    case "itinerary.remove":
       return `${action.placeName} plandan çıkarıldı — geri al`;
-    case 'itinerary.reorder':
+    case "itinerary.reorder":
       return `${action.dayIndex}. gün yeniden sıralandı — geri al`;
-    case 'itinerary.move_to_day':
+    case "itinerary.move_to_day":
       return `${action.placeName} ${action.toDay}. güne taşındı — geri al`;
-    case 'itinerary.pin':
+    case "itinerary.pin":
       return `${action.placeName} sabitlendi (optimizasyondan etkilenmeyecek)`;
-    case 'itinerary.unpin':
+    case "itinerary.unpin":
       return `${action.placeName} sabitleme kaldırıldı`;
   }
 }
@@ -165,59 +165,59 @@ export function parseItineraryToolCalls(toolCalls: RawToolCall[]): ItineraryActi
 
   for (const call of toolCalls) {
     switch (call.name) {
-      case 'itinerary.add': {
+      case "itinerary.add": {
         const input = call.input;
-        if (typeof input.placeId === 'string' && typeof input.placeName === 'string') {
+        if (typeof input.placeId === "string" && typeof input.placeName === "string") {
           actions.push({
-            type: 'itinerary.add',
+            type: "itinerary.add",
             placeId: input.placeId,
             placeName: input.placeName,
-            dayIndex: typeof input.dayIndex === 'number' ? input.dayIndex : undefined,
-            startTime: typeof input.startTime === 'string' ? input.startTime : undefined,
-            durationMin: typeof input.durationMin === 'number' ? input.durationMin : undefined,
-            addedVia: 'chat',
+            dayIndex: typeof input.dayIndex === "number" ? input.dayIndex : undefined,
+            startTime: typeof input.startTime === "string" ? input.startTime : undefined,
+            durationMin: typeof input.durationMin === "number" ? input.durationMin : undefined,
+            addedVia: "chat",
           });
         }
         break;
       }
-      case 'itinerary.remove': {
+      case "itinerary.remove": {
         const input = call.input;
-        if (typeof input.placeId === 'string' && typeof input.placeName === 'string') {
+        if (typeof input.placeId === "string" && typeof input.placeName === "string") {
           actions.push({
-            type: 'itinerary.remove',
+            type: "itinerary.remove",
             placeId: input.placeId,
             placeName: input.placeName,
-            dayIndex: typeof input.dayIndex === 'number' ? input.dayIndex : undefined,
-            reason: typeof input.reason === 'string' ? input.reason : undefined,
+            dayIndex: typeof input.dayIndex === "number" ? input.dayIndex : undefined,
+            reason: typeof input.reason === "string" ? input.reason : undefined,
           });
         }
         break;
       }
-      case 'itinerary.reorder': {
+      case "itinerary.reorder": {
         const input = call.input;
         if (
-          typeof input.dayIndex === 'number' &&
+          typeof input.dayIndex === "number" &&
           Array.isArray(input.orderedPlaceIds) &&
-          input.orderedPlaceIds.every((id: unknown) => typeof id === 'string')
+          input.orderedPlaceIds.every((id: unknown) => typeof id === "string")
         ) {
           actions.push({
-            type: 'itinerary.reorder',
+            type: "itinerary.reorder",
             dayIndex: input.dayIndex,
             orderedPlaceIds: input.orderedPlaceIds as string[],
           });
         }
         break;
       }
-      case 'itinerary.move_to_day': {
+      case "itinerary.move_to_day": {
         const input = call.input;
         if (
-          typeof input.placeId === 'string' &&
-          typeof input.placeName === 'string' &&
-          typeof input.fromDay === 'number' &&
-          typeof input.toDay === 'number'
+          typeof input.placeId === "string" &&
+          typeof input.placeName === "string" &&
+          typeof input.fromDay === "number" &&
+          typeof input.toDay === "number"
         ) {
           actions.push({
-            type: 'itinerary.move_to_day',
+            type: "itinerary.move_to_day",
             placeId: input.placeId,
             placeName: input.placeName,
             fromDay: input.fromDay,
@@ -226,15 +226,15 @@ export function parseItineraryToolCalls(toolCalls: RawToolCall[]): ItineraryActi
         }
         break;
       }
-      case 'itinerary.pin':
-      case 'itinerary.unpin': {
+      case "itinerary.pin":
+      case "itinerary.unpin": {
         const input = call.input;
-        if (typeof input.placeId === 'string' && typeof input.placeName === 'string') {
+        if (typeof input.placeId === "string" && typeof input.placeName === "string") {
           actions.push({
-            type: call.name as 'itinerary.pin' | 'itinerary.unpin',
+            type: call.name as "itinerary.pin" | "itinerary.unpin",
             placeId: input.placeId,
             placeName: input.placeName,
-            pinned: call.name === 'itinerary.pin',
+            pinned: call.name === "itinerary.pin",
           });
         }
         break;
@@ -251,82 +251,90 @@ export function parseItineraryToolCalls(toolCalls: RawToolCall[]): ItineraryActi
 
 export const ITINERARY_TOOL_SCHEMAS = [
   {
-    name: 'itinerary.add',
-    description: 'Bir mekanı seyahat planına ekle. Kullanıcı "rotaya ekle" veya "plana ekle" dediğinde ÇAĞRIlır. Kullanıcı hangi mekanı istediğini seçmeli — toplu ekleme yapma.',
+    name: "itinerary.add",
+    description:
+      'Bir mekanı seyahat planına ekle. Kullanıcı "rotaya ekle" veya "plana ekle" dediğinde ÇAĞRIlır. Kullanıcı hangi mekanı istediğini seçmeli — toplu ekleme yapma.',
     input_schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        placeId: { type: 'string', description: 'Mekanın benzersiz ID\'si' },
-        placeName: { type: 'string', description: 'Mekanın adı' },
-        dayIndex: { type: 'number', description: 'Hedef gün (1\'den başlar). Belirsizse atla, sistem otomatik atar.' },
-        startTime: { type: 'string', description: 'Başlangıç saati HH:MM formatında (opsiyonel)' },
-        durationMin: { type: 'number', description: 'Tahmini ziyaret süresi dakika cinsinden' },
+        placeId: { type: "string", description: "Mekanın benzersiz ID'si" },
+        placeName: { type: "string", description: "Mekanın adı" },
+        dayIndex: {
+          type: "number",
+          description: "Hedef gün (1'den başlar). Belirsizse atla, sistem otomatik atar.",
+        },
+        startTime: { type: "string", description: "Başlangıç saati HH:MM formatında (opsiyonel)" },
+        durationMin: { type: "number", description: "Tahmini ziyaret süresi dakika cinsinden" },
       },
-      required: ['placeId', 'placeName'],
+      required: ["placeId", "placeName"],
     },
   },
   {
-    name: 'itinerary.remove',
-    description: 'Bir mekanı plandan çıkar. Her çıkarma işlemi geri alınabilir.',
+    name: "itinerary.remove",
+    description: "Bir mekanı plandan çıkar. Her çıkarma işlemi geri alınabilir.",
     input_schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        placeId: { type: 'string' },
-        placeName: { type: 'string' },
-        dayIndex: { type: 'number', description: 'Hangi güne ait — bilinmiyorsa atla' },
-        reason: { type: 'string', description: 'Çıkarma gerekçesi (opsiyonel)' },
+        placeId: { type: "string" },
+        placeName: { type: "string" },
+        dayIndex: { type: "number", description: "Hangi güne ait — bilinmiyorsa atla" },
+        reason: { type: "string", description: "Çıkarma gerekçesi (opsiyonel)" },
       },
-      required: ['placeId', 'placeName'],
+      required: ["placeId", "placeName"],
     },
   },
   {
-    name: 'itinerary.reorder',
-    description: 'Bir günün mekanlarını yeniden sırala.',
+    name: "itinerary.reorder",
+    description: "Bir günün mekanlarını yeniden sırala.",
     input_schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        dayIndex: { type: 'number' },
-        orderedPlaceIds: { type: 'array', items: { type: 'string' }, description: 'Yeni sırayla tüm place_id\'ler' },
+        dayIndex: { type: "number" },
+        orderedPlaceIds: {
+          type: "array",
+          items: { type: "string" },
+          description: "Yeni sırayla tüm place_id'ler",
+        },
       },
-      required: ['dayIndex', 'orderedPlaceIds'],
+      required: ["dayIndex", "orderedPlaceIds"],
     },
   },
   {
-    name: 'itinerary.move_to_day',
-    description: 'Bir mekanı başka bir güne taşı.',
+    name: "itinerary.move_to_day",
+    description: "Bir mekanı başka bir güne taşı.",
     input_schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        placeId: { type: 'string' },
-        placeName: { type: 'string' },
-        fromDay: { type: 'number' },
-        toDay: { type: 'number' },
+        placeId: { type: "string" },
+        placeName: { type: "string" },
+        fromDay: { type: "number" },
+        toDay: { type: "number" },
       },
-      required: ['placeId', 'placeName', 'fromDay', 'toDay'],
+      required: ["placeId", "placeName", "fromDay", "toDay"],
     },
   },
   {
-    name: 'itinerary.pin',
-    description: 'Bir mekanı sabitle — optimizasyon bu mekanı yerinden oynamaz.',
+    name: "itinerary.pin",
+    description: "Bir mekanı sabitle — optimizasyon bu mekanı yerinden oynamaz.",
     input_schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        placeId: { type: 'string' },
-        placeName: { type: 'string' },
+        placeId: { type: "string" },
+        placeName: { type: "string" },
       },
-      required: ['placeId', 'placeName'],
+      required: ["placeId", "placeName"],
     },
   },
   {
-    name: 'itinerary.unpin',
-    description: 'Bir mekanın sabitlemesini kaldır.',
+    name: "itinerary.unpin",
+    description: "Bir mekanın sabitlemesini kaldır.",
     input_schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        placeId: { type: 'string' },
-        placeName: { type: 'string' },
+        placeId: { type: "string" },
+        placeName: { type: "string" },
       },
-      required: ['placeId', 'placeName'],
+      required: ["placeId", "placeName"],
     },
   },
 ] as const;

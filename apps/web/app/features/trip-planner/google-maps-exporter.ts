@@ -4,7 +4,11 @@ import type { Pin } from "../../lib/trip/models";
  * Generates a Google Maps directions URL with origin, destination, and waypoints.
  * Opens the URL in a new window/tab.
  */
-export function exportTripToGoogleMaps(stops: Pin[]): { success: boolean; url?: string; message: string } {
+export function exportTripToGoogleMaps(stops: Pin[]): {
+  success: boolean;
+  url?: string;
+  message: string;
+} {
   const validStops = (stops || []).filter(
     (p) =>
       typeof p.lat === "number" &&
@@ -12,7 +16,7 @@ export function exportTripToGoogleMaps(stops: Pin[]): { success: boolean; url?: 
       typeof p.lng === "number" &&
       !isNaN(p.lng) &&
       p.lat !== 0 &&
-      p.lng !== 0
+      p.lng !== 0,
   );
 
   if (validStops.length === 0) {
@@ -27,10 +31,13 @@ export function exportTripToGoogleMaps(stops: Pin[]): { success: boolean; url?: 
     validStops.length > 1
       ? `${validStops[validStops.length - 1].lat},${validStops[validStops.length - 1].lng}`
       : origin;
-  const waypoints = validStops.slice(1, -1).map((p) => `${p.lat},${p.lng}`).join("|");
+  const waypoints = validStops
+    .slice(1, -1)
+    .map((p) => `${p.lat},${p.lng}`)
+    .join("|");
 
   let url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
-    origin
+    origin,
   )}&destination=${encodeURIComponent(destination)}&travelmode=walking`;
 
   if (waypoints) {

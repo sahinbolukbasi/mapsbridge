@@ -5,12 +5,12 @@
 
 export interface BudgetLine {
   placeId?: string;
-  category: 'transport' | 'lodging' | 'entry_ticket' | 'food' | 'activity' | 'other';
+  category: "transport" | "lodging" | "entry_ticket" | "food" | "activity" | "other";
   description: string;
   amount: number;
   currency: string;
-  isEstimate: boolean;   // true = estimate, false = confirmed price
-  addedAt: string;       // ISO timestamp
+  isEstimate: boolean; // true = estimate, false = confirmed price
+  addedAt: string; // ISO timestamp
 }
 
 export interface TripBudgetSummary {
@@ -29,7 +29,7 @@ export interface TripBudgetSummary {
 // Budget thresholds per person per day (EUR) — §11.5
 // ---------------------------------------------------------------------------
 
-const THRESHOLDS_EUR_PER_PERSON_PER_DAY: Record<'budget' | 'mid' | 'luxury', number> = {
+const THRESHOLDS_EUR_PER_PERSON_PER_DAY: Record<"budget" | "mid" | "luxury", number> = {
   budget: 50,
   mid: 150,
   luxury: 500,
@@ -78,10 +78,7 @@ export function computeBudgetSummary(
 // ---------------------------------------------------------------------------
 
 /** Add a BudgetLine and return a recomputed summary (immutable). */
-export function addBudgetLine(
-  summary: TripBudgetSummary,
-  line: BudgetLine,
-): TripBudgetSummary {
+export function addBudgetLine(summary: TripBudgetSummary, line: BudgetLine): TripBudgetSummary {
   return computeBudgetSummary(
     [...summary.lines, line],
     summary.travelers,
@@ -94,10 +91,7 @@ export function addBudgetLine(
  * Remove all lines that match the given placeId and return a recomputed
  * summary (immutable). Lines without a placeId are never removed.
  */
-export function removeBudgetLine(
-  summary: TripBudgetSummary,
-  placeId: string,
-): TripBudgetSummary {
+export function removeBudgetLine(summary: TripBudgetSummary, placeId: string): TripBudgetSummary {
   const filtered = summary.lines.filter((l) => l.placeId !== placeId);
   return computeBudgetSummary(filtered, summary.travelers, summary.currency, summary.days);
 }
@@ -126,14 +120,14 @@ export function budgetSummaryToPromptSnippet(summary: TripBudgetSummary): string
   }
 
   if (summary.lines.length > 0) {
-    lines.push('Kalemler:');
+    lines.push("Kalemler:");
     for (const l of summary.lines) {
-      const tag = l.isEstimate ? 'tahmini' : 'onaylandı';
+      const tag = l.isEstimate ? "tahmini" : "onaylandı";
       lines.push(`  • ${l.description} — ${l.amount.toFixed(2)} ${l.currency} (${tag})`);
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -148,9 +142,9 @@ export function budgetSummaryToPromptSnippet(summary: TripBudgetSummary): string
  */
 export function checkBudgetOverrun(
   summary: TripBudgetSummary,
-  budgetLevel: 'budget' | 'mid' | 'luxury' | 'unspecified',
+  budgetLevel: "budget" | "mid" | "luxury" | "unspecified",
 ): string | null {
-  if (budgetLevel === 'unspecified') return null;
+  if (budgetLevel === "unspecified") return null;
 
   const threshold = THRESHOLDS_EUR_PER_PERSON_PER_DAY[budgetLevel];
 

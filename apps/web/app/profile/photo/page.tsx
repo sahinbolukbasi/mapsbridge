@@ -9,12 +9,42 @@ import { getStoredSession, getUserProfile } from "../../lib/cognito";
 import "./photo.css";
 
 const PRESET_AVATARS = [
-  { id: "avatar-1", label: "Kaşif Gezgin", emoji: "🧭", bg: "linear-gradient(135deg, #0284c7, #2563eb)" },
-  { id: "avatar-2", label: "Dağ & Kamp", emoji: "⛰️", bg: "linear-gradient(135deg, #059669, #10b981)" },
-  { id: "avatar-3", label: "Dünya Seyyahı", emoji: "🌍", bg: "linear-gradient(135deg, #8b5cf6, #6366f1)" },
-  { id: "avatar-4", label: "Güneş & Deniz", emoji: "🏖️", bg: "linear-gradient(135deg, #f59e0b, #f97316)" },
-  { id: "avatar-5", label: "Uçak & Rota", emoji: "✈️", bg: "linear-gradient(135deg, #ec4899, #ef4444)" },
-  { id: "avatar-6", label: "Kamera & Anı", emoji: "📸", bg: "linear-gradient(135deg, #06b6d4, #0ea5e9)" },
+  {
+    id: "avatar-1",
+    label: "Kaşif Gezgin",
+    emoji: "🧭",
+    bg: "linear-gradient(135deg, #0284c7, #2563eb)",
+  },
+  {
+    id: "avatar-2",
+    label: "Dağ & Kamp",
+    emoji: "⛰️",
+    bg: "linear-gradient(135deg, #059669, #10b981)",
+  },
+  {
+    id: "avatar-3",
+    label: "Dünya Seyyahı",
+    emoji: "🌍",
+    bg: "linear-gradient(135deg, #8b5cf6, #6366f1)",
+  },
+  {
+    id: "avatar-4",
+    label: "Güneş & Deniz",
+    emoji: "🏖️",
+    bg: "linear-gradient(135deg, #f59e0b, #f97316)",
+  },
+  {
+    id: "avatar-5",
+    label: "Uçak & Rota",
+    emoji: "✈️",
+    bg: "linear-gradient(135deg, #ec4899, #ef4444)",
+  },
+  {
+    id: "avatar-6",
+    label: "Kamera & Anı",
+    emoji: "📸",
+    bg: "linear-gradient(135deg, #06b6d4, #0ea5e9)",
+  },
 ];
 
 export default function ProfilePhotoPage() {
@@ -73,7 +103,7 @@ export default function ProfilePhotoPage() {
     }
   }
 
-  function handlePresetSelect(preset: typeof PRESET_AVATARS[0]) {
+  function handlePresetSelect(preset: (typeof PRESET_AVATARS)[0]) {
     // Generate an SVG data URL for the preset avatar
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0284c7"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs><rect width="200" height="200" rx="100" fill="url(#g)"/><text x="50%" y="54%" font-size="80" dominant-baseline="middle" text-anchor="middle">${preset.emoji}</text></svg>`;
     const dataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
@@ -86,8 +116,12 @@ export default function ProfilePhotoPage() {
       triggerToast("⚠️ Lütfen bir görsel yükleyin veya hazır avatar seçin.");
       return;
     }
-    try { userStorage.setItem("mapsbridge.userAvatar", previewUrl); }
-    catch { triggerToast("Fotoğraf kaydedilemedi. Daha küçük bir görsel deneyin."); return; }
+    try {
+      userStorage.setItem("mapsbridge.userAvatar", previewUrl);
+    } catch {
+      triggerToast("Fotoğraf kaydedilemedi. Daha küçük bir görsel deneyin.");
+      return;
+    }
     setCurrentAvatar(previewUrl);
     triggerToast("✓ Profil fotoğrafınız başarıyla güncellendi!");
     setTimeout(() => {
@@ -118,12 +152,14 @@ export default function ProfilePhotoPage() {
           {
             icon: "📸",
             title: "Özel Gezgin Fotoğrafı",
-            description: "Kendi fotoğrafınızı veya seyahat karenizi profil avatarı olarak yükleyin.",
+            description:
+              "Kendi fotoğrafınızı veya seyahat karenizi profil avatarı olarak yükleyin.",
           },
           {
             icon: "🧭",
             title: "Tematik Avatarlar",
-            description: "Kaşif, kampçı veya dünya seyyahı hazır avatarlarından dilediğinizi seçin.",
+            description:
+              "Kaşif, kampçı veya dünya seyyahı hazır avatarlarından dilediğinizi seçin.",
           },
           {
             icon: "🌟",
@@ -153,7 +189,8 @@ export default function ProfilePhotoPage() {
           <span className="photo-eyebrow">HESAP GÖRÜNÜMÜ</span>
           <h1 className="photo-title">Profil Fotoğrafı Yükle</h1>
           <p className="photo-sub">
-            MapsBridge profilinizde, seyahat gruplarınızda ve harita paylaşımlarınızda görünecek fotoğrafınızı belirleyin.
+            MapsBridge profilinizde, seyahat gruplarınızda ve harita paylaşımlarınızda görünecek
+            fotoğrafınızı belirleyin.
           </p>
         </div>
 
@@ -224,7 +261,14 @@ export default function ProfilePhotoPage() {
               <div className="drop-icon">📷</div>
               <strong className="drop-title">Fotoğrafı Buraya Sürükleyin veya Tıklayın</strong>
               <span className="drop-sub">PNG, JPG, WebP (Maksimum 5 MB)</span>
-              <button type="button" className="browse-btn" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+              <button
+                type="button"
+                className="browse-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
                 Bilgisayarımdan / Telefonumdan Seç
               </button>
             </div>
@@ -234,7 +278,9 @@ export default function ProfilePhotoPage() {
             </div>
 
             <h3 className="card-heading">2. Hazır Gezgin Avatarları</h3>
-            <p className="preset-sub">Fotoğraf yüklemek istemiyorsanız stilinize uygun bir seyahat avatarı seçin:</p>
+            <p className="preset-sub">
+              Fotoğraf yüklemek istemiyorsanız stilinize uygun bir seyahat avatarı seçin:
+            </p>
 
             <div className="preset-avatars-grid">
               {PRESET_AVATARS.map((preset) => (
@@ -254,7 +300,11 @@ export default function ProfilePhotoPage() {
         </div>
 
         {/* Toast Bildirimi */}
-        {toast && <div role="status" className="photo-toast">{toast}</div>}
+        {toast && (
+          <div role="status" className="photo-toast">
+            {toast}
+          </div>
+        )}
       </main>
     </div>
   );

@@ -19,7 +19,12 @@
   transform: translateX(-50%);
   width: 750px;
   height: 450px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.22) 0%, rgba(239, 107, 91, 0.12) 45%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.22) 0%,
+    rgba(239, 107, 91, 0.12) 45%,
+    transparent 70%
+  );
   pointer-events: none;
   filter: blur(50px);
   z-index: 0;
@@ -167,7 +172,9 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   backdrop-filter: blur(12px);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .promo-feature-card:hover {
@@ -309,7 +316,9 @@
   max-width: 460px;
   width: 100%;
   padding: 2rem 1.75rem 1.75rem;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(59, 130, 246, 0.15);
+  box-shadow:
+    0 25px 60px -15px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(59, 130, 246, 0.15);
   position: relative;
   text-align: center;
   animation: authSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
@@ -562,15 +571,64 @@
 }
 
 /* Guest entry points share the same light/dark product language. */
-.promotion-page-root { background: var(--bg); color: var(--text); }
-.promo-ambient-glow-1, .promo-ambient-glow-2 { display: none; }
-.promotion-page-root .promo-hero-title { background: none; -webkit-text-fill-color: var(--text); font-weight: 650; }
-.promotion-page-root :is(.promo-hero-subtitle, .promo-card-desc, .promo-sample-card p) { color: var(--text-muted); }
-.promotion-page-root :is(.promo-feature-card, .promo-teaser-container, .promo-sample-card) { background: var(--surface); border-color: var(--border); border-radius: var(--radius); box-shadow: none; backdrop-filter: none; }
-.promotion-page-root :is(.promo-card-title, .promo-teaser-title, .promo-sample-card strong) { color: var(--text); }
-.promotion-page-root :is(.promo-badge, .promo-teaser-pill) { background: var(--brand-soft); color: var(--brand); border: 0; box-shadow: none; }
-.promotion-page-root .promo-btn-primary, .auth-modal-card .auth-modal-signup-btn { background: var(--brand); color: var(--on-brand); box-shadow: none; border-radius: var(--radius-sm); min-height: 44px; }
-.promotion-page-root .promo-btn-secondary, .auth-modal-card .auth-modal-login-btn { background: var(--surface); color: var(--text); border-color: var(--border); border-radius: var(--radius-sm); min-height: 44px; }
-.auth-modal-overlay .auth-modal-card { background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); border-color: var(--border); border-radius: var(--radius-lg); }
-.auth-modal-card .auth-modal-title { color: var(--text); }
-.auth-modal-card :is(.auth-modal-subtitle, .auth-modal-perk-item, .auth-modal-close-btn) { color: var(--text-muted); }
+.promotion-page-root {
+  background: var(--bg);
+  color: var(--text);
+}
+.promo-ambient-glow-1,
+.promo-ambient-glow-2 {
+  display: none;
+}
+.promotion-page-root .promo-hero-title {
+  background: none;
+  -webkit-text-fill-color: var(--text);
+  font-weight: 650;
+}
+.promotion-page-root :is(.promo-hero-subtitle, .promo-card-desc, .promo-sample-card p) {
+  color: var(--text-muted);
+}
+.promotion-page-root :is(.promo-feature-card, .promo-teaser-container, .promo-sample-card) {
+  background: var(--surface);
+  border-color: var(--border);
+  border-radius: var(--radius);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.promotion-page-root :is(.promo-card-title, .promo-teaser-title, .promo-sample-card strong) {
+  color: var(--text);
+}
+.promotion-page-root :is(.promo-badge, .promo-teaser-pill) {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border: 0;
+  box-shadow: none;
+}
+.promotion-page-root .promo-btn-primary,
+.auth-modal-card .auth-modal-signup-btn {
+  background: var(--brand);
+  color: var(--on-brand);
+  box-shadow: none;
+  border-radius: var(--radius-sm);
+  min-height: 44px;
+}
+.promotion-page-root .promo-btn-secondary,
+.auth-modal-card .auth-modal-login-btn {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+  border-radius: var(--radius-sm);
+  min-height: 44px;
+}
+.auth-modal-overlay .auth-modal-card {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border);
+  border-radius: var(--radius-lg);
+}
+.auth-modal-card .auth-modal-title {
+  color: var(--text);
+}
+.auth-modal-card :is(.auth-modal-subtitle, .auth-modal-perk-item, .auth-modal-close-btn) {
+  color: var(--text-muted);
+}

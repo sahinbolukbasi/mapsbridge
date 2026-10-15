@@ -1,6 +1,6 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
-import type { DealItem } from '../../tracker/deal-models';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
+import type { DealItem } from "../../tracker/deal-models";
 
 export interface TicketTrackerOutput {
   origin: string;
@@ -51,11 +51,11 @@ export async function runTicketTrackerAgent(
   destination: string,
   dates?: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 5000
-): Promise<{ output: TicketTrackerOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 5000,
+): Promise<{ output: TicketTrackerOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const dateInfo = dates ? `Tarihler: ${dates}.` : 'Önümüzdeki sezon / esnek tarihler.';
-  const travelers = profile?.travelers ? `${profile.travelers.adults || 1} yolcu` : '1 yolcu';
+  const dateInfo = dates ? `Tarihler: ${dates}.` : "Önümüzdeki sezon / esnek tarihler.";
+  const travelers = profile?.travelers ? `${profile.travelers.adults || 1} yolcu` : "1 yolcu";
 
   const userQuery = `Kalkış: "${origin}". Varış: "${destination}". ${dateInfo} Yolcular: ${travelers}. En uygun fiyatlı bilet fırsatlarını ve fiyat takibi önerisini hazırla.`;
 
@@ -73,17 +73,19 @@ export async function runTicketTrackerAgent(
         destination: bedrockRes.data.destination || destination,
         bestEstimatedPrice: Number(bedrockRes.data.bestEstimatedPrice) || 2500,
         averageMarketPrice: Number(bedrockRes.data.averageMarketPrice) || 4000,
-        currency: bedrockRes.data.currency || '₺',
+        currency: bedrockRes.data.currency || "₺",
         bestDeals: bedrockRes.data.bestDeals.map((d, i) => ({
           ...d,
           id: d.id || `deal-${i + 1}`,
           foundAt: d.foundAt || new Date().toISOString().slice(0, 10),
         })),
-        flexibleDateSavings: Array.isArray(bedrockRes.data.flexibleDateSavings) ? bedrockRes.data.flexibleDateSavings : [],
+        flexibleDateSavings: Array.isArray(bedrockRes.data.flexibleDateSavings)
+          ? bedrockRes.data.flexibleDateSavings
+          : [],
         bookingTips: Array.isArray(bedrockRes.data.bookingTips) ? bedrockRes.data.bookingTips : [],
         trackerRecommended: bedrockRes.data.trackerRecommended ?? true,
       },
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
@@ -95,24 +97,24 @@ export async function runTicketTrackerAgent(
       destination,
       bestEstimatedPrice: 2800,
       averageMarketPrice: 4500,
-      currency: '₺',
+      currency: "₺",
       bestDeals: [
         {
-          id: 'deal-fb-1',
+          id: "deal-fb-1",
           title: `${destination} Erken Rezervasyon Fırsatı`,
           price: 2800,
           originalPrice: 4500,
-          currency: '₺',
-          provider: 'Optimum Seyahat Botu',
-          highlights: ['Esnek tarih avantajı', 'Fiyat takibi aktif'],
+          currency: "₺",
+          provider: "Optimum Seyahat Botu",
+          highlights: ["Esnek tarih avantajı", "Fiyat takibi aktif"],
           foundAt: new Date().toISOString().slice(0, 10),
         },
       ],
-      flexibleDateSavings: ['Hafta içi uçuşlar hafta sonuna göre daha ekonomiktir.'],
-      bookingTips: ['Fiyat alarmını açık tutarak ani indirimleri yakalayabilirsin.'],
+      flexibleDateSavings: ["Hafta içi uçuşlar hafta sonuna göre daha ekonomiktir."],
+      bookingTips: ["Fiyat alarmını açık tutarak ani indirimleri yakalayabilirsin."],
       trackerRecommended: true,
     },
-    source: 'bedrock',
+    source: "bedrock",
     durationMs: Date.now() - startTime,
   };
 }

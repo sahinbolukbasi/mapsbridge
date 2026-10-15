@@ -9,8 +9,8 @@
  * planBToPromptSnippet   — AI context injection
  */
 
-import type { PlaceEntity } from './place-entity';
-import type { DayBlock, TripProfile } from './types';
+import type { PlaceEntity } from "./place-entity";
+import type { DayBlock, TripProfile } from "./types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -18,7 +18,7 @@ import type { DayBlock, TripProfile } from './types';
 
 export interface PlanBAlternative {
   forPlaceId: string;
-  reason: 'rain' | 'closed' | 'full' | 'rejected' | 'accessibility';
+  reason: "rain" | "closed" | "full" | "rejected" | "accessibility";
   alternatives: PlaceEntity[];
   generatedAt: string;
 }
@@ -36,24 +36,17 @@ export interface DayLiteVersion {
 // ---------------------------------------------------------------------------
 
 /** Block types that are primarily outdoors and affected by bad weather. */
-const OUTDOOR_TYPES: ReadonlySet<DayBlock['type']> = new Set([
-  'park',
-  'viewpoint',
-]);
+const OUTDOOR_TYPES: ReadonlySet<DayBlock["type"]> = new Set(["park", "viewpoint"]);
 
 /** Block types that are indoors and suitable as rain alternatives. */
-const INDOOR_TYPES: ReadonlySet<DayBlock['type']> = new Set([
-  'museum',
-  'cafe',
-  'restaurant',
-]);
+const INDOOR_TYPES: ReadonlySet<DayBlock["type"]> = new Set(["museum", "cafe", "restaurant"]);
 
 /**
  * Very rough walking-time heuristic: assumes each non-transit block involves
  * ~10 minutes of walking to/from the venue.
  */
 function estimateWalkingMinutes(blocks: DayBlock[]): number {
-  return blocks.filter((b) => b.type !== 'transit').length * 10;
+  return blocks.filter((b) => b.type !== "transit").length * 10;
 }
 
 function nowISO(): string {
@@ -82,7 +75,7 @@ export function buildRainAlternatives(dayBlocks: DayBlock[]): DayBlock[] {
     if (block.alt) {
       const altBlock: DayBlock = {
         ...block,
-        type: 'museum', // safe indoor fallback category
+        type: "museum", // safe indoor fallback category
         name: block.alt,
         place_id: `alt_${block.place_id}`,
         why: `Yağmurlu hava alternatifi: ${block.alt}`,
@@ -94,10 +87,10 @@ export function buildRainAlternatives(dayBlocks: DayBlock[]): DayBlock[] {
     // No alt available — convert to a cafe break (minimal disruption)
     return {
       ...block,
-      type: 'cafe' as DayBlock['type'],
+      type: "cafe" as DayBlock["type"],
       name: `${block.name} — Kapalı Alan Alternatifi`,
       place_id: `rain_alt_${block.place_id}`,
-      why: 'Yağmurlu hava için iç mekan alternatifi.',
+      why: "Yağmurlu hava için iç mekan alternatifi.",
       alt: undefined,
     };
   });
@@ -122,19 +115,15 @@ export function buildRainAlternatives(dayBlocks: DayBlock[]): DayBlock[] {
  *  - moderate → keep 2
  *  - fast     → keep 3
  */
-export function buildLiteDay(
-  day: DayBlock[],
-  profile: TripProfile,
-  dayIndex = 1,
-): DayLiteVersion {
-  const pace = profile.pace ?? 'moderate';
-  const maxDiscretionary = pace === 'relaxed' ? 1 : pace === 'fast' ? 3 : 2;
+export function buildLiteDay(day: DayBlock[], profile: TripProfile, dayIndex = 1): DayLiteVersion {
+  const pace = profile.pace ?? "moderate";
+  const maxDiscretionary = pace === "relaxed" ? 1 : pace === "fast" ? 3 : 2;
 
-  const ALWAYS_KEEP: ReadonlySet<DayBlock['type']> = new Set([
-    'hotel',
-    'transit',
-    'restaurant',
-    'cafe',
+  const ALWAYS_KEEP: ReadonlySet<DayBlock["type"]> = new Set([
+    "hotel",
+    "transit",
+    "restaurant",
+    "cafe",
   ]);
 
   const kept: DayBlock[] = [];
@@ -154,7 +143,7 @@ export function buildLiteDay(
 
   return {
     dayIndex,
-    description: 'Hafif versiyon — daha az durak, daha çok dinlenme zamanı',
+    description: "Hafif versiyon — daha az durak, daha çok dinlenme zamanı",
     removedPlaceIds: removed.map((b) => b.place_id),
     keptPlaceIds: kept.map((b) => b.place_id),
     estimatedWalkingMinutes: estimateWalkingMinutes(kept),
@@ -170,17 +159,15 @@ export function buildLiteDay(
  * injection so the assistant knows which alternatives are available.
  */
 export function planBToPromptSnippet(alts: PlanBAlternative[]): string {
-  if (alts.length === 0) return '';
+  if (alts.length === 0) return "";
 
-  const lines: string[] = ['=== PLAN B ALTERNATIVES ==='];
+  const lines: string[] = ["=== PLAN B ALTERNATIVES ==="];
 
   for (const alt of alts) {
-    const altNames = alt.alternatives.map((a) => a.name).join(', ') || 'yok';
-    lines.push(
-      `• ${alt.forPlaceId} [${alt.reason}] → alternatifler: ${altNames}`,
-    );
+    const altNames = alt.alternatives.map((a) => a.name).join(", ") || "yok";
+    lines.push(`• ${alt.forPlaceId} [${alt.reason}] → alternatifler: ${altNames}`);
   }
 
-  lines.push('=== END PLAN B ===');
-  return lines.join('\n');
+  lines.push("=== END PLAN B ===");
+  return lines.join("\n");
 }

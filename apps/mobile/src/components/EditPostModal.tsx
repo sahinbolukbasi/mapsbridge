@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -11,9 +11,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-} from 'react-native';
-import { CloseIcon, CheckIcon, TrashIcon, TagIcon, MapPinIcon } from './Icons';
-import { socialSyncService, MobileCommunityPost } from '../services/socialSync';
+} from "react-native";
+import { CloseIcon, CheckIcon, TrashIcon, TagIcon, MapPinIcon } from "./Icons";
+import { socialSyncService, MobileCommunityPost } from "../services/socialSync";
 
 interface EditPostModalProps {
   visible: boolean;
@@ -23,38 +23,32 @@ interface EditPostModalProps {
   onDeleted: (postId: string) => void;
 }
 
-export function EditPostModal({
-  visible,
-  post,
-  onClose,
-  onSaved,
-  onDeleted,
-}: EditPostModalProps) {
+export function EditPostModal({ visible, post, onClose, onSaved, onDeleted }: EditPostModalProps) {
   if (!post) return null;
 
   const [content, setContent] = useState(post.content);
-  const [locationTag, setLocationTag] = useState(post.locationTag || '');
-  const [hashtagsText, setHashtagsText] = useState((post.hashtags || []).join(' '));
+  const [locationTag, setLocationTag] = useState(post.locationTag || "");
+  const [hashtagsText, setHashtagsText] = useState((post.hashtags || []).join(" "));
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!content.trim()) {
-      Alert.alert('Eksik İçerik', 'Paylaşım metni boş bırakılamaz.');
+      Alert.alert("Eksik İçerik", "Paylaşım metni boş bırakılamaz.");
       return;
     }
 
     setSaving(true);
     try {
       const parsedTags = hashtagsText
-        .split(' ')
+        .split(" ")
         .map((t) => t.trim())
         .filter((t) => t.length > 0)
-        .map((t) => (t.startsWith('#') ? t : `#${t}`));
+        .map((t) => (t.startsWith("#") ? t : `#${t}`));
 
       const updated = await socialSyncService.editPost(post.id, {
         content: content.trim(),
         locationTag: locationTag.trim() || undefined,
-        hashtags: parsedTags.length > 0 ? parsedTags : ['#Keşif'],
+        hashtags: parsedTags.length > 0 ? parsedTags : ["#Keşif"],
       });
 
       if (updated) {
@@ -62,7 +56,7 @@ export function EditPostModal({
         onClose();
       }
     } catch {
-      Alert.alert('Hata', 'Gönderi güncellenirken bir sorun oluştu.');
+      Alert.alert("Hata", "Gönderi güncellenirken bir sorun oluştu.");
     } finally {
       setSaving(false);
     }
@@ -70,20 +64,20 @@ export function EditPostModal({
 
   const handleDelete = () => {
     Alert.alert(
-      'Gönderiyi Sil',
-      'Bu gezi paylaşımınızı kalıcı olarak silmek istediğinize emin misiniz?',
+      "Gönderiyi Sil",
+      "Bu gezi paylaşımınızı kalıcı olarak silmek istediğinize emin misiniz?",
       [
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: "Vazgeç", style: "cancel" },
         {
-          text: 'Sil',
-          style: 'destructive',
+          text: "Sil",
+          style: "destructive",
           onPress: async () => {
             await socialSyncService.deletePost(post.id);
             onDeleted(post.id);
             onClose();
           },
         },
-      ]
+      ],
     );
   };
 
@@ -91,7 +85,7 @@ export function EditPostModal({
     <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={{ flex: 1 }}
         >
           {/* Top Bar */}
@@ -107,7 +101,7 @@ export function EditPostModal({
               activeOpacity={0.8}
             >
               <CheckIcon size={16} color="#ffffff" />
-              <Text style={styles.saveBtnText}>{saving ? '...' : 'Güncelle'}</Text>
+              <Text style={styles.saveBtnText}>{saving ? "..." : "Güncelle"}</Text>
             </TouchableOpacity>
           </View>
 
@@ -172,44 +166,44 @@ export function EditPostModal({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#faf8ff',
+    backgroundColor: "#faf8ff",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#eaedff',
-    backgroundColor: '#ffffff',
+    borderBottomColor: "#eaedff",
+    backgroundColor: "#ffffff",
   },
   iconBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f2f3ff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f2f3ff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 17,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   saveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
-    backgroundColor: '#10b981',
+    backgroundColor: "#10b981",
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 999,
   },
   saveBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   content: {
     padding: 20,
@@ -220,27 +214,27 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#286954',
+    fontWeight: "800",
+    color: "#286954",
     letterSpacing: 0.5,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#eaedff',
+    borderColor: "#eaedff",
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
-    color: '#013628',
+    color: "#013628",
   },
   inputWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#eaedff',
+    borderColor: "#eaedff",
     borderRadius: 12,
     paddingHorizontal: 12,
   },
@@ -248,18 +242,18 @@ const styles = StyleSheet.create({
     minHeight: 120,
   },
   deleteBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    backgroundColor: '#ffdad6',
+    backgroundColor: "#ffdad6",
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 20,
   },
   deleteBtnText: {
-    color: '#ba1a1a',
+    color: "#ba1a1a",
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: "800",
   },
 });

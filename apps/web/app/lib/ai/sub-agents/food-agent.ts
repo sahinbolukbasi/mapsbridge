@@ -1,11 +1,11 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface FoodRecommendation {
   name: string;
-  category: 'specialty_coffee' | 'local_cuisine' | 'burger' | 'michelin' | 'bakery' | 'casual';
+  category: "specialty_coffee" | "local_cuisine" | "burger" | "michelin" | "bakery" | "casual";
   area: string;
-  priceLevel: '$' | '$$' | '$$$' | '$$$$';
+  priceLevel: "$" | "$$" | "$$$" | "$$$$";
   highlight: string;
   dietaryNotes: string[];
 }
@@ -43,12 +43,12 @@ JSON formatı:
 export async function runFoodAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: FoodAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: FoodAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const interests = profile?.interests?.food?.join(', ') || 'yerel lezzetler, nitelikli kahve';
-  const constraints = profile?.constraints?.join(', ') || 'yok';
-  const budget = profile?.budget?.level || 'mid';
+  const interests = profile?.interests?.food?.join(", ") || "yerel lezzetler, nitelikli kahve";
+  const constraints = profile?.constraints?.join(", ") || "yok";
+  const budget = profile?.budget?.level || "mid";
 
   const userQuery = `Hedef Şehir: "${destination}".
 İlgi Alanları: ${interests}.
@@ -68,10 +68,12 @@ Bu kriterlere uygun en iyi 3-5 mekan ve gastronomi ipuçları hazırla.`;
     const cleanOutput: FoodAgentOutput = {
       destination: bedrockRes.data.destination || destination,
       culinaryTips: Array.isArray(bedrockRes.data.culinaryTips) ? bedrockRes.data.culinaryTips : [],
-      recommendations: bedrockRes.data.recommendations.filter(r => {
+      recommendations: bedrockRes.data.recommendations.filter((r) => {
         if (!r.name || !r.highlight) return false;
         if (/balık|deniz\s*ürün/iu.test(constraints)) {
-          if (/balık|seafood|sushi|fish|oyster|istakoz|karides/iu.test(r.name + ' ' + r.highlight)) {
+          if (
+            /balık|seafood|sushi|fish|oyster|istakoz|karides/iu.test(r.name + " " + r.highlight)
+          ) {
             return false;
           }
         }
@@ -81,10 +83,10 @@ Bu kriterlere uygun en iyi 3-5 mekan ve gastronomi ipuçları hazırla.`;
 
     return {
       output: cleanOutput,
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
-  throw new Error('Yemek uzmanı tavsiyesi oluşturulamadı.');
+  throw new Error("Yemek uzmanı tavsiyesi oluşturulamadı.");
 }

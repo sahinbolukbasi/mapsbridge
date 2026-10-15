@@ -74,9 +74,17 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     color: "#10b981",
     features: [
       { text: "Aylık 500 AI Rota Kredisi", included: true, highlight: true },
-      { text: "Doğal Dilde AI ile Rota Düzenleme & Versiyonlama (v1, v2, v3...)", included: true, highlight: true },
+      {
+        text: "Doğal Dilde AI ile Rota Düzenleme & Versiyonlama (v1, v2, v3...)",
+        included: true,
+        highlight: true,
+      },
       { text: "Tek Tıkla Google Maps'e Sınırsız Aktarım", included: true },
-      { text: "Akıllı Gezi Arkadaşı Eşleşmesi (% Uyum Algoritması)", included: true, highlight: true },
+      {
+        text: "Akıllı Gezi Arkadaşı Eşleşmesi (% Uyum Algoritması)",
+        included: true,
+        highlight: true,
+      },
       { text: "Otomatik Mekan Zenginleştirme Agent'ı", included: true },
       { text: "Sınırsız Katılımcılı Grup Gezileri & Ortak Planlama", included: true },
       { text: "7/24 Öncelikli VIP Destek", included: true },
@@ -92,7 +100,11 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     color: "#8b5cf6",
     features: [
       { text: "Aylık 2.500 AI Rota Kredisi", included: true, highlight: true },
-      { text: "Toplu Gezi Grupları ve Eşzamanlı Canlı Rota Planlama", included: true, highlight: true },
+      {
+        text: "Toplu Gezi Grupları ve Eşzamanlı Canlı Rota Planlama",
+        included: true,
+        highlight: true,
+      },
       { text: "Harita Üzerinde Özel Marka & Logo", included: true },
       { text: "Çoklu Rehber ve Ekip Üyesi Yönetimi", included: true },
       { text: "Özel API & Veri İçe/Dışa Aktarımı", included: true },
@@ -161,8 +173,12 @@ const DEFAULT_BILLING_DETAILS: BillingDetails = {
 const DEFAULT_MARKETPLACE_ROUTES: MarketplaceRouteItem[] = [];
 
 const DEFAULT_WALLET: WalletData = {
-  credits: 0, subscriptionTier: "free", subscriptionCycle: "monthly",
-  creatorEarningsTry: 0, creatorPendingPayoutTry: 0, totalWithdrawnTry: 0,
+  credits: 0,
+  subscriptionTier: "free",
+  subscriptionCycle: "monthly",
+  creatorEarningsTry: 0,
+  creatorPendingPayoutTry: 0,
+  totalWithdrawnTry: 0,
 };
 
 export class BillingService {
@@ -189,22 +205,53 @@ export class BillingService {
     this.walletOwner = "";
     this.serverWallet = { ...DEFAULT_WALLET };
     if (!owner) return this.getWallet();
-    const data = await apiFetch<{ credits: number; tier: SubscriptionTierId; currentPeriodEnd?: string; welcomeGift?: WalletData["welcomeGift"] }>("/stripe/wallet");
+    const data = await apiFetch<{
+      credits: number;
+      tier: SubscriptionTierId;
+      currentPeriodEnd?: string;
+      welcomeGift?: WalletData["welcomeGift"];
+    }>("/stripe/wallet");
     if (getStoredSession()?.token !== owner) return this.getWallet();
     this.walletOwner = owner;
-    this.serverWallet = { ...DEFAULT_WALLET, credits: data.credits, welcomeGift: data.welcomeGift, subscriptionTier: data.tier, subscriptionRenewsAt: data.currentPeriodEnd };
-    window.dispatchEvent(new CustomEvent("mapsbridge:wallet_updated", { detail: this.getWallet() }));
+    this.serverWallet = {
+      ...DEFAULT_WALLET,
+      credits: data.credits,
+      welcomeGift: data.welcomeGift,
+      subscriptionTier: data.tier,
+      subscriptionRenewsAt: data.currentPeriodEnd,
+    };
+    window.dispatchEvent(
+      new CustomEvent("mapsbridge:wallet_updated", { detail: this.getWallet() }),
+    );
     return this.getWallet();
   }
 
-  public saveWallet(_wallet: WalletData): void { throw new Error("Kredi ve üyelik yalnız sunucuda güncellenebilir."); }
-  public getTransactions(): BillingTransaction[] { return []; }
-  public addTransaction(_tx: Omit<BillingTransaction, "id" | "date">): void { throw new Error("İşlem kaydı sunucu onayı gerektirir."); }
-  public deductCredits(_amount: number, _reason: string): boolean { return false; }
-  public addCredits(_amount: number, _reason: string, _amountTry?: number): void { throw new Error("Kredi yalnız doğrulanmış ödeme ile eklenebilir."); }
-  public async processCheckout(payload: CheckoutPayload): Promise<CheckoutResult> { return createStripeCheckoutSession(payload); }
-  public recordRouteSale(_title: string, _price: number): void { throw new Error("Satış sunucu doğrulaması gerektirir."); }
-  public async requestPayout(_amount: number, _iban: string, _holder: string): Promise<{ success: boolean; message: string }> {
+  public saveWallet(_wallet: WalletData): void {
+    throw new Error("Kredi ve üyelik yalnız sunucuda güncellenebilir.");
+  }
+  public getTransactions(): BillingTransaction[] {
+    return [];
+  }
+  public addTransaction(_tx: Omit<BillingTransaction, "id" | "date">): void {
+    throw new Error("İşlem kaydı sunucu onayı gerektirir.");
+  }
+  public deductCredits(_amount: number, _reason: string): boolean {
+    return false;
+  }
+  public addCredits(_amount: number, _reason: string, _amountTry?: number): void {
+    throw new Error("Kredi yalnız doğrulanmış ödeme ile eklenebilir.");
+  }
+  public async processCheckout(payload: CheckoutPayload): Promise<CheckoutResult> {
+    return createStripeCheckoutSession(payload);
+  }
+  public recordRouteSale(_title: string, _price: number): void {
+    throw new Error("Satış sunucu doğrulaması gerektirir.");
+  }
+  public async requestPayout(
+    _amount: number,
+    _iban: string,
+    _holder: string,
+  ): Promise<{ success: boolean; message: string }> {
     return { success: false, message: "Para çekme servisi henüz kullanıma açık değil." };
   }
 
@@ -226,7 +273,9 @@ export class BillingService {
     if (typeof window === "undefined") return;
     try {
       localStorage.setItem(STORAGE_KEYS.BILLING_DETAILS, JSON.stringify(details));
-      window.dispatchEvent(new CustomEvent("mapsbridge:billing_details_updated", { detail: details }));
+      window.dispatchEvent(
+        new CustomEvent("mapsbridge:billing_details_updated", { detail: details }),
+      );
     } catch {}
   }
 
@@ -240,7 +289,11 @@ export class BillingService {
   /**
    * Checks whether the user has sufficient credits for an action
    */
-  public canAffordAction(action: AICreditAction): { allowed: boolean; cost: number; currentCredits: number } {
+  public canAffordAction(action: AICreditAction): {
+    allowed: boolean;
+    cost: number;
+    currentCredits: number;
+  } {
     const cost = this.getActionCost(action);
     const wallet = this.getWallet();
     return {
@@ -254,7 +307,12 @@ export class BillingService {
    * Deducts credits for a specific AI / travel action and emits an event
    */
   public consumeActionCredits(action: AICreditAction, _contextLabel?: string) {
-    return { success: false, remainingCredits: this.getWallet().credits, cost: this.getActionCost(action), error: "Kredi AI isteği sırasında sunucuda işlenir." };
+    return {
+      success: false,
+      remainingCredits: this.getWallet().credits,
+      cost: this.getActionCost(action),
+      error: "Kredi AI isteği sırasında sunucuda işlenir.",
+    };
   }
 
   /**
@@ -262,7 +320,11 @@ export class BillingService {
    * Free tier: max 3 routes.
    * Explorer, Pro, Agency: unlimited routes.
    */
-  public canCreateRoute(currentRouteCount: number): { allowed: boolean; maxRoutes: number; reason?: string } {
+  public canCreateRoute(currentRouteCount: number): {
+    allowed: boolean;
+    maxRoutes: number;
+    reason?: string;
+  } {
     const wallet = this.getWallet();
     if (wallet.subscriptionTier === "free") {
       const MAX_FREE_ROUTES = 3;
@@ -270,7 +332,8 @@ export class BillingService {
         return {
           allowed: false,
           maxRoutes: MAX_FREE_ROUTES,
-          reason: "Ücretsiz Gezgin planında en fazla 3 aktif rota oluşturabilirsiniz. Sınırsız rota kaydetmek ve GPX/PDF çıktısı almak için Kaşif veya Pro Plana geçebilirsiniz.",
+          reason:
+            "Ücretsiz Gezgin planında en fazla 3 aktif rota oluşturabilirsiniz. Sınırsız rota kaydetmek ve GPX/PDF çıktısı almak için Kaşif veya Pro Plana geçebilirsiniz.",
         };
       }
       return { allowed: true, maxRoutes: MAX_FREE_ROUTES };
@@ -301,7 +364,8 @@ export class BillingService {
     if (wallet.subscriptionTier === "free") {
       return {
         allowed: false,
-        reason: "GPX rota dosyası ve çevrimdışı PDF gezi rehberi dışa aktarma özelliği Kaşif ve Pro üyelere özeldir.",
+        reason:
+          "GPX rota dosyası ve çevrimdışı PDF gezi rehberi dışa aktarma özelliği Kaşif ve Pro üyelere özeldir.",
       };
     }
     return { allowed: true };
@@ -324,7 +388,10 @@ export class BillingService {
   /**
    * Publishes a creator route to the marketplace
    */
-  public publishRouteToMarketplace(item: Omit<MarketplaceRouteItem, "isPurchased">): { success: boolean; error?: string } {
+  public publishRouteToMarketplace(item: Omit<MarketplaceRouteItem, "isPurchased">): {
+    success: boolean;
+    error?: string;
+  } {
     const permission = this.canSellRoutes();
     if (!permission.allowed) {
       return { success: false, error: permission.reason };
@@ -353,7 +420,10 @@ export class BillingService {
   /**
    * Purchases a route from the marketplace
    */
-  public buyMarketplaceRoute(_routeId: string, _cardName?: string): { success: boolean; message: string; route?: MarketplaceRouteItem } {
+  public buyMarketplaceRoute(
+    _routeId: string,
+    _cardName?: string,
+  ): { success: boolean; message: string; route?: MarketplaceRouteItem } {
     return { success: false, message: "Rota satın alma servisi henüz kullanıma açık değil." };
   }
 }

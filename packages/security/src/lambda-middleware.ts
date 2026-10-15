@@ -36,10 +36,7 @@ export interface LambdaResponse {
 }
 
 /** A Lambda handler function. */
-export type LambdaHandler = (
-  event: LambdaEvent,
-  context?: unknown,
-) => Promise<LambdaResponse>;
+export type LambdaHandler = (event: LambdaEvent, context?: unknown) => Promise<LambdaResponse>;
 
 /** A middleware is a function that wraps a handler and returns a new handler. */
 export type Middleware = (handler: LambdaHandler) => LambdaHandler;
@@ -194,8 +191,7 @@ function defaultTokenExtractor(event: LambdaEvent): string | null {
   const headers = event.headers ?? {};
 
   // API Gateway may normalise header names to lower-case, but we handle both.
-  const authHeader =
-    headers["authorization"] ?? headers["Authorization"] ?? null;
+  const authHeader = headers["authorization"] ?? headers["Authorization"] ?? null;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return null;
@@ -220,15 +216,8 @@ function defaultTokenExtractor(event: LambdaEvent): string | null {
  * });
  * ```
  */
-export function withAuth(
-  handler: LambdaHandler,
-  options: AuthOptions,
-): LambdaHandler {
-  const {
-    tokenExtractor = defaultTokenExtractor,
-    verifyToken,
-    onUnauthorized,
-  } = options;
+export function withAuth(handler: LambdaHandler, options: AuthOptions): LambdaHandler {
+  const { tokenExtractor = defaultTokenExtractor, verifyToken, onUnauthorized } = options;
 
   return async (event: LambdaEvent, context?: unknown): Promise<LambdaResponse> => {
     const token = tokenExtractor(event);
@@ -292,8 +281,5 @@ export function compose(...middlewares: Middleware[]): Middleware {
   }
 
   return (handler: LambdaHandler): LambdaHandler =>
-    middlewares.reduceRight<LambdaHandler>(
-      (wrapped, middleware) => middleware(wrapped),
-      handler,
-    );
+    middlewares.reduceRight<LambdaHandler>((wrapped, middleware) => middleware(wrapped), handler);
 }

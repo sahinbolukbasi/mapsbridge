@@ -194,7 +194,7 @@ const RULES: EntryRule[] = [
   },
 ];
 
-const RULE_INDEX = new Map<string, EntryRule>(RULES.map(r => [r.id, r]));
+const RULE_INDEX = new Map<string, EntryRule>(RULES.map((r) => [r.id, r]));
 
 function ruleKey(passportIso2: string, destinationIso2: string): string {
   return `${passportIso2.toLowerCase()}-${destinationIso2.toLowerCase()}`;
@@ -224,7 +224,7 @@ const CITY_ISO2: Record<string, string> = {
   "united kingdom": "GB",
   uk: "GB",
   "new york": "US",
-  "newyork": "US",
+  newyork: "US",
   usa: "US",
   "united states": "US",
   tokyo: "JP",
@@ -232,10 +232,7 @@ const CITY_ISO2: Record<string, string> = {
   japonya: "JP",
 };
 
-export function getEntryRule(
-  destinationId: string,
-  passportIso2 = "TR"
-): EntryRuleQueryResult {
+export function getEntryRule(destinationId: string, passportIso2 = "TR"): EntryRuleQueryResult {
   const destIso2 = CITY_ISO2[destinationId.toLowerCase().replace(/\s+/g, "")];
   if (!destIso2) {
     return {
@@ -266,7 +263,7 @@ export function getEntryRule(
 
 /** Get all rules for a given passport country (for checklist / prepare phase). */
 export function getEntryRulesForPassport(passportIso2 = "TR"): EntryRule[] {
-  return RULES.filter(r => r.passportIso2.toUpperCase() === passportIso2.toUpperCase());
+  return RULES.filter((r) => r.passportIso2.toUpperCase() === passportIso2.toUpperCase());
 }
 
 export { RULE_INDEX };

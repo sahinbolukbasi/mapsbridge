@@ -35,7 +35,7 @@ export function trackEvent(
     creatorUsername?: string;
     amount?: number;
     currency?: string;
-  } = {}
+  } = {},
 ) {
   if (typeof window === "undefined") return;
 
@@ -81,12 +81,12 @@ export function getCreatorAnalyticsSummary(creatorUsername: string) {
     const events: AnalyticsEvent[] = raw ? JSON.parse(raw) : [];
 
     const creatorEvents = events.filter(
-      (e) => !e.creatorUsername || e.creatorUsername === creatorUsername
+      (e) => !e.creatorUsername || e.creatorUsername === creatorUsername,
     );
 
     const routeViews = Math.max(
       3420,
-      creatorEvents.filter((e) => e.type === "route_view").length * 28 + 1200
+      creatorEvents.filter((e) => e.type === "route_view").length * 28 + 1200,
     );
 
     const routePurchases = creatorEvents.filter((e) => e.type === "route_purchase");
@@ -100,7 +100,7 @@ export function getCreatorAnalyticsSummary(creatorUsername: string) {
     const routesSold = 18 + routePurchases.length;
     const tripJoins = 14 + creatorEvents.filter((e) => e.type === "trip_join").length;
     const conversionRate = Number(
-      Math.min(9.5, Math.max(3.2, ((routesSold + tripJoins) / (routeViews / 20)) * 100)).toFixed(1)
+      Math.min(9.5, Math.max(3.2, ((routesSold + tripJoins) / (routeViews / 20)) * 100)).toFixed(1),
     );
 
     const savesCount = 142 + creatorEvents.filter((e) => e.type === "route_save").length;

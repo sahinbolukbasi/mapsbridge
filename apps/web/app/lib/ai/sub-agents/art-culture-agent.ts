@@ -1,9 +1,9 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface ArtCultureItem {
   name: string;
-  type: 'modern_art' | 'historic_museum' | 'gallery' | 'architecture' | 'sculpture';
+  type: "modern_art" | "historic_museum" | "gallery" | "architecture" | "sculpture";
   location: string;
   highlightExhibition: string;
   recommendedDuration: string;
@@ -43,10 +43,10 @@ JSON formatı:
 export async function runArtCultureAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: ArtCultureOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: ArtCultureOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const interests = profile?.interests?.culture?.join(', ') || 'modern sanat, tarih, resim';
+  const interests = profile?.interests?.culture?.join(", ") || "modern sanat, tarih, resim";
 
   const userQuery = `Hedef Şehir: "${destination}". İlgi Alanları: ${interests}. En seçkin 2-4 müze ve sanat galerisi rehberi hazırla.`;
 
@@ -60,7 +60,7 @@ export async function runArtCultureAgent(
   if (bedrockRes.success && bedrockRes.data && Array.isArray(bedrockRes.data.venues)) {
     return {
       output: bedrockRes.data,
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
@@ -71,16 +71,16 @@ export async function runArtCultureAgent(
       venues: [
         {
           name: `${destination} Şehir ve Sanat Müzesi`,
-          type: 'historic_museum',
-          location: 'Tarihi Merkez',
-          highlightExhibition: 'Kalıcı tarih ve klasik sanat koleksiyonu',
-          recommendedDuration: '2 saat',
-          bookingAdvice: 'Öğleden önce ziyaretlerde daha az kalabalık olur',
+          type: "historic_museum",
+          location: "Tarihi Merkez",
+          highlightExhibition: "Kalıcı tarih ve klasik sanat koleksiyonu",
+          recommendedDuration: "2 saat",
+          bookingAdvice: "Öğleden önce ziyaretlerde daha az kalabalık olur",
         },
       ],
       museumPassAdvice: `${destination} Şehir Kartı alarak müzelere indirimli giriş sağlayabilirsiniz.`,
     },
-    source: 'bedrock',
+    source: "bedrock",
     durationMs: Date.now() - startTime,
   };
 }

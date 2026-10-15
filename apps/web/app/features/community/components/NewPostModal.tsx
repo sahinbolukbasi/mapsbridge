@@ -51,12 +51,7 @@ export function NewPostModal({
       <div className="x-tweet-modal" onClick={(e) => e.stopPropagation()}>
         {/* Tweet Modal Top Bar */}
         <div className="x-tweet-header">
-          <button
-            type="button"
-            className="x-tweet-close-btn"
-            onClick={onClose}
-            title="Kapat"
-          >
+          <button type="button" className="x-tweet-close-btn" onClick={onClose} title="Kapat">
             ✕
           </button>
           <div className="x-tweet-privacy-pill">
@@ -69,9 +64,7 @@ export function NewPostModal({
           <div className="x-tweet-body">
             {/* Sol Avatar */}
             <div className="x-tweet-avatar-wrap">
-              <div className="x-tweet-avatar">
-                {activeUsername.charAt(0).toUpperCase()}
-              </div>
+              <div className="x-tweet-avatar">{activeUsername.charAt(0).toUpperCase()}</div>
             </div>
 
             {/* Sağ Yazım Alanı */}

@@ -6,8 +6,8 @@
  * reminders) and can auto-rebuild a day's schedule after a disruption.
  */
 
-import type { TripState } from './trip-state';
-import type { StructuredTripPlan, DayBlock } from './types';
+import type { TripState } from "./trip-state";
+import type { StructuredTripPlan, DayBlock } from "./types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -27,11 +27,11 @@ export interface TripProgressContext {
 
 export interface ProgressAlert {
   type:
-    | 'reservation_reminder'
-    | 'last_entry_warning'
-    | 'checkout_reminder'
-    | 'transport_last_run'
-    | 'disruption';
+    | "reservation_reminder"
+    | "last_entry_warning"
+    | "checkout_reminder"
+    | "transport_last_run"
+    | "disruption";
   placeId?: string;
   message: string;
   /** Minutes until deadline */
@@ -45,7 +45,7 @@ export interface ProgressAlert {
 
 /** Parse "HH:MM" → minutes since midnight. Returns NaN on failure. */
 function hmToMinutes(hm: string): number {
-  const parts = hm.trim().split(':');
+  const parts = hm.trim().split(":");
   if (parts.length < 2) return NaN;
   const h = parseInt(parts[0], 10);
   const m = parseInt(parts[1], 10);
@@ -93,18 +93,10 @@ export function isTripInProgress(tripState: TripState, now?: Date): boolean {
   if (isNaN(startDate.getTime())) return false;
 
   // Normalise to start-of-day UTC for comparison
-  const startDay = new Date(
-    startDate.getFullYear(),
-    startDate.getMonth(),
-    startDate.getDate(),
-  );
+  const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
 
   const reference = now ?? new Date();
-  const referenceDay = new Date(
-    reference.getFullYear(),
-    reference.getMonth(),
-    reference.getDate(),
-  );
+  const referenceDay = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate());
 
   return referenceDay >= startDay;
 }
@@ -140,7 +132,7 @@ export function computeProgressAlerts(
   // Disruption alert
   if (ctx.delayMinutes && ctx.delayMinutes > 0) {
     alerts.push({
-      type: 'disruption',
+      type: "disruption",
       message: `Ulaşımda ${ctx.delayMinutes} dakikalık gecikme tespit edildi. Günün geri kalanı yeniden planlanıyor.`,
       urgencyMinutes: 0,
       createdAt,
@@ -161,12 +153,12 @@ export function computeProgressAlerts(
     if (minutesUntilEnd < 0) continue;
 
     // Hotel checkout: warn 60 min before noon (12:00 = 720)
-    if (block.type === 'hotel') {
+    if (block.type === "hotel") {
       const checkoutMinutes = 12 * 60; // noon default
       const untilCheckout = checkoutMinutes - currentMinutes;
       if (untilCheckout > 0 && untilCheckout <= 90) {
         alerts.push({
-          type: 'checkout_reminder',
+          type: "checkout_reminder",
           placeId: block.place_id,
           message: `${block.name} için çıkış saati yaklaşıyor. Saat 12:00'ye ${Math.round(untilCheckout)} dakika kaldı.`,
           urgencyMinutes: Math.round(untilCheckout),
@@ -176,10 +168,10 @@ export function computeProgressAlerts(
     }
 
     // Last-entry warning for museums/activities: 60 min before block end
-    if (block.type === 'museum' || block.type === 'activity') {
+    if (block.type === "museum" || block.type === "activity") {
       if (minutesUntilEnd > 0 && minutesUntilEnd <= 60) {
         alerts.push({
-          type: 'last_entry_warning',
+          type: "last_entry_warning",
           placeId: block.place_id,
           message: `${block.name} için son giriş saatine ${Math.round(minutesUntilEnd)} dakika kaldı.`,
           urgencyMinutes: Math.round(minutesUntilEnd),
@@ -189,10 +181,10 @@ export function computeProgressAlerts(
     }
 
     // Reservation reminder for restaurants: 120 min before start
-    if (block.type === 'restaurant') {
+    if (block.type === "restaurant") {
       if (minutesUntilStart > 0 && minutesUntilStart <= 120) {
         alerts.push({
-          type: 'reservation_reminder',
+          type: "reservation_reminder",
           placeId: block.place_id,
           message: `${block.name} için rezervasyon saatinize ${Math.round(minutesUntilStart)} dakika kaldı.`,
           urgencyMinutes: Math.round(minutesUntilStart),
@@ -202,10 +194,10 @@ export function computeProgressAlerts(
     }
 
     // Transport last-run: transit block starting within 20 min
-    if (block.type === 'transit') {
+    if (block.type === "transit") {
       if (minutesUntilStart > 0 && minutesUntilStart <= 20) {
         alerts.push({
-          type: 'transport_last_run',
+          type: "transport_last_run",
           placeId: block.place_id,
           message: `${block.name} — son sefer veya transfer ${Math.round(minutesUntilStart)} dakika içinde.`,
           urgencyMinutes: Math.round(minutesUntilStart),
@@ -253,7 +245,7 @@ export function rebuildDayAfterDisruption(
       const fmtHour = (mins: number) => {
         const h = Math.floor(mins / 60);
         const m = mins % 60;
-        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
       };
 
       return {
@@ -276,7 +268,7 @@ export function buildProgressPromptSnippet(
   ctx: TripProgressContext,
   alerts: ProgressAlert[],
 ): string {
-  const lines: string[] = ['=== TRIP IN PROGRESS ==='];
+  const lines: string[] = ["=== TRIP IN PROGRESS ==="];
 
   lines.push(`Şu an: ${ctx.currentTime} (Gün ${ctx.currentDayIndex})`);
 
@@ -299,12 +291,12 @@ export function buildProgressPromptSnippet(
   }
 
   if (alerts.length > 0) {
-    lines.push('Aktif uyarılar:');
+    lines.push("Aktif uyarılar:");
     for (const alert of alerts) {
       lines.push(`  [${alert.type.toUpperCase()}] ${alert.message}`);
     }
   }
 
-  lines.push('=== END TRIP IN PROGRESS ===');
-  return lines.join('\n');
+  lines.push("=== END TRIP IN PROGRESS ===");
+  return lines.join("\n");
 }
