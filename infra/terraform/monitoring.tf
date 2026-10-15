@@ -1,8 +1,10 @@
 # ── CloudWatch Alarms & Dashboard for all services ──────────────────────────
 
 locals {
+  # Main-stack functions use "api-" prefix. admin/routes/ai/stripe are in admin-runtime.
   lambda_functions = [
-    "auth", "routes", "chat", "marketplace", "ai", "stripe", "admin"
+    "api-auth", "api-chat", "api-marketplace",
+    "ws-onconnect", "ws-onmessage", "ws-ondisconnect"
   ]
   alarm_prefix = "${local.name}-alarm"
 }

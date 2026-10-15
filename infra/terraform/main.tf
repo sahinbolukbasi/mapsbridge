@@ -1,29 +1,12 @@
 locals {
   name = "${var.project}-${var.environment}"
-  tags = {
-    Project     = var.project
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    CostCenter  = var.project
-    Pillar      = "well-architected-cost-performance"
-  }
-  # Lambda package paths — each domain bundled with esbuild (scripts/build-lambdas.sh)
+  tags = {}
+  # Lambda package paths — auth, chat, marketplace only.
+  # admin/ai/routes/stripe are managed by infra/admin-runtime (mapsbridge-prod-{domain}).
   lambda_packages = {
     auth = {
       zip_path = "${path.module}/.build/lambdas/auth.zip"
       env_vars = { DYNAMODB_TABLE = aws_dynamodb_table.data.name }
-    }
-    routes = {
-      zip_path = "${path.module}/.build/lambdas/routes.zip"
-      env_vars = {
-        OSRM_BASE_URL              = "https://router.project-osrm.org"
-        DYNAMODB_TABLE             = aws_dynamodb_table.data.name
-        SLACK_SIGNING_SECRET       = "secret:/mapsbridge/slack/signing-secret"
-        SLACK_BOT_TOKEN            = "secret:/mapsbridge/slack/bot-token"
-        GH_TOKEN                   = "secret:/mapsbridge/github/token"
-        ALLOWED_USERS              = ""
-        ALLOWED_CHANNELS           = ""
-      }
     }
     chat = {
       zip_path = "${path.module}/.build/lambdas/chat.zip"
@@ -33,22 +16,12 @@ locals {
       zip_path = "${path.module}/.build/lambdas/marketplace.zip"
       env_vars = { PRESIGN_URL_TTL_SECONDS = "900", DYNAMODB_TABLE = aws_dynamodb_table.data.name }
     }
-    ai = {
-      zip_path = "${path.module}/.build/lambdas/ai.zip"
-      env_vars = { DYNAMODB_TABLE = aws_dynamodb_table.data.name, AI_DAILY_REQUEST_LIMIT = tostring(var.ai_daily_request_limit) }
-    }
-    stripe = {
-      zip_path = "${path.module}/.build/lambdas/stripe.zip"
-      env_vars = merge(var.stripe_price_ids, { STRIPE_AWS_REGION = var.aws_region, DYNAMODB_TABLE = aws_dynamodb_table.data.name, APP_ORIGIN = var.frontend_domain != "" ? "https://${var.frontend_domain}" : "" })
-    }
-    admin = {
-      zip_path = "${path.module}/.build/lambdas/admin.zip"
-      env_vars = { ATHENA_RESULTS_BUCKET = "", DYNAMODB_TABLE = aws_dynamodb_table.data.name }
-    }
   }
 
+  # Route ownership:
+  # auth, chat, marketplace → this stack (mapsbridge-prod-api-*)
+  # admin, ai, routes, stripe, operations → infra/admin-runtime (mapsbridge-prod-*)
   domain_routes = {
-    ai = ["POST /ai/route-planner"]
     auth = [
       "POST /auth/reset-password",
       "POST /auth/change-password",
@@ -57,26 +30,6 @@ locals {
       "POST /profile/unpublish",
       "GET /profiles/{username}",
     ]
-    routes = [
-      "GET /health",
-      "GET /routes",
-      "POST /routes",
-      "GET /routes/{id}",
-      "PUT /routes/{id}",
-      "DELETE /routes/{id}",
-      "POST /routes/{id}/share",
-      "GET /routes/{id}/osrm/{profile}",
-      "POST /slack-bot/deploy",
-      "POST /slack-bot/status",
-      "POST /slack-bot/health",
-      "POST /slack-bot/logs",
-      "POST /slack-bot/rollback",
-      "POST /slack-bot/interactive",
-      "GET /media/presign-upload",
-      "POST /routes/telemetry",
-      "GET /user/saved-addresses",
-      "PUT /user/saved-addresses",
-    ]
     marketplace = [
       "GET /marketplace/guides",
       "GET /marketplace/guides/{id}",
@@ -84,85 +37,6 @@ locals {
       "POST /marketplace/guides/{id}/purchase",
       "GET /marketplace/guides/{id}/download",
       "POST /marketplace/blogs",
-      "GET /marketplace/blogs",
-      "GET /marketplace/blogs/{id}",
-    ]
-    stripe = [
-      "GET /stripe/plans",
-      "POST /stripe/checkout",
-      "POST /stripe/portal",
-      "GET /stripe/subscription",
-      "GET /stripe/wallet",
-      "POST /stripe/balance/topup",
-    ]
-    admin = [
-      "GET /admin/session",
-      "GET /admin/metrics",
-      "GET /admin/finance",
-      "GET /admin/system-health",
-      "GET /admin/system-config",
-      "POST /admin/system-config",
-      "GET /admin/module-config",
-      "POST /admin/module-config",
-      "GET /admin/credit-stats",
-      "GET /admin/users",
-      "GET /admin/users/{id}",
-      "POST /admin/users/{id}/suspend",
-      "POST /admin/users/{id}/unsuspend",
-      "POST /admin/users/{id}/refund",
-      "POST /admin/users/{id}/profile",
-      "POST /admin/users/{id}/sessions",
-      "POST /admin/users/{id}/role",
-      "POST /admin/users/{id}/credits",
-      "POST /admin/users/{id}/wallet",
-      "POST /admin/users/{id}/subscription",
-      "GET /admin/routes",
-      "POST /admin/routes/{id}/action",
-      "POST /admin/routes/{id}/details",
-      "GET /admin/payments",
-      "GET /admin/reports",
-      "POST /admin/reports/{id}/resolve",
-      "GET /admin/audit-logs",
-      "GET /admin/token-usage",
-      "GET /admin/realtime",
-      "GET /admin/shares",
-      "POST /admin/shares/{id}/revoke",
-      "GET /admin/profiles",
-      "POST /admin/profiles/{id}/moderate",
-      "GET /admin/content",
-      "POST /admin/content",
-      "POST /admin/content/{type}/{id}",
-      "GET /admin/tickets",
-      "POST /admin/tickets/{id}",
-      "GET /admin/announcements",
-      "POST /admin/announcements",
-      "GET /admin/subscriptions",
-      "GET /admin/usage",
-      "GET /admin/ai-operations",
-      "POST /admin/ai-control",
-      "GET /admin/ai-agents",
-      "POST /admin/ai-agents/{id}/config",
-      "GET /admin/ai-training",
-      "POST /admin/ai-training/{id}/review",
-      "GET /admin/ai-release",
-      "POST /admin/ai-release/propose",
-      "POST /admin/ai-release/publish",
-      "POST /admin/ai-release/rollback",
-      "GET /admin/analytics/devices",
-      "GET /admin/analytics/ai-topics",
-      "GET /admin/analytics/community",
-      "GET /admin/analytics/subscriptions",
-      "POST /admin/analytics/track",
-      "GET /admin/agentcore-status",
-      "POST /admin/users/{id}/grant-credits",
-      "GET /admin/ai-training/jobs",
-      "POST /admin/ai-training/fine-tune",
-      "GET /admin/credit-packs",
-      "POST /admin/credit-packs/{id}",
-      "GET /admin/plans",
-      "POST /admin/plans/{id}",
-      "GET /admin/stripe-config",
-      "POST /admin/stripe-config",
     ]
     chat = [
       "GET /chat/threads",
@@ -376,20 +250,7 @@ module "messaging" {
   ondisconnect_zip    = "${path.module}/.build/lambdas/ws-ondisconnect.zip"
 }
 
-# Raw webhook body and signature reach the Stripe Lambda unchanged.
-# Stripe retries non-2xx responses; business receipts provide durable deduplication.
-resource "aws_apigatewayv2_integration" "stripe_webhook" {
-  api_id                 = module.api.api_gateway_id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = module.api.lambda_function_arns["stripe"]
-  payload_format_version = "2.0"
-}
-
-resource "aws_apigatewayv2_route" "stripe_webhook" {
-  api_id    = module.api.api_gateway_id
-  route_key = "POST /stripe/webhook"
-  target    = "integrations/${aws_apigatewayv2_integration.stripe_webhook.id}"
-}
+# Stripe webhook is managed by infra/admin-runtime via routes.json ("POST /stripe/webhook": "stripe")
 
 # ─── Security Module (WAF for API Gateway) ──────────────────────────────
 module "security" {

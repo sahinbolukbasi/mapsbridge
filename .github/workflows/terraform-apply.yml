@@ -3,13 +3,27 @@ name: Terraform Apply
 on:
   workflow_dispatch:
     inputs:
+      stack:
+        description: "Which stack to deploy"
+        required: true
+        default: "main"
+        type: choice
+        options:
+          - main
+          - admin-runtime
+          - agentcore-gateway
+          - ai-memory
+          - ai-finops
+          - ai-training
+          - travel-rag
+          - all
       plan_only:
         description: "Plan only (no apply)"
         required: false
-        default: "false"
+        default: false
         type: boolean
       target:
-        description: "Terraform target (e.g. module.api). Leave empty for full apply."
+        description: "Terraform -target (e.g. module.api). Leave empty for full apply."
         required: false
         default: ""
         type: string
@@ -20,38 +34,39 @@ permissions:
 
 env:
   AWS_REGION: eu-central-1
-  TF_DIR: infra/terraform
+  ACCOUNT_ID: "865369794421"
+  PREFIX: mapsbridge-prod
 
 jobs:
-  terraform:
-    name: Terraform ${{ github.event.inputs.plan_only == 'true' && 'Plan' || 'Apply' }}
+  # ─── Main Stack ──────────────────────────────────────────────────────────
+  main:
+    name: "Stack: main"
+    if: ${{ github.event.inputs.stack == 'main' || github.event.inputs.stack == 'all' }}
     runs-on: ubuntu-latest
     environment: production
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-
       - uses: hashicorp/setup-terraform@v3
 
       - name: Create Lambda zip placeholders
         run: |
           mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
-          for name in auth routes chat marketplace ai stripe admin cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
+          for name in auth chat marketplace cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
             echo "placeholder" | zip -q infra/terraform/.build/lambdas/${name}.zip -
           done
           echo "placeholder" | zip -q infra/terraform/.build/layer/shared.zip -
 
       - name: Terraform Init
-        working-directory: ${{ env.TF_DIR }}
+        working-directory: infra/terraform
         run: terraform init
 
       - name: Terraform Plan
-        working-directory: ${{ env.TF_DIR }}
+        id: plan
+        working-directory: infra/terraform
         env:
           TF_VAR_environment: prod
           TF_VAR_frontend_domain: mapsbridge.com
@@ -65,8 +80,8 @@ jobs:
           terraform plan -out=tfplan $TARGET_ARGS
 
       - name: Terraform Apply
-        if: github.event.inputs.plan_only != 'true'
-        working-directory: ${{ env.TF_DIR }}
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: infra/terraform
         env:
           TF_VAR_environment: prod
           TF_VAR_frontend_domain: mapsbridge.com
@@ -75,6 +90,242 @@ jobs:
         run: terraform apply -auto-approve tfplan
 
       - name: Show Outputs
-        if: github.event.inputs.plan_only != 'true'
-        working-directory: ${{ env.TF_DIR }}
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: infra/terraform
         run: terraform output -json 2>/dev/null || true
+
+  # ─── Admin Runtime ────────────────────────────────────────────────────────
+  admin-runtime:
+    name: "Stack: admin-runtime"
+    if: ${{ github.event.inputs.stack == 'admin-runtime' || github.event.inputs.stack == 'all' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create Lambda zip placeholders
+        run: |
+          mkdir -p infra/admin-runtime/.build
+          for name in admin routes operations ai stripe ai-stream background-monitor; do
+            echo "placeholder" | zip -q infra/admin-runtime/.build/${name}.zip -
+          done
+
+      - name: Terraform Init
+        working-directory: infra/admin-runtime
+        run: terraform init
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: infra/admin-runtime
+        env:
+          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
+          TF_VAR_prefix: ${{ env.PREFIX }}
+          TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
+          TF_VAR_dynamodb_table: ${{ secrets.DYNAMODB_TABLE }}
+          TF_VAR_cognito_user_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
+          TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
+          TF_VAR_protected_admin_sub: ${{ secrets.PROTECTED_ADMIN_SUB }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: infra/admin-runtime
+        env:
+          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
+          TF_VAR_prefix: ${{ env.PREFIX }}
+          TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
+          TF_VAR_dynamodb_table: ${{ secrets.DYNAMODB_TABLE }}
+          TF_VAR_cognito_user_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
+          TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
+          TF_VAR_protected_admin_sub: ${{ secrets.PROTECTED_ADMIN_SUB }}
+        run: terraform apply -auto-approve tfplan
+
+  # ─── AgentCore Gateway ────────────────────────────────────────────────────
+  agentcore-gateway:
+    name: "Stack: agentcore-gateway"
+    if: ${{ github.event.inputs.stack == 'agentcore-gateway' || github.event.inputs.stack == 'all' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create Lambda zip placeholders
+        run: |
+          mkdir -p infra/agentcore-gateway/.build
+          echo "placeholder" | zip -q infra/agentcore-gateway/.build/tools.zip -
+          echo "placeholder" | zip -q infra/agentcore-gateway/.build/data-tools.zip -
+
+      - name: Terraform Init
+        working-directory: infra/agentcore-gateway
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra/agentcore-gateway
+        env:
+          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
+          TF_VAR_prefix: ${{ env.PREFIX }}
+          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
+          TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: infra/agentcore-gateway
+        env:
+          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
+          TF_VAR_prefix: ${{ env.PREFIX }}
+          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
+          TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
+        run: terraform apply -auto-approve tfplan
+
+  # ─── AI Memory ────────────────────────────────────────────────────────────
+  ai-memory:
+    name: "Stack: ai-memory"
+    if: ${{ github.event.inputs.stack == 'ai-memory' || github.event.inputs.stack == 'all' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create Lambda zip placeholders
+        run: |
+          mkdir -p infra/ai-memory/.build
+          echo "placeholder" | zip -q infra/ai-memory/.build/control.zip -
+          echo "placeholder" | zip -q infra/ai-memory/.build/worker.zip -
+
+      - name: Terraform Init
+        working-directory: infra/ai-memory
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra/ai-memory
+        env:
+          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
+          TF_VAR_prefix: ${{ env.PREFIX }}
+          TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
+          TF_VAR_application_table: ${{ secrets.DYNAMODB_TABLE }}
+          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
+          TF_VAR_cognito_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
+          TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: infra/ai-memory
+        env:
+          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
+          TF_VAR_prefix: ${{ env.PREFIX }}
+          TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
+          TF_VAR_application_table: ${{ secrets.DYNAMODB_TABLE }}
+          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
+          TF_VAR_cognito_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
+          TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
+        run: terraform apply -auto-approve tfplan
+
+  # ─── AI FinOps ────────────────────────────────────────────────────────────
+  ai-finops:
+    name: "Stack: ai-finops"
+    if: ${{ github.event.inputs.stack == 'ai-finops' || github.event.inputs.stack == 'all' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infra/ai-finops
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra/ai-finops
+        env:
+          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
+          TF_VAR_prefix: ${{ env.PREFIX }}
+          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
+          TF_VAR_source_inference_profile_arn: ${{ secrets.BEDROCK_SOURCE_INFERENCE_PROFILE_ARN }}
+          TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: infra/ai-finops
+        env:
+          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
+          TF_VAR_prefix: ${{ env.PREFIX }}
+          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
+          TF_VAR_source_inference_profile_arn: ${{ secrets.BEDROCK_SOURCE_INFERENCE_PROFILE_ARN }}
+          TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
+        run: terraform apply -auto-approve tfplan
+
+  # ─── AI Training ──────────────────────────────────────────────────────────
+  ai-training:
+    name: "Stack: ai-training"
+    if: ${{ github.event.inputs.stack == 'ai-training' || github.event.inputs.stack == 'all' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infra/ai-training
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra/ai-training
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: infra/ai-training
+        run: terraform apply -auto-approve tfplan
+
+  # ─── Travel RAG ───────────────────────────────────────────────────────────
+  travel-rag:
+    name: "Stack: travel-rag"
+    if: ${{ github.event.inputs.stack == 'travel-rag' || github.event.inputs.stack == 'all' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infra/travel-rag
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra/travel-rag
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.plan_only != 'true' }}
+        working-directory: infra/travel-rag
+        run: terraform apply -auto-approve tfplan

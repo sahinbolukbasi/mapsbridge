@@ -5,7 +5,14 @@ terraform {
 provider "aws" {
   region              = var.region
   allowed_account_ids = [var.account_id]
-  default_tags { tags = { Project = "mapsbridge", Workload = "travel-ai", Component = "agentcore-gateway" } }
+  default_tags {
+    tags = {
+      Project     = "mapsbridge"
+      Environment = "prod"
+      ManagedBy   = "terraform"
+      Stack       = "agentcore-gateway"
+    }
+  }
 }
 variable "region" {
   type    = string
@@ -264,4 +271,14 @@ output "ai_gateway_environment" {
     AGENTCORE_ADVISORY_TOOL     = "advisory___get_advisory"
   }
   depends_on = [aws_bedrockagentcore_gateway_target.travel, aws_bedrockagentcore_gateway_target.flights, aws_bedrockagentcore_gateway_target.advisory, aws_iam_role_policy.caller]
+}
+
+resource "aws_resourcegroups_group" "stack" {
+  name = "${var.prefix}-agentcore-gateway"
+  resource_query {
+    query = jsonencode({
+      ResourceTypeFilters = ["AWS::AllSupported"]
+      TagFilters          = [{ Key = "Stack", Values = ["agentcore-gateway"] }]
+    })
+  }
 }

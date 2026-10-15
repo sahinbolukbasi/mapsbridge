@@ -5,7 +5,14 @@ terraform {
 provider "aws" {
   region              = var.region
   allowed_account_ids = [var.account_id]
-  default_tags { tags = { Project = "mapsbridge", Workload = "travel-ai", Component = "memory", Environment = "prod" } }
+  default_tags {
+    tags = {
+      Project     = "mapsbridge"
+      Environment = "prod"
+      ManagedBy   = "terraform"
+      Stack       = "ai-memory"
+    }
+  }
 }
 variable "region" {
   type    = string
@@ -200,3 +207,13 @@ resource "aws_cloudwatch_dashboard" "memory" {
   } }] })
 }
 output "ai_environment" { value = local.environment }
+
+resource "aws_resourcegroups_group" "stack" {
+  name = "${var.prefix}-ai-memory"
+  resource_query {
+    query = jsonencode({
+      ResourceTypeFilters = ["AWS::AllSupported"]
+      TagFilters          = [{ Key = "Stack", Values = ["ai-memory"] }]
+    })
+  }
+}
