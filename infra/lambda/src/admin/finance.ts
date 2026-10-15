@@ -227,16 +227,90 @@ export async function handleUpdateStripeConfig(event: ApiGatewayEvent) {
 }
 
 const DEFAULT_PLANS = [
-  { id: "free", name: "Gezgin", tagline: "Temel seyahat planlama", badge: "ÜCRETSİZ", monthlyPriceTry: 0, yearlyPriceTry: 0, monthlyCredits: 10, color: "#64748b", highlight: false, enabled: true },
-  { id: "explorer", name: "Kaşif", tagline: "Aktif seyahat planlamacılar için", badge: "KAŞİF", monthlyPriceTry: 14900, yearlyPriceTry: 9900, monthlyCredits: 100, color: "#0d9488", highlight: false, enabled: true },
-  { id: "pro", name: "Pro Kaşif", tagline: "Sık seyahat edenler için", badge: "PRO", monthlyPriceTry: 29900, yearlyPriceTry: 24900, monthlyCredits: 300, color: "#7c3aed", highlight: true, enabled: true },
-  { id: "agency", name: "Tur Lideri", tagline: "Tur operatörleri ve profesyoneller", badge: "LİDER", monthlyPriceTry: 79900, yearlyPriceTry: 64900, monthlyCredits: 1000, color: "#c2410c", highlight: false, enabled: true },
+  {
+    id: "free",
+    name: "Gezgin",
+    tagline: "Temel seyahat planlama",
+    badge: "ÜCRETSİZ",
+    monthlyPriceTry: 0,
+    yearlyPriceTry: 0,
+    monthlyCredits: 10,
+    color: "#64748b",
+    highlight: false,
+    enabled: true,
+  },
+  {
+    id: "explorer",
+    name: "Kaşif",
+    tagline: "Aktif seyahat planlamacılar için",
+    badge: "KAŞİF",
+    monthlyPriceTry: 14900,
+    yearlyPriceTry: 9900,
+    monthlyCredits: 100,
+    color: "#0d9488",
+    highlight: false,
+    enabled: true,
+  },
+  {
+    id: "pro",
+    name: "Pro Kaşif",
+    tagline: "Sık seyahat edenler için",
+    badge: "PRO",
+    monthlyPriceTry: 29900,
+    yearlyPriceTry: 24900,
+    monthlyCredits: 300,
+    color: "#7c3aed",
+    highlight: true,
+    enabled: true,
+  },
+  {
+    id: "agency",
+    name: "Tur Lideri",
+    tagline: "Tur operatörleri ve profesyoneller",
+    badge: "LİDER",
+    monthlyPriceTry: 79900,
+    yearlyPriceTry: 64900,
+    monthlyCredits: 1000,
+    color: "#c2410c",
+    highlight: false,
+    enabled: true,
+  },
 ];
 
 const DEFAULT_CREDIT_PACKS = [
-  { id: "starter", title: "Başlangıç Paketi", description: "Seyahat planlamaya başlamak için", credits: 50, bonusCredits: 0, priceTry: 4900, unitPriceTry: 98, popular: false, enabled: true },
-  { id: "explorer", title: "Kaşif Paketi", description: "Aktif seyahat planlamacılar için", credits: 150, bonusCredits: 15, priceTry: 12900, unitPriceTry: 86, popular: true, enabled: true },
-  { id: "pro", title: "Pro Paket", description: "En iyi değer — sık seyahat edenler için", credits: 400, bonusCredits: 60, priceTry: 29900, unitPriceTry: 74, popular: false, enabled: true },
+  {
+    id: "starter",
+    title: "Başlangıç Paketi",
+    description: "Seyahat planlamaya başlamak için",
+    credits: 50,
+    bonusCredits: 0,
+    priceTry: 4900,
+    unitPriceTry: 98,
+    popular: false,
+    enabled: true,
+  },
+  {
+    id: "explorer",
+    title: "Kaşif Paketi",
+    description: "Aktif seyahat planlamacılar için",
+    credits: 150,
+    bonusCredits: 15,
+    priceTry: 12900,
+    unitPriceTry: 86,
+    popular: true,
+    enabled: true,
+  },
+  {
+    id: "pro",
+    title: "Pro Paket",
+    description: "En iyi değer — sık seyahat edenler için",
+    credits: 400,
+    bonusCredits: 60,
+    priceTry: 29900,
+    unitPriceTry: 74,
+    popular: false,
+    enabled: true,
+  },
 ];
 
 export async function handleGetPlans() {
@@ -278,7 +352,11 @@ export async function handleUpdatePlan(event: ApiGatewayEvent) {
 
   const previous = await get(`PLAN#${planId}`);
   const defaults: Record<string, any> = DEFAULT_PLANS.find((p) => p.id === planId) || {
-    monthlyPriceTry: 0, yearlyPriceTry: 0, monthlyCredits: 0, color: "#64748b", highlight: false,
+    monthlyPriceTry: 0,
+    yearlyPriceTry: 0,
+    monthlyCredits: 0,
+    color: "#64748b",
+    highlight: false,
   };
 
   const next: Record<string, any> = {
@@ -289,23 +367,47 @@ export async function handleUpdatePlan(event: ApiGatewayEvent) {
     name: body.name || previous?.name || defaults.id,
     tagline: body.tagline !== undefined ? body.tagline : previous?.tagline || "",
     badge: body.badge || previous?.badge || planId.toUpperCase(),
-    monthlyPriceTry: Number(body.monthlyPriceTry ?? previous?.monthlyPriceTry ?? defaults.monthlyPriceTry),
-    yearlyPriceTry: Number(body.yearlyPriceTry ?? previous?.yearlyPriceTry ?? defaults.yearlyPriceTry),
-    monthlyCredits: Number(body.monthlyCredits ?? previous?.monthlyCredits ?? defaults.monthlyCredits),
+    monthlyPriceTry: Number(
+      body.monthlyPriceTry ?? previous?.monthlyPriceTry ?? defaults.monthlyPriceTry,
+    ),
+    yearlyPriceTry: Number(
+      body.yearlyPriceTry ?? previous?.yearlyPriceTry ?? defaults.yearlyPriceTry,
+    ),
+    monthlyCredits: Number(
+      body.monthlyCredits ?? previous?.monthlyCredits ?? defaults.monthlyCredits,
+    ),
     color: previous?.color || defaults.color,
     highlight: previous?.highlight ?? defaults.highlight,
     enabled: body.enabled !== undefined ? !!body.enabled : previous?.enabled !== false,
-    stripePriceIdMonthly: body.stripePriceIdMonthly !== undefined ? body.stripePriceIdMonthly : previous?.stripePriceIdMonthly || "",
-    stripePriceIdYearly: body.stripePriceIdYearly !== undefined ? body.stripePriceIdYearly : previous?.stripePriceIdYearly || "",
+    stripePriceIdMonthly:
+      body.stripePriceIdMonthly !== undefined
+        ? body.stripePriceIdMonthly
+        : previous?.stripePriceIdMonthly || "",
+    stripePriceIdYearly:
+      body.stripePriceIdYearly !== undefined
+        ? body.stripePriceIdYearly
+        : previous?.stripePriceIdYearly || "",
   };
 
-  const saved = (await commit(event, next, "plan_updated", reason, previous ? { ...previous } : null)) as Record<string, any>;
+  const saved = (await commit(
+    event,
+    next,
+    "plan_updated",
+    reason,
+    previous ? { ...previous } : null,
+  )) as Record<string, any>;
   return ok({ status: "updated", plan: saved });
 }
 
 export async function handleGetCreditPacks() {
-  const rows = await scan("begins_with(PK, :pk) AND SK = :sk", { ":pk": "CREDITPACK#", ":sk": "META" });
-  const paymentRows = await scan("begins_with(PK, :pk) AND SK = :sk", { ":pk": "PAYMENT#", ":sk": "META" });
+  const rows = await scan("begins_with(PK, :pk) AND SK = :sk", {
+    ":pk": "CREDITPACK#",
+    ":sk": "META",
+  });
+  const paymentRows = await scan("begins_with(PK, :pk) AND SK = :sk", {
+    ":pk": "PAYMENT#",
+    ":sk": "META",
+  });
   const packCounts: Record<string, number> = {};
   for (const p of paymentRows) {
     if (p.packId && p.status === "succeeded")
@@ -318,9 +420,18 @@ export async function handleGetCreditPacks() {
           const id = r.packId || r.id || r.PK?.replace(/^CREDITPACK#/, "");
           const credits = r.credits || 0;
           const priceTry = r.priceTry || 0;
-          return { ...r, id, totalPurchases: packCounts[id] || r.totalPurchases || 0, unitPriceTry: credits > 0 ? Math.round(priceTry / credits) : 0 };
+          return {
+            ...r,
+            id,
+            totalPurchases: packCounts[id] || r.totalPurchases || 0,
+            unitPriceTry: credits > 0 ? Math.round(priceTry / credits) : 0,
+          };
         })
-      : DEFAULT_CREDIT_PACKS.map((p) => ({ ...p, totalPurchases: packCounts[p.id] || 0, stripeProductId: "" }));
+      : DEFAULT_CREDIT_PACKS.map((p) => ({
+          ...p,
+          totalPurchases: packCounts[p.id] || 0,
+          stripeProductId: "",
+        }));
 
   return ok({ packs });
 }
@@ -336,7 +447,10 @@ export async function handleUpdateCreditPack(event: ApiGatewayEvent) {
 
   const previous = await get(`CREDITPACK#${packId}`);
   const defaults: Record<string, any> = DEFAULT_CREDIT_PACKS.find((p) => p.id === packId) || {
-    credits: 0, bonusCredits: 0, priceTry: 0, popular: false,
+    credits: 0,
+    bonusCredits: 0,
+    priceTry: 0,
+    popular: false,
   };
 
   const credits = Number(body.credits ?? previous?.credits ?? defaults.credits);
@@ -355,9 +469,19 @@ export async function handleUpdateCreditPack(event: ApiGatewayEvent) {
     unitPriceTry: credits > 0 ? Math.round(priceTry / credits) : 0,
     popular: body.popular !== undefined ? !!body.popular : (previous?.popular ?? defaults.popular),
     enabled: body.enabled !== undefined ? !!body.enabled : previous?.enabled !== false,
-    stripeProductId: body.stripeProductId !== undefined ? body.stripeProductId : previous?.stripeProductId || "",
+    stripeProductId:
+      body.stripeProductId !== undefined ? body.stripeProductId : previous?.stripeProductId || "",
   };
 
-  const saved = (await commit(event, next, "creditpack_updated", reason, previous ? { ...previous } : null)) as Record<string, any>;
-  return ok({ status: "updated", pack: { ...saved, totalPurchases: previous?.totalPurchases || 0 } });
+  const saved = (await commit(
+    event,
+    next,
+    "creditpack_updated",
+    reason,
+    previous ? { ...previous } : null,
+  )) as Record<string, any>;
+  return ok({
+    status: "updated",
+    pack: { ...saved, totalPurchases: previous?.totalPurchases || 0 },
+  });
 }

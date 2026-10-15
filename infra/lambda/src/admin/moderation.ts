@@ -32,7 +32,9 @@ export async function handleResolveReport(event: ApiGatewayEvent) {
   const reportId = event.pathParameters?.id;
   if (!reportId) return badRequest("Şikâyet ID gerekli.");
 
-  const body = parseBody<{ action?: "dismiss" | "hide_content" | "suspend_user"; notes?: string }>(event);
+  const body = parseBody<{ action?: "dismiss" | "hide_content" | "suspend_user"; notes?: string }>(
+    event,
+  );
   const action = body?.action;
   if (!action || !["dismiss", "hide_content", "suspend_user"].includes(action))
     return badRequest("Geçerli şikâyet işlemi gerekli.");

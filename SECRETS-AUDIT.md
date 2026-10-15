@@ -6,12 +6,12 @@
 
 ## Öncelik Sırası — Rotate Edilmesi Gerekenler
 
-| Öncelik | Secret | Konum | Neden Acil |
-|---------|--------|-------|-----------|
-| **1 — ACİL** | RevenueCat iOS/Android Public Key | `apps/mobile/.env.example` (3 commit'te git'te) | Git history'de herkese açık |
-| **2 — ACİL** | Google Maps Platform API Key | `.agents/mcp_config.json` (initial commit'ten beri git'te) | Git history'de herkese açık |
-| **3 — ORTA** | Aurora DB Password | `infra/terraform/terraform.tfvars` (gitignored) | Test değeri görünümlü ama production'a apply edildiyse rotate et |
-| **4 — DÜŞÜK** | Google Places API Key | Terraform variable (henüz boş görünüyor) | Atandığında `secret:/` pattern kullan |
+| Öncelik       | Secret                            | Konum                                                      | Neden Acil                                                       |
+| ------------- | --------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------- |
+| **1 — ACİL**  | RevenueCat iOS/Android Public Key | `apps/mobile/.env.example` (3 commit'te git'te)            | Git history'de herkese açık                                      |
+| **2 — ACİL**  | Google Maps Platform API Key      | `.agents/mcp_config.json` (initial commit'ten beri git'te) | Git history'de herkese açık                                      |
+| **3 — ORTA**  | Aurora DB Password                | `infra/terraform/terraform.tfvars` (gitignored)            | Test değeri görünümlü ama production'a apply edildiyse rotate et |
+| **4 — DÜŞÜK** | Google Places API Key             | Terraform variable (henüz boş görünüyor)                   | Atandığında `secret:/` pattern kullan                            |
 
 ---
 
@@ -27,6 +27,7 @@
 **Doğru saklanma yeri:** `.env.example` sadece placeholder içermeli; gerçek değer EAS Secrets veya CI env var olarak yönetilmeli
 
 **Migration adımı:**
+
 1. RevenueCat Dashboard → Project Settings → API Keys → eski key'i revoke et, yeni üret
 2. `apps/mobile/.env` ve `apps/mobile/.env.example` güncelle (placeholder)
 3. EAS Secret olarak ekle: `eas secret:create EXPO_PUBLIC_RC_API_KEY_IOS=<new_key>`
@@ -45,6 +46,7 @@
 **Doğru saklanma yeri:** `.agents/` gitignore'a eklenmiş (AUDIT.md Adım 1'de yapıldı), MCP key shell env var'ına taşınmalı
 
 **Migration adımı:**
+
 1. Google Cloud Console → Credentials → bu key'i HTTP referrer kısıtlamasıyla kısıtla (geçici koruma)
 2. Yeni key üret, eskisini sil
 3. `.agents/mcp_config.json`'da değeri `$GOOGLE_MAPS_API_KEY` ortam değişkenine bırak

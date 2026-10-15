@@ -55,7 +55,8 @@ export async function handler(event: any) {
     const user = await getVerifiedUser(token);
     const userId = user?.sub;
     if (!userId) return jsonResponse(401, { error: "Oturumunuz doğrulanamadı." });
-    if (method === "GET" && path === "/stripe/wallet") return jsonResponse(200, await wallet(userId));
+    if (method === "GET" && path === "/stripe/wallet")
+      return jsonResponse(200, await wallet(userId));
     if (method === "GET" && path === "/stripe/subscription")
       return jsonResponse(200, await subscription(userId));
     if (method === "GET" && path === "/stripe/session") {
@@ -211,7 +212,8 @@ async function webhook(event: any) {
       const userId = session.client_reference_id;
       if (typeof userId !== "string" || userId !== session.metadata?.userId)
         throw new Error("Checkout identity mismatch");
-      if (session.payment_status !== "paid") return jsonResponse(200, { received: true, pending: true });
+      if (session.payment_status !== "paid")
+        return jsonResponse(200, { received: true, pending: true });
       const customerId =
         typeof session.customer === "string" ? session.customer : session.customer?.id;
       if (customerId) await bindCustomer(userId, customerId);

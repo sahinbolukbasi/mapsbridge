@@ -8,19 +8,19 @@
 
 ### AWS Bölgesi ve Temel Stack
 
-| Katman | Teknoloji | Notlar |
-|---|---|---|
-| Bölge | `eu-central-1` (Frankfurt) | Tüm servisler |
-| API | Amazon API Gateway | ID: `0duy2hfjd2`, endpoint: `execute-api.eu-central-1.amazonaws.com` |
-| Hesaplama | AWS Lambda (`nodejs22.x`) | Serverless, per-route Lambda'lar |
-| Veritabanı | Amazon DynamoDB | Single-table design, tablo adı: `{env}-data` |
-| Kimlik | Amazon Cognito | + Google/Apple OAuth JWKS doğrulama |
-| AI | Amazon Bedrock | [doğrulanmadı] model: Claude 3.5 Sonnet |
-| Web frontend | Next.js → S3 + CloudFront | Statik export |
-| Mobil | Expo React Native | EAS Build ile dağıtım |
-| Ödeme (web) | Stripe | Checkout Sessions + Webhook |
-| Ödeme (mobil) | RevenueCat | [doğrulanmadı] |
-| Rota motoru | OSRM | `router.project-osrm.org` demo sunucusu — auth yok |
+| Katman        | Teknoloji                  | Notlar                                                               |
+| ------------- | -------------------------- | -------------------------------------------------------------------- |
+| Bölge         | `eu-central-1` (Frankfurt) | Tüm servisler                                                        |
+| API           | Amazon API Gateway         | ID: `0duy2hfjd2`, endpoint: `execute-api.eu-central-1.amazonaws.com` |
+| Hesaplama     | AWS Lambda (`nodejs22.x`)  | Serverless, per-route Lambda'lar                                     |
+| Veritabanı    | Amazon DynamoDB            | Single-table design, tablo adı: `{env}-data`                         |
+| Kimlik        | Amazon Cognito             | + Google/Apple OAuth JWKS doğrulama                                  |
+| AI            | Amazon Bedrock             | [doğrulanmadı] model: Claude 3.5 Sonnet                              |
+| Web frontend  | Next.js → S3 + CloudFront  | Statik export                                                        |
+| Mobil         | Expo React Native          | EAS Build ile dağıtım                                                |
+| Ödeme (web)   | Stripe                     | Checkout Sessions + Webhook                                          |
+| Ödeme (mobil) | RevenueCat                 | [doğrulanmadı]                                                       |
+| Rota motoru   | OSRM                       | `router.project-osrm.org` demo sunucusu — auth yok                   |
 
 ### Giriş Noktaları (Entrypoints)
 
@@ -108,23 +108,24 @@ Stripe   → POST /stripe/webhook → Lambda (imzalı)
 
 Single-table design. Bilinen key pattern'leri:
 
-| PK | SK | İçerik |
-|---|---|---|
-| `USER#{sub}` | `ROUTE#{uuid}` | Rota verisi |
-| `USER#{sub}` | `SUBSCRIPTION` | Abonelik tier, bitiş tarihi |
-| `USER#{sub}` | `CREDITS` | AI kredi bakiyesi |
-| `BILLING#CHECKOUT#{id}` | `RECEIPT` | Stripe idempotency kaydı |
-| `SYSTEM#CONFIG` | `META` | Sistem konfigürasyonu [doğrulanmadı] |
+| PK                      | SK             | İçerik                               |
+| ----------------------- | -------------- | ------------------------------------ |
+| `USER#{sub}`            | `ROUTE#{uuid}` | Rota verisi                          |
+| `USER#{sub}`            | `SUBSCRIPTION` | Abonelik tier, bitiş tarihi          |
+| `USER#{sub}`            | `CREDITS`      | AI kredi bakiyesi                    |
+| `BILLING#CHECKOUT#{id}` | `RECEIPT`      | Stripe idempotency kaydı             |
+| `SYSTEM#CONFIG`         | `META`         | Sistem konfigürasyonu [doğrulanmadı] |
 
 **GSI durumu:**
+
 - `chat/index.ts:75-87` GSI1 kullanıyor **ancak Terraform tanımında GSI1 yok** → `GET /chat/threads` endpoint'i kırık [doğrulanmadı — canlı ortamda doğrulanmadı]
 
 ### In-Memory (Lambda Warm State)
 
-| Dosya | Nesne | Notlar |
-|---|---|---|
-| `infra/lambda/src/shared/dynamo.ts:4` | `DynamoDBClient` singleton | Lambda container yeniden kullanıldığında tek instance |
-| `infra/lambda/src/billing/store.ts:25` | `new DynamoDBClient()` | **Her çağrıda yeni instance yaratıyor** — singleton değil, tutarsızlık |
+| Dosya                                  | Nesne                      | Notlar                                                                 |
+| -------------------------------------- | -------------------------- | ---------------------------------------------------------------------- |
+| `infra/lambda/src/shared/dynamo.ts:4`  | `DynamoDBClient` singleton | Lambda container yeniden kullanıldığında tek instance                  |
+| `infra/lambda/src/billing/store.ts:25` | `new DynamoDBClient()`     | **Her çağrıda yeni instance yaratıyor** — singleton değil, tutarsızlık |
 
 ### Browser (localStorage)
 
@@ -139,13 +140,13 @@ mapsbridge.userEmail
 
 ### Dış Servisler (Canonical Source of Truth)
 
-| Servis | Ne Tutuyor |
-|---|---|
-| Cognito | Kullanıcı kimliği, şifre hash, OAuth link |
-| Stripe | Ödeme yöntemi, fatura geçmişi |
-| RevenueCat | Mobil abonelik durumu [doğrulanmadı] |
+| Servis           | Ne Tutuyor                                    |
+| ---------------- | --------------------------------------------- |
+| Cognito          | Kullanıcı kimliği, şifre hash, OAuth link     |
+| Stripe           | Ödeme yöntemi, fatura geçmişi                 |
+| RevenueCat       | Mobil abonelik durumu [doğrulanmadı]          |
 | OSRM demo server | Hiçbir şey — stateless, rota hesaplama API'si |
-| Bedrock | Hiçbir şey — stateless inference |
+| Bedrock          | Hiçbir şey — stateless inference              |
 
 ---
 
@@ -154,6 +155,7 @@ mapsbridge.userEmail
 ### 1. `billing/store.ts:110` — `reserveAI()` Kredi Atomikliği
 
 DynamoDB `TransactWriteItems` ile kredi rezervasyonu yapılıyor. Bu işlem **tüm ödeme ve AI kullanım akışının kalbi.** Koşul ifadeleri (`ConditionExpression`) değiştirilirse ya da hata yönetimi bozulursa:
+
 - Çift harcama (double-spend) oluşabilir
 - Krediler negatife düşebilir
 - Kullanıcılar ücret ödemeden sınırsız AI kullanabilir
@@ -165,6 +167,7 @@ DynamoDB `TransactWriteItems` ile kredi rezervasyonu yapılıyor. Bu işlem **t�
 ### 2. `shared/auth.ts:94-181` — Google/Apple JWKS Doğrulama + Hesap Birleştirme
 
 E-posta/şifre, Google OAuth ve Apple Sign-In akışlarının birleştiği tek nokta. Yanlış değişiklik:
+
 - Farklı provider'larla aynı e-postanın farklı hesaplara açılmasına neden olabilir (hesap bölünmesi)
 - JWKS önbellek/yenileme mantığı bozulursa tüm OAuth girişleri başarısız olur
 - Account linking silme/güncelleme hatası veri tutarsızlığı yaratır
@@ -176,6 +179,7 @@ E-posta/şifre, Google OAuth ve Apple Sign-In akışlarının birleştiği tek n
 ### 3. `stripe/index.ts:187` — Webhook İmza Doğrulama + Idempotency
 
 `constructEvent()` başarısız olursa abonelik hiç aktif olmaz. Idempotency mantığı bozulursa:
+
 - Aynı webhook iki kez işlenip kullanıcıya iki abonelik yazılabilir
 - Ya da webhook hiç işlenmeyip kullanıcı ödeme yaptığı halde erişim alamayabilir
 
@@ -186,6 +190,7 @@ E-posta/şifre, Google OAuth ve Apple Sign-In akışlarının birleştiği tek n
 ### 4. `routes/index.ts:52-85` — Auth Middleware Zinciri
 
 Lambda handler'ın ilk ~33 satırı auth, tier kontrolü ve kota doğrulamasını sırayla çalıştırıyor. Sıra değişirse ya da bir adım atlanırsa:
+
 - Yetkisiz kullanıcılar rota oluşturabilir
 - Free tier kullanıcılar paid özelliklerine erişebilir
 - Kota kontrolü bypass edilebilir
@@ -350,4 +355,4 @@ sequenceDiagram
 
 ---
 
-*Son güncelleme: Kod tabanı statik analizi ile üretildi. Canlı ortam doğrulaması için `[doğrulanmadı]` etiketli kısımları elle test edin.*
+_Son güncelleme: Kod tabanı statik analizi ile üretildi. Canlı ortam doğrulaması için `[doğrulanmadı]` etiketli kısımları elle test edin._

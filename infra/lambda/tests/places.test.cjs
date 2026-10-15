@@ -111,7 +111,10 @@ function harness(options = {}) {
         fetch: async (url) =>
           options.fetch
             ? options.fetch(url)
-            : { ok: true, json: async () => ({ UserAttributes: [{ Name: "sub", Value: "user-a" }] }) },
+            : {
+                ok: true,
+                json: async () => ({ UserAttributes: [{ Name: "sub", Value: "user-a" }] }),
+              },
         require(specifier) {
           if (specifier.startsWith("."))
             return load(path.resolve(path.dirname(filename), `${specifier}.ts`));
@@ -130,18 +133,18 @@ function harness(options = {}) {
 
 test("POST /places/discover returns 401 without auth token", async () => {
   const h = harness();
-  const res = await h.load("places/index.ts").handler(
-    event("POST", "/places/discover", null, { city: "Rome" }),
-  );
+  const res = await h
+    .load("places/index.ts")
+    .handler(event("POST", "/places/discover", null, { city: "Rome" }));
   assert.equal(res.statusCode, 401);
   assert.equal(h.calls.length, 0, "no DB calls before auth");
 });
 
 test("POST /places/discover returns 400 when city is missing", async () => {
   const h = harness();
-  const res = await h.load("places/index.ts").handler(
-    event("POST", "/places/discover", token(), {}),
-  );
+  const res = await h
+    .load("places/index.ts")
+    .handler(event("POST", "/places/discover", token(), {}));
   assert.equal(res.statusCode, 400);
   const body = JSON.parse(res.body);
   assert.ok(body.message || body.error, "error message present");
@@ -149,9 +152,9 @@ test("POST /places/discover returns 400 when city is missing", async () => {
 
 test("POST /places/discover returns 400 when city is too long", async () => {
   const h = harness();
-  const res = await h.load("places/index.ts").handler(
-    event("POST", "/places/discover", token(), { city: "x".repeat(101) }),
-  );
+  const res = await h
+    .load("places/index.ts")
+    .handler(event("POST", "/places/discover", token(), { city: "x".repeat(101) }));
   assert.equal(res.statusCode, 400);
 });
 
@@ -186,17 +189,17 @@ test("POST /places/batch-discover returns 403 for non-admin user", async () => {
       return { Item: { PK: "USER#user-a", SK: "PROFILE", role: "user" } };
     },
   });
-  const res = await h.load("places/index.ts").handler(
-    event("POST", "/places/batch-discover", token(), { cities: ["Rome"] }),
-  );
+  const res = await h
+    .load("places/index.ts")
+    .handler(event("POST", "/places/batch-discover", token(), { cities: ["Rome"] }));
   assert.equal(res.statusCode, 403);
 });
 
 test("POST /places/batch-discover returns 403 without auth (requireAdmin returns false)", async () => {
   const h = harness();
-  const res = await h.load("places/index.ts").handler(
-    event("POST", "/places/batch-discover", null, { cities: [] }),
-  );
+  const res = await h
+    .load("places/index.ts")
+    .handler(event("POST", "/places/batch-discover", null, { cities: [] }));
   // requireAdmin() returns false for unauthenticated, handler calls forbidden() → 403
   assert.equal(res.statusCode, 403);
 });

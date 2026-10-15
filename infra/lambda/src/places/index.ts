@@ -77,7 +77,10 @@ async function handleDiscover(event: ApiGatewayEvent) {
   // Reject URL schemes and injection chars before city reaches external collector URLs
   if (/[<>"{}|\\^`\x00-\x1f]|https?:\/\//i.test(body.city))
     return badRequest("Şehir adı geçersiz karakter içeriyor.");
-  if (body.country && (body.country.length > 60 || /[<>"{}|\\^`\x00-\x1f]|https?:\/\//i.test(body.country)))
+  if (
+    body.country &&
+    (body.country.length > 60 || /[<>"{}|\\^`\x00-\x1f]|https?:\/\//i.test(body.country))
+  )
     return badRequest("Ülke adı geçersiz.");
 
   const { discoverCity } =

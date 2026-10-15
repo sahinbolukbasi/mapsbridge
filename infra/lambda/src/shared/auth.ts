@@ -152,7 +152,9 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
               );
               if (acct.Item && unmarshall(acct.Item).suspended === true) return null;
             }
-            const groups: string[] = Array.isArray(claims["cognito:groups"]) ? claims["cognito:groups"] : [];
+            const groups: string[] = Array.isArray(claims["cognito:groups"])
+              ? claims["cognito:groups"]
+              : [];
             const isAdmin = process.env.ADMIN_GROUP_NAME
               ? groups.includes(process.env.ADMIN_GROUP_NAME)
               : role === "admin";
@@ -241,7 +243,9 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
             if (account.Item && unmarshall(account.Item).suspended === true) return null;
           }
 
-          const groups: string[] = Array.isArray(claims["cognito:groups"]) ? claims["cognito:groups"] : [];
+          const groups: string[] = Array.isArray(claims["cognito:groups"])
+            ? claims["cognito:groups"]
+            : [];
           const isAdmin = process.env.ADMIN_GROUP_NAME
             ? groups.includes(process.env.ADMIN_GROUP_NAME)
             : role === "admin";
@@ -259,7 +263,9 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
         }
       }
     }
-  } catch (e) { console.error("[auth] Cognito GetUser failed:", (e as Error).message) }
+  } catch (e) {
+    console.error("[auth] Cognito GetUser failed:", (e as Error).message);
+  }
 
   return null;
 }

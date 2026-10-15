@@ -162,7 +162,9 @@ async function handleRequest(event: Event) {
   if (!user) return reply(401, { error: "Oturum doğrulanamadı." });
   try {
     if (user.emailVerified) await initializeTrial(user.sub);
-  } catch (err) { console.error("[ai] initializeTrial failed:", (err as Error).message) }
+  } catch (err) {
+    console.error("[ai] initializeTrial failed:", (err as Error).message);
+  }
   if (!user.emailVerified)
     return reply(403, { error: "AI kullanmadan önce e-postanızı doğrulayın." });
   if (
@@ -368,7 +370,9 @@ async function handleRequest(event: Event) {
     if (reservation && !completed) {
       try {
         await finishAI(reservation, false);
-      } catch (err) { console.error("[ai] finishAI rollback failed:", (err as Error).message) }
+      } catch (err) {
+        console.error("[ai] finishAI rollback failed:", (err as Error).message);
+      }
     }
     if (err instanceof BillingError)
       return reply(err.status, { error: err.message, code: err.code });
@@ -496,7 +500,9 @@ async function handleStreamRequest(
 
       try {
         if (user.emailVerified) await initializeTrial(user.sub);
-      } catch (err) { console.error("[ai] initializeTrial failed:", (err as Error).message) }
+      } catch (err) {
+        console.error("[ai] initializeTrial failed:", (err as Error).message);
+      }
 
       writeSse(meta, "status", { phase: "intake", message: "İstek değerlendiriliyor..." });
       let normalized;
@@ -645,7 +651,9 @@ async function handleStreamRequest(
         if (!completed) {
           try {
             await finishAI(reservation, false);
-          } catch (err) { console.error("[ai] finishAI rollback failed:", (err as Error).message) }
+          } catch (err) {
+            console.error("[ai] finishAI rollback failed:", (err as Error).message);
+          }
         }
         throw err;
       }
@@ -654,11 +662,15 @@ async function handleStreamRequest(
     console.error("Stream handler error", err instanceof Error ? err.name : "Error");
     try {
       writeSse(meta, "error", { message: "Bir hata oluştu.", code: "SERVER_ERROR" });
-    } catch (err) { console.error("[ai] writeSse error failed:", (err as Error).message) }
+    } catch (err) {
+      console.error("[ai] writeSse error failed:", (err as Error).message);
+    }
   } finally {
     try {
       (meta as any).end();
-    } catch (err) { console.error("[ai] stream end failed:", (err as Error).message) }
+    } catch (err) {
+      console.error("[ai] stream end failed:", (err as Error).message);
+    }
   }
 }
 

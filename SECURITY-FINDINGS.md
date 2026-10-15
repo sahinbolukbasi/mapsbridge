@@ -69,10 +69,11 @@
 ### P1-6: Bilinen Kritik Bağımlılık Açıkları
 
 **Dosya:satır:** `apps/web/package.json`  
-**Bulgu tipi:** CVE  
-- `sharp < 0.35.5`: CVE-2026-96889 — use-after-free  
+**Bulgu tipi:** CVE
+
+- `sharp < 0.35.5`: CVE-2026-96889 — use-after-free
 - `source-map-js < 1.2.2`: GHSA-68fv-2mgg-jv7q — event-loop DoS (CVSS 7.5)  
-**Düzeltme:** `npm update sharp source-map-js`
+  **Düzeltme:** `npm update sharp source-map-js`
 
 ---
 
@@ -129,13 +130,13 @@
 
 ## Durum Özeti
 
-| Adım 1'de Düzeltilen | Kalan P0/P1 |
-|---|---|
-| Client-side admin bypass kaldırıldı | P0-1: RevenueCat key rotate et |
-| .agents/ gitignore'a eklendi | P0-2: Next.js yükselt |
-| .env.example placeholder'a çevrildi | P0-3: OSRM auth ekle |
-| Gitleaks CI'da zorunlu hale getirildi | P1-2: Token'ları cookie'ye taşı |
-| | P1-3: places admin check düzelt |
-| | P1-4: isAdmin mantık hatası |
-| | P1-5: Google Maps key rotate et |
-| | P1-6: npm bağımlılıkları güncelle |
+| Adım 1'de Düzeltilen                  | Kalan P0/P1                       |
+| ------------------------------------- | --------------------------------- |
+| Client-side admin bypass kaldırıldı   | P0-1: RevenueCat key rotate et    |
+| .agents/ gitignore'a eklendi          | P0-2: Next.js yükselt             |
+| .env.example placeholder'a çevrildi   | P0-3: OSRM auth ekle              |
+| Gitleaks CI'da zorunlu hale getirildi | P1-2: Token'ları cookie'ye taşı   |
+|                                       | P1-3: places admin check düzelt   |
+|                                       | P1-4: isAdmin mantık hatası       |
+|                                       | P1-5: Google Maps key rotate et   |
+|                                       | P1-6: npm bağımlılıkları güncelle |

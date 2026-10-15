@@ -5,11 +5,7 @@
  * when the advisory level changes.
  */
 
-import {
-  ScanCommand,
-  PutItemCommand,
-  GetItemCommand,
-} from "@aws-sdk/client-dynamodb";
+import { ScanCommand, PutItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { getDynamoClient } from "../shared/dynamo";
 

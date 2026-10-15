@@ -232,8 +232,7 @@ async function handleSendMessage(event: ApiGatewayEvent) {
 
   const now = new Date().toISOString();
 
-  const { PutItemCommand, UpdateItemCommand } =
-    await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = getDynamoClient();
 

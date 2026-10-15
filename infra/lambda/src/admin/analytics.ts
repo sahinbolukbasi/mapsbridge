@@ -216,8 +216,16 @@ export async function handleAITopicAnalytics() {
     }
 
     const destPatterns = [
-      "istanbul", "barcelona", "paris", "londra", "roma",
-      "amsterdam", "berlin", "madrid", "atina", "dubai",
+      "istanbul",
+      "barcelona",
+      "paris",
+      "londra",
+      "roma",
+      "amsterdam",
+      "berlin",
+      "madrid",
+      "atina",
+      "dubai",
     ];
     for (const dest of destPatterns) {
       if (prompt.includes(dest)) destCounts[dest] = (destCounts[dest] || 0) + 1;

@@ -172,7 +172,10 @@ export async function handleAgentCoreStatus() {
         url: gw.gatewayUrl,
         protocol: gw.protocolType,
         targets: (targets.items || []).map((t) => ({
-          id: t.targetId, name: t.name, status: t.status, type: t.targetType,
+          id: t.targetId,
+          name: t.name,
+          status: t.status,
+          type: t.targetType,
         })),
       };
       client.destroy();
@@ -194,7 +197,9 @@ export async function handleAgentCoreStatus() {
         name: mem.memory?.name,
         status: mem.memory?.status,
         strategies: (mem.memory?.strategies || []).map((s) => ({
-          name: s.name, type: s.type, status: s.status,
+          name: s.name,
+          type: s.type,
+          status: s.status,
         })),
       };
       client.destroy();
@@ -217,25 +222,39 @@ export async function handleAgentCoreStatus() {
     const now = new Date();
     const [fn, errors, invocations] = await Promise.all([
       lambda.send(new lambdaSdk.GetFunctionConfigurationCommand({ FunctionName: workerName })),
-      cw.send(new cwSdk.GetMetricStatisticsCommand({
-        Namespace: "AWS/Lambda", MetricName: "Errors",
-        Dimensions: [{ Name: "FunctionName", Value: workerName }],
-        StartTime: since, EndTime: now, Period: 3600, Statistics: ["Sum"],
-      })),
-      cw.send(new cwSdk.GetMetricStatisticsCommand({
-        Namespace: "AWS/Lambda", MetricName: "Invocations",
-        Dimensions: [{ Name: "FunctionName", Value: workerName }],
-        StartTime: since, EndTime: now, Period: 3600, Statistics: ["Sum"],
-      })),
+      cw.send(
+        new cwSdk.GetMetricStatisticsCommand({
+          Namespace: "AWS/Lambda",
+          MetricName: "Errors",
+          Dimensions: [{ Name: "FunctionName", Value: workerName }],
+          StartTime: since,
+          EndTime: now,
+          Period: 3600,
+          Statistics: ["Sum"],
+        }),
+      ),
+      cw.send(
+        new cwSdk.GetMetricStatisticsCommand({
+          Namespace: "AWS/Lambda",
+          MetricName: "Invocations",
+          Dimensions: [{ Name: "FunctionName", Value: workerName }],
+          StartTime: since,
+          EndTime: now,
+          Period: 3600,
+          Statistics: ["Sum"],
+        }),
+      ),
     ]);
     let dlqMessages: string | number = "unknown";
     if (dlqUrl) {
       const sqs = new sqsSdk.SQSClient({ region, maxAttempts: 1 });
       const dlqResult = await sqs
-        .send(new sqsSdk.GetQueueAttributesCommand({
-          QueueUrl: dlqUrl,
-          AttributeNames: ["ApproximateNumberOfMessages"],
-        }))
+        .send(
+          new sqsSdk.GetQueueAttributesCommand({
+            QueueUrl: dlqUrl,
+            AttributeNames: ["ApproximateNumberOfMessages"],
+          }),
+        )
         .catch(() => null);
       dlqMessages = dlqResult?.Attributes?.ApproximateNumberOfMessages ?? "unknown";
       sqs.destroy();

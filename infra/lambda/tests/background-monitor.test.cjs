@@ -105,7 +105,9 @@ test("handler handles FCDO fetch failure gracefully — no alerts, no crash", as
       }
       return { Item: null };
     },
-    fetch: async () => { throw new Error("network error"); },
+    fetch: async () => {
+      throw new Error("network error");
+    },
   });
   const result = await h.load("background-monitor/index.ts").handler();
   assert.equal(typeof result.checked, "number");

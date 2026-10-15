@@ -1,13 +1,6 @@
 import { getVerifiedUser } from "../shared/auth";
 import { resolveEnvSecret } from "../shared/http";
-import {
-  BillingError,
-  table,
-  read,
-  wallet,
-  grantCredits,
-  initializeTrial,
-} from "../billing/store";
+import { BillingError, table, read, wallet, grantCredits, initializeTrial } from "../billing/store";
 import { getDynamoClient } from "../shared/dynamo";
 import { catalog } from "../billing/catalog";
 import { UpdateItemCommand } from "@aws-sdk/client-dynamodb";

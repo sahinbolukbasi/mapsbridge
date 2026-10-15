@@ -22,7 +22,10 @@ function harness(options = {}) {
   const commands = {};
   for (const name of ["ScanCommand", "GetItemCommand"]) {
     commands[name] = class {
-      constructor(input) { this.name = name; this.input = input; }
+      constructor(input) {
+        this.name = name;
+        this.input = input;
+      }
     };
   }
   const external = {
@@ -45,7 +48,12 @@ function harness(options = {}) {
           return {};
         }
       },
-      PutObjectCommand: class { constructor(i) { this.name = "PutObjectCommand"; this.input = i; } },
+      PutObjectCommand: class {
+        constructor(i) {
+          this.name = "PutObjectCommand";
+          this.input = i;
+        }
+      },
     },
     "@aws-sdk/client-bedrock-agent": {
       BedrockAgentClient: class {
@@ -55,7 +63,10 @@ function harness(options = {}) {
         }
       },
       StartIngestionJobCommand: class {
-        constructor(i) { this.name = "StartIngestionJobCommand"; this.input = i; }
+        constructor(i) {
+          this.name = "StartIngestionJobCommand";
+          this.input = i;
+        }
       },
     },
     "node:fs": require("node:fs"),

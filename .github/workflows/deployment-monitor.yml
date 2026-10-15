@@ -5,7 +5,7 @@ on:
     workflows: [Deploy]
     types: [completed]
   schedule:
-    - cron: "0 * * * *"   # hourly — every 5 min created too much noise
+    - cron: "0 * * * *" # hourly — every 5 min created too much noise
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Check Site Health
         id: site
-        continue-on-error: true   # job must not fail just because site is down
+        continue-on-error: true # job must not fail just because site is down
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://mapsbridge.com || echo "0")
           echo "status=$STATUS" >> $GITHUB_OUTPUT

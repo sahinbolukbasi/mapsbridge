@@ -192,7 +192,10 @@ function harness(options = {}) {
   function load(relative) {
     let filename = path.resolve(sourceRoot, relative);
     // Fall back to index.ts when the path points to a directory
-    if (!require("node:fs").existsSync(filename) && require("node:fs").existsSync(filename.replace(/\.ts$/, "/index.ts"))) {
+    if (
+      !require("node:fs").existsSync(filename) &&
+      require("node:fs").existsSync(filename.replace(/\.ts$/, "/index.ts"))
+    ) {
       filename = filename.replace(/\.ts$/, "/index.ts");
     }
     if (cache.has(filename)) return cache.get(filename).exports;
@@ -318,7 +321,9 @@ test("GET /routes/{id}/osrm/{profile} rejects unsupported profiles for authentic
   assert.equal(result.statusCode, 400);
   assert.ok(JSON.parse(result.body).error.includes("Geçersiz"));
   // Auth suspension check makes 1 DynamoDB call; no route data is accessed
-  const routeDataCalls = h.calls.data.filter((c) => c.name !== "GetItemCommand" || !c.input?.Key?.PK?.S?.startsWith("USER#"));
+  const routeDataCalls = h.calls.data.filter(
+    (c) => c.name !== "GetItemCommand" || !c.input?.Key?.PK?.S?.startsWith("USER#"),
+  );
   assert.equal(routeDataCalls.length, 0);
 });
 
