@@ -364,37 +364,11 @@ export default function AdminDashboard() {
         setData({});
         return;
       }
-      const email = (stored.email || "").toLowerCase();
-      const superAdminList = (process.env.NEXT_PUBLIC_SUPER_ADMINS || "")
-        .split(",")
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean);
-      const isSuperAdmin = superAdminList.includes(email);
-
       let current: AdminSession;
       try {
         current = (await managementApi.session()).session;
       } catch (err: any) {
-        if (isSuperAdmin) {
-          current = {
-            userId: email,
-            role: "admin",
-            permissions: [
-              "users",
-              "roles",
-              "credits",
-              "content",
-              "support",
-              "finance",
-              "audit",
-              "system",
-            ],
-            paymentsConfigured: false,
-            userManagement: true,
-          };
-        } else {
-          throw err;
-        }
+        throw err;
       }
       setSession(current);
       setAccess("allowed");
