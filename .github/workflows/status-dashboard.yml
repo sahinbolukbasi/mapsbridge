@@ -161,9 +161,12 @@ jobs:
           retention-days: 30
 
       - name: Slack Dashboard Notification
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1.27.0
+        continue-on-error: true
+        if: always()
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_DASHBOARD }}
+          webhook: ${{ secrets.SLACK_WEBHOOK_DASHBOARD }}
+          webhook-type: incoming-webhook
           payload: |
             {
               "blocks": [
@@ -197,4 +200,3 @@ jobs:
                 }
               ]
             }
-        if: always()

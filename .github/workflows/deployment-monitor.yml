@@ -105,9 +105,11 @@ jobs:
 
       - name: Slack Notification - Healthy
         if: steps.issues.outputs.healthy == 'true'
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1.27.0
+        continue-on-error: true
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_DEPLOYMENTS }}
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEPLOYMENTS }}
+          webhook-type: incoming-webhook
           payload: |
             {
               "blocks": [
@@ -144,9 +146,11 @@ jobs:
 
       - name: Slack Notification - Issues
         if: steps.issues.outputs.healthy == 'false'
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v1.27.0
+        continue-on-error: true
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_ALERTS }}
+          webhook: ${{ secrets.SLACK_WEBHOOK_ALERTS }}
+          webhook-type: incoming-webhook
           payload: |
             {
               "blocks": [
