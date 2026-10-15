@@ -550,7 +550,7 @@ export default function Panel() {
 
   function toggleLanguage() {
     const alternate = getAlternatePath(window.location.pathname);
-    document.cookie = `locale=${isEnglish ? "tr" : "en"};path=/;max-age=31536000;SameSite=Lax`;
+    document.cookie = `locale=${isEnglish ? "tr" : "en"};path=/;max-age=31536000;SameSite=Strict;Secure`;
     window.location.assign(alternate);
   }
 

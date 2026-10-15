@@ -11,7 +11,7 @@ function getCookie(name: string): string | null {
 
 function setCookie(name: string, value: string) {
   if (typeof document === "undefined") return;
-  document.cookie = `${name}=${value};path=/;max-age=${COOKIE_MAX_AGE};SameSite=Lax`;
+  document.cookie = `${name}=${value};path=/;max-age=${COOKIE_MAX_AGE};SameSite=Strict;Secure`;
 }
 
 function localeFromPathname(pathname: string): AppLocale {
