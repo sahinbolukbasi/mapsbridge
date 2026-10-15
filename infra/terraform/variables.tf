@@ -55,8 +55,8 @@ variable "enable_bedrock" {
 
 variable "bedrock_model_id" {
   type        = string
-  default     = "anthropic.claude-3-haiku-20240307-v1:0"
-  description = "Bedrock foundation model ID for AI route planning"
+  default     = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+  description = "Bedrock foundation model ID for AI route planning (Claude 3.5 Sonnet)"
 }
 
 variable "opensearch_collection_arn" {
