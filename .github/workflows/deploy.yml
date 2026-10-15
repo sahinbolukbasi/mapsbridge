@@ -163,12 +163,13 @@ jobs:
 
       - name: Update Lambda functions
         if: steps.check-secrets.outputs.skip == 'false'
+        continue-on-error: true
         run: |
           FUNCTIONS=$(aws lambda list-functions \
             --query "Functions[?starts_with(FunctionName, 'mapsbridge-')].FunctionName" \
-            --output text)
+            --output text 2>/dev/null) || true
           if [ -z "$FUNCTIONS" ]; then
-            echo "No Lambda functions found with prefix 'mapsbridge-'"
+            echo "No Lambda functions found with prefix 'mapsbridge-' (may not be deployed yet)"
             exit 0
           fi
           for fn in $FUNCTIONS; do
