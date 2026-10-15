@@ -17,7 +17,7 @@ budget_alert_email  = "devops@example.com"
 
 # Database
 db_username = "mapsbridge_admin"
-db_password = "REPLACE_WITH_STRONG_PASSWORD"
+# db_password is managed by Aurora Secrets Manager (manage_master_user_password=true)
 
 # AI
 bedrock_model_id       = "anthropic.claude-3-haiku-20240307-v1:0"
