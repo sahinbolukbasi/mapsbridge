@@ -30,7 +30,7 @@ async function getDdb() {
 }
 
 function getTableName(): string {
-  return process.env.DYNAMODB_TABLE || `adreskopru-${process.env.ENVIRONMENT || "prod"}-data`;
+  return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "prod"}-data`;
 }
 
 /**

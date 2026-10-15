@@ -54,7 +54,7 @@ export const handler = async (event: ApiGatewayEvent) => {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 function getTableName(): string {
-  return process.env.DYNAMODB_TABLE || `adreskopru-${process.env.ENVIRONMENT}-data`;
+  return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT}-data`;
 }
 
 async function getDdb() {

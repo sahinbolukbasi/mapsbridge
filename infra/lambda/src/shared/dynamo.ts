@@ -17,7 +17,7 @@ export function getDynamoClient(): DynamoDBClient {
  * Returns the configured primary DynamoDB table name.
  */
 export function getTableName(): string {
-  return process.env.DYNAMODB_TABLE || `adreskopru-${process.env.ENVIRONMENT || "dev"}-data`;
+  return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "dev"}-data`;
 }
 
 export { marshall, unmarshall };

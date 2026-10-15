@@ -17,7 +17,7 @@ function client() {
 }
 
 function table(): string {
-  return process.env.DYNAMODB_TABLE || `adreskopru-${process.env.ENVIRONMENT || "dev"}-data`;
+  return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "dev"}-data`;
 }
 
 function marshall(item: Record<string, any>) {

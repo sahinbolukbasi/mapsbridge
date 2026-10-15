@@ -66,7 +66,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
     const fallbackEmail =
       typeof window !== "undefined"
         ? localStorage.getItem("mapsbridge.userEmail") ||
-          localStorage.getItem("adreskopru.userEmail")
+          localStorage.getItem("mapsbridge.userEmail")
         : null;
     const activeEmail = session?.email || fallbackEmail;
 
@@ -95,7 +95,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
     }
     document.documentElement.dataset.theme = "light";
     try {
-      const stored = userStorage.getItem("adreskopru.savedAddresses");
+      const stored = userStorage.getItem("mapsbridge.savedAddresses");
       if (stored) {
         const addresses = JSON.parse(stored);
         if (Array.isArray(addresses)) setLocalSavedCount(addresses.length);

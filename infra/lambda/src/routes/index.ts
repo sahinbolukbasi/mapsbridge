@@ -83,7 +83,7 @@ async function getDdb() {
 }
 
 function getTableName(): string {
-  return process.env.DYNAMODB_TABLE || `adreskopru-${process.env.ENVIRONMENT}-data`;
+  return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT}-data`;
 }
 
 // ─── List Routes (user's saved routes) ────────────────────────────────────

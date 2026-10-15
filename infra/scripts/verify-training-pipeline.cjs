@@ -9,7 +9,7 @@ const {
   DeleteObjectCommand,
 } = require("../lambda/node_modules/@aws-sdk/client-s3");
 const s3 = new S3Client({ region: "eu-central-1" }),
-  bucket = "adreskopru-prod-training-996270854731";
+  bucket = "mapsbridge-prod-training-996270854731";
 let trainingId;
 const { randomUUID, randomBytes, createHash } = require("node:crypto");
 const {
@@ -27,7 +27,7 @@ const {
 const region = "eu-central-1",
   pool = "eu-central-1_TKABiLn5f",
   clientId = "62t35qsehl3o9cdc6i4mg01tqt",
-  table = "adreskopru-prod-data";
+  table = "mapsbridge-prod-data";
 const cognito = new CognitoIdentityProviderClient({ region }),
   db = new DynamoDBClient({ region });
 const username = `ai-smoke-${randomUUID()}@example.invalid`;
@@ -99,7 +99,7 @@ async function main() {
           "lambda",
           "invoke",
           "--function-name",
-          "adreskopru-prod-training-worker",
+          "mapsbridge-prod-training-worker",
           "--region",
           region,
           "--payload",

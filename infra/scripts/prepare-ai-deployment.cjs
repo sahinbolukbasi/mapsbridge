@@ -27,7 +27,7 @@ async function main() {
         "lambda",
         "get-function",
         "--function-name",
-        `adreskopru-prod-${domain}`,
+        `mapsbridge-prod-${domain}`,
         "--region",
         "eu-central-1",
         "--query",

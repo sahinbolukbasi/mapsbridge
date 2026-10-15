@@ -8,7 +8,7 @@ export async function publishProfile(username: string, unpublish = false) {
   const details = JSON.parse(userStorage.getItem("mapsbridge.userProfileDetails") || "{}");
   const groups: string[] = JSON.parse(userStorage.getItem("mapsbridge.publicRoutes") || "[]");
   const stops: Array<{ group?: string }> = JSON.parse(
-    userStorage.getItem("adreskopru.savedAddresses") || "[]",
+    userStorage.getItem("mapsbridge.savedAddresses") || "[]",
   );
   const response = await fetch(`${API_ENDPOINT}/profile/${unpublish ? "unpublish" : "publish"}`, {
     method: "POST",

@@ -968,7 +968,7 @@ export function useTravelPlanner() {
       try {
         const raw =
           localStorage.getItem("mapsbridge.customGroups") ||
-          localStorage.getItem("adreskopru.customTabs");
+          localStorage.getItem("mapsbridge.customTabs");
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -987,7 +987,7 @@ export function useTravelPlanner() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("mapsbridge.customGroups", JSON.stringify(updated));
-          localStorage.setItem("adreskopru.customTabs", JSON.stringify(updated));
+          localStorage.setItem("mapsbridge.customTabs", JSON.stringify(updated));
         } catch {}
       }
       return updated;

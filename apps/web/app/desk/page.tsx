@@ -408,7 +408,7 @@ export default function Panel() {
     const fallbackEmail =
       typeof window !== "undefined"
         ? localStorage.getItem("mapsbridge.userEmail") ||
-          localStorage.getItem("adreskopru.userEmail")
+          localStorage.getItem("mapsbridge.userEmail")
         : null;
     const activeEmail = session?.email || fallbackEmail;
     if (activeEmail) {
@@ -472,7 +472,7 @@ export default function Panel() {
       }
 
       // Load saved addresses
-      const stored = userStorage.getItem("adreskopru.savedAddresses");
+      const stored = userStorage.getItem("mapsbridge.savedAddresses");
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
@@ -489,7 +489,7 @@ export default function Panel() {
       }
 
       // Load custom tabs
-      const storedTabs = userStorage.getItem("adreskopru.customTabs");
+      const storedTabs = userStorage.getItem("mapsbridge.customTabs");
       if (storedTabs) {
         try {
           const parsedTabs = JSON.parse(storedTabs);
@@ -742,7 +742,7 @@ export default function Panel() {
     });
     if (typeof window !== "undefined") {
       try {
-        userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+        userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
       } catch {
         return;
       }
@@ -1031,7 +1031,7 @@ export default function Panel() {
 
             // localStorage'dan en güncel durakları oku
             let activeStops = savedAddresses;
-            const freshRaw = userStorage.getItem("adreskopru.savedAddresses");
+            const freshRaw = userStorage.getItem("mapsbridge.savedAddresses");
             if (freshRaw) {
               try {
                 const parsed = JSON.parse(freshRaw);
@@ -1439,7 +1439,7 @@ export default function Panel() {
 
     if (typeof window !== "undefined") {
       try {
-        userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+        userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
       } catch {
         return;
       }
@@ -1454,7 +1454,7 @@ export default function Panel() {
     ) {
       const updatedTabs = [...customTabs, customNewGroup.trim()];
       setCustomTabs(updatedTabs);
-      userStorage.setItem("adreskopru.customTabs", JSON.stringify(updatedTabs));
+      userStorage.setItem("mapsbridge.customTabs", JSON.stringify(updatedTabs));
     }
 
     setSelectedGroup(finalGroup);
@@ -1486,14 +1486,14 @@ export default function Panel() {
     const updatedAddresses = savedAddresses.filter((a) => (a.group || "Genel") !== groupName);
     setSavedAddresses(updatedAddresses);
     if (typeof window !== "undefined") {
-      userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updatedAddresses));
+      userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updatedAddresses));
     }
 
     // Sekmelerden temizle
     const updatedTabs = customTabs.filter((t) => t !== groupName);
     setCustomTabs(updatedTabs);
     if (typeof window !== "undefined") {
-      userStorage.setItem("adreskopru.customTabs", JSON.stringify(updatedTabs));
+      userStorage.setItem("mapsbridge.customTabs", JSON.stringify(updatedTabs));
     }
 
     // Herkese açık rotalardan temizle
@@ -1522,7 +1522,7 @@ export default function Panel() {
       const updated = [...customTabs, trimmed];
       setCustomTabs(updated);
       if (typeof window !== "undefined") {
-        userStorage.setItem("adreskopru.customTabs", JSON.stringify(updated));
+        userStorage.setItem("mapsbridge.customTabs", JSON.stringify(updated));
       }
     }
     // Yeni sekmeyi aktif et
@@ -1546,13 +1546,13 @@ export default function Panel() {
       });
       setSavedAddresses(updated);
       if (typeof window !== "undefined") {
-        userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+        userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
       }
       // customTabs güncelle
       const updatedTabs = customTabs.map((t) => (t === selectedGroup ? name : t));
       if (!updatedTabs.includes(name)) updatedTabs.push(name);
       setCustomTabs(updatedTabs);
-      userStorage.setItem("adreskopru.customTabs", JSON.stringify(updatedTabs));
+      userStorage.setItem("mapsbridge.customTabs", JSON.stringify(updatedTabs));
       setSelectedGroup(name);
     }
     // Toplulukta yayınla / gizle
@@ -1590,7 +1590,7 @@ export default function Panel() {
     const updated = savedAddresses.filter((a) => a.id !== id);
     if (typeof window !== "undefined") {
       try {
-        userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+        userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
       } catch {
         return;
       }
@@ -1628,14 +1628,14 @@ export default function Panel() {
 
     const updated = [...otherStops, ...currentGroupStops];
     setSavedAddresses(updated);
-    localStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+    localStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
     renderGroupOnMap(selectedGroup, updated, undefined, false);
   }
 
   function handleDeleteStop(stopId: string) {
     const updated = savedAddresses.filter((s) => s.id !== stopId);
     setSavedAddresses(updated);
-    localStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+    localStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
     renderGroupOnMap(selectedGroup, updated, undefined, false);
     setAiActionToast("Durak rotadan çıkarıldı.");
     setTimeout(() => setAiActionToast(null), 2500);
@@ -1662,7 +1662,7 @@ export default function Panel() {
     currentGroupStops.splice(afterIdx + 1, 0, newStop);
     const updated = [...otherStops, ...currentGroupStops];
     setSavedAddresses(updated);
-    localStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+    localStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
     renderGroupOnMap(selectedGroup, updated, undefined, false);
     setAiActionToast("✓ Serbest zaman bloğu rotaya eklendi!");
     setTimeout(() => setAiActionToast(null), 3000);
@@ -1728,7 +1728,7 @@ export default function Panel() {
 
     const updated = [...savedAddresses, newStop];
     setSavedAddresses(updated);
-    localStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+    localStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
     renderGroupOnMap(selectedGroup, updated, undefined, false);
     setAiActionToast(`✓ AI: "${newStop.label}" rotanıza eklendi!`);
     setTimeout(() => setAiActionToast(null), 3500);
@@ -1987,7 +1987,7 @@ export default function Panel() {
       const next = savedAddresses.map((p) =>
         p.id === id ? ({ ...p, ...updates } as SavedAddress) : p,
       );
-      userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(next));
+      userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(next));
       setSavedAddresses(next);
     }
   }

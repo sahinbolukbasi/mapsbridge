@@ -5,7 +5,7 @@ terraform {
 provider "aws" {
   region              = var.region
   allowed_account_ids = [var.account_id]
-  default_tags { tags = { Project = "adreskopru", Workload = "travel-ai", Component = "agentcore-gateway" } }
+  default_tags { tags = { Project = "mapsbridge", Workload = "travel-ai", Component = "agentcore-gateway" } }
 }
 variable "region" {
   type    = string

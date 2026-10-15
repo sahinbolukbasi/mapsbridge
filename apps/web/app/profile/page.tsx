@@ -141,10 +141,10 @@ export default function ProfilePage() {
       }
     } catch {}
 
-    // Load user pins/points from adreskopru.savedAddresses or mapsbridge.generalPins
+    // Load user pins/points from mapsbridge.savedAddresses or mapsbridge.generalPins
     try {
       let loadedPins: SavedPoint[] = [];
-      const addrRaw = userStorage.getItem("adreskopru.savedAddresses");
+      const addrRaw = userStorage.getItem("mapsbridge.savedAddresses");
       if (addrRaw) {
         const parsed = JSON.parse(addrRaw);
         if (Array.isArray(parsed)) loadedPins = parsed;
@@ -331,7 +331,7 @@ export default function ProfilePage() {
     const updated = savedPins.filter((p) => p.id !== pinId);
     setSavedPins(updated);
     try {
-      userStorage.setItem("adreskopru.savedAddresses", JSON.stringify(updated));
+      userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
     } catch {}
     showToast("Nokta havuzdan kaldırıldı.");
   }
