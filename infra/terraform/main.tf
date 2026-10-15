@@ -15,7 +15,15 @@ locals {
     }
     routes = {
       zip_path = "${path.module}/.build/lambdas/routes.zip"
-      env_vars = { OSRM_BASE_URL = "https://router.project-osrm.org", DYNAMODB_TABLE = aws_dynamodb_table.data.name }
+      env_vars = {
+        OSRM_BASE_URL              = "https://router.project-osrm.org"
+        DYNAMODB_TABLE             = aws_dynamodb_table.data.name
+        SLACK_SIGNING_SECRET       = "secret:/mapsbridge/slack/signing-secret"
+        SLACK_BOT_TOKEN            = "secret:/mapsbridge/slack/bot-token"
+        GH_TOKEN                   = "secret:/mapsbridge/github/token"
+        ALLOWED_USERS              = ""
+        ALLOWED_CHANNELS           = ""
+      }
     }
     chat = {
       zip_path = "${path.module}/.build/lambdas/chat.zip"

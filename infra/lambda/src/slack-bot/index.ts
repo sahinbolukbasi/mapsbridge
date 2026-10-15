@@ -1,5 +1,29 @@
 import crypto from "node:crypto";
 
+const secretsCache: Record<string, string> = {};
+
+async function getSecret(name: string): Promise<string> {
+  if (secretsCache[name]) return secretsCache[name];
+
+  const secretName = process.env[name];
+  if (!secretName?.startsWith("secret:/")) return secretName || "";
+
+  try {
+    const { SecretsManagerClient, GetSecretValueCommand } =
+      await import("@aws-sdk/client-secrets-manager");
+    const client = new SecretsManagerClient({ region: process.env.AWS_REGION });
+    const result = await client.send(
+      new GetSecretValueCommand({ SecretId: secretName.replace("secret:/", "") }),
+    );
+    const value = result.SecretString || "";
+    secretsCache[name] = value;
+    return value;
+  } catch (error) {
+    console.error(`Failed to fetch secret ${name}`, error);
+    return "";
+  }
+}
+
 interface SlackRequest {
   type?: string;
   user_id?: string;
@@ -278,7 +302,7 @@ export async function handler(event: {
   requestContext?: { http?: { method?: string } };
 }) {
   const { rawPath, headers, body } = event;
-  const secret = process.env.SLACK_SIGNING_SECRET || "";
+  const secret = await getSecret("SLACK_SIGNING_SECRET");
 
   if (!secret) {
     console.error("SLACK_SIGNING_SECRET not set");
@@ -315,7 +339,8 @@ export async function handler(event: {
 
     if (rawPath === "/slack-bot/status") {
       console.info("Status command", { userId });
-      const deploy = await getLatestDeploy(env.GH_TOKEN || "");
+      const ghToken = await getSecret("GH_TOKEN");
+      const deploy = await getLatestDeploy(ghToken);
       const reply = {
         response_type: "in_channel" as const,
         blocks: [
