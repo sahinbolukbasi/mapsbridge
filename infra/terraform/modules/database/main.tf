@@ -30,7 +30,7 @@ resource "aws_rds_cluster" "aurora" {
   engine_version                  = "17.4"
   database_name                   = "mapsbridge"
   master_username                 = var.db_username
-  master_password                 = var.db_password
+  manage_master_user_password     = true   # Aurora stores & rotates password in Secrets Manager
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.aurora.name
   vpc_security_group_ids          = [var.aurora_security_group_id]
   db_subnet_group_name            = aws_db_subnet_group.aurora.name

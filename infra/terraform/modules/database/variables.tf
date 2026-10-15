@@ -34,12 +34,6 @@ variable "db_username" {
   default     = "mapsbridge_admin"
 }
 
-variable "db_password" {
-  type        = string
-  description = "Aurora master password (from Secrets Manager)"
-  sensitive   = true
-}
-
 variable "aurora_instance_class" {
   type        = string
   default     = "db.serverless"
