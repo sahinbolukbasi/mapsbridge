@@ -26,6 +26,7 @@ import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { authService, UserSession } from "./src/services/api";
 import { storage } from "./src/services/storage";
 import { tripStore } from "./src/services/tripStore";
+import { initRevenueCat } from "./src/services/revenuecat";
 
 const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
@@ -167,6 +168,12 @@ export function App() {
           setSession({ token: effectiveToken, email: effectiveEmail, name: effectiveName });
           storage.setItem("mb_last_activity", Date.now().toString()).catch(() => {});
           startSessionRefresh();
+
+          // Initialize RevenueCat with user ID after session is set
+          initRevenueCat(effectiveEmail).catch((err: any) =>
+            console.warn("[RevenueCat] Init failed:", err)
+          );
+
           tripStore
             .syncWithServer()
             .catch((err: any) => console.warn("Initial route sync error:", err));

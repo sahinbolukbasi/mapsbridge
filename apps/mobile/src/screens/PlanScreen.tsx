@@ -37,6 +37,7 @@ import {
   CameraIcon,
 } from "../components/Icons";
 import { ScreenTourModal } from "../components/ScreenTourModal";
+import { purchasePackage, getOfferings } from "../services/revenuecat";
 
 interface PlanScreenProps {
   onOpenMap: (stopId?: string) => void;
@@ -220,6 +221,7 @@ export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
   const [savedPool, setSavedPool] = useState<TripStop[]>(tripStore.getSavedPool());
   const [activeDay, setActiveDay] = useState<number>(1);
   const [showPool, setShowPool] = useState<boolean>(false);
+  const [offerings, setOfferings] = useState<any>(null);
 
   // Modals
   const [showRoutePickerModal, setShowRoutePickerModal] = useState<boolean>(false);
@@ -257,6 +259,13 @@ export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
       setSavedPool([...tripStore.getSavedPool()]);
     });
     return unsub;
+  }, []);
+
+  // Load RevenueCat offerings
+  useEffect(() => {
+    getOfferings()
+      .then((off) => setOfferings(off))
+      .catch((err) => console.warn("Failed to load offerings:", err));
   }, []);
 
   // Sync stops with embedded map preview
