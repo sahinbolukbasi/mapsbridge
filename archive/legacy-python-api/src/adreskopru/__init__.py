@@ -1,1 +1,0 @@
-"""AdresKöprü API package."""
