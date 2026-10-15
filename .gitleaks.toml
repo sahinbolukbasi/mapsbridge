@@ -1,0 +1,80 @@
+# Gitleaks configuration for MapsBridge
+# https://github.com/gitleaks/gitleaks
+
+title = "MapsBridge Gitleaks Config"
+
+[extend]
+# Use the default gitleaks ruleset as a base
+useDefault = true
+
+# ---------------------------------------------------------------------------
+# Custom rules
+# ---------------------------------------------------------------------------
+
+[[rules]]
+id = "travelpayouts-token"
+description = "Travelpayouts API token"
+regex = '''(?i)(travelpayouts[_\-]?(api[_\-]?)?token|tp[_\-]?token)\s*[:=]\s*['\"]?([A-Za-z0-9]{32,})['\"]?'''
+tags = ["travelpayouts", "affiliate"]
+[rules.allowlist]
+regexes = [
+  "YOUR_.*_HERE",       # placeholder values in .env.example
+]
+
+[[rules]]
+id = "google-maps-api-key"
+description = "Google Maps / Cloud Platform API key"
+regex = '''AIza[0-9A-Za-z\-_]{35}'''
+tags = ["google", "api-key"]
+[rules.allowlist]
+regexes = [
+  "YOUR_GOOGLE_MAPS_API_KEY_HERE",
+]
+paths = [
+  ".env.example",
+  ".env.local.example",
+]
+
+[[rules]]
+id = "google-oauth-client-id"
+description = "Google OAuth 2.0 Client ID"
+regex = '''[0-9]{12}-[A-Za-z0-9]{32}\.apps\.googleusercontent\.com'''
+tags = ["google", "oauth"]
+[rules.allowlist]
+paths = [
+  ".env.example",
+  "apps/web/.env.example",
+]
+
+# ---------------------------------------------------------------------------
+# Global allowlist — known safe patterns / paths
+# ---------------------------------------------------------------------------
+
+[allowlist]
+description = "Global allowlist for MapsBridge"
+
+regexes = [
+  # AWS account IDs embedded in Terraform backend configs are not secrets
+  '''account_id\s*=\s*"(865369794421|996270854731)"''',
+  # Placeholder values used in example / documentation files
+  "YOUR_.*_HERE",
+  "DEMO_MAP_ID",
+]
+
+paths = [
+  # Example / template files intentionally contain key names with no values
+  ".env.example",
+  ".env.local.example",
+  "apps/web/.env.example",
+  "apps/mobile/.env.example",
+  # Terraform example variable files
+  "infra/.*terraform.tfvars.example",
+  # Test fixtures
+  ".build/test-kb-out/",
+  "evals/",
+  "training/",
+]
+
+commits = [
+  # Seed commit that pre-dates secrets scanning — audit separately
+]

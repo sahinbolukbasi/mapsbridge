@@ -286,6 +286,9 @@ async function handleOsrmRoute(event: ApiGatewayEvent) {
   const coords = event.queryStringParameters?.coords;
   if (!coords) return badRequest("coords parametresi gerekli (format: lon1,lat1;lon2,lat2;...)");
 
+  const COORDS_RE = /^(-?\d{1,3}(\.\d+)?,-?\d{1,3}(\.\d+)?)(;-?\d{1,3}(\.\d+)?,-?\d{1,3}(\.\d+)?)*$/;
+  if (!COORDS_RE.test(coords)) return badRequest("coords formatı geçersiz (beklenen: lon,lat;lon,lat;...)");
+
   const osrmBase = process.env.OSRM_BASE_URL || "https://router.project-osrm.org";
   const url = `${osrmBase}/route/v1/${profile}/${coords}?overview=full&geometries=geojson&steps=true&alternatives=false`;
 

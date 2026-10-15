@@ -11,6 +11,9 @@ interface GoogleAuthButtonProps {
   className?: string;
 }
 
+// Env var derleme zamanında kontrol edilir; undefined ise bileşeni render etme
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
 export function GoogleAuthButton({
   mode = "signin",
   nextUrl = "/desk/",
@@ -22,10 +25,15 @@ export function GoogleAuthButton({
   const [errorMessage, setErrorMessage] = useState("");
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
-  // Ortam değişkeninden veya varsayılan istemci kimliğinden al
-  const clientId =
-    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-    "393729296050-7idcos40rl4n1vj33nsmn9ug00b5tf45.apps.googleusercontent.com";
+  // Hooks always called — guard render after hooks
+  if (!GOOGLE_CLIENT_ID) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("GoogleAuthButton: NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set");
+    }
+    return null;
+  }
+
+  const clientId = GOOGLE_CLIENT_ID;
 
   const redirectToNext = useCallback(() => {
     try {
