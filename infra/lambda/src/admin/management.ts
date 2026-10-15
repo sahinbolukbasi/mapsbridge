@@ -3,6 +3,7 @@ import { DynamoDBClient, GetItemCommand, ScanCommand, QueryCommand, TransactWrit
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { CognitoIdentityProviderClient, AdminGetUserCommand, AdminListGroupsForUserCommand, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand, AdminUpdateUserAttributesCommand, AdminUserGlobalSignOutCommand, AdminDeleteUserAttributesCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { ok, created, jsonResponse, parseBody, type ApiGatewayEvent } from "../shared/http";
+import type { AuthorizedEvent } from "../shared/types";
 import { permissions, type StaffRole } from "./permissions";
 
 export type Row = Record<string, any>;
@@ -11,7 +12,7 @@ export const db = () => new DynamoDBClient({ region: process.env.AWS_REGION });
 export const table = () => process.env.DYNAMODB_TABLE!;
 const cognito = () => new CognitoIdentityProviderClient({ region: process.env.AWS_REGION });
 const pool = () => process.env.COGNITO_USER_POOL_ID!;
-const actor = (event: ApiGatewayEvent) => (event as any).verifiedUser.sub as string;
+const actor = (event: ApiGatewayEvent) => (event as AuthorizedEvent).verifiedUser.sub as string;
 export function text(value: unknown, label: string, max = 1000, required = true): string {
   if (typeof value !== "string" || (required && !value.trim()) || value.length > max) throw new AdminError(400, `${label} geçersiz (en fazla ${max} karakter).`);
   return value.trim();
@@ -101,7 +102,7 @@ export async function protectAccount(event: ApiGatewayEvent, id: string) {
 }
 export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<any>> = {
   "GET /admin/session": async e => {
-    const user = (e as any).verifiedUser; const role: StaffRole = user.staffRole || "admin";
+    const user = (e as AuthorizedEvent).verifiedUser; const role: StaffRole = user.staffRole || "admin";
     return ok({ session: { userId: user.sub, role, permissions: permissions[role], paymentsConfigured: !!process.env.STRIPE_SECRET_KEY, userManagement: process.env.COGNITO_USER_MANAGEMENT === "true" } });
   },
   "GET /admin/users/{id}": async e => {

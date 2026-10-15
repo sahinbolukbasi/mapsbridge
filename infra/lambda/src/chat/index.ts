@@ -164,7 +164,21 @@ async function handleGetMessages(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || ChatService.MAX_THREAD_LIST, ChatService.MAX_MESSAGE_HISTORY);
-  const exclusiveStartKey = event.queryStringParameters?.cursor;
+  const rawCursor = event.queryStringParameters?.cursor;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let parsedCursor: any;
+  if (rawCursor) {
+    try {
+      const cursor = JSON.parse(Buffer.from(rawCursor, "base64").toString());
+      if (cursor.PK?.S !== `CHAT#${threadId}`) {
+        return badRequest("Invalid cursor");
+      }
+      parsedCursor = cursor;
+    } catch {
+      return badRequest("Invalid cursor");
+    }
+  }
 
   const result = await ddb.send(new QueryCommand({
     TableName: getTableName(),
@@ -172,7 +186,7 @@ async function handleGetMessages(event: ApiGatewayEvent) {
     ExpressionAttributeValues: marshall({ ":pk": `CHAT#${threadId}`, ":sk": "MSG#" }),
     Limit: limit,
     ScanIndexForward: false, // newest first
-    ExclusiveStartKey: exclusiveStartKey ? JSON.parse(Buffer.from(exclusiveStartKey, "base64").toString()) : undefined,
+    ExclusiveStartKey: parsedCursor,
   }));
 
   const messages = (result.Items || []).map(i => unmarshall(i)).reverse();
