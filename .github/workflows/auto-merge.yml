@@ -1,4 +1,4 @@
-name: Auto Merge develop → main
+name: Auto Merge
 
 on:
   workflow_run:
@@ -11,28 +11,35 @@ permissions:
   pull-requests: write
 
 jobs:
-  auto-merge:
-    if: github.event.workflow_run.conclusion == 'success'
+  promote:
+    name: Promote to main
     runs-on: ubuntu-latest
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create or update PR and enable auto-merge
+      - name: Check diff
+        id: diff
+        run: |
+          git fetch origin main
+          AHEAD=$(git rev-list --count origin/main..origin/develop)
+          echo "ahead=$AHEAD" >> $GITHUB_OUTPUT
+
+      - name: Create or reuse PR
+        if: steps.diff.outputs.ahead != '0'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          EXISTING=$(gh pr list --base main --head develop --json number --jq '.[0].number' 2>/dev/null || true)
-
-          if [ -z "$EXISTING" ] || [ "$EXISTING" = "null" ]; then
-            gh pr create \
-              --base main \
-              --head develop \
-              --title "release: merge develop → main" \
-              --body "Automated merge after CI passed on develop."
-            EXISTING=$(gh pr list --base main --head develop --json number --jq '.[0].number')
+          PR=$(gh pr list --base main --head develop --json number --jq '.[0].number // empty')
+          if [ -z "$PR" ]; then
+            PR=$(gh pr create \
+              --base main --head develop \
+              --title "release: promote develop → main" \
+              --body "Automated promotion — CI passed on develop." \
+              | grep -oP '\d+$')
           fi
-
-          gh pr merge "$EXISTING" --auto --merge
+          gh pr merge "$PR" --auto --merge
