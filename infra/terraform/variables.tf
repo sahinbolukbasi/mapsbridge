@@ -14,7 +14,7 @@ variable "environment" {
 
 variable "project" {
   type    = string
-  default = "adreskopru"
+  default = "mapsbridge"
 }
 
 variable "frontend_domain" {

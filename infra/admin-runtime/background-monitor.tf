@@ -38,7 +38,7 @@ resource "aws_lambda_function" "monitor" {
     variables = { DYNAMODB_TABLE = var.dynamodb_table }
   }
   depends_on = [aws_iam_role_policy.monitor, aws_cloudwatch_log_group.monitor]
-  tags = { Environment = "prod", Project = "adreskopru", Workload = "core-backend" }
+  tags = { Environment = "prod", Project = "mapsbridge", Workload = "core-backend" }
 }
 
 resource "aws_iam_role" "monitor_scheduler" {

@@ -7,11 +7,11 @@ terraform {
 provider "aws" {
   region              = "eu-central-1"
   allowed_account_ids = ["865369794421"]
-  default_tags { tags = { Project = "adreskopru", Workload = "travel-ai", Component = "knowledge", Environment = "prod" } }
+  default_tags { tags = { Project = "mapsbridge", Workload = "travel-ai", Component = "knowledge", Environment = "prod" } }
 }
 data "aws_caller_identity" "current" {}
 locals {
-  name      = "adreskopru-prod-travel"
+  name      = "mapsbridge-prod-travel"
   embedding = "arn:aws:bedrock:eu-central-1::foundation-model/amazon.titan-embed-text-v2:0"
 }
 resource "aws_s3_bucket" "documents" {

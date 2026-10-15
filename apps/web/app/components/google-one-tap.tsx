@@ -14,7 +14,7 @@ export function GoogleOneTap() {
         return; // Bu sayfalarda GoogleAuthButton butonu ve prompt'u doğrudan yönetir
       }
       const activeToken =
-        localStorage.getItem("mapsbridge.idToken") || localStorage.getItem("adreskopru.idToken");
+        localStorage.getItem("mapsbridge.idToken") || localStorage.getItem("mapsbridge.idToken");
       if (activeToken) return; // Oturum zaten var, One Tap göstermeye gerek yok
     } catch {
       // ignore

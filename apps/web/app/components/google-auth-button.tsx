@@ -103,7 +103,7 @@ export function GoogleAuthButton({
       // Kullanıcı henüz giriş yapmamışsa One Tap kartını göster
       try {
         const currentToken =
-          localStorage.getItem("mapsbridge.idToken") || localStorage.getItem("adreskopru.idToken");
+          localStorage.getItem("mapsbridge.idToken") || localStorage.getItem("mapsbridge.idToken");
         if (!currentToken) {
           google.accounts.id.prompt();
         }

@@ -17,7 +17,7 @@ variable "region" {
 }
 variable "project" {
   type    = string
-  default = "adreskopru"
+  default = "mapsbridge"
 }
 variable "environment" {
   type    = string

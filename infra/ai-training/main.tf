@@ -10,7 +10,7 @@ variable "alarm_topic_arn" { default = "" }
 provider "aws" {
   region              = var.region
   allowed_account_ids = [var.account_id]
-  default_tags { tags = { Project = "adreskopru", Component = "ai-training" } }
+  default_tags { tags = { Project = "mapsbridge", Component = "ai-training" } }
 }
 locals {
   name      = "${var.prefix}-training-worker"

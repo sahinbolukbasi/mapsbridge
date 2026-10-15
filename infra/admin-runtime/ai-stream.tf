@@ -11,7 +11,7 @@ resource "aws_lambda_function" "ai_stream" {
   memory_size      = 256
   filename         = "${path.module}/.build/ai.zip"
   source_code_hash = filebase64sha256("${path.module}/.build/ai.zip")
-  tags             = { Environment = "prod", Project = "adreskopru", Workload = "travel-ai" }
+  tags             = { Environment = "prod", Project = "mapsbridge", Workload = "travel-ai" }
   environment {
     variables = merge(
       { ENVIRONMENT = "prod", DYNAMODB_TABLE = var.dynamodb_table, COGNITO_USER_POOL_ID = var.cognito_user_pool_id, COGNITO_CLIENT_ID = var.cognito_client_id },

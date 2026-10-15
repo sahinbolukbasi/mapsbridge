@@ -91,7 +91,7 @@ resource "aws_lambda_function" "domain" {
   memory_size      = 256
   filename         = "${path.module}/.build/${each.key}.zip"
   source_code_hash = filebase64sha256("${path.module}/.build/${each.key}.zip")
-  tags             = { Environment = "prod", Project = "adreskopru", Workload = each.key == "ai" ? "travel-ai" : "core-backend" }
+  tags             = { Environment = "prod", Project = "mapsbridge", Workload = each.key == "ai" ? "travel-ai" : "core-backend" }
   environment {
     variables = merge({ ENVIRONMENT = "prod", DYNAMODB_TABLE = var.dynamodb_table, COGNITO_USER_POOL_ID = var.cognito_user_pool_id, COGNITO_CLIENT_ID = var.cognito_client_id }, each.key == "admin" ? { ADMIN_GROUP_NAME = local.group, COGNITO_USER_MANAGEMENT = "true", MODERATOR_GROUP_NAME = "mapsbridge-moderator", SUPPORT_GROUP_NAME = "mapsbridge-support", PROTECTED_ADMIN_SUB = var.protected_admin_sub, AI_TRAINING_BUCKET = "${var.prefix}-training-${var.account_id}", BEDROCK_TRAINING_REGION = "us-east-1", BEDROCK_TRAINING_ROLE_ARN = "arn:aws:iam::${var.account_id}:role/${var.prefix}-bedrock-finetune" } : {}, each.key == "ai" ? { BEDROCK_MODEL_ID = "eu.anthropic.claude-haiku-4-5-20251001-v1:0", AI_DAILY_REQUEST_LIMIT = "200", TRAVEL_KNOWLEDGE_BASE_ID = var.travel_knowledge_base_id, PLACE_RESEARCH_ENABLED = "true" } : {}, each.key == "ai" ? var.ai_memory_environment : {}, each.key == "ai" ? var.ai_gateway_environment : {}, each.key == "ai" ? { AI_TRAINING_COLLECTION_ENABLED = tostring(var.ai_training_collection_enabled) } : {}, each.key == "ai" ? var.ai_finops_environment : {}, each.key == "stripe" ? merge({ APP_ORIGIN = var.frontend_origin, BILLING_ENABLED = "false" }, var.billing_environment) : {})
   }

@@ -158,7 +158,7 @@ export async function sendDealNotificationEmail(
   // 2. Persist notification into DynamoDB for in-app alert inbox
   let fallbackStored = false;
   try {
-    const tableName = process.env.DYNAMODB_TABLE || "adreskopru-prod-data";
+    const tableName = process.env.DYNAMODB_TABLE || "mapsbridge-prod-data";
     const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
     const { marshall } = await import("@aws-sdk/util-dynamodb");
     const ddb = new DynamoDBClient({ region: process.env.AWS_REGION || "eu-central-1" });

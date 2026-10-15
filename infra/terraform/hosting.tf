@@ -263,7 +263,7 @@ resource "aws_dynamodb_table" "data" {
 
 
 # ─── Legacy DynamoDB IAM for existing Python Lambda (smooth migration path) ──
-# The .build/adreskopru-api.zip Python Lambda can be imported into the new
+# The .build/mapsbridge-api.zip Python Lambda can be imported into the new
 # module structure by adding a "legacy" domain to lambda_domains in locals.
 # Until then, its data_access policy is handled by the API module's IAM.
 # The old Python handler.py remains in infra/lambda/ for reference.

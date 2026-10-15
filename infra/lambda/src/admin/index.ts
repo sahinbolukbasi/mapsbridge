@@ -181,7 +181,7 @@ export const handler = async (event: ApiGatewayEvent) => {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 function getTableName(): string {
-  return process.env.DYNAMODB_TABLE || `adreskopru-${process.env.ENVIRONMENT || "prod"}-data`;
+  return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "prod"}-data`;
 }
 
 async function scanAll(ddb: any, command: any) {
@@ -670,7 +670,7 @@ async function handleAgentCoreStatus() {
   const region = process.env.AWS_REGION || "eu-central-1";
   const memoryId = process.env.AGENTCORE_MEMORY_ID;
   const gatewayId = process.env.AGENTCORE_GATEWAY_ID;
-  const workerName = `${process.env.ENVIRONMENT === "prod" ? "adreskopru-prod" : "adreskopru-dev"}-ai-memory-worker`;
+  const workerName = `${process.env.ENVIRONMENT === "prod" ? "mapsbridge-prod" : "mapsbridge-dev"}-ai-memory-worker`;
   const dlqUrl = process.env.MEMORY_DLQ_URL;
   const result: Record<string, any> = { observedAt: new Date().toISOString(), region };
 

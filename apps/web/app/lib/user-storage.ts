@@ -6,9 +6,7 @@ function scopedKey(key: string): string | null {
   if (typeof window === "undefined") return null;
   const email =
     localStorage.getItem("mapsbridge.userEmail") || localStorage.getItem("adreskopru.userEmail");
-  const token =
-    localStorage.getItem("mapsbridge.accessToken") ||
-    localStorage.getItem("adreskopru.accessToken");
+  const token = localStorage.getItem("mapsbridge.accessToken");
   if (!email || !token) return null;
   const owner = email.trim().toLowerCase();
   if (boundOwner === undefined) boundOwner = owner;

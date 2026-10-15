@@ -30,18 +30,18 @@ test("account storage preserves legacy data without exposing it to another user"
   data.setItem("mapsbridge.userEmail", "a@example.com");
   data.setItem("mapsbridge.accessToken", "token");
   const a = loadStorage(data);
-  assert.equal(a.getItem("adreskopru.savedAddresses"), null);
-  a.setItem("adreskopru.savedAddresses", "A");
+  assert.equal(a.getItem("mapsbridge.savedAddresses"), null);
+  a.setItem("mapsbridge.savedAddresses", "A");
   data.setItem("mapsbridge.userEmail", "b@example.com");
-  assert.throws(() => a.setItem("adreskopru.savedAddresses", "stale A tab"));
+  assert.throws(() => a.setItem("mapsbridge.savedAddresses", "stale A tab"));
   const b = loadStorage(data);
-  assert.equal(b.getItem("adreskopru.savedAddresses"), null);
-  b.setItem("adreskopru.savedAddresses", "B");
+  assert.equal(b.getItem("mapsbridge.savedAddresses"), null);
+  b.setItem("mapsbridge.savedAddresses", "B");
   data.setItem("mapsbridge.userEmail", "a@example.com");
-  assert.equal(loadStorage(data).getItem("adreskopru.savedAddresses"), "A");
+  assert.equal(loadStorage(data).getItem("mapsbridge.savedAddresses"), "A");
   assert.equal(data.getItem("adreskopru.savedAddresses"), "legacy");
   data.removeItem("mapsbridge.accessToken");
-  assert.equal(a.getItem("adreskopru.savedAddresses"), null);
+  assert.equal(a.getItem("mapsbridge.savedAddresses"), null);
 });
 
 // Stub AWS Lambda streaming API so handler.cjs loads outside Lambda runtime

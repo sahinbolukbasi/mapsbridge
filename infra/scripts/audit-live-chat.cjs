@@ -17,7 +17,7 @@ const {
 const region = "eu-central-1",
   pool = "eu-central-1_TKABiLn5f",
   client = "62t35qsehl3o9cdc6i4mg01tqt",
-  table = "adreskopru-prod-data",
+  table = "mapsbridge-prod-data",
   base = "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com";
 const cognito = new CognitoIdentityProviderClient({ region }),
   db = new DynamoDBClient({ region });
