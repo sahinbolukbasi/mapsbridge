@@ -61,6 +61,8 @@ regexes = [
   "DEMO_MAP_ID",
 ]
 
+regexTarget = "match"
+
 paths = [
   # Example / template files intentionally contain key names with no values
   ".env.example",
@@ -69,10 +71,14 @@ paths = [
   "apps/mobile/.env.example",
   # Terraform example variable files
   "infra/.*terraform.tfvars.example",
-  # Test fixtures
+  # Test fixtures — contain mock/placeholder values
   ".build/test-kb-out/",
   "evals/",
   "training/",
+  "infra/lambda/tests/",
+  "apps/web/tests/",
+  # Admin dashboard uses {key} JSX variable (false positive)
+  "apps/web/app/u/admin/",
 ]
 
 commits = [
