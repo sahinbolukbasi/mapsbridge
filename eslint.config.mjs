@@ -36,10 +36,17 @@ export default tseslint.config(
       "infra/lambda/src/**/*.ts",
     ],
     rules: {
-      // 384 existing violations — warn for now, not error
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-require-imports": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unsafe-function-type": "warn",
       "no-console": "warn",
+      "no-empty": "warn",
+      "no-useless-assignment": "warn",
+      "no-useless-catch": "warn",
+      "no-useless-escape": "warn",
+      "prefer-const": "warn",
+      "preserve-caught-error": "off",
     },
   },
 );

@@ -68,7 +68,7 @@ test.describe('AI Asistanı Sohbet Testleri', () => {
       // Başlangıç promptlarından en az biri görünmeli
       const starterPrompt = page.locator('text=Roma 3 Günlük Gezi').or(
         page.locator('text=İstanbul Butik Keşif')
-      ).or(page.locator('text=Kapadokya Macera');
+      ).or(page.locator('text=Kapadokya Macera'));
       
       await expect(starterPrompt.first()).toBeVisible({ timeout: 5000 });
     });

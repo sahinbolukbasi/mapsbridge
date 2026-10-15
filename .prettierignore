@@ -5,3 +5,5 @@ out
 *.tfstate
 package-lock.json
 infra/terraform
+figma/
+apps/mobile/ios/Pods/
