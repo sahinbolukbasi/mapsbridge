@@ -26,8 +26,17 @@ import {
 } from "../shared/http";
 import { Router } from "../shared/router";
 import { read, subscription } from "../shared/data";
+import { handler as slackBotHandler } from "../slack-bot";
 
 const router = new Router();
+
+// Slack Bot routes
+router.add("POST /slack-bot/deploy", async (event) => slackBotHandler(event));
+router.add("POST /slack-bot/status", async (event) => slackBotHandler(event));
+router.add("POST /slack-bot/health", async (event) => slackBotHandler(event));
+router.add("POST /slack-bot/logs", async (event) => slackBotHandler(event));
+router.add("POST /slack-bot/rollback", async (event) => slackBotHandler(event));
+router.add("POST /slack-bot/interactive", async (event) => slackBotHandler(event));
 
 router.add("GET /routes", handleListRoutes);
 router.add("POST /routes", handleCreateRoute);
