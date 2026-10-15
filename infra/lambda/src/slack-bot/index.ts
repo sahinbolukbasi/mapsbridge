@@ -13,7 +13,7 @@ interface SlackRequest {
 interface AppEnv {
   SLACK_SIGNING_SECRET?: string;
   SLACK_BOT_TOKEN?: string;
-  GITHUB_TOKEN?: string;
+  GH_TOKEN?: string;
   ALLOWED_USERS?: string;
   ALLOWED_CHANNELS?: string;
 }
@@ -315,7 +315,7 @@ export async function handler(event: {
 
     if (rawPath === "/slack-bot/status") {
       console.info("Status command", { userId });
-      const deploy = await getLatestDeploy(env.GITHUB_TOKEN || "");
+      const deploy = await getLatestDeploy(env.GH_TOKEN || "");
       const reply = {
         response_type: "in_channel" as const,
         blocks: [
