@@ -21,6 +21,7 @@ The Slack bot backend is fully implemented and integrated with the API Gateway. 
 - **Logging:** Records user, channel, branch, confirmation status
 
 Example:
+
 ```
 /deploy main
 → Shows confirmation dialog with 2-button flow
@@ -35,6 +36,7 @@ Example:
 - **Buttons:** Refresh (polls again), View Logs (links to Actions tab)
 
 Example:
+
 ```
 /deploy-status
 → Shows:
@@ -50,6 +52,7 @@ Example:
 - **Buttons:** Auto-Recover (for issues)
 
 Example:
+
 ```
 /health
 → Shows:
@@ -65,6 +68,7 @@ Example:
 - **Response:** In-channel message with 3 buttons, each linking to a GitHub Actions workflow
 
 Example:
+
 ```
 /logs ci
 → Shows buttons:
@@ -78,6 +82,7 @@ Example:
 - **Action:** Triggers Lambda version alias rollback + CloudFront invalidate
 
 Example:
+
 ```
 /rollback
 → Shows confirmation dialog
@@ -125,6 +130,7 @@ Requests older than 5 minutes or with invalid signatures return **HTTP 401 Unaut
 - **Unauthorized requests:** Return **HTTP 403 Forbidden**
 
 Example:
+
 ```
 ALLOWED_USERS=U123456,U789012
 ALLOWED_CHANNELS=C123456
@@ -132,14 +138,14 @@ ALLOWED_CHANNELS=C123456
 
 ## Environment Variables
 
-| Variable | Purpose | Example |
-|---|---|---|
-| `SLACK_SIGNING_SECRET` | Slack request verification | `abc123def456...` |
-| `SLACK_BOT_TOKEN` | Bot user token (future use for proactive messages) | `xoxb-...` |
-| `GITHUB_TOKEN` | GitHub API access for deployment status | (Personal access token) |
-| `ALLOWED_USERS` | Comma-separated user IDs (optional, if empty allows all) | `U123456,U789012` |
-| `ALLOWED_CHANNELS` | Comma-separated channel IDs (optional, if empty allows all) | `C123456,C789012` |
-| `APP_ORIGIN` | Base URL for API health check | `https://mapsbridge.com` |
+| Variable               | Purpose                                                     | Example                  |
+| ---------------------- | ----------------------------------------------------------- | ------------------------ |
+| `SLACK_SIGNING_SECRET` | Slack request verification                                  | `abc123def456...`        |
+| `SLACK_BOT_TOKEN`      | Bot user token (future use for proactive messages)          | `xoxb-...`               |
+| `GITHUB_TOKEN`         | GitHub API access for deployment status                     | (Personal access token)  |
+| `ALLOWED_USERS`        | Comma-separated user IDs (optional, if empty allows all)    | `U123456,U789012`        |
+| `ALLOWED_CHANNELS`     | Comma-separated channel IDs (optional, if empty allows all) | `C123456,C789012`        |
+| `APP_ORIGIN`           | Base URL for API health check                               | `https://mapsbridge.com` |
 
 ### Where to Set
 
@@ -161,6 +167,7 @@ terraform apply
 ```
 
 This creates/updates:
+
 - 6 new API Gateway routes (`/slack-bot/*`)
 - Slack bot handler attached to routes Lambda
 
@@ -214,6 +221,7 @@ All handler operations log to CloudWatch:
 ```
 
 View logs:
+
 ```bash
 # CloudWatch Logs group: /aws/lambda/mapsbridge-api-routes
 aws logs tail /aws/lambda/mapsbridge-api-routes --follow
@@ -221,13 +229,13 @@ aws logs tail /aws/lambda/mapsbridge-api-routes --follow
 
 ## Error Handling
 
-| Error | HTTP Status | Response |
-|---|---|---|
-| Invalid/missing signature | 401 | `{"error": "Unauthorized"}` |
-| Old timestamp (>5min) | 401 | `{"error": "Unauthorized"}` |
-| Unauthorized user/channel | 403 | `{"error": "Forbidden"}` |
-| Unknown route | 404 | `{"error": "Not found"}` |
-| Handler exception | 500 | `{"error": "Internal server error"}` |
+| Error                     | HTTP Status | Response                             |
+| ------------------------- | ----------- | ------------------------------------ |
+| Invalid/missing signature | 401         | `{"error": "Unauthorized"}`          |
+| Old timestamp (>5min)     | 401         | `{"error": "Unauthorized"}`          |
+| Unauthorized user/channel | 403         | `{"error": "Forbidden"}`             |
+| Unknown route             | 404         | `{"error": "Not found"}`             |
+| Handler exception         | 500         | `{"error": "Internal server error"}` |
 
 ## Response Format
 
@@ -266,12 +274,12 @@ All channel members see the message:
 {
   "response_type": "in_channel",
   "blocks": [
-    {"type": "header", "text": {"type": "plain_text", "text": "📊 System Status"}},
+    { "type": "header", "text": { "type": "plain_text", "text": "📊 System Status" } },
     {
       "type": "section",
       "fields": [
-        {"type": "mrkdwn", "text": "*Website:* ✅ Healthy"},
-        {"type": "mrkdwn", "text": "*API:* ✅ Responsive"}
+        { "type": "mrkdwn", "text": "*Website:* ✅ Healthy" },
+        { "type": "mrkdwn", "text": "*API:* ✅ Responsive" }
       ]
     }
   ]
@@ -288,6 +296,7 @@ node --test tests/slack-bot.test.cjs
 ```
 
 Coverage:
+
 - ✅ Signature verification (valid, old timestamp, format)
 - ✅ All command formats
 - ✅ Response structures (Block Kit validation)
@@ -297,20 +306,25 @@ Coverage:
 ### Manual Testing (Slack)
 
 1. **Invite bot to channel:**
+
    ```
    /invite @mapsbridge-bot
    ```
 
 2. **Test health check:**
+
    ```
    /health
    ```
+
    Expected: In-channel message with 3 health indicators
 
 3. **Test deploy (requires confirmation):**
+
    ```
    /deploy main
    ```
+
    Expected: Ephemeral message with Confirm/Cancel buttons
 
 4. **Test logs:**
@@ -322,6 +336,7 @@ Coverage:
 ## Monitoring & Alerting
 
 Health checks run every 5 minutes (deployment-monitor workflow). If issues detected:
+
 - Alert posted to `#health-alerts`
 - If critical: Alert to `#incidents` with auto-recovery suggestion
 - All logged to CloudWatch

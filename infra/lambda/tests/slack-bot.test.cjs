@@ -6,10 +6,7 @@ const SLACK_SIGNING_SECRET = "test-secret";
 
 function createSignature(timestamp, body) {
   const baseString = `v0:${timestamp}:${body}`;
-  const hmac = crypto
-    .createHmac("sha256", SLACK_SIGNING_SECRET)
-    .update(baseString)
-    .digest("hex");
+  const hmac = crypto.createHmac("sha256", SLACK_SIGNING_SECRET).update(baseString).digest("hex");
   return `v0=${hmac}`;
 }
 
