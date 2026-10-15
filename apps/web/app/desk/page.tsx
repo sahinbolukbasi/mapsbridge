@@ -489,51 +489,52 @@ export default function Panel() {
       }
 
       // Load saved addresses — try API first, fallback to localStorage
-      try {
-        const session = getStoredSession();
-        if (session?.token) {
-          const res = await fetch(`${API_ENDPOINT}/user/saved-addresses`, {
-            headers: { Authorization: `Bearer ${session.token}` },
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data.addresses) && data.addresses.length > 0) {
-              addressesInitialized.current = true;
-              setSavedAddresses(data.addresses);
-              userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(data.addresses));
-            } else {
-              // API empty — try localStorage as seed, then push to server
-              const stored = userStorage.getItem("mapsbridge.savedAddresses");
-              const parsed = stored ? JSON.parse(stored) : [];
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                fetch(`${API_ENDPOINT}/user/saved-addresses`, {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${session.token}`,
-                  },
-                  body: JSON.stringify({ addresses: parsed }),
-                }).catch(() => {});
-                setSavedAddresses(parsed);
+      (async () => {
+        try {
+          const session = getStoredSession();
+          if (session?.token) {
+            const res = await fetch(`${API_ENDPOINT}/user/saved-addresses`, {
+              headers: { Authorization: `Bearer ${session.token}` },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data.addresses) && data.addresses.length > 0) {
+                addressesInitialized.current = true;
+                setSavedAddresses(data.addresses);
+                userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(data.addresses));
+              } else {
+                const stored = userStorage.getItem("mapsbridge.savedAddresses");
+                const parsed = stored ? JSON.parse(stored) : [];
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  fetch(`${API_ENDPOINT}/user/saved-addresses`, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${session.token}`,
+                    },
+                    body: JSON.stringify({ addresses: parsed }),
+                  }).catch(() => {});
+                  setSavedAddresses(parsed);
+                }
+                addressesInitialized.current = true;
               }
-              addressesInitialized.current = true;
+            } else {
+              throw new Error("api-fail");
             }
           } else {
-            throw new Error("api-fail");
+            throw new Error("no-session");
           }
-        } else {
-          throw new Error("no-session");
-        }
-      } catch {
-        const stored = userStorage.getItem("mapsbridge.savedAddresses");
-        try {
-          const parsed = stored ? JSON.parse(stored) : [];
-          setSavedAddresses(Array.isArray(parsed) ? parsed : []);
         } catch {
-          setSavedAddresses([]);
+          const stored = userStorage.getItem("mapsbridge.savedAddresses");
+          try {
+            const parsed = stored ? JSON.parse(stored) : [];
+            setSavedAddresses(Array.isArray(parsed) ? parsed : []);
+          } catch {
+            setSavedAddresses([]);
+          }
+          addressesInitialized.current = true;
         }
-        addressesInitialized.current = true;
-      }
+      })();
 
       // Load custom tabs
       const storedTabs = userStorage.getItem("mapsbridge.customTabs");
