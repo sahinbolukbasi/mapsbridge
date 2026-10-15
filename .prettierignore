@@ -7,3 +7,4 @@ package-lock.json
 infra/terraform
 figma/
 apps/mobile/ios/Pods/
+results.sarif
