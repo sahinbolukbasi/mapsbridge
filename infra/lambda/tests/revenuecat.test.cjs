@@ -110,8 +110,8 @@ function harness(options = {}) {
           RC_SECRET_API_KEY: "placeholder-skipped",
           RC_WEBHOOK_AUTH_SECRET: WEBHOOK_SECRET,
           RC_BILLING_CHECKOUT_URL: "https://billing.revenuecat.com/checkout",
-          RC_EXPLORER_PRODUCT_ID: "mapsbridge_explorer_monthly",
-          RC_PRO_PRODUCT_ID: "mapsbridge_pro_monthly",
+          RC_EXPLORER_PRODUCT_ID: "prode1930276ca",
+          RC_PRO_PRODUCT_ID: "prod99e16b0cb7",
           RC_PACK_STARTER_PRODUCT_ID: "mapsbridge_pack_starter",
           APP_ORIGIN: "https://mapsbridge.com",
           ...options.env,
@@ -160,7 +160,7 @@ function webhookEvent(type, overrides = {}) {
         id: "evt-test-1",
         type,
         app_user_id: "user-a",
-        product_id: "mapsbridge_explorer_monthly",
+        product_id: "prode1930276ca",
         event_timestamp_ms: Date.now(),
         expiration_at_ms: Date.now() + 30 * 24 * 60 * 60 * 1000,
         transaction_id: "txn-test-1",
@@ -196,7 +196,7 @@ test("INITIAL_PURCHASE grants credits and sets subscription", async () => {
   const res = await handler(webhookEvent("INITIAL_PURCHASE"));
   assert.equal(res.statusCode, 200);
   const sub = rows.get("USER#user-a|SUBSCRIPTION");
-  assert.equal(sub?.tier, "explorer");
+  assert.equal(sub?.tier, "pro");
   assert.equal(sub?.status, "active");
   // Credits granted
   const credits = rows.get("USER#user-a|CREDITS");
@@ -206,7 +206,7 @@ test("INITIAL_PURCHASE grants credits and sets subscription", async () => {
 test("RENEWAL grants another month of credits", async () => {
   const { load, rows } = harness();
   rows.set("USER#user-a|CREDITS", { PK: "USER#user-a", SK: "CREDITS", credits: 100, welcomeGift: null });
-  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "explorer", status: "active", eventTime: 1 });
+  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "pro", status: "active", eventTime: 1 });
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("RENEWAL", { transaction_id: "txn-renewal" }));
   assert.equal(res.statusCode, 200);
@@ -216,7 +216,7 @@ test("RENEWAL grants another month of credits", async () => {
 
 test("CANCELLATION sets status to cancelled", async () => {
   const { load, rows } = harness();
-  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "explorer", status: "active", eventTime: 1 });
+  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "pro", status: "active", eventTime: 1 });
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("CANCELLATION"));
   assert.equal(res.statusCode, 200);
@@ -226,7 +226,7 @@ test("CANCELLATION sets status to cancelled", async () => {
 
 test("EXPIRATION downgrades to free", async () => {
   const { load, rows } = harness();
-  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "explorer", status: "active", eventTime: 1 });
+  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "pro", status: "active", eventTime: 1 });
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("EXPIRATION"));
   assert.equal(res.statusCode, 200);
@@ -284,18 +284,18 @@ test("GET /revenuecat/wallet returns wallet for authenticated user", async () =>
   assert.equal(body.credits, 42);
 });
 
-test("pro subscription purchase works", async () => {
+test("pro-yearly subscription purchase works", async () => {
   const { load, rows } = harness();
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("INITIAL_PURCHASE", {
-    product_id: "mapsbridge_pro_monthly",
+    product_id: "prod99e16b0cb7",
     transaction_id: "txn-pro",
   }));
   assert.equal(res.statusCode, 200);
   const sub = rows.get("USER#user-a|SUBSCRIPTION");
-  assert.equal(sub?.tier, "pro");
+  assert.equal(sub?.tier, "pro-yearly");
   const credits = rows.get("USER#user-a|CREDITS");
-  assert.ok(credits?.credits >= 500, "pro tier should grant 500 credits");
+  assert.ok(credits?.credits >= 5500, "pro-yearly tier should grant 5500 credits");
 });
 
 test("unknown product_id is silently ignored", async () => {
