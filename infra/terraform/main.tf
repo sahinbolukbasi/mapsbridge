@@ -58,6 +58,7 @@ locals {
       "GET /profiles/{username}",
     ]
     routes = [
+      "GET /health",
       "GET /routes",
       "POST /routes",
       "GET /routes/{id}",
@@ -71,6 +72,10 @@ locals {
       "POST /slack-bot/logs",
       "POST /slack-bot/rollback",
       "POST /slack-bot/interactive",
+      "GET /media/presign-upload",
+      "POST /routes/telemetry",
+      "GET /user/saved-addresses",
+      "PUT /user/saved-addresses",
     ]
     marketplace = [
       "GET /marketplace/guides",
@@ -149,6 +154,9 @@ locals {
       "GET /admin/analytics/subscriptions",
       "POST /admin/analytics/track",
       "GET /admin/agentcore-status",
+      "POST /admin/users/{id}/grant-credits",
+      "GET /admin/ai-training/jobs",
+      "POST /admin/ai-training/fine-tune",
       "GET /admin/credit-packs",
       "POST /admin/credit-packs/{id}",
       "GET /admin/plans",
