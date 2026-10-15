@@ -58,7 +58,7 @@ jobs:
         run: eas build --platform android --profile production --non-interactive
 
       - name: Submit to Google Play
-        if: steps.check.outputs.skip == 'false' && secrets.GOOGLE_SERVICE_ACCOUNT_KEY != ''
+        if: steps.check.outputs.skip == 'false'
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
