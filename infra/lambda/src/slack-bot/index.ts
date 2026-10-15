@@ -7,10 +7,23 @@ interface SlackRequest {
   text?: string;
   response_url?: string;
   payload?: string;
+  channel_id?: string;
 }
 
-function verifySlackSignature(body: string, timestamp: string, signature: string): boolean {
-  const secret = process.env.SLACK_SIGNING_SECRET;
+interface AppEnv {
+  SLACK_SIGNING_SECRET?: string;
+  SLACK_BOT_TOKEN?: string;
+  GITHUB_TOKEN?: string;
+  ALLOWED_USERS?: string;
+  ALLOWED_CHANNELS?: string;
+}
+
+function verifySlackSignature(
+  body: string,
+  timestamp: string,
+  signature: string,
+  secret: string,
+): boolean {
   if (!secret || !timestamp || !signature) return false;
 
   const now = Math.floor(Date.now() / 1000);
@@ -27,37 +40,230 @@ function verifySlackSignature(body: string, timestamp: string, signature: string
   }
 }
 
+function isAuthorized(userId: string, channelId: string, env: AppEnv): boolean {
+  const allowed = env.ALLOWED_USERS?.split(",").map((u) => u.trim()) || [];
+  const channels = env.ALLOWED_CHANNELS?.split(",").map((c) => c.trim()) || [];
+
+  if (allowed.length > 0 && !allowed.includes(userId)) return false;
+  if (channels.length > 0 && !channels.includes(channelId)) return false;
+
+  return true;
+}
+
 async function getSystemHealth() {
-  const check = async (url: string) => {
-    try {
-      const res = await fetch(url, { method: "HEAD" });
-      return res.status < 400 ? "✅ healthy" : "⚠️ unhealthy";
-    } catch {
-      return "❌ down";
-    }
+  try {
+    const [site, api] = await Promise.all([
+      fetch("https://mapsbridge.com", { method: "HEAD" }).then((r) =>
+        r.status < 400 ? "✅" : "⚠️",
+      ),
+      fetch("https://mapsbridge.com/api/health", { method: "HEAD" }).then((r) =>
+        r.status < 400 ? "✅" : "⚠️",
+      ),
+    ]);
+    return { site, api, lambda: "✅" };
+  } catch {
+    return { site: "❌", api: "❌", lambda: "⚠️" };
+  }
+}
+
+async function getLatestDeploy(
+  gitHubToken: string,
+): Promise<{ status: string; timestamp: string; commit: string }> {
+  try {
+    const res = await fetch(
+      "https://api.github.com/repos/sahinbolukbasi/mapsbridge/actions/runs?limit=1&branch=main",
+      {
+        headers: { Authorization: `Bearer ${gitHubToken}` },
+      },
+    );
+    const data = (await res.json()) as any;
+    const run = data.workflow_runs?.[0];
+    return {
+      status: run?.conclusion || "pending",
+      timestamp: run?.updated_at || "N/A",
+      commit: run?.head_sha?.slice(0, 7) || "N/A",
+    };
+  } catch {
+    return { status: "unknown", timestamp: "N/A", commit: "N/A" };
+  }
+}
+
+function ephemeralReply(text: string) {
+  return {
+    response_type: "ephemeral",
+    text,
+  };
+}
+
+function richReply(blocks: any[]) {
+  return {
+    response_type: "in_channel",
+    blocks,
+  };
+}
+
+function formatHealthReply(health: any) {
+  return {
+    response_type: "in_channel",
+    blocks: [
+      {
+        type: "header",
+        text: { type: "plain_text", text: "🏥 System Health Check" },
+      },
+      {
+        type: "section",
+        fields: [
+          { type: "mrkdwn", text: `*Website:*\n${health.site} Healthy` },
+          { type: "mrkdwn", text: `*API:*\n${health.api} Responsive` },
+          { type: "mrkdwn", text: `*Lambda:*\n${health.lambda} Active` },
+          { type: "mrkdwn", text: `*Time:*\n${new Date().toLocaleTimeString("en-GB")}` },
+        ],
+      },
+    ],
+  };
+}
+
+function handleDeploy(text: string, userId: string) {
+  const branch = text?.trim() || "main";
+  if (!["main", "develop"].includes(branch)) {
+    return ephemeralReply("❌ Invalid branch. Use: `/deploy main` or `/deploy develop`");
+  }
+
+  const payload = {
+    response_type: "ephemeral",
+    blocks: [
+      {
+        type: "header",
+        text: { type: "plain_text", text: "🚀 Deploy Confirmation" },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `Deploy to **${branch}** requested by <@${userId}>\n\nThis will:\n• Run CI/CD pipeline\n• Deploy web, Lambda, mobile builds\n• Update status (25-35 min)`,
+        },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "Confirm Deploy", emoji: true },
+            value: `deploy:${branch}`,
+            action_id: "deploy_confirm",
+            style: "danger",
+          },
+          {
+            type: "button",
+            text: { type: "plain_text", text: "Cancel", emoji: true },
+            value: "cancel",
+            action_id: "deploy_cancel",
+          },
+        ],
+      },
+    ],
   };
 
-  const [site, api] = await Promise.all([
-    check("https://mapsbridge.com"),
-    check(`${process.env.APP_ORIGIN ?? "https://mapsbridge.com"}/api/health`),
-  ]);
-
-  return { site, api, lambda: api };
+  return payload;
 }
 
-async function sendSlackResponse(url: string, payload: object) {
-  await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  }).catch(console.error);
-}
-
-function reply(statusCode: number, body: object) {
+function handleStatus() {
   return {
-    statusCode,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    response_type: "in_channel",
+    blocks: [
+      {
+        type: "header",
+        text: { type: "plain_text", text: "📊 Deployment Status" },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: "*Status:* Checking latest runs...",
+        },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "Refresh", emoji: true },
+            action_id: "status_refresh",
+          },
+          {
+            type: "button",
+            text: { type: "plain_text", text: "View Logs", emoji: true },
+            url: "https://github.com/sahinbolukbasi/mapsbridge/actions",
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function handleLogs(type: string) {
+  const urls: Record<string, string> = {
+    deploy: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deploy.yml",
+    ci: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/ci.yml",
+    monitor:
+      "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deployment-monitor.yml",
+  };
+
+  const url = urls[type || "deploy"] || urls.deploy;
+
+  return {
+    response_type: "in_channel",
+    blocks: [
+      {
+        type: "header",
+        text: { type: "plain_text", text: "📋 Logs & Workflows" },
+      },
+      {
+        type: "section",
+        fields: [
+          { type: "mrkdwn", text: `*Deploy:*\n<${urls.deploy}|View Deploy Logs>` },
+          { type: "mrkdwn", text: `*CI:*\n<${urls.ci}|View CI Logs>` },
+          { type: "mrkdwn", text: `*Monitor:*\n<${urls.monitor}|View Monitor Logs>` },
+        ],
+      },
+    ],
+  };
+}
+
+function handleRollback(userId: string) {
+  return {
+    response_type: "ephemeral",
+    blocks: [
+      {
+        type: "header",
+        text: { type: "plain_text", text: "🔄 Rollback Confirmation" },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `Rollback to previous version requested by <@${userId}>\n\nThis will:\n• Revert to last stable deployment\n• Restore previous Lambda versions\n• Update CloudFront cache (5-10 min)`,
+        },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "Confirm Rollback", emoji: true },
+            value: "rollback",
+            action_id: "rollback_confirm",
+            style: "danger",
+          },
+          {
+            type: "button",
+            text: { type: "plain_text", text: "Cancel", emoji: true },
+            value: "cancel",
+            action_id: "rollback_cancel",
+          },
+        ],
+      },
+    ],
   };
 }
 
@@ -67,247 +273,136 @@ function parseFormBody(raw: string): Record<string, string> {
 
 export async function handler(event: {
   rawPath: string;
-  requestContext: { http: { method: string } };
   headers: Record<string, string>;
   body: string;
+  requestContext?: { http?: { method?: string } };
 }) {
   const { rawPath, headers, body } = event;
-  const timestamp = headers["x-slack-request-timestamp"] ?? "";
-  const signature = headers["x-slack-signature"] ?? "";
+  const secret = process.env.SLACK_SIGNING_SECRET || "";
 
-  if (!verifySlackSignature(body ?? "", timestamp, signature)) {
-    return reply(401, { error: "Unauthorized" });
+  if (!secret) {
+    console.error("SLACK_SIGNING_SECRET not set");
+    return { statusCode: 500, body: JSON.stringify({ error: "Configuration error" }) };
   }
 
-  if (rawPath === "/slack-bot/interactive") {
-    const params = parseFormBody(body);
-    const payload = JSON.parse(params.payload ?? "{}");
-    const actionId = payload.actions?.[0]?.action_id;
-    const responseUrl = payload.response_url;
+  const timestamp = headers["x-slack-request-timestamp"] || "";
+  const signature = headers["x-slack-signature"] || "";
 
-    if (actionId === "status_refresh") {
-      const health = await getSystemHealth();
-      await sendSlackResponse(responseUrl, {
-        replace_original: true,
-        blocks: [
-          {
-            type: "header",
-            text: { type: "plain_text", text: "📊 Status Refreshed" },
-          },
-          {
-            type: "section",
-            fields: [
-              { type: "mrkdwn", text: `*Site:*\n${health.site}` },
-              { type: "mrkdwn", text: `*API:*\n${health.api}` },
-            ],
-          },
-        ],
-      });
-    } else if (actionId === "health_recover") {
-      await sendSlackResponse(responseUrl, {
-        replace_original: true,
-        blocks: [
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: "🔧 *Auto-Recovery Started*\n\nAttempting to recover...",
-            },
-          },
-        ],
-      });
+  if (!verifySlackSignature(body || "", timestamp, signature, secret)) {
+    console.warn("Invalid Slack signature", { timestamp, path: rawPath });
+    return { statusCode: 401, body: JSON.stringify({ error: "Unauthorized" }) };
+  }
+
+  const params = parseFormBody(body || "");
+  const userId = params.user_id || "";
+  const channelId = params.channel_id || "";
+  const command = params.command || "";
+  const text = params.text || "";
+
+  if (!isAuthorized(userId, channelId, process.env as AppEnv)) {
+    console.warn("Unauthorized user/channel", { userId, channelId });
+    return { statusCode: 403, body: JSON.stringify({ error: "Forbidden" }) };
+  }
+
+  const env = process.env as AppEnv;
+
+  try {
+    if (rawPath === "/slack-bot/deploy") {
+      console.info("Deploy command", { userId, channel: channelId, branch: text });
+      const reply = handleDeploy(text, userId);
+      return { statusCode: 200, body: JSON.stringify(reply) };
     }
 
-    return reply(200, {});
-  }
-
-  const params = parseFormBody(body);
-  const command = params.command ?? rawPath.replace("/slack-bot", "");
-  const text = (params.text ?? "").trim();
-  const userId = params.user_id ?? "unknown";
-  const responseUrl = params.response_url ?? "";
-
-  if (!responseUrl) {
-    return reply(400, { error: "Missing response_url" });
-  }
-
-  // Acknowledge immediately (Slack requires <3s)
-  const ack = reply(200, {
-    response_type: "ephemeral",
-    text: "Processing...",
-  });
-
-  // Handle each command
-  setImmediate(async () => {
-    if (command === "/deploy" || rawPath === "/slack-bot/deploy") {
-      const branch = text || "main";
-      await sendSlackResponse(responseUrl, {
-        response_type: "in_channel",
+    if (rawPath === "/slack-bot/status") {
+      console.info("Status command", { userId });
+      const deploy = await getLatestDeploy(env.GITHUB_TOKEN || "");
+      const reply = {
+        response_type: "in_channel" as const,
         blocks: [
-          {
-            type: "header",
-            text: { type: "plain_text", text: "🚀 Deployment Triggered" },
-          },
+          { type: "header", text: { type: "plain_text", text: "📊 Deployment Status" } },
           {
             type: "section",
             fields: [
-              { type: "mrkdwn", text: `*Branch:*\n\`${branch}\`` },
-              { type: "mrkdwn", text: `*Triggered by:*\n<@${userId}>` },
-              { type: "mrkdwn", text: `*Duration:*\n~25-35 min` },
+              { type: "mrkdwn", text: `*Latest Deploy:*\n${deploy.status}` },
+              { type: "mrkdwn", text: `*Commit:*\n\`${deploy.commit}\`` },
               {
                 type: "mrkdwn",
-                text: `*Time:*\n<!date^${Math.floor(Date.now() / 1000)}^{time_secs}|now>`,
-              },
-            ],
-          },
-          {
-            type: "actions",
-            elements: [
-              {
-                type: "button",
-                text: { type: "plain_text", text: "View Actions" },
-                url: "https://github.com/sahinbolukbasi/mapsbridge/actions",
+                text: `*Updated:*\n${new Date(deploy.timestamp).toLocaleTimeString()}`,
               },
             ],
           },
         ],
-      });
+      };
+      return { statusCode: 200, body: JSON.stringify(reply) };
+    }
 
-      await fetch(
-        "https://api.github.com/repos/sahinbolukbasi/mapsbridge/actions/workflows/deploy.yml/dispatches",
-        {
+    if (rawPath === "/slack-bot/health") {
+      console.info("Health check", { userId });
+      const health = await getSystemHealth();
+      const reply = formatHealthReply(health);
+      return { statusCode: 200, body: JSON.stringify(reply) };
+    }
+
+    if (rawPath === "/slack-bot/logs") {
+      console.info("Logs command", { userId, type: text });
+      const reply = handleLogs(text);
+      return { statusCode: 200, body: JSON.stringify(reply) };
+    }
+
+    if (rawPath === "/slack-bot/rollback") {
+      console.info("Rollback command", { userId });
+      const reply = handleRollback(userId);
+      return { statusCode: 200, body: JSON.stringify(reply) };
+    }
+
+    if (rawPath === "/slack-bot/interactive") {
+      const payload = JSON.parse(params.payload || "{}");
+      const actionId = payload.actions?.[0]?.action_id || "";
+      const value = payload.actions?.[0]?.value || "";
+      const responseUrl = payload.response_url || "";
+
+      console.info("Interactive action", { actionId, value, userId: payload.user?.id });
+
+      if (actionId === "status_refresh" && responseUrl) {
+        const health = await getSystemHealth();
+        const reply = formatHealthReply(health);
+        await fetch(responseUrl, {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ ref: branch }),
-        },
-      ).catch(console.error);
-    } else if (command === "/status" || rawPath === "/slack-bot/status") {
-      const health = await getSystemHealth();
-      await sendSlackResponse(responseUrl, {
-        response_type: "in_channel",
-        blocks: [
-          {
-            type: "header",
-            text: { type: "plain_text", text: "📊 System Status" },
-          },
-          {
-            type: "section",
-            fields: [
-              { type: "mrkdwn", text: `*Site:*\n${health.site}` },
-              { type: "mrkdwn", text: `*API:*\n${health.api}` },
-              { type: "mrkdwn", text: `*Lambda:*\n${health.lambda}` },
-              {
-                type: "mrkdwn",
-                text: `*Updated:*\n<!date^${Math.floor(Date.now() / 1000)}^{time_secs}|now>`,
-              },
-            ],
-          },
-          {
-            type: "actions",
-            elements: [
-              {
-                type: "button",
-                text: { type: "plain_text", text: "View Logs" },
-                url: "https://github.com/sahinbolukbasi/mapsbridge/actions",
-              },
-              {
-                type: "button",
-                text: { type: "plain_text", text: "Refresh" },
-                action_id: "status_refresh",
-              },
-            ],
-          },
-        ],
-      });
-    } else if (command === "/health" || rawPath === "/slack-bot/health") {
-      const health = await getSystemHealth();
-      const allOk = health.site.includes("✅") && health.api.includes("✅");
-      await sendSlackResponse(responseUrl, {
-        response_type: "in_channel",
-        blocks: [
-          {
-            type: "header",
-            text: {
-              type: "plain_text",
-              text: allOk ? "✅ All Systems Healthy" : "⚠️ Issues Detected",
-            },
-          },
-          {
-            type: "section",
-            fields: [
-              { type: "mrkdwn", text: `*Website:*\n${health.site}` },
-              { type: "mrkdwn", text: `*API:*\n${health.api}` },
-            ],
-          },
-          ...(allOk
-            ? []
-            : [
-                {
-                  type: "actions",
-                  elements: [
-                    {
-                      type: "button",
-                      style: "danger",
-                      text: { type: "plain_text", text: "Auto-Recover" },
-                      action_id: "health_recover",
-                    },
-                  ],
-                },
-              ]),
-        ],
-      });
-    } else if (command === "/logs" || rawPath === "/slack-bot/logs") {
-      await sendSlackResponse(responseUrl, {
-        response_type: "in_channel",
-        blocks: [
-          {
-            type: "section",
-            text: { type: "mrkdwn", text: "📋 *Deployment Logs*" },
-          },
-          {
-            type: "actions",
-            elements: [
-              {
-                type: "button",
-                text: { type: "plain_text", text: "Deploy Logs" },
-                url: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deploy.yml",
-              },
-              {
-                type: "button",
-                text: { type: "plain_text", text: "CI Logs" },
-                url: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/ci.yml",
-              },
-              {
-                type: "button",
-                text: { type: "plain_text", text: "Monitor" },
-                url: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deployment-monitor.yml",
-              },
-            ],
-          },
-        ],
-      });
-    } else if (command === "/rollback" || rawPath === "/slack-bot/rollback") {
-      await sendSlackResponse(responseUrl, {
-        response_type: "in_channel",
-        blocks: [
-          {
-            type: "header",
-            text: { type: "plain_text", text: "🔄 Rollback Initiated" },
-          },
-          {
-            type: "section",
-            fields: [
-              { type: "mrkdwn", text: `*Triggered by:*\n<@${userId}>` },
-              { type: "mrkdwn", text: `*Status:*\nIn Progress` },
-            ],
-          },
-        ],
-      });
-    }
-  });
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...reply, replace_original: true }),
+        }).catch((e) => console.error("Failed to post response", e));
+      }
 
-  return ack;
+      if (actionId === "deploy_confirm" && value.startsWith("deploy:")) {
+        const branch = value.replace("deploy:", "");
+        const message = {
+          text: `🚀 Deploy to **${branch}** initiated by <@${payload.user?.id}>\n\nMonitor progress in #deployments`,
+        };
+        await fetch(responseUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...message, replace_original: true }),
+        }).catch((e) => console.error("Failed to post response", e));
+      }
+
+      if (actionId === "rollback_confirm" && value === "rollback") {
+        const message = {
+          text: `🔄 Rollback initiated by <@${payload.user?.id}>\n\nMonitor progress in #deployments`,
+        };
+        await fetch(responseUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...message, replace_original: true }),
+        }).catch((e) => console.error("Failed to post response", e));
+      }
+
+      return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+    }
+
+    console.warn("Unknown path", { path: rawPath });
+    return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
+  } catch (error) {
+    console.error("Handler error", error);
+    return { statusCode: 500, body: JSON.stringify({ error: "Internal server error" }) };
+  }
 }
