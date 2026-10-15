@@ -18,7 +18,7 @@ resource "aws_rds_cluster_parameter_group" "aurora" {
   }
   parameter {
     name  = "rds.force_ssl"
-    value = "0"
+    value = "1"
   }
   tags = var.tags
 }

@@ -6,7 +6,7 @@ terraform {
 }
 provider "aws" {
   region              = "eu-central-1"
-  allowed_account_ids = ["996270854731"]
+  allowed_account_ids = ["865369794421"]
   default_tags { tags = { Project = "adreskopru", Workload = "travel-ai", Component = "knowledge", Environment = "prod" } }
 }
 data "aws_caller_identity" "current" {}

@@ -42,15 +42,39 @@ resource "aws_security_group" "redis" {
 
 resource "aws_security_group" "lambda" {
   name        = "${var.name}-lambda-sg"
-  description = "Allow outbound to Aurora, Redis, internet via endpoints"
+  description = "Allow outbound to Aurora, Redis, and HTTPS via VPC endpoints"
   vpc_id      = aws_vpc.this.id
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = { Name = "${var.name}-lambda-sg", Project = var.project, Environment = var.environment }
+  tags        = { Name = "${var.name}-lambda-sg", Project = var.project, Environment = var.environment }
+}
+
+# HTTPS — VPC endpoints, external APIs (Bedrock, SSM, CloudWatch, etc.)
+resource "aws_vpc_security_group_egress_rule" "lambda_https" {
+  security_group_id = aws_security_group.lambda.id
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+  description       = "HTTPS to VPC endpoints and external AWS services"
+}
+
+# PostgreSQL — Aurora only within VPC
+resource "aws_vpc_security_group_egress_rule" "lambda_postgres" {
+  security_group_id = aws_security_group.lambda.id
+  from_port         = 5432
+  to_port           = 5432
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr
+  description       = "PostgreSQL to Aurora within VPC"
+}
+
+# Redis — ElastiCache only within VPC
+resource "aws_vpc_security_group_egress_rule" "lambda_redis" {
+  security_group_id = aws_security_group.lambda.id
+  from_port         = 6379
+  to_port           = 6379
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr
+  description       = "Redis to ElastiCache within VPC"
 }
 
 # VPC Gateway Endpoint for S3 (free, no NAT needed)
@@ -122,4 +146,51 @@ resource "aws_vpc_security_group_ingress_rule" "redis_lambda" {
   to_port                      = 6379
   ip_protocol                  = "tcp"
   description                  = "Lambda to ElastiCache Redis"
+}
+
+# ─── VPC Flow Logs ─────────────────────────────────────────────────────────
+resource "aws_cloudwatch_log_group" "flow_logs" {
+  name              = "/aws/vpc/${var.name}/flow-logs"
+  retention_in_days = 30
+  tags              = { Name = "${var.name}-flow-logs", Project = var.project, Environment = var.environment }
+}
+
+resource "aws_iam_role" "flow_logs" {
+  name = "${var.name}-vpc-flow-logs"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "vpc-flow-logs.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+  tags = { Name = "${var.name}-vpc-flow-logs", Project = var.project, Environment = var.environment }
+}
+
+resource "aws_iam_role_policy" "flow_logs" {
+  name = "${var.name}-vpc-flow-logs"
+  role = aws_iam_role.flow_logs.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams"
+      ]
+      Resource = "${aws_cloudwatch_log_group.flow_logs.arn}:*"
+    }]
+  })
+}
+
+resource "aws_flow_log" "this" {
+  vpc_id          = aws_vpc.this.id
+  traffic_type    = "ALL"
+  iam_role_arn    = aws_iam_role.flow_logs.arn
+  log_destination = aws_cloudwatch_log_group.flow_logs.arn
+  tags            = { Name = "${var.name}-flow-logs", Project = var.project, Environment = var.environment }
 }
