@@ -67,6 +67,7 @@ const CATEGORY_FILTERS = [
 interface MapScreenProps {
   onOpenProfile?: () => void;
   onOpenPlan?: () => void;
+  onOpenAi?: () => void;
   focusedStopId?: string | null;
   onClearFocus?: () => void;
 }
@@ -95,6 +96,7 @@ export interface ClickedPlaceInfo {
 export function MapScreen({
   onOpenProfile,
   onOpenPlan,
+  onOpenAi,
   focusedStopId,
   onClearFocus,
 }: MapScreenProps) {
@@ -1317,7 +1319,7 @@ export function MapScreen({
                     style={styles.aiAskButtonPill}
                     onPress={() => {
                       setClickedPlace(null);
-                      onOpenProfile?.();
+                      onOpenAi?.();
                     }}
                     activeOpacity={0.8}
                   >

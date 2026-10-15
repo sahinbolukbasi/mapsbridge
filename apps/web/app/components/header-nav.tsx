@@ -451,40 +451,6 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         </span>
                       </a>
 
-                      {userEmail && (
-                        userEmail.toLowerCase() === "sahinbolukbasii@gmail.com" ||
-                        userEmail.toLowerCase() === "sahin@mapsbridge.com" ||
-                        userEmail.toLowerCase() === "admin@mapsbridge.com"
-                      ) && (
-                        <a
-                          href="/u/admin/"
-                          className="header-stitch-item"
-                          style={{ color: "#6d28d9", background: "rgba(245, 243, 255, 0.85)", marginTop: "0.25rem" }}
-                          onClick={() => setIsOpen(false)}
-                        >
-                          <div className="header-stitch-item-left">
-                            <span className="material-symbols-outlined" style={{ color: "#8b5cf6" }}>
-                              admin_panel_settings
-                            </span>
-                            <span style={{ fontWeight: 700 }}>Yönetim Paneli</span>
-                          </div>
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "3px",
-                              padding: "0.15rem 0.4rem",
-                              borderRadius: "4px",
-                              background: "#ede9fe",
-                              color: "#6d28d9",
-                              fontSize: "9px",
-                              fontWeight: 800,
-                            }}
-                          >
-                            🛡️ ADMIN
-                          </span>
-                        </a>
-                      )}
 
                       <div style={{ height: "1px", background: "rgba(226, 232, 240, 0.8)", margin: "0.35rem 0.25rem" }}></div>
 

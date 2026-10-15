@@ -7485,6 +7485,14 @@
  .mobile-pin-sheet input,.mobile-pin-sheet select,.mobile-pin-sheet textarea{width:100%;box-sizing:border-box;min-height:44px;font:inherit;font-size:16px;color:inherit;background:var(--surface,#fff);border:1px solid var(--border,#c7d6cc);border-radius:10px;padding:10px;min-width:0}.mobile-pin-sheet textarea{resize:vertical}
  .mobile-pin-add{width:100%;margin-bottom:8px}.mobile-pin-actions{display:flex;gap:10px;margin-top:12px}.mobile-pin-actions>*{flex:1;min-width:0}.mobile-pin-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.mobile-pin-meta span{font-size:12px;border-radius:8px;background:var(--surface-soft,#eef5f0);padding:6px 8px}.mobile-pin-photo{height:110px;width:100%;object-fit:cover;border-radius:12px;margin-bottom:12px}
  .mobile-pin-sheet :focus-visible{outline:3px solid #d7a438;outline-offset:2px}
+ .mobile-pin-action-buttons{display:flex;flex-direction:column;gap:8px;margin:14px 0 8px}
+ .mobile-pin-ai-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:linear-gradient(135deg,#1a1a2e,#16213e)!important;color:#e0e0ff!important;border:1px solid #2a2a4a!important;font-weight:700;font-size:14px;border-radius:12px;min-height:44px;padding:11px 14px;cursor:pointer;transition:all .2s}
+ .mobile-pin-ai-btn:hover{background:linear-gradient(135deg,#252547,#1e2d50)!important;box-shadow:0 2px 12px rgba(99,102,241,.3)}
+ .mobile-pin-ai-btn .material-symbols-outlined{font-size:18px;color:#818cf8}
+ .mobile-pin-tabs{display:flex;gap:0;margin:12px 0 8px;border-radius:10px;overflow:hidden;border:1px solid var(--border,#dce7e0)}
+ .mobile-pin-tabs button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;font-size:13px;font-weight:600;border:none!important;border-radius:0!important;background:var(--surface,#fff)!important;color:var(--text-muted,#61736a)!important;padding:8px 12px;cursor:pointer;transition:all .15s}
+ .mobile-pin-tabs button.active{background:#176548!important;color:white!important}
+ .mobile-pin-tabs button .material-symbols-outlined{font-size:16px}
 
 @media(max-width:767px){
  .mobile-pin-sheet{display:flex}
