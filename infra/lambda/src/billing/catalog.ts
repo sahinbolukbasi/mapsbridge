@@ -1,67 +1,36 @@
-// RevenueCat product IDs are the primary payment method.
-// Stripe price IDs are kept for the transition period (existing subscribers).
+// RevenueCat product IDs from mapsbridge project
+// Monthly: prode1930276ca, Yearly: prod99e16b0cb7, Lifetime: prod742c37a698
+// Offering: ofrng762b1657ce, Packages: $rc_monthly, $rc_annual, $rc_lifetime
+// Entitlement: entl39bf296e8c (lookup_key: mapsbridge_pro)
 export const catalog = () => [
-  {
-    id: "explorer",
-    mode: "subscription",
-    credits: 100,
-    amount: 19900,
-    productId: process.env.RC_EXPLORER_PRODUCT_ID,
-    entitlementId: "explorer",
-    priceId: process.env.STRIPE_EXPLORER_PRICE_ID,
-  },
   {
     id: "pro",
     mode: "subscription",
     credits: 500,
     amount: 49900,
-    productId: process.env.RC_PRO_PRODUCT_ID,
-    entitlementId: "pro",
+    productId: "prode1930276ca", // Monthly product
+    packageId: "$rc_monthly", // Monthly package
+    entitlementId: "mapsbridge_pro", // mapsbridge_pro entitlement lookup_key
+    priceId: process.env.STRIPE_PRO_PRICE_ID, // Stripe fallback
+  },
+  {
+    id: "pro-yearly",
+    mode: "subscription",
+    credits: 5500, // 10% bonus for annual commitment
+    amount: 499900,
+    productId: "prod99e16b0cb7", // Yearly product
+    packageId: "$rc_annual", // Yearly package
+    entitlementId: "mapsbridge_pro",
     priceId: process.env.STRIPE_PRO_PRICE_ID,
   },
   {
-    id: "agency",
+    id: "lifetime",
     mode: "subscription",
-    credits: 2500,
-    amount: 149900,
-    productId: process.env.RC_AGENCY_PRODUCT_ID,
-    entitlementId: "agency",
-    priceId: process.env.STRIPE_AGENCY_PRICE_ID,
-  },
-  {
-    id: "pack-starter",
-    mode: "credit_pack",
-    credits: 50,
-    amount: 8900,
-    productId: process.env.RC_PACK_STARTER_PRODUCT_ID,
-    entitlementId: null,
-    priceId: process.env.STRIPE_PACK_STARTER_PRICE_ID,
-  },
-  {
-    id: "pack-popular",
-    mode: "credit_pack",
-    credits: 300,
-    amount: 29900,
-    productId: process.env.RC_PACK_POPULAR_PRODUCT_ID,
-    entitlementId: null,
-    priceId: process.env.STRIPE_PACK_POPULAR_PRICE_ID,
-  },
-  {
-    id: "pack-master",
-    mode: "credit_pack",
-    credits: 1000,
-    amount: 74900,
-    productId: process.env.RC_PACK_MASTER_PRODUCT_ID,
-    entitlementId: null,
-    priceId: process.env.STRIPE_PACK_MASTER_PRICE_ID,
-  },
-  {
-    id: "pack-pro",
-    mode: "credit_pack",
-    credits: 3000,
-    amount: 189900,
-    productId: process.env.RC_PACK_PRO_PRODUCT_ID,
-    entitlementId: null,
-    priceId: process.env.STRIPE_PACK_PRO_PRICE_ID,
+    credits: 100000, // Unlimited usage
+    amount: 999900,
+    productId: "prod742c37a698", // Lifetime product
+    packageId: "$rc_lifetime", // Lifetime package
+    entitlementId: "mapsbridge_pro",
+    priceId: null,
   },
 ];
