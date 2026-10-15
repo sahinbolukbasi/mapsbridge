@@ -1,0 +1,79 @@
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      plan_only:
+        description: "Plan only (no apply)"
+        required: false
+        default: "false"
+        type: boolean
+      target:
+        description: "Terraform target (e.g. module.api). Leave empty for full apply."
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: eu-central-1
+  TF_DIR: infra/terraform
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.inputs.plan_only == 'true' && 'Plan' || 'Apply' }}
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create Lambda zip placeholders
+        run: |
+          mkdir -p infra/terraform/.build/lambdas
+          for name in cognito-custom-message kb-ingest; do
+            echo "placeholder" | zip -q infra/terraform/.build/lambdas/${name}.zip -
+          done
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          TF_VAR_environment: prod
+          TF_VAR_frontend_domain: mapsbridge.com
+          TF_VAR_stripe_secret_key: ${{ secrets.STRIPE_SECRET_KEY }}
+          TF_VAR_stripe_webhook_secret: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+        run: |
+          TARGET_ARGS=""
+          if [ -n "${{ github.event.inputs.target }}" ]; then
+            TARGET_ARGS="-target=${{ github.event.inputs.target }}"
+          fi
+          terraform plan -out=tfplan $TARGET_ARGS
+
+      - name: Terraform Apply
+        if: github.event.inputs.plan_only != 'true'
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          TF_VAR_environment: prod
+          TF_VAR_frontend_domain: mapsbridge.com
+          TF_VAR_stripe_secret_key: ${{ secrets.STRIPE_SECRET_KEY }}
+          TF_VAR_stripe_webhook_secret: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+        run: terraform apply -auto-approve tfplan
+
+      - name: Show Outputs
+        if: github.event.inputs.plan_only != 'true'
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform output -json 2>/dev/null || true

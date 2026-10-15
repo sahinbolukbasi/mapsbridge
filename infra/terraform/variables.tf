@@ -71,12 +71,6 @@ variable "db_username" {
   description = "Aurora Serverless master username"
 }
 
-variable "db_password" {
-  type        = string
-  sensitive   = true
-  description = "Aurora Serverless master password (sensitive, use Secrets Manager or TF var)"
-}
-
 variable "aurora_instance_class" {
   type        = string
   default     = "db.serverless"

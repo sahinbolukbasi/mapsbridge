@@ -271,7 +271,6 @@ module "database" {
   aurora_security_group_id  = module.vpc.aurora_security_group_id
   redis_security_group_id   = module.vpc.redis_security_group_id
   db_username               = var.db_username
-  db_password               = var.db_password
   aurora_instance_class     = var.aurora_instance_class
   redis_max_data_storage_gb = var.redis_max_data_storage_gb
   redis_max_ecpu_per_second = var.redis_max_ecpu_per_second
