@@ -64,18 +64,38 @@ export function BuddyTab({
       >
         <div style={{ maxWidth: "680px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-            <span className="material-symbols-outlined" style={{ color: "#34d399", fontSize: "22px" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ color: "#34d399", fontSize: "22px" }}
+            >
               psychology
             </span>
-            <span style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.06em", color: "#34d399", textTransform: "uppercase" }}>
+            <span
+              style={{
+                fontSize: "12px",
+                fontWeight: 800,
+                letterSpacing: "0.06em",
+                color: "#34d399",
+                textTransform: "uppercase",
+              }}
+            >
               AI Destekli Akıllı Gezgin Eşleşmesi
             </span>
           </div>
           <h3 style={{ margin: "0 0 6px", fontSize: "17px", fontWeight: 700, color: "#fff" }}>
             Ortak İlgi Alanları ve Rotalara Göre Gezi Arkadaşı Bulun
           </h3>
-          <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.5", color: "rgba(255,255,255,0.8)" }}>
-            Yapay zeka motorumuz seyahat etmek istediğiniz destinasyonları, ilgi etiketlerinizi (Tarih, Doğa, Gastronomi) ve planlanan gezi tarihlerini analiz ederek en yüksek uyuma sahip gezginleri eşleştirir.
+          <p
+            style={{
+              margin: 0,
+              fontSize: "13px",
+              lineHeight: "1.5",
+              color: "rgba(255,255,255,0.8)",
+            }}
+          >
+            Yapay zeka motorumuz seyahat etmek istediğiniz destinasyonları, ilgi etiketlerinizi
+            (Tarih, Doğa, Gastronomi) ve planlanan gezi tarihlerini analiz ederek en yüksek uyuma
+            sahip gezginleri eşleştirir.
           </p>
         </div>
 
@@ -161,9 +181,7 @@ export function BuddyTab({
               border: "1px dashed var(--card-border, rgba(1,54,40,0.2))",
             }}
           >
-            <span style={{ fontSize: "2rem", display: "block", marginBottom: "0.5rem" }}>
-              🤝
-            </span>
+            <span style={{ fontSize: "2rem", display: "block", marginBottom: "0.5rem" }}>🤝</span>
             <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, #0d281e)" }}>
               Aramanıza uygun gezi arkadaşı bulunamadı
             </h3>
@@ -191,7 +209,9 @@ export function BuddyTab({
                 }}
               >
                 {/* Header: Avatar, Name, Score */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                >
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <img
                       src={buddy.avatar}
@@ -205,7 +225,14 @@ export function BuddyTab({
                       }}
                     />
                     <div>
-                      <h4 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--text-primary, #0d281e)" }}>
+                      <h4
+                        style={{
+                          margin: 0,
+                          fontSize: "15px",
+                          fontWeight: 700,
+                          color: "var(--text-primary, #0d281e)",
+                        }}
+                      >
                         {buddy.name}
                       </h4>
                       <span style={{ fontSize: "12px", color: "var(--text-muted, #64748b)" }}>
@@ -223,7 +250,14 @@ export function BuddyTab({
                       textAlign: "center",
                     }}
                   >
-                    <span style={{ fontSize: "10px", fontWeight: 700, color: "#059669", display: "block" }}>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        color: "#059669",
+                        display: "block",
+                      }}
+                    >
                       UYUM
                     </span>
                     <strong style={{ fontSize: "14px", color: "#047857" }}>
@@ -247,18 +281,34 @@ export function BuddyTab({
                     <strong>Hedef:</strong>
                     <span>{buddy.targetDestination}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}
+                  >
                     <span>🗓️</span>
                     <strong>Tarih:</strong>
                     <span>{buddy.travelDates}</span>
                   </div>
-                  <div style={{ fontSize: "11px", color: "#059669", marginTop: "4px", fontStyle: "italic" }}>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#059669",
+                      marginTop: "4px",
+                      fontStyle: "italic",
+                    }}
+                  >
                     ✨ {buddy.matchReason}
                   </div>
                 </div>
 
                 {/* Bio */}
-                <p style={{ margin: 0, fontSize: "12.5px", lineHeight: "1.45", color: "var(--text-body, #334155)" }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "12.5px",
+                    lineHeight: "1.45",
+                    color: "var(--text-body, #334155)",
+                  }}
+                >
                   &quot;{buddy.bio}&quot;
                 </p>
 

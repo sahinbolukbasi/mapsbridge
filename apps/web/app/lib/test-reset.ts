@@ -78,7 +78,13 @@ export function resetTestSystemData(): { success: boolean; backupTimestamp: stri
         isPublic: false,
         groups: [],
         days: [
-          { dayIndex: 1, label: "1. Gün", color: "#2563eb", subtitle: "Keşif Başlangıcı", pins: [] },
+          {
+            dayIndex: 1,
+            label: "1. Gün",
+            color: "#2563eb",
+            subtitle: "Keşif Başlangıcı",
+            pins: [],
+          },
         ],
         pins: [],
       },

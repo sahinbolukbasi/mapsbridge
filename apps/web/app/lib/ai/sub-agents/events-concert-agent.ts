@@ -1,9 +1,9 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface TravelEventItem {
   title: string;
-  category: 'concert' | 'exhibition' | 'festival' | 'theatre' | 'local_fair';
+  category: "concert" | "exhibition" | "festival" | "theatre" | "local_fair";
   venue: string;
   dateOrSchedule: string;
   highlight: string;
@@ -43,10 +43,10 @@ JSON formatı:
 export async function runEventsAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: EventsAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: EventsAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const cultureInterests = profile?.interests?.culture?.join(', ') || 'müzik, sanat, festival';
+  const cultureInterests = profile?.interests?.culture?.join(", ") || "müzik, sanat, festival";
 
   const userQuery = `Hedef Şehir: "${destination}".
 Etkinlik ve Kültür İlgileri: ${cultureInterests}.
@@ -62,7 +62,7 @@ Bu şehre özel en popüler 2-4 güncel etkinlik, sergi veya konser önerisi haz
   if (bedrockRes.success && bedrockRes.data && Array.isArray(bedrockRes.data.events)) {
     return {
       output: bedrockRes.data,
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
@@ -74,16 +74,18 @@ Bu şehre özel en popüler 2-4 güncel etkinlik, sergi veya konser önerisi haz
       events: [
         {
           title: `${destination} Şehir Sanat ve Müzik Etkinlikleri`,
-          category: 'festival',
+          category: "festival",
           venue: `${destination} Tarihi Merkez ve Kültür Meydanı`,
-          dateOrSchedule: 'Hafta sonu akşam saatleri',
-          highlight: 'Yerel müzisyenler ve sokak sanatı performansları',
-          ticketTip: 'Ücretsiz halka açık katılım',
+          dateOrSchedule: "Hafta sonu akşam saatleri",
+          highlight: "Yerel müzisyenler ve sokak sanatı performansları",
+          ticketTip: "Ücretsiz halka açık katılım",
         },
       ],
-      tips: ['Popüler konserler ve opera biletleri için resmi salon web sitelerini önceden kontrol edin.'],
+      tips: [
+        "Popüler konserler ve opera biletleri için resmi salon web sitelerini önceden kontrol edin.",
+      ],
     },
-    source: 'bedrock',
+    source: "bedrock",
     durationMs: Date.now() - startTime,
   };
 }

@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { CompassIcon, SearchIcon, UserIcon } from './Icons';
+import React from "react";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { CompassIcon, SearchIcon, UserIcon } from "./Icons";
 
 interface AppHeaderProps {
   onPressSearch?: () => void;
@@ -53,71 +53,71 @@ export function AppHeader({ onPressSearch, onPressProfile, hideActions }: AppHea
 const styles = StyleSheet.create({
   header: {
     height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(250, 248, 255, 0.96)',
+    backgroundColor: "rgba(250, 248, 255, 0.96)",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
+    borderBottomColor: "rgba(0, 0, 0, 0.06)",
     zIndex: 50,
   },
   brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   brandIconWrap: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#013628',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#013628",
+    alignItems: "center",
+    justifyContent: "center",
   },
   brandTextWrap: {
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   brandTitle: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     letterSpacing: -0.3,
     lineHeight: 18,
   },
   brandSubtitle: {
     fontSize: 9,
-    fontWeight: '700',
-    color: '#286954',
+    fontWeight: "700",
+    color: "#286954",
     letterSpacing: 1.2,
     lineHeight: 12,
   },
   actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   iconButton: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
   },
   profileButton: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   profileAvatar: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#013628',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#013628",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

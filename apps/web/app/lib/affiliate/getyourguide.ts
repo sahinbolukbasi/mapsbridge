@@ -12,9 +12,7 @@
 import type { AffiliateCard } from "./types";
 
 const GYG_PARTNER_ID =
-  typeof process !== "undefined"
-    ? (process.env.NEXT_PUBLIC_GYG_PARTNER_ID ?? "")
-    : "";
+  typeof process !== "undefined" ? (process.env.NEXT_PUBLIC_GYG_PARTNER_ID ?? "") : "";
 
 const GYG_BASE = "https://www.getyourguide.com";
 
@@ -43,12 +41,7 @@ function toSlug(destination: string): string {
 // ── Category-level activity card ─────────────────────────────────────────────
 
 export type GygCategory =
-  | "tours"
-  | "day-trips"
-  | "experiences"
-  | "tickets"
-  | "food-and-drink"
-  | "outdoor-activities";
+  "tours" | "day-trips" | "experiences" | "tickets" | "food-and-drink" | "outdoor-activities";
 
 export interface ActivityCardOptions {
   destination: string;
@@ -62,9 +55,7 @@ export interface ActivityCardOptions {
 export function buildActivityCard(opts: ActivityCardOptions): AffiliateCard {
   const slug = toSlug(opts.destination);
   const url = new URL(
-    opts.tourId
-      ? `${GYG_BASE}/-t${opts.tourId}/`
-      : `${GYG_BASE}/${slug}/activities/`
+    opts.tourId ? `${GYG_BASE}/-t${opts.tourId}/` : `${GYG_BASE}/${slug}/activities/`,
   );
   if (GYG_PARTNER_ID) url.searchParams.set("partner_id", GYG_PARTNER_ID);
   url.searchParams.set("cmp", "activities");
@@ -103,31 +94,29 @@ export function buildCuratedActivityCards(destination: string): AffiliateCard[] 
       cards.push(
         { category: "tours", title: "İstanbul Şehir Turları" },
         { category: "food-and-drink", title: "İstanbul Yemek & İçki Deneyimleri" },
-        { category: "day-trips", title: "Boğaz Tekne Turları" }
+        { category: "day-trips", title: "Boğaz Tekne Turları" },
       );
       break;
     case "barcelona":
       cards.push(
         { category: "tickets", title: "Sagrada Família Biletleri" },
         { category: "tours", title: "Barselona Mimari Turları" },
-        { category: "food-and-drink", title: "Tapas & Şarap Deneyimleri" }
+        { category: "food-and-drink", title: "Tapas & Şarap Deneyimleri" },
       );
       break;
     case "paris":
       cards.push(
         { category: "tickets", title: "Eyfel Kulesi Biletleri" },
         { category: "tours", title: "Paris Müze Turları" },
-        { category: "food-and-drink", title: "Fransız Mutfağı Deneyimleri" }
+        { category: "food-and-drink", title: "Fransız Mutfağı Deneyimleri" },
       );
       break;
     default:
       cards.push(
         { category: "tours", title: `${destination} Şehir Turları` },
-        { category: "experiences", title: `${destination} Yerel Deneyimler` }
+        { category: "experiences", title: `${destination} Yerel Deneyimler` },
       );
   }
 
-  return cards.map(c =>
-    buildActivityCard({ destination, category: c.category, title: c.title })
-  );
+  return cards.map((c) => buildActivityCard({ destination, category: c.category, title: c.title }));
 }

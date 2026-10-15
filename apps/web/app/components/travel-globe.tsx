@@ -79,14 +79,7 @@ export function TravelGlobe({ addresses }: TravelGlobeProps) {
       ctx.fill();
 
       // 2. Dünya Küresi (Gövde)
-      const sphereGrad = ctx.createRadialGradient(
-        cx - R * 0.35,
-        cy - R * 0.35,
-        R * 0.1,
-        cx,
-        cy,
-        R
-      );
+      const sphereGrad = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.35, R * 0.1, cx, cy, R);
       const isDark = document.documentElement.dataset.theme === "dark" || isExpanded;
       if (isDark) {
         sphereGrad.addColorStop(0, "#172554");
@@ -172,21 +165,61 @@ export function TravelGlobe({ addresses }: TravelGlobeProps) {
       // 4. Kıta Hatları
       const continents = [
         [
-          [36, -5], [43, -9], [50, -5], [58, 5], [65, 25], [70, 40],
-          [60, 60], [45, 80], [35, 120], [20, 110], [10, 100],
-          [15, 80], [25, 60], [30, 45], [38, 28], [36, 15], [36, -5]
+          [36, -5],
+          [43, -9],
+          [50, -5],
+          [58, 5],
+          [65, 25],
+          [70, 40],
+          [60, 60],
+          [45, 80],
+          [35, 120],
+          [20, 110],
+          [10, 100],
+          [15, 80],
+          [25, 60],
+          [30, 45],
+          [38, 28],
+          [36, 15],
+          [36, -5],
         ],
         [
-          [36, -5], [35, 12], [30, 32], [12, 51], [5, 48], [-12, 40],
-          [-34, 18], [-34, 25], [-15, 12], [4, 9], [15, -17], [32, -8], [36, -5]
+          [36, -5],
+          [35, 12],
+          [30, 32],
+          [12, 51],
+          [5, 48],
+          [-12, 40],
+          [-34, 18],
+          [-34, 25],
+          [-15, 12],
+          [4, 9],
+          [15, -17],
+          [32, -8],
+          [36, -5],
         ],
         [
-          [25, -80], [35, -75], [45, -65], [60, -65], [70, -130],
-          [55, -165], [35, -120], [20, -105], [15, -90], [25, -80]
+          [25, -80],
+          [35, -75],
+          [45, -65],
+          [60, -65],
+          [70, -130],
+          [55, -165],
+          [35, -120],
+          [20, -105],
+          [15, -90],
+          [25, -80],
         ],
         [
-          [10, -75], [5, -50], [-10, -35], [-25, -48], [-55, -68],
-          [-40, -73], [-15, -75], [0, -80], [10, -75]
+          [10, -75],
+          [5, -50],
+          [-10, -35],
+          [-25, -48],
+          [-55, -68],
+          [-40, -73],
+          [-15, -75],
+          [0, -80],
+          [10, -75],
         ],
       ];
 
@@ -258,7 +291,7 @@ export function TravelGlobe({ addresses }: TravelGlobeProps) {
           ctx.setLineDash([]);
 
           // Akan Işık Fotonu (Flowing Light Particle)
-          const particleT = ((time * 0.02 + i * 0.3) % 1);
+          const particleT = (time * 0.02 + i * 0.3) % 1;
           const particleStep = Math.floor(particleT * 20);
           const activePt = arcPoints[particleStep];
           if (activePt && activePt.visible) {
@@ -443,7 +476,8 @@ export function TravelGlobe({ addresses }: TravelGlobeProps) {
                 <span className="stage-badge">✨ 3D KÜRE SEYAHAT ŞOVU</span>
                 <h2>Dünya Üzerindeki Seyahat Rotanız</h2>
                 <p>
-                  Tamamladığınız duraklar arasında parlayan ışık arkları akıyor. Döndürmek için sürükleyebilirsiniz.
+                  Tamamladığınız duraklar arasında parlayan ışık arkları akıyor. Döndürmek için
+                  sürükleyebilirsiniz.
                 </p>
               </div>
               <div className="stage-actions">

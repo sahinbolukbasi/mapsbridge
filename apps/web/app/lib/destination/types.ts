@@ -27,15 +27,15 @@ export interface NeighborhoodBrief {
   name: string;
   /** One sharp paragraph — specific, not copyable to another city. */
   character: string;
-  bestFor: string[];  // ["locals", "nightlife", "families", "digital_nomads", "design"]
+  bestFor: string[]; // ["locals", "nightlife", "families", "digital_nomads", "design"]
   bestVisitTime?: string;
   accommodationSuitable: boolean;
   walkableFromCenter: boolean;
 }
 
 export interface TimingRule {
-  subject: string;     // venue name or category
-  rule: string;        // "Pazartesi kapalı", "Öğle 14-17 arası kapalı"
+  subject: string; // venue name or category
+  rule: string; // "Pazartesi kapalı", "Öğle 14-17 arası kapalı"
   type: "closed_day" | "best_time" | "avoid_time" | "queue_warning" | "seasonal";
   severity: "blocks_visit" | "degrades_experience" | "fyi";
 }
@@ -69,24 +69,24 @@ export interface NicheAngle {
 
 export interface HighDemandVenue {
   name: string;
-  leadTimeDays: number;    // how far ahead to book
-  method: string;          // "Official site: sagradafamilia.org"
+  leadTimeDays: number; // how far ahead to book
+  method: string; // "Official site: sagradafamilia.org"
   note?: string;
 }
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 
 export interface DestinationBrief {
-  id: string;           // "istanbul" | "barcelona" | "paris"
+  id: string; // "istanbul" | "barcelona" | "paris"
   level: "city" | "neighborhood";
   name: string;
-  nameLocal?: string;   // "İstanbul" / "Barcelona" / "Paris"
-  countryCode: string;  // ISO 3166-1 alpha-2
+  nameLocal?: string; // "İstanbul" / "Barcelona" / "Paris"
+  countryCode: string; // ISO 3166-1 alpha-2
 
   cityRhythm: SourcedField<{
-    wakeUpTime: string;      // "08:00"
-    lunchTime: string;       // "13:00-15:00"
-    dinnerTime: string;      // "21:00-23:00"
+    wakeUpTime: string; // "08:00"
+    lunchTime: string; // "13:00-15:00"
+    dinnerTime: string; // "21:00-23:00"
     siestaExists: boolean;
     nightlifeStartsAt?: string;
     closingDayNote?: string;
@@ -142,16 +142,18 @@ export interface DestinationBrief {
     originBiasNote?: string;
   }>;
 
-  localCalendar: SourcedField<Array<{
-    date: string;     // "MM-DD" or "YYYY-MM-DD"
-    name: string;
-    type: "public_holiday" | "festival" | "closure_period";
-    impact: string;
-  }>>;
+  localCalendar: SourcedField<
+    Array<{
+      date: string; // "MM-DD" or "YYYY-MM-DD"
+      name: string;
+      type: "public_holiday" | "festival" | "closure_period";
+      impact: string;
+    }>
+  >;
 
   nicheAngles: SourcedField<NicheAngle[]>;
 
   schemaVersion: "1.0";
-  lastCuratedAt: string;  // ISO 8601
+  lastCuratedAt: string; // ISO 8601
   curatedBy: "agent_pipeline" | "manual" | "agent_then_curated";
 }

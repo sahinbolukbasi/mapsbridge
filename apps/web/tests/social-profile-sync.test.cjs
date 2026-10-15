@@ -1,9 +1,9 @@
-const { test, describe } = require('node:test');
-const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
-const { transformSync } = require('esbuild');
+const { test, describe } = require("node:test");
+const assert = require("node:assert/strict");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const { transformSync } = require("esbuild");
 
 // Mock localStorage for node environment
 function createMockStorage() {
@@ -24,7 +24,7 @@ function createMockStorage() {
   };
 }
 
-describe('Social Media & Profile Synchronization Engine', () => {
+describe("Social Media & Profile Synchronization Engine", () => {
   const mockStorage = createMockStorage();
   const eventDispatched = [];
 
@@ -78,7 +78,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
       if (updates.avatarUrl) mockStorage.setItem(STORAGE_AVATAR_KEY, updates.avatarUrl);
       if (updates.coverPhotoUrl) mockStorage.setItem(STORAGE_COVER_KEY, updates.coverPhotoUrl);
       this.cascadeAuthorToPosts(updated.fullName, updated.username, updated.avatarUrl);
-      eventDispatched.push({ type: 'profile_updated', detail: updated });
+      eventDispatched.push({ type: "profile_updated", detail: updated });
       return updated;
     },
 
@@ -100,7 +100,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
 
       if (modified) {
         mockStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(updatedPosts));
-        eventDispatched.push({ type: 'posts_updated', detail: updatedPosts });
+        eventDispatched.push({ type: "posts_updated", detail: updatedPosts });
       }
     },
 
@@ -134,7 +134,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
       };
       const nextPosts = [newPost, ...posts];
       mockStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
-      eventDispatched.push({ type: 'posts_updated', detail: nextPosts });
+      eventDispatched.push({ type: "posts_updated", detail: nextPosts });
       return newPost;
     },
 
@@ -156,7 +156,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
       });
       if (updated) {
         mockStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
-        eventDispatched.push({ type: 'posts_updated', detail: nextPosts });
+        eventDispatched.push({ type: "posts_updated", detail: nextPosts });
       }
       return updated;
     },
@@ -165,7 +165,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
       const posts = this.getPosts();
       const nextPosts = posts.filter((p) => p.id !== postId);
       mockStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
-      eventDispatched.push({ type: 'posts_updated', detail: nextPosts });
+      eventDispatched.push({ type: "posts_updated", detail: nextPosts });
       return true;
     },
 
@@ -186,7 +186,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
       });
       if (updated) {
         mockStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
-        eventDispatched.push({ type: 'posts_updated', detail: nextPosts });
+        eventDispatched.push({ type: "posts_updated", detail: nextPosts });
       }
       return updated;
     },
@@ -214,11 +214,11 @@ describe('Social Media & Profile Synchronization Engine', () => {
         return p;
       });
       mockStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
-      eventDispatched.push({ type: 'posts_updated', detail: nextPosts });
+      eventDispatched.push({ type: "posts_updated", detail: nextPosts });
     },
   };
 
-  test('Profile updates persist correctly and retrieve updated state', () => {
+  test("Profile updates persist correctly and retrieve updated state", () => {
     mockStorage.clear();
     const initial = syncEngine.getProfile();
     assert.equal(initial.fullName, "Gezgin");
@@ -242,7 +242,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
     assert.equal(updated.avatarUrl, "https://example.com/arda.jpg");
   });
 
-  test('Creating a community post assigns author details and persists in storage', () => {
+  test("Creating a community post assigns author details and persists in storage", () => {
     const post = syncEngine.createPost({
       content: "Likya Yolu Gelidonya Feneri gün batımı rotası harikaydı!",
       category: "Doğa & Yürüyüş",
@@ -264,19 +264,23 @@ describe('Social Media & Profile Synchronization Engine', () => {
     assert.equal(posts[0].id, post.id);
   });
 
-  test('In-place post editing updates text, category, location, and tags', () => {
+  test("In-place post editing updates text, category, location, and tags", () => {
     const posts = syncEngine.getPosts();
     const targetPost = posts[0];
 
     const edited = syncEngine.editPost(targetPost.id, {
-      content: "Likya Yolu Gelidonya Feneri gün batımı rotası güncellendi. Su kaynakları kontrol edildi!",
+      content:
+        "Likya Yolu Gelidonya Feneri gün batımı rotası güncellendi. Su kaynakları kontrol edildi!",
       category: "Rehber & Rota",
       locationTag: "Taşlıkburnu / Gelidonya",
       hashtags: ["#LikyaYolu", "#Gelidonya", "#DoğaRehberi"],
     });
 
     assert.ok(edited);
-    assert.equal(edited.content, "Likya Yolu Gelidonya Feneri gün batımı rotası güncellendi. Su kaynakları kontrol edildi!");
+    assert.equal(
+      edited.content,
+      "Likya Yolu Gelidonya Feneri gün batımı rotası güncellendi. Su kaynakları kontrol edildi!",
+    );
     assert.equal(edited.category, "Rehber & Rota");
     assert.equal(edited.locationTag, "Taşlıkburnu / Gelidonya");
     assert.deepEqual(edited.hashtags, ["#LikyaYolu", "#Gelidonya", "#DoğaRehberi"]);
@@ -285,7 +289,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
     assert.equal(storedPosts[0].content, edited.content);
   });
 
-  test('Liking a post toggles liked status and increments/decrements like count', () => {
+  test("Liking a post toggles liked status and increments/decrements like count", () => {
     const post = syncEngine.getPosts()[0];
     assert.equal(post.likesCount, 0);
     assert.equal(post.likedByMe, false);
@@ -301,7 +305,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
     assert.equal(unliked.likesCount, 0);
   });
 
-  test('Adding a comment appends to post comments list', () => {
+  test("Adding a comment appends to post comments list", () => {
     const post = syncEngine.getPosts()[0];
     syncEngine.addComment(post.id, "Muazzam bir rota, kamp alanı var mı?");
 
@@ -311,7 +315,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
     assert.equal(updated.comments[0].displayName, "Arda Kurt");
   });
 
-  test('Profile update cascades author name and avatar changes to existing posts', () => {
+  test("Profile update cascades author name and avatar changes to existing posts", () => {
     syncEngine.updateProfile({
       fullName: "Arda Kurt (Pro Rehber)",
       avatarUrl: "https://example.com/arda-new-pro.jpg",
@@ -322,7 +326,7 @@ describe('Social Media & Profile Synchronization Engine', () => {
     assert.equal(posts[0].authorAvatar, "https://example.com/arda-new-pro.jpg");
   });
 
-  test('Deleting a post removes it from storage', () => {
+  test("Deleting a post removes it from storage", () => {
     const post = syncEngine.getPosts()[0];
     const ok = syncEngine.deletePost(post.id);
     assert.equal(ok, true);
@@ -332,8 +336,8 @@ describe('Social Media & Profile Synchronization Engine', () => {
   });
 });
 
-describe('Soft Minimalist Iconography & Badging Design System', () => {
-  test('Soft icon names verify valid minimalist SVG representations without raw emojis', () => {
+describe("Soft Minimalist Iconography & Badging Design System", () => {
+  test("Soft icon names verify valid minimalist SVG representations without raw emojis", () => {
     const validSoftIcons = [
       "compass",
       "map-pin",
@@ -378,7 +382,7 @@ describe('Soft Minimalist Iconography & Badging Design System', () => {
     }
   });
 
-  test('SoftBadge color palette contains soft serene background and subtle borders', () => {
+  test("SoftBadge color palette contains soft serene background and subtle borders", () => {
     const palette = {
       emerald: { bg: "rgba(16, 185, 129, 0.08)", text: "#065f46" },
       slate: { bg: "rgba(100, 116, 139, 0.08)", text: "#334155" },
@@ -394,13 +398,13 @@ describe('Soft Minimalist Iconography & Badging Design System', () => {
   });
 });
 
-describe('Mobile Startup Stability & ErrorBoundary Contract', () => {
-  test('App splash screen logic avoids premature WelcomeScreen flash', () => {
+describe("Mobile Startup Stability & ErrorBoundary Contract", () => {
+  test("App splash screen logic avoids premature WelcomeScreen flash", () => {
     // Simulated state transition:
     // Before fix: (loadingSession && showSplash) => if loadingSession finishes in 10ms,
     // showSplash remains true but condition fails, dropping splash immediately and falling through to WelcomeScreen!
     // After fix: (loadingSession || showSplash) => retains splash smoothly until timer fires.
-    
+
     function shouldShowSplashBeforeFix(loadingSession, showSplash) {
       return loadingSession && showSplash;
     }
@@ -414,6 +418,6 @@ describe('Mobile Startup Stability & ErrorBoundary Contract', () => {
     const splashTimerStillRunning = true; // showSplash = true
 
     assert.equal(shouldShowSplashBeforeFix(sessionLoaded, splashTimerStillRunning), false); // Caused flashing bug!
-    assert.equal(shouldShowSplashAfterFix(sessionLoaded, splashTimerStillRunning), true);   // Fixed! Smooth transition
+    assert.equal(shouldShowSplashAfterFix(sessionLoaded, splashTimerStillRunning), true); // Fixed! Smooth transition
   });
 });

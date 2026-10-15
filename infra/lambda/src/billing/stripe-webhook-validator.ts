@@ -33,20 +33,18 @@ export class StripeWebhookValidator {
    */
   async initialize(): Promise<void> {
     if (this.secret) return;
-    
+
     const secretKey = process.env.STRIPE_WEBHOOK_SECRET;
     if (!secretKey) {
-      throw new BillingError(503, 'STRIPE_NOT_CONFIGURED', 'Stripe webhook secret not configured');
+      throw new BillingError(503, "STRIPE_NOT_CONFIGURED", "Stripe webhook secret not configured");
     }
 
     // Resolve SSM secret if prefixed with "secret:"
-    this.secret = secretKey.startsWith('secret:') 
-      ? await resolveEnvSecret(secretKey)
-      : secretKey;
+    this.secret = secretKey.startsWith("secret:") ? await resolveEnvSecret(secretKey) : secretKey;
 
     // Validate webhook secret format
     if (!/^whsec_[A-Za-z0-9]+$/.test(this.secret)) {
-      throw new BillingError(500, 'INVALID_WEBHOOK_SECRET', 'Invalid Stripe webhook secret format');
+      throw new BillingError(500, "INVALID_WEBHOOK_SECRET", "Invalid Stripe webhook secret format");
     }
   }
 
@@ -58,9 +56,9 @@ export class StripeWebhookValidator {
    */
   async verify(payload: string, signature: string): Promise<VerifiedWebhook> {
     await this.initialize();
-    
+
     if (!signature) {
-      throw new BillingError(401, 'MISSING_SIGNATURE', 'Stripe signature header is missing');
+      throw new BillingError(401, "MISSING_SIGNATURE", "Stripe signature header is missing");
     }
 
     const signatureParts = this.parseSignature(signature);
@@ -68,15 +66,19 @@ export class StripeWebhookValidator {
 
     // Timing-safe comparison
     if (!this.timingSafeCompare(expectedSignature, signatureParts.v1)) {
-      throw new BillingError(401, 'INVALID_SIGNATURE', 'Stripe signature verification failed');
+      throw new BillingError(401, "INVALID_SIGNATURE", "Stripe signature verification failed");
     }
 
     // Check timestamp tolerance (default: 5 minutes)
-    const tolerance = parseInt(process.env.STRIPE_SIGNATURE_TOLERANCE || '300');
+    const tolerance = parseInt(process.env.STRIPE_SIGNATURE_TOLERANCE || "300");
     const now = Math.floor(Date.now() / 1000);
-    
+
     if (Math.abs(now - signatureParts.timestamp) > tolerance) {
-      throw new BillingError(401, 'TIMESTAMP_OUT_OF_RANGE', 'Webhook timestamp is outside tolerance');
+      throw new BillingError(
+        401,
+        "TIMESTAMP_OUT_OF_RANGE",
+        "Webhook timestamp is outside tolerance",
+      );
     }
 
     // Parse payload as event
@@ -84,12 +86,12 @@ export class StripeWebhookValidator {
     try {
       event = JSON.parse(payload);
     } catch (error) {
-      throw new BillingError(400, 'INVALID_PAYLOAD', 'Unable to parse webhook payload');
+      throw new BillingError(400, "INVALID_PAYLOAD", "Unable to parse webhook payload");
     }
 
     // Validate event structure
     if (!event.id || !event.type || !event.data?.object) {
-      throw new BillingError(400, 'INVALID_EVENT', 'Invalid webhook event structure');
+      throw new BillingError(400, "INVALID_EVENT", "Invalid webhook event structure");
     }
 
     return {
@@ -105,21 +107,21 @@ export class StripeWebhookValidator {
    */
   private parseSignature(signature: string): { timestamp: number; v1: string; v0?: string } {
     const parts: Record<string, string> = {};
-    
-    for (const part of signature.split(',')) {
-      const [key, value] = part.split('=', 2);
+
+    for (const part of signature.split(",")) {
+      const [key, value] = part.split("=", 2);
       if (key && value) {
         parts[key] = value;
       }
     }
 
     if (!parts.t || !parts.v1) {
-      throw new BillingError(401, 'MALFORMED_SIGNATURE', 'Stripe signature header is malformed');
+      throw new BillingError(401, "MALFORMED_SIGNATURE", "Stripe signature header is malformed");
     }
 
     const timestamp = parseInt(parts.t);
     if (!Number.isInteger(timestamp) || timestamp < 0) {
-      throw new BillingError(401, 'INVALID_TIMESTAMP', 'Invalid signature timestamp');
+      throw new BillingError(401, "INVALID_TIMESTAMP", "Invalid signature timestamp");
     }
 
     return {
@@ -134,13 +136,11 @@ export class StripeWebhookValidator {
    */
   private computeSignature(payload: string, timestamp: number): string {
     if (!this.secret) {
-      throw new Error('Stripe webhook secret not initialized');
+      throw new Error("Stripe webhook secret not initialized");
     }
 
     const signedPayload = `${timestamp}.${payload}`;
-    return createHmac('sha256', this.secret)
-      .update(signedPayload, 'utf8')
-      .digest('hex');
+    return createHmac("sha256", this.secret).update(signedPayload, "utf8").digest("hex");
   }
 
   /**
@@ -170,12 +170,12 @@ export class StripeWebhookValidator {
       const payload = event.body;
 
       if (!payload) {
-        throw new BillingError(400, 'MISSING_PAYLOAD', 'Webhook payload is missing');
+        throw new BillingError(400, "MISSING_PAYLOAD", "Webhook payload is missing");
       }
 
       try {
         const verified = await validator.verify(payload, signature);
-        
+
         // Add verified event to context
         context.stripe = {
           event: verified.event,
@@ -221,7 +221,7 @@ export class StripeWebhookEventValidator {
    */
   static validateEventData(event: StripeWebhookEvent, requiredFields: string[]): boolean {
     const object = event.data.object;
-    return requiredFields.every(field => {
+    return requiredFields.every((field) => {
       const keys = field.split(".");
       let current = object;
       for (const key of keys) {

@@ -14,7 +14,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type FocusScope = 'trip' | 'day' | 'place' | 'topic';
+export type FocusScope = "trip" | "day" | "place" | "topic";
 
 export interface ThreadFocus {
   scope: FocusScope;
@@ -33,7 +33,7 @@ export interface ThreadFocus {
 
 export function defaultFocus(turn = 0): ThreadFocus {
   return {
-    scope: 'trip',
+    scope: "trip",
     sinceTurn: turn,
     updatedAt: new Date().toISOString(),
   };
@@ -102,7 +102,7 @@ interface FocusUpdateInput {
   /** Ordered list of place names/ids referenced in the last assistant response */
   mentionedPlaces?: Array<{ id: string; name: string }>;
   /** If the user clicked a pin or a day card on the map, pass it here */
-  mapEvent?: { type: 'place' | 'day'; refId: string; label: string };
+  mapEvent?: { type: "place" | "day"; refId: string; label: string };
   previousFocus: ThreadFocus;
   turn: number;
 }
@@ -124,7 +124,7 @@ export function updateFocus(input: FocusUpdateInput): ThreadFocus {
   // 1. Map event overrides everything
   if (mapEvent) {
     return {
-      scope: mapEvent.type === 'place' ? 'place' : 'day',
+      scope: mapEvent.type === "place" ? "place" : "day",
       refId: mapEvent.refId,
       label: mapEvent.label,
       sinceTurn: turn,
@@ -134,10 +134,10 @@ export function updateFocus(input: FocusUpdateInput): ThreadFocus {
 
   // 2. Message references a known place
   for (const place of mentionedPlaces) {
-    const nameEscaped = place.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    if (new RegExp(nameEscaped, 'iu').test(message)) {
+    const nameEscaped = place.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(nameEscaped, "iu").test(message)) {
       return {
-        scope: 'place',
+        scope: "place",
         refId: place.id,
         label: place.name,
         sinceTurn: turn,
@@ -151,7 +151,7 @@ export function updateFocus(input: FocusUpdateInput): ThreadFocus {
   if (dayMatch) {
     const dayNum = dayMatch[1] ?? dayMatch[2] ?? dayMatch[3] ?? dayMatch[4];
     return {
-      scope: 'day',
+      scope: "day",
       refId: String(dayNum),
       label: `${dayNum}. Gün`,
       sinceTurn: turn,
@@ -175,14 +175,14 @@ export function updateFocus(input: FocusUpdateInput): ThreadFocus {
 /** Short string injected into the system prompt so the model knows current focus. */
 export function focusToPromptSnippet(focus: ThreadFocus): string {
   switch (focus.scope) {
-    case 'place':
-      return `Aktif odak: ${focus.label ?? focus.refId ?? 'bilinmeyen mekan'} (mekan)`;
-    case 'day':
+    case "place":
+      return `Aktif odak: ${focus.label ?? focus.refId ?? "bilinmeyen mekan"} (mekan)`;
+    case "day":
       return `Aktif odak: ${focus.label ?? `Gün ${focus.refId}`} (gün planı)`;
-    case 'topic':
-      return `Aktif odak: ${focus.label ?? focus.refId ?? 'konu'} (konu)`;
-    case 'trip':
+    case "topic":
+      return `Aktif odak: ${focus.label ?? focus.refId ?? "konu"} (konu)`;
+    case "trip":
     default:
-      return 'Aktif odak: genel seyahat planı';
+      return "Aktif odak: genel seyahat planı";
   }
 }

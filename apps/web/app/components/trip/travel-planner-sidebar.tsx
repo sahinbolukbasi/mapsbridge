@@ -6,11 +6,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  Pin,
-  PinCategory,
-  DEFAULT_CATEGORY_META,
-} from "../../lib/trip/models";
+import { Pin, PinCategory, DEFAULT_CATEGORY_META } from "../../lib/trip/models";
 import { useTravelPlanner } from "../../lib/trip/use-travel-planner";
 import { googleMapsEnabled } from "../../lib/google/maps-client";
 import { searchPlaces } from "../../lib/trip/geocoding-service";
@@ -154,7 +150,12 @@ export function TravelPlannerSidebar({
   // ── Sidebar Address / Place Search ──
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [isSidebarSearching, setIsSidebarSearching] = useState(false);
-  const [foundPlace, setFoundPlace] = useState<{ lat: number; lng: number; address: string; label?: string } | null>(null);
+  const [foundPlace, setFoundPlace] = useState<{
+    lat: number;
+    lng: number;
+    address: string;
+    label?: string;
+  } | null>(null);
 
   const handleSidebarSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,9 +253,9 @@ export function TravelPlannerSidebar({
     const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
     if (targetIndex < 0 || targetIndex >= currentDayPins.length) return;
 
-    const currentOrder = pin.order || (currentIndex + 1);
+    const currentOrder = pin.order || currentIndex + 1;
     const targetPin = currentDayPins[targetIndex];
-    const targetOrder = targetPin.order || (targetIndex + 1);
+    const targetOrder = targetPin.order || targetIndex + 1;
 
     updatePinAnywhere(pin.id, { order: targetOrder });
     updatePinAnywhere(targetPin.id, { order: currentOrder });
@@ -263,7 +264,8 @@ export function TravelPlannerSidebar({
 
   // ── 1-Click Google Maps Integration (Durak Sıralı Aktarım) ──────
   const handleExportToGoogleMaps = () => {
-    const rawStops = pinsWithTime && pinsWithTime.length > 0 ? pinsWithTime : (activeTrip?.pins || []);
+    const rawStops =
+      pinsWithTime && pinsWithTime.length > 0 ? pinsWithTime : activeTrip?.pins || [];
     const res = exportTripToGoogleMaps(rawStops);
     showToast(res.message);
   };
@@ -300,7 +302,8 @@ export function TravelPlannerSidebar({
   const handleAiModifyRoute = async (customPrompt?: string) => {
     const promptText = (customPrompt || aiPrompt).trim();
     if (!promptText) return;
-    if (guardGuest("AI ile Rota Düzenleme", "Yapay zeka ile rotanızı yeniden düzenlemek için")) return;
+    if (guardGuest("AI ile Rota Düzenleme", "Yapay zeka ile rotanızı yeniden düzenlemek için"))
+      return;
     if (!activeTrip) {
       showToast("⚠️ Lütfen önce aktif bir gezi seçin.");
       return;
@@ -312,13 +315,13 @@ export function TravelPlannerSidebar({
     try {
       const currentRoute = tripToRoute(activeTrip);
       const requestId = crypto.randomUUID();
-      const conversationId = `map-${activeTrip.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 30)}-${Date.now()}`;
+      const conversationId = `map-${activeTrip.id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 30)}-${Date.now()}`;
 
       const res = await apiFetch<MultiAgentResponse>("/ai/route-planner", {
         method: "POST",
         timeoutMs: 35000,
         body: JSON.stringify({
-          prompt: `${activeTrip.destination || activeTrip.title || 'Şehir'}: ${promptText}`,
+          prompt: `${activeTrip.destination || activeTrip.title || "Şehir"}: ${promptText}`,
           requestId,
           conversationId,
           conversationState: {
@@ -330,10 +333,8 @@ export function TravelPlannerSidebar({
               planningRequested: true,
             },
             route: currentRoute,
-            messages: [
-              { role: "user", content: `Mevcut rotamı düzenle: ${promptText}` }
-            ]
-          }
+            messages: [{ role: "user", content: `Mevcut rotamı düzenle: ${promptText}` }],
+          },
         }),
       });
 
@@ -353,7 +354,9 @@ export function TravelPlannerSidebar({
           },
         ]);
         setActiveVersionNum(nextVerNum);
-        showToast(`✨ ${res.orchestratorSummary?.slice(0, 75) || "Rotanız yapay zeka ile güncellendi!"}`);
+        showToast(
+          `✨ ${res.orchestratorSummary?.slice(0, 75) || "Rotanız yapay zeka ile güncellendi!"}`,
+        );
         setAiPrompt("");
         setShowAiInput(false);
       } else if (res && res.orchestratorSummary) {
@@ -368,7 +371,6 @@ export function TravelPlannerSidebar({
       setIsAiModifying(false);
     }
   };
-
 
   const handleSwitchVersion = (verNum: number) => {
     const target = routeVersions.find((v) => v.versionNum === verNum);
@@ -431,7 +433,8 @@ export function TravelPlannerSidebar({
   // Handle saving pin edits
   const handleSavePinEdit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (guardGuest("Durak Düzenleme", "Durak bilgilerini özelleştirmek için lütfen üye olun.")) return;
+    if (guardGuest("Durak Düzenleme", "Durak bilgilerini özelleştirmek için lütfen üye olun."))
+      return;
     if (!selectedPin) return;
 
     const photos = [...(selectedPin.photos || [])];
@@ -505,11 +508,24 @@ export function TravelPlannerSidebar({
     return pinsWithTime.filter((p) => {
       if (categoryFilter !== "all") {
         if (categoryFilter === "kahve" && p.category !== "kahve") return false;
-        if (categoryFilter === "gastronomi" && p.category !== "gastronomi" && p.category !== "yemek") return false;
-        if (categoryFilter === "tarih" && p.category !== "tarih" && p.category !== "muze") return false;
+        if (
+          categoryFilter === "gastronomi" &&
+          p.category !== "gastronomi" &&
+          p.category !== "yemek"
+        )
+          return false;
+        if (categoryFilter === "tarih" && p.category !== "tarih" && p.category !== "muze")
+          return false;
         if (categoryFilter === "alisveris" && p.category !== "alisveris") return false;
-        if (categoryFilter === "spor" && p.category !== "spor" && p.category !== "aktivite") return false;
-        if (categoryFilter === "gezi" && p.category !== "gezi" && p.category !== "gezilecek" && p.category !== "turistik") return false;
+        if (categoryFilter === "spor" && p.category !== "spor" && p.category !== "aktivite")
+          return false;
+        if (
+          categoryFilter === "gezi" &&
+          p.category !== "gezi" &&
+          p.category !== "gezilecek" &&
+          p.category !== "turistik"
+        )
+          return false;
       }
       return true;
     });
@@ -653,7 +669,9 @@ export function TravelPlannerSidebar({
                       type="button"
                       className={`btn-pin-primary-save ${generalPins.some((p) => p.id === selectedPin.id || p.label === selectedPin.label) ? "is-saved" : ""}`}
                       onClick={() => {
-                        const alreadySaved = generalPins.some((p) => p.id === selectedPin.id || p.label === selectedPin.label);
+                        const alreadySaved = generalPins.some(
+                          (p) => p.id === selectedPin.id || p.label === selectedPin.label,
+                        );
                         if (alreadySaved) {
                           showToast("📍 Bu durak zaten kayıtlı havuzunuzda mevcut.");
                         } else {
@@ -675,10 +693,18 @@ export function TravelPlannerSidebar({
                       title="Kayıtlı Adreslerime Ekle"
                     >
                       <span className="material-symbols-outlined text-[17px]">
-                        {generalPins.some((p) => p.id === selectedPin.id || p.label === selectedPin.label) ? "bookmark_added" : "bookmark_add"}
+                        {generalPins.some(
+                          (p) => p.id === selectedPin.id || p.label === selectedPin.label,
+                        )
+                          ? "bookmark_added"
+                          : "bookmark_add"}
                       </span>
                       <span>
-                        {generalPins.some((p) => p.id === selectedPin.id || p.label === selectedPin.label) ? "Kaydedildi" : "Kaydet"}
+                        {generalPins.some(
+                          (p) => p.id === selectedPin.id || p.label === selectedPin.label,
+                        )
+                          ? "Kaydedildi"
+                          : "Kaydet"}
                       </span>
                     </button>
                   </div>
@@ -686,7 +712,9 @@ export function TravelPlannerSidebar({
                   <div className="info-meta-list">
                     <div className="info-meta-row">
                       <span className="info-meta-label">Planlanan Süre</span>
-                      <span className="info-meta-value">⏱️ {selectedPin.durationMinutes || 60} dakika</span>
+                      <span className="info-meta-value">
+                        ⏱️ {selectedPin.durationMinutes || 60} dakika
+                      </span>
                     </div>
                     <div className="info-meta-row">
                       <span className="info-meta-label">Bağlı Olduğu Gezi</span>
@@ -707,7 +735,11 @@ export function TravelPlannerSidebar({
                   ) : (
                     <div className="info-empty-note">
                       <span>Henüz özel not eklenmemiş.</span>
-                      <button type="button" className="btn-add-note-inline" onClick={() => setDetailTab("edit")}>
+                      <button
+                        type="button"
+                        className="btn-add-note-inline"
+                        onClick={() => setDetailTab("edit")}
+                      >
                         + Not Ekle
                       </button>
                     </div>
@@ -743,7 +775,11 @@ export function TravelPlannerSidebar({
                     {selectedPin.photos && selectedPin.photos.length > 0 ? (
                       selectedPin.photos.map((url, i) => (
                         <div key={i} className="photo-card-item">
-                          <img src={url} alt={`${selectedPin.label} - ${i + 1}`} className="photo-thumbnail-img" />
+                          <img
+                            src={url}
+                            alt={`${selectedPin.label} - ${i + 1}`}
+                            className="photo-thumbnail-img"
+                          />
                           <button
                             type="button"
                             className="photo-remove-btn"
@@ -756,7 +792,11 @@ export function TravelPlannerSidebar({
                       ))
                     ) : selectedPin.photo ? (
                       <div className="photo-card-item">
-                        <img src={selectedPin.photo} alt={selectedPin.label} className="photo-thumbnail-img" />
+                        <img
+                          src={selectedPin.photo}
+                          alt={selectedPin.label}
+                          className="photo-thumbnail-img"
+                        />
                       </div>
                     ) : (
                       <div className="no-photos-box">
@@ -785,7 +825,16 @@ export function TravelPlannerSidebar({
                 </div>
 
                 {/* Google Maps Mekan & Yorum Bilgileri (Çok Katmanlı Önbellek) */}
-                <div className="info-section-group" style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div
+                  className="info-section-group"
+                  style={{
+                    marginTop: "0.75rem",
+                    padding: "0.75rem",
+                    backgroundColor: "rgba(255,255,255,0.03)",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
                   <GooglePlaceInfo
                     placeId={selectedPin.googlePlaceId}
                     label={selectedPin.label}
@@ -800,14 +849,20 @@ export function TravelPlannerSidebar({
 
                 {/* Sil / Düzenle toolbar */}
                 <div className="info-actions-toolbar">
-                  <button type="button" className="btn-info-edit-trigger" onClick={() => setDetailTab("edit")}>
+                  <button
+                    type="button"
+                    className="btn-info-edit-trigger"
+                    onClick={() => setDetailTab("edit")}
+                  >
                     ✏️ Düzenle
                   </button>
                   <button
                     type="button"
                     className="btn-sub-action btn-danger"
                     onClick={() => {
-                      if (confirm(`"${selectedPin.label}" pinini silmek istediğinize emin misiniz?`)) {
+                      if (
+                        confirm(`"${selectedPin.label}" pinini silmek istediğinize emin misiniz?`)
+                      ) {
                         deletePinAnywhere(selectedPin.id);
                         setShowInPanelDetail(false);
                       }
@@ -897,7 +952,11 @@ export function TravelPlannerSidebar({
                 </div>
 
                 <div className="form-actions-row">
-                  <button type="button" className="btn-cancel-inline" onClick={() => setDetailTab("info")}>
+                  <button
+                    type="button"
+                    className="btn-cancel-inline"
+                    onClick={() => setDetailTab("info")}
+                  >
                     İptal
                   </button>
                   <button type="submit" className="btn-save-inline">
@@ -924,14 +983,19 @@ export function TravelPlannerSidebar({
                     title="Rotayı değiştir veya yeni rota ekle"
                   >
                     <div className="stitch-route-selector-icon">
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>alt_route</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                        alt_route
+                      </span>
                     </div>
                     <div className="stitch-route-selector-text">
                       <div className="stitch-route-title-wrap">
                         <h2 className="stitch-route-title-text">
                           {activeTrip?.title || "Yeni Seyahat Planım"}
                         </h2>
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#94a3b8" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "16px", color: "#94a3b8" }}
+                        >
                           {showRouteMenu ? "expand_less" : "expand_more"}
                         </span>
                       </div>
@@ -942,7 +1006,13 @@ export function TravelPlannerSidebar({
                         {activeTrip?.destination && (
                           <>
                             <span>•</span>
-                            <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            <span
+                              style={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
                               {activeTrip.destination}
                             </span>
                           </>
@@ -965,7 +1035,9 @@ export function TravelPlannerSidebar({
                           }}
                           className="stitch-dropdown-add-btn"
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>add_circle</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                            add_circle
+                          </span>
                           Yeni Rota
                         </button>
                       </div>
@@ -983,16 +1055,41 @@ export function TravelPlannerSidebar({
                               }}
                               className={`stitch-route-dropdown-item ${isActive ? "active" : ""}`}
                             >
-                              <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: "17px", color: isActive ? "#047857" : "#94a3b8" }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  minWidth: 0,
+                                }}
+                              >
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{
+                                    fontSize: "17px",
+                                    color: isActive ? "#047857" : "#94a3b8",
+                                  }}
+                                >
                                   {isActive ? "check_circle" : "alt_route"}
                                 </span>
-                                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                                  <span style={{ fontSize: "12px", fontWeight: isActive ? 800 : 600, color: isActive ? "#065f46" : "#334155", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                <div
+                                  style={{ display: "flex", flexDirection: "column", minWidth: 0 }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      fontWeight: isActive ? 800 : 600,
+                                      color: isActive ? "#065f46" : "#334155",
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                  >
                                     {t.title}
                                   </span>
                                   <span style={{ fontSize: "10px", color: "#94a3b8" }}>
-                                    {t.pins.length} Durak {t.destination ? `• ${t.destination}` : ""}
+                                    {t.pins.length} Durak{" "}
+                                    {t.destination ? `• ${t.destination}` : ""}
                                   </span>
                                 </div>
                               </div>
@@ -1002,7 +1099,11 @@ export function TravelPlannerSidebar({
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (confirm(`"${t.title}" rotasını silmek istediğinizden emin misiniz?`)) {
+                                    if (
+                                      confirm(
+                                        `"${t.title}" rotasını silmek istediğinizden emin misiniz?`,
+                                      )
+                                    ) {
                                       deleteTrip(t.id);
                                       showToast("🗑️ Rota silindi.");
                                     }
@@ -1010,7 +1111,12 @@ export function TravelPlannerSidebar({
                                   className="stitch-icon-action-btn btn-delete"
                                   title="Rotayı Sil"
                                 >
-                                  <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>delete</span>
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{ fontSize: "15px" }}
+                                  >
+                                    delete
+                                  </span>
                                 </button>
                               )}
                             </div>
@@ -1031,7 +1137,9 @@ export function TravelPlannerSidebar({
                       className={`stitch-mode-segment-btn ${workspaceMode === "edit" ? "active" : ""}`}
                       title="Rota Düzenleme Modu"
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>edit_location_alt</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                        edit_location_alt
+                      </span>
                       <span>Düzenle</span>
                     </button>
                     <button
@@ -1040,7 +1148,9 @@ export function TravelPlannerSidebar({
                       className={`stitch-mode-segment-btn ${workspaceMode === "travel" ? "active" : ""}`}
                       title="Gezi / Navigasyon Modu"
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>navigation</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                        navigation
+                      </span>
                       <span>Gezi</span>
                     </button>
                   </div>
@@ -1052,7 +1162,9 @@ export function TravelPlannerSidebar({
                     onClick={() => setPanelCollapsed(true)}
                     title="Paneli Daralt"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>left_panel_close</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                      left_panel_close
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1062,7 +1174,9 @@ export function TravelPlannerSidebar({
                 <div className="stitch-drawer-card">
                   <div className="stitch-drawer-header">
                     <span className="stitch-drawer-title">
-                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>add_location_alt</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        add_location_alt
+                      </span>
                       Yeni Seyahat Rotası Oluştur
                     </span>
                     <button
@@ -1132,7 +1246,9 @@ export function TravelPlannerSidebar({
                   Tümü ({(activeTrip?.pins || []).length})
                 </button>
                 {(activeTrip?.days || []).map((d) => {
-                  const dayPinsCount = (activeTrip.pins || []).filter((p) => p.dayIndex === d.dayIndex).length;
+                  const dayPinsCount = (activeTrip.pins || []).filter(
+                    (p) => p.dayIndex === d.dayIndex,
+                  ).length;
                   const isActive = activeDayIndex === d.dayIndex;
                   return (
                     <button
@@ -1154,7 +1270,9 @@ export function TravelPlannerSidebar({
                     showToast("🗓️ Yeni gün eklendi");
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>add</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    add
+                  </span>
                   <span>Gün</span>
                 </button>
               </div>
@@ -1166,7 +1284,17 @@ export function TravelPlannerSidebar({
             {workspaceMode === "edit" && (
               <div className="stitch-toolbar-panel">
                 {/* Address / Place Search Input */}
-                <form className="stitch-search-input-group" onSubmit={googleMapsEnabled?e=>{e.preventDefault();document.getElementById("google-place-query")?.focus();}:handleSidebarSearchSubmit}>
+                <form
+                  className="stitch-search-input-group"
+                  onSubmit={
+                    googleMapsEnabled
+                      ? (e) => {
+                          e.preventDefault();
+                          document.getElementById("google-place-query")?.focus();
+                        }
+                      : handleSidebarSearchSubmit
+                  }
+                >
                   <span className="material-symbols-outlined stitch-search-icon-left">search</span>
                   <input
                     type="text"
@@ -1187,10 +1315,34 @@ export function TravelPlannerSidebar({
                 {/* Search Result Card */}
                 {foundPlace && (
                   <div className="stitch-search-result-box">
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <h4 style={{ fontSize: "12px", fontWeight: 800, color: "#065f46", margin: 0, display: "flex", alignItems: "center", gap: "4px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <h4
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 800,
+                          color: "#065f46",
+                          margin: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
                         <span>📍</span>
-                        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{foundPlace.label}</span>
+                        <span
+                          style={{
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {foundPlace.label}
+                        </span>
                       </h4>
                       <button
                         type="button"
@@ -1200,8 +1352,26 @@ export function TravelPlannerSidebar({
                         ✕
                       </button>
                     </div>
-                    <p style={{ fontSize: "11px", color: "#047857", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{foundPlace.address}</p>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingTop: "4px" }}>
+                    <p
+                      style={{
+                        fontSize: "11px",
+                        color: "#047857",
+                        margin: 0,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {foundPlace.address}
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        paddingTop: "4px",
+                      }}
+                    >
                       <button
                         type="button"
                         onClick={() => handleAddFoundPlace("trip")}
@@ -1234,7 +1404,12 @@ export function TravelPlannerSidebar({
                     className="stitch-quick-grid-btn"
                     title="Durakları en uygun yol sırasına göre optimize et"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px", color: "#f59e0b" }}>auto_fix_high</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "15px", color: "#f59e0b" }}
+                    >
+                      auto_fix_high
+                    </span>
                     <span>Otomatik Sırala</span>
                   </button>
 
@@ -1245,7 +1420,12 @@ export function TravelPlannerSidebar({
                     className={`stitch-quick-grid-btn ${showAiInput ? "active" : ""}`}
                     title="AI ile rotayı yeniden düzenleyin veya durak ekleyin"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px", color: showAiInput ? "#ffffff" : "#10b981" }}>smart_toy</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "15px", color: showAiInput ? "#ffffff" : "#10b981" }}
+                    >
+                      smart_toy
+                    </span>
                     <span>AI ile Düzenle</span>
                   </button>
                 </div>
@@ -1255,7 +1435,9 @@ export function TravelPlannerSidebar({
                   <div className="stitch-drawer-card">
                     <div className="stitch-drawer-header">
                       <span className="stitch-drawer-title">
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>smart_toy</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                          smart_toy
+                        </span>
                         AI ile Rota Düzenle
                       </span>
                       <button
@@ -1291,15 +1473,24 @@ export function TravelPlannerSidebar({
                         style={{ display: "flex", alignItems: "center", gap: "4px" }}
                       >
                         {isAiModifying ? (
-                          <span className="material-symbols-outlined animate-spin" style={{ fontSize: "14px" }}>progress_activity</span>
+                          <span
+                            className="material-symbols-outlined animate-spin"
+                            style={{ fontSize: "14px" }}
+                          >
+                            progress_activity
+                          </span>
                         ) : (
-                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>send</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                            send
+                          </span>
                         )}
                         <span>{isAiModifying ? "..." : "Uygula"}</span>
                       </button>
                     </div>
 
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
+                    <div
+                      style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}
+                    >
                       {[
                         "☕ Yakında kafe molası ekle",
                         "🏛️ Tarihi yerleri öne al",
@@ -1330,7 +1521,6 @@ export function TravelPlannerSidebar({
                     </div>
                   </div>
                 )}
-
 
                 {/* Optional Category Filter Chips (Shown when there are stops) */}
                 {pinsWithTime.length > 0 && (
@@ -1364,21 +1554,60 @@ export function TravelPlannerSidebar({
             {workspaceMode === "travel" && (
               <div className="stitch-toolbar-panel">
                 <div className="stitch-travel-overview-box">
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 800 }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#0f172a" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "17px", color: "#047857" }}>navigation</span>
-                      <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{activeTrip?.title || "Aktif Gezi"}</span>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      fontSize: "12px",
+                      fontWeight: 800,
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        color: "#0f172a",
+                      }}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "17px", color: "#047857" }}
+                      >
+                        navigation
+                      </span>
+                      <span
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {activeTrip?.title || "Aktif Gezi"}
+                      </span>
                     </span>
                     <span style={{ color: "#047857", fontSize: "11px" }}>
                       {pinsWithTime.filter((p) => p.visited).length} / {pinsWithTime.length} Durak (
                       {pinsWithTime.length > 0
-                        ? Math.round((pinsWithTime.filter((p) => p.visited).length / pinsWithTime.length) * 100)
+                        ? Math.round(
+                            (pinsWithTime.filter((p) => p.visited).length / pinsWithTime.length) *
+                              100,
+                          )
                         : 0}
                       %)
                     </span>
                   </div>
 
-                  <div style={{ width: "100%", height: "6px", borderRadius: "99px", background: "#e2e8f0", overflow: "hidden" }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "6px",
+                      borderRadius: "99px",
+                      background: "#e2e8f0",
+                      overflow: "hidden",
+                    }}
+                  >
                     <div
                       style={{
                         height: "100%",
@@ -1387,16 +1616,31 @@ export function TravelPlannerSidebar({
                         transition: "width 0.3s ease",
                         width: `${
                           pinsWithTime.length > 0
-                            ? Math.round((pinsWithTime.filter((p) => p.visited).length / pinsWithTime.length) * 100)
+                            ? Math.round(
+                                (pinsWithTime.filter((p) => p.visited).length /
+                                  pinsWithTime.length) *
+                                  100,
+                              )
                             : 0
                         }%`,
                       }}
                     />
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "4px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingTop: "4px",
+                    }}
+                  >
                     <span style={{ fontSize: "11px", color: "#64748b" }}>
-                      ⏱️ Toplam: {daySummary?.totalDayDurationMinutes ? (daySummary.totalDayDurationMinutes / 60).toFixed(1) : "2.5"} saat
+                      ⏱️ Toplam:{" "}
+                      {daySummary?.totalDayDurationMinutes
+                        ? (daySummary.totalDayDurationMinutes / 60).toFixed(1)
+                        : "2.5"}{" "}
+                      saat
                     </span>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1407,33 +1651,48 @@ export function TravelPlannerSidebar({
                         style={{ display: "flex", alignItems: "center", gap: "4px" }}
                         title="Tüm rotayı Google Maps'e aktar"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#34d399" }}>navigation</span>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "14px", color: "#34d399" }}
+                        >
+                          navigation
+                        </span>
                         <span>Google Maps</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => {
-                          window.dispatchEvent(new CustomEvent('mapsbridge:open-trip-manifesto'));
+                          window.dispatchEvent(new CustomEvent("mapsbridge:open-trip-manifesto"));
                         }}
                         className="stitch-btn-secondary"
                         style={{ display: "flex", alignItems: "center", gap: "4px" }}
                         title="Seyahat Rotası Markdown Manifestosu (.md)"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#38bdf8" }}>article</span>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "14px", color: "#38bdf8" }}
+                        >
+                          article
+                        </span>
                         <span>.MD</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => {
-                          window.dispatchEvent(new CustomEvent('mapsbridge:open-deal-tracker'));
+                          window.dispatchEvent(new CustomEvent("mapsbridge:open-deal-tracker"));
                         }}
                         className="stitch-btn-secondary"
                         style={{ display: "flex", alignItems: "center", gap: "4px" }}
                         title="Ucuz Bilet ve Otel Fiyat Takip Botu"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#f59e0b" }}>smart_toy</span>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "14px", color: "#f59e0b" }}
+                        >
+                          smart_toy
+                        </span>
                         <span>Fiyat Botu</span>
                       </button>
 
@@ -1453,7 +1712,9 @@ export function TravelPlannerSidebar({
                         style={{ display: "flex", alignItems: "center", gap: "4px" }}
                         title="Sıradaki durağa haritada odaklan"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>my_location</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                          my_location
+                        </span>
                         <span>Sıradaki</span>
                       </button>
                     </div>
@@ -1469,7 +1730,9 @@ export function TravelPlannerSidebar({
               <div className="stitch-map-point-banner">
                 <div className="stitch-map-point-top">
                   <span className="stitch-map-point-badge">
-                    <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>pin_drop</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
+                      pin_drop
+                    </span>
                     Haritadan Seçildi
                   </span>
                   <button
@@ -1478,14 +1741,35 @@ export function TravelPlannerSidebar({
                     className="stitch-icon-action-btn"
                     title="Kapat"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>close</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                      close
+                    </span>
                   </button>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                  <h4 style={{ fontSize: "13px", fontWeight: 800, color: "#0f172a", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <h4
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 800,
+                      color: "#0f172a",
+                      margin: 0,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {selectedMapPoint.address.split(",")[0] || "Yeni Durak"}
                   </h4>
-                  <p style={{ fontSize: "11px", color: "#64748b", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <p
+                    style={{
+                      fontSize: "11px",
+                      color: "#64748b",
+                      margin: 0,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {selectedMapPoint.address}
                   </p>
                 </div>
@@ -1508,14 +1792,16 @@ export function TravelPlannerSidebar({
                           visited: false,
                           durationMinutes: 60,
                         },
-                        targetDay
+                        targetDay,
                       );
                       onClearSelectedMapPoint?.();
                       showToast(`✓ "${label}" ${targetDay}. güne durak olarak eklendi`);
                     }}
                     className="stitch-btn-add-route"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>add_location</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                      add_location
+                    </span>
                     <span>+ Rotaya Durak Ekle</span>
                   </button>
                   <button
@@ -1550,12 +1836,24 @@ export function TravelPlannerSidebar({
               {filteredPins.length === 0 ? (
                 <div className="stitch-empty-notice-card">
                   <div className="stitch-empty-icon-circle">
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>explore_nearby</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                      explore_nearby
+                    </span>
                   </div>
                   <h3 style={{ fontSize: "13.5px", fontWeight: 800, color: "#0f172a", margin: 0 }}>
-                    {pinsWithTime.length === 0 ? "Rotanızda Henüz Durak Yok" : "Filtreye Uygun Durak Bulunamadı"}
+                    {pinsWithTime.length === 0
+                      ? "Rotanızda Henüz Durak Yok"
+                      : "Filtreye Uygun Durak Bulunamadı"}
                   </h3>
-                  <p style={{ fontSize: "11.5px", color: "#64748b", maxWidth: "260px", lineHeight: "1.4", margin: 0 }}>
+                  <p
+                    style={{
+                      fontSize: "11.5px",
+                      color: "#64748b",
+                      maxWidth: "260px",
+                      lineHeight: "1.4",
+                      margin: 0,
+                    }}
+                  >
                     {pinsWithTime.length === 0
                       ? "Yukarıdaki arama çubuğundan mekan arayabilir veya haritaya tıklayarak ilk durağınızı ekleyebilirsiniz."
                       : "Filtreyi 'Tümü' yaparak diğer durakları görebilirsiniz."}
@@ -1574,7 +1872,8 @@ export function TravelPlannerSidebar({
               ) : (
                 filteredPins.map((pin, index) => {
                   const isSelected = pin.id === selectedPinId;
-                  const catMeta = DEFAULT_CATEGORY_META[pin.category] || DEFAULT_CATEGORY_META.genel;
+                  const catMeta =
+                    DEFAULT_CATEGORY_META[pin.category] || DEFAULT_CATEGORY_META.genel;
                   const prevPin = index > 0 ? filteredPins[index - 1] : null;
 
                   return (
@@ -1583,8 +1882,13 @@ export function TravelPlannerSidebar({
                       {index > 0 && prevPin && (
                         <div className="travel-transit-connector">
                           <div className="transit-icon-pill">
-                            <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>directions_walk</span>
-                            <span>~{pin.transitDurationFromPrevious || (index * 3 + 4)} dk</span>
+                            <span
+                              className="material-symbols-outlined"
+                              style={{ fontSize: "14px" }}
+                            >
+                              directions_walk
+                            </span>
+                            <span>~{pin.transitDurationFromPrevious || index * 3 + 4} dk</span>
                           </div>
                           <a
                             href={`https://www.google.com/maps/dir/?api=1&origin=${prevPin.lat},${prevPin.lng}&destination=${pin.lat},${pin.lng}&travelmode=walking`}
@@ -1595,7 +1899,12 @@ export function TravelPlannerSidebar({
                             onClick={(e) => e.stopPropagation()}
                           >
                             <span>Yol Tarifi</span>
-                            <span className="material-symbols-outlined" style={{ fontSize: "12px" }}>open_in_new</span>
+                            <span
+                              className="material-symbols-outlined"
+                              style={{ fontSize: "12px" }}
+                            >
+                              open_in_new
+                            </span>
                           </a>
                         </div>
                       )}
@@ -1612,7 +1921,12 @@ export function TravelPlannerSidebar({
                           <div className="stitch-card-left-wrap">
                             <div className={`stitch-card-badge ${pin.visited ? "visited" : ""}`}>
                               {pin.visited ? (
-                                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>check</span>
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "16px" }}
+                                >
+                                  check
+                                </span>
                               ) : (
                                 pin.order || index + 1
                               )}
@@ -1620,23 +1934,34 @@ export function TravelPlannerSidebar({
 
                             <div className="stitch-card-text-col">
                               <div className="stitch-card-title-row">
-                                <h4 className="stitch-card-title">
-                                  {pin.label}
-                                </h4>
-                                <span className="stitch-card-time">
-                                  {calcStopTime(index)}
-                                </span>
+                                <h4 className="stitch-card-title">{pin.label}</h4>
+                                <span className="stitch-card-time">{calcStopTime(index)}</span>
                               </div>
 
                               <div className="stitch-card-meta">
-                                <span style={{ fontWeight: 600 }}>{catMeta.emoji} {catMeta.label}</span>
+                                <span style={{ fontWeight: 600 }}>
+                                  {catMeta.emoji} {catMeta.label}
+                                </span>
                                 <span>•</span>
                                 <span>{pin.durationMinutes || 45} dk</span>
                                 {pin.visited && (
                                   <>
                                     <span>•</span>
-                                    <span style={{ color: "#059669", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "2px" }}>
-                                      <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>check_circle</span>
+                                    <span
+                                      style={{
+                                        color: "#059669",
+                                        fontWeight: 700,
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "2px",
+                                      }}
+                                    >
+                                      <span
+                                        className="material-symbols-outlined"
+                                        style={{ fontSize: "13px" }}
+                                      >
+                                        check_circle
+                                      </span>
                                       Ziyaret Edildi
                                     </span>
                                   </>
@@ -1647,7 +1972,10 @@ export function TravelPlannerSidebar({
 
                           {/* Right Controls */}
                           {workspaceMode === "edit" ? (
-                            <div className="stitch-card-actions" onClick={(e) => e.stopPropagation()}>
+                            <div
+                              className="stitch-card-actions"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <button
                                 type="button"
                                 disabled={index === 0}
@@ -1655,7 +1983,12 @@ export function TravelPlannerSidebar({
                                 className="stitch-card-action-btn"
                                 title="Yukarı Taşı"
                               >
-                                <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>arrow_upward</span>
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "15px" }}
+                                >
+                                  arrow_upward
+                                </span>
                               </button>
                               <button
                                 type="button"
@@ -1664,7 +1997,12 @@ export function TravelPlannerSidebar({
                                 className="stitch-card-action-btn"
                                 title="Aşağı Taşı"
                               >
-                                <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>arrow_downward</span>
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "15px" }}
+                                >
+                                  arrow_downward
+                                </span>
                               </button>
                               <button
                                 type="button"
@@ -1676,12 +2014,21 @@ export function TravelPlannerSidebar({
                                 className="stitch-card-action-btn"
                                 title="Düzenle"
                               >
-                                <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>edit</span>
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "15px" }}
+                                >
+                                  edit
+                                </span>
                               </button>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  if (confirm(`"${pin.label}" durağını silmek istediğinizden emin misiniz?`)) {
+                                  if (
+                                    confirm(
+                                      `"${pin.label}" durağını silmek istediğinizden emin misiniz?`,
+                                    )
+                                  ) {
                                     deletePinAnywhere(pin.id);
                                     showToast("Durak silindi.");
                                   }
@@ -1689,7 +2036,12 @@ export function TravelPlannerSidebar({
                                 className="stitch-card-action-btn btn-delete"
                                 title="Sil"
                               >
-                                <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>delete_outline</span>
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "15px" }}
+                                >
+                                  delete_outline
+                                </span>
                               </button>
                             </div>
                           ) : (
@@ -1700,9 +2052,17 @@ export function TravelPlannerSidebar({
                                 togglePinVisitedAnywhere(pin.id);
                               }}
                               className={`stitch-btn-secondary ${pin.visited ? "active" : ""}`}
-                              style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 8px" }}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                padding: "4px 8px",
+                              }}
                             >
-                              <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "14px" }}
+                              >
                                 {pin.visited ? "check_circle" : "radio_button_unchecked"}
                               </span>
                               <span>{pin.visited ? "Tamamlandı" : "Tamamla"}</span>
@@ -1710,11 +2070,7 @@ export function TravelPlannerSidebar({
                           )}
                         </div>
 
-                        {pin.note && (
-                          <div className="stitch-card-note">
-                            💡 {pin.note}
-                          </div>
-                        )}
+                        {pin.note && <div className="stitch-card-note">💡 {pin.note}</div>}
                       </div>
                     </React.Fragment>
                   );
@@ -1723,15 +2079,29 @@ export function TravelPlannerSidebar({
 
               {/* General Pool Accordion (Kayıtlı Adresler) - Sadece Rota Düzenleme Modunda */}
               {workspaceMode === "edit" && generalPins.length > 0 && (
-                <details className="stitch-pool-accordion" style={{ marginTop: "8px", marginBottom: "8px" }} open={false}>
+                <details
+                  className="stitch-pool-accordion"
+                  style={{ marginTop: "8px", marginBottom: "8px" }}
+                  open={false}
+                >
                   <summary className="stitch-pool-summary">
                     <div className="pool-summary-title-row">
-                      <span className="material-symbols-outlined" style={{ color: "#047857", fontSize: "18px" }}>inventory_2</span>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ color: "#047857", fontSize: "18px" }}
+                      >
+                        inventory_2
+                      </span>
                       <span className="pool-summary-title">
                         Kayıtlı Durak Havuzu ({generalPins.length} Yer)
                       </span>
                     </div>
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#64748b" }}>expand_more</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "20px", color: "#64748b" }}
+                    >
+                      expand_more
+                    </span>
                   </summary>
 
                   <div className="pool-items-container">
@@ -1739,8 +2109,15 @@ export function TravelPlannerSidebar({
                       <div key={gPin.id} className="pool-item-row">
                         <div className="pool-item-info">
                           <div className="pool-item-icon-box">
-                            <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                              {gPin.category === "kahve" ? "coffee" : gPin.category === "gastronomi" ? "bakery_dining" : "tour"}
+                            <span
+                              className="material-symbols-outlined"
+                              style={{ fontSize: "14px" }}
+                            >
+                              {gPin.category === "kahve"
+                                ? "coffee"
+                                : gPin.category === "gastronomi"
+                                  ? "bakery_dining"
+                                  : "tour"}
                             </span>
                           </div>
                           <div style={{ minWidth: 0, overflow: "hidden" }}>

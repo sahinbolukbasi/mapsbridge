@@ -14,12 +14,14 @@ export function GooglePlaceInfo({
   lat,
   lng,
   onLink,
+  activeTab = "info",
 }: {
   placeId?: string;
   label: string;
   lat: number;
   lng: number;
   onLink: (id: string) => void;
+  activeTab?: "info" | "reviews";
 }) {
   const [place, setPlace] = useState<google.maps.places.Place>();
   const [candidates, setCandidates] = useState<google.maps.places.Place[]>([]);
@@ -139,17 +141,13 @@ export function GooglePlaceInfo({
       {error && <p className="gpi-error">{error}</p>}
 
       {/* Place Details */}
-      {place && (
+      {place && activeTab === "info" && (
         <div className="gpi-details">
           {/* Rating & Status Row */}
           {place.rating != null && (
             <div className="gpi-rating-row">
-              <span className="gpi-rating-badge">
-                ★ {place.rating.toFixed(1)}
-              </span>
-              <span className="gpi-rating-count">
-                ({place.userRatingCount || 0} değerlendirme)
-              </span>
+              <span className="gpi-rating-badge">★ {place.rating.toFixed(1)}</span>
+              <span className="gpi-rating-count">({place.userRatingCount || 0} değerlendirme)</span>
               {place.businessStatus === "CLOSED_PERMANENTLY" && (
                 <span className="gpi-status-closed">Kalıcı Kapalı</span>
               )}
@@ -193,7 +191,10 @@ export function GooglePlaceInfo({
             </a>
 
             {place.nationalPhoneNumber && (
-              <a href={`tel:${place.nationalPhoneNumber}`} className="gpi-action-btn gpi-action-call">
+              <a
+                href={`tel:${place.nationalPhoneNumber}`}
+                className="gpi-action-btn gpi-action-call"
+              >
                 <span className="material-symbols-outlined">call</span>
                 <span>Ara</span>
               </a>
@@ -212,7 +213,12 @@ export function GooglePlaceInfo({
             )}
 
             {link && (
-              <a href={link} target="_blank" rel="noopener noreferrer" className="gpi-action-btn gpi-action-share">
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gpi-action-btn gpi-action-share"
+              >
                 <span className="material-symbols-outlined">share</span>
                 <span>Paylaş</span>
               </a>
@@ -232,14 +238,18 @@ export function GooglePlaceInfo({
                   <span className="material-symbols-outlined">schedule</span>
                   <span>Çalışma Saatleri</span>
                 </div>
-                <span className={`material-symbols-outlined gpi-chevron ${showHours ? "open" : ""}`}>
+                <span
+                  className={`material-symbols-outlined gpi-chevron ${showHours ? "open" : ""}`}
+                >
                   expand_more
                 </span>
               </button>
               {showHours && (
                 <div className="gpi-hours-list">
                   {place.regularOpeningHours.weekdayDescriptions.map((day) => (
-                    <p key={day} className="gpi-hour-row">{day}</p>
+                    <p key={day} className="gpi-hour-row">
+                      {day}
+                    </p>
                   ))}
                 </div>
               )}
@@ -255,27 +265,21 @@ export function GooglePlaceInfo({
               </a>
             </div>
           )}
+        </div>
+      )}
 
-          {/* Reviews */}
-          {place.reviews && place.reviews.length > 0 && (
+      {/* Reviews Tab */}
+      {place && activeTab === "reviews" && (
+        <div className="gpi-details">
+          {place.reviews && place.reviews.length > 0 ? (
             <div className="gpi-section-card">
-              <button
-                type="button"
-                className="gpi-section-toggle"
-                onClick={() => setShowAllReviews(!showAllReviews)}
-                aria-expanded={showAllReviews}
-              >
-                <div className="gpi-section-toggle-left">
-                  <span className="material-symbols-outlined">reviews</span>
-                  <span>Google Yorumları ({place.reviews.length})</span>
-                </div>
-                <span className={`material-symbols-outlined gpi-chevron ${showAllReviews ? "open" : ""}`}>
-                  expand_more
-                </span>
-              </button>
+              <div className="gpi-section-toggle-left" style={{ padding: "0.5rem 0" }}>
+                <span className="material-symbols-outlined">reviews</span>
+                <span>Google Yorumları ({place.reviews.length})</span>
+              </div>
 
               <div className="gpi-reviews-list">
-                {(showAllReviews ? place.reviews : place.reviews.slice(0, 2)).map((review, i) => (
+                {(showAllReviews ? place.reviews : place.reviews.slice(0, 3)).map((review, i) => (
                   <div key={i} className="gpi-review-card">
                     <div className="gpi-review-header">
                       <span className="gpi-review-author">
@@ -286,14 +290,14 @@ export function GooglePlaceInfo({
                       )}
                     </div>
                     <p className="gpi-review-text">
-                      {review.text?.slice(0, showAllReviews ? 300 : 140)}
-                      {review.text && review.text.length > (showAllReviews ? 300 : 140) ? "…" : ""}
+                      {review.text?.slice(0, showAllReviews ? 500 : 200)}
+                      {review.text && review.text.length > (showAllReviews ? 500 : 200) ? "…" : ""}
                     </p>
                   </div>
                 ))}
               </div>
 
-              {place.reviews.length > 2 && !showAllReviews && (
+              {place.reviews.length > 3 && !showAllReviews && (
                 <button
                   type="button"
                   className="gpi-show-more-btn"
@@ -303,6 +307,8 @@ export function GooglePlaceInfo({
                 </button>
               )}
             </div>
+          ) : (
+            <p className="gpi-loading">Bu mekan için henüz yorum bulunmuyor.</p>
           )}
         </div>
       )}

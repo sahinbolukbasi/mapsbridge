@@ -93,7 +93,7 @@ resource "aws_wafv2_web_acl" "api" {
 
 # ─── Associate WAF WebACL with API Gateway Stage ─────────────────────────
 resource "aws_wafv2_web_acl_association" "api" {
-  count = 0
+  count = var.enable_waf ? 1 : 0
 
   resource_arn = var.api_gateway_stage_arn
   web_acl_arn  = aws_wafv2_web_acl.api[0].arn

@@ -76,6 +76,7 @@ Lambda functions are bundled with esbuild and deployed through Terraform.
 ```
 
 This script:
+
 1. Compiles each Lambda handler from TypeScript to JavaScript using esbuild.
 2. Targets `node22` with `arm64` (Graviton) as the platform.
 3. Bundles all dependencies into a single file per function.
@@ -114,11 +115,11 @@ aws lambda invoke \
 
 ### Variables
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `$BUCKET` | `terraform.tfvars` | S3 bucket name: `{project}-{env}-{account}-web` |
-| `$CF_DIST_ID` | Terraform output | CloudFront distribution ID (environment-specific) |
-| AWS Profile | `~/.aws/config` | AWS CLI profile with deployment permissions |
+| Variable      | Source             | Description                                       |
+| ------------- | ------------------ | ------------------------------------------------- |
+| `$BUCKET`     | `terraform.tfvars` | S3 bucket name: `{project}-{env}-{account}-web`   |
+| `$CF_DIST_ID` | Terraform output   | CloudFront distribution ID (environment-specific) |
+| AWS Profile   | `~/.aws/config`    | AWS CLI profile with deployment permissions       |
 
 ### Terraform variables
 
@@ -184,11 +185,11 @@ terraform apply tfplan
 
 ### Database rollback
 
-| Service | Recovery Method |
-|---------|----------------|
-| **DynamoDB** | Point-in-time recovery (PITR) enabled in production. Restore to any point within the last 35 days. |
-| **Aurora** | Automated backups with configurable retention. Restore to a new cluster from a snapshot or point-in-time. |
-| **Redis** | No persistent rollback. Cache is rebuilt on next access. |
+| Service      | Recovery Method                                                                                           |
+| ------------ | --------------------------------------------------------------------------------------------------------- |
+| **DynamoDB** | Point-in-time recovery (PITR) enabled in production. Restore to any point within the last 35 days.        |
+| **Aurora**   | Automated backups with configurable retention. Restore to a new cluster from a snapshot or point-in-time. |
+| **Redis**    | No persistent rollback. Cache is rebuilt on next access.                                                  |
 
 ```bash
 # DynamoDB point-in-time restore (production)

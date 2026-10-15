@@ -1,5 +1,5 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface AirportGuide {
   code: string;
@@ -43,10 +43,12 @@ JSON formatı:
 export async function runFlightAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: FlightAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: FlightAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const travelers = profile?.travelers ? `${profile.travelers.adults || 1} yetişkin, ${profile.travelers.children || 0} çocuk` : 'Standart seyahat';
+  const travelers = profile?.travelers
+    ? `${profile.travelers.adults || 1} yetişkin, ${profile.travelers.children || 0} çocuk`
+    : "Standart seyahat";
 
   const userQuery = `Hedef Şehir: "${destination}". Gezginler: ${travelers}. Şehrin ana havalimanları ve şehre transfer rehberi hazırla.`;
 
@@ -62,12 +64,14 @@ export async function runFlightAgent(
       output: {
         destination: bedrockRes.data.destination || destination,
         airports: bedrockRes.data.airports,
-        generalFlightTips: Array.isArray(bedrockRes.data.generalFlightTips) ? bedrockRes.data.generalFlightTips : [],
+        generalFlightTips: Array.isArray(bedrockRes.data.generalFlightTips)
+          ? bedrockRes.data.generalFlightTips
+          : [],
       },
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
-  throw new Error('Uçuş ve havalimanı rehberi oluşturulamadı.');
+  throw new Error("Uçuş ve havalimanı rehberi oluşturulamadı.");
 }

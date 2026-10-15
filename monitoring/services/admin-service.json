@@ -6,7 +6,5 @@
     "maintenanceModePropagationMaxSeconds": 5,
     "rbacCheckLatencyP99Ms": 50
   },
-  "protectedAdminAccounts": [
-    "sahinbolukbasii@gmail.com"
-  ]
+  "protectedAdminAccounts": ["sahinbolukbasii@gmail.com"]
 }

@@ -1,3 +1,9 @@
+import { createRemoteJWKSet, jwtVerify } from "jose";
+
+// Cached at module scope — reused across warm Lambda invocations
+const googleJWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
+const appleJWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
+
 export interface VerifiedUser {
   sub: string;
   originalSub?: string;
@@ -9,7 +15,8 @@ export interface VerifiedUser {
 
 function deterministicEmailHash(email: string): string {
   const clean = email.trim().toLowerCase();
-  let h1 = 0xdeadbeef, h2 = 0x41c64e6d;
+  let h1 = 0xdeadbeef,
+    h2 = 0x41c64e6d;
   for (let i = 0; i < clean.length; i++) {
     const ch = clean.charCodeAt(i);
     h1 = Math.imul(h1 ^ ch, 2654435761);
@@ -89,38 +96,60 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
   const isApple = rawIss.includes("appleid.apple.com");
 
   if (isGoogle || isApple) {
+    // Cryptographically verify the signature before trusting any claim
+    const jwks = isGoogle ? googleJWKS : appleJWKS;
+    try {
+      const verifyOpts: { issuer: string; audience?: string } = { issuer: rawIss };
+      if (isGoogle && process.env.GOOGLE_CLIENT_ID) {
+        verifyOpts.audience = process.env.GOOGLE_CLIENT_ID;
+      }
+      await jwtVerify(token, jwks, verifyOpts);
+    } catch {
+      return null;
+    }
+
     if (typeof claims.email === "string" && claims.email.includes("@")) {
       const cleanEmail = claims.email.trim().toLowerCase();
-      const socialEmailVerified = claims.email_verified === true || claims.email_verified === "true";
+      const socialEmailVerified =
+        claims.email_verified === true || claims.email_verified === "true";
 
       // Look up existing Cognito account with this email to merge accounts.
       // If an email/password account already exists with the same email, use its
       // Cognito UUID so Google/Apple and email logins share the same DynamoDB records.
       try {
-        const { CognitoIdentityProviderClient, ListUsersCommand } = await import("@aws-sdk/client-cognito-identity-provider");
-        const cognito = new CognitoIdentityProviderClient({ region, requestHandler: { requestTimeout: 4000 } as any });
-        const result = await cognito.send(new ListUsersCommand({
-          UserPoolId: poolId,
-          Filter: `email = "${cleanEmail.replace(/"/g, '')}"`,
-          Limit: 1,
-        }));
+        const { CognitoIdentityProviderClient, ListUsersCommand } =
+          await import("@aws-sdk/client-cognito-identity-provider");
+        const cognito = new CognitoIdentityProviderClient({
+          region,
+          requestHandler: { requestTimeout: 4000 } as any,
+        });
+        const result = await cognito.send(
+          new ListUsersCommand({
+            UserPoolId: poolId,
+            Filter: `email = "${cleanEmail.replace(/"/g, "")}"`,
+            Limit: 1,
+          }),
+        );
         const cognitoUser = result.Users?.[0];
         if (cognitoUser?.Attributes) {
           const sub = cognitoUser.Attributes.find((a) => a.Name === "sub")?.Value;
           const role = cognitoUser.Attributes.find((a) => a.Name === "custom:role")?.Value;
-          const emailVerifiedAttr = cognitoUser.Attributes.find((a) => a.Name === "email_verified")?.Value === "true";
+          const emailVerifiedAttr =
+            cognitoUser.Attributes.find((a) => a.Name === "email_verified")?.Value === "true";
           if (sub) {
             // Check suspension
             if (process.env.DYNAMODB_TABLE) {
               const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
               const { unmarshall } = await import("@aws-sdk/util-dynamodb");
               const ddb = new DynamoDBClient({ region });
-              const acct = await ddb.send(new GetItemCommand({
-                TableName: process.env.DYNAMODB_TABLE,
-                Key: { PK: { S: `USER#${sub}` }, SK: { S: "META" } },
-                ConsistentRead: true,
-                ProjectionExpression: "suspended",
-              }));
+              const acct = await ddb.send(
+                new GetItemCommand({
+                  TableName: process.env.DYNAMODB_TABLE,
+                  Key: { PK: { S: `USER#${sub}` }, SK: { S: "META" } },
+                  ConsistentRead: true,
+                  ProjectionExpression: "suspended",
+                }),
+              );
               if (acct.Item && unmarshall(acct.Item).suspended === true) return null;
             }
             const isAdmin = !process.env.ADMIN_GROUP_NAME && role === "admin";
@@ -204,13 +233,15 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
                 Key: { PK: { S: `USER#${effectiveSub}` }, SK: { S: "META" } },
                 ConsistentRead: true,
                 ProjectionExpression: "suspended",
-              })
+              }),
             );
             if (account.Item && unmarshall(account.Item).suspended === true) return null;
           }
 
           let isAdmin = !process.env.ADMIN_GROUP_NAME && role === "admin";
-          let staffRole: "admin" | "moderator" | "support" | undefined = isAdmin ? "admin" : undefined;
+          let staffRole: "admin" | "moderator" | "support" | undefined = isAdmin
+            ? "admin"
+            : undefined;
 
           return {
             sub: effectiveSub,

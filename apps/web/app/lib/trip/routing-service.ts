@@ -23,7 +23,7 @@ export function calculateDistanceKm(
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number
+  lon2: number,
 ): number {
   const R = 6371; // Earth radius in km
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -42,7 +42,7 @@ export function calculateDistanceKm(
 export interface IRoutingProvider {
   getRoute(
     points: [number, number][], // [lat, lng][]
-    mode: TransportMode
+    mode: TransportMode,
   ): Promise<RouteGeometry>;
 }
 
@@ -54,10 +54,7 @@ export class OsrmRoutingProvider implements IRoutingProvider {
     cycling: "bike",
   };
 
-  async getRoute(
-    points: [number, number][],
-    mode: TransportMode
-  ): Promise<RouteGeometry> {
+  async getRoute(points: [number, number][], mode: TransportMode): Promise<RouteGeometry> {
     // Filter out invalid, NaN, or out-of-range coordinates
     const validPoints = points.filter(
       ([lat, lng]) =>
@@ -68,7 +65,7 @@ export class OsrmRoutingProvider implements IRoutingProvider {
         typeof lng === "number" &&
         !isNaN(lng) &&
         lng >= -180 &&
-        lng <= 180
+        lng <= 180,
     );
 
     if (validPoints.length < 2) {
@@ -101,7 +98,7 @@ export class OsrmRoutingProvider implements IRoutingProvider {
           const primaryRoute = data.routes[0];
           // GeoJSON coordinates are [lng, lat], convert to [lat, lng] for Leaflet
           const latLngCoordinates: [number, number][] = primaryRoute.geometry.coordinates.map(
-            ([lng, lat]: [number, number]) => [lat, lng]
+            ([lng, lat]: [number, number]) => [lat, lng],
           );
 
           const result: RouteGeometry = {
@@ -154,7 +151,7 @@ function generateFallbackRoute(points: [number, number][], mode: TransportMode):
   // Estimated speed by mode: walking 4.5 km/h, cycling 15 km/h, driving 35 km/h
   const speedsKmH = { walking: 4.5, cycling: 15, driving: 35 };
   const speed = speedsKmH[mode] || 5;
-  const durationSeconds = Math.round(((totalDistanceMeters / 1000) / speed) * 3600);
+  const durationSeconds = Math.round((totalDistanceMeters / 1000 / speed) * 3600);
 
   return {
     coordinates: resultCoords,
@@ -169,7 +166,7 @@ export const routingService: IRoutingProvider = new OsrmRoutingProvider();
 // ── Smart Route Optimization (2-opt TSP + Locked Constraints) ─
 export function optimizeRouteOrder(
   pins: Pin[],
-  mode: TransportMode = "walking"
+  mode: TransportMode = "walking",
 ): RouteOptimizationPreview | null {
   if (pins.length < 3) return null;
 
@@ -180,7 +177,7 @@ export function optimizeRouteOrder(
       pins[i].lat,
       pins[i].lng,
       pins[i + 1].lat,
-      pins[i + 1].lng
+      pins[i + 1].lng,
     );
   }
 
@@ -202,12 +199,7 @@ export function optimizeRouteOrder(
     let minD = Infinity;
 
     for (let j = 0; j < unvisited.length; j++) {
-      const d = calculateDistanceKm(
-        current.lat,
-        current.lng,
-        unvisited[j].lat,
-        unvisited[j].lng
-      );
+      const d = calculateDistanceKm(current.lat, current.lng, unvisited[j].lat, unvisited[j].lng);
       if (d < minD) {
         minD = d;
         nearestIdx = j;
@@ -231,15 +223,35 @@ export function optimizeRouteOrder(
         if (ordered[k].isLocked) continue;
 
         const dCurrent =
-          calculateDistanceKm(ordered[i - 1].lat, ordered[i - 1].lng, ordered[i].lat, ordered[i].lng) +
+          calculateDistanceKm(
+            ordered[i - 1].lat,
+            ordered[i - 1].lng,
+            ordered[i].lat,
+            ordered[i].lng,
+          ) +
           (k + 1 < ordered.length
-            ? calculateDistanceKm(ordered[k].lat, ordered[k].lng, ordered[k + 1].lat, ordered[k + 1].lng)
+            ? calculateDistanceKm(
+                ordered[k].lat,
+                ordered[k].lng,
+                ordered[k + 1].lat,
+                ordered[k + 1].lng,
+              )
             : 0);
 
         const dSwapped =
-          calculateDistanceKm(ordered[i - 1].lat, ordered[i - 1].lng, ordered[k].lat, ordered[k].lng) +
+          calculateDistanceKm(
+            ordered[i - 1].lat,
+            ordered[i - 1].lng,
+            ordered[k].lat,
+            ordered[k].lng,
+          ) +
           (k + 1 < ordered.length
-            ? calculateDistanceKm(ordered[i].lat, ordered[i].lng, ordered[k + 1].lat, ordered[k + 1].lng)
+            ? calculateDistanceKm(
+                ordered[i].lat,
+                ordered[i].lng,
+                ordered[k + 1].lat,
+                ordered[k + 1].lng,
+              )
             : 0);
 
         if (dSwapped < dCurrent - 0.05) {
@@ -268,7 +280,7 @@ export function optimizeRouteOrder(
       ordered[i].lat,
       ordered[i].lng,
       ordered[i + 1].lat,
-      ordered[i + 1].lng
+      ordered[i + 1].lng,
     );
   }
 
@@ -294,7 +306,7 @@ export function optimizeRouteOrder(
 // ── Smart Day Clusterer (Auto-split pins into Days) ──────────
 export function autoSplitPinsIntoDays(
   pins: Pin[],
-  targetDayCount: number = 3
+  targetDayCount: number = 3,
 ): { days: { dayIndex: number; label: string; subtitle: string; pins: Pin[] }[] } {
   if (pins.length === 0) return { days: [] };
 
@@ -397,7 +409,7 @@ export function autoSplitPinsIntoDays(
 export function calculateDayTimeline(
   pins: Pin[],
   startTime: string = "09:00",
-  mode: TransportMode = "walking"
+  mode: TransportMode = "walking",
 ): { pinsWithTime: Pin[]; summary: DayRouteSummary } {
   if (pins.length === 0) {
     return {

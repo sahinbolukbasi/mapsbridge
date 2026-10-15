@@ -28,7 +28,10 @@ export function AuthGuard({
     const resolveSession = async () => {
       const session = getStoredSession();
       if (!session?.token) {
-        if (active) { setIsAuthenticated(false); setChecking(false); }
+        if (active) {
+          setIsAuthenticated(false);
+          setChecking(false);
+        }
         return;
       }
 
@@ -43,23 +46,50 @@ export function AuthGuard({
       }
 
       // Token valid — show content immediately, then silently refresh if expiring soon
-      if (active) { setIsAuthenticated(true); setChecking(false); }
+      if (active) {
+        setIsAuthenticated(true);
+        setChecking(false);
+      }
 
       if (willExpireSoon(session.token)) {
-        refreshSession().catch(() => { /* background refresh; ignore errors */ });
+        refreshSession().catch(() => {
+          /* background refresh; ignore errors */
+        });
       }
     };
     void resolveSession();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (checking) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-main, #f8fafc)" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          background: "var(--bg-main, #f8fafc)",
+        }}
+      >
         <HeaderNav />
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#64748b", fontWeight: 500 }}>
-            <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite" }}>sync</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              color: "#64748b",
+              fontWeight: 500,
+            }}
+          >
+            <span
+              className="material-symbols-outlined"
+              style={{ animation: "spin 1s linear infinite" }}
+            >
+              sync
+            </span>
             Oturum kontrol ediliyor...
           </div>
         </div>
@@ -76,9 +106,25 @@ export function AuthGuard({
     const signupUrl = `/register/?redirect=${encodeURIComponent(currentPath)}`;
 
     return (
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "radial-gradient(ellipse at 50% -20%, rgba(30,77,62,0.15), transparent 70%), var(--bg-main, #0f172a)" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          background:
+            "radial-gradient(ellipse at 50% -20%, rgba(30,77,62,0.15), transparent 70%), var(--bg-main, #0f172a)",
+        }}
+      >
         <HeaderNav />
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px",
+          }}
+        >
           <div
             style={{
               maxWidth: "480px",
@@ -87,7 +133,8 @@ export function AuthGuard({
               backdropFilter: "blur(16px)",
               borderRadius: "24px",
               padding: "40px 32px",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.3)",
+              boxShadow:
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.3)",
               textAlign: "center",
             }}
           >
@@ -105,18 +152,39 @@ export function AuthGuard({
                 color: "#1e4d3e",
               }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>lock</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>
+                lock
+              </span>
             </div>
 
-            <div style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#1e4d3e", textTransform: "uppercase", marginBottom: "8px" }}>
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: 800,
+                letterSpacing: "0.08em",
+                color: "#1e4d3e",
+                textTransform: "uppercase",
+                marginBottom: "8px",
+              }}
+            >
               {featureName}
             </div>
 
-            <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#0f172a", marginBottom: "12px", letterSpacing: "-0.02em" }}>
+            <h1
+              style={{
+                fontSize: "24px",
+                fontWeight: 800,
+                color: "#0f172a",
+                marginBottom: "12px",
+                letterSpacing: "-0.02em",
+              }}
+            >
               {title}
             </h1>
 
-            <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.6, marginBottom: "28px" }}>
+            <p
+              style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.6, marginBottom: "28px" }}
+            >
               {subtitle}
             </p>
 
@@ -139,7 +207,9 @@ export function AuthGuard({
                   transition: "all 0.2s ease",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>login</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                  login
+                </span>
                 Giriş Yap
               </a>
 
@@ -161,17 +231,37 @@ export function AuthGuard({
                   transition: "all 0.2s ease",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>person_add</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                  person_add
+                </span>
                 Ücretsiz Hesap Oluştur
               </a>
             </div>
 
-            <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", fontSize: "13px", color: "#64748b" }}>
-              <a href="/how-it-works/" style={{ color: "#64748b", textDecoration: "none" }}>Nasıl Çalışır?</a>
+            <div
+              style={{
+                marginTop: "24px",
+                paddingTop: "20px",
+                borderTop: "1px solid #f1f5f9",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "16px",
+                fontSize: "13px",
+                color: "#64748b",
+              }}
+            >
+              <a href="/how-it-works/" style={{ color: "#64748b", textDecoration: "none" }}>
+                Nasıl Çalışır?
+              </a>
               <span>&bull;</span>
-              <a href="/community/" style={{ color: "#64748b", textDecoration: "none" }}>Gezgin Rotaları</a>
+              <a href="/community/" style={{ color: "#64748b", textDecoration: "none" }}>
+                Gezgin Rotaları
+              </a>
               <span>&bull;</span>
-              <a href="/support/" style={{ color: "#64748b", textDecoration: "none" }}>Destek</a>
+              <a href="/support/" style={{ color: "#64748b", textDecoration: "none" }}>
+                Destek
+              </a>
             </div>
           </div>
         </div>

@@ -51,7 +51,9 @@ export function GroupTripModal({
           <div className="space-header-meta">
             <span className="space-eyebrow">GRUP SEYAHATİ &amp; ETKİNLİK MASASI</span>
             <h3 className="space-title">{trip.title}</h3>
-            <span className="space-dest">📍 {trip.destination} · {trip.dates}</span>
+            <span className="space-dest">
+              📍 {trip.destination} · {trip.dates}
+            </span>
           </div>
           <button type="button" className="btn-modal-close-icon" onClick={onClose}>
             ✕
@@ -125,13 +127,13 @@ export function GroupTripModal({
           {activeTab === "route" && (
             <div className="route-tab-content">
               <div className="route-action-banner">
-                <span>Bu gezi için belirlenen resmi duraklar haritada görüntülenmeye hazırdır.</span>
+                <span>
+                  Bu gezi için belirlenen resmi duraklar haritada görüntülenmeye hazırdır.
+                </span>
                 <button
                   type="button"
                   className="btn-action-small"
-                  onClick={() =>
-                    onAddToMyTrip({ title: trip.title, stops: trip.routeStops })
-                  }
+                  onClick={() => onAddToMyTrip({ title: trip.title, stops: trip.routeStops })}
                 >
                   ➕ Seyahatime Ekle
                 </button>
@@ -232,13 +234,17 @@ export function GroupTripModal({
 
                 {/* Gezi Rotası Paylaş & Arkadaş Bul Barı */}
                 <div className="chat-route-share-bar">
-                  <span className="material-symbols-outlined text-[17px] text-[#10B981]">route</span>
+                  <span className="material-symbols-outlined text-[17px] text-[#10B981]">
+                    route
+                  </span>
                   <select
                     className="chat-route-select"
                     value={attachedRouteTitle}
                     onChange={(e) => setAttachedRouteTitle(e.target.value)}
                   >
-                    <option value="">(İsteğe Bağlı) Mesaja Gezi Rotası Ekle &amp; Arkadaş Ara...</option>
+                    <option value="">
+                      (İsteğe Bağlı) Mesaja Gezi Rotası Ekle &amp; Arkadaş Ara...
+                    </option>
                     {userSavedRoutes.map((rTitle, idx) => (
                       <option key={idx} value={rTitle}>
                         🗺️ {rTitle}

@@ -1,6 +1,6 @@
 /**
  * MapsBridge User Interaction & Behavioral Telemetry Tracker
- * 
+ *
  * Logs all user engagement: pin clicks, place inspections, searches,
  * category filters, and route additions.
  * Used as the primary data source for AI recommendations, predictive routing,
@@ -232,7 +232,10 @@ class InteractionTracker {
     const profile = this.getBehavioralProfile();
     if (profile.totalInteractions === 0) return "";
 
-    const cats = profile.topCategories.slice(0, 3).map((c) => `${c.category} (%${c.percentage})`).join(", ");
+    const cats = profile.topCategories
+      .slice(0, 3)
+      .map((c) => `${c.category} (%${c.percentage})`)
+      .join(", ");
     const places = profile.recentPlaces.slice(-5).join(", ");
 
     return `[KULLANICI DAVRANIŞ PROFİLİ]: Kullanıcının en çok etkileşime girdiği ilgi alanları: ${cats || "Genel"}. Son incelediği mekanlar: ${places || "Yok"}. Önerileri bu eğilimlere göre kişiselleştir.`;
@@ -255,7 +258,7 @@ class InteractionTracker {
       const recentBatch = this.queue.slice(-25);
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       try {
-        const raw = localStorage.getItem('mapsbridge.session.v1');
+        const raw = localStorage.getItem("mapsbridge.session.v1");
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed?.token) {

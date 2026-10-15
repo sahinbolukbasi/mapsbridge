@@ -1,5 +1,5 @@
-import { storage } from './storage';
-import { routeService, RouteEntity, RouteStop } from './api';
+import { storage } from "./storage";
+import { routeService, RouteEntity, RouteStop } from "./api";
 
 export interface TripStop {
   id: string;
@@ -31,8 +31,8 @@ export const CURATED_ROUTES: ActiveRoute[] = [];
 export const SAVED_POOL_STOPS: TripStop[] = [];
 
 export const EMPTY_ROUTE: ActiveRoute = {
-  id: '',
-  name: 'Yeni Rota',
+  id: "",
+  name: "Yeni Rota",
   day: 1,
   stops: [],
 };
@@ -40,15 +40,15 @@ export const EMPTY_ROUTE: ActiveRoute = {
 function routeEntityToActiveRoute(entity: RouteEntity): ActiveRoute {
   return {
     id: entity.routeId,
-    name: entity.name || 'İsimsiz Rota',
+    name: entity.name || "İsimsiz Rota",
     day: 1,
     stops: (entity.stops || []).map((s, idx) => ({
       id: s.id || `stop-${idx}`,
       name: s.name,
-      category: s.category || 'MEKAN',
-      time: s.timeSlot || '10:00',
-      duration: s.duration || '60 dk',
-      address: s.address || '',
+      category: s.category || "MEKAN",
+      time: s.timeSlot || "10:00",
+      duration: s.duration || "60 dk",
+      address: s.address || "",
       lat: s.lat,
       lng: s.lng,
       visited: false,
@@ -71,7 +71,7 @@ function tripStopToRouteStop(stop: TripStop): RouteStop {
 
 class TripStore {
   private routes: ActiveRoute[] = [];
-  private activeRouteId: string = '';
+  private activeRouteId: string = "";
   private savedPool: TripStop[] = [];
   private listeners: Set<() => void> = new Set();
   private syncTimeout: any = null;
@@ -82,17 +82,17 @@ class TripStore {
 
   private async init() {
     try {
-      const storedRoutes = await storage.getItem('mb_all_routes');
+      const storedRoutes = await storage.getItem("mb_all_routes");
       if (storedRoutes) {
         this.routes = JSON.parse(storedRoutes);
       }
-      const storedActiveId = await storage.getItem('mb_active_route_id');
+      const storedActiveId = await storage.getItem("mb_active_route_id");
       if (storedActiveId && this.routes.some((r) => r.id === storedActiveId)) {
         this.activeRouteId = storedActiveId;
       } else if (this.routes.length > 0) {
         this.activeRouteId = this.routes[0].id;
       }
-      const storedPool = await storage.getItem('mb_saved_pool');
+      const storedPool = await storage.getItem("mb_saved_pool");
       if (storedPool) {
         this.savedPool = JSON.parse(storedPool);
       }
@@ -109,17 +109,17 @@ class TripStore {
         if (serverRoutes.length > 0) {
           this.routes = serverRoutes.map(routeEntityToActiveRoute);
           if (!this.routes.some((r) => r.id === this.activeRouteId)) {
-            this.activeRouteId = this.routes[0]?.id || '';
+            this.activeRouteId = this.routes[0]?.id || "";
           }
         } else {
           // Clean empty state if user has no server routes
           this.routes = [];
-          this.activeRouteId = '';
+          this.activeRouteId = "";
         }
         this.notify();
       }
     } catch (err) {
-      console.warn('Failed to sync routes from server:', err);
+      console.warn("Failed to sync routes from server:", err);
     }
   }
 
@@ -152,9 +152,9 @@ class TripStore {
 
   private async persist() {
     try {
-      await storage.setItem('mb_all_routes', JSON.stringify(this.routes));
-      await storage.setItem('mb_active_route_id', this.activeRouteId);
-      await storage.setItem('mb_saved_pool', JSON.stringify(this.savedPool));
+      await storage.setItem("mb_all_routes", JSON.stringify(this.routes));
+      await storage.setItem("mb_active_route_id", this.activeRouteId);
+      await storage.setItem("mb_saved_pool", JSON.stringify(this.savedPool));
     } catch {}
   }
 
@@ -165,7 +165,7 @@ class TripStore {
       if (current && current.id) {
         routeService
           .updateRoute(current.id, current.name, current.stops.map(tripStopToRouteStop))
-          .catch((err) => console.warn('Background route sync error:', err));
+          .catch((err) => console.warn("Background route sync error:", err));
       }
     }, 1200);
   }
@@ -202,7 +202,7 @@ class TripStore {
     const localId = `route-${Date.now()}`;
     const newRoute: ActiveRoute = {
       id: localId,
-      name: name.trim() || 'Yeni Rota',
+      name: name.trim() || "Yeni Rota",
       day: 1,
       stops: stops && stops.length > 0 ? stops : [],
     };
@@ -222,7 +222,7 @@ class TripStore {
           this.notify();
         }
       })
-      .catch((err) => console.warn('Create route server error:', err));
+      .catch((err) => console.warn("Create route server error:", err));
 
     return newRoute;
   }
@@ -230,12 +230,12 @@ class TripStore {
   public updateRouteName(routeId: string, name: string) {
     const route = this.routes.find((r) => r.id === routeId);
     if (route) {
-      route.name = name.trim() || 'İsimsiz Rota';
+      route.name = name.trim() || "İsimsiz Rota";
       this.notify();
       if (route.id) {
         routeService
           .updateRoute(route.id, route.name, route.stops.map(tripStopToRouteStop))
-          .catch((err) => console.warn('Update route name server error:', err));
+          .catch((err) => console.warn("Update route name server error:", err));
       }
     }
   }
@@ -243,11 +243,13 @@ class TripStore {
   public deleteRoute(routeId: string) {
     this.routes = this.routes.filter((r) => r.id !== routeId);
     if (this.activeRouteId === routeId) {
-      this.activeRouteId = this.routes[0]?.id || '';
+      this.activeRouteId = this.routes[0]?.id || "";
     }
     this.notify();
     if (routeId) {
-      routeService.deleteRoute(routeId).catch((err) => console.warn('Delete route server error:', err));
+      routeService
+        .deleteRoute(routeId)
+        .catch((err) => console.warn("Delete route server error:", err));
     }
   }
 
@@ -263,7 +265,7 @@ class TripStore {
   public addStop(stop: TripStop) {
     let current = this.getActiveRoute();
     if (!current || !current.id) {
-      current = this.createRoute('Yeni Keşif Rotam', [stop]);
+      current = this.createRoute("Yeni Keşif Rotam", [stop]);
       return;
     }
     current.stops = [...current.stops, stop];
@@ -291,7 +293,13 @@ class TripStore {
 
   public reorderStops(fromIndex: number, toIndex: number) {
     const current = this.getActiveRoute();
-    if (!current || fromIndex < 0 || toIndex < 0 || fromIndex >= current.stops.length || toIndex >= current.stops.length) {
+    if (
+      !current ||
+      fromIndex < 0 ||
+      toIndex < 0 ||
+      fromIndex >= current.stops.length ||
+      toIndex >= current.stops.length
+    ) {
       return;
     }
     const stops = [...current.stops];
@@ -305,9 +313,7 @@ class TripStore {
   public toggleVisited(id: string) {
     const current = this.getActiveRoute();
     if (current) {
-      current.stops = current.stops.map((s) =>
-        s.id === id ? { ...s, visited: !s.visited } : s
-      );
+      current.stops = current.stops.map((s) => (s.id === id ? { ...s, visited: !s.visited } : s));
       this.notify();
     }
   }
@@ -319,10 +325,10 @@ class TripStore {
     const newStop: TripStop = {
       ...item,
       id: `stop-${Date.now()}`,
-      time: '15:30',
-      duration: item.duration || '60 dk',
-      walkTimeFromPrev: '~8 dk yürüyüş',
-      distanceFromPrev: '500m',
+      time: "15:30",
+      duration: item.duration || "60 dk",
+      walkTimeFromPrev: "~8 dk yürüyüş",
+      distanceFromPrev: "500m",
     };
     const current = this.getActiveRoute();
     if (current && current.id) {
@@ -334,7 +340,7 @@ class TripStore {
 
   public clearSavedPool() {
     this.savedPool = [];
-    storage.removeItem('mb_saved_pool');
+    storage.removeItem("mb_saved_pool");
     this.notify();
   }
 
@@ -371,9 +377,9 @@ class TripStore {
       const min = (idx * 25) % 60;
       return {
         ...s,
-        time: `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`,
-        walkTimeFromPrev: idx === 0 ? '0 dk' : `~${4 + (idx % 4) * 2} dk yürüyüş`,
-        distanceFromPrev: idx === 0 ? '0m' : `${300 + (idx % 5) * 80}m`,
+        time: `${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`,
+        walkTimeFromPrev: idx === 0 ? "0 dk" : `~${4 + (idx % 4) * 2} dk yürüyüş`,
+        distanceFromPrev: idx === 0 ? "0m" : `${300 + (idx % 5) * 80}m`,
       };
     });
 
@@ -387,9 +393,17 @@ class TripStore {
 
   // Pending add stop from map selection
   private pendingAddStopFlag: boolean = false;
-  private pendingAddStopLocation: { lat: number; lng: number; name?: string; address?: string } | null = null;
+  private pendingAddStopLocation: {
+    lat: number;
+    lng: number;
+    name?: string;
+    address?: string;
+  } | null = null;
 
-  public setPendingAddStop(flag: boolean, location?: { lat: number; lng: number; name?: string; address?: string }) {
+  public setPendingAddStop(
+    flag: boolean,
+    location?: { lat: number; lng: number; name?: string; address?: string },
+  ) {
     this.pendingAddStopFlag = flag;
     this.pendingAddStopLocation = location || null;
   }
@@ -398,7 +412,12 @@ class TripStore {
     return this.pendingAddStopFlag;
   }
 
-  public getPendingAddStopLocation(): { lat: number; lng: number; name?: string; address?: string } | null {
+  public getPendingAddStopLocation(): {
+    lat: number;
+    lng: number;
+    name?: string;
+    address?: string;
+  } | null {
     return this.pendingAddStopLocation;
   }
 
@@ -407,19 +426,24 @@ class TripStore {
     this.pendingAddStopLocation = null;
   }
 
-  public addStopFromMapSelection(lat: number, lng: number, name: string = 'Seçilen Konum', address: string = '') {
+  public addStopFromMapSelection(
+    lat: number,
+    lng: number,
+    name: string = "Seçilen Konum",
+    address: string = "",
+  ) {
     const newStop: TripStop = {
       id: `stop-${Date.now()}`,
       name,
-      category: 'MEKAN',
-      time: '15:00',
-      duration: '45 dk',
+      category: "MEKAN",
+      time: "15:00",
+      duration: "45 dk",
       address: address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
       lat,
       lng,
       rating: 4.8,
-      walkTimeFromPrev: '~6 dk yürüyüş',
-      distanceFromPrev: '400m',
+      walkTimeFromPrev: "~6 dk yürüyüş",
+      distanceFromPrev: "400m",
     };
     this.addStop(newStop);
     this.clearPendingAddStop();

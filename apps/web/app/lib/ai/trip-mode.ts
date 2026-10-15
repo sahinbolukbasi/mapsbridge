@@ -1,7 +1,7 @@
-import type { StructuredTripPlan, DayBlock } from './types';
+import type { StructuredTripPlan, DayBlock } from "./types";
 
 export interface OnTripAlert {
-  type: 'upcoming_block' | 'weather_warning' | 'transit_advice' | 'emergency_notice';
+  type: "upcoming_block" | "weather_warning" | "transit_advice" | "emergency_notice";
   title: string;
   message: string;
   suggestedAction?: string;
@@ -17,11 +17,11 @@ export function parseMinutesFromMidnight(timeStr: string): number {
 export function getCurrentAndNextBlock(
   plan: StructuredTripPlan,
   dayDate: string,
-  currentTimeStr: string
+  currentTimeStr: string,
 ): { currentBlock?: DayBlock; nextBlock?: DayBlock } {
   if (!plan || !Array.isArray(plan.days)) return {};
 
-  const targetDay = plan.days.find(d => d.date === dayDate) || plan.days[0];
+  const targetDay = plan.days.find((d) => d.date === dayDate) || plan.days[0];
   if (!targetDay || !Array.isArray(targetDay.blocks) || targetDay.blocks.length === 0) {
     return {};
   }
@@ -54,24 +54,26 @@ export function getCurrentAndNextBlock(
 export function evaluateWeatherAlertTrigger(weatherNote: string): OnTripAlert | null {
   if (!weatherNote) return null;
 
-  const isSevere = /fırtına|şiddetli yağış|kar fırtınası|dolu|storm|blizzard|heavy rain/iu.test(weatherNote);
+  const isSevere = /fırtına|şiddetli yağış|kar fırtınası|dolu|storm|blizzard|heavy rain/iu.test(
+    weatherNote,
+  );
   const isRainy = /yağmur|yağış|rain|shower/iu.test(weatherNote);
 
   if (isSevere) {
     return {
-      type: 'weather_warning',
-      title: '⚠️ Şiddetli Hava Koşulu Uyarısı',
+      type: "weather_warning",
+      title: "⚠️ Şiddetli Hava Koşulu Uyarısı",
       message: `Bölgede ${weatherNote} bekleniyor. Açık hava duraklarını erteleyip kapalı mekanlara veya müzeye geçmeniz önerilir.`,
-      suggestedAction: 'En yakın metro istasyonuna veya kapalı alana sığının.',
+      suggestedAction: "En yakın metro istasyonuna veya kapalı alana sığının.",
     };
   }
 
   if (isRainy) {
     return {
-      type: 'weather_warning',
-      title: '🌧️ Yağış Uyarısı',
+      type: "weather_warning",
+      title: "🌧️ Yağış Uyarısı",
       message: `Hava durumu: ${weatherNote}. Gün içindeki açık hava durakları için alternatif planları inceleyin.`,
-      suggestedAction: 'Şemsiyenizi veya yağmurluğunuzu yanınıza almayı unutmayın.',
+      suggestedAction: "Şemsiyenizi veya yağmurluğunuzu yanınıza almayı unutmayın.",
     };
   }
 
@@ -82,12 +84,12 @@ export function generateOnTripUpdate(
   plan: StructuredTripPlan,
   dayDate: string,
   currentTimeStr: string,
-  userLocation?: { lat: number; lng: number }
+  userLocation?: { lat: number; lng: number },
 ): OnTripAlert[] {
   const alerts: OnTripAlert[] = [];
   const { currentBlock, nextBlock } = getCurrentAndNextBlock(plan, dayDate, currentTimeStr);
 
-  const targetDay = plan?.days?.find(d => d.date === dayDate) || plan?.days?.[0];
+  const targetDay = plan?.days?.find((d) => d.date === dayDate) || plan?.days?.[0];
   if (targetDay?.weather_note) {
     const weatherAlert = evaluateWeatherAlertTrigger(targetDay.weather_note);
     if (weatherAlert) alerts.push(weatherAlert);
@@ -95,7 +97,7 @@ export function generateOnTripUpdate(
 
   if (currentBlock) {
     alerts.push({
-      type: 'upcoming_block',
+      type: "upcoming_block",
       title: `📍 Şu Anda: ${currentBlock.name}`,
       message: `${currentBlock.time} saatleri arasındasınız. ${currentBlock.why}`,
       block: currentBlock,
@@ -103,12 +105,15 @@ export function generateOnTripUpdate(
   }
 
   if (nextBlock) {
-    const transitInfo = nextBlock.transit ? `(${nextBlock.transit.minutes} dk ${nextBlock.transit.mode})` : '';
+    const transitInfo = nextBlock.transit
+      ? `(${nextBlock.transit.minutes} dk ${nextBlock.transit.mode})`
+      : "";
     alerts.push({
-      type: 'upcoming_block',
+      type: "upcoming_block",
       title: `⏳ Sıradaki Durak: ${nextBlock.name}`,
       message: `Planlanan saat: ${nextBlock.time} ${transitInfo}.`,
-      suggestedAction: nextBlock.transit?.mode === 'subway' ? 'Metroya doğru yönelin.' : 'Yürüyüşe başlayın.',
+      suggestedAction:
+        nextBlock.transit?.mode === "subway" ? "Metroya doğru yönelin." : "Yürüyüşe başlayın.",
       block: nextBlock,
     });
   }

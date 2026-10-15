@@ -174,7 +174,8 @@ export const PARIS_BRIEF: DestinationBrief = {
         overrated: "Champs-Élysées alışveriş",
         why: "Çoğu büyük marka burada — ama Londra veya İstanbul'da da var. Atmosfer turistik ve sıradan.",
         alternative: "Galerie Vivienne veya Palais-Royal passaj",
-        alternativeNote: "19. yüzyıl kapalı çarşı mimarisi, özgün butikler, fotoğraf için de harika.",
+        alternativeNote:
+          "19. yüzyıl kapalı çarşı mimarisi, özgün butikler, fotoğraf için de harika.",
       },
     ],
     source: "manual:curator",
@@ -294,7 +295,8 @@ export const PARIS_BRIEF: DestinationBrief = {
     value: {
       tippingNorm:
         "Servise dahil (service compris) her zaman faturada. Ekstra bahşiş zorunlu değil; memnunsan 1-2€ bırakmak takdir edilir.",
-      plugType: "Type E (Fransız-Belçika tipi) — 230V/50Hz. Türk ve Avrupa şarj cihazları çoğunlukla uyumlu, tip kontrolü yap.",
+      plugType:
+        "Type E (Fransız-Belçika tipi) — 230V/50Hz. Türk ve Avrupa şarj cihazları çoğunlukla uyumlu, tip kontrolü yap.",
       tapWaterSafe: true,
       cashVsCard:
         "Kart neredeyse her yerde geçerli. Bazı küçük kafeler ve pazarlar minimum tutar gerektirebilir. 50-100€ nakit yeterli.",
@@ -302,8 +304,7 @@ export const PARIS_BRIEF: DestinationBrief = {
         "Dini mekanlarda (Notre-Dame, Sacré-Cœur) omuzlar örtülü olmalı. Üst düzey restoranlar smart casual bekler.",
       emergencyNumbers: { police: "17", ambulance: "15", general: "112" },
       currency: "EUR",
-      paymentNote:
-        "ATM'ler yaygın; banka kartı ile çekim DCC seçeneğini reddet.",
+      paymentNote: "ATM'ler yaygın; banka kartı ile çekim DCC seçeneğini reddet.",
     },
     source: "manual:curator",
     license: "proprietary",
@@ -333,12 +334,42 @@ export const PARIS_BRIEF: DestinationBrief = {
   localCalendar: {
     value: [
       { date: "01-01", name: "Yılbaşı", type: "public_holiday", impact: "Pek çok şey kapalı." },
-      { date: "05-01", name: "İşçi Bayramı", type: "public_holiday", impact: "Tüm müze ve restoranların büyük kısmı kapalı." },
-      { date: "05-08", name: "2. Dünya Savaşı Zafer Günü", type: "public_holiday", impact: "Resmi tatil." },
-      { date: "06-21", name: "Fête de la Musique", type: "festival", impact: "Şehir genelinde ücretsiz konserler. Fantastik atmosfer." },
-      { date: "07-14", name: "Bastille Günü", type: "festival", impact: "Askeri geçit töreni Champs-Élysées'de. Akşam havai fişek. Pek çok bölge kapalı." },
-      { date: "09-01", name: "Paris Moda Haftası (yaklaşık)", type: "festival", impact: "Eylül sonu, otel ve restoran dolup taşıyor." },
-      { date: "10-01", name: "Nuit Blanche (yaklaşık)", type: "festival", impact: "Ekim başı bir gece sanat mekânları sabaha kadar açık." },
+      {
+        date: "05-01",
+        name: "İşçi Bayramı",
+        type: "public_holiday",
+        impact: "Tüm müze ve restoranların büyük kısmı kapalı.",
+      },
+      {
+        date: "05-08",
+        name: "2. Dünya Savaşı Zafer Günü",
+        type: "public_holiday",
+        impact: "Resmi tatil.",
+      },
+      {
+        date: "06-21",
+        name: "Fête de la Musique",
+        type: "festival",
+        impact: "Şehir genelinde ücretsiz konserler. Fantastik atmosfer.",
+      },
+      {
+        date: "07-14",
+        name: "Bastille Günü",
+        type: "festival",
+        impact: "Askeri geçit töreni Champs-Élysées'de. Akşam havai fişek. Pek çok bölge kapalı.",
+      },
+      {
+        date: "09-01",
+        name: "Paris Moda Haftası (yaklaşık)",
+        type: "festival",
+        impact: "Eylül sonu, otel ve restoran dolup taşıyor.",
+      },
+      {
+        date: "10-01",
+        name: "Nuit Blanche (yaklaşık)",
+        type: "festival",
+        impact: "Ekim başı bir gece sanat mekânları sabaha kadar açık.",
+      },
       { date: "12-25", name: "Noel", type: "public_holiday", impact: "Şehir büyük ölçüde kapalı." },
     ],
     source: "manual:curator",
@@ -352,7 +383,8 @@ export const PARIS_BRIEF: DestinationBrief = {
     value: [
       {
         category: "running",
-        description: "Paris koşu parkurları çeşitli ama Pazar sabahları bazı yollar araçlara kapanır. Jardin des Tuileries-Luxembourg bağlantısı güzel.",
+        description:
+          "Paris koşu parkurları çeşitli ama Pazar sabahları bazı yollar araçlara kapanır. Jardin des Tuileries-Luxembourg bağlantısı güzel.",
         highlights: [
           "Bois de Boulogne döngüleri (8-15 km arası seçenek)",
           "Canal Saint-Martin ve Canal de l'Ourcq düz bandı",
@@ -361,7 +393,8 @@ export const PARIS_BRIEF: DestinationBrief = {
       },
       {
         category: "food_specialty",
-        description: "Fransız mutfağı bölgesel. Paris'in kendi spesyalitesi: brasserie kültürü, steak-frites, onion soup, crème brûlée. Fırın kültürü ayrı bir dal.",
+        description:
+          "Fransız mutfağı bölgesel. Paris'in kendi spesyalitesi: brasserie kültürü, steak-frites, onion soup, crème brûlée. Fırın kültürü ayrı bir dal.",
         highlights: [
           "Du Pain et des Idées — Paris'in en iyi boulangerie'lerinden, Canal Saint-Martin",
           "Bistrot Paul Bert (11e) — steak-frites ve Fransız klasiği",
@@ -371,7 +404,8 @@ export const PARIS_BRIEF: DestinationBrief = {
       },
       {
         category: "art_gallery",
-        description: "Paris müze yoğunluğu inanılmaz. Bağımsız galeriler için Le Marais ve Saint-Germain-des-Prés.",
+        description:
+          "Paris müze yoğunluğu inanılmaz. Bağımsız galeriler için Le Marais ve Saint-Germain-des-Prés.",
         highlights: [
           "Fondation Louis Vuitton (Bois de Boulogne) — çağdaş sanat ve mimari",
           "Palais de Tokyo — gece 22:00'ye kadar açık, çağdaş",
@@ -381,7 +415,8 @@ export const PARIS_BRIEF: DestinationBrief = {
       },
       {
         category: "coworking",
-        description: "Paris'te coworking altyapısı gelişiyor. Marais ve Oberkampf bölgesinde laptop dostu kafeler yoğun.",
+        description:
+          "Paris'te coworking altyapısı gelişiyor. Marais ve Oberkampf bölgesinde laptop dostu kafeler yoğun.",
         highlights: [
           "WeWork Paris — Châtelet ve Opéra lokasyonları",
           "Anticafé (Louvre yakını) — saatlik ücret, sınırsız içecek",

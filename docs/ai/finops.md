@@ -58,12 +58,12 @@ Cost estimation uses operator-configured rate cards supplied via the `AI_MODEL_R
 
 ### Core Functions
 
-| Function | Purpose |
-|---|---|
-| `estimateModelCost()` | Calculates cost for a single model call using the rate card and actual token counts |
-| `reserveModelWork()` | Claims token budget from the request-scoped meter; rejects if limits would be exceeded |
-| `withAIRequestMeter()` | Wraps a request handler, attaching an isolated meter via `AsyncLocalStorage` |
-| `requestCostSummary()` | Returns aggregate stats for the current request: total tokens, total cost, call count |
+| Function               | Purpose                                                                                |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| `estimateModelCost()`  | Calculates cost for a single model call using the rate card and actual token counts    |
+| `reserveModelWork()`   | Claims token budget from the request-scoped meter; rejects if limits would be exceeded |
+| `withAIRequestMeter()` | Wraps a request handler, attaching an isolated meter via `AsyncLocalStorage`           |
+| `requestCostSummary()` | Returns aggregate stats for the current request: total tokens, total cost, call count  |
 
 ### Request-Scoped Metering
 
@@ -86,20 +86,20 @@ Metrics are emitted in AWS Embedded Metric Format (EMF), which allows CloudWatch
 
 ### Dimensions
 
-| Dimension | Example Values |
-|---|---|
-| `model` | `anthropic.claude-3-haiku`, `anthropic.claude-3-sonnet` |
-| `region` | `eu-west-1`, `us-east-1` |
-| `environment` | `production`, `staging` |
+| Dimension     | Example Values                                          |
+| ------------- | ------------------------------------------------------- |
+| `model`       | `anthropic.claude-3-haiku`, `anthropic.claude-3-sonnet` |
+| `region`      | `eu-west-1`, `us-east-1`                                |
+| `environment` | `production`, `staging`                                 |
 
 ### Metrics
 
-| Metric | Unit |
-|---|---|
-| `input_tokens` | Count |
-| `output_tokens` | Count |
-| `estimated_cost` | USD (float) |
-| `duration_ms` | Milliseconds |
+| Metric           | Unit         |
+| ---------------- | ------------ |
+| `input_tokens`   | Count        |
+| `output_tokens`  | Count        |
+| `estimated_cost` | USD (float)  |
+| `duration_ms`    | Milliseconds |
 
 These metrics feed the CloudWatch dashboards and alarms defined in Terraform (see Section 6).
 
@@ -111,39 +111,39 @@ These metrics feed the CloudWatch dashboards and alarms defined in Terraform (se
 
 Each user action consumes a fixed number of credits, independent of actual token usage:
 
-| Action | Credit Cost |
-|---|---|
-| Clarify (follow-up question) | 0 |
-| Chat (general conversation) | 1 |
-| Route (itinerary generation) | 5 |
+| Action                       | Credit Cost |
+| ---------------------------- | ----------- |
+| Clarify (follow-up question) | 0           |
+| Chat (general conversation)  | 1           |
+| Route (itinerary generation) | 5           |
 
 ### Model Tier Costs
 
 Model tier pricing is defined in service contracts. When a request uses a higher-tier model, the additional cost is applied:
 
-| Tier | Additional Credit Cost | Typical Use |
-|---|---|---|
-| Tier 1 | 0 | Lightweight classification, routing |
-| Tier 2 | 0.5 | Clarification, simple chat |
-| Tier 3 | 2 | Standard generation |
-| Tier 4 | 5 | Complex multi-step planning |
+| Tier   | Additional Credit Cost | Typical Use                         |
+| ------ | ---------------------- | ----------------------------------- |
+| Tier 1 | 0                      | Lightweight classification, routing |
+| Tier 2 | 0.5                    | Clarification, simple chat          |
+| Tier 3 | 2                      | Standard generation                 |
+| Tier 4 | 5                      | Complex multi-step planning         |
 
 ### Subscription Plans
 
-| Plan | Price (TL/month) | Credits Included |
-|---|---|---|
-| Explorer | 199 | 100 |
-| Pro | 499 | 500 |
-| Agency | 1,499 | 2,500 |
+| Plan     | Price (TL/month) | Credits Included |
+| -------- | ---------------- | ---------------- |
+| Explorer | 199              | 100              |
+| Pro      | 499              | 500              |
+| Agency   | 1,499            | 2,500            |
 
 ### Credit Packs (one-time purchase)
 
-| Pack | Price (TL) | Credits |
-|---|---|---|
-| Starter | 89 | 50 |
-| Popular | 299 | 300 |
-| Master | 749 | 1,000 |
-| Pro | 1,899 | 3,000 |
+| Pack    | Price (TL) | Credits |
+| ------- | ---------- | ------- |
+| Starter | 89         | 50      |
+| Popular | 299        | 300     |
+| Master  | 749        | 1,000   |
+| Pro     | 1,899      | 3,000   |
 
 ---
 
@@ -153,11 +153,11 @@ Model tier pricing is defined in service contracts. When a request uses a higher
 
 These modules aggregate cost data for display in admin interfaces and internal dashboards.
 
-| Function | Purpose |
-|---|---|
-| `calculateCompletedPlanCost()` | Breaks down cost for a single completed travel plan: tokens by agent, model tier costs, credit consumption |
-| `aggregateFinOpsMetrics()` | Produces summary statistics across all plans in a time window: total spend, average cost per plan, cost by model |
-| `getCostAllocationTags()` | Returns cost allocation grouped by agent role (route agent, chat agent, emergency agent, etc.) for chargeback or analysis |
+| Function                       | Purpose                                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `calculateCompletedPlanCost()` | Breaks down cost for a single completed travel plan: tokens by agent, model tier costs, credit consumption                |
+| `aggregateFinOpsMetrics()`     | Produces summary statistics across all plans in a time window: total spend, average cost per plan, cost by model          |
+| `getCostAllocationTags()`      | Returns cost allocation grouped by agent role (route agent, chat agent, emergency agent, etc.) for chargeback or analysis |
 
 ---
 
@@ -167,12 +167,12 @@ These modules aggregate cost data for display in admin interfaces and internal d
 
 Hard limits are enforced at the infrastructure level. They are not advisory --- exceeding any limit causes the current model call or request to be rejected.
 
-| Limit | Scope | Value |
-|---|---|---|
-| Max model calls | Per request | 6 |
-| Max output tokens | Per call | 4,200 |
+| Limit             | Scope       | Value  |
+| ----------------- | ----------- | ------ |
+| Max model calls   | Per request | 6      |
+| Max output tokens | Per call    | 4,200  |
 | Max output tokens | Per request | 14,000 |
-| Max input size | Per call | 64 KB |
+| Max input size    | Per call    | 64 KB  |
 
 ### Why These Values
 
@@ -193,11 +193,11 @@ A standalone Terraform stack for AI cost management resources. Separated from th
 
 ### CloudWatch Dashboards and Alarms
 
-| File | Purpose |
-|---|---|
-| `infra/terraform/finops.tf` | Core FinOps resources: metric filters, log groups, IAM roles for metric emission |
-| `infra/terraform/finops-dashboard.tf` | CloudWatch dashboard definition: cost over time, tokens by model, cost by region |
-| `infra/terraform/ai-alarms.tf` | AI-specific alarms: cost spike detection, token usage anomalies, error rate thresholds |
+| File                                  | Purpose                                                                                |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| `infra/terraform/finops.tf`           | Core FinOps resources: metric filters, log groups, IAM roles for metric emission       |
+| `infra/terraform/finops-dashboard.tf` | CloudWatch dashboard definition: cost over time, tokens by model, cost by region       |
+| `infra/terraform/ai-alarms.tf`        | AI-specific alarms: cost spike detection, token usage anomalies, error rate thresholds |
 
 Alarms trigger SNS notifications that can be routed to Slack, email, or PagerDuty depending on operator configuration.
 
@@ -207,12 +207,12 @@ Alarms trigger SNS notifications that can be routed to Slack, email, or PagerDut
 
 ### Endpoints
 
-| Method | Path | Purpose |
-|---|---|---|
-| `GET` | `/admin/ai-operations` | View real-time cost metrics: active requests, token consumption rate, estimated spend for current period |
-| `POST` | `/admin/ai-control` | Emergency controls: disable AI system-wide, adjust rate limits, toggle specific agents |
-| `GET` | `/admin/credit-stats` | Credit economy dashboard: credits granted vs. consumed vs. remaining, breakdown by module, top consumers by user |
-| `GET` | `/admin/token-usage` | Token usage overview: total tokens by model, average tokens per request, trend data |
+| Method | Path                   | Purpose                                                                                                          |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/admin/ai-operations` | View real-time cost metrics: active requests, token consumption rate, estimated spend for current period         |
+| `POST` | `/admin/ai-control`    | Emergency controls: disable AI system-wide, adjust rate limits, toggle specific agents                           |
+| `GET`  | `/admin/credit-stats`  | Credit economy dashboard: credits granted vs. consumed vs. remaining, breakdown by module, top consumers by user |
+| `GET`  | `/admin/token-usage`   | Token usage overview: total tokens by model, average tokens per request, trend data                              |
 
 ### Kill Switch
 

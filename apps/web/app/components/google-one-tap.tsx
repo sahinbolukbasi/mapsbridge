@@ -14,8 +14,7 @@ export function GoogleOneTap() {
         return; // Bu sayfalarda GoogleAuthButton butonu ve prompt'u doğrudan yönetir
       }
       const activeToken =
-        localStorage.getItem("mapsbridge.idToken") ||
-        localStorage.getItem("adreskopru.idToken");
+        localStorage.getItem("mapsbridge.idToken") || localStorage.getItem("adreskopru.idToken");
       if (activeToken) return; // Oturum zaten var, One Tap göstermeye gerek yok
     } catch {
       // ignore
@@ -40,7 +39,10 @@ export function GoogleOneTap() {
               const res = handleGoogleCredentialResponse(response.credential);
               if (res) {
                 // Giriş başarılı, sayfayı yenile veya yönlendir
-                if (window.location.pathname.startsWith("/login") || window.location.pathname.startsWith("/register")) {
+                if (
+                  window.location.pathname.startsWith("/login") ||
+                  window.location.pathname.startsWith("/register")
+                ) {
                   window.location.assign("/desk/");
                 } else {
                   window.location.reload();

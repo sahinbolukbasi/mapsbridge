@@ -1,13 +1,17 @@
 export interface KnowledgeBaseMetadata {
   sehir: string;
-  kategori: 'cafe' | 'food' | 'lodging' | 'parks_sports' | 'transit' | 'culture' | 'emergency';
+  kategori: "cafe" | "food" | "lodging" | "parks_sports" | "transit" | "culture" | "emergency";
   mahalle?: string;
-  fiyat_seviyesi?: '$' | '$$' | '$$$' | '$$$$' | 'ucretsiz' | 'belirsiz';
+  fiyat_seviyesi?: "$" | "$$" | "$$$" | "$$$$" | "ucretsiz" | "belirsiz";
   kaynak: string;
   son_dogrulama_tarihi: string;
 }
 
-export function isDocumentStale(sonDogrulamaTarihi: string, maxAgeDays = 180, referenceDate = new Date()): boolean {
+export function isDocumentStale(
+  sonDogrulamaTarihi: string,
+  maxAgeDays = 180,
+  referenceDate = new Date(),
+): boolean {
   const verifiedDate = new Date(sonDogrulamaTarihi);
   if (isNaN(verifiedDate.getTime())) return true;
   const diffTime = referenceDate.getTime() - verifiedDate.getTime();
@@ -16,26 +20,34 @@ export function isDocumentStale(sonDogrulamaTarihi: string, maxAgeDays = 180, re
 }
 
 export function validateKBMeta(meta: unknown): meta is KnowledgeBaseMetadata {
-  if (!meta || typeof meta !== 'object') return false;
+  if (!meta || typeof meta !== "object") return false;
   const m = meta as Record<string, any>;
-  const validCategories = ['cafe', 'food', 'lodging', 'parks_sports', 'transit', 'culture', 'emergency'];
+  const validCategories = [
+    "cafe",
+    "food",
+    "lodging",
+    "parks_sports",
+    "transit",
+    "culture",
+    "emergency",
+  ];
   return (
-    typeof m.sehir === 'string' &&
+    typeof m.sehir === "string" &&
     m.sehir.trim().length > 0 &&
-    typeof m.kategori === 'string' &&
+    typeof m.kategori === "string" &&
     validCategories.includes(m.kategori) &&
-    typeof m.kaynak === 'string' &&
-    m.kaynak.startsWith('https://') &&
-    typeof m.son_dogrulama_tarihi === 'string' &&
+    typeof m.kaynak === "string" &&
+    m.kaynak.startsWith("https://") &&
+    typeof m.son_dogrulama_tarihi === "string" &&
     /^\d{4}-\d{2}-\d{2}$/.test(m.son_dogrulama_tarihi)
   );
 }
 
 export function filterDocumentsByMetadata(
   documents: Array<{ metadata?: KnowledgeBaseMetadata; text: string; [key: string]: any }>,
-  filters: { sehir?: string; kategori?: string; mahalle?: string; excludeStale?: boolean }
+  filters: { sehir?: string; kategori?: string; mahalle?: string; excludeStale?: boolean },
 ): Array<{ metadata?: KnowledgeBaseMetadata; text: string; [key: string]: any }> {
-  return documents.filter(doc => {
+  return documents.filter((doc) => {
     if (!doc.metadata) return false;
 
     if (filters.excludeStale !== false && isDocumentStale(doc.metadata.son_dogrulama_tarihi)) {
@@ -58,13 +70,16 @@ export function filterDocumentsByMetadata(
   });
 }
 
-export function buildBedrockRetrievalFilter(filters: { sehir?: string; kategori?: string }): Record<string, any> | undefined {
+export function buildBedrockRetrievalFilter(filters: {
+  sehir?: string;
+  kategori?: string;
+}): Record<string, any> | undefined {
   const conditions: Array<Record<string, any>> = [];
 
   if (filters.sehir) {
     conditions.push({
       equals: {
-        key: 'sehir',
+        key: "sehir",
         value: filters.sehir,
       },
     });
@@ -73,7 +88,7 @@ export function buildBedrockRetrievalFilter(filters: { sehir?: string; kategori?
   if (filters.kategori) {
     conditions.push({
       equals: {
-        key: 'kategori',
+        key: "kategori",
         value: filters.kategori,
       },
     });

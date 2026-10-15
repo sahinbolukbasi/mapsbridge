@@ -34,7 +34,8 @@ export class ModelRouter {
       modelName: "Amazon Nova Lite",
       estimatedLatencyMs: 420,
       creditCost: ACTION_CREDIT_COSTS.ai_chat,
-      description: "Standart seyahat sohbeti, tek şehir-1-3 günlük plan, restoran/konaklama önerileri",
+      description:
+        "Standart seyahat sohbeti, tek şehir-1-3 günlük plan, restoran/konaklama önerileri",
     },
     tier3: {
       tier: "tier3",
@@ -69,8 +70,12 @@ export class ModelRouter {
     const norm = (payload.prompt || "").toLocaleLowerCase("tr");
 
     // ── Tier 1: Basit selamlama veya çok kısa tek-kelime niyet ──────────────
-    const isGreeting = /^(merhaba|selam|günaydın|iyi günler|hey|hi|hello|nasılsın|ne haber)[!.,?]?$/iu.test(norm.trim());
-    const isVeryShort = norm.trim().split(/\s+/).length <= 3 && !payload.dayCount && !payload.multiCity;
+    const isGreeting =
+      /^(merhaba|selam|günaydın|iyi günler|hey|hi|hello|nasılsın|ne haber)[!.,?]?$/iu.test(
+        norm.trim(),
+      );
+    const isVeryShort =
+      norm.trim().split(/\s+/).length <= 3 && !payload.dayCount && !payload.multiCity;
     if (isGreeting || isVeryShort) {
       return ModelRouter.TIER_CONFIGS.tier1;
     }
@@ -78,7 +83,9 @@ export class ModelRouter {
     // ── Tier 4: Yeniden planlama veya çok karmaşık optimizasyon ─────────────
     const isReplanning =
       payload.isReplanning ||
-      /yeniden\s+planla|rotayı\s+değiştir|tam\s+program|ayrıntılı\s+rota|tüm\s+güzergah|komple\s+güncelle/iu.test(norm);
+      /yeniden\s+planla|rotayı\s+değiştir|tam\s+program|ayrıntılı\s+rota|tüm\s+güzergah|komple\s+güncelle/iu.test(
+        norm,
+      );
     if (isReplanning) {
       return ModelRouter.TIER_CONFIGS.tier4;
     }

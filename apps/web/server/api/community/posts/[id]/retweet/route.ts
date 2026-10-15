@@ -11,10 +11,7 @@ export async function OPTIONS(request: NextRequest) {
   });
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const corsHeaders = getCorsHeaders(request);
   const auth = await authenticateRequest(request, corsHeaders);
   if (auth instanceof NextResponse) return auth;
@@ -25,18 +22,15 @@ export async function POST(
     if (!post) {
       return NextResponse.json(
         { error: "Gönderi bulunamadı." },
-        { status: 404, headers: corsHeaders }
+        { status: 404, headers: corsHeaders },
       );
     }
 
-    return NextResponse.json(
-      { success: true, post },
-      { headers: corsHeaders }
-    );
+    return NextResponse.json({ success: true, post }, { headers: corsHeaders });
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message || "Sunucu hatası" },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders },
     );
   }
 }

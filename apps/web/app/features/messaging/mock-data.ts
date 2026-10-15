@@ -74,7 +74,8 @@ export const PRESET_GROUP_ROUTES: Record<string, GroupTopicRoute> = {
     code: "KP-302",
     name: "Kapadokya Peri Bacaları & Vadi Keşfi",
     stats: "9 Durak • 18.4 km • 840m Tırmanış",
-    coverImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuBgbzFN9sn_tofBJ4zoOYV2kldz6peamsTyAlVvyfQV4UNqn1f25WuOzqrlZxr-2tFyh9OqMCPlRsf6fLEHHq6w-IFjZonglyq6qcHZE2YbIxpwx-Wsh4dC4M5qDh5E33OwOmPR3Szj-ni1QlyjjtsaP5WYsyCJUaJUF8HYVnFLzIebPasUuwACzsHA2o8elBcgFo4RAWytHm34doEyGZqeQfSuzWD241nscPR1ncOMm3bkHcrl55_CzQ",
+    coverImage:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBgbzFN9sn_tofBJ4zoOYV2kldz6peamsTyAlVvyfQV4UNqn1f25WuOzqrlZxr-2tFyh9OqMCPlRsf6fLEHHq6w-IFjZonglyq6qcHZE2YbIxpwx-Wsh4dC4M5qDh5E33OwOmPR3Szj-ni1QlyjjtsaP5WYsyCJUaJUF8HYVnFLzIebPasUuwACzsHA2o8elBcgFo4RAWytHm34doEyGZqeQfSuzWD241nscPR1ncOMm3bkHcrl55_CzQ",
     waypoints: [
       { num: 1, title: "Aşk Vadisi Balon Kalkışı", sub: "05:30 Buluşma Noktası" },
       { num: 2, title: "Kızılçukur Seyir Noktası", sub: "18:15 Gün Batımı Kampı" },
@@ -86,7 +87,8 @@ export const PRESET_GROUP_ROUTES: Record<string, GroupTopicRoute> = {
     code: "LK-108",
     name: "Likya Yolu Doğa & Kıyı Yürüyüşü",
     stats: "12 Durak • 42.0 km • 1.250m Tırmanış",
-    coverImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuDiLpwyngo5NBNi9lt1H15e1t-RU-EDBN32qrucWT-4d5GDcgURhhYdZuzKYQCC0rXr1Psxoz0SRfixjETBXnsaWmYDmQQ3GuRO1leeQ4s02fRulQimRhvrIkznkQk-GjaZ_upsGsaUEztfaAz2EIbBl0iKHOkVr1IOPbCahSj1T_to2vs-udokgquO8yTLCwPKxeeD-HEWLihOWJkfIHatXpQDVSg-CrVNN5azkZKZSb1D6-B11kTl8Q",
+    coverImage:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDiLpwyngo5NBNi9lt1H15e1t-RU-EDBN32qrucWT-4d5GDcgURhhYdZuzKYQCC0rXr1Psxoz0SRfixjETBXnsaWmYDmQQ3GuRO1leeQ4s02fRulQimRhvrIkznkQk-GjaZ_upsGsaUEztfaAz2EIbBl0iKHOkVr1IOPbCahSj1T_to2vs-udokgquO8yTLCwPKxeeD-HEWLihOWJkfIHatXpQDVSg-CrVNN5azkZKZSb1D6-B11kTl8Q",
     waypoints: [
       { num: 1, title: "Ölüdeniz Başlangıç Kapısı", sub: "08:00 Toplanma" },
       { num: 2, title: "Kelebekler Vadisi Seyir Terası", sub: "Mola & Fotoğraf Çekimi" },
@@ -98,7 +100,8 @@ export const PRESET_GROUP_ROUTES: Record<string, GroupTopicRoute> = {
     code: "EG-204",
     name: "Ege Bağ Yolu & Gurme Rota",
     stats: "7 Durak • 28.5 km • Gurme Turu",
-    coverImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuBqBIhnVGRQ1gqKBQjyC_7Yr7J9nIoR2KBo6hAi5N3eMfwBt5MLD2Vp3rZUZMlSe-nBIO-b5y00RjVjuboxmHQrhBFTFeH2DbH7R157acNNY7xWhooWdbzR3Vu5aEV5BHaxeyIYO2Myq5HDX6DQWyYbGS8tRJBf3--f7b4juLWEMhjocwxEV1-RPqFUUoS0kPPlMPWqVdmAgCjJfc2SE651uxnh0SYdl-vX-VJ9Jv0S6psx3EtPJ2Lkbg",
+    coverImage:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBqBIhnVGRQ1gqKBQjyC_7Yr7J9nIoR2KBo6hAi5N3eMfwBt5MLD2Vp3rZUZMlSe-nBIO-b5y00RjVjuboxmHQrhBFTFeH2DbH7R157acNNY7xWhooWdbzR3Vu5aEV5BHaxeyIYO2Myq5HDX6DQWyYbGS8tRJBf3--f7b4juLWEMhjocwxEV1-RPqFUUoS0kPPlMPWqVdmAgCjJfc2SE651uxnh0SYdl-vX-VJ9Jv0S6psx3EtPJ2Lkbg",
     waypoints: [
       { num: 1, title: "Urla Sanat Sokağı", sub: "10:00 Sabah Kahvesi" },
       { num: 2, title: "Zeytinyağı Müzesi & Tadım", sub: "13:30 Yerel Üreticiler" },

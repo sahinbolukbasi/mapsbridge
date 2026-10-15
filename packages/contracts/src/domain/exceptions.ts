@@ -28,7 +28,9 @@ export class ValidationException extends DomainException {
 
 export class NotFoundException extends DomainException {
   constructor(entityName: string, identifier?: string | number) {
-    const msg = identifier ? `${entityName} with id '${identifier}' not found.` : `${entityName} not found.`;
+    const msg = identifier
+      ? `${entityName} with id '${identifier}' not found.`
+      : `${entityName} not found.`;
     super(msg, "NOT_FOUND", 404);
     this.name = "NotFoundException";
   }
@@ -60,7 +62,7 @@ export class InsufficientCreditsException extends DomainException {
     super(
       `Insufficient credits. Required: ${required}, available: ${available}.`,
       "INSUFFICIENT_CREDITS",
-      402
+      402,
     );
     this.name = "InsufficientCreditsException";
   }

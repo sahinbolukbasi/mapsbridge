@@ -1,4 +1,11 @@
-import type { StructuredTripPlan, TripProfile, FeasibilityReport, FeasibilityIssue, DayBlock, DayPlan } from './types';
+import type {
+  StructuredTripPlan,
+  TripProfile,
+  FeasibilityReport,
+  FeasibilityIssue,
+  DayBlock,
+  DayPlan,
+} from "./types";
 
 function parseTimeToMinutes(timeStr: string): { start: number; end: number } | null {
   const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})$/);
@@ -30,7 +37,12 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
 // §11.1 Rule: Meal gap (8+ hours without a food/cafe block)
 // ---------------------------------------------------------------------------
 
-interface ParsedBlock { block: DayBlock; start: number; end: number; blockIdx: number }
+interface ParsedBlock {
+  block: DayBlock;
+  start: number;
+  end: number;
+  blockIdx: number;
+}
 
 function checkMealGap(day: DayPlan, dayNum: number): FeasibilityIssue[] {
   const parsed: ParsedBlock[] = [];
@@ -47,18 +59,16 @@ function checkMealGap(day: DayPlan, dayNum: number): FeasibilityIssue[] {
 
   if (dayEnd - dayStart < 480) return []; // Day span too short to worry
 
-  const foodParsed = parsed.filter(
-    (p) => p.block.type === 'cafe' || p.block.type === 'restaurant',
-  );
+  const foodParsed = parsed.filter((p) => p.block.type === "cafe" || p.block.type === "restaurant");
 
   if (foodParsed.length === 0) {
     return [
       {
-        severity: 'warning',
+        severity: "warning",
         day: dayNum,
-        code: 'MEAL_GAP',
+        code: "MEAL_GAP",
         message: `${dayNum}. günde hiç yemek/kafe durağı planlanmamış (gün süresi: ${((dayEnd - dayStart) / 60).toFixed(1)} saat).`,
-        suggestedFix: 'Öğle veya akşam yemeği için bir yemek durağı ekleyin.',
+        suggestedFix: "Öğle veya akşam yemeği için bir yemek durağı ekleyin.",
       },
     ];
   }
@@ -68,11 +78,11 @@ function checkMealGap(day: DayPlan, dayNum: number): FeasibilityIssue[] {
   if (gapToFirst >= 480) {
     return [
       {
-        severity: 'warning',
+        severity: "warning",
         day: dayNum,
-        code: 'MEAL_GAP',
+        code: "MEAL_GAP",
         message: `${dayNum}. günde ilk yemek durağına kadar ${Math.floor(gapToFirst / 60)} saat geçiyor.`,
-        suggestedFix: 'Daha erken bir kahvaltı veya öğle yemeği durağı ekleyin.',
+        suggestedFix: "Daha erken bir kahvaltı veya öğle yemeği durağı ekleyin.",
       },
     ];
   }
@@ -83,11 +93,11 @@ function checkMealGap(day: DayPlan, dayNum: number): FeasibilityIssue[] {
     if (gap >= 480) {
       return [
         {
-          severity: 'warning',
+          severity: "warning",
           day: dayNum,
-          code: 'MEAL_GAP',
+          code: "MEAL_GAP",
           message: `${dayNum}. günde yemek blokları arasında ${Math.floor(gap / 60)} saat aralık var.`,
-          suggestedFix: 'Uzun aktivite aralarına öğün arası bir kafe veya öğle yemeği ekleyin.',
+          suggestedFix: "Uzun aktivite aralarına öğün arası bir kafe veya öğle yemeği ekleyin.",
         },
       ];
     }
@@ -98,11 +108,11 @@ function checkMealGap(day: DayPlan, dayNum: number): FeasibilityIssue[] {
   if (gapFromLast >= 480) {
     return [
       {
-        severity: 'warning',
+        severity: "warning",
         day: dayNum,
-        code: 'MEAL_GAP',
+        code: "MEAL_GAP",
         message: `${dayNum}. günde son yemek durağından sonra ${Math.floor(gapFromLast / 60)} saat aktivite daha planlanmış, akşam yemeği eksik.`,
-        suggestedFix: 'Günün sonuna bir akşam yemeği durağı ekleyin.',
+        suggestedFix: "Günün sonuna bir akşam yemeği durağı ekleyin.",
       },
     ];
   }
@@ -114,7 +124,10 @@ function checkMealGap(day: DayPlan, dayNum: number): FeasibilityIssue[] {
 // Main validator
 // ---------------------------------------------------------------------------
 
-export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: TripProfile): FeasibilityReport {
+export function validateTripPlanFeasibility(
+  plan: StructuredTripPlan,
+  profile?: TripProfile,
+): FeasibilityReport {
   const issues: FeasibilityIssue[] = [];
   let totalMinutesPlanned = 0;
   let estimatedCostSum = 0;
@@ -123,17 +136,19 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
     return {
       isValid: false,
       score: 0,
-      issues: [{
-        severity: 'error',
-        code: 'EXCESSIVE_DURATION',
-        message: 'Plan geçerli günler içermiyor.',
-      }],
+      issues: [
+        {
+          severity: "error",
+          code: "EXCESSIVE_DURATION",
+          message: "Plan geçerli günler içermiyor.",
+        },
+      ],
       totalPlannedHours: 0,
       estimatedCostTotal: 0,
     };
   }
 
-  const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
   for (let dayIdx = 0; dayIdx < plan.days.length; dayIdx++) {
     const day = plan.days[dayIdx];
@@ -142,7 +157,7 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
     let previousEnd: number | null = null;
     let previousBlockWithCoords: DayBlock | null = null;
     let totalWalkingMeters = 0;
-    const isRainy = /yağmur|yağış|fırtına|rain|storm|shower/iu.test(day.weather_note || '');
+    const isRainy = /yağmur|yağış|fırtına|rain|storm|shower/iu.test(day.weather_note || "");
 
     // Determine day-of-week from date string for closed days check
     let dayOfWeek: string | null = null;
@@ -160,36 +175,36 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
     for (let blockIdx = 0; blockIdx < (day.blocks || []).length; blockIdx++) {
       const block: DayBlock = day.blocks[blockIdx];
 
-      if (typeof block.est_cost === 'number' && block.est_cost > 0) {
+      if (typeof block.est_cost === "number" && block.est_cost > 0) {
         estimatedCostSum += block.est_cost;
       }
 
       // §11.1 Walking budget accumulation
-      if (block.transit?.mode === 'walking' && block.transit.minutes > 0) {
+      if (block.transit?.mode === "walking" && block.transit.minutes > 0) {
         totalWalkingMeters += block.transit.minutes * 83; // ~5 km/h ≈ 83 m/min
       }
 
       const parsedTime = parseTimeToMinutes(block.time);
       if (!parsedTime) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           day: dayNum,
           blockIndex: blockIdx,
-          code: 'TIME_OVERLAP',
+          code: "TIME_OVERLAP",
           message: `${block.name} için zaman biçimi ("${block.time}") geçersiz. "09:00-10:00" biçimi beklenir.`,
-          suggestedFix: 'Zaman dilimini HH:MM-HH:MM olarak düzenleyin.',
+          suggestedFix: "Zaman dilimini HH:MM-HH:MM olarak düzenleyin.",
         });
         continue;
       }
 
       if (parsedTime.end <= parsedTime.start) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           day: dayNum,
           blockIndex: blockIdx,
-          code: 'TIME_OVERLAP',
+          code: "TIME_OVERLAP",
           message: `${block.name} bloğunun bitiş saati başlangıç saatinden önce veya aynı.`,
-          suggestedFix: 'Bitiş saatini başlangıçtan sonraya ayarlayın.',
+          suggestedFix: "Bitiş saatini başlangıçtan sonraya ayarlayın.",
         });
       }
 
@@ -200,23 +215,23 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
       if (previousEnd !== null) {
         if (parsedTime.start < previousEnd) {
           issues.push({
-            severity: 'error',
+            severity: "error",
             day: dayNum,
             blockIndex: blockIdx,
-            code: 'TIME_OVERLAP',
+            code: "TIME_OVERLAP",
             message: `${dayNum}. gün: "${block.name}" bloğu önceki durakla zaman olarak çakışıyor.`,
-            suggestedFix: 'Saatleri çakışmayacak şekilde ileri kaydırın.',
+            suggestedFix: "Saatleri çakışmayacak şekilde ileri kaydırın.",
           });
         } else if (block.transit && block.transit.minutes > 0) {
           const gap = parsedTime.start - previousEnd;
           if (gap < block.transit.minutes) {
             issues.push({
-              severity: 'warning',
+              severity: "warning",
               day: dayNum,
               blockIndex: blockIdx,
-              code: 'TRANSIT_INSUFFICIENT',
+              code: "TRANSIT_INSUFFICIENT",
               message: `${dayNum}. gün: "${block.name}" için ${block.transit.minutes} dk ${block.transit.mode} süresi gerekiyor, ancak iki blok arası sadece ${gap} dk.`,
-              suggestedFix: 'İki blok arasına en az ulaşım süresi kadar boşluk bırakın.',
+              suggestedFix: "İki blok arasına en az ulaşım süresi kadar boşluk bırakın.",
             });
           }
         }
@@ -225,15 +240,15 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
       previousEnd = parsedTime.end;
 
       // Weather alternative check
-      if (isRainy && (block.type === 'park' || block.type === 'viewpoint')) {
+      if (isRainy && (block.type === "park" || block.type === "viewpoint")) {
         if (!block.alt || block.alt.trim().length < 5) {
           issues.push({
-            severity: 'warning',
+            severity: "warning",
             day: dayNum,
             blockIndex: blockIdx,
-            code: 'MISSING_WEATHER_ALT',
+            code: "MISSING_WEATHER_ALT",
             message: `${dayNum}. gün yağışlı hava uyarısı var ancak açık hava noktası "${block.name}" için yağmur alternatifi belirtilmemiş.`,
-            suggestedFix: 'Yağmur durumu için yakın kapalı bir müze veya kafe alternatifi ekleyin.',
+            suggestedFix: "Yağmur durumu için yakın kapalı bir müze veya kafe alternatifi ekleyin.",
           });
         }
       }
@@ -245,34 +260,34 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
           const minutesBeforeClosing = closingMin - parsedTime.start;
           if (minutesBeforeClosing < 30) {
             issues.push({
-              severity: 'error',
+              severity: "error",
               day: dayNum,
               blockIndex: blockIdx,
-              code: 'LAST_ENTRY_VIOLATION',
+              code: "LAST_ENTRY_VIOLATION",
               message: `${dayNum}. gün: "${block.name}" ziyaret başlangıcı (${block.time.split(/[-–]/)[0].trim()}) kapanış saatine (${block.closingTime}) 30 dakikadan az kalmış.`,
-              suggestedFix: 'Ziyareti en az 30-60 dakika öne alın.',
+              suggestedFix: "Ziyareti en az 30-60 dakika öne alın.",
             });
           } else if (minutesBeforeClosing < 60) {
             issues.push({
-              severity: 'warning',
+              severity: "warning",
               day: dayNum,
               blockIndex: blockIdx,
-              code: 'LAST_ENTRY_VIOLATION',
+              code: "LAST_ENTRY_VIOLATION",
               message: `${dayNum}. gün: "${block.name}" ziyaret başlangıcı kapanış saatine (${block.closingTime}) 60 dakikadan az kalmışken başlıyor.`,
-              suggestedFix: 'Ziyareti 30-60 dakika öne almayı düşünün.',
+              suggestedFix: "Ziyareti 30-60 dakika öne almayı düşünün.",
             });
           }
         }
       }
 
       // §11.1 Minimum visit duration
-      if (typeof block.minVisitMinutes === 'number' && block.minVisitMinutes > 0) {
+      if (typeof block.minVisitMinutes === "number" && block.minVisitMinutes > 0) {
         if (blockDuration < block.minVisitMinutes) {
           issues.push({
-            severity: 'warning',
+            severity: "warning",
             day: dayNum,
             blockIndex: blockIdx,
-            code: 'MIN_VISIT_DURATION',
+            code: "MIN_VISIT_DURATION",
             message: `${dayNum}. gün: "${block.name}" için planlanan süre (${blockDuration} dk) minimum önerilen sürenin (${block.minVisitMinutes} dk) altında.`,
             suggestedFix: `Bu yer için en az ${block.minVisitMinutes} dakika ayırın.`,
           });
@@ -283,23 +298,23 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
       if (dayOfWeek && Array.isArray(block.closedDays) && block.closedDays.length > 0) {
         if (block.closedDays.includes(dayOfWeek)) {
           issues.push({
-            severity: 'error',
+            severity: "error",
             day: dayNum,
             blockIndex: blockIdx,
-            code: 'CLOSED_DAY',
+            code: "CLOSED_DAY",
             message: `${dayNum}. gün: "${block.name}" ${dayOfWeek} günü kapalıdır.`,
-            suggestedFix: 'Bu durağı açık olduğu bir güne taşıyın veya alternatif bir yer ekleyin.',
+            suggestedFix: "Bu durağı açık olduğu bir güne taşıyın veya alternatif bir yer ekleyin.",
           });
         }
       }
 
       // §11.1 Geographic coherence (haversine > 20 km without transit)
       if (
-        typeof block.lat === 'number' &&
-        typeof block.lng === 'number' &&
+        typeof block.lat === "number" &&
+        typeof block.lng === "number" &&
         previousBlockWithCoords !== null &&
-        typeof previousBlockWithCoords.lat === 'number' &&
-        typeof previousBlockWithCoords.lng === 'number'
+        typeof previousBlockWithCoords.lat === "number" &&
+        typeof previousBlockWithCoords.lng === "number"
       ) {
         const distKm = haversineKm(
           previousBlockWithCoords.lat,
@@ -309,18 +324,19 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
         );
         if (distKm > 20) {
           issues.push({
-            severity: 'warning',
+            severity: "warning",
             day: dayNum,
             blockIndex: blockIdx,
-            code: 'GEO_INCOHERENCE',
+            code: "GEO_INCOHERENCE",
             message: `${dayNum}. gün: "${previousBlockWithCoords.name}" ile "${block.name}" arasındaki mesafe yaklaşık ${distKm.toFixed(1)} km — aynı gün için çok uzak olabilir.`,
-            suggestedFix: 'Bu iki durağı farklı günlere ayırın veya aralarına ulaşım bloğu ekleyin.',
+            suggestedFix:
+              "Bu iki durağı farklı günlere ayırın veya aralarına ulaşım bloğu ekleyin.",
           });
         }
       }
 
       // Update previous block with coords for next iteration
-      if (typeof block.lat === 'number' && typeof block.lng === 'number') {
+      if (typeof block.lat === "number" && typeof block.lng === "number") {
         previousBlockWithCoords = block;
       }
     }
@@ -328,11 +344,11 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
     // §11.1 Daily walking budget check (> 15 km = 15,000 m)
     if (totalWalkingMeters > 15000) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         day: dayNum,
-        code: 'WALKING_BUDGET',
+        code: "WALKING_BUDGET",
         message: `${dayNum}. günde tahmini yürüyüş mesafesi ${(totalWalkingMeters / 1000).toFixed(1)} km (önerilen limit: 15 km).`,
-        suggestedFix: 'Bazı yürüyüş transferlerini metro veya taksi ile değiştirin.',
+        suggestedFix: "Bazı yürüyüş transferlerini metro veya taksi ile değiştirin.",
       });
     }
 
@@ -343,11 +359,11 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
     // Daily duration check (> 8.5 hours = 510 minutes)
     if (dayTotalMinutes > 510) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         day: dayNum,
-        code: 'EXCESSIVE_DURATION',
+        code: "EXCESSIVE_DURATION",
         message: `${dayNum}. günün toplam planlanan süresi ${(dayTotalMinutes / 60).toFixed(1)} saat. Maksimum önerilen günlük yük 8.5 saattir.`,
-        suggestedFix: 'Bir veya iki durağı sonraki güne kaydırarak gün temposunu hafifletin.',
+        suggestedFix: "Bir veya iki durağı sonraki güne kaydırarak gün temposunu hafifletin.",
       });
     }
 
@@ -358,10 +374,10 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
   if (profile?.budget?.total && profile.budget.total > 0) {
     if (estimatedCostSum > profile.budget.total) {
       issues.push({
-        severity: 'error',
-        code: 'BUDGET_EXCEEDED',
-        message: `Toplam tahmini maliyet (${estimatedCostSum} ${profile.budget.currency || 'USD'}) kullanıcının belirlediği bütçeyi (${profile.budget.total} ${profile.budget.currency || 'USD'}) aşıyor.`,
-        suggestedFix: 'Pahalı aktiviteleri veya restoranları ekonomik alternatiflerle değiştirin.',
+        severity: "error",
+        code: "BUDGET_EXCEEDED",
+        message: `Toplam tahmini maliyet (${estimatedCostSum} ${profile.budget.currency || "USD"}) kullanıcının belirlediği bütçeyi (${profile.budget.total} ${profile.budget.currency || "USD"}) aşıyor.`,
+        suggestedFix: "Pahalı aktiviteleri veya restoranları ekonomik alternatiflerle değiştirin.",
       });
     }
   }
@@ -369,11 +385,14 @@ export function validateTripPlanFeasibility(plan: StructuredTripPlan, profile?: 
   let errorCount = 0;
   let warningCount = 0;
   for (const issue of issues) {
-    if (issue.severity === 'error') errorCount++;
+    if (issue.severity === "error") errorCount++;
     else warningCount++;
   }
 
-  const score = Math.max(0.0, Math.min(1.0, Math.round((1.0 - errorCount * 0.25 - warningCount * 0.08) * 100) / 100));
+  const score = Math.max(
+    0.0,
+    Math.min(1.0, Math.round((1.0 - errorCount * 0.25 - warningCount * 0.08) * 100) / 100),
+  );
   const isValid = errorCount === 0;
 
   return {

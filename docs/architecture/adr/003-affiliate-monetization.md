@@ -9,6 +9,7 @@
 ## Bağlam
 
 Faz C hedefi: Travelpayouts (uçuş, otel, araç, sigorta) ve GetYourGuide (aktivite) affiliate linklerini plan yanıtlarına entegre etmek. Temel gereksinimler:
+
 1. Affiliate linkleri atfedilmiş (attribution metni zorunlu)
 2. Tıklama ölçülüyor
 3. Expired fiyat render edilmiyor (otomatik test)

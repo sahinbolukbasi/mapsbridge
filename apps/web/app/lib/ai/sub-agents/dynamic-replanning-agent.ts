@@ -1,11 +1,11 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { RouteStop } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { RouteStop } from "../types";
 
 export interface DynamicReplanningOutput {
   summary: string;
   adjustedStops: Array<{
     name: string;
-    action: 'kept' | 'swapped' | 'deferred' | 'time_shifted';
+    action: "kept" | "swapped" | "deferred" | "time_shifted";
     reason: string;
     newTimeSlot?: string;
   }>;
@@ -37,16 +37,16 @@ JSON formatı:
 
 export async function runDynamicReplanningAgent(
   destination: string,
-  triggerReason: 'late_start' | 'rain_weather' | 'venue_closed',
+  triggerReason: "late_start" | "rain_weather" | "venue_closed",
   currentStops: RouteStop[],
-  timeoutMs = 4500
-): Promise<{ output: DynamicReplanningOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: DynamicReplanningOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const stopNames = currentStops.map((s) => s.name).join(', ') || 'Planlanan duraklar';
+  const stopNames = currentStops.map((s) => s.name).join(", ") || "Planlanan duraklar";
 
   const userQuery = `Hedef Şehir: "${destination}".
 Mevcut Duraklar: ${stopNames}.
-Tetikleyici Neden: "${triggerReason === 'rain_weather' ? 'Yağmur başladı (açık hava duraklarını kapalı alternatiflerle değiştir)' : triggerReason === 'late_start' ? 'Güne 2 saat geç başlandı (durakları ötele)' : 'Bir mekan kapalı' }".
+Tetikleyici Neden: "${triggerReason === "rain_weather" ? "Yağmur başladı (açık hava duraklarını kapalı alternatiflerle değiştir)" : triggerReason === "late_start" ? "Güne 2 saat geç başlandı (durakları ötele)" : "Bir mekan kapalı"}".
 Bu duruma göre rotayı anında optimize et.`;
 
   const bedrockRes = await invokeBedrockJSON<DynamicReplanningOutput>(userQuery, {
@@ -59,24 +59,26 @@ Bu duruma göre rotayı anında optimize et.`;
   if (bedrockRes.success && bedrockRes.data && Array.isArray(bedrockRes.data.adjustedStops)) {
     return {
       output: bedrockRes.data,
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
   return {
     output: {
-      summary: triggerReason === 'rain_weather'
-        ? 'Yağış nedeniyle açık hava durakları kapalı kültürel alternatiflere uyarlandı.'
-        : 'Zaman çizelgesi günün geri kalanı için daha rahat bir tempoya uyarlandı.',
+      summary:
+        triggerReason === "rain_weather"
+          ? "Yağış nedeniyle açık hava durakları kapalı kültürel alternatiflere uyarlandı."
+          : "Zaman çizelgesi günün geri kalanı için daha rahat bir tempoya uyarlandı.",
       adjustedStops: currentStops.map((s, idx) => ({
         name: s.name,
-        action: idx === 0 ? 'kept' : 'time_shifted',
-        reason: 'Güncellenen gün saatine göre ötelendi.',
+        action: idx === 0 ? "kept" : "time_shifted",
+        reason: "Güncellenen gün saatine göre ötelendi.",
       })),
-      weatherOrTimingAlert: 'Lütfen kapalı mekanların son bilet giriş saatlerini kontrol etmeyi unutmayın.',
+      weatherOrTimingAlert:
+        "Lütfen kapalı mekanların son bilet giriş saatlerini kontrol etmeyi unutmayın.",
     },
-    source: 'bedrock',
+    source: "bedrock",
     durationMs: Date.now() - startTime,
   };
 }

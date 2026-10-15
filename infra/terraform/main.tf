@@ -129,6 +129,18 @@ locals {
       "POST /admin/ai-release/propose",
       "POST /admin/ai-release/publish",
       "POST /admin/ai-release/rollback",
+      "GET /admin/analytics/devices",
+      "GET /admin/analytics/ai-topics",
+      "GET /admin/analytics/community",
+      "GET /admin/analytics/subscriptions",
+      "POST /admin/analytics/track",
+      "GET /admin/agentcore-status",
+      "GET /admin/credit-packs",
+      "POST /admin/credit-packs/{id}",
+      "GET /admin/plans",
+      "POST /admin/plans/{id}",
+      "GET /admin/stripe-config",
+      "POST /admin/stripe-config",
     ]
     chat = [
       "GET /chat/threads",

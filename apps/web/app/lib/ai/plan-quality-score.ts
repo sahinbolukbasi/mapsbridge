@@ -6,17 +6,17 @@
  * and give the model self-reflection input.
  */
 
-import type { StructuredTripPlan, TripProfile, FeasibilityIssue } from './types';
+import type { StructuredTripPlan, TripProfile, FeasibilityIssue } from "./types";
 
 export interface PlanQualityScore {
-  overall: number;               // 0-100
-  geoEfficiency: number;         // 0-100: wasted travel ratio
-  densityBalance: number;        // 0-100: not too packed, not too sparse
-  profileMatch: number;          // 0-100: matches user interests/pace
+  overall: number; // 0-100
+  geoEfficiency: number; // 0-100: wasted travel ratio
+  densityBalance: number; // 0-100: not too packed, not too sparse
+  profileMatch: number; // 0-100: matches user interests/pace
   feasibilityCompliance: number; // 0-100: 100 = no feasibility issues
-  sourcedInfoRatio: number;      // 0-100: % claims with sources
-  userCorrectionCount: number;   // lower = better; raw count
-  details: string[];             // human-readable breakdown
+  sourcedInfoRatio: number; // 0-100: % claims with sources
+  userCorrectionCount: number; // lower = better; raw count
+  details: string[]; // human-readable breakdown
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -27,18 +27,13 @@ export interface PlanQualityScore {
  * `name`. We fall back to 0 and let geo scoring be neutral when coords are
  * absent.  (Real implementation would join with a PlaceRef lookup.)
  */
-function haversineKm(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number,
-): number {
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -59,7 +54,7 @@ function scoreGeoEfficiency(plan: StructuredTripPlan): { score: number; detail: 
   const dayDistances: number[] = [];
 
   for (const day of plan.days) {
-    const blocksWithTransit = (day.blocks || []).filter(b => b.transit && b.transit.minutes > 0);
+    const blocksWithTransit = (day.blocks || []).filter((b) => b.transit && b.transit.minutes > 0);
     if (blocksWithTransit.length === 0) continue;
 
     // Approximate km from transit minutes: 1 min walking ≈ 0.08 km, taxi/metro ≈ 0.5 km/min
@@ -67,7 +62,7 @@ function scoreGeoEfficiency(plan: StructuredTripPlan): { score: number; detail: 
       blocksWithTransit.reduce((sum, b) => {
         const mode = b.transit!.mode;
         const multiplier =
-          mode === 'walking' ? 0.08 : mode === 'subway' ? 0.5 : mode === 'taxi' ? 0.6 : 0.3;
+          mode === "walking" ? 0.08 : mode === "subway" ? 0.5 : mode === "taxi" ? 0.6 : 0.3;
         return sum + b.transit!.minutes * multiplier;
       }, 0) / blocksWithTransit.length;
 
@@ -75,7 +70,7 @@ function scoreGeoEfficiency(plan: StructuredTripPlan): { score: number; detail: 
   }
 
   if (dayDistances.length === 0) {
-    return { score: 75, detail: 'Coğrafi mesafe verisi yok — varsayılan skor 75' };
+    return { score: 75, detail: "Coğrafi mesafe verisi yok — varsayılan skor 75" };
   }
 
   const overallAvg = dayDistances.reduce((a, b) => a + b, 0) / dayDistances.length;
@@ -94,12 +89,12 @@ function scoreGeoEfficiency(plan: StructuredTripPlan): { score: number; detail: 
  * densityBalance — ideal 3–5 stops/day; penalise above 7 or below 2.
  */
 function scoreDensityBalance(plan: StructuredTripPlan): { score: number; detail: string } {
-  const stopsPerDay = plan.days.map(d =>
-    (d.blocks || []).filter(b => b.type !== 'transit').length,
+  const stopsPerDay = plan.days.map(
+    (d) => (d.blocks || []).filter((b) => b.type !== "transit").length,
   );
 
   if (stopsPerDay.length === 0) {
-    return { score: 0, detail: 'Gün bloğu bulunamadı' };
+    return { score: 0, detail: "Gün bloğu bulunamadı" };
   }
 
   const avgStops = stopsPerDay.reduce((a, b) => a + b, 0) / stopsPerDay.length;
@@ -143,20 +138,19 @@ function scoreProfileMatch(
   const hasFoodInterest =
     (profile.interests.food && profile.interests.food.length > 0) ||
     (profile.interests.general &&
-      profile.interests.general.some(i => /food|yemek|gastro|mutfak/i.test(i)));
+      profile.interests.general.some((i) => /food|yemek|gastro|mutfak/i.test(i)));
 
-  const hasCultureInterest =
-    profile.interests.culture && profile.interests.culture.length > 0;
+  const hasCultureInterest = profile.interests.culture && profile.interests.culture.length > 0;
 
-  const FOOD_TYPES = new Set(['cafe', 'restaurant']);
-  const CULTURE_TYPES = new Set(['museum']);
+  const FOOD_TYPES = new Set(["cafe", "restaurant"]);
+  const CULTURE_TYPES = new Set(["museum"]);
 
   for (const day of plan.days) {
     const blocks = day.blocks || [];
-    const nonTransit = blocks.filter(b => b.type !== 'transit');
+    const nonTransit = blocks.filter((b) => b.type !== "transit");
 
     if (hasFoodInterest) {
-      const hasFoodBlock = nonTransit.some(b => FOOD_TYPES.has(b.type));
+      const hasFoodBlock = nonTransit.some((b) => FOOD_TYPES.has(b.type));
       if (!hasFoodBlock) {
         deductions += 10;
         details.push(`${day.date}: yemek ilgisi var ama yiyecek/içecek durağı yok`);
@@ -164,7 +158,7 @@ function scoreProfileMatch(
     }
 
     if (hasCultureInterest) {
-      const hasCultureBlock = nonTransit.some(b => CULTURE_TYPES.has(b.type));
+      const hasCultureBlock = nonTransit.some((b) => CULTURE_TYPES.has(b.type));
       if (!hasCultureBlock) {
         deductions += 8;
         details.push(`${day.date}: kültür ilgisi var ama müze/tarihi mekan yok`);
@@ -173,9 +167,9 @@ function scoreProfileMatch(
   }
 
   // Pace mismatch
-  if (profile.pace === 'relaxed') {
+  if (profile.pace === "relaxed") {
     const overloadedDays = plan.days.filter(
-      d => (d.blocks || []).filter(b => b.type !== 'transit').length > 5,
+      (d) => (d.blocks || []).filter((b) => b.type !== "transit").length > 5,
     );
     if (overloadedDays.length > 0) {
       deductions += overloadedDays.length * 12;
@@ -185,9 +179,7 @@ function scoreProfileMatch(
 
   const score = clamp100(100 - deductions);
   const detail =
-    details.length > 0
-      ? `Profil uyumu sorunları: ${details.join('; ')}`
-      : `Plan profil ile uyumlu`;
+    details.length > 0 ? `Profil uyumu sorunları: ${details.join("; ")}` : `Plan profil ile uyumlu`;
 
   return { score, detail };
 }
@@ -199,12 +191,12 @@ function scoreFeasibilityCompliance(issues: FeasibilityIssue[]): {
   score: number;
   detail: string;
 } {
-  const errors = issues.filter(i => i.severity === 'error').length;
-  const warnings = issues.filter(i => i.severity === 'warning').length;
+  const errors = issues.filter((i) => i.severity === "error").length;
+  const warnings = issues.filter((i) => i.severity === "warning").length;
   const score = clamp100(100 - errors * 20 - warnings * 5);
   const detail =
     errors + warnings === 0
-      ? 'Uygunluk sorunu yok'
+      ? "Uygunluk sorunu yok"
       : `${errors} hata, ${warnings} uyarı tespit edildi`;
   return { score, detail };
 }
@@ -216,11 +208,11 @@ function scoreFeasibilityCompliance(issues: FeasibilityIssue[]): {
  */
 function scoreSourcedInfoRatio(plan: StructuredTripPlan): { score: number; detail: string } {
   const totalBlocks = plan.days.reduce(
-    (sum, d) => sum + (d.blocks || []).filter(b => b.type !== 'transit').length,
+    (sum, d) => sum + (d.blocks || []).filter((b) => b.type !== "transit").length,
     0,
   );
 
-  if (totalBlocks === 0) return { score: 0, detail: 'Blok yok' };
+  if (totalBlocks === 0) return { score: 0, detail: "Blok yok" };
 
   const sourcesCount = (plan.sources || []).length;
   // Heuristic: assume each source covers ~2 blocks

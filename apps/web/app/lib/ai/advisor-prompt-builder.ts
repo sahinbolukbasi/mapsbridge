@@ -12,7 +12,7 @@ import { buildVisaContext } from "../visa/formatter";
 
 export interface AdvisorPromptOptions {
   mode: "stream" | "json";
-  destination?: string;           // "istanbul" | "barcelona" | "paris"
+  destination?: string; // "istanbul" | "barcelona" | "paris"
   travelDate?: string;
   interests?: string[];
   phase?: TripPhase;
@@ -49,7 +49,13 @@ export function buildAdvisorSystemPrompt(opts: AdvisorPromptOptions): string {
 
   // Visa / entry rule injection (Faz D — §9.2)
   // Injected when: destination known AND phase is orient/constrain/draft/prepare
-  const visaPhases: Array<TripPhase | undefined> = ["orient", "constrain", "draft", "prepare", undefined];
+  const visaPhases: Array<TripPhase | undefined> = [
+    "orient",
+    "constrain",
+    "draft",
+    "prepare",
+    undefined,
+  ];
   if (opts.destination && visaPhases.includes(opts.phase)) {
     const visaCtx = buildVisaContext({
       destinationId: opts.destination,
@@ -76,7 +82,8 @@ function buildPhaseHeader(opts: AdvisorPromptOptions): string {
 
   if (opts.phase) {
     const phaseDesc: Record<TripPhase, string> = {
-      orient: "Destinasyon biliniyor, kısıtlar henüz netleşmedi. Şehri bildiğini göster, en fazla 2 soru sor, taslak sun.",
+      orient:
+        "Destinasyon biliniyor, kısıtlar henüz netleşmedi. Şehri bildiğini göster, en fazla 2 soru sor, taslak sun.",
       constrain: "Tarih/kişi/tempo netleşiyor. Hatırlanan tercihler varsayılan olarak dolduruldu.",
       draft: "İlk plan oluşturuldu. Gerekçeli sun, gerçekçilik itirazlarını yap.",
       refine: "Düzenleme döngüsü. Her değişiklikte etkilenen diğer öğeleri yeniden çöz.",
@@ -94,7 +101,7 @@ function buildPhaseHeader(opts: AdvisorPromptOptions): string {
   if (opts.visibleAssumptions?.length) {
     lines.push(
       "GÖRÜNÜR VARSAYIMLAR (kullanıcıya göster, düzeltme imkânı ver):\n" +
-        opts.visibleAssumptions.map(a => `- ${a}`).join("\n")
+        opts.visibleAssumptions.map((a) => `- ${a}`).join("\n"),
     );
   }
 
@@ -109,8 +116,8 @@ function buildPhaseHeader(opts: AdvisorPromptOptions): string {
       : `${opts.currentLocation.lat.toFixed(4)}, ${opts.currentLocation.lng.toFixed(4)}`;
     lines.push(
       `KULLANICININ ANLIKI KONUMU: ${locLabel}\n` +
-      `Bu faz için kurallar: cevaplar kısa ve doğrudan. Yakın öneriler önce. ` +
-      `Sapma normaldir — planı savunma, alternatif bul.`
+        `Bu faz için kurallar: cevaplar kısa ve doğrudan. Yakın öneriler önce. ` +
+        `Sapma normaldir — planı savunma, alternatif bul.`,
     );
   }
 
@@ -131,8 +138,8 @@ export function buildPreferencesSummary(prefs: {
 }): string {
   const parts: string[] = [];
   if (prefs.pace) parts.push(`Tempo: ${prefs.pace}`);
-  if (prefs.budget && prefs.budget !== 'unspecified') {
-    const budgetLabel: Record<string, string> = { budget: 'Ekonomik', mid: 'Orta', luxury: 'Lüks' };
+  if (prefs.budget && prefs.budget !== "unspecified") {
+    const budgetLabel: Record<string, string> = { budget: "Ekonomik", mid: "Orta", luxury: "Lüks" };
     parts.push(`Bütçe: ${budgetLabel[prefs.budget] || prefs.budget}`);
   }
   if (prefs.travelStyle) parts.push(`Stil: ${prefs.travelStyle}`);
@@ -144,16 +151,22 @@ export function buildPreferencesSummary(prefs: {
     if (total > 0) {
       let label = `${total} kişi`;
       if (children > 0) label += ` (${children} çocuk)`;
-      if (pets) label += ' + evcil hayvan';
+      if (pets) label += " + evcil hayvan";
       parts.push(label);
     }
   }
   if (prefs.dates?.start) parts.push(`Tarih: ${prefs.dates.start.slice(0, 7)}`);
   else if (prefs.dates?.description) parts.push(`Tarih: ${prefs.dates.description}`);
   if (prefs.lodging_type?.length) {
-    const lodgingLabel: Record<string, string> = { hotel: 'Otel', hostel: 'Hostel', apartment: 'Apart', boutique: 'Butik otel', resort: 'Resort' };
-    parts.push(`Konaklama: ${(lodgingLabel[prefs.lodging_type[0]] || prefs.lodging_type[0])}`);
+    const lodgingLabel: Record<string, string> = {
+      hotel: "Otel",
+      hostel: "Hostel",
+      apartment: "Apart",
+      boutique: "Butik otel",
+      resort: "Resort",
+    };
+    parts.push(`Konaklama: ${lodgingLabel[prefs.lodging_type[0]] || prefs.lodging_type[0]}`);
   }
-  if (prefs.needs?.flights) parts.push('Uçuş aranıyor');
+  if (prefs.needs?.flights) parts.push("Uçuş aranıyor");
   return parts.join(" | ");
 }

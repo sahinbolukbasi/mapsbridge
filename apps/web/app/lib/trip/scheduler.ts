@@ -20,9 +20,9 @@ interface ScheduleOptions {
 }
 
 const DAY_START_BY_TEMPO: Record<TempoPreference, number> = {
-  relaxed: 9 * 60,    // 09:00
-  moderate: 9 * 60,   // 09:00
-  fast: 8 * 60,       // 08:00
+  relaxed: 9 * 60, // 09:00
+  moderate: 9 * 60, // 09:00
+  fast: 8 * 60, // 08:00
 };
 
 const MEAL_BREAK_MINUTES = 60;
@@ -54,9 +54,10 @@ export function scheduleDay(day: TripDay, opts: ScheduleOptions): TripDay {
     const assignedStart = minutesToTime(cursor);
 
     // Visit duration
-    const duration = opts.tempo === "relaxed"
-      ? (stop.duration.p90Minutes ?? stop.duration.p50Minutes)
-      : stop.duration.p50Minutes;
+    const duration =
+      opts.tempo === "relaxed"
+        ? (stop.duration.p90Minutes ?? stop.duration.p50Minutes)
+        : stop.duration.p50Minutes;
 
     stops.push({ ...stop, order: i, startTime: assignedStart });
     cursor += duration;
@@ -74,10 +75,10 @@ export function scheduleDay(day: TripDay, opts: ScheduleOptions): TripDay {
 
 /** Schedule all days of a trip. */
 export function scheduleTrip(trip: Trip): Trip {
-  const days = trip.days.map(d => scheduleDay(d, { tempo: trip.tempo }));
+  const days = trip.days.map((d) => scheduleDay(d, { tempo: trip.tempo }));
 
   // Compute geo bounding box per day (placeholder — real impl needs haversine)
-  const daysWithGeo = days.map(d => ({
+  const daysWithGeo = days.map((d) => ({
     ...d,
     geoBoundingBoxKm: estimateGeoBoundingBox(d.stops),
   }));
@@ -95,7 +96,7 @@ export function suggestCuts(day: TripDay, tempo: TempoPreference): string[] {
   const max = maxStops[tempo];
   if (day.stops.length <= max) return [];
   // Return the last N stops as candidates (tail of the day)
-  return day.stops.slice(max).map(s => s.id);
+  return day.stops.slice(max).map((s) => s.id);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -109,8 +110,8 @@ function minutesToTime(minutes: number): string {
 /** Rough estimate: sqrt of sum of squared lat/lng differences × 111km/deg */
 function estimateGeoBoundingBox(stops: TripStop[]): number {
   if (stops.length < 2) return 0;
-  const lats = stops.map(s => s.placeRef.lat);
-  const lngs = stops.map(s => s.placeRef.lng);
+  const lats = stops.map((s) => s.placeRef.lat);
+  const lngs = stops.map((s) => s.placeRef.lng);
   const dLat = (Math.max(...lats) - Math.min(...lats)) * 111;
   const dLng = (Math.max(...lngs) - Math.min(...lngs)) * 85; // ~85km/deg at mid-latitudes
   return Math.sqrt(dLat ** 2 + dLng ** 2);

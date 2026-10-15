@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,11 +11,11 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { authService, UserSession } from '../services/api';
-import { AppleLogo, GoogleLogo, ArrowRightIcon, ExploreIcon } from '../components/Icons';
+} from "react-native";
+import { authService, UserSession } from "../services/api";
+import { AppleLogo, GoogleLogo, ArrowRightIcon, ExploreIcon } from "../components/Icons";
 
-type AuthMode = 'login' | 'register' | 'confirm_signup' | 'forgot_password' | 'reset_password';
+type AuthMode = "login" | "register" | "confirm_signup" | "forgot_password" | "reset_password";
 
 interface AuthScreenProps {
   onSuccess: (session: UserSession) => void;
@@ -30,40 +30,44 @@ export function AuthScreen({
   onCancel,
   onSelectGoogle,
   onSelectApple,
-  initialMode = 'login',
+  initialMode = "login",
 }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('+90');
-  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("+90");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [code, setCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [infoMessage, setInfoMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
 
   // Password rules
   const rules = [
-    { id: 'rule-length', label: 'En az 12 karakter', valid: password.length >= 12 },
-    { id: 'rule-lower', label: 'En az bir küçük harf', valid: /[a-zğüşıöç]/.test(password) },
-    { id: 'rule-upper', label: 'En az bir büyük harf', valid: /[A-ZĞÜŞİÖÇ]/.test(password) },
-    { id: 'rule-number', label: 'En az bir rakam', valid: /[0-9]/.test(password) },
-    { id: 'rule-symbol', label: 'En az bir sembol (ör. !, ?, #)', valid: /[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ]/.test(password) },
+    { id: "rule-length", label: "En az 12 karakter", valid: password.length >= 12 },
+    { id: "rule-lower", label: "En az bir küçük harf", valid: /[a-zğüşıöç]/.test(password) },
+    { id: "rule-upper", label: "En az bir büyük harf", valid: /[A-ZĞÜŞİÖÇ]/.test(password) },
+    { id: "rule-number", label: "En az bir rakam", valid: /[0-9]/.test(password) },
+    {
+      id: "rule-symbol",
+      label: "En az bir sembol (ör. !, ?, #)",
+      valid: /[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ]/.test(password),
+    },
   ];
   const isPasswordValid = rules.every((r) => r.valid);
 
   const clearMessages = () => {
-    setErrorMessage('');
-    setInfoMessage('');
+    setErrorMessage("");
+    setInfoMessage("");
   };
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) {
-      setErrorMessage('Lütfen e-posta ve şifrenizi girin.');
+      setErrorMessage("Lütfen e-posta ve şifrenizi girin.");
       return;
     }
     setLoading(true);
@@ -72,11 +76,16 @@ export function AuthScreen({
       const session = await authService.signIn(email, password);
       onSuccess(session);
     } catch (err: any) {
-      if (err.message?.includes('UserNotConfirmedException') || err.message?.includes('not confirmed')) {
-        setInfoMessage('Hesabınız henüz onaylanmamış. E-postanıza gönderilen doğrulama kodunu girin.');
-        setMode('confirm_signup');
+      if (
+        err.message?.includes("UserNotConfirmedException") ||
+        err.message?.includes("not confirmed")
+      ) {
+        setInfoMessage(
+          "Hesabınız henüz onaylanmamış. E-postanıza gönderilen doğrulama kodunu girin.",
+        );
+        setMode("confirm_signup");
       } else {
-        setErrorMessage(err.message || 'E-posta veya şifre hatalı.');
+        setErrorMessage(err.message || "E-posta veya şifre hatalı.");
       }
     } finally {
       setLoading(false);
@@ -89,11 +98,13 @@ export function AuthScreen({
     const cleanLast = lastName.trim();
     const cleanPhone = phone.trim();
     if (!cleanFirst || !cleanLast || !cleanEmail || !password || cleanPhone.length < 10) {
-      setErrorMessage('Lütfen tüm zorunlu alanları (Ad, Soyad, Telefon, E-posta, Şifre) eksiksiz doldurun.');
+      setErrorMessage(
+        "Lütfen tüm zorunlu alanları (Ad, Soyad, Telefon, E-posta, Şifre) eksiksiz doldurun.",
+      );
       return;
     }
     if (!isPasswordValid) {
-      setErrorMessage('Lütfen tüm şifre güvenlik kriterlerini sağlayın.');
+      setErrorMessage("Lütfen tüm şifre güvenlik kriterlerini sağlayın.");
       return;
     }
 
@@ -102,9 +113,9 @@ export function AuthScreen({
     try {
       await authService.signUp(cleanEmail, password, `${cleanFirst} ${cleanLast}`, cleanPhone);
       setInfoMessage(`Doğrulama kodu ${cleanEmail} adresine iletildi.`);
-      setMode('confirm_signup');
+      setMode("confirm_signup");
     } catch (err: any) {
-      setErrorMessage(err.message || 'Kayıt işlemi tamamlanamadı.');
+      setErrorMessage(err.message || "Kayıt işlemi tamamlanamadı.");
     } finally {
       setLoading(false);
     }
@@ -112,17 +123,17 @@ export function AuthScreen({
 
   const handleConfirmSignUp = async () => {
     if (!code.trim()) {
-      setErrorMessage('Lütfen doğrulama kodunu girin.');
+      setErrorMessage("Lütfen doğrulama kodunu girin.");
       return;
     }
     setLoading(true);
     clearMessages();
     try {
       await authService.confirmSignUp(email, code);
-      setInfoMessage('Hesabınız başarıyla doğrulandı! Şimdi giriş yapabilirsiniz.');
-      setMode('login');
+      setInfoMessage("Hesabınız başarıyla doğrulandı! Şimdi giriş yapabilirsiniz.");
+      setMode("login");
     } catch (err: any) {
-      setErrorMessage(err.message || 'Doğrulama kodu hatalı.');
+      setErrorMessage(err.message || "Doğrulama kodu hatalı.");
     } finally {
       setLoading(false);
     }
@@ -130,7 +141,7 @@ export function AuthScreen({
 
   const handleForgotPassword = async () => {
     if (!email.trim()) {
-      setErrorMessage('Lütfen şifresini sıfırlamak istediğiniz e-posta adresini girin.');
+      setErrorMessage("Lütfen şifresini sıfırlamak istediğiniz e-posta adresini girin.");
       return;
     }
     setLoading(true);
@@ -138,9 +149,9 @@ export function AuthScreen({
     try {
       await authService.forgotPassword(email);
       setInfoMessage(`Şifre sıfırlama kodu ${email} adresine gönderildi.`);
-      setMode('reset_password');
+      setMode("reset_password");
     } catch (err: any) {
-      setErrorMessage(err.message || 'Şifre sıfırlama talebi gönderilemedi.');
+      setErrorMessage(err.message || "Şifre sıfırlama talebi gönderilemedi.");
     } finally {
       setLoading(false);
     }
@@ -148,17 +159,17 @@ export function AuthScreen({
 
   const handleResetPassword = async () => {
     if (!code.trim() || !newPassword) {
-      setErrorMessage('Lütfen kod ve yeni şifreyi girin.');
+      setErrorMessage("Lütfen kod ve yeni şifreyi girin.");
       return;
     }
     setLoading(true);
     clearMessages();
     try {
       await authService.confirmForgotPassword(email, code, newPassword);
-      setInfoMessage('Şifreniz başarıyla güncellendi! Yeni şifrenizle giriş yapabilirsiniz.');
-      setMode('login');
+      setInfoMessage("Şifreniz başarıyla güncellendi! Yeni şifrenizle giriş yapabilirsiniz.");
+      setMode("login");
     } catch (err: any) {
-      setErrorMessage(err.message || 'Şifre sıfırlanamadı.');
+      setErrorMessage(err.message || "Şifre sıfırlanamadı.");
     } finally {
       setLoading(false);
     }
@@ -168,7 +179,7 @@ export function AuthScreen({
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#faf8ff" />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
       >
         <ScrollView
@@ -177,12 +188,8 @@ export function AuthScreen({
         >
           {/* Top Navigation & Brand Header */}
           <View style={styles.header}>
-            <TouchableOpacity
-              onPress={onCancel}
-              style={styles.backBtn}
-              activeOpacity={0.8}
-            >
-              <Text style={{ fontSize: 16, color: '#013628' }}>←</Text>
+            <TouchableOpacity onPress={onCancel} style={styles.backBtn} activeOpacity={0.8}>
+              <Text style={{ fontSize: 16, color: "#013628" }}>←</Text>
             </TouchableOpacity>
 
             <View style={styles.headerCenter}>
@@ -198,18 +205,19 @@ export function AuthScreen({
           {/* Heading & Subtitle */}
           <View style={styles.titleSection}>
             <Text style={styles.screenHeading}>
-              {mode === 'login' && 'Tekrar Hoş Geldiniz'}
-              {mode === 'register' && 'Hesap Oluştur'}
-              {mode === 'confirm_signup' && 'Kodu Doğrula'}
-              {mode === 'forgot_password' && 'Şifremi Unuttum'}
-              {mode === 'reset_password' && 'Yeni Şifre Belirle'}
+              {mode === "login" && "Tekrar Hoş Geldiniz"}
+              {mode === "register" && "Hesap Oluştur"}
+              {mode === "confirm_signup" && "Kodu Doğrula"}
+              {mode === "forgot_password" && "Şifremi Unuttum"}
+              {mode === "reset_password" && "Yeni Şifre Belirle"}
             </Text>
             <Text style={styles.screenSubheading}>
-              {mode === 'login' && 'MapsBridge hesabınıza giriş yaparak rotalarınıza devam edin.'}
-              {mode === 'register' && 'Kendi rotalarını çiz, gizli patikaları keşfet ve dünya ile paylaş.'}
-              {mode === 'confirm_signup' && `${email} adresine iletilen 6 haneli kodu girin.`}
-              {mode === 'forgot_password' && 'E-posta adresinize sıfırlama kodu göndereceğiz.'}
-              {mode === 'reset_password' && 'E-postanıza gelen kodla yeni şifrenizi oluşturun.'}
+              {mode === "login" && "MapsBridge hesabınıza giriş yaparak rotalarınıza devam edin."}
+              {mode === "register" &&
+                "Kendi rotalarını çiz, gizli patikaları keşfet ve dünya ile paylaş."}
+              {mode === "confirm_signup" && `${email} adresine iletilen 6 haneli kodu girin.`}
+              {mode === "forgot_password" && "E-posta adresinize sıfırlama kodu göndereceğiz."}
+              {mode === "reset_password" && "E-postanıza gelen kodla yeni şifrenizi oluşturun."}
             </Text>
           </View>
 
@@ -229,24 +237,32 @@ export function AuthScreen({
           {/* Main Card Container */}
           <View style={styles.mainCard}>
             {/* Segmented Tab Switcher (Login / Register) */}
-            {(mode === 'login' || mode === 'register') && (
+            {(mode === "login" || mode === "register") && (
               <View style={styles.segmentContainer}>
                 <TouchableOpacity
-                  style={[styles.segmentBtn, mode === 'login' && styles.segmentBtnActive]}
-                  onPress={() => { setMode('login'); clearMessages(); }}
+                  style={[styles.segmentBtn, mode === "login" && styles.segmentBtnActive]}
+                  onPress={() => {
+                    setMode("login");
+                    clearMessages();
+                  }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.segmentText, mode === 'login' && styles.segmentTextActive]}>
+                  <Text style={[styles.segmentText, mode === "login" && styles.segmentTextActive]}>
                     Giriş Yap
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.segmentBtn, mode === 'register' && styles.segmentBtnActive]}
-                  onPress={() => { setMode('register'); clearMessages(); }}
+                  style={[styles.segmentBtn, mode === "register" && styles.segmentBtnActive]}
+                  onPress={() => {
+                    setMode("register");
+                    clearMessages();
+                  }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.segmentText, mode === 'register' && styles.segmentTextActive]}>
+                  <Text
+                    style={[styles.segmentText, mode === "register" && styles.segmentTextActive]}
+                  >
                     Kayıt Ol
                   </Text>
                 </TouchableOpacity>
@@ -254,7 +270,7 @@ export function AuthScreen({
             )}
 
             {/* Social Auth Buttons (Apple & Google) */}
-            {(mode === 'login' || mode === 'register') && (
+            {(mode === "login" || mode === "register") && (
               <>
                 <View style={styles.socialButtonsGroup}>
                   {/* Apple Button */}
@@ -266,8 +282,8 @@ export function AuthScreen({
                       } else {
                         const appleSession: UserSession = {
                           token: `mb_apple_${Date.now()}`,
-                          email: 'apple.user@icloud.com',
-                          name: 'Apple Gezgini',
+                          email: "apple.user@icloud.com",
+                          name: "Apple Gezgini",
                         };
                         onSuccess(appleSession);
                       }
@@ -276,7 +292,7 @@ export function AuthScreen({
                   >
                     <AppleLogo size={18} color="#ffffff" />
                     <Text style={styles.appleBtnText}>
-                      {mode === 'register' ? 'Apple ile Kayıt Ol' : 'Apple ile Giriş Yap'}
+                      {mode === "register" ? "Apple ile Kayıt Ol" : "Apple ile Giriş Yap"}
                     </Text>
                   </TouchableOpacity>
 
@@ -288,7 +304,7 @@ export function AuthScreen({
                   >
                     <GoogleLogo size={18} />
                     <Text style={styles.googleBtnText}>
-                      {mode === 'register' ? 'Google ile Kayıt Ol' : 'Google ile Giriş Yap'}
+                      {mode === "register" ? "Google ile Kayıt Ol" : "Google ile Giriş Yap"}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -302,7 +318,7 @@ export function AuthScreen({
             )}
 
             {/* Form Fields */}
-            {mode === 'register' && (
+            {mode === "register" && (
               <>
                 <View style={styles.fieldGroup}>
                   <Text style={styles.fieldLabel}>Adınız</Text>
@@ -352,7 +368,7 @@ export function AuthScreen({
               </>
             )}
 
-            {(mode === 'login' || mode === 'register' || mode === 'forgot_password') && (
+            {(mode === "login" || mode === "register" || mode === "forgot_password") && (
               <View style={styles.fieldGroup}>
                 <Text style={styles.fieldLabel}>E-posta Adresi</Text>
                 <View style={styles.inputWrap}>
@@ -370,7 +386,7 @@ export function AuthScreen({
               </View>
             )}
 
-            {(mode === 'login' || mode === 'register') && (
+            {(mode === "login" || mode === "register") && (
               <View style={styles.fieldGroup}>
                 <Text style={styles.fieldLabel}>Şifre</Text>
                 <View style={styles.inputWrap}>
@@ -387,24 +403,24 @@ export function AuthScreen({
                     style={styles.eyeBtn}
                     onPress={() => setShowPassword(!showPassword)}
                   >
-                    <Text style={{ fontSize: 16 }}>{showPassword ? '👁️' : '🙈'}</Text>
+                    <Text style={{ fontSize: 16 }}>{showPassword ? "👁️" : "🙈"}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
 
             {/* Register Password Criteria */}
-            {mode === 'register' && password.length > 0 && (
+            {mode === "register" && password.length > 0 && (
               <View style={styles.rulesContainer}>
                 {rules.map((r) => (
                   <View key={r.id} style={styles.ruleRow}>
-                    <Text style={{ fontSize: 11, color: r.valid ? '#10B981' : '#94a3b8' }}>
-                      {r.valid ? '✓' : '○'}
+                    <Text style={{ fontSize: 11, color: r.valid ? "#10B981" : "#94a3b8" }}>
+                      {r.valid ? "✓" : "○"}
                     </Text>
                     <Text
                       style={[
                         styles.ruleText,
-                        r.valid ? { color: '#10B981' } : { color: '#717974' },
+                        r.valid ? { color: "#10B981" } : { color: "#717974" },
                       ]}
                     >
                       {r.label}
@@ -415,7 +431,7 @@ export function AuthScreen({
             )}
 
             {/* Remember Me & Forgot Password (Login Mode) */}
-            {mode === 'login' && (
+            {mode === "login" && (
               <View style={styles.auxRow}>
                 <TouchableOpacity
                   style={styles.rememberWrap}
@@ -423,19 +439,24 @@ export function AuthScreen({
                   activeOpacity={0.8}
                 >
                   <View style={[styles.checkbox, rememberMe && styles.checkboxActive]}>
-                    {rememberMe && <Text style={{ color: '#fff', fontSize: 10 }}>✓</Text>}
+                    {rememberMe && <Text style={{ color: "#fff", fontSize: 10 }}>✓</Text>}
                   </View>
                   <Text style={styles.rememberText}>Beni hatırla</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => { setMode('forgot_password'); clearMessages(); }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setMode("forgot_password");
+                    clearMessages();
+                  }}
+                >
                   <Text style={styles.forgotPassText}>Şifremi Unuttum?</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             {/* Verification Code Fields */}
-            {(mode === 'confirm_signup' || mode === 'reset_password') && (
+            {(mode === "confirm_signup" || mode === "reset_password") && (
               <View style={styles.fieldGroup}>
                 <Text style={styles.fieldLabel}>Doğrulama Kodu</Text>
                 <View style={styles.inputWrap}>
@@ -452,7 +473,7 @@ export function AuthScreen({
               </View>
             )}
 
-            {mode === 'reset_password' && (
+            {mode === "reset_password" && (
               <View style={styles.fieldGroup}>
                 <Text style={styles.fieldLabel}>Yeni Şifre</Text>
                 <View style={styles.inputWrap}>
@@ -473,11 +494,11 @@ export function AuthScreen({
             <TouchableOpacity
               style={styles.primaryAuthBtn}
               onPress={() => {
-                if (mode === 'login') handleSignIn();
-                else if (mode === 'register') handleSignUp();
-                else if (mode === 'confirm_signup') handleConfirmSignUp();
-                else if (mode === 'forgot_password') handleForgotPassword();
-                else if (mode === 'reset_password') handleResetPassword();
+                if (mode === "login") handleSignIn();
+                else if (mode === "register") handleSignUp();
+                else if (mode === "confirm_signup") handleConfirmSignUp();
+                else if (mode === "forgot_password") handleForgotPassword();
+                else if (mode === "reset_password") handleResetPassword();
               }}
               disabled={loading}
               activeOpacity={0.88}
@@ -487,11 +508,11 @@ export function AuthScreen({
               ) : (
                 <View style={styles.primaryBtnInner}>
                   <Text style={styles.primaryAuthBtnText}>
-                    {mode === 'login' && 'Giriş Yap'}
-                    {mode === 'register' && 'Hesap Oluştur'}
-                    {mode === 'confirm_signup' && 'Kodu Doğrula'}
-                    {mode === 'forgot_password' && 'Kod Gönder'}
-                    {mode === 'reset_password' && 'Şifreyi Değiştir'}
+                    {mode === "login" && "Giriş Yap"}
+                    {mode === "register" && "Hesap Oluştur"}
+                    {mode === "confirm_signup" && "Kodu Doğrula"}
+                    {mode === "forgot_password" && "Kod Gönder"}
+                    {mode === "reset_password" && "Şifreyi Değiştir"}
                   </Text>
                   <ArrowRightIcon size={16} color="#ffffff" />
                 </View>
@@ -500,9 +521,12 @@ export function AuthScreen({
 
             {/* Bottom Switcher */}
             <View style={styles.bottomSwitcherRow}>
-              {mode === 'login' ? (
+              {mode === "login" ? (
                 <TouchableOpacity
-                  onPress={() => { setMode('register'); clearMessages(); }}
+                  onPress={() => {
+                    setMode("register");
+                    clearMessages();
+                  }}
                   style={styles.switchTouch}
                 >
                   <Text style={styles.switchMuted}>Hesabın yok mu? </Text>
@@ -510,7 +534,10 @@ export function AuthScreen({
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  onPress={() => { setMode('login'); clearMessages(); }}
+                  onPress={() => {
+                    setMode("login");
+                    clearMessages();
+                  }}
                   style={styles.switchTouch}
                 >
                   <Text style={styles.switchMuted}>Zaten üye misin? </Text>
@@ -523,9 +550,7 @@ export function AuthScreen({
           {/* Trust Badges Footer */}
           <View style={styles.trustFooter}>
             <Text style={{ fontSize: 13, marginRight: 5 }}>🔒</Text>
-            <Text style={styles.trustFooterText}>
-              256-Bit SSL uçtan uca güvenli şifreleme
-            </Text>
+            <Text style={styles.trustFooterText}>256-Bit SSL uçtan uca güvenli şifreleme</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -536,7 +561,7 @@ export function AuthScreen({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#faf8ff',
+    backgroundColor: "#faf8ff",
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -544,36 +569,36 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 12,
   },
   backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f2f3ff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f2f3ff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   headerLogoBadge: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#013628',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#013628",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerBrandText: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     letterSpacing: -0.2,
   },
   titleSection: {
@@ -581,51 +606,51 @@ const styles = StyleSheet.create({
   },
   screenHeading: {
     fontSize: 26,
-    fontWeight: '800',
-    color: '#131b2e',
+    fontWeight: "800",
+    color: "#131b2e",
     letterSpacing: -0.5,
     marginBottom: 4,
   },
   screenSubheading: {
     fontSize: 13,
-    color: '#404945',
+    color: "#404945",
     lineHeight: 19,
   },
   errorAlert: {
-    backgroundColor: '#ffdad6',
+    backgroundColor: "#ffdad6",
     padding: 12,
     borderRadius: 12,
     marginBottom: 12,
   },
   errorAlertText: {
-    color: '#ba1a1a',
+    color: "#ba1a1a",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   infoAlert: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: "#ECFDF5",
     padding: 12,
     borderRadius: 12,
     marginBottom: 12,
   },
   infoAlertText: {
-    color: '#013628',
+    color: "#013628",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   mainCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 18,
-    shadowColor: '#013628',
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
     elevation: 3,
   },
   segmentContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#F1F5F9',
+    flexDirection: "row",
+    backgroundColor: "#F1F5F9",
     borderRadius: 12,
     padding: 3,
     marginBottom: 16,
@@ -634,12 +659,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   segmentBtnActive: {
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
+    backgroundColor: "#ffffff",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -647,85 +672,85 @@ const styles = StyleSheet.create({
   },
   segmentText: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#717974',
+    fontWeight: "600",
+    color: "#717974",
   },
   segmentTextActive: {
-    color: '#013628',
-    fontWeight: '800',
+    color: "#013628",
+    fontWeight: "800",
   },
   socialButtonsGroup: {
     gap: 10,
     marginBottom: 14,
   },
   appleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
-    backgroundColor: '#000000',
+    backgroundColor: "#000000",
     paddingVertical: 13,
     borderRadius: 14,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   appleBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   googleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
-    backgroundColor: '#faf8ff',
+    backgroundColor: "#faf8ff",
     paddingVertical: 13,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#e2e7ff',
+    borderColor: "#e2e7ff",
   },
   googleBtnText: {
-    color: '#131b2e',
+    color: "#131b2e",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   separatorContainer: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
     marginVertical: 12,
   },
   separatorLine: {
-    width: '100%',
+    width: "100%",
     height: 1,
-    backgroundColor: '#e2e7ff',
+    backgroundColor: "#e2e7ff",
   },
   separatorText: {
-    position: 'absolute',
-    backgroundColor: '#ffffff',
+    position: "absolute",
+    backgroundColor: "#ffffff",
     paddingHorizontal: 10,
     fontSize: 12,
-    color: '#717974',
-    fontWeight: '500',
+    color: "#717974",
+    fontWeight: "500",
   },
   fieldGroup: {
     marginBottom: 12,
   },
   fieldLabel: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#131b2e',
+    fontWeight: "700",
+    color: "#131b2e",
     marginBottom: 6,
   },
   inputWrap: {
-    position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    position: "relative",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F1F5F9",
     borderRadius: 12,
     paddingHorizontal: 12,
   },
@@ -737,7 +762,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 46,
     fontSize: 14,
-    color: '#131b2e',
+    color: "#131b2e",
   },
   eyeBtn: {
     padding: 6,
@@ -748,23 +773,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   ruleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   ruleText: {
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   auxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginVertical: 8,
   },
   rememberWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   checkbox: {
@@ -772,76 +797,76 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: '#c0c8c3',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    borderColor: "#c0c8c3",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ffffff",
   },
   checkboxActive: {
-    backgroundColor: '#013628',
-    borderColor: '#013628',
+    backgroundColor: "#013628",
+    borderColor: "#013628",
   },
   rememberText: {
     fontSize: 12,
-    color: '#404945',
-    fontWeight: '500',
+    color: "#404945",
+    fontWeight: "500",
   },
   forgotPassText: {
     fontSize: 12,
-    color: '#286954',
-    fontWeight: '700',
+    color: "#286954",
+    fontWeight: "700",
   },
   primaryAuthBtn: {
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
     paddingVertical: 14,
     borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 8,
-    shadowColor: '#013628',
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 3,
   },
   primaryBtnInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   primaryAuthBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 0.1,
   },
   bottomSwitcherRow: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 14,
   },
   switchTouch: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   switchMuted: {
     fontSize: 13,
-    color: '#717974',
+    color: "#717974",
   },
   switchActive: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#286954',
+    fontWeight: "700",
+    color: "#286954",
   },
   trustFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 20,
   },
   trustFooterText: {
     fontSize: 12,
-    color: '#717974',
-    fontWeight: '500',
+    color: "#717974",
+    fontWeight: "500",
   },
 });

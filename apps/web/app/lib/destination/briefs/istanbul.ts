@@ -248,7 +248,8 @@ export const ISTANBUL_BRIEF: DestinationBrief = {
         {
           name: "Topkapı Sarayı",
           leadTimeDays: 3,
-          method: "muze.gov.tr üzerinden çevrimiçi — yoğun sezonda (Temmuz-Ağustos) 1 hafta öncesinden al.",
+          method:
+            "muze.gov.tr üzerinden çevrimiçi — yoğun sezonda (Temmuz-Ağustos) 1 hafta öncesinden al.",
         },
         {
           name: "Kapadokya gezisi (günübirlik)",
@@ -321,7 +322,8 @@ export const ISTANBUL_BRIEF: DestinationBrief = {
         "Taksi dolandırıcılığı: tur başında sayacın sıfırlandığından emin ol, gece geç saatlerde uygulama kullan.",
         "Kalabalık vapur iskele önlerinde çanta hırsızlığı bildirilmiştir.",
       ],
-      originBiasNote: "FCDO tavsiyesi İngiliz pasaport sahipleri için hazırlanmıştır. Türk vatandaşları için koşullar farklı olabilir.",
+      originBiasNote:
+        "FCDO tavsiyesi İngiliz pasaport sahipleri için hazırlanmıştır. Türk vatandaşları için koşullar farklı olabilir.",
     },
     source: "manual:curator",
     license: "proprietary",
@@ -332,14 +334,49 @@ export const ISTANBUL_BRIEF: DestinationBrief = {
 
   localCalendar: {
     value: [
-      { date: "01-01", name: "Yılbaşı", type: "public_holiday", impact: "Resmi tatil, pek çok dükkan kapalı." },
-      { date: "04-23", name: "Ulusal Egemenlik ve Çocuk Bayramı", type: "public_holiday", impact: "Resmi tatil." },
-      { date: "05-01", name: "İşçi Bayramı", type: "public_holiday", impact: "Resmi tatil; Taksim Meydanı erişim kısıtlaması olabilir." },
-      { date: "05-19", name: "Atatürk'ü Anma, Gençlik ve Spor Bayramı", type: "public_holiday", impact: "Resmi tatil." },
-      { date: "07-15", name: "Demokrasi ve Milli Birlik Günü", type: "public_holiday", impact: "Resmi tatil; köprüler akşam yürüyüşe kapatılır." },
+      {
+        date: "01-01",
+        name: "Yılbaşı",
+        type: "public_holiday",
+        impact: "Resmi tatil, pek çok dükkan kapalı.",
+      },
+      {
+        date: "04-23",
+        name: "Ulusal Egemenlik ve Çocuk Bayramı",
+        type: "public_holiday",
+        impact: "Resmi tatil.",
+      },
+      {
+        date: "05-01",
+        name: "İşçi Bayramı",
+        type: "public_holiday",
+        impact: "Resmi tatil; Taksim Meydanı erişim kısıtlaması olabilir.",
+      },
+      {
+        date: "05-19",
+        name: "Atatürk'ü Anma, Gençlik ve Spor Bayramı",
+        type: "public_holiday",
+        impact: "Resmi tatil.",
+      },
+      {
+        date: "07-15",
+        name: "Demokrasi ve Milli Birlik Günü",
+        type: "public_holiday",
+        impact: "Resmi tatil; köprüler akşam yürüyüşe kapatılır.",
+      },
       { date: "08-30", name: "Zafer Bayramı", type: "public_holiday", impact: "Resmi tatil." },
-      { date: "10-29", name: "Cumhuriyet Bayramı", type: "public_holiday", impact: "Resmi tatil; ana caddelerde tören." },
-      { date: "04-01", name: "Lale Festivali (yaklaşık)", type: "festival", impact: "Emirgan Korusu ve Gülhane'de zirve kalabalık. Nisan başı-ortası." },
+      {
+        date: "10-29",
+        name: "Cumhuriyet Bayramı",
+        type: "public_holiday",
+        impact: "Resmi tatil; ana caddelerde tören.",
+      },
+      {
+        date: "04-01",
+        name: "Lale Festivali (yaklaşık)",
+        type: "festival",
+        impact: "Emirgan Korusu ve Gülhane'de zirve kalabalık. Nisan başı-ortası.",
+      },
     ],
     source: "manual:curator",
     license: "proprietary",
@@ -352,12 +389,14 @@ export const ISTANBUL_BRIEF: DestinationBrief = {
     value: [
       {
         category: "running",
-        description: "Boğaz kenarı koşu parkurları ve ormanlık alanlar. Flat tercih edenlere Yenikapı sahil bandı (6 km düz). Tepeli için Çamlıca tepesi.",
+        description:
+          "Boğaz kenarı koşu parkurları ve ormanlık alanlar. Flat tercih edenlere Yenikapı sahil bandı (6 km düz). Tepeli için Çamlıca tepesi.",
         highlights: ["Yenikapı sahil bandı", "Maçka Parkı döngüsü", "Emirgan Korusu"],
       },
       {
         category: "food_specialty",
-        description: "İstanbul yemeği farklı bölgelerden göçün karışımı. Güneydoğu mutfağı (Kadıköy Çiya), sahil balıkçısı (Beşiktaş), meyhane kültürü (Nevizade).",
+        description:
+          "İstanbul yemeği farklı bölgelerden göçün karışımı. Güneydoğu mutfağı (Kadıköy Çiya), sahil balıkçısı (Beşiktaş), meyhane kültürü (Nevizade).",
         highlights: [
           "Çiya Sofrası — Güneydoğu meze ve kebap, Kadıköy",
           "Nevizade sokağı meyhane akşamı",
@@ -367,7 +406,8 @@ export const ISTANBUL_BRIEF: DestinationBrief = {
       },
       {
         category: "art_gallery",
-        description: "İstanbul Bienali (Eylül-Kasım çift yıllarda), İstanbul Modern yeni binada (Karaköy), SALT Galata mimari arşivi ücretsiz.",
+        description:
+          "İstanbul Bienali (Eylül-Kasım çift yıllarda), İstanbul Modern yeni binada (Karaköy), SALT Galata mimari arşivi ücretsiz.",
         highlights: [
           "İstanbul Modern — Renzo Piano binası, Karaköy",
           "SALT Galata — ücretsiz giriş, güçlü arşiv",
@@ -376,7 +416,8 @@ export const ISTANBUL_BRIEF: DestinationBrief = {
       },
       {
         category: "coworking",
-        description: "Dijital göçmen varlığı son yıllarda arttı. Beyoğlu ve Karaköy en yoğun coworking bölgesi.",
+        description:
+          "Dijital göçmen varlığı son yıllarda arttı. Beyoğlu ve Karaköy en yoğun coworking bölgesi.",
         highlights: [
           "Kolektif İstanbul — Maslak ve Levent şubeleri",
           "Bay Kafe Beşiktaş — güçlü WiFi, laptop dostu sabah",

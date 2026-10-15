@@ -6,12 +6,12 @@ This guide walks you through setting up the MapsBridge monorepo for local develo
 
 ## Prerequisites
 
-| Tool | Version | Notes |
-|------|---------|-------|
-| **Node.js** | 22+ | Lambda runtime target; use `nvm` or `fnm` to manage versions |
-| **AWS CLI** | v2 | Configured with appropriate profiles (`aws configure`) |
-| **Terraform** | 1.5+ | Infrastructure-as-code for all AWS resources |
-| **esbuild** | latest | Used by `build-lambdas.sh` for Lambda bundling |
+| Tool          | Version | Notes                                                        |
+| ------------- | ------- | ------------------------------------------------------------ |
+| **Node.js**   | 22+     | Lambda runtime target; use `nvm` or `fnm` to manage versions |
+| **AWS CLI**   | v2      | Configured with appropriate profiles (`aws configure`)       |
+| **Terraform** | 1.5+    | Infrastructure-as-code for all AWS resources                 |
+| **esbuild**   | latest  | Used by `build-lambdas.sh` for Lambda bundling               |
 
 Verify your toolchain:
 
@@ -123,14 +123,14 @@ NEXT_PUBLIC_SUPER_ADMINS=admin1@example.com,admin2@example.com
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth client ID for social sign-in |
-| `NEXT_PUBLIC_COGNITO_CLIENT_ID` | AWS Cognito User Pool app client ID |
-| `NEXT_PUBLIC_COGNITO_USER_POOL_ID` | AWS Cognito User Pool ID |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps JavaScript API key |
-| `NEXT_PUBLIC_SUPER_ADMINS` | Comma-separated list of emails with super-admin privileges |
-| `NEXT_PUBLIC_SITE_URL` | Base URL of the application (used for OAuth redirects and links) |
+| Variable                           | Purpose                                                          |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID`     | Google OAuth client ID for social sign-in                        |
+| `NEXT_PUBLIC_COGNITO_CLIENT_ID`    | AWS Cognito User Pool app client ID                              |
+| `NEXT_PUBLIC_COGNITO_USER_POOL_ID` | AWS Cognito User Pool ID                                         |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`  | Google Maps JavaScript API key                                   |
+| `NEXT_PUBLIC_SUPER_ADMINS`         | Comma-separated list of emails with super-admin privileges       |
+| `NEXT_PUBLIC_SITE_URL`             | Base URL of the application (used for OAuth redirects and links) |
 
 > **Note:** All variables prefixed with `NEXT_PUBLIC_` are embedded into the client bundle at build time. Never place secrets here.
 
@@ -138,14 +138,14 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 ## Key Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start the Next.js dev server |
-| `npm run build` | Production build (includes AI handler bundling) |
-| `npm run typecheck` | Full type check across the project |
-| `./infra/scripts/build-lambdas.sh` | Bundle all Lambda functions with esbuild |
-| `terraform plan` | Preview infrastructure changes |
-| `terraform apply` | Apply infrastructure changes |
+| Command                            | Description                                     |
+| ---------------------------------- | ----------------------------------------------- |
+| `npm run dev`                      | Start the Next.js dev server                    |
+| `npm run build`                    | Production build (includes AI handler bundling) |
+| `npm run typecheck`                | Full type check across the project              |
+| `./infra/scripts/build-lambdas.sh` | Bundle all Lambda functions with esbuild        |
+| `terraform plan`                   | Preview infrastructure changes                  |
+| `terraform apply`                  | Apply infrastructure changes                    |
 
 ---
 

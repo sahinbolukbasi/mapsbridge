@@ -31,12 +31,12 @@ export interface ShareableDay {
 }
 
 export interface ShareableTrip {
-  shareToken: string;   // content-hash, stable for same trip content
+  shareToken: string; // content-hash, stable for same trip content
   title: string;
   destination: string;
   durationDays: number;
   days: ShareableDay[];
-  sharedAt: string;     // ISO-8601
+  sharedAt: string; // ISO-8601
   /** Semantic version — bumped when content changes */
   version: number;
 }
@@ -60,12 +60,9 @@ export function buildShareableTrip(trip: Trip): ShareableTrip {
 
   const contentPayload = JSON.stringify({
     destination: trip.destination,
-    days: days.map(d => d.stops.map(s => s.id).join(",")),
+    days: days.map((d) => d.stops.map((s) => s.id).join(",")),
   });
-  const shareToken = createHash("sha256")
-    .update(contentPayload)
-    .digest("hex")
-    .slice(0, 12);
+  const shareToken = createHash("sha256").update(contentPayload).digest("hex").slice(0, 12);
 
   return {
     shareToken,
@@ -93,9 +90,9 @@ export interface TripComment {
   shareToken: string;
   /** Anonymized display name — never email or real name. */
   displayName: string;
-  text: string;           // max 280 chars
+  text: string; // max 280 chars
   reactions: Record<CommentReaction, number>;
-  createdAt: string;      // ISO-8601
+  createdAt: string; // ISO-8601
   /** If the comment is about a specific stop. */
   stopId?: string;
 }

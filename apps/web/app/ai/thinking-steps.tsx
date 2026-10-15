@@ -64,11 +64,10 @@ export function ThinkingSteps({ isRoute }: ThinkingStepsProps) {
         {phases.slice(0, visiblePhases).map((phase, i) => {
           const isLatest = i === visiblePhases - 1;
           return (
-            <div
-              key={i}
-              className={`ai-thinking-phase ${isLatest ? "active" : "done"}`}
-            >
-              <span className={`material-symbols-outlined ai-thinking-phase-icon ${isLatest ? "ai-phase-spin" : ""}`}>
+            <div key={i} className={`ai-thinking-phase ${isLatest ? "active" : "done"}`}>
+              <span
+                className={`material-symbols-outlined ai-thinking-phase-icon ${isLatest ? "ai-phase-spin" : ""}`}
+              >
                 {isLatest ? phase.icon : "check_circle"}
               </span>
               <span className="ai-thinking-phase-label">{phase.label}</span>
@@ -79,7 +78,10 @@ export function ThinkingSteps({ isRoute }: ThinkingStepsProps) {
 
       {isRoute && visiblePhases >= 3 && (
         <div className="ai-thinking-fact" key={factIndex}>
-          <span className="material-symbols-outlined" style={{ fontSize: "13px", color: "#10b981" }}>
+          <span
+            className="material-symbols-outlined"
+            style={{ fontSize: "13px", color: "#10b981" }}
+          >
             lightbulb
           </span>
           <span>{QUICK_FACTS[factIndex]}</span>

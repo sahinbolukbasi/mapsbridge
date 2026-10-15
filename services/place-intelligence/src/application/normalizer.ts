@@ -5,94 +5,100 @@
  * deduplicates by proximity + name similarity, and merges enrichments.
  */
 
-import type { NormalizedPlace, PlaceCategory } from '../domain/types';
+import type { NormalizedPlace, PlaceCategory } from "../domain/types";
 
 export function categoryFromOsmTags(tags: Record<string, string>): PlaceCategory {
-  if (tags.amenity === 'restaurant' || tags.cuisine) return 'restaurant';
-  if (tags.amenity === 'cafe') return 'cafe';
-  if (tags.amenity === 'bar' || tags.amenity === 'pub') return 'bar';
-  if (tags.amenity === 'nightclub') return 'nightlife';
-  if (tags.tourism === 'museum') return 'museum';
-  if (tags.tourism === 'gallery') return 'gallery';
-  if (tags.historic === 'monument' || tags.historic === 'memorial') return 'monument';
-  if (tags.historic) return 'historical';
-  if (tags.leisure === 'park' || tags.leisure === 'nature_reserve') return 'park';
-  if (tags.leisure === 'garden') return 'garden';
-  if (tags.natural === 'beach') return 'beach';
-  if (tags.tourism === 'hotel' || tags.tourism === 'motel') return 'hotel';
-  if (tags.tourism === 'hostel') return 'hostel';
-  if (tags.amenity === 'place_of_worship') {
+  if (tags.amenity === "restaurant" || tags.cuisine) return "restaurant";
+  if (tags.amenity === "cafe") return "cafe";
+  if (tags.amenity === "bar" || tags.amenity === "pub") return "bar";
+  if (tags.amenity === "nightclub") return "nightlife";
+  if (tags.tourism === "museum") return "museum";
+  if (tags.tourism === "gallery") return "gallery";
+  if (tags.historic === "monument" || tags.historic === "memorial") return "monument";
+  if (tags.historic) return "historical";
+  if (tags.leisure === "park" || tags.leisure === "nature_reserve") return "park";
+  if (tags.leisure === "garden") return "garden";
+  if (tags.natural === "beach") return "beach";
+  if (tags.tourism === "hotel" || tags.tourism === "motel") return "hotel";
+  if (tags.tourism === "hostel") return "hostel";
+  if (tags.amenity === "place_of_worship") {
     const religion = tags.religion;
-    if (religion === 'muslim') return 'mosque';
-    if (religion === 'christian') return 'church';
-    return 'temple';
+    if (religion === "muslim") return "mosque";
+    if (religion === "christian") return "church";
+    return "temple";
   }
-  if (tags.shop) return 'shop';
-  if (tags.amenity === 'marketplace') return 'market';
-  if (tags.tourism === 'viewpoint') return 'viewpoint';
-  if (tags.tourism === 'attraction') return 'attraction';
-  if (tags.railway === 'station') return 'transport';
-  if (tags.amenity === 'pharmacy') return 'pharmacy';
-  if (tags.amenity === 'hospital') return 'hospital';
-  return 'other';
+  if (tags.shop) return "shop";
+  if (tags.amenity === "marketplace") return "market";
+  if (tags.tourism === "viewpoint") return "viewpoint";
+  if (tags.tourism === "attraction") return "attraction";
+  if (tags.railway === "station") return "transport";
+  if (tags.amenity === "pharmacy") return "pharmacy";
+  if (tags.amenity === "hospital") return "hospital";
+  return "other";
 }
 
-export function inferTiming(category: PlaceCategory, name: string): {
+export function inferTiming(
+  category: PlaceCategory,
+  name: string,
+): {
   typicalDurationMins: number;
-  recommendedSlot: 'morning' | 'afternoon' | 'evening' | 'any';
+  recommendedSlot: "morning" | "afternoon" | "evening" | "any";
 } {
   const n = name.toLowerCase();
 
   switch (category) {
-    case 'museum':
-    case 'gallery':
-      return { typicalDurationMins: 120, recommendedSlot: 'morning' };
-    case 'cafe':
-      return { typicalDurationMins: 45, recommendedSlot: 'morning' };
-    case 'restaurant':
-      if (n.includes('breakfast') || n.includes('kahvaltı')) return { typicalDurationMins: 60, recommendedSlot: 'morning' };
-      return { typicalDurationMins: 75, recommendedSlot: 'afternoon' };
-    case 'bar':
-    case 'nightlife':
-      return { typicalDurationMins: 90, recommendedSlot: 'evening' };
-    case 'park':
-    case 'garden':
-    case 'beach':
-    case 'nature':
-      return { typicalDurationMins: 90, recommendedSlot: 'morning' };
-    case 'monument':
-    case 'historical':
-      return { typicalDurationMins: 45, recommendedSlot: 'morning' };
-    case 'viewpoint':
-      if (n.includes('sunset') || n.includes('gün batımı')) return { typicalDurationMins: 45, recommendedSlot: 'evening' };
-      return { typicalDurationMins: 30, recommendedSlot: 'afternoon' };
-    case 'landmark':
-    case 'attraction':
-      return { typicalDurationMins: 60, recommendedSlot: 'afternoon' };
-    case 'temple':
-    case 'mosque':
-    case 'church':
-      return { typicalDurationMins: 30, recommendedSlot: 'morning' };
-    case 'shop':
-    case 'market':
-    case 'mall':
-      return { typicalDurationMins: 60, recommendedSlot: 'afternoon' };
+    case "museum":
+    case "gallery":
+      return { typicalDurationMins: 120, recommendedSlot: "morning" };
+    case "cafe":
+      return { typicalDurationMins: 45, recommendedSlot: "morning" };
+    case "restaurant":
+      if (n.includes("breakfast") || n.includes("kahvaltı"))
+        return { typicalDurationMins: 60, recommendedSlot: "morning" };
+      return { typicalDurationMins: 75, recommendedSlot: "afternoon" };
+    case "bar":
+    case "nightlife":
+      return { typicalDurationMins: 90, recommendedSlot: "evening" };
+    case "park":
+    case "garden":
+    case "beach":
+    case "nature":
+      return { typicalDurationMins: 90, recommendedSlot: "morning" };
+    case "monument":
+    case "historical":
+      return { typicalDurationMins: 45, recommendedSlot: "morning" };
+    case "viewpoint":
+      if (n.includes("sunset") || n.includes("gün batımı"))
+        return { typicalDurationMins: 45, recommendedSlot: "evening" };
+      return { typicalDurationMins: 30, recommendedSlot: "afternoon" };
+    case "landmark":
+    case "attraction":
+      return { typicalDurationMins: 60, recommendedSlot: "afternoon" };
+    case "temple":
+    case "mosque":
+    case "church":
+      return { typicalDurationMins: 30, recommendedSlot: "morning" };
+    case "shop":
+    case "market":
+    case "mall":
+      return { typicalDurationMins: 60, recommendedSlot: "afternoon" };
     default:
-      return { typicalDurationMins: 45, recommendedSlot: 'any' };
+      return { typicalDurationMins: 45, recommendedSlot: "any" };
   }
 }
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function normalizeString(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9À-ɏЀ-ӿ؀-ۿ]/g, '');
+  return s.toLowerCase().replace(/[^a-z0-9À-ɏЀ-ӿ؀-ۿ]/g, "");
 }
 
 function nameSimilarity(a: string, b: string): number {
@@ -117,9 +123,10 @@ export function deduplicatePlaces(places: NormalizedPlace[]): NormalizedPlace[] 
   const result: NormalizedPlace[] = [];
 
   for (const place of places) {
-    const duplicate = result.find(existing =>
-      haversineKm(existing.lat, existing.lng, place.lat, place.lng) < PROXIMITY_THRESHOLD_KM &&
-      nameSimilarity(existing.name, place.name) > NAME_SIMILARITY_THRESHOLD
+    const duplicate = result.find(
+      (existing) =>
+        haversineKm(existing.lat, existing.lng, place.lat, place.lng) < PROXIMITY_THRESHOLD_KM &&
+        nameSimilarity(existing.name, place.name) > NAME_SIMILARITY_THRESHOLD,
     );
 
     if (duplicate) {
@@ -140,18 +147,20 @@ function mergePlaceData(target: NormalizedPlace, source: NormalizedPlace): void 
   if (!target.description && source.description) target.description = source.description;
   if (!target.openingHours && source.openingHours) target.openingHours = source.openingHours;
   if (!target.priceLevel && source.priceLevel) target.priceLevel = source.priceLevel;
-  if ((!target.photos || target.photos.length === 0) && source.photos?.length) target.photos = source.photos;
+  if ((!target.photos || target.photos.length === 0) && source.photos?.length)
+    target.photos = source.photos;
 
-  const newTags = source.tags.filter(t => !target.tags.includes(t));
+  const newTags = source.tags.filter((t) => !target.tags.includes(t));
   target.tags.push(...newTags);
 
-  const newSubs = source.subcategories.filter(s => !target.subcategories.includes(s));
+  const newSubs = source.subcategories.filter((s) => !target.subcategories.includes(s));
   target.subcategories.push(...newSubs);
 }
 
 export function rankPlaces(places: NormalizedPlace[]): NormalizedPlace[] {
   return [...places].sort((a, b) => {
-    let scoreA = 0, scoreB = 0;
+    let scoreA = 0,
+      scoreB = 0;
 
     if (a.rating) scoreA += a.rating * 10;
     if (b.rating) scoreB += b.rating * 10;

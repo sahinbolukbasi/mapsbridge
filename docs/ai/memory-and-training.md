@@ -38,32 +38,32 @@ flowchart TB
 
 The primary interface for all memory operations:
 
-| Function | Description |
-|----------|-------------|
-| `getMemorySettings()` | Returns the user's current memory consent state and generation |
-| `retrievePersonalMemory()` | Fetches stored preferences for context injection (bounded to 1500 UTF-8 bytes) |
-| `changeMemory()` | Updates or creates a memory record; triggers generation rotation if modifying existing data |
-| `writeJob()` | Enqueues a memory write event for asynchronous processing by the worker |
+| Function                   | Description                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `getMemorySettings()`      | Returns the user's current memory consent state and generation                              |
+| `retrievePersonalMemory()` | Fetches stored preferences for context injection (bounded to 1500 UTF-8 bytes)              |
+| `changeMemory()`           | Updates or creates a memory record; triggers generation rotation if modifying existing data |
+| `writeJob()`               | Enqueues a memory write event for asynchronous processing by the worker                     |
 
 #### `memory-worker.ts`
 
 A scheduled Lambda that processes queued memory events:
 
-| Function | Description |
-|----------|-------------|
-| `processMemoryJob()` | Writes pending memory events to AgentCore via `CreateEventCommand` |
-| `sweepMemoryJobs()` | Purges memory records belonging to retired actors (deleted accounts, revoked consent) |
+| Function             | Description                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------- |
+| `processMemoryJob()` | Writes pending memory events to AgentCore via `CreateEventCommand`                    |
+| `sweepMemoryJobs()`  | Purges memory records belonging to retired actors (deleted accounts, revoked consent) |
 
 Memory records have a **180-day retention period**. After 180 days without updates, records are automatically purged.
 
 #### `ai-memory-handler.ts` -- HTTP API
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/ai/memory/settings` | GET | Retrieve current memory consent settings |
-| `/ai/memory/settings` | PATCH | Enable or disable memory collection |
-| `/ai/memory/preferences` | DELETE | Delete stored preferences (rotates generation) |
-| `/ai/memory` | DELETE | Delete all memory data for the user (rotates generation) |
+| Endpoint                 | Method | Description                                              |
+| ------------------------ | ------ | -------------------------------------------------------- |
+| `/ai/memory/settings`    | GET    | Retrieve current memory consent settings                 |
+| `/ai/memory/settings`    | PATCH  | Enable or disable memory collection                      |
+| `/ai/memory/preferences` | DELETE | Delete stored preferences (rotates generation)           |
+| `/ai/memory`             | DELETE | Delete all memory data for the user (rotates generation) |
 
 ### Generation Rotation
 
@@ -172,22 +172,22 @@ A scheduled Lambda that processes pending training jobs:
 
 The following PII patterns are detected and stripped before any training data is stored:
 
-| Pattern | Example | Replacement |
-|---------|---------|-------------|
-| Credit card numbers | `4111 1111 1111 1111` | `[CARD_REDACTED]` |
-| Email addresses | `user@example.com` | `[EMAIL_REDACTED]` |
-| TC Kimlik (Turkish ID) | `12345678901` | `[TCKN_REDACTED]` |
-| Social Security Numbers | `123-45-6789` | `[SSN_REDACTED]` |
-| Phone numbers | `+1 (555) 123-4567` | `[PHONE_REDACTED]` |
+| Pattern                 | Example               | Replacement        |
+| ----------------------- | --------------------- | ------------------ |
+| Credit card numbers     | `4111 1111 1111 1111` | `[CARD_REDACTED]`  |
+| Email addresses         | `user@example.com`    | `[EMAIL_REDACTED]` |
+| TC Kimlik (Turkish ID)  | `12345678901`         | `[TCKN_REDACTED]`  |
+| Social Security Numbers | `123-45-6789`         | `[SSN_REDACTED]`   |
+| Phone numbers           | `+1 (555) 123-4567`   | `[PHONE_REDACTED]` |
 
 PII masking runs at the outbox stage, before the data enters the pending queue. No unmasked PII reaches the training worker or S3.
 
 ### Admin Review
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/admin/ai-training` | GET | List all pending training jobs (quarantine queue) |
-| `/admin/ai-training/{id}/review` | POST | Approve or reject a specific training job |
+| Endpoint                         | Method | Description                                       |
+| -------------------------------- | ------ | ------------------------------------------------- |
+| `/admin/ai-training`             | GET    | List all pending training jobs (quarantine queue) |
+| `/admin/ai-training/{id}/review` | POST   | Approve or reject a specific training job         |
 
 Approved jobs move from `quarantine/` to the training dataset. Rejected jobs are permanently deleted from S3.
 
@@ -210,12 +210,12 @@ stateDiagram-v2
 
 ### Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/admin/ai-release` | GET | View current pipeline status (active version, pending candidates, history) |
-| `/admin/ai-release/propose` | POST | Propose a release candidate with quality metrics (accuracy, latency, cost) |
-| `/admin/ai-release/publish` | POST | Publish the candidate to production (quality gate must pass) |
-| `/admin/ai-release/rollback` | POST | Roll back to the previous published version |
+| Endpoint                     | Method | Description                                                                |
+| ---------------------------- | ------ | -------------------------------------------------------------------------- |
+| `/admin/ai-release`          | GET    | View current pipeline status (active version, pending candidates, history) |
+| `/admin/ai-release/propose`  | POST   | Propose a release candidate with quality metrics (accuracy, latency, cost) |
+| `/admin/ai-release/publish`  | POST   | Publish the candidate to production (quality gate must pass)               |
+| `/admin/ai-release/rollback` | POST   | Roll back to the previous published version                                |
 
 ### Quality Gate
 

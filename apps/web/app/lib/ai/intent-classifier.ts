@@ -3,16 +3,11 @@
 // ---------------------------------------------------------------------------
 
 export type IntentClass =
-  | 'fact_lookup'
-  | 'recommendation'
-  | 'planning'
-  | 'constraint_change'
-  | 'procedural'
-  | 'smalltalk';
+  "fact_lookup" | "recommendation" | "planning" | "constraint_change" | "procedural" | "smalltalk";
 
 export interface ClassifiedIntent {
   intentClass: IntentClass;
-  reasoningBudget: 'low' | 'medium' | 'high';
+  reasoningBudget: "low" | "medium" | "high";
   modelTier: 1 | 2 | 3 | 4;
   shouldFanOut: boolean;
   relevantAgents: string[];
@@ -45,15 +40,31 @@ const RECOMMENDATION_PATTERN =
 // ---------------------------------------------------------------------------
 
 const AGENT_PATTERNS: Array<{ id: string; pattern: RegExp }> = [
-  { id: 'food', pattern: /yemek|restoran|kahve|lezzet|mutfak|nerede yiyelim|açlık|breakfast|lunch|dinner|cafe/iu },
-  { id: 'car-rental', pattern: /araç|araba|kiralama|kiralık|ehliyet|sürüş|rent.*car|driving/iu },
-  { id: 'city-transit', pattern: /metro|otobüs|tramvay|toplu taşıma|ulaşım kartı|bilet|tren|bus|subway/iu },
-  { id: 'city-intel', pattern: /güvenlik|hava durumu|sezon|ne zaman gidilir|nasıl bir şehir|genel bilgi|overview/iu },
-  { id: 'hotel-deal', pattern: /otel|konaklama|hotel|nerede kal|airbnb|hostel|booking/iu },
-  { id: 'flight', pattern: /uçuş|uçak|bilet|havayolu|flight|nasıl giderim/iu },
-  { id: 'transit', pattern: /konaklama|otel|nerede kal|ulaşım|apart|hostel/iu },
-  { id: 'discovery', pattern: /yerel keşif|gizli köşe|kültürel ipuç|ne yenir|restoran|lezzet|kafe/iu },
-  { id: 'emergency', pattern: /acil|yardım|hastane|polis|doktor|güvenlik|kayıp|pasaport|tehlike/iu },
+  {
+    id: "food",
+    pattern:
+      /yemek|restoran|kahve|lezzet|mutfak|nerede yiyelim|açlık|breakfast|lunch|dinner|cafe/iu,
+  },
+  { id: "car-rental", pattern: /araç|araba|kiralama|kiralık|ehliyet|sürüş|rent.*car|driving/iu },
+  {
+    id: "city-transit",
+    pattern: /metro|otobüs|tramvay|toplu taşıma|ulaşım kartı|bilet|tren|bus|subway/iu,
+  },
+  {
+    id: "city-intel",
+    pattern: /güvenlik|hava durumu|sezon|ne zaman gidilir|nasıl bir şehir|genel bilgi|overview/iu,
+  },
+  { id: "hotel-deal", pattern: /otel|konaklama|hotel|nerede kal|airbnb|hostel|booking/iu },
+  { id: "flight", pattern: /uçuş|uçak|bilet|havayolu|flight|nasıl giderim/iu },
+  { id: "transit", pattern: /konaklama|otel|nerede kal|ulaşım|apart|hostel/iu },
+  {
+    id: "discovery",
+    pattern: /yerel keşif|gizli köşe|kültürel ipuç|ne yenir|restoran|lezzet|kafe/iu,
+  },
+  {
+    id: "emergency",
+    pattern: /acil|yardım|hastane|polis|doktor|güvenlik|kayıp|pasaport|tehlike/iu,
+  },
 ];
 
 function findRelevantAgents(request: string): string[] {
@@ -74,8 +85,8 @@ export function classifyIntent(
   // 1. Smalltalk — greetings, thanks (checked first since it is the most specific)
   if (SMALLTALK_PATTERN.test(trimmed)) {
     return {
-      intentClass: 'smalltalk',
-      reasoningBudget: 'low',
+      intentClass: "smalltalk",
+      reasoningBudget: "low",
       modelTier: 1,
       shouldFanOut: false,
       relevantAgents: [],
@@ -85,8 +96,8 @@ export function classifyIntent(
   // 2. Constraint change — user modifying existing trip parameters
   if (CONSTRAINT_CHANGE_PATTERN.test(trimmed)) {
     return {
-      intentClass: 'constraint_change',
-      reasoningBudget: 'medium',
+      intentClass: "constraint_change",
+      reasoningBudget: "medium",
       modelTier: hasRoute ? 3 : 2,
       shouldFanOut: hasRoute,
       relevantAgents: findRelevantAgents(trimmed),
@@ -98,13 +109,13 @@ export function classifyIntent(
     const agents = findRelevantAgents(trimmed);
     // In planning mode, always include core agents if destination is known
     if (hasDestination) {
-      for (const core of ['food', 'city-transit', 'city-intel']) {
+      for (const core of ["food", "city-transit", "city-intel"]) {
         if (!agents.includes(core)) agents.push(core);
       }
     }
     return {
-      intentClass: 'planning',
-      reasoningBudget: 'high',
+      intentClass: "planning",
+      reasoningBudget: "high",
       modelTier: 3,
       shouldFanOut: true,
       relevantAgents: agents,
@@ -115,11 +126,11 @@ export function classifyIntent(
   if (PROCEDURAL_PATTERN.test(trimmed)) {
     const agents = findRelevantAgents(trimmed);
     return {
-      intentClass: 'procedural',
-      reasoningBudget: 'medium',
+      intentClass: "procedural",
+      reasoningBudget: "medium",
       modelTier: 2,
       shouldFanOut: false,
-      relevantAgents: agents.length > 0 ? agents : ['emergency'],
+      relevantAgents: agents.length > 0 ? agents : ["emergency"],
     };
   }
 
@@ -127,8 +138,8 @@ export function classifyIntent(
   if (FACT_LOOKUP_PATTERN.test(trimmed)) {
     const agents = findRelevantAgents(trimmed);
     return {
-      intentClass: 'fact_lookup',
-      reasoningBudget: 'low',
+      intentClass: "fact_lookup",
+      reasoningBudget: "low",
       modelTier: agents.length > 1 ? 2 : 1,
       shouldFanOut: false,
       relevantAgents: agents.slice(0, 1), // single agent for fact lookups
@@ -139,8 +150,8 @@ export function classifyIntent(
   if (RECOMMENDATION_PATTERN.test(trimmed)) {
     const agents = findRelevantAgents(trimmed);
     return {
-      intentClass: 'recommendation',
-      reasoningBudget: 'medium',
+      intentClass: "recommendation",
+      reasoningBudget: "medium",
       modelTier: 2,
       shouldFanOut: agents.length > 1,
       relevantAgents: agents.slice(0, 2), // 1-2 agents for recommendations
@@ -151,8 +162,8 @@ export function classifyIntent(
   const agents = findRelevantAgents(trimmed);
   if (hasDestination && agents.length > 0) {
     return {
-      intentClass: 'recommendation',
-      reasoningBudget: 'medium',
+      intentClass: "recommendation",
+      reasoningBudget: "medium",
       modelTier: 2,
       shouldFanOut: agents.length > 1,
       relevantAgents: agents.slice(0, 2),
@@ -160,8 +171,8 @@ export function classifyIntent(
   }
 
   return {
-    intentClass: 'fact_lookup',
-    reasoningBudget: 'low',
+    intentClass: "fact_lookup",
+    reasoningBudget: "low",
     modelTier: 1,
     shouldFanOut: false,
     relevantAgents: agents.slice(0, 1),

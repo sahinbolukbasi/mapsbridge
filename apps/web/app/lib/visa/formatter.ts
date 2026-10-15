@@ -28,9 +28,7 @@ const LEVEL_LABELS: Record<VisaRequirementLevel, string> = {
 export function formatEntryRuleForPrompt(rule: EntryRule): string {
   const levelLabel = LEVEL_LABELS[rule.requirementLevel];
   const stayNote =
-    rule.maxStayDays && rule.maxStayDays > 0
-      ? ` (maks. ${rule.maxStayDays} gün)`
-      : "";
+    rule.maxStayDays && rule.maxStayDays > 0 ? ` (maks. ${rule.maxStayDays} gün)` : "";
   const notes = rule.notes.slice(0, 2).join(" ");
 
   return (
@@ -86,7 +84,7 @@ export function buildVisaChecklistItems(passportIso2 = "TR"): Array<{
   disclaimer: string;
 }> {
   const rules = getEntryRulesForPassport(passportIso2);
-  return rules.map(r => ({
+  return rules.map((r) => ({
     destinationCountry: r.destinationCountry,
     levelLabel: LEVEL_LABELS[r.requirementLevel],
     sourceUrl: r.sourceUrl,

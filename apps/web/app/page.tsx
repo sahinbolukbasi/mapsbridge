@@ -1,7 +1,12 @@
 import Home from "./home-client";
 import { publicMetadata, siteOrigin } from "./lib/site-metadata";
 
-export const metadata = publicMetadata("Seyahatini planla, birlikte keşfet", "AI seyahat asistanı, kişisel haritalar ve gezgin rehberleriyle yolculuğunu planla. Duraklarını kaydet ve deneyimlerini paylaş.", "/", "tr");
+export const metadata = publicMetadata(
+  "Seyahatini planla, birlikte keşfet",
+  "AI seyahat asistanı, kişisel haritalar ve gezgin rehberleriyle yolculuğunu planla. Duraklarını kaydet ve deneyimlerini paylaş.",
+  "/",
+  "tr",
+);
 
 export default function HomePage() {
   return (

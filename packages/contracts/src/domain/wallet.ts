@@ -1,4 +1,8 @@
-import { InsufficientCreditsException, ValidationException, ForbiddenException } from "./exceptions";
+import {
+  InsufficientCreditsException,
+  ValidationException,
+  ForbiddenException,
+} from "./exceptions";
 import { BILLING_COST, SubscriptionTier } from "../index";
 
 export interface WalletProps {

@@ -28,25 +28,76 @@ export interface NearbyPoi {
 
 function detectCategoryFromText(text: string): PinCategory {
   const lower = text.toLowerCase();
-  if (lower.includes("cami") || lower.includes("kilise") || lower.includes("saray") || lower.includes("kale") || lower.includes("tarih") || lower.includes("antik") || lower.includes("sarnıç") || lower.includes("tapınak")) {
+  if (
+    lower.includes("cami") ||
+    lower.includes("kilise") ||
+    lower.includes("saray") ||
+    lower.includes("kale") ||
+    lower.includes("tarih") ||
+    lower.includes("antik") ||
+    lower.includes("sarnıç") ||
+    lower.includes("tapınak")
+  ) {
     return "tarih";
   }
-  if (lower.includes("müze") || lower.includes("museum") || lower.includes("galeri") || lower.includes("sanat")) {
+  if (
+    lower.includes("müze") ||
+    lower.includes("museum") ||
+    lower.includes("galeri") ||
+    lower.includes("sanat")
+  ) {
     return "muze";
   }
-  if (lower.includes("kafe") || lower.includes("cafe") || lower.includes("kahve") || lower.includes("coffee") || lower.includes("roastery")) {
+  if (
+    lower.includes("kafe") ||
+    lower.includes("cafe") ||
+    lower.includes("kahve") ||
+    lower.includes("coffee") ||
+    lower.includes("roastery")
+  ) {
     return "kahve";
   }
-  if (lower.includes("restoran") || lower.includes("lokanta") || lower.includes("kebap") || lower.includes("meyhane") || lower.includes("mutfak") || lower.includes("tatlı") || lower.includes("bistro")) {
+  if (
+    lower.includes("restoran") ||
+    lower.includes("lokanta") ||
+    lower.includes("kebap") ||
+    lower.includes("meyhane") ||
+    lower.includes("mutfak") ||
+    lower.includes("tatlı") ||
+    lower.includes("bistro")
+  ) {
     return "yemek";
   }
-  if (lower.includes("park") || lower.includes("bahçe") || lower.includes("koru") || lower.includes("orman") || lower.includes("göl") || lower.includes("şelale") || lower.includes("vadi") || lower.includes("tepe") || lower.includes("sahil")) {
+  if (
+    lower.includes("park") ||
+    lower.includes("bahçe") ||
+    lower.includes("koru") ||
+    lower.includes("orman") ||
+    lower.includes("göl") ||
+    lower.includes("şelale") ||
+    lower.includes("vadi") ||
+    lower.includes("tepe") ||
+    lower.includes("sahil")
+  ) {
     return "manzara";
   }
-  if (lower.includes("çarşı") || lower.includes("avm") || lower.includes("bazar") || lower.includes("pasaj") || lower.includes("mağaza") || lower.includes("market")) {
+  if (
+    lower.includes("çarşı") ||
+    lower.includes("avm") ||
+    lower.includes("bazar") ||
+    lower.includes("pasaj") ||
+    lower.includes("mağaza") ||
+    lower.includes("market")
+  ) {
     return "alisveris";
   }
-  if (lower.includes("otel") || lower.includes("hotel") || lower.includes("pansiyon") || lower.includes("resort") || lower.includes("hostel")) {
+  if (
+    lower.includes("otel") ||
+    lower.includes("hotel") ||
+    lower.includes("pansiyon") ||
+    lower.includes("resort") ||
+    lower.includes("hostel")
+  ) {
     return "konaklama";
   }
   return "genel";
@@ -54,7 +105,9 @@ function detectCategoryFromText(text: string): PinCategory {
 
 /** Reverse Geocoding with Fallback Hierarchy and Multi-Tier Cache */
 export async function reverseGeocodeLocation(lat: number, lng: number): Promise<GeocodedPlace> {
-  const cached = placesCache.getPlaceDetails<GeocodedPlace>(`geo:${lat.toFixed(4)},${lng.toFixed(4)}`);
+  const cached = placesCache.getPlaceDetails<GeocodedPlace>(
+    `geo:${lat.toFixed(4)},${lng.toFixed(4)}`,
+  );
   if (cached) return cached;
 
   const fallbackLabel = `Nokta (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
@@ -66,22 +119,32 @@ export async function reverseGeocodeLocation(lat: number, lng: number): Promise<
     const timeout = setTimeout(() => controller.abort(), 4000);
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=tr&email=destek@mapsbridge.com`,
-      { signal: controller.signal }
+      { signal: controller.signal },
     );
     clearTimeout(timeout);
     if (res.ok) {
       const data = await res.json();
       if (data && data.address) {
         const addr = data.address;
-        const namePart = data.name || addr.amenity || addr.historic || addr.tourism || addr.building || addr.road || addr.suburb;
+        const namePart =
+          data.name ||
+          addr.amenity ||
+          addr.historic ||
+          addr.tourism ||
+          addr.building ||
+          addr.road ||
+          addr.suburb;
         const district = addr.suburb || addr.district || addr.town || addr.county || "";
         const city = addr.province || addr.city || addr.state || "";
-        
+
         let label = namePart || district || city || fallbackLabel;
         if (label === district && city) label = `${district}, ${city}`;
 
         const shortAddrParts = [addr.road, district, city].filter(Boolean);
-        const address = shortAddrParts.length > 0 ? shortAddrParts.join(", ") : (data.display_name?.split(", ").slice(0, 3).join(", ") || fallbackAddr);
+        const address =
+          shortAddrParts.length > 0
+            ? shortAddrParts.join(", ")
+            : data.display_name?.split(", ").slice(0, 3).join(", ") || fallbackAddr;
 
         return {
           label,
@@ -101,10 +164,9 @@ export async function reverseGeocodeLocation(lat: number, lng: number): Promise<
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
-    const res = await fetch(
-      `https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=tr`,
-      { signal: controller.signal }
-    );
+    const res = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=tr`, {
+      signal: controller.signal,
+    });
     clearTimeout(timeout);
     if (res.ok) {
       const data = await res.json();
@@ -135,13 +197,15 @@ export async function reverseGeocodeLocation(lat: number, lng: number): Promise<
     const timeout = setTimeout(() => controller.abort(), 3000);
     const res = await fetch(
       `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=tr`,
-      { signal: controller.signal }
+      { signal: controller.signal },
     );
     clearTimeout(timeout);
     if (res.ok) {
       const data = await res.json();
       const label = data.locality || data.principalSubdivision || fallbackLabel;
-      const address = [data.locality, data.principalSubdivision, data.countryName].filter(Boolean).join(", ") || fallbackAddr;
+      const address =
+        [data.locality, data.principalSubdivision, data.countryName].filter(Boolean).join(", ") ||
+        fallbackAddr;
       return {
         label,
         address,
@@ -177,7 +241,7 @@ export async function searchPlaces(query: string, limit = 5): Promise<GeocodedPl
     const timeout = setTimeout(() => controller.abort(), 4000);
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQ)}&limit=${limit}&addressdetails=1&accept-language=tr&email=destek@mapsbridge.com`,
-      { signal: controller.signal }
+      { signal: controller.signal },
     );
     clearTimeout(timeout);
     if (res.ok) {
@@ -215,7 +279,7 @@ export async function searchPlaces(query: string, limit = 5): Promise<GeocodedPl
     const timeout = setTimeout(() => controller.abort(), 3500);
     const res = await fetch(
       `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanQ)}&limit=${limit}&lang=tr`,
-      { signal: controller.signal }
+      { signal: controller.signal },
     );
     clearTimeout(timeout);
     if (res.ok) {
@@ -253,10 +317,10 @@ export function getCuratedNearbyPOIs(lat: number, lng: number): NearbyPoi[] {
     { lat: 41.0086, lng: 28.9802, name: "Ayasofya-i Kebîr Câmii", cat: "tarih" },
     { lat: 41.0084, lng: 28.9778, name: "Yerebatan Sarnıcı", cat: "muze" },
     { lat: 41.0115, lng: 28.9833, name: "Topkapı Sarayı Müzesi", cat: "muze" },
-    { lat: 41.0106, lng: 28.9680, name: "Kapalıçarşı", cat: "alisveris" },
-    { lat: 41.0165, lng: 28.9710, name: "Mısır Çarşısı (Eminönü)", cat: "alisveris" },
+    { lat: 41.0106, lng: 28.968, name: "Kapalıçarşı", cat: "alisveris" },
+    { lat: 41.0165, lng: 28.971, name: "Mısır Çarşısı (Eminönü)", cat: "alisveris" },
     { lat: 41.0256, lng: 28.9741, name: "Galata Kulesi", cat: "manzara" },
-    { lat: 41.0369, lng: 28.9850, name: "İstiklal Caddesi & Taksim", cat: "turistik" },
+    { lat: 41.0369, lng: 28.985, name: "İstiklal Caddesi & Taksim", cat: "turistik" },
     { lat: 40.9882, lng: 29.0267, name: "Moda Sahili & Parkı", cat: "manzara" },
     { lat: 40.9904, lng: 29.0289, name: "Bahariye Caddesi & Süreyya Operası", cat: "kultur" },
     { lat: 38.6431, lng: 34.8289, name: "Göreme Açık Hava Müzesi", cat: "muze" },

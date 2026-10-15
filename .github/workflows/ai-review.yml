@@ -1,0 +1,118 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+env:
+  AWS_REGION: eu-central-1
+
+jobs:
+  ai-review:
+    name: Claude Code Review
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+
+      - uses: aws-actions/configure-aws-credentials@e3ef5a70f08b73a6ca7a8dca7ce5a5e4c816e4c6 # v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          DIFF=$(git diff origin/${{ github.base_ref }}...HEAD -- \
+            '*.ts' '*.tsx' '*.tf' '*.json' '*.yml' '*.yaml' \
+            ':!package-lock.json' ':!*.tsbuildinfo' \
+            | head -c 30000)
+          if [ -z "$DIFF" ]; then
+            echo "has_diff=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_diff=true" >> $GITHUB_OUTPUT
+            echo "$DIFF" > /tmp/pr-diff.txt
+          fi
+
+      - name: Get changed files
+        if: steps.diff.outputs.has_diff == 'true'
+        run: git diff --name-only origin/${{ github.base_ref }}...HEAD | head -50 > /tmp/changed-files.txt
+
+      - name: AI Review via Bedrock
+        if: steps.diff.outputs.has_diff == 'true'
+        run: |
+          FILES=$(cat /tmp/changed-files.txt)
+          DIFF=$(cat /tmp/pr-diff.txt)
+          TITLE="${{ github.event.pull_request.title }}"
+
+          jq -n \
+            --arg title "$TITLE" \
+            --arg files "$FILES" \
+            --arg diff "$DIFF" \
+            '{
+              anthropic_version: "bedrock-2023-05-31",
+              max_tokens: 2048,
+              messages: [{
+                role: "user",
+                content: ("You are a senior code reviewer for MapsBridge, an AI-powered travel platform (TypeScript + Terraform + AWS). Review this PR concisely.\n\nPR Title: " + $title + "\n\nChanged files:\n" + $files + "\n\nDiff:\n```\n" + $diff + "\n```\n\nProvide a brief review with:\n1. **Summary** - what this PR does (1-2 sentences)\n2. **Issues** - bugs, security issues, or correctness problems (if any)\n3. **Suggestions** - improvements (max 3)\n\nBe concise. No praise. Skip if changes are trivial. Use markdown.")
+              }]
+            }' > /tmp/payload.json
+
+          aws bedrock-runtime invoke-model \
+            --model-id "eu.anthropic.claude-haiku-4-5-20251001-v1:0" \
+            --content-type "application/json" \
+            --accept "application/json" \
+            --body fileb:///tmp/payload.json \
+            /tmp/response.json 2>&1 || true
+
+          if [ -f /tmp/response.json ] && jq -e '.content[0].text' /tmp/response.json > /dev/null 2>&1; then
+            jq -r '.content[0].text' /tmp/response.json > /tmp/review.md
+          else
+            echo "AI review unavailable for this PR." > /tmp/review.md
+          fi
+
+      - name: Post Review Comment
+        if: steps.diff.outputs.has_diff == 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (!fs.existsSync('/tmp/review.md')) return;
+            const review = fs.readFileSync('/tmp/review.md', 'utf8').trim();
+            if (!review || review.includes('could not be generated')) return;
+
+            const body = `## 🤖 AI Code Review\n\n${review}\n\n---\n*Automated review by Claude (Bedrock) — verify suggestions before applying.*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('AI Code Review')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

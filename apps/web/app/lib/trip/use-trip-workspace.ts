@@ -3,16 +3,32 @@
 // ============================================================
 
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { Pin, TripDay, TripGroup, TripWorkspace, DrawerState, DrawerView, RouteSegment, PinCategory } from "./models";
+import {
+  Pin,
+  TripDay,
+  TripGroup,
+  TripWorkspace,
+  DrawerState,
+  DrawerView,
+  RouteSegment,
+  PinCategory,
+} from "./models";
 
 const STORAGE_KEY = "mapsbridge.tripWorkspace";
 
 // ── helpers ────────────────────────────────────────────────
 
 const DAY_COLORS = [
-  "#2563eb", "#10b981", "#8b5cf6", "#f97316",
-  "#ec4899", "#06b6d4", "#eab308", "#ef4444",
-  "#6366f1", "#14b8a6",
+  "#2563eb",
+  "#10b981",
+  "#8b5cf6",
+  "#f97316",
+  "#ec4899",
+  "#06b6d4",
+  "#eab308",
+  "#ef4444",
+  "#6366f1",
+  "#14b8a6",
 ];
 
 function defaultDay(dayIndex: number, label: string): TripDay {
@@ -72,16 +88,18 @@ export function useTripWorkspace() {
 
   // ── derived ──
   const currentDay = useMemo(
-    () => (drawer.activeDayIndex == null
-      ? null
-      : workspace.days.find((d) => d.dayIndex === drawer.activeDayIndex) ?? null),
+    () =>
+      drawer.activeDayIndex == null
+        ? null
+        : (workspace.days.find((d) => d.dayIndex === drawer.activeDayIndex) ?? null),
     [workspace.days, drawer.activeDayIndex],
   );
 
   const pinsForActiveDay = useMemo(
-    () => (drawer.activeDayIndex == null || drawer.activeDayIndex === 0
-      ? workspace.pins
-      : workspace.pins.filter((p) => p.dayIndex === drawer.activeDayIndex)),
+    () =>
+      drawer.activeDayIndex == null || drawer.activeDayIndex === 0
+        ? workspace.pins
+        : workspace.pins.filter((p) => p.dayIndex === drawer.activeDayIndex),
     [workspace.pins, drawer.activeDayIndex],
   );
 
@@ -205,9 +223,8 @@ export function useTripWorkspace() {
 
   const addDay = useCallback(() => {
     setWorkspace((prev) => {
-      const nextIndex = prev.days.length > 0
-        ? Math.max(...prev.days.map((d) => d.dayIndex)) + 1
-        : 1;
+      const nextIndex =
+        prev.days.length > 0 ? Math.max(...prev.days.map((d) => d.dayIndex)) + 1 : 1;
       return {
         ...prev,
         days: [...prev.days, defaultDay(nextIndex, `${nextIndex}. Gün`)],
@@ -236,10 +253,7 @@ export function useTripWorkspace() {
       if (prev.groups.find((g) => g.id === id)) return prev;
       return {
         ...prev,
-        groups: [
-          ...prev.groups,
-          { id, name, emoji, color: color ?? "#6366f1", pinCount: 0 },
-        ],
+        groups: [...prev.groups, { id, name, emoji, color: color ?? "#6366f1", pinCount: 0 }],
       };
     });
   }, []);

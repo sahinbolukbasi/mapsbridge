@@ -27,7 +27,7 @@ Canlı fiyat ve müsaitlik verin yok. Sayısal fiyat, kesin sefer süresi, günc
 export async function runDiscoveryAgent(
   prompt: string,
   destination: string,
-  timeoutMs = 4500
+  timeoutMs = 4500,
 ): Promise<{ info: LocalDiscoveryInfo; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
 
@@ -48,5 +48,5 @@ export async function runDiscoveryAgent(
     };
   }
 
-  throw new Error('Ek seyahat bilgisi doğrulanamadı.');
+  throw new Error("Ek seyahat bilgisi doğrulanamadı.");
 }

@@ -11,12 +11,12 @@ export function decodeJwtPayload(token: string): Record<string, unknown> | null 
     const parts = token.split(".");
     if (parts.length < 2) return null;
     const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = b64.padEnd(b64.length + (4 - (b64.length % 4)) % 4, "=");
+    const padded = b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), "=");
     const jsonStr = decodeURIComponent(
       atob(padded)
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
+        .join(""),
     );
     return JSON.parse(jsonStr);
   } catch {
@@ -60,7 +60,10 @@ async function request(target: string, body: Record<string, unknown>) {
   if (!response.ok) {
     const errorType = payload.__type || "";
     const msg = payload.message || "İşlem tamamlanamadı.";
-    if (errorType.includes("NotAuthorizedException") || msg.includes("Incorrect username or password")) {
+    if (
+      errorType.includes("NotAuthorizedException") ||
+      msg.includes("Incorrect username or password")
+    ) {
       throw new Error("E-posta veya şifre hatalı. Lütfen kontrol edip tekrar deneyin.");
     }
     if (errorType.includes("UserNotFoundException")) {
@@ -198,8 +201,7 @@ export function willExpireSoon(token: string | null | undefined, windowMs = 600_
 export function getStoredSession() {
   if (typeof window === "undefined") return null;
   let token =
-    localStorage.getItem("mapsbridge.accessToken") ||
-    localStorage.getItem("mapsbridge.idToken");
+    localStorage.getItem("mapsbridge.accessToken") || localStorage.getItem("mapsbridge.idToken");
   const email = localStorage.getItem("mapsbridge.userEmail");
 
   const cleanEmail = email ? email.trim().toLowerCase() : "";
@@ -283,7 +285,7 @@ export async function changePasswordDirect(newPassword: string) {
 
 export function handleGoogleCredentialResponse(
   credential: string,
-  manualProfile?: { email: string; name?: string; picture?: string }
+  manualProfile?: { email: string; name?: string; picture?: string },
 ) {
   if (typeof window === "undefined") return null;
 
@@ -343,7 +345,7 @@ export function handleGoogleCredentialResponse(
       email: cleanEmail,
       avatarUrl: picture,
       provider: "google",
-    })
+    }),
   );
 
   return {
@@ -357,7 +359,7 @@ export function handleGoogleCredentialResponse(
 
 export function handleAppleCredentialResponse(
   credential?: string,
-  manualProfile?: { email: string; name?: string }
+  manualProfile?: { email: string; name?: string },
 ) {
   if (typeof window === "undefined") return null;
 
@@ -403,7 +405,7 @@ export function handleAppleCredentialResponse(
       username: cleanUsername,
       email: cleanEmail,
       provider: "apple",
-    })
+    }),
   );
 
   return {
@@ -413,5 +415,3 @@ export function handleAppleCredentialResponse(
     token,
   };
 }
-
-

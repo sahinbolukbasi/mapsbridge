@@ -3,11 +3,11 @@
  * Database persistence is handled separately (DynamoDB via KB_PATTERNS).
  */
 
-import type { KBEntity, KBSource, KBConflict } from './types';
+import type { KBEntity, KBSource, KBConflict } from "./types";
 
 export interface KBStore {
   entities: Map<string, KBEntity>;
-  sources: Map<string, KBSource[]>;   // entityId → sources
+  sources: Map<string, KBSource[]>; // entityId → sources
   conflicts: Map<string, KBConflict[]>; // entityId → conflicts
 }
 
@@ -35,17 +35,12 @@ export function getEntity(store: KBStore, id: string): KBEntity | undefined {
  * Return all entities whose city matches (case-insensitive).
  * Pass `type` to narrow by KBEntityType.
  */
-export function getEntitiesForCity(
-  store: KBStore,
-  city: string,
-  type?: string
-): KBEntity[] {
+export function getEntitiesForCity(store: KBStore, city: string, type?: string): KBEntity[] {
   const cityLower = city.toLowerCase();
   const results: KBEntity[] = [];
   for (const entity of store.entities.values()) {
     const matchCity =
-      entity.city?.toLowerCase() === cityLower ||
-      entity.country?.toLowerCase() === cityLower;
+      entity.city?.toLowerCase() === cityLower || entity.country?.toLowerCase() === cityLower;
     if (matchCity && (type === undefined || entity.type === type)) {
       results.push(entity);
     }
@@ -76,7 +71,7 @@ export function resolveConflict(
   store: KBStore,
   entityId: string,
   field: string,
-  resolvedValue: unknown
+  resolvedValue: unknown,
 ): KBStore {
   const entity = store.entities.get(entityId);
   if (!entity) return store;
@@ -88,10 +83,8 @@ export function resolveConflict(
   };
 
   const newConflicts = new Map(store.conflicts);
-  const entityConflicts = (newConflicts.get(entityId) ?? []).map(c =>
-    c.field === field
-      ? { ...c, resolvedBy: 'manual', resolvedAt: new Date().toISOString() }
-      : c
+  const entityConflicts = (newConflicts.get(entityId) ?? []).map((c) =>
+    c.field === field ? { ...c, resolvedBy: "manual", resolvedAt: new Date().toISOString() } : c,
   );
   newConflicts.set(entityId, entityConflicts);
 
@@ -106,13 +99,11 @@ export function resolveConflict(
  * Caller MUST inject verbatim — do not paraphrase.
  */
 export function kbEntityToPromptSnippet(entity: KBEntity): string {
-  const geo = entity.geo
-    ? ` (${entity.geo.lat.toFixed(4)},${entity.geo.lng.toFixed(4)})`
-    : '';
+  const geo = entity.geo ? ` (${entity.geo.lat.toFixed(4)},${entity.geo.lng.toFixed(4)})` : "";
   const payloadStr = Object.entries(entity.payload)
     .slice(0, 6)
     .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
-    .join('; ');
+    .join("; ");
   const confidence = `${(entity.confidence * 100).toFixed(0)}%`;
   return (
     `[KB:${entity.type.toUpperCase()}] ${entity.name}${geo}\n` +
@@ -126,9 +117,7 @@ export function kbEntityToPromptSnippet(entity: KBEntity): string {
  * Remove all stale entities (and their associated sources/conflicts) from the store.
  * Returns a new immutable store plus the count of pruned records.
  */
-export function pruneStaleEntities(
-  store: KBStore
-): { store: KBStore; pruned: number } {
+export function pruneStaleEntities(store: KBStore): { store: KBStore; pruned: number } {
   const newEntities = new Map(store.entities);
   const newSources = new Map(store.sources);
   const newConflicts = new Map(store.conflicts);

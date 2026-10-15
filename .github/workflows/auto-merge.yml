@@ -1,0 +1,38 @@
+name: Auto Merge develop → main
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [develop]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create or update PR and enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING=$(gh pr list --base main --head develop --json number --jq '.[0].number' 2>/dev/null || true)
+
+          if [ -z "$EXISTING" ] || [ "$EXISTING" = "null" ]; then
+            gh pr create \
+              --base main \
+              --head develop \
+              --title "release: merge develop → main" \
+              --body "Automated merge after CI passed on develop."
+            EXISTING=$(gh pr list --base main --head develop --json number --jq '.[0].number')
+          fi
+
+          gh pr merge "$EXISTING" --auto --merge

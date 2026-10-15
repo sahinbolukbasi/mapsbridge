@@ -1,4 +1,5 @@
 import { Trip, Coordinate, RouteStop } from "@mapsbridge/contracts";
+import { randomBytes } from "crypto";
 import type { TemporarySharePayload } from "../domain/types.js";
 
 export class TripService {
@@ -10,14 +11,14 @@ export class TripService {
     lat: number,
     lng: number,
     hours: number,
-    tripId?: string
+    tripId?: string,
   ): TemporarySharePayload {
     const validHours = Math.max(1, Math.min(hours, 72));
     const coordinate = new Coordinate(lat, lng);
     const expiresAt = Math.floor(Date.now() / 1000) + validHours * 3600;
-    
-    // Generate clean 6-character alphanumeric share code
-    const shareCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    // Generate cryptographically random 8-character hex share code
+    const shareCode = randomBytes(4).toString("hex").toUpperCase();
 
     return {
       shareCode,

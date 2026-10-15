@@ -10,7 +10,7 @@ export class ChatService {
   }
 
   public static getRecipients(participants: string[], senderId: string): string[] {
-    return participants.filter(p => p !== senderId);
+    return participants.filter((p) => p !== senderId);
   }
 
   public static truncateMessage(content: string): string {

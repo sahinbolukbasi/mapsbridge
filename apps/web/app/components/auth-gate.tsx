@@ -144,13 +144,14 @@ export function AuthActionModal({
 
   return (
     <div className="auth-modal-overlay" onClick={onClose}>
-      <div className="auth-modal-card" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className="auth-modal-close-btn"
-          onClick={onClose}
-          aria-label="Kapat"
-        >
+      <div
+        className="auth-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button type="button" className="auth-modal-close-btn" onClick={onClose} aria-label="Kapat">
           ✕
         </button>
 
@@ -217,7 +218,8 @@ export function PanelGuestBanner({ nextUrl = "/desk/" }: PanelGuestBannerProps) 
       <div className="panel-guest-banner-left">
         <span className="panel-guest-banner-icon">🌟</span>
         <div>
-          <strong>Harita Masası Önizleme:</strong> Kendi özel seyahat rotanızı çizmek, yeni duraklar eklemek ve planlarınızı kaydetmek için ücretsiz üye olun veya giriş yapın.
+          <strong>Harita Masası Önizleme:</strong> Kendi özel seyahat rotanızı çizmek, yeni duraklar
+          eklemek ve planlarınızı kaydetmek için ücretsiz üye olun veya giriş yapın.
         </div>
       </div>
       <div className="panel-guest-banner-actions">

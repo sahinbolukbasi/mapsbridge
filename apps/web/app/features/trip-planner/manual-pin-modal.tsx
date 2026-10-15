@@ -75,8 +75,24 @@ export function ManualPinModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "16px",
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "1.1rem",
+              fontWeight: 700,
+              margin: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <span>📍</span> Manuel Durak Ekle
           </h3>
           <button
@@ -93,9 +109,19 @@ export function ManualPinModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+        >
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "4px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "0.8rem",
+                color: "#94a3b8",
+                marginBottom: "4px",
+              }}
+            >
               Durak Adı / Mekan *
             </label>
             <input
@@ -118,7 +144,14 @@ export function ManualPinModal({
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div>
-              <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "4px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "0.8rem",
+                  color: "#94a3b8",
+                  marginBottom: "4px",
+                }}
+              >
                 Kategori
               </label>
               <select
@@ -143,7 +176,14 @@ export function ManualPinModal({
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "4px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "0.8rem",
+                  color: "#94a3b8",
+                  marginBottom: "4px",
+                }}
+              >
                 Hangi Gün?
               </label>
               <select
@@ -169,7 +209,14 @@ export function ManualPinModal({
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "4px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "0.8rem",
+                color: "#94a3b8",
+                marginBottom: "4px",
+              }}
+            >
               Tahmini Süre (Dakika)
             </label>
             <input
@@ -192,7 +239,14 @@ export function ManualPinModal({
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "0.8rem", color: "#94a3b8", marginBottom: "4px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "0.8rem",
+                color: "#94a3b8",
+                marginBottom: "4px",
+              }}
+            >
               Özel Not (İsteğe Bağlı)
             </label>
             <textarea
@@ -213,7 +267,9 @@ export function ManualPinModal({
             />
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "12px" }}>
+          <div
+            style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "12px" }}
+          >
             <button
               type="button"
               onClick={onClose}

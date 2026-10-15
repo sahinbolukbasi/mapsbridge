@@ -22,6 +22,7 @@
 MapsBridge is a full-stack travel platform where users create multi-day trip itineraries, get AI-powered travel recommendations via AWS Bedrock (Claude, Nova), explore community routes, and securely share their location through time-limited links.
 
 **Key capabilities:**
+
 - Multi-day trip planner with route optimization (OSRM)
 - AI travel assistant with multi-model orchestration (Bedrock AgentCore)
 - Real-time WebSocket messaging
@@ -170,16 +171,16 @@ terraform apply
 
 ### AWS Services Used
 
-| Service | Purpose |
-|---------|---------|
-| S3 + CloudFront | Static hosting with edge caching |
-| API Gateway v2 | HTTP + WebSocket API (103 routes) |
-| Lambda (Node.js 22) | Serverless compute (38 handlers) |
-| DynamoDB | Single-table design + AI memory |
-| Cognito | User authentication (email + Google) |
-| Bedrock | AI models (Claude, Nova) via AgentCore |
-| CloudWatch | Monitoring, alarms, dashboards |
-| EventBridge | Async event routing between services |
+| Service             | Purpose                                |
+| ------------------- | -------------------------------------- |
+| S3 + CloudFront     | Static hosting with edge caching       |
+| API Gateway v2      | HTTP + WebSocket API (103 routes)      |
+| Lambda (Node.js 22) | Serverless compute (38 handlers)       |
+| DynamoDB            | Single-table design + AI memory        |
+| Cognito             | User authentication (email + Google)   |
+| Bedrock             | AI models (Claude, Nova) via AgentCore |
+| CloudWatch          | Monitoring, alarms, dashboards         |
+| EventBridge         | Async event routing between services   |
 
 ---
 
@@ -191,13 +192,13 @@ This is an npm workspace monorepo. Shared packages under `packages/` are consume
 
 ### Key Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start web dev server |
-| `npm run build` | Production build |
-| `npm run typecheck` | TypeScript check |
-| `npm test` | Run all tests |
-| `npm run test:backend` | Lambda handler tests |
+| Command                      | Description                 |
+| ---------------------------- | --------------------------- |
+| `npm run dev`                | Start web dev server        |
+| `npm run build`              | Production build            |
+| `npm run typecheck`          | TypeScript check            |
+| `npm test`                   | Run all tests               |
+| `npm run test:backend`       | Lambda handler tests        |
 | `npm run monitor:synthetics` | Run synthetic canary checks |
 
 ### Code Standards

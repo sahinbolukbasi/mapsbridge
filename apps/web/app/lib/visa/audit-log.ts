@@ -23,10 +23,7 @@ function coarseWeek(date = new Date()): string {
 /** Build an anonymized session reference from a session token (one-way hash). */
 export function buildSessionRef(sessionToken?: string): string | undefined {
   if (!sessionToken) return undefined;
-  return createHash("sha256")
-    .update(`visa-audit-salt:${sessionToken}`)
-    .digest("hex")
-    .slice(0, 16);
+  return createHash("sha256").update(`visa-audit-salt:${sessionToken}`).digest("hex").slice(0, 16);
 }
 
 export function buildAuditEntry(
@@ -34,7 +31,7 @@ export function buildAuditEntry(
   opts: {
     surface: EntryRuleAuditEntry["surface"];
     sessionRef?: string;
-  }
+  },
 ): EntryRuleAuditEntry {
   return {
     auditId: randomUUID(),
@@ -58,7 +55,7 @@ export function logEntryRuleQuery(
   opts: {
     surface: EntryRuleAuditEntry["surface"];
     sessionRef?: string;
-  }
+  },
 ): EntryRuleAuditEntry {
   const entry = buildAuditEntry(rule, opts);
   try {
@@ -73,7 +70,7 @@ export function logEntryRuleQuery(
         surface: entry.surface,
         coarseWeek: coarseWeek(),
         // surfacedAt NOT logged to stdout — reduces risk of log-based fingerprinting
-      })
+      }),
     );
   } catch {
     // log write failure is non-fatal

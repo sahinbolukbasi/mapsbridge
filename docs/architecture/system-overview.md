@@ -131,26 +131,26 @@ Connection IDs are stored in DynamoDB, keyed by user. When a message is sent, th
 
 Each backend domain is deployed as an independent Lambda function with its own IAM execution role. This provides:
 
-| Property | Implementation |
-|----------|---------------|
-| **Separate deployable** | Each Lambda is built and deployed independently via dedicated build scripts |
-| **Minimal IAM scope** | Each function's role grants access only to the resources it needs (e.g., the `stripe` Lambda can access the SQS queue; the `chat` Lambda cannot) |
-| **Independent scaling** | Each function scales independently based on its own invocation patterns |
-| **Fault isolation** | A failure in the `ai` domain does not affect `auth` or `routes` |
-| **Shared utilities** | Cross-cutting concerns (logging, DynamoDB client, rate limiting) live in `infra/lambda/src/shared/` and `packages/` |
+| Property                | Implementation                                                                                                                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Separate deployable** | Each Lambda is built and deployed independently via dedicated build scripts                                                                      |
+| **Minimal IAM scope**   | Each function's role grants access only to the resources it needs (e.g., the `stripe` Lambda can access the SQS queue; the `chat` Lambda cannot) |
+| **Independent scaling** | Each function scales independently based on its own invocation patterns                                                                          |
+| **Fault isolation**     | A failure in the `ai` domain does not affect `auth` or `routes`                                                                                  |
+| **Shared utilities**    | Cross-cutting concerns (logging, DynamoDB client, rate limiting) live in `infra/lambda/src/shared/` and `packages/`                              |
 
 ### Domain Responsibilities
 
-| Domain | Lambda | Primary Resources |
-|--------|--------|-------------------|
-| **Auth** | `auth` | Cognito, DynamoDB (USER# keys) |
-| **Routes** | `routes` | DynamoDB (USER#/ROUTE#, SHARE# keys), S3 media |
-| **Chat** | `chat` | DynamoDB (THREAD#, CHAT# keys), WebSocket API |
-| **Marketplace** | `marketplace` | DynamoDB (GUIDE#, PURCHASE# keys), S3 guides |
-| **AI** | `ai` | Bedrock (Claude), AgentCore MCP, DynamoDB (AI# keys) |
-| **Stripe** | `stripe` | Stripe API, SQS webhook queue, DynamoDB (BILLING#, PAYMENT# keys) |
-| **Admin** | `admin` | DynamoDB (full read, SYSTEM# write), Aurora (reporting) |
-| **Operations** | `operations` | DynamoDB (SYSTEM# keys), CloudWatch |
+| Domain          | Lambda        | Primary Resources                                                 |
+| --------------- | ------------- | ----------------------------------------------------------------- |
+| **Auth**        | `auth`        | Cognito, DynamoDB (USER# keys)                                    |
+| **Routes**      | `routes`      | DynamoDB (USER#/ROUTE#, SHARE# keys), S3 media                    |
+| **Chat**        | `chat`        | DynamoDB (THREAD#, CHAT# keys), WebSocket API                     |
+| **Marketplace** | `marketplace` | DynamoDB (GUIDE#, PURCHASE# keys), S3 guides                      |
+| **AI**          | `ai`          | Bedrock (Claude), AgentCore MCP, DynamoDB (AI# keys)              |
+| **Stripe**      | `stripe`      | Stripe API, SQS webhook queue, DynamoDB (BILLING#, PAYMENT# keys) |
+| **Admin**       | `admin`       | DynamoDB (full read, SYSTEM# write), Aurora (reporting)           |
+| **Operations**  | `operations`  | DynamoDB (SYSTEM# keys), CloudWatch                               |
 
 The `services/` layer enforces hexagonal architecture. Each service module exposes ports (interfaces) that Lambda handlers and the frontend consume. Adapters for DynamoDB, Aurora, Redis, Stripe, and Bedrock are injected at runtime.
 
@@ -230,6 +230,7 @@ Client              API GW       stripe Lambda       Stripe API        SQS Queue
 ```
 
 Stripe webhooks are delivered to an SQS queue rather than directly to a Lambda URL. This provides:
+
 - **Durability**: messages survive Lambda cold starts and transient failures.
 - **Dead Letter Queue (DLQ)**: failed events are retained for investigation and replay.
 - **Backpressure**: SQS controls concurrency, preventing thundering herd on subscription renewal waves.
@@ -277,16 +278,16 @@ Offline participants do not have a stored connectionId. Undeliverable messages a
 
 All AWS resources are managed by Terraform, organized into eight modules:
 
-| Module | Resources |
-|--------|-----------|
-| `api` | API Gateway v2 (HTTP + WebSocket), Lambda functions, IAM roles, CloudWatch log groups |
-| `database` | DynamoDB table, GSIs, Aurora Serverless v2 cluster, ElastiCache Serverless |
-| `messaging` | WebSocket API routes, Lambda integrations, DynamoDB connection table |
-| `storage` | S3 buckets (media, guides, analytics), CloudFront distribution, CloudFront Functions |
-| `payments` | SQS queue + DLQ, Stripe webhook endpoint configuration, IAM policies |
-| `analytics` | Kinesis Firehose, S3 analytics bucket, Glue catalog |
-| `vpc` | VPC, subnets, NAT gateway, security groups, VPC endpoints |
-| `security` | WAF v2 WebACL, Cognito User Pool, rate limiting rules, OWASP managed rules |
+| Module      | Resources                                                                             |
+| ----------- | ------------------------------------------------------------------------------------- |
+| `api`       | API Gateway v2 (HTTP + WebSocket), Lambda functions, IAM roles, CloudWatch log groups |
+| `database`  | DynamoDB table, GSIs, Aurora Serverless v2 cluster, ElastiCache Serverless            |
+| `messaging` | WebSocket API routes, Lambda integrations, DynamoDB connection table                  |
+| `storage`   | S3 buckets (media, guides, analytics), CloudFront distribution, CloudFront Functions  |
+| `payments`  | SQS queue + DLQ, Stripe webhook endpoint configuration, IAM policies                  |
+| `analytics` | Kinesis Firehose, S3 analytics bucket, Glue catalog                                   |
+| `vpc`       | VPC, subnets, NAT gateway, security groups, VPC endpoints                             |
+| `security`  | WAF v2 WebACL, Cognito User Pool, rate limiting rules, OWASP managed rules            |
 
 ---
 
@@ -302,19 +303,19 @@ All AWS resources are managed by Terraform, organized into eight modules:
 
 ## Technology Summary
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js (static export), React, TypeScript |
-| CDN | CloudFront + CloudFront Functions |
-| API | API Gateway v2 (HTTP + WebSocket) |
-| Compute | AWS Lambda (Node.js) |
-| Primary Database | DynamoDB (single-table design) |
-| Relational Database | Aurora Serverless v2 (PostgreSQL 17 + PostGIS) |
-| Cache | ElastiCache Serverless (Redis) |
-| AI | AWS Bedrock (Claude models), AgentCore MCP gateway |
-| Auth | Cognito User Pool (email, Google, Apple) |
-| Payments | Stripe + SQS webhook queue |
-| Storage | S3 (media, guides, analytics) |
-| Analytics | Kinesis Firehose, Parquet on S3 |
-| IaC | Terraform (8 modules) |
-| Security | WAF v2, IAM, KMS, VPC |
+| Layer               | Technology                                         |
+| ------------------- | -------------------------------------------------- |
+| Frontend            | Next.js (static export), React, TypeScript         |
+| CDN                 | CloudFront + CloudFront Functions                  |
+| API                 | API Gateway v2 (HTTP + WebSocket)                  |
+| Compute             | AWS Lambda (Node.js)                               |
+| Primary Database    | DynamoDB (single-table design)                     |
+| Relational Database | Aurora Serverless v2 (PostgreSQL 17 + PostGIS)     |
+| Cache               | ElastiCache Serverless (Redis)                     |
+| AI                  | AWS Bedrock (Claude models), AgentCore MCP gateway |
+| Auth                | Cognito User Pool (email, Google, Apple)           |
+| Payments            | Stripe + SQS webhook queue                         |
+| Storage             | S3 (media, guides, analytics)                      |
+| Analytics           | Kinesis Firehose, Parquet on S3                    |
+| IaC                 | Terraform (8 modules)                              |
+| Security            | WAF v2, IAM, KMS, VPC                              |

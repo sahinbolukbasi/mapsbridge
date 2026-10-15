@@ -92,7 +92,13 @@ function createInitialTrips(): Trip[] {
       isPublic: false,
       groups: [],
       days: [
-        { dayIndex: 1, label: "1. Gün", color: DAY_COLORS[0], subtitle: "Keşif Başlangıcı", pins: [] },
+        {
+          dayIndex: 1,
+          label: "1. Gün",
+          color: DAY_COLORS[0],
+          subtitle: "Keşif Başlangıcı",
+          pins: [],
+        },
       ],
       pins: [],
     },
@@ -112,7 +118,7 @@ export function useTravelPlanner() {
       // Clean up legacy keys if they exist
       localStorage.removeItem("mapsbridge.travelPlanner");
       localStorage.removeItem("mapsbridge.generalPins");
-      
+
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
@@ -120,7 +126,10 @@ export function useTravelPlanner() {
           return parsed.map((t) => ({
             ...t,
             title: t.title === "İstanbul Keşfi" ? "Yeni Seyahat Planım" : t.title,
-            destination: (t.destination === "İstanbul, Türkiye" || t.destination === "Destinasyon Belirlenmedi") ? "" : (t.destination || ""),
+            destination:
+              t.destination === "İstanbul, Türkiye" || t.destination === "Destinasyon Belirlenmedi"
+                ? ""
+                : t.destination || "",
           }));
         }
       }
@@ -146,7 +155,9 @@ export function useTravelPlanner() {
   const [transportMode, setTransportMode] = useState<TransportMode>("walking");
   const [activeRoadGeometry, setActiveRoadGeometry] = useState<RouteGeometry | null>(null);
   const [isRoutingLoading, setIsRoutingLoading] = useState(false);
-  const [optimizationPreview, setOptimizationPreview] = useState<RouteOptimizationPreview | null>(null);
+  const [optimizationPreview, setOptimizationPreview] = useState<RouteOptimizationPreview | null>(
+    null,
+  );
   const [aiMessageToast, setAiMessageToast] = useState<string | null>(null);
 
   // Persist generalPins to localStorage
@@ -222,7 +233,7 @@ export function useTravelPlanner() {
           });
           if (res?.routeId) {
             setTrips((prev) =>
-              prev.map((t) => (t.id === activeTrip.id ? { ...t, id: res.routeId } : t))
+              prev.map((t) => (t.id === activeTrip.id ? { ...t, id: res.routeId } : t)),
             );
             setActiveTripId(res.routeId);
           }
@@ -362,7 +373,13 @@ export function useTravelPlanner() {
       isPublic: false,
       groups: [],
       days: [
-        { dayIndex: 1, label: "1. Gün", color: DAY_COLORS[0], subtitle: "Keşif Başlangıcı", pins: [] },
+        {
+          dayIndex: 1,
+          label: "1. Gün",
+          color: DAY_COLORS[0],
+          subtitle: "Keşif Başlangıcı",
+          pins: [],
+        },
       ],
       pins: [],
     };
@@ -379,55 +396,68 @@ export function useTravelPlanner() {
     setOptimizationPreview(null);
   }, []);
 
-  const deleteTrip = useCallback((tripId: string) => {
-    if (!tripId.startsWith("trip-")) {
-      routesApi.delete(tripId).catch((err) => console.warn("Delete trip server error:", err));
-    }
-    setTrips((prev) => {
-      const remaining = prev.filter((t) => t.id !== tripId);
-      if (remaining.length === 0) {
-        const freshId = "trip-" + Date.now();
-        setActiveTripId(freshId);
-        setActiveDayIndex(1);
-        setSelectedPinId(null);
-        return [
-          {
-            id: freshId,
-            title: "Yeni Seyahat Planım",
-            transportMode: "walking",
-            isPublic: false,
-            groups: [],
-            days: [{ dayIndex: 1, label: "1. Gün", color: DAY_COLORS[0], subtitle: "Keşif Başlangıcı", pins: [] }],
-            pins: [],
-          },
-        ];
+  const deleteTrip = useCallback(
+    (tripId: string) => {
+      if (!tripId.startsWith("trip-")) {
+        routesApi.delete(tripId).catch((err) => console.warn("Delete trip server error:", err));
       }
-      if (activeTripId === tripId) {
-        setActiveTripId(remaining[0].id);
-        setActiveDayIndex(1);
-        setSelectedPinId(null);
-      }
-      return remaining;
-    });
-  }, [activeTripId]);
+      setTrips((prev) => {
+        const remaining = prev.filter((t) => t.id !== tripId);
+        if (remaining.length === 0) {
+          const freshId = "trip-" + Date.now();
+          setActiveTripId(freshId);
+          setActiveDayIndex(1);
+          setSelectedPinId(null);
+          return [
+            {
+              id: freshId,
+              title: "Yeni Seyahat Planım",
+              transportMode: "walking",
+              isPublic: false,
+              groups: [],
+              days: [
+                {
+                  dayIndex: 1,
+                  label: "1. Gün",
+                  color: DAY_COLORS[0],
+                  subtitle: "Keşif Başlangıcı",
+                  pins: [],
+                },
+              ],
+              pins: [],
+            },
+          ];
+        }
+        if (activeTripId === tripId) {
+          setActiveTripId(remaining[0].id);
+          setActiveDayIndex(1);
+          setSelectedPinId(null);
+        }
+        return remaining;
+      });
+    },
+    [activeTripId],
+  );
 
   const updateTripInfo = useCallback(
-    (updates: Partial<Pick<Trip, "title" | "destination" | "startDate" | "endDate" | "theme" | "isPublic">>) => {
-      setTrips((prev) =>
-        prev.map((t) => (t.id === activeTripId ? { ...t, ...updates } : t))
-      );
+    (
+      updates: Partial<
+        Pick<Trip, "title" | "destination" | "startDate" | "endDate" | "theme" | "isPublic">
+      >,
+    ) => {
+      setTrips((prev) => prev.map((t) => (t.id === activeTripId ? { ...t, ...updates } : t)));
     },
-    [activeTripId]
+    [activeTripId],
   );
 
   const changeTransportMode = useCallback(
     (mode: TransportMode) => {
       setTransportMode(mode);
       setTrips((prev) =>
-        prev.map((t) => (t.id === activeTripId ? { ...t, transportMode: mode } : t))
+        prev.map((t) => (t.id === activeTripId ? { ...t, transportMode: mode } : t)),
       );
     },
-    [activeTripId]
+    [activeTripId],
   );
 
   // ── Day Actions ──────────────────────────────────────────────
@@ -447,9 +477,7 @@ export function useTravelPlanner() {
     };
 
     setTrips((prev) =>
-      prev.map((t) =>
-        t.id === activeTripId ? { ...t, days: [...t.days, newDay] } : t
-      )
+      prev.map((t) => (t.id === activeTripId ? { ...t, days: [...t.days, newDay] } : t)),
     );
     setActiveDayIndex(nextIndex);
   }, [activeTrip, activeTripId]);
@@ -464,17 +492,17 @@ export function useTravelPlanner() {
           const updatedDays = t.days.filter((d) => d.dayIndex !== dayIndex);
           // Move deleted day's pins to Day 1
           const updatedPins = t.pins.map((p) =>
-            p.dayIndex === dayIndex ? { ...p, dayIndex: 1 } : p
+            p.dayIndex === dayIndex ? { ...p, dayIndex: 1 } : p,
           );
           return { ...t, days: updatedDays, pins: updatedPins };
-        })
+        }),
       );
 
       if (activeDayIndex === dayIndex) {
         setActiveDayIndex(1);
       }
     },
-    [activeTrip, activeTripId, activeDayIndex]
+    [activeTrip, activeTripId, activeDayIndex],
   );
 
   // ── Pin Actions ──────────────────────────────────────────────
@@ -503,12 +531,12 @@ export function useTravelPlanner() {
           };
 
           return { ...t, pins: [...t.pins, completePin] };
-        })
+        }),
       );
 
       setSelectedPinId(pinId);
     },
-    [activeTripId, activeDayIndex]
+    [activeTripId, activeDayIndex],
   );
 
   const updatePin = useCallback(
@@ -520,10 +548,10 @@ export function useTravelPlanner() {
             ...t,
             pins: t.pins.map((p) => (p.id === pinId ? { ...p, ...updates } : p)),
           };
-        })
+        }),
       );
     },
-    [activeTripId]
+    [activeTripId],
   );
 
   const deletePin = useCallback(
@@ -544,14 +572,14 @@ export function useTravelPlanner() {
           });
 
           return { ...t, pins: reordered };
-        })
+        }),
       );
 
       if (selectedPinId === pinId) {
         setSelectedPinId(null);
       }
     },
-    [activeTripId, selectedPinId]
+    [activeTripId, selectedPinId],
   );
 
   const movePinOrder = useCallback(
@@ -586,10 +614,10 @@ export function useTravelPlanner() {
               return p;
             }),
           };
-        })
+        }),
       );
     },
-    [activeTrip, activeTripId]
+    [activeTrip, activeTripId],
   );
 
   const movePinToDay = useCallback(
@@ -603,13 +631,13 @@ export function useTravelPlanner() {
           return {
             ...t,
             pins: t.pins.map((p) =>
-              p.id === pinId ? { ...p, dayIndex: targetDayIndex, order: nextOrder } : p
+              p.id === pinId ? { ...p, dayIndex: targetDayIndex, order: nextOrder } : p,
             ),
           };
-        })
+        }),
       );
     },
-    [activeTripId]
+    [activeTripId],
   );
 
   const togglePinVisited = useCallback(
@@ -621,10 +649,10 @@ export function useTravelPlanner() {
             ...t,
             pins: t.pins.map((p) => (p.id === pinId ? { ...p, visited: !p.visited } : p)),
           };
-        })
+        }),
       );
     },
-    [activeTripId]
+    [activeTripId],
   );
 
   const markVisitedAndAdvance = useCallback(
@@ -636,7 +664,7 @@ export function useTravelPlanner() {
             ...t,
             pins: t.pins.map((p) => (p.id === pinId ? { ...p, visited: true } : p)),
           };
-        })
+        }),
       );
 
       // Auto advance to next unvisited pin
@@ -645,7 +673,7 @@ export function useTravelPlanner() {
         setSelectedPinId(remainingUnvisited[0].id);
       }
     },
-    [activeTripId, pinsWithTime]
+    [activeTripId, pinsWithTime],
   );
 
   // ── Two-Pin Distance Comparison ──────────────────────────────
@@ -667,7 +695,13 @@ export function useTravelPlanner() {
       if (!pA || !pB) return;
 
       try {
-        const geom = await routingService.getRoute([[pA.lat, pA.lng], [pB.lat, pB.lng]], transportMode);
+        const geom = await routingService.getRoute(
+          [
+            [pA.lat, pA.lng],
+            [pB.lat, pB.lng],
+          ],
+          transportMode,
+        );
         setTwoPinComparison({
           pinA: pA,
           pinB: pB,
@@ -686,7 +720,7 @@ export function useTravelPlanner() {
         });
       }
     },
-    [activeTrip, transportMode]
+    [activeTrip, transportMode],
   );
 
   const clearPinComparison = useCallback(() => {
@@ -710,10 +744,10 @@ export function useTravelPlanner() {
             ...t,
             pins: t.pins.map((p) => (p.id === pinId ? { ...p, isLocked: !p.isLocked } : p)),
           };
-        })
+        }),
       );
     },
-    [activeTripId]
+    [activeTripId],
   );
 
   // ── Route Optimization ───────────────────────────────────────
@@ -733,7 +767,7 @@ export function useTravelPlanner() {
           return p;
         });
         return { ...t, pins: updated };
-      })
+      }),
     );
 
     setOptimizationPreview(null);
@@ -768,17 +802,17 @@ export function useTravelPlanner() {
 
       setTrips((prev) =>
         prev.map((t) =>
-          t.id === activeTripId
-            ? { ...t, days: updatedTripDays, pins: flattenedPins }
-            : t
-        )
+          t.id === activeTripId ? { ...t, days: updatedTripDays, pins: flattenedPins } : t,
+        ),
       );
 
       setActiveDayIndex(1);
-      setAiMessageToast(`✨ Seyahat coğrafi konumlara göre ${newDays.length} dengeli güne ayrıldı!`);
+      setAiMessageToast(
+        `✨ Seyahat coğrafi konumlara göre ${newDays.length} dengeli güne ayrıldı!`,
+      );
       setTimeout(() => setAiMessageToast(null), 4500);
     },
-    [activeTrip, activeTripId]
+    [activeTrip, activeTripId],
   );
 
   // ── AI Command Runner (In-Panel AI) ──────────────────────────
@@ -792,7 +826,9 @@ export function useTravelPlanner() {
         const opt = optimizeRouteOrder(pinsWithTime, transportMode);
         if (opt) {
           setOptimizationPreview(opt);
-          setAiMessageToast(`💡 Rota analizi: ${opt.savedDistanceKm} km (${opt.savedDurationMinutes} dk) tasarruf bulundu!`);
+          setAiMessageToast(
+            `💡 Rota analizi: ${opt.savedDistanceKm} km (${opt.savedDurationMinutes} dk) tasarruf bulundu!`,
+          );
         } else {
           setAiMessageToast("✨ Mevcut rota sıralaması zaten oldukça verimli.");
         }
@@ -854,12 +890,14 @@ export function useTravelPlanner() {
           setAiMessageToast("📸 Gün batımı için fotoğraf seyir noktası eklendi.");
         }
       } else {
-        setAiMessageToast("🤖 'Öğleden sonraya kahve ekle', 'Rotayı optimize et' veya 'Günlere böl' komutlarını deneyebilirsiniz.");
+        setAiMessageToast(
+          "🤖 'Öğleden sonraya kahve ekle', 'Rotayı optimize et' veya 'Günlere böl' komutlarını deneyebilirsiniz.",
+        );
       }
 
       setTimeout(() => setAiMessageToast(null), 4500);
     },
-    [activeTrip, pinsWithTime, transportMode, autoSplitCurrentTrip, addPin, activeDayIndex]
+    [activeTrip, pinsWithTime, transportMode, autoSplitCurrentTrip, addPin, activeDayIndex],
   );
 
   // ── General Pin Pool Actions ─────────────────────────────────
@@ -879,7 +917,7 @@ export function useTravelPlanner() {
       setSelectedPinId(pinId);
       return pinId;
     },
-    [generalPins.length]
+    [generalPins.length],
   );
 
   const addPinDirectlyToTrip = useCallback(
@@ -898,21 +936,25 @@ export function useTravelPlanner() {
             durationMinutes: pinData.durationMinutes || 60,
           };
           return { ...t, pins: [...t.pins, newPin] };
-        })
+        }),
       );
       setActiveTripId(targetTripId);
       setActiveDayIndex(targetDayIndex);
       setSelectedPinId(pinId);
       return pinId;
     },
-    []
+    [],
   );
 
   const importTrip = useCallback((trip: Trip) => {
     setTrips((prev) => {
-      const exists = prev.some((t) => t.id === trip.id || t.title.toLowerCase() === trip.title.toLowerCase());
+      const exists = prev.some(
+        (t) => t.id === trip.id || t.title.toLowerCase() === trip.title.toLowerCase(),
+      );
       if (exists) {
-        return prev.map((t) => (t.id === trip.id || t.title.toLowerCase() === trip.title.toLowerCase() ? trip : t));
+        return prev.map((t) =>
+          t.id === trip.id || t.title.toLowerCase() === trip.title.toLowerCase() ? trip : t,
+        );
       }
       return [trip, ...prev];
     });
@@ -924,7 +966,9 @@ export function useTravelPlanner() {
   const [customGroups, setCustomGroups] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem("mapsbridge.customGroups") || localStorage.getItem("adreskopru.customTabs");
+        const raw =
+          localStorage.getItem("mapsbridge.customGroups") ||
+          localStorage.getItem("adreskopru.customTabs");
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -966,7 +1010,7 @@ export function useTravelPlanner() {
               order: countInDay + 1,
             };
             return { ...t, pins: [...t.pins, moved] };
-          })
+          }),
         );
         setActiveTripId(targetTripId);
         setActiveDayIndex(targetDayIndex);
@@ -1002,7 +1046,7 @@ export function useTravelPlanner() {
       setActiveDayIndex(targetDayIndex);
       setSelectedPinId(pinId);
     },
-    [generalPins]
+    [generalPins],
   );
 
   const movePinToGeneral = useCallback(
@@ -1016,7 +1060,7 @@ export function useTravelPlanner() {
             return { ...t, pins: t.pins.filter((p) => p.id !== pinId) };
           }
           return t;
-        })
+        }),
       );
       if (extracted) {
         const foundPin: Pin = extracted;
@@ -1031,7 +1075,7 @@ export function useTravelPlanner() {
         setSelectedPinId(pinId);
       }
     },
-    [generalPins.length]
+    [generalPins.length],
   );
 
   const allPins = useMemo(() => {
@@ -1050,39 +1094,38 @@ export function useTravelPlanner() {
   }, [allPins, selectedPinId]);
 
   const updatePinAnywhere = useCallback((pinId: string, updates: Partial<Pin>) => {
-    setGeneralPins((prev) =>
-      prev.map((p) => (p.id === pinId ? { ...p, ...updates } : p))
-    );
+    setGeneralPins((prev) => prev.map((p) => (p.id === pinId ? { ...p, ...updates } : p)));
     setTrips((prev) =>
       prev.map((t) => ({
         ...t,
         pins: t.pins.map((p) => (p.id === pinId ? { ...p, ...updates } : p)),
-      }))
+      })),
     );
   }, []);
 
-  const deletePinAnywhere = useCallback((pinId: string) => {
-    setGeneralPins((prev) => prev.filter((p) => p.id !== pinId));
-    setTrips((prev) =>
-      prev.map((t) => ({
-        ...t,
-        pins: t.pins.filter((p) => p.id !== pinId),
-      }))
-    );
-    if (selectedPinId === pinId) {
-      setSelectedPinId(null);
-    }
-  }, [selectedPinId]);
+  const deletePinAnywhere = useCallback(
+    (pinId: string) => {
+      setGeneralPins((prev) => prev.filter((p) => p.id !== pinId));
+      setTrips((prev) =>
+        prev.map((t) => ({
+          ...t,
+          pins: t.pins.filter((p) => p.id !== pinId),
+        })),
+      );
+      if (selectedPinId === pinId) {
+        setSelectedPinId(null);
+      }
+    },
+    [selectedPinId],
+  );
 
   const togglePinVisitedAnywhere = useCallback((pinId: string) => {
-    setGeneralPins((prev) =>
-      prev.map((p) => (p.id === pinId ? { ...p, visited: !p.visited } : p))
-    );
+    setGeneralPins((prev) => prev.map((p) => (p.id === pinId ? { ...p, visited: !p.visited } : p)));
     setTrips((prev) =>
       prev.map((t) => ({
         ...t,
         pins: t.pins.map((p) => (p.id === pinId ? { ...p, visited: !p.visited } : p)),
-      }))
+      })),
     );
   }, []);
 

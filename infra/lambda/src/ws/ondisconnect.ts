@@ -21,7 +21,7 @@ export const handler = async (event: any) => {
     new DeleteItemCommand({
       TableName: tableName,
       Key: marshall({ connectionId }),
-    })
+    }),
   );
 
   return { statusCode: 200, body: "Disconnected" };

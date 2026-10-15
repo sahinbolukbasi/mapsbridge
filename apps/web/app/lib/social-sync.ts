@@ -126,7 +126,9 @@ export const webSocialSync = {
       if (modified) {
         userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(updatedPosts));
         if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: updatedPosts }));
+          window.dispatchEvent(
+            new CustomEvent("mapsbridge:posts_updated", { detail: updatedPosts }),
+          );
         }
       }
     } catch {}
@@ -156,7 +158,9 @@ export const webSocialSync = {
 
     try {
       const profile = this.getProfile();
-      const res = await fetch(`/api/community/posts?username=${encodeURIComponent(profile.username)}`);
+      const res = await fetch(
+        `/api/community/posts?username=${encodeURIComponent(profile.username)}`,
+      );
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.posts)) {
@@ -192,7 +196,9 @@ export const webSocialSync = {
       id: `post-${Date.now()}`,
       authorDisplayName: profile.fullName,
       authorUsername: profile.username,
-      authorAvatar: profile.avatarUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuCQdOMegHKRlkwubsFEMHDlXU8mVoZKUlXw7A0Quos1oSmZCSZEg30fAB4aMRnCI9q8UEUkdzonH9DUfJ3dTRjIPGpEsvmdB7q2Hrn_b98XcVBeB1CNFBlpaQM33IpQEZ9Bj2TQCR_rWOyCdeIsnX_hZXhb7z1nrWj53EXbHiVov_Hx5WO-_ikQRe6lEE_jnkFjZlEF1WXEue5BMqYbUXVJqoHBc--0mvHvT89fTCsu0mllchVOc6h24A",
+      authorAvatar:
+        profile.avatarUrl ||
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCQdOMegHKRlkwubsFEMHDlXU8mVoZKUlXw7A0Quos1oSmZCSZEg30fAB4aMRnCI9q8UEUkdzonH9DUfJ3dTRjIPGpEsvmdB7q2Hrn_b98XcVBeB1CNFBlpaQM33IpQEZ9Bj2TQCR_rWOyCdeIsnX_hZXhb7z1nrWj53EXbHiVov_Hx5WO-_ikQRe6lEE_jnkFjZlEF1WXEue5BMqYbUXVJqoHBc--0mvHvT89fTCsu0mllchVOc6h24A",
       authorFollowersCount: profile.followersCount,
       createdAt: "Şimdi",
       category: cleanCategory,
@@ -215,7 +221,7 @@ export const webSocialSync = {
 
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: nextPosts }));
-      
+
       // Async backend sync
       fetch("/api/community/posts", {
         method: "POST",
@@ -246,7 +252,7 @@ export const webSocialSync = {
       hashtags?: string[];
       image?: string | null;
       linkedRoute?: CommunityPost["linkedRoute"];
-    }
+    },
   ): CommunityPost | null {
     const posts = this.getPosts();
     const profile = this.getProfile();
@@ -269,8 +275,12 @@ export const webSocialSync = {
           ...post,
           ...(updates.content !== undefined ? { content: sanitizeInput(updates.content) } : {}),
           ...(updates.category !== undefined ? { category: sanitizeInput(updates.category) } : {}),
-          ...(updates.locationTag !== undefined ? { locationTag: sanitizeInput(updates.locationTag) } : {}),
-          ...(updates.hashtags !== undefined ? { hashtags: updates.hashtags.map((h) => sanitizeInput(h)) } : {}),
+          ...(updates.locationTag !== undefined
+            ? { locationTag: sanitizeInput(updates.locationTag) }
+            : {}),
+          ...(updates.hashtags !== undefined
+            ? { hashtags: updates.hashtags.map((h) => sanitizeInput(h)) }
+            : {}),
           ...(updates.image !== undefined ? { image: updates.image || undefined } : {}),
           ...(updates.linkedRoute !== undefined ? { linkedRoute: updates.linkedRoute } : {}),
         };
@@ -365,7 +375,9 @@ export const webSocialSync = {
         updated = {
           ...post,
           savedByMe: nextSaved,
-          savesCount: nextSaved ? (post.savesCount || 0) + 1 : Math.max(0, (post.savesCount || 0) - 1),
+          savesCount: nextSaved
+            ? (post.savesCount || 0) + 1
+            : Math.max(0, (post.savesCount || 0) - 1),
         };
         return updated;
       }
@@ -398,7 +410,9 @@ export const webSocialSync = {
         updated = {
           ...post,
           repostedByMe: nextReposted,
-          repostCount: nextReposted ? (post.repostCount || 0) + 1 : Math.max(0, (post.repostCount || 0) - 1),
+          repostCount: nextReposted
+            ? (post.repostCount || 0) + 1
+            : Math.max(0, (post.repostCount || 0) - 1),
         };
         return updated;
       }

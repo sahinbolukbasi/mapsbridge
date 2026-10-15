@@ -1,14 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getSecureItem, setSecureItem, deleteSecureItem } from './secure-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getSecureItem, setSecureItem, deleteSecureItem } from "./secure-storage";
 
 type StorageMap = Record<string, string>;
 const memoryFallback: StorageMap = {};
 
 /** Keys that contain sensitive data and should use secure storage. */
-const SECURE_KEYS = new Set([
-  'mb_token',
-  'mb_refresh_token',
-]);
+const SECURE_KEYS = new Set(["mb_token", "mb_refresh_token"]);
 
 export const storage = {
   async getItem(key: string): Promise<string | null> {
@@ -21,7 +18,7 @@ export const storage = {
           return secVal;
         }
       } catch (e) {
-        console.warn('[storage] secure getItem failed for key:', key, e);
+        console.warn("[storage] secure getItem failed for key:", key, e);
       }
     }
 
@@ -32,12 +29,12 @@ export const storage = {
         return val;
       }
     } catch (e) {
-      console.warn('[storage] AsyncStorage.getItem failed for key:', key, e);
+      console.warn("[storage] AsyncStorage.getItem failed for key:", key, e);
     }
 
     // Web fallback if window.localStorage is directly available
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
+      if (typeof window !== "undefined" && window.localStorage) {
         const localVal = window.localStorage.getItem(key);
         if (localVal !== null && localVal !== undefined) {
           memoryFallback[key] = localVal;
@@ -58,18 +55,18 @@ export const storage = {
         await setSecureItem(key, value);
         return;
       } catch (e) {
-        console.warn('[storage] secure setItem failed, falling back:', key, e);
+        console.warn("[storage] secure setItem failed, falling back:", key, e);
       }
     }
 
     try {
       await AsyncStorage.setItem(key, value);
     } catch (e) {
-      console.warn('[storage] AsyncStorage.setItem failed for key:', key, e);
+      console.warn("[storage] AsyncStorage.setItem failed for key:", key, e);
     }
 
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
+      if (typeof window !== "undefined" && window.localStorage) {
         window.localStorage.setItem(key, value);
       }
     } catch {}
@@ -83,18 +80,18 @@ export const storage = {
       try {
         await deleteSecureItem(key);
       } catch (e) {
-        console.warn('[storage] secure removeItem failed:', key, e);
+        console.warn("[storage] secure removeItem failed:", key, e);
       }
     }
 
     try {
       await AsyncStorage.removeItem(key);
     } catch (e) {
-      console.warn('[storage] AsyncStorage.removeItem failed for key:', key, e);
+      console.warn("[storage] AsyncStorage.removeItem failed for key:", key, e);
     }
 
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
+      if (typeof window !== "undefined" && window.localStorage) {
         window.localStorage.removeItem(key);
       }
     } catch {}
@@ -105,11 +102,11 @@ export const storage = {
     try {
       await AsyncStorage.clear();
     } catch (e) {
-      console.warn('[storage] AsyncStorage.clear failed:', e);
+      console.warn("[storage] AsyncStorage.clear failed:", e);
     }
 
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
+      if (typeof window !== "undefined" && window.localStorage) {
         window.localStorage.clear();
       }
     } catch {}
@@ -128,7 +125,7 @@ export const storage = {
       }
       return result;
     } catch (e) {
-      console.warn('[storage] AsyncStorage.multiGet failed:', e);
+      console.warn("[storage] AsyncStorage.multiGet failed:", e);
     }
 
     // Fill missing keys from memoryFallback or individual gets

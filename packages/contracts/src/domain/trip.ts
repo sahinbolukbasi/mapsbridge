@@ -206,7 +206,7 @@ export class Trip {
           timeSlot: s.timeSlot,
           category: s.category,
           address: s.address,
-        })
+        }),
     );
     return new Trip({
       id,

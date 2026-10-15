@@ -1,5 +1,5 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
 
 export interface SeasonalIntelligence {
   seasonNotes: string;
@@ -35,10 +35,12 @@ JSON formatı:
 export async function runCityIntelAgent(
   destination: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 4500
-): Promise<{ output: CityIntelAgentOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 4500,
+): Promise<{ output: CityIntelAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const dates = profile?.dates ? `${profile.dates.start || ''} - ${profile.dates.end || ''}` : 'Mevcut seyahat dönemi';
+  const dates = profile?.dates
+    ? `${profile.dates.start || ""} - ${profile.dates.end || ""}`
+    : "Mevcut seyahat dönemi";
 
   const userQuery = `Hedef Şehir: "${destination}". Seyahat Tarihleri: ${dates}. Kültürel görgü kuralları, giyim önerisi ve şehir istihbaratı hazırla.`;
 
@@ -55,10 +57,10 @@ export async function runCityIntelAgent(
         destination: bedrockRes.data.destination || destination,
         intelligence: bedrockRes.data.intelligence,
       },
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
-  throw new Error('Şehir istihbaratı oluşturulamadı.');
+  throw new Error("Şehir istihbaratı oluşturulamadı.");
 }

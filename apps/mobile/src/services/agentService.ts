@@ -1,8 +1,8 @@
-import { storage } from './storage';
+import { storage } from "./storage";
 
 export interface TravelAgent {
   id: string;
-  type: 'visa' | 'flight' | 'emergency' | 'events' | 'accommodation' | 'restaurant';
+  type: "visa" | "flight" | "emergency" | "events" | "accommodation" | "restaurant";
   title: string;
   description: string;
   icon: string;
@@ -16,7 +16,7 @@ export interface AgentReminder {
   title: string;
   dueDate?: string;
   completed: boolean;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
 }
 
 export interface VisaInfo {
@@ -25,7 +25,7 @@ export interface VisaInfo {
   applicationDate?: string;
   appointmentDate?: string;
   expiryDate?: string;
-  status: 'not_started' | 'applied' | 'approved' | 'rejected';
+  status: "not_started" | "applied" | "approved" | "rejected";
   documents: string[];
   notes: string;
 }
@@ -44,14 +44,14 @@ export interface FlightInfo {
     time: string;
   };
   bookingReference: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
+  status: "confirmed" | "pending" | "cancelled";
 }
 
 export interface EmergencyContact {
   id: string;
   name: string;
   phone: string;
-  type: 'police' | 'ambulance' | 'hospital' | 'embassy' | 'general';
+  type: "police" | "ambulance" | "hospital" | "embassy" | "general";
   address?: string;
   notes?: string;
 }
@@ -59,7 +59,7 @@ export interface EmergencyContact {
 export interface EventRecommendation {
   id: string;
   title: string;
-  type: 'cinema' | 'theater' | 'concert' | 'exhibition' | 'festival' | 'sports';
+  type: "cinema" | "theater" | "concert" | "exhibition" | "festival" | "sports";
   date: string;
   venue: string;
   price?: string;
@@ -70,7 +70,7 @@ export interface EventRecommendation {
 
 export interface LanguagePhrase {
   id: string;
-  category: 'emergency' | 'transport' | 'accommodation' | 'restaurant' | 'shopping' | 'general';
+  category: "emergency" | "transport" | "accommodation" | "restaurant" | "shopping" | "general";
   phrase: string;
   translation: string;
   pronunciation?: string;
@@ -79,61 +79,61 @@ export interface LanguagePhrase {
 // Default agents configuration
 const DEFAULT_AGENTS: TravelAgent[] = [
   {
-    id: 'agent-visa',
-    type: 'visa',
-    title: '🛂 Vize Takipçisi',
-    description: 'Vize başvurularınızı ve randevularınızı takip edin',
-    icon: '🛂',
+    id: "agent-visa",
+    type: "visa",
+    title: "🛂 Vize Takipçisi",
+    description: "Vize başvurularınızı ve randevularınızı takip edin",
+    icon: "🛂",
     isActive: true,
     settings: {},
     reminders: [],
   },
   {
-    id: 'agent-flight',
-    type: 'flight',
-    title: '✈️ Uçuş Takipçisi',
-    description: 'Uçuş bilgilerinizi ve check-in hatırlatmalarını yönetin',
-    icon: '✈️',
+    id: "agent-flight",
+    type: "flight",
+    title: "✈️ Uçuş Takipçisi",
+    description: "Uçuş bilgilerinizi ve check-in hatırlatmalarını yönetin",
+    icon: "✈️",
     isActive: true,
     settings: {},
     reminders: [],
   },
   {
-    id: 'agent-emergency',
-    type: 'emergency',
-    title: '🚨 Acil Durum Asistanı',
-    description: 'Acil durum kontakları ve hastane bilgileri',
-    icon: '🚨',
+    id: "agent-emergency",
+    type: "emergency",
+    title: "🚨 Acil Durum Asistanı",
+    description: "Acil durum kontakları ve hastane bilgileri",
+    icon: "🚨",
     isActive: true,
     settings: {},
     reminders: [],
   },
   {
-    id: 'agent-events',
-    type: 'events',
-    title: '🎭 Etkinlik Keşifçisi',
-    description: 'Bulunduğunuz şehirdeki sinema, tiyatro, konser ve etkinlikler',
-    icon: '🎭',
+    id: "agent-events",
+    type: "events",
+    title: "🎭 Etkinlik Keşifçisi",
+    description: "Bulunduğunuz şehirdeki sinema, tiyatro, konser ve etkinlikler",
+    icon: "🎭",
     isActive: true,
     settings: {},
     reminders: [],
   },
   {
-    id: 'agent-accommodation',
-    type: 'accommodation',
-    title: '🏨 Konaklama Asistanı',
-    description: 'Otel rezervasyonlarınızı yönetin ve öneriler alın',
-    icon: '🏨',
+    id: "agent-accommodation",
+    type: "accommodation",
+    title: "🏨 Konaklama Asistanı",
+    description: "Otel rezervasyonlarınızı yönetin ve öneriler alın",
+    icon: "🏨",
     isActive: true,
     settings: {},
     reminders: [],
   },
   {
-    id: 'agent-restaurant',
-    type: 'restaurant',
-    title: '🍽️ Restoran Rehberi',
-    description: 'Yerel lezzetler ve restoran rezervasyonları',
-    icon: '🍽️',
+    id: "agent-restaurant",
+    type: "restaurant",
+    title: "🍽️ Restoran Rehberi",
+    description: "Yerel lezzetler ve restoran rezervasyonları",
+    icon: "🍽️",
     isActive: true,
     settings: {},
     reminders: [],
@@ -142,18 +142,90 @@ const DEFAULT_AGENTS: TravelAgent[] = [
 
 // Common English phrases for travelers
 const COMMON_PHRASES: LanguagePhrase[] = [
-  { id: 'phrase-1', category: 'emergency', phrase: 'I need a doctor', translation: 'Doktora ihtiyacım var', pronunciation: 'ay niid a doktır' },
-  { id: 'phrase-2', category: 'emergency', phrase: 'Call the police', translation: 'Polisi arayın', pronunciation: 'kol dı poliis' },
-  { id: 'phrase-3', category: 'emergency', phrase: 'Where is the hospital?', translation: 'Hastane nerede?', pronunciation: 'wer iz dı hospitıl' },
-  { id: 'phrase-4', category: 'emergency', phrase: 'I need help', translation: 'Yardıma ihtiyacım var', pronunciation: 'ay niid help' },
-  { id: 'phrase-5', category: 'emergency', phrase: 'It is an emergency', translation: 'Bu acil bir durum', pronunciation: 'it iz anıimörcinsi' },
-  { id: 'phrase-6', category: 'transport', phrase: 'Where is the subway station?', translation: 'Metro istasyonu nerede?', pronunciation: 'wer iz dı sabvey steyşın' },
-  { id: 'phrase-7', category: 'transport', phrase: 'How much is the ticket?', translation: 'Bilet ne kadar?', pronunciation: 'hau maç iz dı tikit' },
-  { id: 'phrase-8', category: 'transport', phrase: 'I want to go to...', translation: 'Gitmek istiyorum...', pronunciation: 'ay want tı goo tı...' },
-  { id: 'phrase-9', category: 'accommodation', phrase: 'I have a reservation', translation: 'Rezervasyonum var', pronunciation: 'ay hav a rezöveyşın' },
-  { id: 'phrase-10', category: 'restaurant', phrase: 'A table for two, please', translation: 'İki kişilik masa lütfen', pronunciation: 'a teybıl foo tüu pliiz' },
-  { id: 'phrase-11', category: 'general', phrase: 'I do not speak English well', translation: 'İngilizceyi iyi konuşamıyorum', pronunciation: 'ay duu not spiiik ingliiş wel' },
-  { id: 'phrase-12', category: 'general', phrase: 'Can you speak slower?', translation: 'Daha yavaş konuşabilir misiniz?', pronunciation: 'kan yuu spiiik slowır' },
+  {
+    id: "phrase-1",
+    category: "emergency",
+    phrase: "I need a doctor",
+    translation: "Doktora ihtiyacım var",
+    pronunciation: "ay niid a doktır",
+  },
+  {
+    id: "phrase-2",
+    category: "emergency",
+    phrase: "Call the police",
+    translation: "Polisi arayın",
+    pronunciation: "kol dı poliis",
+  },
+  {
+    id: "phrase-3",
+    category: "emergency",
+    phrase: "Where is the hospital?",
+    translation: "Hastane nerede?",
+    pronunciation: "wer iz dı hospitıl",
+  },
+  {
+    id: "phrase-4",
+    category: "emergency",
+    phrase: "I need help",
+    translation: "Yardıma ihtiyacım var",
+    pronunciation: "ay niid help",
+  },
+  {
+    id: "phrase-5",
+    category: "emergency",
+    phrase: "It is an emergency",
+    translation: "Bu acil bir durum",
+    pronunciation: "it iz anıimörcinsi",
+  },
+  {
+    id: "phrase-6",
+    category: "transport",
+    phrase: "Where is the subway station?",
+    translation: "Metro istasyonu nerede?",
+    pronunciation: "wer iz dı sabvey steyşın",
+  },
+  {
+    id: "phrase-7",
+    category: "transport",
+    phrase: "How much is the ticket?",
+    translation: "Bilet ne kadar?",
+    pronunciation: "hau maç iz dı tikit",
+  },
+  {
+    id: "phrase-8",
+    category: "transport",
+    phrase: "I want to go to...",
+    translation: "Gitmek istiyorum...",
+    pronunciation: "ay want tı goo tı...",
+  },
+  {
+    id: "phrase-9",
+    category: "accommodation",
+    phrase: "I have a reservation",
+    translation: "Rezervasyonum var",
+    pronunciation: "ay hav a rezöveyşın",
+  },
+  {
+    id: "phrase-10",
+    category: "restaurant",
+    phrase: "A table for two, please",
+    translation: "İki kişilik masa lütfen",
+    pronunciation: "a teybıl foo tüu pliiz",
+  },
+  {
+    id: "phrase-11",
+    category: "general",
+    phrase: "I do not speak English well",
+    translation: "İngilizceyi iyi konuşamıyorum",
+    pronunciation: "ay duu not spiiik ingliiş wel",
+  },
+  {
+    id: "phrase-12",
+    category: "general",
+    phrase: "Can you speak slower?",
+    translation: "Daha yavaş konuşabilir misiniz?",
+    pronunciation: "kan yuu spiiik slowır",
+  },
 ];
 
 class AgentService {
@@ -169,38 +241,41 @@ class AgentService {
 
   private async loadFromStorage() {
     try {
-      const agentsData = await storage.getItem('mb_agents');
+      const agentsData = await storage.getItem("mb_agents");
       if (agentsData) {
         this.agents = JSON.parse(agentsData);
       }
 
-      const visaData = await storage.getItem('mb_visa_info');
+      const visaData = await storage.getItem("mb_visa_info");
       if (visaData) {
         this.visaInfo = new Map(Object.entries(JSON.parse(visaData)));
       }
 
-      const flightsData = await storage.getItem('mb_flights');
+      const flightsData = await storage.getItem("mb_flights");
       if (flightsData) {
         this.flights = new Map(Object.entries(JSON.parse(flightsData)));
       }
 
-      const emergencyData = await storage.getItem('mb_emergency_contacts');
+      const emergencyData = await storage.getItem("mb_emergency_contacts");
       if (emergencyData) {
         this.emergencyContacts = new Map(Object.entries(JSON.parse(emergencyData)));
       }
     } catch (e) {
-      console.warn('Failed to load agent data:', e);
+      console.warn("Failed to load agent data:", e);
     }
   }
 
   private async saveToStorage() {
     try {
-      await storage.setItem('mb_agents', JSON.stringify(this.agents));
-      await storage.setItem('mb_visa_info', JSON.stringify(Object.fromEntries(this.visaInfo)));
-      await storage.setItem('mb_flights', JSON.stringify(Object.fromEntries(this.flights)));
-      await storage.setItem('mb_emergency_contacts', JSON.stringify(Object.fromEntries(this.emergencyContacts)));
+      await storage.setItem("mb_agents", JSON.stringify(this.agents));
+      await storage.setItem("mb_visa_info", JSON.stringify(Object.fromEntries(this.visaInfo)));
+      await storage.setItem("mb_flights", JSON.stringify(Object.fromEntries(this.flights)));
+      await storage.setItem(
+        "mb_emergency_contacts",
+        JSON.stringify(Object.fromEntries(this.emergencyContacts)),
+      );
     } catch (e) {
-      console.warn('Failed to save agent data:', e);
+      console.warn("Failed to save agent data:", e);
     }
   }
 
@@ -210,11 +285,11 @@ class AgentService {
   }
 
   public getActiveAgents(): TravelAgent[] {
-    return this.agents.filter(a => a.isActive);
+    return this.agents.filter((a) => a.isActive);
   }
 
   public toggleAgent(agentId: string): boolean {
-    const agent = this.agents.find(a => a.id === agentId);
+    const agent = this.agents.find((a) => a.id === agentId);
     if (agent) {
       agent.isActive = !agent.isActive;
       this.saveToStorage();
@@ -266,14 +341,17 @@ class AgentService {
 
   private getDefaultEmergencyContacts(): EmergencyContact[] {
     return [
-      { id: 'emergency-1', name: 'Police', phone: '155', type: 'police' },
-      { id: 'emergency-2', name: 'Ambulance', phone: '112', type: 'ambulance' },
-      { id: 'emergency-3', name: 'Fire Department', phone: '110', type: 'general' },
+      { id: "emergency-1", name: "Police", phone: "155", type: "police" },
+      { id: "emergency-2", name: "Ambulance", phone: "112", type: "ambulance" },
+      { id: "emergency-3", name: "Fire Department", phone: "110", type: "general" },
     ];
   }
 
   // Event Recommendations (mock data - would integrate with APIs)
-  public async fetchEventRecommendations(city: string, date: string): Promise<EventRecommendation[]> {
+  public async fetchEventRecommendations(
+    city: string,
+    date: string,
+  ): Promise<EventRecommendation[]> {
     // This would integrate with event APIs like:
     // - Skyscanner for flights
     // - Google Events API
@@ -282,28 +360,28 @@ class AgentService {
     return [
       {
         id: `event-${Date.now()}-1`,
-        title: 'Roma Antik Tiyatrosu',
-        type: 'theater',
+        title: "Roma Antik Tiyatrosu",
+        type: "theater",
         date,
-        venue: 'Teatro di Marcello',
-        price: '25€',
-        description: 'Antik Roma tiyatrosunda canlı performans',
+        venue: "Teatro di Marcello",
+        price: "25€",
+        description: "Antik Roma tiyatrosunda canlı performans",
       },
       {
         id: `event-${Date.now()}-2`,
-        title: 'Vatikan Müzesi Özel Turu',
-        type: 'exhibition',
+        title: "Vatikan Müzesi Özel Turu",
+        type: "exhibition",
         date,
-        venue: 'Vatikan Müzeleri',
-        price: '35€',
-        description: 'Sistina Şapeli özel erişim turu',
+        venue: "Vatikan Müzeleri",
+        price: "35€",
+        description: "Sistina Şapeli özel erişim turu",
       },
     ];
   }
 
   // Language Phrases
-  public getPhrasesByCategory(category: LanguagePhrase['category']): LanguagePhrase[] {
-    return COMMON_PHRASES.filter(p => p.category === category);
+  public getPhrasesByCategory(category: LanguagePhrase["category"]): LanguagePhrase[] {
+    return COMMON_PHRASES.filter((p) => p.category === category);
   }
 
   public getAllPhrases(): LanguagePhrase[] {
@@ -311,8 +389,8 @@ class AgentService {
   }
 
   // Reminders
-  public addReminder(agentId: string, reminder: Omit<AgentReminder, 'id'>): AgentReminder {
-    const agent = this.agents.find(a => a.id === agentId);
+  public addReminder(agentId: string, reminder: Omit<AgentReminder, "id">): AgentReminder {
+    const agent = this.agents.find((a) => a.id === agentId);
     if (agent) {
       const newReminder: AgentReminder = {
         ...reminder,
@@ -322,13 +400,13 @@ class AgentService {
       this.saveToStorage();
       return newReminder;
     }
-    throw new Error('Agent not found');
+    throw new Error("Agent not found");
   }
 
   public completeReminder(agentId: string, reminderId: string) {
-    const agent = this.agents.find(a => a.id === agentId);
+    const agent = this.agents.find((a) => a.id === agentId);
     if (agent) {
-      const reminder = agent.reminders.find(r => r.id === reminderId);
+      const reminder = agent.reminders.find((r) => r.id === reminderId);
       if (reminder) {
         reminder.completed = true;
         this.saveToStorage();

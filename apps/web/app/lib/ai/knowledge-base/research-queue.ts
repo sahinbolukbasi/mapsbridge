@@ -5,10 +5,10 @@
  * (e.g. DynamoDB or Redis) if durability is needed across Lambda invocations.
  */
 
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
-export type ResearchJobStatus = 'pending' | 'running' | 'done' | 'failed' | 'cancelled';
-export type ResearchJobPriority = 'high' | 'normal' | 'low';
+export type ResearchJobStatus = "pending" | "running" | "done" | "failed" | "cancelled";
+export type ResearchJobPriority = "high" | "normal" | "low";
 
 export interface ResearchJob {
   id: string;
@@ -43,12 +43,12 @@ export function enqueueJob(
   queue: ResearchQueue,
   entityRef: string,
   priority: ResearchJobPriority,
-  threadId?: string
+  threadId?: string,
 ): { queue: ResearchQueue; job: ResearchJob } {
   const job: ResearchJob = {
     id: randomUUID(),
     entityRef,
-    status: 'pending',
+    status: "pending",
     priority,
     requestedByThreadId: threadId,
     createdAt: new Date().toISOString(),
@@ -61,10 +61,11 @@ export function enqueueJob(
  * Pick the highest-priority pending job (FIFO within same priority) and
  * transition it to 'running'. Returns null if no pending jobs exist.
  */
-export function dequeueNext(
-  queue: ResearchQueue
-): { queue: ResearchQueue; job: ResearchJob | null } {
-  const pending = queue.jobs.filter(j => j.status === 'pending');
+export function dequeueNext(queue: ResearchQueue): {
+  queue: ResearchQueue;
+  job: ResearchJob | null;
+} {
+  const pending = queue.jobs.filter((j) => j.status === "pending");
   if (pending.length === 0) return { queue, job: null };
 
   const sorted = [...pending].sort((a, b) => {
@@ -76,51 +77,45 @@ export function dequeueNext(
   const next = sorted[0];
   const running: ResearchJob = {
     ...next,
-    status: 'running',
+    status: "running",
     startedAt: new Date().toISOString(),
   };
   return {
-    queue: { jobs: queue.jobs.map(j => (j.id === next.id ? running : j)) },
+    queue: { jobs: queue.jobs.map((j) => (j.id === next.id ? running : j)) },
     job: running,
   };
 }
 
 export function markRunning(queue: ResearchQueue, jobId: string): ResearchQueue {
   return {
-    jobs: queue.jobs.map(j =>
+    jobs: queue.jobs.map((j) =>
       j.id === jobId
-        ? { ...j, status: 'running' as const, startedAt: j.startedAt ?? new Date().toISOString() }
-        : j
+        ? { ...j, status: "running" as const, startedAt: j.startedAt ?? new Date().toISOString() }
+        : j,
     ),
   };
 }
 
 export function markDone(queue: ResearchQueue, jobId: string): ResearchQueue {
   return {
-    jobs: queue.jobs.map(j =>
-      j.id === jobId
-        ? { ...j, status: 'done' as const, completedAt: new Date().toISOString() }
-        : j
+    jobs: queue.jobs.map((j) =>
+      j.id === jobId ? { ...j, status: "done" as const, completedAt: new Date().toISOString() } : j,
     ),
   };
 }
 
-export function markFailed(
-  queue: ResearchQueue,
-  jobId: string,
-  error: string
-): ResearchQueue {
+export function markFailed(queue: ResearchQueue, jobId: string, error: string): ResearchQueue {
   return {
-    jobs: queue.jobs.map(j =>
+    jobs: queue.jobs.map((j) =>
       j.id === jobId
         ? {
             ...j,
-            status: 'failed' as const,
+            status: "failed" as const,
             completedAt: new Date().toISOString(),
             error,
             retryCount: j.retryCount + 1,
           }
-        : j
+        : j,
     ),
   };
 }
@@ -129,20 +124,12 @@ export function markFailed(
  * Returns false when the same entityRef already has a pending or running job,
  * preventing duplicate research requests.
  */
-export function shouldEnqueue(
-  queue: ResearchQueue,
-  entityRef: string
-): boolean {
+export function shouldEnqueue(queue: ResearchQueue, entityRef: string): boolean {
   return !queue.jobs.some(
-    j =>
-      j.entityRef === entityRef &&
-      (j.status === 'pending' || j.status === 'running')
+    (j) => j.entityRef === entityRef && (j.status === "pending" || j.status === "running"),
   );
 }
 
-export function getJobsForThread(
-  queue: ResearchQueue,
-  threadId: string
-): ResearchJob[] {
-  return queue.jobs.filter(j => j.requestedByThreadId === threadId);
+export function getJobsForThread(queue: ResearchQueue, threadId: string): ResearchJob[] {
+  return queue.jobs.filter((j) => j.requestedByThreadId === threadId);
 }

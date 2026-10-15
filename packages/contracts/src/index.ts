@@ -13,14 +13,15 @@ export const BILLING_COST = {
   WELCOME_CREDITS: 5 as const,
 } as const;
 
-export type AICreditAction = "ai_deep_trip" | "ai_stay_dining" | "ai_chat" | "route_optimize" | "ai_greeting";
+export type AICreditAction =
+  "ai_deep_trip" | "ai_stay_dining" | "ai_chat" | "route_optimize" | "ai_greeting";
 
 export const ACTION_CREDIT_COSTS: Record<AICreditAction, number> = {
-  ai_greeting: 0,       // Selamlama, çok kısa sorular (Tier1 - Nova Micro)
-  ai_chat: 0.5,         // Standart seyahat sohbeti (Tier2 - Nova Lite)
-  ai_stay_dining: 2,    // Otel, konaklama, gastronomi analizi (Tier3 - Haiku)
-  ai_deep_trip: 5,      // Çok günlü detaylı plan / yeniden planlama (Tier4 - Sonnet)
-  route_optimize: 1,    // OSRM rota optimizasyonu
+  ai_greeting: 0, // Selamlama, çok kısa sorular (Tier1 - Nova Micro)
+  ai_chat: 0.5, // Standart seyahat sohbeti (Tier2 - Nova Lite)
+  ai_stay_dining: 2, // Otel, konaklama, gastronomi analizi (Tier3 - Haiku)
+  ai_deep_trip: 5, // Çok günlü detaylı plan / yeniden planlama (Tier4 - Sonnet)
+  route_optimize: 1, // OSRM rota optimizasyonu
 } as const;
 
 export function getActionCreditCost(action: AICreditAction): number {
@@ -41,10 +42,48 @@ export interface SubscriptionPlanDef {
 }
 
 export const SUBSCRIPTION_PLAN_DEFS: SubscriptionPlanDef[] = [
-  { id: "free", name: "Gezgin (Free)", tagline: "Harita masasını keşfetmek ve temel seyahat planları için", monthlyPriceTry: 0, yearlyPriceTry: 0, monthlyCredits: 5, color: "#64748b", maxRoutes: 3 },
-  { id: "explorer", name: "Kaşif (Explorer)", tagline: "Sık seyahat edenler ve gezi rotası oluşturanlar için ideal", monthlyPriceTry: 199, yearlyPriceTry: 159, monthlyCredits: 100, color: "#2563eb", maxRoutes: Infinity },
-  { id: "pro", name: "Pro Kaşif (Pro Traveler)", tagline: "Sınırsız AI rota planlama gücü", badge: "EN POPÜLER", monthlyPriceTry: 499, yearlyPriceTry: 399, monthlyCredits: 500, highlight: true, color: "#10b981", maxRoutes: Infinity },
-  { id: "agency", name: "Tur Lideri & Grup Paketi", tagline: "Rehberler ve seyahat toplulukları için kurumsal güç", monthlyPriceTry: 1499, yearlyPriceTry: 1199, monthlyCredits: 2500, color: "#8b5cf6", maxRoutes: Infinity },
+  {
+    id: "free",
+    name: "Gezgin (Free)",
+    tagline: "Harita masasını keşfetmek ve temel seyahat planları için",
+    monthlyPriceTry: 0,
+    yearlyPriceTry: 0,
+    monthlyCredits: 5,
+    color: "#64748b",
+    maxRoutes: 3,
+  },
+  {
+    id: "explorer",
+    name: "Kaşif (Explorer)",
+    tagline: "Sık seyahat edenler ve gezi rotası oluşturanlar için ideal",
+    monthlyPriceTry: 199,
+    yearlyPriceTry: 159,
+    monthlyCredits: 100,
+    color: "#2563eb",
+    maxRoutes: Infinity,
+  },
+  {
+    id: "pro",
+    name: "Pro Kaşif (Pro Traveler)",
+    tagline: "Sınırsız AI rota planlama gücü",
+    badge: "EN POPÜLER",
+    monthlyPriceTry: 499,
+    yearlyPriceTry: 399,
+    monthlyCredits: 500,
+    highlight: true,
+    color: "#10b981",
+    maxRoutes: Infinity,
+  },
+  {
+    id: "agency",
+    name: "Tur Lideri & Grup Paketi",
+    tagline: "Rehberler ve seyahat toplulukları için kurumsal güç",
+    monthlyPriceTry: 1499,
+    yearlyPriceTry: 1199,
+    monthlyCredits: 2500,
+    color: "#8b5cf6",
+    maxRoutes: Infinity,
+  },
 ];
 
 export interface CreditPackageDef {
@@ -58,10 +97,39 @@ export interface CreditPackageDef {
 }
 
 export const CREDIT_PACKAGE_DEFS: CreditPackageDef[] = [
-  { id: "pack-starter", title: "Hızlı Başlangıç", credits: 50, priceTry: 89, unitPriceTry: 1.78, description: "5-10 kapsamlı AI seyahat planı ve harita analizi için." },
-  { id: "pack-popular", title: "Popüler Gezgin", credits: 300, priceTry: 299, unitPriceTry: 0.99, popular: true, description: "Düzenli gezginler için en avantajlı ve çok tercih edilen paket." },
-  { id: "pack-master", title: "Usta Kaşif", credits: 1000, priceTry: 749, unitPriceTry: 0.74, description: "Geniş rota kütüphanesi oluşturan kaşifler ve grup liderleri için." },
-  { id: "pack-pro", title: "Stratejik Kaşif", credits: 3000, priceTry: 1899, unitPriceTry: 0.63, description: "Acentalar, içerik üreticileri ve profesyonel tur rehberleri için dev paket." },
+  {
+    id: "pack-starter",
+    title: "Hızlı Başlangıç",
+    credits: 50,
+    priceTry: 89,
+    unitPriceTry: 1.78,
+    description: "5-10 kapsamlı AI seyahat planı ve harita analizi için.",
+  },
+  {
+    id: "pack-popular",
+    title: "Popüler Gezgin",
+    credits: 300,
+    priceTry: 299,
+    unitPriceTry: 0.99,
+    popular: true,
+    description: "Düzenli gezginler için en avantajlı ve çok tercih edilen paket.",
+  },
+  {
+    id: "pack-master",
+    title: "Usta Kaşif",
+    credits: 1000,
+    priceTry: 749,
+    unitPriceTry: 0.74,
+    description: "Geniş rota kütüphanesi oluşturan kaşifler ve grup liderleri için.",
+  },
+  {
+    id: "pack-pro",
+    title: "Stratejik Kaşif",
+    credits: 3000,
+    priceTry: 1899,
+    unitPriceTry: 0.63,
+    description: "Acentalar, içerik üreticileri ve profesyonel tur rehberleri için dev paket.",
+  },
 ];
 
 export const SUBSCRIPTION_TIERS = {
@@ -212,13 +280,15 @@ export interface StructuredTransitCardDto {
 }
 
 export interface AIAssistantActionDto {
-  type: "ADD_PINS_TO_DAY" | "SWITCH_TO_RAIN_ALTERNATIVE" | "OPTIMIZE_ROUTE_ORDER" | "REPLAN_SCHEDULE";
+  type:
+    "ADD_PINS_TO_DAY" | "SWITCH_TO_RAIN_ALTERNATIVE" | "OPTIMIZE_ROUTE_ORDER" | "REPLAN_SCHEDULE";
   payload: Record<string, any>;
 }
 
 export interface StructuredAIResponseDto {
   message: string;
-  intent: "chat" | "clarify" | "create_trip" | "modify_day" | "find_places" | "find_transit" | "replan";
+  intent:
+    "chat" | "clarify" | "create_trip" | "modify_day" | "find_places" | "find_transit" | "replan";
   places?: StructuredPlaceCardDto[];
   restaurants?: StructuredRestaurantCardDto[];
   events?: StructuredEventCardDto[];
@@ -386,4 +456,3 @@ export * from "./domain/wallet";
 export * from "./domain/trip";
 export * from "./domain/subscription";
 export * from "./domain/community";
-

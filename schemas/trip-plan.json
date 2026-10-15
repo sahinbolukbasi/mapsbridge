@@ -35,7 +35,16 @@
                 },
                 "type": {
                   "type": "string",
-                  "enum": ["cafe", "restaurant", "museum", "park", "hotel", "activity", "transit", "viewpoint"]
+                  "enum": [
+                    "cafe",
+                    "restaurant",
+                    "museum",
+                    "park",
+                    "hotel",
+                    "activity",
+                    "transit",
+                    "viewpoint"
+                  ]
                 },
                 "place_id": {
                   "type": "string"

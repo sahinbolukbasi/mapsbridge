@@ -8,11 +8,11 @@ import { DynamoDBClient, UpdateItemCommand, GetItemCommand } from "@aws-sdk/clie
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 export interface RateLimitConfig {
-  windowMs: number;        // Time window in milliseconds
-  maxRequests: number;     // Max requests per window
-  keyPrefix: string;         // DynamoDB key prefix (USER# or IP#)
-  key: string;               // User ID or IP address
-  endpoint?: string;         // Optional: per-endpoint limiting
+  windowMs: number; // Time window in milliseconds
+  maxRequests: number; // Max requests per window
+  keyPrefix: string; // DynamoDB key prefix (USER# or IP#)
+  key: string; // User ID or IP address
+  endpoint?: string; // Optional: per-endpoint limiting
 }
 
 export interface RateLimitResult {
@@ -40,9 +40,9 @@ export class RateLimiter {
   async checkLimit(config: RateLimitConfig): Promise<RateLimitResult> {
     const now = Date.now();
     const windowStart = now - config.windowMs;
-    
+
     // Create composite key for endpoint-specific limiting
-    const sk = config.endpoint 
+    const sk = config.endpoint
       ? `RATELIMIT#${config.endpoint}#${Math.floor(now / config.windowMs)}`
       : `RATELIMIT#${Math.floor(now / config.windowMs)}`;
 
@@ -50,25 +50,27 @@ export class RateLimiter {
 
     try {
       // Atomically increment counter and get current value
-      const result = await this.ddb.send(new UpdateItemCommand({
-        TableName: this.tableName,
-        Key: marshall({ PK: pk, SK: sk }),
-        UpdateExpression: `
+      const result = await this.ddb.send(
+        new UpdateItemCommand({
+          TableName: this.tableName,
+          Key: marshall({ PK: pk, SK: sk }),
+          UpdateExpression: `
           ADD #count :increment
           SET #ttl = :ttl, #window = :window
         `,
-        ExpressionAttributeNames: {
-          "#count": "requestCount",
-          "#ttl": "ttl",
-          "#window": "windowStart",
-        },
-        ExpressionAttributeValues: marshall({
-          ":increment": 1,
-          ":ttl": Math.floor((now + config.windowMs + 60000) / 1000), // TTL with 1min buffer
-          ":window": windowStart,
+          ExpressionAttributeNames: {
+            "#count": "requestCount",
+            "#ttl": "ttl",
+            "#window": "windowStart",
+          },
+          ExpressionAttributeValues: marshall({
+            ":increment": 1,
+            ":ttl": Math.floor((now + config.windowMs + 60000) / 1000), // TTL with 1min buffer
+            ":window": windowStart,
+          }),
+          ReturnValues: "ALL_NEW",
         }),
-        ReturnValues: "ALL_NEW",
-      }));
+      );
 
       const data = unmarshall(result.Attributes || {});
       const currentCount = data.requestCount || 0;
@@ -78,14 +80,16 @@ export class RateLimiter {
       const isNewWindow = windowStartTime < now - config.windowMs;
       if (isNewWindow) {
         // Delete old window and start fresh
-        await this.ddb.send(new UpdateItemCommand({
-          TableName: this.tableName,
-          Key: marshall({ PK: pk, SK: sk }),
-          UpdateExpression: "SET #count = :one, #window = :now",
-          ExpressionAttributeNames: { "#count": "requestCount", "#window": "windowStart" },
-          ExpressionAttributeValues: marshall({ ":one": 1, ":now": now }),
-        }));
-        
+        await this.ddb.send(
+          new UpdateItemCommand({
+            TableName: this.tableName,
+            Key: marshall({ PK: pk, SK: sk }),
+            UpdateExpression: "SET #count = :one, #window = :now",
+            ExpressionAttributeNames: { "#count": "requestCount", "#window": "windowStart" },
+            ExpressionAttributeValues: marshall({ ":one": 1, ":now": now }),
+          }),
+        );
+
         return {
           allowed: true,
           remaining: config.maxRequests - 1,
@@ -120,18 +124,20 @@ export class RateLimiter {
    */
   async getLimitStatus(config: RateLimitConfig): Promise<RateLimitResult> {
     const now = Date.now();
-    const sk = config.endpoint 
+    const sk = config.endpoint
       ? `RATELIMIT#${config.endpoint}#${Math.floor(now / config.windowMs)}`
       : `RATELIMIT#${Math.floor(now / config.windowMs)}`;
-    
+
     const pk = `${config.keyPrefix}${config.key}`;
 
     try {
-      const result = await this.ddb.send(new GetItemCommand({
-        TableName: this.tableName,
-        Key: marshall({ PK: pk, SK: sk }),
-        ProjectionExpression: "requestCount, windowStart",
-      }));
+      const result = await this.ddb.send(
+        new GetItemCommand({
+          TableName: this.tableName,
+          Key: marshall({ PK: pk, SK: sk }),
+          ProjectionExpression: "requestCount, windowStart",
+        }),
+      );
 
       if (!result.Item) {
         return {
@@ -144,7 +150,7 @@ export class RateLimiter {
 
       const data = unmarshall(result.Item);
       const currentCount = data.requestCount || 0;
-      const windowStartTime = data.windowStart || (now - config.windowMs);
+      const windowStartTime = data.windowStart || now - config.windowMs;
       const isNewWindow = windowStartTime < now - config.windowMs;
 
       if (isNewWindow) {
@@ -190,9 +196,8 @@ export function createRateLimitMiddleware(options: {
   const rateLimiter = new RateLimiter();
 
   return async (event: any, context: any, next: Function) => {
-    const key = options.keyPrefix === "USER" 
-      ? event.verifiedUser?.sub 
-      : event.requestContext?.http?.sourceIp;
+    const key =
+      options.keyPrefix === "USER" ? event.verifiedUser?.sub : event.requestContext?.http?.sourceIp;
 
     if (!key) {
       // Skip rate limiting if no key available

@@ -6,7 +6,11 @@
   border-top: 1px solid rgba(226, 232, 240, 0.85);
   padding: 3.5rem 1.5rem 2rem;
   color: var(--mb-on-surface, #131b2e);
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Plus Jakarta Sans",
+    system-ui,
+    -apple-system,
+    sans-serif;
   margin-top: auto;
 }
 
@@ -121,9 +125,18 @@
 }
 
 @keyframes footerDotPulse {
-  0% { opacity: 0.4; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.1); }
-  100% { opacity: 0.4; transform: scale(0.9); }
+  0% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
 }
 
 /* Links Columns */
@@ -134,7 +147,7 @@
 }
 
 .global-footer-group-title {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -361,7 +374,7 @@
   .global-footer-app-buttons {
     flex-direction: column;
   }
-  
+
   .global-footer-app-btn {
     width: 100%;
     justify-content: center;

@@ -10,13 +10,13 @@ MapsBridge enforces safety through eight independent layers. Each layer operates
 
 Strips personally identifiable information before any text leaves the application boundary.
 
-| Pattern | Example |
-|---|---|
-| Credit card numbers | `4111 1111 1111 1111` |
-| Email addresses | `user@example.com` |
-| TC Kimlik numbers | 11-digit Turkish national ID |
-| Social Security Numbers | `123-45-6789` |
-| Phone numbers | `+90 555 123 4567` |
+| Pattern                 | Example                      |
+| ----------------------- | ---------------------------- |
+| Credit card numbers     | `4111 1111 1111 1111`        |
+| Email addresses         | `user@example.com`           |
+| TC Kimlik numbers       | 11-digit Turkish national ID |
+| Social Security Numbers | `123-45-6789`                |
+| Phone numbers           | `+90 555 123 4567`           |
 
 **Applied before:**
 
@@ -114,11 +114,11 @@ Bedrock guardrails provide an additional content filtering boundary managed by A
 
 Hard limits enforced per model invocation and per request, preventing runaway costs from recursive agent calls or unexpectedly large outputs.
 
-| Limit | Value |
-|---|---|
-| Max output tokens per call | 4,200 |
-| Max input bytes per call | 64 KB |
-| Max model calls per request | 6 |
+| Limit                         | Value  |
+| ----------------------------- | ------ |
+| Max output tokens per call    | 4,200  |
+| Max input bytes per call      | 64 KB  |
+| Max model calls per request   | 6      |
 | Max output tokens per request | 14,000 |
 
 Metering is request-scoped via `AsyncLocalStorage`. Each incoming request gets an isolated meter that tracks cumulative token usage across all model calls within that request. When any limit is hit, further model calls are blocked regardless of what the model or agent logic requests.
@@ -131,12 +131,12 @@ Metering is request-scoped via `AsyncLocalStorage`. Each incoming request gets a
 
 Financial guardrails that prevent abuse and enforce subscription economics:
 
-| Control | Detail |
-|---|---|
-| Daily user limit | 20 requests per user per day |
-| System-wide daily cap | Configurable ceiling across all users |
-| Credit reservation | Credits are reserved before generation begins; if insufficient, the request is rejected |
-| Wallet freeze | Admin can freeze a user wallet, immediately halting all AI access |
+| Control               | Detail                                                                                  |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| Daily user limit      | 20 requests per user per day                                                            |
+| System-wide daily cap | Configurable ceiling across all users                                                   |
+| Credit reservation    | Credits are reserved before generation begins; if insufficient, the request is rejected |
+| Wallet freeze         | Admin can freeze a user wallet, immediately halting all AI access                       |
 
 Credit reservation happens synchronously before the first model call. If generation fails or is interrupted, reserved credits are released.
 

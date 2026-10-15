@@ -1,4 +1,4 @@
-import { AgentMetricEvent, AgentRole } from './finops';
+import { AgentMetricEvent, AgentRole } from "./finops";
 
 export interface PlanCostBreakdown {
   totalCostUsd: number;
@@ -32,12 +32,12 @@ export interface FinOpsAggregateSummary {
     p95Ms: number;
     avgMs: number;
   };
-  topCostDriverAgent: AgentRole | 'none';
+  topCostDriverAgent: AgentRole | "none";
 }
 
 export function calculateCompletedPlanCost(
   events: AgentMetricEvent[],
-  targetBudgetUsd = 0.15
+  targetBudgetUsd = 0.15,
 ): PlanCostBreakdown {
   let totalCostUsd = 0;
   let inputTokens = 0;
@@ -94,7 +94,7 @@ export function calculateCompletedPlanCost(
 
 export function aggregateFinOpsMetrics(
   events: AgentMetricEvent[],
-  estimatedCompletedPlans = 0
+  estimatedCompletedPlans = 0,
 ): FinOpsAggregateSummary {
   if (events.length === 0) {
     return {
@@ -105,7 +105,7 @@ export function aggregateFinOpsMetrics(
       totalCostUsd: 0,
       averageCostPerPlanUsd: null,
       latency: { p50Ms: 0, p95Ms: 0, avgMs: 0 },
-      topCostDriverAgent: 'none',
+      topCostDriverAgent: "none",
     };
   }
 
@@ -131,7 +131,7 @@ export function aggregateFinOpsMetrics(
   const p95Index = Math.min(durations.length - 1, Math.floor(durations.length * 0.95));
   const avgMs = Math.round(durations.reduce((sum, d) => sum + d, 0) / durations.length);
 
-  let topCostDriverAgent: AgentRole | 'none' = 'none';
+  let topCostDriverAgent: AgentRole | "none" = "none";
   let maxAgentCost = -1;
   for (const [role, cost] of Object.entries(costByAgent) as [AgentRole, number][]) {
     if (cost > maxAgentCost) {
@@ -141,7 +141,10 @@ export function aggregateFinOpsMetrics(
   }
 
   const roundedTotalCost = Math.round(totalCostUsd * 100000) / 100000;
-  const plans = Number.isSafeInteger(estimatedCompletedPlans) && estimatedCompletedPlans > 0 ? estimatedCompletedPlans : 0;
+  const plans =
+    Number.isSafeInteger(estimatedCompletedPlans) && estimatedCompletedPlans > 0
+      ? estimatedCompletedPlans
+      : 0;
 
   return {
     totalInvocations: events.length,

@@ -1,11 +1,5 @@
 import { nanoid } from "nanoid";
-import type {
-  Trip,
-  TripMutation,
-  TripMutationEvent,
-  TripStop,
-  TripPhase,
-} from "./domain";
+import type { Trip, TripMutation, TripMutationEvent, TripStop, TripPhase } from "./domain";
 import { isValidPlaceRef } from "./domain";
 
 /**
@@ -28,7 +22,9 @@ export function applyMutation(trip: Trip, mut: TripMutation): Trip {
       const { placeRef, day, insertAfter } = mut.payload;
       if (!isValidPlaceRef(placeRef)) {
         const anyRef = placeRef as Partial<{ id: string }>;
-        throw new Error(`addStop: placeRef missing required fields or source prefix. id=${anyRef?.id}`);
+        throw new Error(
+          `addStop: placeRef missing required fields or source prefix. id=${anyRef?.id}`,
+        );
       }
       if (day < 1 || day > base.duration.days) {
         throw new Error(`addStop: day ${day} out of range 1..${base.duration.days}`);
@@ -42,11 +38,11 @@ export function applyMutation(trip: Trip, mut: TripMutation): Trip {
         why: "",
         confidence: placeRef.confidence,
       };
-      const days = base.days.map(d => {
+      const days = base.days.map((d) => {
         if (d.day !== day) return d;
         const stops = [...d.stops];
         const insertIdx = insertAfter
-          ? stops.findIndex(s => s.id === insertAfter) + 1
+          ? stops.findIndex((s) => s.id === insertAfter) + 1
           : stops.length;
         stops.splice(insertIdx, 0, newStop);
         return { ...d, stops: reorder(stops) };
@@ -56,9 +52,9 @@ export function applyMutation(trip: Trip, mut: TripMutation): Trip {
 
     case "removeStop": {
       const { stopId } = mut.payload;
-      const days = base.days.map(d => ({
+      const days = base.days.map((d) => ({
         ...d,
-        stops: reorder(d.stops.filter(s => s.id !== stopId)),
+        stops: reorder(d.stops.filter((s) => s.id !== stopId)),
       }));
       return { ...base, days };
     }
@@ -67,15 +63,15 @@ export function applyMutation(trip: Trip, mut: TripMutation): Trip {
       const { stopId, toDay, toOrder } = mut.payload;
       let movedStop: TripStop | undefined;
       // Remove from current day
-      const days = base.days.map(d => {
-        const idx = d.stops.findIndex(s => s.id === stopId);
+      const days = base.days.map((d) => {
+        const idx = d.stops.findIndex((s) => s.id === stopId);
         if (idx === -1) return d;
         movedStop = { ...d.stops[idx], day: toDay };
-        return { ...d, stops: reorder(d.stops.filter(s => s.id !== stopId)) };
+        return { ...d, stops: reorder(d.stops.filter((s) => s.id !== stopId)) };
       });
       if (!movedStop) throw new Error(`moveStop: stop ${stopId} not found`);
       // Insert into target day
-      const finalDays = days.map(d => {
+      const finalDays = days.map((d) => {
         if (d.day !== toDay) return d;
         const stops = [...d.stops];
         stops.splice(toOrder, 0, movedStop!);
@@ -90,12 +86,10 @@ export function applyMutation(trip: Trip, mut: TripMutation): Trip {
         const anyRef = newPlaceRef as Partial<{ id: string }>;
         throw new Error(`replaceStop: newPlaceRef invalid. id=${anyRef?.id}`);
       }
-      const days = base.days.map(d => ({
+      const days = base.days.map((d) => ({
         ...d,
-        stops: d.stops.map(s =>
-          s.id === stopId
-            ? { ...s, placeRef: newPlaceRef, confidence: newPlaceRef.confidence }
-            : s
+        stops: d.stops.map((s) =>
+          s.id === stopId ? { ...s, placeRef: newPlaceRef, confidence: newPlaceRef.confidence } : s,
         ),
       }));
       return { ...base, days };
@@ -111,23 +105,24 @@ export function applyMutation(trip: Trip, mut: TripMutation): Trip {
 
     case "setTheme": {
       const { day, theme } = mut.payload;
-      const days = base.days.map(d => d.day === day ? { ...d, theme } : d);
+      const days = base.days.map((d) => (d.day === day ? { ...d, theme } : d));
       return { ...base, days };
     }
 
     case "attachBooking": {
       const { booking } = mut.payload;
-      const existing = base.bookings.findIndex(b => b.id === booking.id);
-      const bookings = existing >= 0
-        ? base.bookings.map((b, i) => i === existing ? booking : b)
-        : [...base.bookings, booking];
+      const existing = base.bookings.findIndex((b) => b.id === booking.id);
+      const bookings =
+        existing >= 0
+          ? base.bookings.map((b, i) => (i === existing ? booking : b))
+          : [...base.bookings, booking];
       return { ...base, bookings };
     }
 
     case "removeBooking": {
       return {
         ...base,
-        bookings: base.bookings.filter(b => b.id !== mut.payload.bookingId),
+        bookings: base.bookings.filter((b) => b.id !== mut.payload.bookingId),
       };
     }
 
@@ -148,7 +143,7 @@ export function applyMutation(trip: Trip, mut: TripMutation): Trip {
 export function buildMutationEvent(
   tripId: string,
   mutation: TripMutation,
-  source: TripMutationEvent["source"]
+  source: TripMutationEvent["source"],
 ): TripMutationEvent {
   return { tripId, mutation, source, at: new Date().toISOString() };
 }

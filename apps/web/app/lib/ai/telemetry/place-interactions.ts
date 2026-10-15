@@ -10,17 +10,17 @@
  */
 
 export type PlaceActionType =
-  | 'view'
-  | 'pin'
-  | 'popup_open'
-  | 'ask_ai'
-  | 'add'
-  | 'reject'
-  | 'remove'
-  | 'reorder'
-  | 'focus'
-  | 'zoom_in'
-  | 'note_added';
+  | "view"
+  | "pin"
+  | "popup_open"
+  | "ask_ai"
+  | "add"
+  | "reject"
+  | "remove"
+  | "reorder"
+  | "focus"
+  | "zoom_in"
+  | "note_added";
 
 export interface PlaceInteraction {
   id: string;
@@ -35,7 +35,7 @@ export interface PlaceInteraction {
 }
 
 export interface PlaceInteractionContext {
-  sourceScreen: 'chat' | 'map' | 'popup' | 'day_plan' | 'search';
+  sourceScreen: "chat" | "map" | "popup" | "day_plan" | "search";
   day?: number;
   zoomLevel?: number;
   previousAction?: PlaceActionType;
@@ -53,7 +53,7 @@ export function createPlaceInteraction(
     placeName?: string;
     context?: PlaceInteractionContext;
     dwellMs?: number;
-  }
+  },
 ): PlaceInteraction {
   return {
     id: crypto.randomUUID(),
@@ -83,14 +83,14 @@ export function placeInteractionTTL(): number {
 export interface PlaceInteractionBatch {
   interactions: PlaceInteraction[];
   sessionId?: string;
-  deviceType?: 'mobile' | 'desktop' | 'tablet';
+  deviceType?: "mobile" | "desktop" | "tablet";
   timestamp: string;
 }
 
 export function batchPlaceInteractions(
   interactions: PlaceInteraction[],
   sessionId?: string,
-  deviceType?: 'mobile' | 'desktop' | 'tablet'
+  deviceType?: "mobile" | "desktop" | "tablet",
 ): PlaceInteractionBatch {
   return {
     interactions,

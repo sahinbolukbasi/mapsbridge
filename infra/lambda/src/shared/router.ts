@@ -65,7 +65,8 @@ export class Router {
    */
   async dispatch(event: ApiGatewayEvent): Promise<ApiResponse> {
     const method = event.requestContext?.http?.method?.toUpperCase() || "GET";
-    const path = (event.requestContext?.http?.path || event.rawPath || "/").replace(/\/$/, "") || "/";
+    const path =
+      (event.requestContext?.http?.path || event.rawPath || "/").replace(/\/$/, "") || "/";
 
     if (method === "OPTIONS") {
       return handlePreflight();
@@ -84,7 +85,9 @@ export class Router {
 
       const match = path.match(route.pattern);
       if (match) {
-        const pathParameters: Record<string, string | undefined> = { ...(event.pathParameters || {}) };
+        const pathParameters: Record<string, string | undefined> = {
+          ...(event.pathParameters || {}),
+        };
         route.paramNames.forEach((name, index) => {
           pathParameters[name] = decodeURIComponent(match[index + 1]);
         });

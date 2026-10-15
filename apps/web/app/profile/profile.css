@@ -6,19 +6,19 @@
 :root {
   /* MapsBridge Design Tokens (Stitch) */
   --mb-forest: #013628;
-  --mb-emerald: #10B981;
-  --mb-mint: #ECFDF5;
-  --mb-canvas: #F8FAFC;
-  --profile-canvas: #F8FAFC;
+  --mb-emerald: #10b981;
+  --mb-mint: #ecfdf5;
+  --mb-canvas: #f8fafc;
+  --profile-canvas: #f8fafc;
 
   --sb-primary: var(--brand, #24634d);
   --sb-primary-container: #1e4d3e;
   --sb-secondary: #286954;
   --sb-secondary-container: #abedd3;
   --sb-on-secondary-container: #2d6e58;
-  --sb-mint-glow: #34D399;
-  --sb-emerald-accent: #10B981;
-  --sb-mint-subtle: #ECFDF5;
+  --sb-mint-glow: #34d399;
+  --sb-emerald-accent: #10b981;
+  --sb-mint-subtle: #ecfdf5;
   --sb-bg-page: var(--bg, #f8f7f4);
   --sb-canvas-base: var(--surface-alt, #f0f2ed);
   --sb-canvas-subtle: var(--surface-alt, #f0f2ed);
@@ -27,7 +27,7 @@
   --sb-text-muted: var(--text-muted, #5e6d65);
   --sb-text-outline: #717974;
   --sb-border-subtle: var(--border, #dde2da);
-  --sb-deep-forest: #0D281E;
+  --sb-deep-forest: #0d281e;
   --sb-error: #ba1a1a;
   --sb-error-container: #ffdad6;
 }
@@ -45,7 +45,13 @@
   min-height: 100vh;
   background-color: var(--sb-bg-page);
   color: var(--sb-text-main);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    "Plus Jakarta Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -117,7 +123,7 @@
 }
 
 .brand-main-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--sb-primary);
@@ -130,7 +136,7 @@
 }
 
 .brand-sub-title {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   color: var(--sb-secondary);
@@ -160,7 +166,7 @@
 .profile-nav-pill {
   padding: 0.35rem 1rem;
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--sb-text-muted);
@@ -218,7 +224,7 @@
   background: transparent;
   border: none;
   outline: none;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
   color: var(--sb-text-main);
 }
@@ -242,7 +248,7 @@
   background: var(--sb-mint-subtle);
   color: var(--sb-primary);
   text-decoration: none;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   font-weight: 700;
   transition: all 0.2s ease;
@@ -260,7 +266,7 @@
   border-radius: 9999px;
   background: var(--sb-canvas-subtle);
   color: var(--sb-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   font-weight: 700;
 }
@@ -340,7 +346,7 @@
 }
 
 .profile-role-text {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   color: var(--sb-secondary);
@@ -351,20 +357,20 @@
 .profile-hero-bg {
   width: 100%;
   height: 180px;
-  background: linear-gradient(135deg, #013628 0%, #1e4d3e 50%, #0D281E 100%);
+  background: linear-gradient(135deg, #013628 0%, #1e4d3e 50%, #0d281e 100%);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
 }
 
 .profile-hero-bg::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   height: 60%;
-  background: linear-gradient(to bottom, transparent, var(--profile-canvas, #F8FAFC));
+  background: linear-gradient(to bottom, transparent, var(--profile-canvas, #f8fafc));
 }
 
 /* Panoramic Cover Hero */
@@ -386,7 +392,12 @@
 .stitch-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(1, 54, 40, 0.7) 0%, rgba(1, 54, 40, 0.35) 45%, var(--sb-bg-page) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(1, 54, 40, 0.7) 0%,
+    rgba(1, 54, 40, 0.35) 45%,
+    var(--sb-bg-page) 100%
+  );
 }
 
 .stitch-hero-tag {
@@ -466,8 +477,10 @@
   height: 7.5rem;
   border-radius: 1.5rem;
   overflow: hidden;
-  border: 3px solid var(--mb-emerald, #10B981);
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18), 0 6px 20px rgba(0, 0, 0, 0.12);
+  border: 3px solid var(--mb-emerald, #10b981);
+  box-shadow:
+    0 0 0 4px rgba(16, 185, 129, 0.18),
+    0 6px 20px rgba(0, 0, 0, 0.12);
   background: var(--sb-primary);
   display: flex;
   align-items: center;
@@ -495,7 +508,7 @@
   align-items: center;
   gap: 0.25rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -541,7 +554,7 @@
   border-radius: 9999px;
   background-color: var(--sb-mint-subtle);
   color: var(--sb-secondary);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -706,7 +719,7 @@
   border-radius: 9999px;
   background-color: var(--sb-secondary-container);
   color: var(--sb-on-secondary-container);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
 }
@@ -930,7 +943,7 @@
   border-radius: 9999px;
   background-color: var(--sb-primary-container);
   color: #ffffff;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -972,7 +985,7 @@
   align-items: center;
   gap: 0.25rem;
   color: var(--sb-secondary);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -1074,7 +1087,7 @@
 }
 
 .stitch-status-live {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 800;
   color: var(--sb-emerald-accent);
@@ -1163,7 +1176,7 @@
 }
 
 .stitch-activity-time {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   color: var(--sb-text-muted);
@@ -1293,7 +1306,7 @@
   border-radius: 9999px;
   background-color: var(--sb-secondary-container);
   color: var(--sb-on-secondary-container);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
 }
@@ -1589,7 +1602,7 @@
 }
 
 .stitch-bar-label {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   color: var(--sb-text-muted);
@@ -1670,32 +1683,107 @@
 }
 
 @media (max-width: 767px) {
-  .profile-hero-bg { height: 120px; }
-  .stitch-main-profile-root .stitch-panoramic-hero { height: 100px; min-height: 0; }
-  .stitch-main-profile-root .stitch-hero-tag { display: none; }
-  .stitch-main-profile-root .stitch-profile-container { padding: 0 12px 20px; margin-top: -28px; }
-  .stitch-main-profile-root .stitch-profile-header-card { padding: 16px; border-radius: 18px; }
-  .stitch-main-profile-root .stitch-identity-col { flex-direction: row; align-items: center; gap: 12px; }
-  .stitch-main-profile-root .stitch-avatar-large-box { width: 64px; height: 64px; border-radius: 18px; }
-  .stitch-main-profile-root .stitch-name-status-row { flex-wrap: wrap; }
-  .stitch-main-profile-root .stitch-stats-badges-row { flex-wrap: wrap; gap: 8px; }
-  .stitch-main-profile-root .stitch-profile-actions-bar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .stitch-main-profile-root .stitch-profile-actions-bar > * { min-width: 0; min-height: 44px; padding: 10px 8px; justify-content: center; font-size: 12px; }
-  .stitch-main-profile-root .stitch-tabs-bar { overflow-x: auto; flex-wrap: nowrap; }
-  .stitch-main-profile-root .stitch-workspace-tab { flex-shrink: 0; min-height: 44px; padding: 10px 12px; font-size: 12px; }
+  .profile-hero-bg {
+    height: 120px;
+  }
+  .stitch-main-profile-root .stitch-panoramic-hero {
+    height: 100px;
+    min-height: 0;
+  }
+  .stitch-main-profile-root .stitch-hero-tag {
+    display: none;
+  }
+  .stitch-main-profile-root .stitch-profile-container {
+    padding: 0 12px 20px;
+    margin-top: -28px;
+  }
+  .stitch-main-profile-root .stitch-profile-header-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+  .stitch-main-profile-root .stitch-identity-col {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .stitch-main-profile-root .stitch-avatar-large-box {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+  }
+  .stitch-main-profile-root .stitch-name-status-row {
+    flex-wrap: wrap;
+  }
+  .stitch-main-profile-root .stitch-stats-badges-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .stitch-main-profile-root .stitch-profile-actions-bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stitch-main-profile-root .stitch-profile-actions-bar > * {
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 8px;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .stitch-main-profile-root .stitch-tabs-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  .stitch-main-profile-root .stitch-workspace-tab {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
 }
 
-.profile-copy-label { display: none; }
+.profile-copy-label {
+  display: none;
+}
 @media (max-width: 767px) {
-  .profile-copy-address { display: none; }
-  .profile-copy-label { display: inline; }
-  .stitch-main-profile-root .stitch-panoramic-hero { display: none; }
-  .stitch-main-profile-root .stitch-profile-container { margin-top: 16px; }
-  .stitch-main-profile-root .stitch-identity-col { align-items: flex-start; }
-  .stitch-main-profile-root .stitch-user-fullname { font-size: 22px; overflow-wrap: anywhere; }
-  .stitch-main-profile-root .stitch-user-handle-tag { font-size: 12px; overflow-wrap: anywhere; }
-  .stitch-main-profile-root .stitch-route-leader-badge { font-size: 8px; white-space: normal; }
-  .stitch-main-profile-root .stitch-pro-badge-pill { position: static; font-size: 8px; padding: 4px; margin-top: 6px; box-shadow: none; }
-  .stitch-main-profile-root .stitch-user-bio-text { font-size: 13px; line-height: 1.5; }
-  .stitch-main-profile-root .stitch-profile-actions-bar > * { overflow-wrap: anywhere; }
+  .profile-copy-address {
+    display: none;
+  }
+  .profile-copy-label {
+    display: inline;
+  }
+  .stitch-main-profile-root .stitch-panoramic-hero {
+    display: none;
+  }
+  .stitch-main-profile-root .stitch-profile-container {
+    margin-top: 16px;
+  }
+  .stitch-main-profile-root .stitch-identity-col {
+    align-items: flex-start;
+  }
+  .stitch-main-profile-root .stitch-user-fullname {
+    font-size: 22px;
+    overflow-wrap: anywhere;
+  }
+  .stitch-main-profile-root .stitch-user-handle-tag {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  .stitch-main-profile-root .stitch-route-leader-badge {
+    font-size: 8px;
+    white-space: normal;
+  }
+  .stitch-main-profile-root .stitch-pro-badge-pill {
+    position: static;
+    font-size: 8px;
+    padding: 4px;
+    margin-top: 6px;
+    box-shadow: none;
+  }
+  .stitch-main-profile-root .stitch-user-bio-text {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .stitch-main-profile-root .stitch-profile-actions-bar > * {
+    overflow-wrap: anywhere;
+  }
 }

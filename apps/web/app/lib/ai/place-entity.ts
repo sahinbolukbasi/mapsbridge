@@ -30,7 +30,7 @@ export interface PlaceEntity {
   estimatedCostEur?: number;
 
   // Reservation
-  reservationRequired: 'none' | 'recommended' | 'required' | 'far_advance';
+  reservationRequired: "none" | "recommended" | "required" | "far_advance";
   reservationUrl?: string;
 
   // Reviews
@@ -47,7 +47,7 @@ export interface PlaceEntity {
   confidenceScore?: number;
 
   // Itinerary state — per-thread, not global
-  status?: 'suggested' | 'accepted' | 'rejected' | 'removed';
+  status?: "suggested" | "accepted" | "rejected" | "removed";
   dayIndex?: number;
   pinned?: boolean;
 }
@@ -81,23 +81,23 @@ export function placeEntityToPromptSnippet(entity: PlaceEntity): string {
   if (entity.estimatedCostEur != null) {
     parts.push(`~€${entity.estimatedCostEur}`);
   }
-  if (entity.reservationRequired !== 'none') {
+  if (entity.reservationRequired !== "none") {
     parts.push(`rezervasyon: ${entity.reservationRequired}`);
   }
   if (entity.rating != null) {
     parts.push(`★${entity.rating.toFixed(1)}`);
   }
   if (entity.closedDays && entity.closedDays.length > 0) {
-    parts.push(`kapalı: ${entity.closedDays.join(', ')}`);
+    parts.push(`kapalı: ${entity.closedDays.join(", ")}`);
   }
   if (entity.lastEntryMinutesBefore != null) {
     parts.push(`son giriş kapanmadan ${entity.lastEntryMinutesBefore}dk önce`);
   }
-  if (entity.status && entity.status !== 'suggested') {
+  if (entity.status && entity.status !== "suggested") {
     parts.push(`durum: ${entity.status}`);
   }
 
-  return parts.join(' | ');
+  return parts.join(" | ");
 }
 
 /**
@@ -115,7 +115,7 @@ export function buildMinimalPlaceEntity(
 ): PlaceEntity {
   return {
     typicalDurationMin: 60,
-    reservationRequired: 'none',
+    reservationRequired: "none",
     ttlDays: 30,
     ...partial,
   };

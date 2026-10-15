@@ -9,15 +9,11 @@ interface StripeCheckoutModalProps {
   onConfirm: () => void;
 }
 
-export function StripeCheckoutModal({
-  item,
-  onClose,
-  onConfirm,
-}: StripeCheckoutModalProps) {
+export function StripeCheckoutModal({ item, onClose, onConfirm }: StripeCheckoutModalProps) {
   if (!item) return null;
 
   const isRoute = "price" in item;
-  const price = isRoute ? (item as MarketRoute).price : ((item as GroupTrip).pricePerPerson || 0);
+  const price = isRoute ? (item as MarketRoute).price : (item as GroupTrip).pricePerPerson || 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

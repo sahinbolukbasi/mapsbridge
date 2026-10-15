@@ -173,7 +173,8 @@ export const BARCELONA_BRIEF: DestinationBrief = {
         overrated: "Tibidabo",
         why: "Manzara güzel ama ulaşım meşakkatli, park kalabalık, değer/uğraş oranı düşük.",
         alternative: "Bunker del Carmel (El Carmel tepesi)",
-        alternativeNote: "Ücretsiz, panoramik 360° manzara, kalabalık az — özellikle gün batımında.",
+        alternativeNote:
+          "Ücretsiz, panoramik 360° manzara, kalabalık az — özellikle gün batımında.",
       },
     ],
     source: "manual:curator",
@@ -329,12 +330,43 @@ export const BARCELONA_BRIEF: DestinationBrief = {
 
   localCalendar: {
     value: [
-      { date: "01-06", name: "Üç Bilge Günü (Reis Mags)", type: "public_holiday", impact: "Büyük parade önceki akşam. Pek çok dükkan kapalı." },
-      { date: "04-23", name: "Sant Jordi Festivali", type: "festival", impact: "Ramblas ve çevresi kitap-gül tezgahlarıyla doluyor. Harika ama kalabalık." },
-      { date: "06-24", name: "Sant Joan (Ateş Gecesi)", type: "festival", impact: "Havai fişek şehir genelinde, sahil partileri. Bir önceki gece uykusuz." },
-      { date: "06-01", name: "Sonar Müzik Festivali (yaklaşık)", type: "festival", impact: "Mid-Haziran. Otel fiyatları artıyor, şehir kalabalık." },
-      { date: "09-24", name: "La Mercè (şehir festivali)", type: "festival", impact: "Son hafta Eylül. Bedava konserler, castellers (insan kulesi), ücretsiz müze girişleri." },
-      { date: "12-25", name: "Noel", type: "public_holiday", impact: "Resmi tatil. Restoranlar kapalı veya sınırlı." },
+      {
+        date: "01-06",
+        name: "Üç Bilge Günü (Reis Mags)",
+        type: "public_holiday",
+        impact: "Büyük parade önceki akşam. Pek çok dükkan kapalı.",
+      },
+      {
+        date: "04-23",
+        name: "Sant Jordi Festivali",
+        type: "festival",
+        impact: "Ramblas ve çevresi kitap-gül tezgahlarıyla doluyor. Harika ama kalabalık.",
+      },
+      {
+        date: "06-24",
+        name: "Sant Joan (Ateş Gecesi)",
+        type: "festival",
+        impact: "Havai fişek şehir genelinde, sahil partileri. Bir önceki gece uykusuz.",
+      },
+      {
+        date: "06-01",
+        name: "Sonar Müzik Festivali (yaklaşık)",
+        type: "festival",
+        impact: "Mid-Haziran. Otel fiyatları artıyor, şehir kalabalık.",
+      },
+      {
+        date: "09-24",
+        name: "La Mercè (şehir festivali)",
+        type: "festival",
+        impact:
+          "Son hafta Eylül. Bedava konserler, castellers (insan kulesi), ücretsiz müze girişleri.",
+      },
+      {
+        date: "12-25",
+        name: "Noel",
+        type: "public_holiday",
+        impact: "Resmi tatil. Restoranlar kapalı veya sınırlı.",
+      },
     ],
     source: "manual:curator",
     license: "proprietary",
@@ -347,17 +379,28 @@ export const BARCELONA_BRIEF: DestinationBrief = {
     value: [
       {
         category: "running",
-        description: "Sahil koşu bandı düz ve uzun. Montjuïc tepesi zorlu ama manzaralı. Ciudadela Parkı şehir içi döngü için ideal.",
-        highlights: ["Barceloneta sahil bandı (5 km düz)", "Montjuïc döngüsü (~8 km)", "Parc de la Ciutadella"],
+        description:
+          "Sahil koşu bandı düz ve uzun. Montjuïc tepesi zorlu ama manzaralı. Ciudadela Parkı şehir içi döngü için ideal.",
+        highlights: [
+          "Barceloneta sahil bandı (5 km düz)",
+          "Montjuïc döngüsü (~8 km)",
+          "Parc de la Ciutadella",
+        ],
       },
       {
         category: "cycling",
-        description: "Şehir bisiklet altyapısı iyi. Bicing paylaşımlı bisiklet uygulaması kısa süreli ziyaretçi için biraz zor; Donkey Republic veya kiralık bisiklet daha kolay.",
-        highlights: ["Sahilden Fòrum'a uzanan bisiklet yolu", "Poblenou-Glòries rotası", "Gràcia çevresi"],
+        description:
+          "Şehir bisiklet altyapısı iyi. Bicing paylaşımlı bisiklet uygulaması kısa süreli ziyaretçi için biraz zor; Donkey Republic veya kiralık bisiklet daha kolay.",
+        highlights: [
+          "Sahilden Fòrum'a uzanan bisiklet yolu",
+          "Poblenou-Glòries rotası",
+          "Gràcia çevresi",
+        ],
       },
       {
         category: "food_specialty",
-        description: "Katalon mutfağı İspanyol değil — pa amb tomàquet (domates sürtülmüş ekmek), fideuà (erişte paella), crema catalana. İyi tapas için El Born ve Gràcia.",
+        description:
+          "Katalon mutfağı İspanyol değil — pa amb tomàquet (domates sürtülmüş ekmek), fideuà (erişte paella), crema catalana. İyi tapas için El Born ve Gràcia.",
         highlights: [
           "Bar del Pla (El Born) — klasik tapas",
           "El Xampanyet (El Born) — cava ve tapas",
@@ -367,7 +410,8 @@ export const BARCELONA_BRIEF: DestinationBrief = {
       },
       {
         category: "art_gallery",
-        description: "Modernista mimarisi dışında güçlü çağdaş sahne. MACBA ücretsiz Salı, Fundació Joan Miró Montjuïc'te.",
+        description:
+          "Modernista mimarisi dışında güçlü çağdaş sahne. MACBA ücretsiz Salı, Fundació Joan Miró Montjuïc'te.",
         highlights: [
           "MACBA — ücretsiz Salı ve Cumartesi 15:00-19:30",
           "Fundació Joan Miró — Montjuïc",
@@ -377,7 +421,8 @@ export const BARCELONA_BRIEF: DestinationBrief = {
       },
       {
         category: "coworking",
-        description: "Poblenou @22 bölgesi Avrupa'nın en aktif coworking ekosistemleri arasında. El Born ve Gràcia'da laptop dostu kafeler çok.",
+        description:
+          "Poblenou @22 bölgesi Avrupa'nın en aktif coworking ekosistemleri arasında. El Born ve Gràcia'da laptop dostu kafeler çok.",
         highlights: [
           "Betahaus Barcelona (Poblenou)",
           "Utopicus Passeig de Gràcia (Eixample)",

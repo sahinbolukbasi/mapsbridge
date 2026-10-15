@@ -19,7 +19,7 @@ async function checkEndpoint(check) {
     const req = https.get(url, { timeout: check.maxLatencyMs || 5000 }, (res) => {
       const latencyMs = Date.now() - start;
       const passed = res.statusCode === check.expectedStatus;
-      
+
       resolve({
         name: check.name,
         path: check.path,
@@ -56,12 +56,14 @@ async function checkEndpoint(check) {
 async function runCanary() {
   console.log(`[Synthetics] Starting health check for ${config.checks.length} endpoints...`);
   const results = [];
-  
+
   for (const check of config.checks) {
     const result = await checkEndpoint(check);
     results.push(result);
     const statusIcon = result.passed ? "✓ PASS" : "✗ FAIL";
-    console.log(`  ${statusIcon}: ${result.name} (${result.path}) -> ${result.actual || result.error} in ${result.latencyMs}ms`);
+    console.log(
+      `  ${statusIcon}: ${result.name} (${result.path}) -> ${result.actual || result.error} in ${result.latencyMs}ms`,
+    );
   }
 
   const failures = results.filter((r) => !r.passed);

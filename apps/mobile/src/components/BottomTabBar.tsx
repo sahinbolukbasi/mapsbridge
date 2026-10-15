@@ -1,13 +1,7 @@
-import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Platform,
-} from 'react-native';
-import { MobileTab } from '../types';
-import { MapIcon, CalendarIcon, SparkIcon, ExploreIcon, ProfileIcon } from './Icons';
+import React from "react";
+import { StyleSheet, Text, View, TouchableOpacity, Platform } from "react-native";
+import { MobileTab } from "../types";
+import { MapIcon, CalendarIcon, SparkIcon, ExploreIcon, ProfileIcon } from "./Icons";
 
 interface BottomTabBarProps {
   activeTab: MobileTab;
@@ -15,32 +9,32 @@ interface BottomTabBarProps {
 }
 
 export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
-  const isIOS = Platform.OS === 'ios';
+  const isIOS = Platform.OS === "ios";
 
   const TABS: { id: MobileTab; label: string; icon: (color: string) => React.ReactNode }[] = [
     {
-      id: 'map',
-      label: 'Harita',
+      id: "map",
+      label: "Harita",
       icon: (color) => <MapIcon size={22} color={color} />,
     },
     {
-      id: 'plan',
-      label: 'Planım',
+      id: "plan",
+      label: "Rotalarım",
       icon: (color) => <CalendarIcon size={22} color={color} />,
     },
     {
-      id: 'ai',
-      label: 'AI Asistan',
+      id: "ai",
+      label: "AI Asistan",
       icon: (color) => <SparkIcon size={22} color={color} />,
     },
     {
-      id: 'community',
-      label: 'Keşfet',
+      id: "community",
+      label: "Keşfet",
       icon: (color) => <ExploreIcon size={22} color={color} />,
     },
     {
-      id: 'profile',
-      label: 'Profil',
+      id: "profile",
+      label: "Profil",
       icon: (color) => <ProfileIcon size={22} color={color} />,
     },
   ];
@@ -50,8 +44,8 @@ export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
       <View style={styles.barTrack}>
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
-          const activeColor = '#013628';
-          const inactiveColor = '#717974';
+          const activeColor = "#013628";
+          const inactiveColor = "#717974";
 
           return (
             <TouchableOpacity
@@ -64,12 +58,7 @@ export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
                 {tab.icon(isActive ? activeColor : inactiveColor)}
               </View>
 
-              <Text
-                style={[
-                  styles.tabLabel,
-                  isActive ? styles.activeLabel : styles.inactiveLabel,
-                ]}
-              >
+              <Text style={[styles.tabLabel, isActive ? styles.activeLabel : styles.inactiveLabel]}>
                 {tab.label}
               </Text>
             </TouchableOpacity>
@@ -82,10 +71,10 @@ export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-    shadowColor: '#000000',
+    borderTopColor: "#e2e8f0",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: -1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -101,26 +90,26 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   barTrack: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
     height: 52,
     paddingHorizontal: 8,
-    width: '100%',
+    width: "100%",
   },
   tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     flex: 1,
   },
   iconWrap: {
     width: 38,
     height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   activeIconWrap: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: "#ECFDF5",
     borderRadius: 14,
   },
   tabLabel: {
@@ -129,11 +118,11 @@ const styles = StyleSheet.create({
     letterSpacing: -0.1,
   },
   activeLabel: {
-    color: '#013628',
-    fontWeight: '700',
+    color: "#013628",
+    fontWeight: "700",
   },
   inactiveLabel: {
-    color: '#717974',
-    fontWeight: '500',
+    color: "#717974",
+    fontWeight: "500",
   },
 });

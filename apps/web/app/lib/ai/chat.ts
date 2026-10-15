@@ -16,7 +16,7 @@ export interface QuickReplyOption {
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   text: string;
   decisionSummary?: string[];
   route?: UnifiedRoutePlan;
@@ -31,9 +31,13 @@ export interface ChatMessage {
 }
 
 export function conversationHistory(messages: ChatMessage[]) {
-  return messages.slice(-6).map(message => ({
+  return messages.slice(-6).map((message) => ({
     role: message.role,
-    content: `${message.text}${message.route ? `\nRota: ${message.route.destination}; ${message.route.estimatedDays} gün; ${message.route.stops.map((stop: RouteStop) => `${stop.day}. gün: ${stop.name}`).join('; ')}` : ''}`.slice(0, 1500)
+    content:
+      `${message.text}${message.route ? `\nRota: ${message.route.destination}; ${message.route.estimatedDays} gün; ${message.route.stops.map((stop: RouteStop) => `${stop.day}. gün: ${stop.name}`).join("; ")}` : ""}`.slice(
+        0,
+        1500,
+      ),
   }));
 }
 
@@ -42,10 +46,25 @@ export function planText(route: UnifiedRoutePlan) {
     route.title,
     route.destination,
     route.summary,
-    ...Array.from({ length: route.estimatedDays }, (_, i) => `${i + 1}. Gün\n${route.stops.filter((stop: RouteStop) => stop.day === i + 1).map((stop: RouteStop) => `• ${stop.name} — ${stop.suggestedDuration}\n${stop.description}`).join('\n\n')}`)
-  ].join('\n\n');
+    ...Array.from(
+      { length: route.estimatedDays },
+      (_, i) =>
+        `${i + 1}. Gün\n${route.stops
+          .filter((stop: RouteStop) => stop.day === i + 1)
+          .map(
+            (stop: RouteStop) => `• ${stop.name} — ${stop.suggestedDuration}\n${stop.description}`,
+          )
+          .join("\n\n")}`,
+    ),
+  ].join("\n\n");
 }
 
-export function shouldRecheckRequest(error: { status?: number; code?: string } | null | undefined): boolean {
-  return !error?.status || [408, 500, 502, 503, 504].includes(error.status) || error.code === 'REQUEST_IN_PROGRESS';
+export function shouldRecheckRequest(
+  error: { status?: number; code?: string } | null | undefined,
+): boolean {
+  return (
+    !error?.status ||
+    [408, 500, 502, 503, 504].includes(error.status) ||
+    error.code === "REQUEST_IN_PROGRESS"
+  );
 }

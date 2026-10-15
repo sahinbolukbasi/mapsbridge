@@ -14,8 +14,6 @@ interface ShareData {
   expiresAt: number;
 }
 
-
-
 export default function FindByCodePage() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -48,16 +46,15 @@ export default function FindByCodePage() {
 
       mapInstanceRef.current = map;
       if (latestShare.current) renderShare(latestShare.current);
-
     }
 
     // Read the address independently of the map SDK.
-      const params = new URLSearchParams(window.location.search);
-      const queryCode = params.get("kod") || params.get("code");
-      if (queryCode && isMounted) {
-        setInputCode(queryCode);
-        fetchLocationByCode(queryCode);
-      }
+    const params = new URLSearchParams(window.location.search);
+    const queryCode = params.get("kod") || params.get("code");
+    if (queryCode && isMounted) {
+      setInputCode(queryCode);
+      fetchLocationByCode(queryCode);
+    }
 
     if (!(window as any).L) {
       if (!document.getElementById("leaflet-css")) {
@@ -72,7 +69,8 @@ export default function FindByCodePage() {
       script.id = "leaflet-js";
       script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
       script.async = true;
-      script.onerror = () => setError("Harita yüklenemedi. Kodla adres sorgulamasını yine kullanabilirsiniz.");
+      script.onerror = () =>
+        setError("Harita yüklenemedi. Kodla adres sorgulamasını yine kullanabilirsiniz.");
       script.onload = () => {
         if (isMounted) initMap();
       };
@@ -120,37 +118,42 @@ export default function FindByCodePage() {
   }
 
   function renderShare(data: ShareData) {
-      // Render marker and fly on map
-      const L = (window as any).L;
-      if (mapInstanceRef.current && L) {
-        const customPin = L.divIcon({
-          className: "custom-map-pin",
-          html: `<div class="pin-pulse"></div><div class="pin-marker"><svg width="32" height="42" viewBox="0 0 28 36" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 22 14 22s14-11.5 14-22c0-7.732-6.268-14-14-14z" fill="#ef6b5b"/><circle cx="14" cy="14" r="6" fill="#ffffff"/></svg></div>`,
-          iconSize: [32, 42],
-          iconAnchor: [16, 42],
-        });
+    // Render marker and fly on map
+    const L = (window as any).L;
+    if (mapInstanceRef.current && L) {
+      const customPin = L.divIcon({
+        className: "custom-map-pin",
+        html: `<div class="pin-pulse"></div><div class="pin-marker"><svg width="32" height="42" viewBox="0 0 28 36" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 22 14 22s14-11.5 14-22c0-7.732-6.268-14-14-14z" fill="#ef6b5b"/><circle cx="14" cy="14" r="6" fill="#ffffff"/></svg></div>`,
+        iconSize: [32, 42],
+        iconAnchor: [16, 42],
+      });
 
-        if (markerRef.current) {
-          markerRef.current.remove();
-        }
-
-        const marker = L.marker([data.lat, data.lng], { icon: customPin }).addTo(mapInstanceRef.current);
-        markerRef.current = marker;
-
-        mapInstanceRef.current.flyTo([data.lat, data.lng], 16, { animate: true, duration: 1.5 });
+      if (markerRef.current) {
+        markerRef.current.remove();
       }
+
+      const marker = L.marker([data.lat, data.lng], { icon: customPin }).addTo(
+        mapInstanceRef.current,
+      );
+      markerRef.current = marker;
+
+      mapInstanceRef.current.flyTo([data.lat, data.lng], 16, { animate: true, duration: 1.5 });
+    }
   }
 
   useEffect(() => {
     if (!shareData) return;
-    const timer = setTimeout(() => {
-      latestShare.current = null;
-      setShareData(null);
-      markerRef.current?.remove();
-      markerRef.current = null;
-      setError("Paylaşımın süresi doldu. Yeni bir kod isteyin.");
-      setShowLookupModal(true);
-    }, Math.max(0, shareData.expiresAt * 1000 - Date.now()));
+    const timer = setTimeout(
+      () => {
+        latestShare.current = null;
+        setShareData(null);
+        markerRef.current?.remove();
+        markerRef.current = null;
+        setError("Paylaşımın süresi doldu. Yeni bir kod isteyin.");
+        setShowLookupModal(true);
+      },
+      Math.max(0, shareData.expiresAt * 1000 - Date.now()),
+    );
     return () => clearTimeout(timer);
   }, [shareData]);
 
@@ -189,7 +192,10 @@ export default function FindByCodePage() {
             </button>
             <div className="icon-wrap">🔑</div>
             <h2>Kodla Konum Bul</h2>
-            <p>Sizinle paylaşılan 6 haneli konum doğrulama kodunu girerek adresi ve haritadaki yerini anında görüntüleyin.</p>
+            <p>
+              Sizinle paylaşılan 6 haneli konum doğrulama kodunu girerek adresi ve haritadaki yerini
+              anında görüntüleyin.
+            </p>
 
             <form onSubmit={handleSubmit} className="code-form">
               <input
@@ -207,7 +213,11 @@ export default function FindByCodePage() {
               </button>
             </form>
 
-            {error && <p role="alert" className="error-msg">{error}</p>}
+            {error && (
+              <p role="alert" className="error-msg">
+                {error}
+              </p>
+            )}
 
             <button
               type="button"

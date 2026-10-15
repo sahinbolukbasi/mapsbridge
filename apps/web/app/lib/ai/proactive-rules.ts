@@ -102,7 +102,7 @@ function ruleGeoCohérence(trip: Trip): ProactiveAlert[] {
 function ruleClosedDayConflicts(
   trip: Trip,
   brief: DestinationBrief,
-  travelDate?: string
+  travelDate?: string,
 ): ProactiveAlert[] {
   const alerts: ProactiveAlert[] = [];
   const timingRules = brief.timingRules?.value ?? [];
@@ -115,7 +115,7 @@ function ruleClosedDayConflicts(
       // Check stop opening hours from stop data
       if (stop.openingHours?.closedDays?.length) {
         const closedDays = stop.openingHours.closedDays;
-        if (dayName && closedDays.some(cd => cd.toLowerCase() === dayName.toLowerCase())) {
+        if (dayName && closedDays.some((cd) => cd.toLowerCase() === dayName.toLowerCase())) {
           alerts.push({
             code: "CLOSED_DAY_CONFLICT",
             severity: "error",
@@ -153,8 +153,8 @@ function ruleReservationRequired(trip: Trip, brief: DestinationBrief): Proactive
 
   for (const day of trip.days) {
     for (const stop of day.stops) {
-      const match = highDemand.find(v =>
-        stop.placeRef.name.toLowerCase().includes(v.name.toLowerCase().slice(0, 10))
+      const match = highDemand.find((v) =>
+        stop.placeRef.name.toLowerCase().includes(v.name.toLowerCase().slice(0, 10)),
       );
       if (match) {
         alerts.push({
@@ -183,7 +183,7 @@ function ruleReservationRequired(trip: Trip, brief: DestinationBrief): Proactive
 function ruleSeasonalClosure(
   trip: Trip,
   brief: DestinationBrief,
-  travelDate?: string
+  travelDate?: string,
 ): ProactiveAlert[] {
   if (!travelDate) return [];
   const alerts: ProactiveAlert[] = [];
@@ -208,7 +208,7 @@ function ruleFatigueCurve(trip: Trip): ProactiveAlert[] {
   const last = days.length;
 
   // Ayrılış günü çok dolu?
-  const lastDay = days.find(d => d.day === last);
+  const lastDay = days.find((d) => d.day === last);
   if (lastDay && lastDay.stops.length > 3) {
     alerts.push({
       code: "FATIGUE_CURVE_VIOLATION",
@@ -248,16 +248,21 @@ function severityOrder(s: AlertSeverity): number {
 
 function estimateSpread(stops: TripStop[]): number {
   if (stops.length < 2) return 0;
-  const lats = stops.map(s => s.placeRef.lat);
-  const lngs = stops.map(s => s.placeRef.lng);
+  const lats = stops.map((s) => s.placeRef.lat);
+  const lngs = stops.map((s) => s.placeRef.lng);
   const dLat = (Math.max(...lats) - Math.min(...lats)) * 111;
   const dLng = (Math.max(...lngs) - Math.min(...lngs)) * 85;
   return Math.sqrt(dLat ** 2 + dLng ** 2);
 }
 
 const TR_DAY_NAMES: Record<number, string> = {
-  0: "sunday", 1: "monday", 2: "tuesday", 3: "wednesday",
-  4: "thursday", 5: "friday", 6: "saturday",
+  0: "sunday",
+  1: "monday",
+  2: "tuesday",
+  3: "wednesday",
+  4: "thursday",
+  5: "friday",
+  6: "saturday",
 };
 
 function getDayName(travelDate: string | undefined, tripDay: number): string | null {
@@ -270,7 +275,7 @@ function getDayName(travelDate: string | undefined, tripDay: number): string | n
 /** Format alerts as a compact string for system prompt injection. */
 export function formatAlertsForPrompt(alerts: ProactiveAlert[]): string {
   if (alerts.length === 0) return "";
-  const lines = alerts.map(a => {
+  const lines = alerts.map((a) => {
     const icon = a.severity === "error" ? "⛔" : a.severity === "warning" ? "⚠️" : "ℹ️";
     return `${icon} ${a.message}`;
   });

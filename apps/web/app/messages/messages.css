@@ -31,8 +31,8 @@
   --chat-canvas-base: #f8fafc;
   --chat-canvas-subtle: #f1f5f9;
   --chat-border-subtle: rgba(226, 232, 240, 0.85);
-  --chat-font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --chat-font-label: 'Inter', system-ui, -apple-system, sans-serif;
+  --chat-font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --chat-font-label: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 .chat-page-root {
@@ -86,14 +86,18 @@
 }
 
 .chat-page-root .material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
   display: inline-block;
   vertical-align: middle;
   line-height: 1;
 }
 
 .chat-page-root .material-symbols-outlined.fill {
-  font-variation-settings: 'FILL' 1;
+  font-variation-settings: "FILL" 1;
 }
 
 /* Top Workspace Navbar */
@@ -662,7 +666,7 @@
 }
 
 .chat-item-card.active::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0.75rem;
@@ -1190,8 +1194,13 @@
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 /* System Route Event Line */
@@ -1348,7 +1357,12 @@
 .chat-right-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(13, 40, 30, 0.9) 0%, rgba(13, 40, 30, 0.3) 60%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(13, 40, 30, 0.9) 0%,
+    rgba(13, 40, 30, 0.3) 60%,
+    transparent 100%
+  );
 }
 
 .chat-right-section {
@@ -1773,42 +1787,100 @@
   transform: translateY(-1px);
 }
 
-
 /* Keep each conversation pane usable without a desktop-sized canvas. */
-.chat-mobile-tabs { display: none; }
+.chat-mobile-tabs {
+  display: none;
+}
 .chat-page-root {
   height: calc(100dvh - var(--mobile-nav-height));
   min-height: 0;
   max-height: none;
   overflow: hidden;
 }
-.chat-architecture-grid { height: auto; }
-.chat-architecture-grid > *, .chat-text-input { min-width: 0; }
-.chat-bubble { overflow-wrap: anywhere; }
-.chat-middle-header-left > div { min-width: 0; }
-.chat-middle-header-title { overflow-wrap: anywhere; }
-.chat-middle-header-sub { flex-wrap: wrap; }
+.chat-architecture-grid {
+  height: auto;
+}
+.chat-architecture-grid > *,
+.chat-text-input {
+  min-width: 0;
+}
+.chat-bubble {
+  overflow-wrap: anywhere;
+}
+.chat-middle-header-left > div {
+  min-width: 0;
+}
+.chat-middle-header-title {
+  overflow-wrap: anywhere;
+}
+.chat-middle-header-sub {
+  flex-wrap: wrap;
+}
 @media (min-width: 1024px) and (max-width: 1439px) {
-  .chat-architecture-grid { grid-template-columns: 260px minmax(0, 1fr) 260px; }
-  .chat-middle-header { flex-wrap: wrap; }
+  .chat-architecture-grid {
+    grid-template-columns: 260px minmax(0, 1fr) 260px;
+  }
+  .chat-middle-header {
+    flex-wrap: wrap;
+  }
 }
 @media (min-width: 1024px) {
-  .chat-architecture-grid:not(:has(.chat-right-col)) { grid-template-columns: minmax(240px, 28%) minmax(0, 1fr); }
+  .chat-architecture-grid:not(:has(.chat-right-col)) {
+    grid-template-columns: minmax(240px, 28%) minmax(0, 1fr);
+  }
 }
 @media (max-width: 1023px) {
-  .chat-mobile-tabs { display: flex; gap: 8px; padding-bottom: 8px; flex-shrink: 0; }
-  .chat-mobile-tabs button { flex: 1; min-height: 44px; border: 1px solid var(--chat-border-subtle); border-radius: 12px; background: var(--chat-surface-card); color: var(--chat-on-surface); cursor: pointer; }
-  .chat-mobile-tabs button[aria-pressed="true"] { background: var(--chat-primary); color: white; }
-  .chat-mobile-tabs button:disabled { opacity: .5; cursor: default; }
-  .chat-architecture-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .chat-mobile-tabs {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+  }
+  .chat-mobile-tabs button {
+    flex: 1;
+    min-height: 44px;
+    border: 1px solid var(--chat-border-subtle);
+    border-radius: 12px;
+    background: var(--chat-surface-card);
+    color: var(--chat-on-surface);
+    cursor: pointer;
+  }
+  .chat-mobile-tabs button[aria-pressed="true"] {
+    background: var(--chat-primary);
+    color: white;
+  }
+  .chat-mobile-tabs button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .chat-architecture-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
   .chat-page-root[data-mobile-pane="list"] :is(.chat-middle-col, .chat-right-col),
   .chat-page-root[data-mobile-pane="chat"] :is(.chat-left-col, .chat-right-col),
-  .chat-page-root[data-mobile-pane="details"] :is(.chat-left-col, .chat-middle-col) { display: none; }
-  .chat-middle-header { flex-wrap: wrap; padding: 8px; }
-  .chat-middle-header-actions { flex-wrap: wrap; }
-  .chat-input-footer { padding: 8px; }
-  .chat-icon-btn, .chat-send-btn { min-width: 44px; min-height: 44px; flex-shrink: 0; }
-  .chat-stream-scroll { padding: 12px; }
+  .chat-page-root[data-mobile-pane="details"] :is(.chat-left-col, .chat-middle-col) {
+    display: none;
+  }
+  .chat-middle-header {
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+  .chat-middle-header-actions {
+    flex-wrap: wrap;
+  }
+  .chat-input-footer {
+    padding: 8px;
+  }
+  .chat-icon-btn,
+  .chat-send-btn {
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+  .chat-stream-scroll {
+    padding: 12px;
+  }
 }
 
 [data-theme="dark"] .chat-page-root {
@@ -1829,7 +1901,15 @@
   --chat-canvas-subtle: #192a20;
   --chat-border-subtle: #34483c;
 }
-[data-theme="dark"] .chat-middle-header { background: var(--chat-surface-card); }
-[data-theme="dark"] .chat-mobile-tabs button[aria-pressed="true"] { color: #123122; }
-[data-theme="dark"] .chat-stream-scroll { background: var(--chat-canvas-base); }
-[data-theme="dark"] .chat-msg-avatar.owner { color: #123122; }
+[data-theme="dark"] .chat-middle-header {
+  background: var(--chat-surface-card);
+}
+[data-theme="dark"] .chat-mobile-tabs button[aria-pressed="true"] {
+  color: #123122;
+}
+[data-theme="dark"] .chat-stream-scroll {
+  background: var(--chat-canvas-base);
+}
+[data-theme="dark"] .chat-msg-avatar.owner {
+  color: #123122;
+}

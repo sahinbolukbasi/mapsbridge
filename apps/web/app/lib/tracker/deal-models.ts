@@ -2,8 +2,8 @@
  * MapsBridge Deal & Ticket Tracker Models
  */
 
-export type TrackerType = 'flight' | 'hotel';
-export type TrackerStatus = 'active' | 'triggered' | 'paused' | 'expired';
+export type TrackerType = "flight" | "hotel";
+export type TrackerStatus = "active" | "triggered" | "paused" | "expired";
 
 export interface DealItem {
   id: string;
@@ -51,7 +51,7 @@ export interface SystemCapacityMetrics {
   activeTrackersCount: number;
   supportedConcurrentUsers: number;
   cacheHitRatePercent: number;
-  queueStatus: 'healthy' | 'degraded' | 'overloaded';
+  queueStatus: "healthy" | "degraded" | "overloaded";
   averageExecutionLatencyMs: number;
-  circuitBreakerStatus: 'closed' | 'open' | 'half-open';
+  circuitBreakerStatus: "closed" | "open" | "half-open";
 }

@@ -105,7 +105,10 @@ export function UpgradeModal() {
       if (e.detail?.tab) setActiveTab(e.detail.tab);
       setErrorMessage("");
       setIsOpen(true);
-      void billingService.refreshWallet().then(setWallet).catch(() => {});
+      void billingService
+        .refreshWallet()
+        .then(setWallet)
+        .catch(() => {});
     };
 
     const handleWallet = (e: CustomEvent<any>) => {
@@ -154,10 +157,14 @@ export function UpgradeModal() {
 
   const getTierName = (t: string) => {
     switch (t) {
-      case "explorer": return "Kaşif";
-      case "pro": return "Pro Kaşif";
-      case "agency": return "Tur Lideri";
-      default: return "Gezgin (Ücretsiz)";
+      case "explorer":
+        return "Kaşif";
+      case "pro":
+        return "Pro Kaşif";
+      case "agency":
+        return "Tur Lideri";
+      default:
+        return "Gezgin (Ücretsiz)";
     }
   };
 
@@ -304,8 +311,8 @@ export function UpgradeModal() {
                         {isBusy
                           ? "Yönlendiriliyor…"
                           : isCurrent
-                          ? "Mevcut Planınız"
-                          : `${plan.name}'e Geç`}
+                            ? "Mevcut Planınız"
+                            : `${plan.name}'e Geç`}
                       </button>
                     </div>
                   );
@@ -360,7 +367,7 @@ export function openUpgradeModal(reason?: string, tab?: "subscriptions" | "packs
     window.dispatchEvent(
       new CustomEvent("mapsbridge:open_upgrade_modal", {
         detail: { reason, tab },
-      })
+      }),
     );
   }
 }

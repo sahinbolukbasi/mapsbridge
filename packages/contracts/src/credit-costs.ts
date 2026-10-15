@@ -11,11 +11,7 @@
 
 // ─── Action-based credit costs (used by web billing UI) ──────────────────────
 
-export type AICreditAction =
-  | "ai_deep_trip"
-  | "ai_stay_dining"
-  | "ai_chat"
-  | "route_optimize";
+export type AICreditAction = "ai_deep_trip" | "ai_stay_dining" | "ai_chat" | "route_optimize";
 
 /**
  * Credit cost per AI action.
@@ -120,9 +116,17 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlanDef[] = [
     color: "#10b981",
     features: [
       { text: "Aylık 500 AI Rota Kredisi", included: true, highlight: true },
-      { text: "Doğal Dilde AI ile Rota Düzenleme & Versiyonlama (v1, v2, v3...)", included: true, highlight: true },
+      {
+        text: "Doğal Dilde AI ile Rota Düzenleme & Versiyonlama (v1, v2, v3...)",
+        included: true,
+        highlight: true,
+      },
       { text: "Tek Tıkla Google Maps'e Sınırsız Aktarım", included: true },
-      { text: "Akıllı Gezi Arkadaşı Eşleşmesi (% Uyum Algoritması)", included: true, highlight: true },
+      {
+        text: "Akıllı Gezi Arkadaşı Eşleşmesi (% Uyum Algoritması)",
+        included: true,
+        highlight: true,
+      },
       { text: "Otomatik Mekan Zenginleştirme Agent'ı", included: true },
       { text: "Sınırsız Katılımcılı Grup Gezileri & Ortak Planlama", included: true },
       { text: "7/24 Öncelikli VIP Destek", included: true },
@@ -138,7 +142,11 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlanDef[] = [
     color: "#8b5cf6",
     features: [
       { text: "Aylık 2.500 AI Rota Kredisi", included: true, highlight: true },
-      { text: "Toplu Gezi Grupları ve Eşzamanlı Canlı Rota Planlama", included: true, highlight: true },
+      {
+        text: "Toplu Gezi Grupları ve Eşzamanlı Canlı Rota Planlama",
+        included: true,
+        highlight: true,
+      },
       { text: "Harita Üzerinde Özel Marka & Logo", included: true },
       { text: "Çoklu Rehber ve Ekip Üyesi Yönetimi", included: true },
       { text: "Özel API & Veri İçe/Dışa Aktarımı", included: true },

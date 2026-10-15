@@ -1,6 +1,6 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import type { TripProfile } from '../types';
-import type { DealItem } from '../../tracker/deal-models';
+import { invokeBedrockJSON } from "../bedrock-client";
+import type { TripProfile } from "../types";
+import type { DealItem } from "../../tracker/deal-models";
 
 export interface HotelDealOutput {
   destination: string;
@@ -48,11 +48,11 @@ export async function runHotelDealAgent(
   destination: string,
   dates?: string,
   profile?: Partial<TripProfile>,
-  timeoutMs = 5000
-): Promise<{ output: HotelDealOutput; source: 'bedrock'; durationMs: number }> {
+  timeoutMs = 5000,
+): Promise<{ output: HotelDealOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
-  const dateInfo = dates ? `Tarihler: ${dates}.` : 'Genel seyahat dönemi.';
-  const travelers = profile?.travelers ? `${profile.travelers.adults || 1} yetişkin` : '2 yetişkin';
+  const dateInfo = dates ? `Tarihler: ${dates}.` : "Genel seyahat dönemi.";
+  const travelers = profile?.travelers ? `${profile.travelers.adults || 1} yetişkin` : "2 yetişkin";
 
   const userQuery = `Şehir: "${destination}". ${dateInfo} Gezginler: ${travelers}. En uygun fiyatlı otel ve konaklama fırsatlarını araştır.`;
 
@@ -69,8 +69,8 @@ export async function runHotelDealAgent(
         destination: bedrockRes.data.destination || destination,
         bestEstimatedNightlyPrice: Number(bedrockRes.data.bestEstimatedNightlyPrice) || 1500,
         averageMarketPrice: Number(bedrockRes.data.averageMarketPrice) || 3000,
-        currency: bedrockRes.data.currency || '₺',
-        recommendedArea: bedrockRes.data.recommendedArea || 'Ulaşımı kolay merkezi bölgeler',
+        currency: bedrockRes.data.currency || "₺",
+        recommendedArea: bedrockRes.data.recommendedArea || "Ulaşımı kolay merkezi bölgeler",
         bestDeals: bedrockRes.data.bestDeals.map((d, i) => ({
           ...d,
           id: d.id || `hotel-${i + 1}`,
@@ -79,7 +79,7 @@ export async function runHotelDealAgent(
         budgetTips: Array.isArray(bedrockRes.data.budgetTips) ? bedrockRes.data.budgetTips : [],
         trackerRecommended: bedrockRes.data.trackerRecommended ?? true,
       },
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
@@ -90,24 +90,24 @@ export async function runHotelDealAgent(
       destination,
       bestEstimatedNightlyPrice: 1600,
       averageMarketPrice: 2900,
-      currency: '₺',
-      recommendedArea: 'Toplu taşımaya yakın alternatif semtler',
+      currency: "₺",
+      recommendedArea: "Toplu taşımaya yakın alternatif semtler",
       bestDeals: [
         {
-          id: 'hotel-fb-1',
+          id: "hotel-fb-1",
           title: `${destination} Fiyat/Performans Konaklama Fırsatı`,
           price: 1600,
           originalPrice: 2900,
-          currency: '₺',
-          provider: 'Optimum Otel Takipçisi',
-          highlights: ['Merkezi konuma metroyla 10 dk', 'Yüksek temizlik puanı'],
+          currency: "₺",
+          provider: "Optimum Otel Takipçisi",
+          highlights: ["Merkezi konuma metroyla 10 dk", "Yüksek temizlik puanı"],
           foundAt: new Date().toISOString().slice(0, 10),
         },
       ],
-      budgetTips: ['Erken rezervasyon veya son dakika fırsatlarını fiyat alarmı ile takip edin.'],
+      budgetTips: ["Erken rezervasyon veya son dakika fırsatlarını fiyat alarmı ile takip edin."],
       trackerRecommended: true,
     },
-    source: 'bedrock',
+    source: "bedrock",
     durationMs: Date.now() - startTime,
   };
 }

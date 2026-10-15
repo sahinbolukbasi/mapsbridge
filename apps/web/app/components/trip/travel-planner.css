@@ -1,6 +1,5 @@
-
 .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined' !important;
+  font-family: "Material Symbols Outlined" !important;
   font-weight: normal;
   font-style: normal;
   font-size: 20px;
@@ -33,18 +32,26 @@
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 20px;
-  box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.03);
+  box-shadow:
+    0 20px 45px -12px rgba(15, 23, 42, 0.16),
+    0 0 0 1px rgba(0, 0, 0, 0.03);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    width 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 [data-theme="dark"] .travel-planner-panel {
   background: rgba(15, 23, 42, 0.92);
   border-color: rgba(51, 65, 85, 0.8);
-  box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 20px 45px -12px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .travel-planner-panel.closed {
@@ -71,7 +78,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: transform 0.2s, background 0.2s;
+  transition:
+    transform 0.2s,
+    background 0.2s;
 }
 
 .travel-planner-reopen-btn:hover {
@@ -227,8 +236,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── 2. Day Tabs ─────────────────────────────────────────── */
@@ -1139,7 +1152,9 @@
 
 .planner-numbered-marker.selected {
   transform: scale(1.25);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.4), 0 8px 20px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.4),
+    0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Mobile Responsiveness (Bottom Sheet Pattern) ────────── */
@@ -1238,9 +1253,18 @@
 }
 
 @keyframes pulseTarget {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.25); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
 }
 
 .target-sub-next {
@@ -2294,7 +2318,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  transition: background 0.15s, transform 0.15s;
+  transition:
+    background 0.15s,
+    transform 0.15s;
 }
 
 .btn-quick-add-pin:hover {
@@ -3063,7 +3089,9 @@
   color: #0f172a;
   outline: none;
   font-family: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 [data-theme="dark"] .form-input,
@@ -3802,7 +3830,9 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
   font-size: 14px;
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .planner-general-marker:hover {
@@ -4339,7 +4369,7 @@
 }
 
 .stitch-route-heading {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
   font-weight: 800;
   color: #0f172a;
@@ -4405,7 +4435,7 @@
   border: none;
   background: transparent;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   color: #64748b;
@@ -4472,7 +4502,7 @@
 .stitch-day-pill-btn {
   padding: 0.25rem 0.7rem;
   border-radius: 10px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -4508,7 +4538,7 @@
 .stitch-day-add-btn {
   padding: 0.25rem 0.55rem;
   border-radius: 10px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   background: #ecfdf5;
@@ -4556,7 +4586,7 @@
   border-radius: 12px;
   background: #ffffff;
   border: 1px solid rgba(203, 213, 225, 0.85);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   color: #0f172a;
   outline: none;
@@ -4591,7 +4621,7 @@
   color: #ffffff;
   border: none;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -4618,7 +4648,7 @@
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 10px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10.5px;
   font-weight: 700;
   color: #334155;
@@ -4688,7 +4718,7 @@
   background: #d1fae5;
   color: #047857;
   border-radius: 999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 9.5px;
   font-weight: 800;
   text-transform: uppercase;
@@ -4720,7 +4750,7 @@
 }
 
 .stitch-map-point-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
   font-weight: 800;
   color: #064e3b;
@@ -4761,7 +4791,7 @@
   color: #ffffff;
   border: none;
   border-radius: 10px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -4783,7 +4813,7 @@
   color: #334155;
   border: 1px solid rgba(203, 213, 225, 0.85);
   border-radius: 10px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -4845,7 +4875,7 @@
 }
 
 .stitch-empty-feed-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 14px;
   font-weight: 800;
   color: #0f172a;
@@ -4916,7 +4946,7 @@
   border-radius: 8px;
   background: #013628;
   color: #ffffff;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 11px;
   font-weight: 800;
   display: flex;
@@ -4945,7 +4975,7 @@
 }
 
 .stitch-stop-label {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
   font-weight: 800;
   color: #0f172a;
@@ -4960,7 +4990,7 @@
 }
 
 .stitch-stop-time-tag {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10.5px;
   font-weight: 750;
   color: #047857;
@@ -5051,7 +5081,7 @@
   height: 32px;
   border-radius: 9999px;
   background: #1e4d3e;
-  color: #34D399;
+  color: #34d399;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5064,7 +5094,7 @@
 }
 
 .desk-main-heading {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 16px;
   font-weight: 800;
   color: #013628;
@@ -5077,7 +5107,7 @@
 }
 
 .desk-sub-heading {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   color: #286954;
@@ -5087,7 +5117,7 @@
 }
 
 [data-theme="dark"] .desk-sub-heading {
-  color: #34D399;
+  color: #34d399;
 }
 
 .desk-header-actions {
@@ -5102,7 +5132,7 @@
   color: #ffffff;
   border: none;
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   font-weight: 600;
   display: flex;
@@ -5119,7 +5149,7 @@
 }
 
 .btn-desk-add-pin.active {
-  background: #10B981;
+  background: #10b981;
 }
 
 .planner-main-container {
@@ -5195,7 +5225,7 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: #F1F5F9;
+  background: #f1f5f9;
   border: 1px solid rgba(226, 232, 240, 0.8);
   display: flex;
   align-items: center;
@@ -5334,7 +5364,7 @@
 }
 
 .desk-route-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 17px;
   font-weight: 800;
   color: #013628;
@@ -5542,7 +5572,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 3px;
   padding: 3px;
-  background: #F1F5F9;
+  background: #f1f5f9;
   border-radius: 12px;
   margin-top: 0.25rem;
 }
@@ -5556,7 +5586,7 @@
   border: none;
   background: transparent;
   border-radius: 9px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: #404945;
@@ -5585,14 +5615,14 @@
 
 [data-theme="dark"] .stitch-segment-btn.active {
   background: rgba(13, 40, 30, 0.95);
-  color: #34D399;
+  color: #34d399;
 }
 
 /* Map Selected Point Alert Pill */
 .stitch-point-alert {
   margin: 0.65rem 1rem 0;
   padding: 0.75rem;
-  background: #ECFDF5;
+  background: #ecfdf5;
   border: 1px solid rgba(16, 185, 129, 0.25);
   border-radius: 14px;
   display: flex;
@@ -5625,7 +5655,7 @@
 }
 
 .alert-tag {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 800;
   color: #286954;
@@ -5634,7 +5664,7 @@
 }
 
 [data-theme="dark"] .alert-tag {
-  color: #34D399;
+  color: #34d399;
 }
 
 .alert-close-btn {
@@ -5646,10 +5676,10 @@
 }
 
 .alert-address-strong {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
   font-weight: 700;
-  color: #0D281E;
+  color: #0d281e;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5685,7 +5715,7 @@
   color: #ffffff;
   border: none;
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -5699,10 +5729,10 @@
 .alert-btn-secondary {
   padding: 0.3rem 0.75rem;
   background: #ffffff;
-  color: #0D281E;
+  color: #0d281e;
   border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -5710,7 +5740,7 @@
 }
 
 .alert-btn-secondary:hover {
-  background: #F1F5F9;
+  background: #f1f5f9;
 }
 
 /* Trip Selector & Day Filter Row */
@@ -5751,7 +5781,7 @@
 
 [data-theme="dark"] .trip-selector-icon-box {
   background: rgba(30, 77, 62, 0.4);
-  color: #34D399;
+  color: #34d399;
 }
 
 .trip-title-flex {
@@ -5766,7 +5796,7 @@
 }
 
 .trip-name-text {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 15px;
   font-weight: 800;
   color: #013628;
@@ -5778,7 +5808,7 @@
 }
 
 .trip-meta-subtitle {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   color: #404945;
 }
@@ -5789,11 +5819,11 @@
 
 .btn-new-trip-mini {
   padding: 0.3rem 0.65rem;
-  background: #F1F5F9;
+  background: #f1f5f9;
   color: #013628;
   border: none;
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -5824,9 +5854,9 @@
 .day-chip-btn {
   padding: 0.3rem 0.75rem;
   border-radius: 9999px;
-  background: #F1F5F9;
+  background: #f1f5f9;
   border: none;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: #404945;
@@ -5858,7 +5888,7 @@
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  background: #34D399;
+  background: #34d399;
 }
 
 .day-chip-add {
@@ -5868,7 +5898,7 @@
 }
 
 .day-chip-add:hover {
-  background: #ECFDF5;
+  background: #ecfdf5;
 }
 
 /* Route Metrics Bar */
@@ -5879,7 +5909,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   color: #404945;
 }
@@ -5925,7 +5955,7 @@
 }
 
 [data-theme="dark"] .metrics-checkbox-label {
-  color: #34D399;
+  color: #34d399;
 }
 
 /* Scrollable Itinerary Feed */
@@ -5944,7 +5974,7 @@
   align-items: center;
   gap: 0.5rem;
   padding-left: 0.65rem;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   color: #404945;
   margin: -0.2rem 0;
@@ -6019,7 +6049,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
   font-weight: 800;
   flex-shrink: 0;
@@ -6031,7 +6061,7 @@
 }
 
 .stop-sequence-badge.selected {
-  background: #10B981;
+  background: #10b981;
 }
 
 .stop-card-main {
@@ -6047,7 +6077,7 @@
 }
 
 .stop-name-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 14px;
   font-weight: 700;
   color: #013628;
@@ -6064,7 +6094,7 @@
   padding: 0.15rem 0.5rem;
   border-radius: 9999px;
   background: #f2f3ff;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -6078,7 +6108,7 @@
 }
 
 .stop-cat-chip.completed {
-  background: #ECFDF5;
+  background: #ecfdf5;
   color: #286954;
 }
 
@@ -6104,7 +6134,7 @@
   margin-top: 0.45rem;
   padding: 0.45rem 0.6rem;
   border-radius: 8px;
-  background: #F1F5F9;
+  background: #f1f5f9;
   font-size: 11px;
   color: #131b2e;
   display: flex;
@@ -6138,7 +6168,7 @@
   color: #ffffff;
   border: none;
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 600;
   display: flex;
@@ -6183,7 +6213,7 @@
 }
 
 .pool-summary-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13px;
   font-weight: 700;
   color: #013628;
@@ -6226,7 +6256,7 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: #F1F5F9;
+  background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6236,11 +6266,11 @@
 
 [data-theme="dark"] .pool-item-icon-box {
   background: rgba(30, 77, 62, 0.4);
-  color: #34D399;
+  color: #34d399;
 }
 
 .pool-item-name {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 12px;
   font-weight: 700;
   color: #013628;
@@ -6267,11 +6297,11 @@
 
 .btn-pool-assign {
   padding: 0.25rem 0.65rem;
-  background: #ECFDF5;
+  background: #ecfdf5;
   color: #286954;
   border: none;
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   cursor: pointer;
@@ -6304,7 +6334,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 600;
   color: #404945;
@@ -6318,16 +6348,16 @@
   width: 8px;
   height: 8px;
   border-radius: 9999px;
-  background: #10B981;
+  background: #10b981;
 }
 
 .btn-desk-start-nav {
   padding: 0.4rem 1rem;
-  background: #0D281E;
+  background: #0d281e;
   color: #ffffff;
   border: none;
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -6360,7 +6390,9 @@
   cursor: pointer;
   user-select: none;
   filter: drop-shadow(0 6px 12px rgba(13, 40, 30, 0.28));
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s ease;
 }
 
 .stitch-leaflet-pin:hover {
@@ -6388,7 +6420,8 @@
 }
 
 @keyframes stitch-pulse-ping {
-  75%, 100% {
+  75%,
+  100% {
     transform: translate(-50%, -50%) scale(2.2);
     opacity: 0;
   }
@@ -6410,7 +6443,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    sans-serif;
   font-size: 13px;
   font-weight: 800;
   border: 2.5px solid #ffffff;
@@ -6452,7 +6488,7 @@
 }
 
 .stitch-pin-pill-title {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   color: #131b2e;
@@ -6464,7 +6500,7 @@
 }
 
 .stitch-pin-pill-meta {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 9.5px;
   font-weight: 500;
   color: #10b981;
@@ -6481,7 +6517,9 @@
   padding: 0.65rem;
   background: #ffffff;
   border-radius: 18px;
-  box-shadow: 0 16px 36px -4px rgba(13, 40, 30, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 16px 36px -4px rgba(13, 40, 30, 0.22),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -6499,8 +6537,14 @@
 }
 
 @keyframes stitchFadeIn {
-  from { opacity: 0; transform: translate(-50%, 8px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 .popup-photo-wrap {
@@ -6526,7 +6570,7 @@
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
   border-radius: 9999px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 10px;
   font-weight: 700;
   color: #013628;
@@ -6540,7 +6584,7 @@
 }
 
 .popup-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 13.5px;
   font-weight: 700;
   color: #013628;
@@ -6558,7 +6602,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   color: #f59e0b;
@@ -6590,7 +6634,7 @@
   border-radius: 9999px;
   background: #013628;
   color: #ffffff;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 600;
   border: none;
@@ -6605,9 +6649,9 @@
 .popup-btn-detail {
   padding: 4px 12px;
   border-radius: 9999px;
-  background: #ECFDF5;
+  background: #ecfdf5;
   color: #005035;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 600;
   border: none;
@@ -6631,7 +6675,9 @@
   -webkit-backdrop-filter: blur(24px);
   padding: 1rem;
   border-radius: 20px;
-  box-shadow: 0 20px 45px -8px rgba(13, 40, 30, 0.22), 0 0 0 1px rgba(226, 232, 240, 0.9);
+  box-shadow:
+    0 20px 45px -8px rgba(13, 40, 30, 0.22),
+    0 0 0 1px rgba(226, 232, 240, 0.9);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -6704,7 +6750,7 @@
   border: 1px solid rgba(203, 213, 225, 0.8);
   background: #ffffff;
   color: #475569;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -6754,7 +6800,7 @@
   padding: 0.3rem 0.6rem;
   border: 1px solid rgba(40, 105, 84, 0.3);
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   background: #ffffff;
   color: #0f172a;
@@ -6772,7 +6818,7 @@
   color: #ffffff;
   border: none;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -6789,7 +6835,7 @@
   color: #64748b;
   border: none;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 11px;
   cursor: pointer;
 }
@@ -6798,7 +6844,7 @@
   padding: 0.35rem 0.55rem;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   background: #ffffff;
   color: #0f172a;
@@ -6813,14 +6859,18 @@
 }
 
 .btn-active-pinning {
-  background: #10B981 !important;
+  background: #10b981 !important;
   color: #ffffff !important;
   animation: pulse-pinning 1.5s infinite alternate ease-in-out;
 }
 
 @keyframes pulse-pinning {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-  100% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
 }
 
 /* ── Primary Pin Actions: Paylaş & Kaydet ── */
@@ -6849,49 +6899,49 @@
 }
 
 .btn-pin-primary-share {
-  background: #ECFDF5;
-  color: #065F46;
+  background: #ecfdf5;
+  color: #065f46;
   border-color: rgba(16, 185, 129, 0.3);
 }
 
 .btn-pin-primary-share:hover {
-  background: #D1FAE5;
+  background: #d1fae5;
   color: #047857;
   transform: translateY(-1px);
 }
 
 .btn-pin-primary-save {
-  background: #F1F5F9;
-  color: #1E293B;
+  background: #f1f5f9;
+  color: #1e293b;
   border-color: rgba(203, 213, 225, 0.8);
 }
 
 .btn-pin-primary-save:hover {
-  background: #E2E8F0;
-  color: #0F172A;
+  background: #e2e8f0;
+  color: #0f172a;
   transform: translateY(-1px);
 }
 
 .btn-pin-primary-save.is-saved {
-  background: #10B981;
-  color: #FFFFFF;
+  background: #10b981;
+  color: #ffffff;
   border-color: #059669;
 }
 
 [data-theme="dark"] .btn-pin-primary-share {
   background: rgba(6, 95, 70, 0.3);
-  color: #34D399;
+  color: #34d399;
   border-color: rgba(52, 211, 153, 0.3);
 }
 
 [data-theme="dark"] .btn-pin-primary-share:hover {
   background: rgba(6, 95, 70, 0.5);
-  color: #6EE7B7;
+  color: #6ee7b7;
 }
 
 [data-theme="dark"] .btn-pin-primary-save {
-  background: #1E293B;
-  color: #F1F5F9;
+  background: #1e293b;
+  color: #f1f5f9;
   border-color: #334155;
 }
 
@@ -6901,7 +6951,7 @@
 
 [data-theme="dark"] .btn-pin-primary-save.is-saved {
   background: #059669;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 /* ============================================================ */
@@ -7226,7 +7276,14 @@
   width: 100% !important;
   background: #ffffff;
   overflow: hidden !important;
-  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Plus Jakarta Sans",
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 [data-theme="dark"] .planner-main-container {
@@ -7371,7 +7428,9 @@
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: 14px;
-  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 12px 30px -4px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -7627,8 +7686,14 @@
 }
 
 @keyframes stitchFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .stitch-drawer-header {
@@ -8226,5 +8291,3 @@
   background: #15241f;
   border-color: rgba(45, 110, 88, 0.4);
 }
-
-

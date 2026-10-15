@@ -13,7 +13,7 @@ import type {
   TravelerInfo,
   TripDates,
   TripNeeds,
-} from './types';
+} from "./types";
 
 // ---------------------------------------------------------------------------
 // Core Interfaces
@@ -30,7 +30,7 @@ export interface TripState {
   durationDays?: number;
   travelers?: { adults?: number; children?: number; pets?: boolean };
   budget?: {
-    level?: 'budget' | 'mid' | 'luxury' | 'unspecified';
+    level?: "budget" | "mid" | "luxury" | "unspecified";
     currency?: string;
     total?: number;
   };
@@ -41,8 +41,8 @@ export interface TripState {
     general?: string[];
   };
   constraints?: string[];
-  pace?: 'relaxed' | 'moderate' | 'fast';
-  lodgingType?: Array<'hotel' | 'hostel' | 'apartment' | 'boutique' | 'resort'>;
+  pace?: "relaxed" | "moderate" | "fast";
+  lodgingType?: Array<"hotel" | "hostel" | "apartment" | "boutique" | "resort">;
   needs?: { flights?: boolean; carRental?: boolean; localTransit?: boolean };
   decisions: TripDecision[];
   rejections: TripRejection[];
@@ -58,7 +58,7 @@ export interface TripDecision {
 }
 
 export interface TripRejection {
-  type: 'place' | 'suggestion' | 'option';
+  type: "place" | "suggestion" | "option";
   name: string;
   reason?: string;
   rejectedAt: string;
@@ -73,20 +73,20 @@ export interface AnsweredSlot {
   value: unknown;
   askedAt?: string;
   answeredAt: string;
-  source: 'stated' | 'confirmed' | 'derived' | 'assumed';
+  source: "stated" | "confirmed" | "derived" | "assumed";
 }
 
 export const SLOT_KEYS = [
-  'destination',
-  'durationDays',
-  'dates',
-  'travelers',
-  'budget',
-  'pace',
-  'interests',
-  'lodgingType',
-  'needs',
-  'constraints',
+  "destination",
+  "durationDays",
+  "dates",
+  "travelers",
+  "budget",
+  "pace",
+  "interests",
+  "lodgingType",
+  "needs",
+  "constraints",
 ] as const;
 
 export type SlotKey = (typeof SLOT_KEYS)[number];
@@ -128,7 +128,7 @@ function deepEqual(a: unknown, b: unknown): boolean {
     return a.every((v, i) => deepEqual(v, b[i]));
   }
 
-  if (typeof a === 'object' && typeof b === 'object') {
+  if (typeof a === "object" && typeof b === "object") {
     const aObj = a as Record<string, unknown>;
     const bObj = b as Record<string, unknown>;
     const aKeys = Object.keys(aObj);
@@ -144,18 +144,18 @@ function deepEqual(a: unknown, b: unknown): boolean {
 function cloneValue<T>(v: T): T {
   if (v == null) return v;
   if (Array.isArray(v)) return [...v] as unknown as T;
-  if (typeof v === 'object') return { ...v } as T;
+  if (typeof v === "object") return { ...v } as T;
   return v;
 }
 
 /** Check whether a slot value is meaningfully filled. */
 function isSlotFilled(value: unknown): boolean {
   if (value == null) return false;
-  if (typeof value === 'string') return value.trim().length > 0;
-  if (typeof value === 'number') return true;
-  if (typeof value === 'boolean') return true;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number") return true;
+  if (typeof value === "boolean") return true;
   if (Array.isArray(value)) return value.length > 0;
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const obj = value as Record<string, unknown>;
     return Object.values(obj).some((v) => isSlotFilled(v));
   }
@@ -171,22 +171,19 @@ function nowISO(): string {
 // ---------------------------------------------------------------------------
 
 const DIFFABLE_FIELDS: string[] = [
-  'destination',
-  'dates',
-  'durationDays',
-  'travelers',
-  'budget',
-  'interests',
-  'constraints',
-  'pace',
-  'lodgingType',
-  'needs',
+  "destination",
+  "dates",
+  "durationDays",
+  "travelers",
+  "budget",
+  "interests",
+  "constraints",
+  "pace",
+  "lodgingType",
+  "needs",
 ];
 
-export function computeStateDiff(
-  previous: TripState,
-  current: TripState,
-): TripStateEvent[] {
+export function computeStateDiff(previous: TripState, current: TripState): TripStateEvent[] {
   const events: TripStateEvent[] = [];
   const now = nowISO();
 
@@ -226,141 +223,138 @@ interface NextQuestion {
 
 /** Ordered priority for unanswered-slot questions. */
 const SLOT_PRIORITY: SlotKey[] = [
-  'destination',
-  'durationDays',
-  'interests',
-  'travelers',
-  'budget',
-  'pace',
+  "destination",
+  "durationDays",
+  "interests",
+  "travelers",
+  "budget",
+  "pace",
 ];
 
-const QUESTION_MAP: Record<
-  string,
-  { question: string; quickOptions: QuickOption[] }
-> = {
+const QUESTION_MAP: Record<string, { question: string; quickOptions: QuickOption[] }> = {
   destination: {
-    question: 'Nereye gitmek istiyorsun?',
+    question: "Nereye gitmek istiyorsun?",
     quickOptions: [
-      { label: 'Paris', prompt: "Paris'e gitmek istiyorum", value: 'Paris' },
-      { label: 'Roma', prompt: "Roma'ya gitmek istiyorum", value: 'Roma' },
-      { label: 'Tokyo', prompt: "Tokyo'ya gitmek istiyorum", value: 'Tokyo' },
+      { label: "Paris", prompt: "Paris'e gitmek istiyorum", value: "Paris" },
+      { label: "Roma", prompt: "Roma'ya gitmek istiyorum", value: "Roma" },
+      { label: "Tokyo", prompt: "Tokyo'ya gitmek istiyorum", value: "Tokyo" },
       {
-        label: 'Barselona',
+        label: "Barselona",
         prompt: "Barselona'ya gitmek istiyorum",
-        value: 'Barselona',
+        value: "Barselona",
       },
     ],
   },
   durationDays: {
-    question: 'Tatil kac gun surecek?',
+    question: "Tatil kac gun surecek?",
     quickOptions: [
-      { label: '3 gun', prompt: '3 gunluk bir tatil planliyorum', value: 3 },
-      { label: '5 gun', prompt: '5 gunluk bir tatil planliyorum', value: 5 },
-      { label: '7 gun', prompt: '1 haftalik bir tatil planliyorum', value: 7 },
+      { label: "3 gun", prompt: "3 gunluk bir tatil planliyorum", value: 3 },
+      { label: "5 gun", prompt: "5 gunluk bir tatil planliyorum", value: 5 },
+      { label: "7 gun", prompt: "1 haftalik bir tatil planliyorum", value: 7 },
       {
-        label: '10+ gun',
-        prompt: '10 gunluk bir tatil planliyorum',
+        label: "10+ gun",
+        prompt: "10 gunluk bir tatil planliyorum",
         value: 10,
       },
     ],
   },
   interests: {
-    question: 'Ne tur aktiviteler ilgini ceker?',
+    question: "Ne tur aktiviteler ilgini ceker?",
     quickOptions: [
       {
-        label: 'Yemek & Kafeler',
-        prompt: 'Yemek kulturunu ve kafeleri kesfetmek istiyorum',
-        value: { food: ['local cuisine', 'cafes'] },
+        label: "Yemek & Kafeler",
+        prompt: "Yemek kulturunu ve kafeleri kesfetmek istiyorum",
+        value: { food: ["local cuisine", "cafes"] },
       },
       {
-        label: 'Tarih & Kultur',
-        prompt: 'Tarihi ve kulturel yerleri gezmek istiyorum',
-        value: { culture: ['museums', 'historical sites'] },
+        label: "Tarih & Kultur",
+        prompt: "Tarihi ve kulturel yerleri gezmek istiyorum",
+        value: { culture: ["museums", "historical sites"] },
       },
       {
-        label: 'Doga & Spor',
-        prompt: 'Doga yuruuyusleri ve spor aktiviteleri istiyorum',
-        value: { sports: ['hiking', 'outdoor activities'] },
+        label: "Doga & Spor",
+        prompt: "Doga yuruuyusleri ve spor aktiviteleri istiyorum",
+        value: { sports: ["hiking", "outdoor activities"] },
       },
       {
-        label: 'Her seyden biraz',
-        prompt: 'Yemek, kultur ve doga hepsinden biraz olsun',
+        label: "Her seyden biraz",
+        prompt: "Yemek, kultur ve doga hepsinden biraz olsun",
         value: {
-          food: ['local cuisine'],
-          culture: ['museums'],
-          sports: ['walking tours'],
-          general: ['sightseeing'],
+          food: ["local cuisine"],
+          culture: ["museums"],
+          sports: ["walking tours"],
+          general: ["sightseeing"],
         },
       },
     ],
   },
   travelers: {
-    question: 'Kac kisi seyahat edeceksiniz?',
+    question: "Kac kisi seyahat edeceksiniz?",
     quickOptions: [
       {
-        label: 'Tek basima',
-        prompt: 'Tek basima seyahat edecegim',
+        label: "Tek basima",
+        prompt: "Tek basima seyahat edecegim",
         value: { adults: 1 },
       },
       {
-        label: 'Cift',
-        prompt: '2 kisi olarak gidecegiz',
+        label: "Cift",
+        prompt: "2 kisi olarak gidecegiz",
         value: { adults: 2 },
       },
       {
-        label: 'Aile (cocuklu)',
-        prompt: '2 yetiskin ve 1 cocuk olarak gidecegiz',
+        label: "Aile (cocuklu)",
+        prompt: "2 yetiskin ve 1 cocuk olarak gidecegiz",
         value: { adults: 2, children: 1 },
       },
       {
-        label: 'Grup (4+)',
-        prompt: '4 kisilik bir grupla gidecegiz',
+        label: "Grup (4+)",
+        prompt: "4 kisilik bir grupla gidecegiz",
         value: { adults: 4 },
       },
     ],
   },
   budget: {
-    question: 'Butce tercihin ne yonde?',
+    question: "Butce tercihin ne yonde?",
     quickOptions: [
       {
-        label: 'Ekonomik',
-        prompt: 'Ekonomik bir butce planliyorum',
-        value: { level: 'budget' as const },
+        label: "Ekonomik",
+        prompt: "Ekonomik bir butce planliyorum",
+        value: { level: "budget" as const },
       },
       {
-        label: 'Orta',
-        prompt: 'Orta butceli bir tatil istiyorum',
-        value: { level: 'mid' as const },
+        label: "Orta",
+        prompt: "Orta butceli bir tatil istiyorum",
+        value: { level: "mid" as const },
       },
       {
-        label: 'Luks',
-        prompt: 'Luks bir tatil planliyorum',
-        value: { level: 'luxury' as const },
+        label: "Luks",
+        prompt: "Luks bir tatil planliyorum",
+        value: { level: "luxury" as const },
       },
       {
-        label: 'Farketmez',
-        prompt: 'Butce konusunda esnek davranirim',
-        value: { level: 'unspecified' as const },
+        label: "Farketmez",
+        prompt: "Butce konusunda esnek davranirim",
+        value: { level: "unspecified" as const },
       },
     ],
   },
   pace: {
-    question: 'Nasil bir tempo istiyorsun?',
+    question: "Nasil bir tempo istiyorsun?",
     quickOptions: [
       {
-        label: 'Rahat',
-        prompt: 'Rahat ve yavas tempolu bir tatil istiyorum',
-        value: 'relaxed' as const,
+        label: "Rahat",
+        prompt: "Rahat ve yavas tempolu bir tatil istiyorum",
+        value: "relaxed" as const,
       },
       {
-        label: 'Dengeli',
-        prompt: 'Ne cok yogun ne cok yavas, dengeli olsun',
-        value: 'moderate' as const,
+        label: "Dengeli",
+        prompt: "Ne cok yogun ne cok yavas, dengeli olsun",
+        value: "moderate" as const,
       },
       {
-        label: 'Yogun',
-        prompt: 'Mumkun oldugunca cok sey gormek istiyorum',
-        value: 'fast' as const,
+        label: "Yogun",
+        prompt: "Mumkun oldugunca cok sey gormek istiyorum",
+        value: "fast" as const,
       },
     ],
   },
@@ -431,21 +425,15 @@ export function tripProfileToState(profile: TripProfile): TripState {
   if (profile.interests) {
     state.interests = {
       food: profile.interests.food ? [...profile.interests.food] : undefined,
-      sports: profile.interests.sports
-        ? [...profile.interests.sports]
-        : undefined,
-      culture: profile.interests.culture
-        ? [...profile.interests.culture]
-        : undefined,
-      general: profile.interests.general
-        ? [...profile.interests.general]
-        : undefined,
+      sports: profile.interests.sports ? [...profile.interests.sports] : undefined,
+      culture: profile.interests.culture ? [...profile.interests.culture] : undefined,
+      general: profile.interests.general ? [...profile.interests.general] : undefined,
     };
   }
 
   if (profile.constraints) state.constraints = [...profile.constraints];
 
-  if (profile.pace && profile.pace !== 'unspecified') {
+  if (profile.pace && profile.pace !== "unspecified") {
     state.pace = profile.pace;
   }
 
@@ -475,12 +463,8 @@ export function tripStateToProfile(state: TripState): TripProfile {
     interests: {
       food: state.interests.food ? [...state.interests.food] : undefined,
       sports: state.interests.sports ? [...state.interests.sports] : undefined,
-      culture: state.interests.culture
-        ? [...state.interests.culture]
-        : undefined,
-      general: state.interests.general
-        ? [...state.interests.general]
-        : undefined,
+      culture: state.interests.culture ? [...state.interests.culture] : undefined,
+      general: state.interests.general ? [...state.interests.general] : undefined,
     },
     completeness,
   };
@@ -583,17 +567,13 @@ export function mergeTripState(
     }
 
     // Apply the update
-    if (field === 'interests' && updateVal && typeof updateVal === 'object') {
+    if (field === "interests" && updateVal && typeof updateVal === "object") {
       // Merge interests rather than replacing
-      const updInterests = updateVal as TripState['interests'];
-      if (updInterests.food)
-        state.interests.food = [...(updInterests.food ?? [])];
-      if (updInterests.sports)
-        state.interests.sports = [...(updInterests.sports ?? [])];
-      if (updInterests.culture)
-        state.interests.culture = [...(updInterests.culture ?? [])];
-      if (updInterests.general)
-        state.interests.general = [...(updInterests.general ?? [])];
+      const updInterests = updateVal as TripState["interests"];
+      if (updInterests.food) state.interests.food = [...(updInterests.food ?? [])];
+      if (updInterests.sports) state.interests.sports = [...(updInterests.sports ?? [])];
+      if (updInterests.culture) state.interests.culture = [...(updInterests.culture ?? [])];
+      if (updInterests.general) state.interests.general = [...(updInterests.general ?? [])];
     } else {
       (state as unknown as Record<string, unknown>)[field] = cloneValue(updateVal);
     }
@@ -612,7 +592,7 @@ export function mergeTripState(
         key: field,
         value: cloneValue(updateVal),
         answeredAt: now,
-        source: 'stated',
+        source: "stated",
       });
     }
   }
@@ -642,12 +622,9 @@ export function mergeTripState(
 // 7. State-to-context-prompt
 // ---------------------------------------------------------------------------
 
-export function stateToContextPrompt(
-  state: TripState,
-  answeredSlots: AnsweredSlot[],
-): string {
+export function stateToContextPrompt(state: TripState, answeredSlots: AnsweredSlot[]): string {
   const lines: string[] = [];
-  lines.push('=== TRIP STATE ===');
+  lines.push("=== TRIP STATE ===");
 
   if (state.destination) {
     lines.push(`Destination: ${state.destination}`);
@@ -661,18 +638,17 @@ export function stateToContextPrompt(
     const parts: string[] = [];
     if (state.dates.start) parts.push(`from ${state.dates.start}`);
     if (state.dates.end) parts.push(`to ${state.dates.end}`);
-    if (state.dates.flexible) parts.push('(flexible)');
+    if (state.dates.flexible) parts.push("(flexible)");
     if (state.dates.description) parts.push(state.dates.description);
-    if (parts.length > 0) lines.push(`Dates: ${parts.join(' ')}`);
+    if (parts.length > 0) lines.push(`Dates: ${parts.join(" ")}`);
   }
 
   if (state.travelers) {
     const tp: string[] = [];
     if (state.travelers.adults) tp.push(`${state.travelers.adults} adults`);
-    if (state.travelers.children)
-      tp.push(`${state.travelers.children} children`);
-    if (state.travelers.pets) tp.push('with pets');
-    if (tp.length > 0) lines.push(`Travelers: ${tp.join(', ')}`);
+    if (state.travelers.children) tp.push(`${state.travelers.children} children`);
+    if (state.travelers.pets) tp.push("with pets");
+    if (tp.length > 0) lines.push(`Travelers: ${tp.join(", ")}`);
   }
 
   if (state.budget) {
@@ -681,50 +657,45 @@ export function stateToContextPrompt(
     if (state.budget.total != null && state.budget.currency) {
       bp.push(`${state.budget.total} ${state.budget.currency}`);
     }
-    if (bp.length > 0) lines.push(`Budget: ${bp.join(', ')}`);
+    if (bp.length > 0) lines.push(`Budget: ${bp.join(", ")}`);
   }
 
   // Interests
   const interestParts: string[] = [];
-  if (state.interests.food?.length)
-    interestParts.push(`food: ${state.interests.food.join(', ')}`);
+  if (state.interests.food?.length) interestParts.push(`food: ${state.interests.food.join(", ")}`);
   if (state.interests.sports?.length)
-    interestParts.push(`sports: ${state.interests.sports.join(', ')}`);
+    interestParts.push(`sports: ${state.interests.sports.join(", ")}`);
   if (state.interests.culture?.length)
-    interestParts.push(`culture: ${state.interests.culture.join(', ')}`);
+    interestParts.push(`culture: ${state.interests.culture.join(", ")}`);
   if (state.interests.general?.length)
-    interestParts.push(`general: ${state.interests.general.join(', ')}`);
-  if (interestParts.length > 0)
-    lines.push(`Interests: ${interestParts.join('; ')}`);
+    interestParts.push(`general: ${state.interests.general.join(", ")}`);
+  if (interestParts.length > 0) lines.push(`Interests: ${interestParts.join("; ")}`);
 
   if (state.pace) {
     lines.push(`Pace: ${state.pace}`);
   }
 
   if (state.lodgingType?.length) {
-    lines.push(`Lodging: ${state.lodgingType.join(', ')}`);
+    lines.push(`Lodging: ${state.lodgingType.join(", ")}`);
   }
 
   if (state.needs) {
     const np: string[] = [];
-    if (state.needs.flights) np.push('flights');
-    if (state.needs.carRental) np.push('car rental');
-    if (state.needs.localTransit) np.push('local transit');
-    if (np.length > 0) lines.push(`Needs: ${np.join(', ')}`);
+    if (state.needs.flights) np.push("flights");
+    if (state.needs.carRental) np.push("car rental");
+    if (state.needs.localTransit) np.push("local transit");
+    if (np.length > 0) lines.push(`Needs: ${np.join(", ")}`);
   }
 
   if (state.constraints?.length) {
-    lines.push(`Constraints: ${state.constraints.join('; ')}`);
+    lines.push(`Constraints: ${state.constraints.join("; ")}`);
   }
 
   // Active rejections
   if (state.rejections.length > 0) {
     const rejList = state.rejections
-      .map(
-        (r) =>
-          `${r.name} (${r.type}${r.reason ? ': ' + r.reason : ''})`,
-      )
-      .join('; ');
+      .map((r) => `${r.name} (${r.type}${r.reason ? ": " + r.reason : ""})`)
+      .join("; ");
     lines.push(`Rejected: ${rejList}`);
   }
 
@@ -736,9 +707,9 @@ export function stateToContextPrompt(
     return !isSlotFilled(val);
   });
   if (unanswered.length > 0) {
-    lines.push(`Unanswered: ${unanswered.join(', ')}`);
+    lines.push(`Unanswered: ${unanswered.join(", ")}`);
   }
 
-  lines.push('=== END TRIP STATE ===');
-  return lines.join('\n');
+  lines.push("=== END TRIP STATE ===");
+  return lines.join("\n");
 }

@@ -30,7 +30,9 @@ export interface ApiResponseError {
 export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {}): Promise<T> {
   const { timeoutMs = 12000, skipAuth = false, headers: customHeaders, ...fetchOptions } = options;
 
-  const url = endpoint.startsWith("http") ? endpoint : `${API_ENDPOINT}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+  const url = endpoint.startsWith("http")
+    ? endpoint
+    : `${API_ENDPOINT}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
   const headers: Record<string, string> = {
     "content-type": "application/json",
@@ -47,7 +49,9 @@ export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {
         }
       } catch (refreshErr) {
         if (typeof window !== "undefined" && window.dispatchEvent) {
-          window.dispatchEvent(new CustomEvent("mapsbridge:token-refresh-failed", { detail: { error: refreshErr } }));
+          window.dispatchEvent(
+            new CustomEvent("mapsbridge:token-refresh-failed", { detail: { error: refreshErr } }),
+          );
         }
       }
     }
@@ -156,14 +160,23 @@ export const routesApi = {
     return apiFetch<RouteEntity>(`/routes/${encodeURIComponent(id)}`);
   },
 
-  async create(data: { name: string; stops: RouteStop[]; days?: any[]; isPublic?: boolean; tier?: string }): Promise<{ routeId: string; name: string }> {
+  async create(data: {
+    name: string;
+    stops: RouteStop[];
+    days?: any[];
+    isPublic?: boolean;
+    tier?: string;
+  }): Promise<{ routeId: string; name: string }> {
     return apiFetch<{ routeId: string; name: string }>("/routes", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  async update(id: string, data: { name?: string; stops?: RouteStop[]; days?: any[]; isPublic?: boolean }): Promise<{ routeId: string; status: string }> {
+  async update(
+    id: string,
+    data: { name?: string; stops?: RouteStop[]; days?: any[]; isPublic?: boolean },
+  ): Promise<{ routeId: string; status: string }> {
     return apiFetch<{ routeId: string; status: string }>(`/routes/${encodeURIComponent(id)}`, {
       method: "PUT",
       body: JSON.stringify(data),
@@ -176,18 +189,27 @@ export const routesApi = {
     });
   },
 
-  async share(id: string, expiresInHours = 48): Promise<{ shareCode: string; expiresAt: number; url: string }> {
-    return apiFetch<{ shareCode: string; expiresAt: number; url: string }>(`/routes/${encodeURIComponent(id)}/share`, {
-      method: "POST",
-      body: JSON.stringify({ expiresInHours }),
-    });
+  async share(
+    id: string,
+    expiresInHours = 48,
+  ): Promise<{ shareCode: string; expiresAt: number; url: string }> {
+    return apiFetch<{ shareCode: string; expiresAt: number; url: string }>(
+      `/routes/${encodeURIComponent(id)}/share`,
+      {
+        method: "POST",
+        body: JSON.stringify({ expiresInHours }),
+      },
+    );
   },
 
   async readShare(code: string): Promise<any> {
     return apiFetch<any>(`/shares/${encodeURIComponent(code.trim())}`, { skipAuth: true });
   },
 
-  async getOsrmRoute(profile: "driving" | "walking" | "cycling", coordinatesStr: string): Promise<any> {
+  async getOsrmRoute(
+    profile: "driving" | "walking" | "cycling",
+    coordinatesStr: string,
+  ): Promise<any> {
     return apiFetch<any>(`/routes/osrm/${profile}?coords=${encodeURIComponent(coordinatesStr)}`, {
       skipAuth: true,
     });
@@ -207,7 +229,11 @@ export const mediaApi = {
   /**
    * Request a 5-minute pre-signed S3 PUT URL
    */
-  async getPresignedUpload(fileName: string, contentType: string, category: "avatars" | "route-covers" | "traveler-photos" = "traveler-photos"): Promise<PresignUploadResponse> {
+  async getPresignedUpload(
+    fileName: string,
+    contentType: string,
+    category: "avatars" | "route-covers" | "traveler-photos" = "traveler-photos",
+  ): Promise<PresignUploadResponse> {
     const params = new URLSearchParams({ fileName, contentType, category });
     return apiFetch<PresignUploadResponse>(`/media/presign-upload?${params.toString()}`);
   },
@@ -215,7 +241,10 @@ export const mediaApi = {
   /**
    * Directly uploads a file to S3 using a pre-signed URL (zero Lambda compute cost)
    */
-  async uploadDirectlyToS3(file: File, category: "avatars" | "route-covers" | "traveler-photos" = "traveler-photos"): Promise<string> {
+  async uploadDirectlyToS3(
+    file: File,
+    category: "avatars" | "route-covers" | "traveler-photos" = "traveler-photos",
+  ): Promise<string> {
     const presign = await this.getPresignedUpload(file.name, file.type, category);
 
     const uploadResponse = await fetch(presign.uploadUrl, {
@@ -259,24 +288,40 @@ export const chatApi = {
     return apiFetch<{ threads: ChatThreadSummary[] }>("/chat/threads");
   },
 
-  async createThread(participants: string[], initialMessage?: string): Promise<{ threadId: string }> {
+  async createThread(
+    participants: string[],
+    initialMessage?: string,
+  ): Promise<{ threadId: string }> {
     return apiFetch<{ threadId: string }>("/chat/threads", {
       method: "POST",
       body: JSON.stringify({ participants, initialMessage }),
     });
   },
 
-  async getMessages(threadId: string, limit = 50, cursor?: string): Promise<{ messages: ChatMessageItem[]; nextCursor?: string }> {
+  async getMessages(
+    threadId: string,
+    limit = 50,
+    cursor?: string,
+  ): Promise<{ messages: ChatMessageItem[]; nextCursor?: string }> {
     const params = new URLSearchParams({ limit: String(limit) });
     if (cursor) params.set("cursor", cursor);
-    return apiFetch<{ messages: ChatMessageItem[]; nextCursor?: string }>(`/chat/threads/${encodeURIComponent(threadId)}/messages?${params.toString()}`);
+    return apiFetch<{ messages: ChatMessageItem[]; nextCursor?: string }>(
+      `/chat/threads/${encodeURIComponent(threadId)}/messages?${params.toString()}`,
+    );
   },
 
-  async sendMessage(threadId: string, content: string, embeds?: { routeEmbed?: any; locationPin?: any }): Promise<{ messageId: string; timestamp: string }> {
-    return apiFetch<{ messageId: string; timestamp: string }>(`/chat/threads/${encodeURIComponent(threadId)}/messages`, {
-      method: "POST",
-      body: JSON.stringify({ content, ...embeds }),
-    });
+  async sendMessage(
+    threadId: string,
+    content: string,
+    embeds?: { routeEmbed?: any; locationPin?: any },
+  ): Promise<{ messageId: string; timestamp: string }> {
+    return apiFetch<{ messageId: string; timestamp: string }>(
+      `/chat/threads/${encodeURIComponent(threadId)}/messages`,
+      {
+        method: "POST",
+        body: JSON.stringify({ content, ...embeds }),
+      },
+    );
   },
 };
 
@@ -458,45 +503,74 @@ export const adminApi = {
     return apiFetch<{ metrics: AdminMetrics }>("/admin/metrics");
   },
 
-  async listUsers(params?: { limit?: number; cursor?: string }): Promise<{ users: AdminUserItem[]; count: number; nextCursor?: string | null }> {
+  async listUsers(params?: {
+    limit?: number;
+    cursor?: string;
+  }): Promise<{ users: AdminUserItem[]; count: number; nextCursor?: string | null }> {
     const search = new URLSearchParams();
     if (params?.limit) search.set("limit", String(params.limit));
     if (params?.cursor) search.set("cursor", params.cursor);
     const qs = search.toString();
-    return apiFetch<{ users: AdminUserItem[]; count: number; nextCursor?: string | null }>(`/admin/users${qs ? `?${qs}` : ""}`);
+    return apiFetch<{ users: AdminUserItem[]; count: number; nextCursor?: string | null }>(
+      `/admin/users${qs ? `?${qs}` : ""}`,
+    );
   },
 
-  async suspendUser(userId: string, reason: string): Promise<{ status: string; userId: string; reason: string }> {
-    return apiFetch<{ status: string; userId: string; reason: string }>(`/admin/users/${encodeURIComponent(userId)}/suspend`, {
-      method: "POST",
-      body: JSON.stringify({ reason }),
-    });
+  async suspendUser(
+    userId: string,
+    reason: string,
+  ): Promise<{ status: string; userId: string; reason: string }> {
+    return apiFetch<{ status: string; userId: string; reason: string }>(
+      `/admin/users/${encodeURIComponent(userId)}/suspend`,
+      {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+      },
+    );
   },
 
-  async unsuspendUser(userId: string, reason: string): Promise<{ status: string; userId: string; reason: string }> {
-    return apiFetch<{ status: string; userId: string; reason: string }>(`/admin/users/${encodeURIComponent(userId)}/unsuspend`, {
-      method: "POST",
-      body: JSON.stringify({ reason }),
-    });
+  async unsuspendUser(
+    userId: string,
+    reason: string,
+  ): Promise<{ status: string; userId: string; reason: string }> {
+    return apiFetch<{ status: string; userId: string; reason: string }>(
+      `/admin/users/${encodeURIComponent(userId)}/unsuspend`,
+      {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+      },
+    );
   },
 
   async getFinance(): Promise<{ finance: AdminFinanceData }> {
     return apiFetch<{ finance: AdminFinanceData }>("/admin/finance");
   },
 
-  async listPayments(params?: { limit?: number; status?: string }): Promise<{ payments: AdminPaymentItem[]; count: number }> {
+  async listPayments(params?: {
+    limit?: number;
+    status?: string;
+  }): Promise<{ payments: AdminPaymentItem[]; count: number }> {
     const search = new URLSearchParams();
     if (params?.limit) search.set("limit", String(params.limit));
     if (params?.status) search.set("status", params.status);
     const qs = search.toString();
-    return apiFetch<{ payments: AdminPaymentItem[]; count: number }>(`/admin/payments${qs ? `?${qs}` : ""}`);
+    return apiFetch<{ payments: AdminPaymentItem[]; count: number }>(
+      `/admin/payments${qs ? `?${qs}` : ""}`,
+    );
   },
 
-  async refundPayment(userId: string, paymentIntentId: string, reason: string): Promise<{ status: string; refundId: string; amount: number }> {
-    return apiFetch<{ status: string; refundId: string; amount: number }>(`/admin/users/${encodeURIComponent(userId)}/refund`, {
-      method: "POST",
-      body: JSON.stringify({ paymentIntentId, reason }),
-    });
+  async refundPayment(
+    userId: string,
+    paymentIntentId: string,
+    reason: string,
+  ): Promise<{ status: string; refundId: string; amount: number }> {
+    return apiFetch<{ status: string; refundId: string; amount: number }>(
+      `/admin/users/${encodeURIComponent(userId)}/refund`,
+      {
+        method: "POST",
+        body: JSON.stringify({ paymentIntentId, reason }),
+      },
+    );
   },
 
   async getTokenUsage(): Promise<{ usage: AdminTokenUsage }> {
@@ -512,11 +586,18 @@ export const adminApi = {
     return apiFetch<{ reports: AdminReportItem[]; count: number }>(`/admin/reports${qs}`);
   },
 
-  async resolveReport(reportId: string, action: "dismiss" | "hide_content" | "suspend_user", notes: string): Promise<{ status: string; reportId: string; action: string }> {
-    return apiFetch<{ status: string; reportId: string; action: string }>(`/admin/reports/${encodeURIComponent(reportId)}/resolve`, {
-      method: "POST",
-      body: JSON.stringify({ action, notes }),
-    });
+  async resolveReport(
+    reportId: string,
+    action: "dismiss" | "hide_content" | "suspend_user",
+    notes: string,
+  ): Promise<{ status: string; reportId: string; action: string }> {
+    return apiFetch<{ status: string; reportId: string; action: string }>(
+      `/admin/reports/${encodeURIComponent(reportId)}/resolve`,
+      {
+        method: "POST",
+        body: JSON.stringify({ action, notes }),
+      },
+    );
   },
 
   async getAuditLogs(limit = 50): Promise<{ logs: AdminAuditItem[]; count: number }> {
@@ -531,14 +612,31 @@ export const adminApi = {
     return apiFetch<{ routes: any[]; count: number }>(`/admin/routes?limit=${limit}`);
   },
 
-  async routeAction(routeId: string, action: "approve" | "feature" | "suspend", reason?: string): Promise<{ status: string; routeId: string; action: string }> {
-    return apiFetch<{ status: string; routeId: string; action: string }>(`/admin/routes/${encodeURIComponent(routeId)}/action`, {
-      method: "POST",
-      body: JSON.stringify({ action, reason }),
-    });
+  async routeAction(
+    routeId: string,
+    action: "approve" | "feature" | "suspend",
+    reason?: string,
+  ): Promise<{ status: string; routeId: string; action: string }> {
+    return apiFetch<{ status: string; routeId: string; action: string }>(
+      `/admin/routes/${encodeURIComponent(routeId)}/action`,
+      {
+        method: "POST",
+        body: JSON.stringify({ action, reason }),
+      },
+    );
   },
 
-  async getSystemConfig(): Promise<{ config: { maintenanceMode: boolean; reason?: string; version?: number; maintenanceMessage?: string; routeCreationEnabled?: boolean; sharesEnabled?: boolean; moduleConfig?: AdminModuleConfig } }> {
+  async getSystemConfig(): Promise<{
+    config: {
+      maintenanceMode: boolean;
+      reason?: string;
+      version?: number;
+      maintenanceMessage?: string;
+      routeCreationEnabled?: boolean;
+      sharesEnabled?: boolean;
+      moduleConfig?: AdminModuleConfig;
+    };
+  }> {
     return apiFetch("/admin/system-config");
   },
 
@@ -553,7 +651,10 @@ export const adminApi = {
     return apiFetch<{ moduleConfig: AdminModuleConfig }>("/admin/module-config");
   },
 
-  async updateModuleConfig(config: Partial<AdminModuleConfig>, reason: string): Promise<{ status: string; moduleConfig: AdminModuleConfig }> {
+  async updateModuleConfig(
+    config: Partial<AdminModuleConfig>,
+    reason: string,
+  ): Promise<{ status: string; moduleConfig: AdminModuleConfig }> {
     return apiFetch<{ status: string; moduleConfig: AdminModuleConfig }>("/admin/module-config", {
       method: "POST",
       body: JSON.stringify({ ...config, reason }),
@@ -568,7 +669,9 @@ export const adminApi = {
     return apiFetch<{ stripe: AdminStripeConfig }>("/admin/stripe-config");
   },
 
-  async updateStripeConfig(config: Partial<AdminStripeConfig> & { reason: string }): Promise<{ status: string; stripe: AdminStripeConfig }> {
+  async updateStripeConfig(
+    config: Partial<AdminStripeConfig> & { reason: string },
+  ): Promise<{ status: string; stripe: AdminStripeConfig }> {
     return apiFetch<{ status: string; stripe: AdminStripeConfig }>("/admin/stripe-config", {
       method: "POST",
       body: JSON.stringify(config),
@@ -579,23 +682,33 @@ export const adminApi = {
     return apiFetch<{ plans: AdminPlanConfig[] }>("/admin/plans");
   },
 
-  async updatePlan(planId: string, updates: Partial<AdminPlanConfig> & { reason: string }): Promise<{ status: string; plan: AdminPlanConfig }> {
-    return apiFetch<{ status: string; plan: AdminPlanConfig }>(`/admin/plans/${encodeURIComponent(planId)}`, {
-      method: "POST",
-      body: JSON.stringify(updates),
-    });
+  async updatePlan(
+    planId: string,
+    updates: Partial<AdminPlanConfig> & { reason: string },
+  ): Promise<{ status: string; plan: AdminPlanConfig }> {
+    return apiFetch<{ status: string; plan: AdminPlanConfig }>(
+      `/admin/plans/${encodeURIComponent(planId)}`,
+      {
+        method: "POST",
+        body: JSON.stringify(updates),
+      },
+    );
   },
 
   async getCreditPacks(): Promise<{ packs: AdminCreditPackConfig[] }> {
     return apiFetch<{ packs: AdminCreditPackConfig[] }>("/admin/credit-packs");
   },
 
-  async updateCreditPack(packId: string, updates: Partial<AdminCreditPackConfig> & { reason: string }): Promise<{ status: string; pack: AdminCreditPackConfig }> {
-    return apiFetch<{ status: string; pack: AdminCreditPackConfig }>(`/admin/credit-packs/${encodeURIComponent(packId)}`, {
-      method: "POST",
-      body: JSON.stringify(updates),
-    });
+  async updateCreditPack(
+    packId: string,
+    updates: Partial<AdminCreditPackConfig> & { reason: string },
+  ): Promise<{ status: string; pack: AdminCreditPackConfig }> {
+    return apiFetch<{ status: string; pack: AdminCreditPackConfig }>(
+      `/admin/credit-packs/${encodeURIComponent(packId)}`,
+      {
+        method: "POST",
+        body: JSON.stringify(updates),
+      },
+    );
   },
 };
-
-

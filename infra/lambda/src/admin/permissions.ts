@@ -12,7 +12,8 @@ export function routePermission(path: string, method: string): string | null {
   if (path.includes("/role")) return "roles";
   if (/\/(credits|wallet)$/.test(path)) return "credits";
   if (path.endsWith("/subscription")) return "finance";
-  if (path.includes("/refund") || /\/admin\/(finance|payments|subscriptions)/.test(path)) return "finance";
+  if (path.includes("/refund") || /\/admin\/(finance|payments|subscriptions)/.test(path))
+    return "finance";
   if (path.includes("/users")) return "users";
   if (/\/admin\/(routes|reports|content|shares|profiles)/.test(path)) return "content";
   if (path.includes("/tickets")) return "support";

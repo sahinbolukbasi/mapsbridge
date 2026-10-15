@@ -42,7 +42,9 @@ export class AgentDispatcher {
     }
 
     // Ephemeral Location Share intent
-    if (/konum\s+paylaş|harita\s+linki|link\s+oluştur|kod\s+üret|arkadaşıma\s+gönder/iu.test(norm)) {
+    if (
+      /konum\s+paylaş|harita\s+linki|link\s+oluştur|kod\s+üret|arkadaşıma\s+gönder/iu.test(norm)
+    ) {
       return {
         action: "share_location",
         recommendedSubAgents: ["share-token-tool"],

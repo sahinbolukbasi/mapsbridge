@@ -51,32 +51,26 @@ export interface RouteCardItem {
   stops: SavedAddressItem[];
 }
 
-export default function PublicProfileClient({
-  initialUsername,
-}: {
-  initialUsername: string;
-}) {
+export default function PublicProfileClient({ initialUsername }: { initialUsername: string }) {
   const [username] = useState(initialUsername.toLowerCase());
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // Profile data with Stitch defaults
   const [displayName, setDisplayName] = useState(
-    initialUsername
-      ? initialUsername.charAt(0).toUpperCase() + initialUsername.slice(1)
-      : "Gezgin"
+    initialUsername ? initialUsername.charAt(0).toUpperCase() + initialUsername.slice(1) : "Gezgin",
   );
   const [userHandle, setUserHandle] = useState(`@${username}`);
   const [locationText, setLocationText] = useState("İstanbul, Türkiye");
   const [joinDate, setJoinDate] = useState("Üyelik: Mayıs 2022");
   const [bioText, setBioText] = useState(
-    "Akdeniz ve Uzak Doğu yollarında yürüyen, gastronomi ve antik kent tutkunu. Rotalarımı yerel halkın keşfedilmemiş ipuçları, optimize edilmiş toplu taşıma bağlantıları ve bizzat test edilmiş yürüyüş süreleriyle titizlikle hazırlıyorum."
+    "Akdeniz ve Uzak Doğu yollarında yürüyen, gastronomi ve antik kent tutkunu. Rotalarımı yerel halkın keşfedilmemiş ipuçları, optimize edilmiş toplu taşıma bağlantıları ve bizzat test edilmiş yürüyüş süreleriyle titizlikle hazırlıyorum.",
   );
   const [avatarUrl, setAvatarUrl] = useState(
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuBNDffBXjAztvobCIL2d0SZrVhNMEaSshkO6euPsbKNr3gMpliHBUupTGJlw6ZIW73pHwRG_VV7mvHUFdcTNSgHro6JQNduyeZY9pPSF91fvK-UgtX0EwiIKmSCWIuLff1ERD7SWlHYv4zp7Frgk0ttga7YUjnuF75Tvicezr1dWHtOaI_lMNMXKysEX1bM2uighGFRpr4wrFGZMXw9iG2s_r97KMyWEid9Q_W4qZVoKSQRrsO_rO93UA"
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBNDffBXjAztvobCIL2d0SZrVhNMEaSshkO6euPsbKNr3gMpliHBUupTGJlw6ZIW73pHwRG_VV7mvHUFdcTNSgHro6JQNduyeZY9pPSF91fvK-UgtX0EwiIKmSCWIuLff1ERD7SWlHYv4zp7Frgk0ttga7YUjnuF75Tvicezr1dWHtOaI_lMNMXKysEX1bM2uighGFRpr4wrFGZMXw9iG2s_r97KMyWEid9Q_W4qZVoKSQRrsO_rO93UA",
   );
   const [coverUrl, setCoverUrl] = useState(
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuBRa6IhHenaRkLdslFsWnaGz58pf3b5RlZpMP1M2Gb9jjsmqm5RO0v-5S7gQLJlKJcQTQINNvDCXBWmytQI5vUBU_9fPg5IXclDuicY7Sv4S-7xQk4qXPJ6KL3FuMemW2Xg3knuWeoEas2arWPN_WLKfQLgQ3tZMwaeV3A8CTGblnjk-6uEw7V0y7eO9sbYS5kHjqBHimT7FDBmQi7U-N4X4ufmwcRDFpgAZdiHSrzL3jpte-ZhYEQA7w"
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBRa6IhHenaRkLdslFsWnaGz58pf3b5RlZpMP1M2Gb9jjsmqm5RO0v-5S7gQLJlKJcQTQINNvDCXBWmytQI5vUBU_9fPg5IXclDuicY7Sv4S-7xQk4qXPJ6KL3FuMemW2Xg3knuWeoEas2arWPN_WLKfQLgQ3tZMwaeV3A8CTGblnjk-6uEw7V0y7eO9sbYS5kHjqBHimT7FDBmQi7U-N4X4ufmwcRDFpgAZdiHSrzL3jpte-ZhYEQA7w",
   );
 
   // Follow & Favorite state
@@ -85,12 +79,17 @@ export default function PublicProfileClient({
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   // Tabs & filters
-  const [activeTab, setActiveTab] = useState<"rotalar" | "rehberler" | "galeri" | "yorumlar">("rotalar");
+  const [activeTab, setActiveTab] = useState<"rotalar" | "rehberler" | "galeri" | "yorumlar">(
+    "rotalar",
+  );
   const [routeFilter, setRouteFilter] = useState<"all" | "free" | "market">("all");
   const [cityFilter, setCityFilter] = useState<string>("all");
 
   // Interactive Route Modals
-  const [previewRoute, setPreviewRoute] = useState<{ name: string; stops: SavedAddressItem[] } | null>(null);
+  const [previewRoute, setPreviewRoute] = useState<{
+    name: string;
+    stops: SavedAddressItem[];
+  } | null>(null);
   const [selectedPlanRoute, setSelectedPlanRoute] = useState<RouteCardItem | null>(null);
   const mapModalRef = useRef<HTMLDivElement>(null);
   const leafletInstanceRef = useRef<any>(null);
@@ -164,20 +163,31 @@ export default function PublicProfileClient({
   }, [username]);
 
   function handleToggleFollow() {
-    if (!requireAuth("Gezgini Takip Et", "Bu gezgini takip etmek ve yeni rotalarından anında haberdar olmak")) return;
+    if (
+      !requireAuth(
+        "Gezgini Takip Et",
+        "Bu gezgini takip etmek ve yeni rotalarından anında haberdar olmak",
+      )
+    )
+      return;
     const nowFollowing = toggleFollowUser(username);
     setIsFollowing(nowFollowing);
     setFollowerCount((prev) => (nowFollowing ? prev + 1 : prev - 1));
-    showToastMessage(nowFollowing ? `✓ ${userHandle} takip ediliyor!` : `Takip bırakıldı: ${userHandle}`);
+    showToastMessage(
+      nowFollowing ? `✓ ${userHandle} takip ediliyor!` : `Takip bırakıldı: ${userHandle}`,
+    );
   }
 
   function handleBookmarkToggle() {
     setIsBookmarked(!isBookmarked);
-    showToastMessage(!isBookmarked ? "★ Gezgin favorilerinize eklendi!" : "Favorilerden çıkarıldı.");
+    showToastMessage(
+      !isBookmarked ? "★ Gezgin favorilerinize eklendi!" : "Favorilerden çıkarıldı.",
+    );
   }
 
   function handleShareProfile() {
-    const url = typeof window !== "undefined" ? window.location.href : `https://mapsbridge.com/@${username}`;
+    const url =
+      typeof window !== "undefined" ? window.location.href : `https://mapsbridge.com/@${username}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       showToastMessage("✓ Profil bağlantısı panoya kopyalandı!");
@@ -198,15 +208,41 @@ export default function PublicProfileClient({
       duration: "3 Günlük",
       stopsCount: 14,
       category: "Yürüyüş",
-      description: "Turistik kalabalıklardan uzak, 500 yıllık hanlar, çatı terasları ve geleneksel ustaların gizli atölyeleri.",
+      description:
+        "Turistik kalabalıklardan uzak, 500 yıllık hanlar, çatı terasları ve geleneksel ustaların gizli atölyeleri.",
       priceTag: "₺120",
       priceLabel: "ROTA ERİŞİMİ",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuA9auz0nMBA4KRXGYite_AL45bw5Dhivt2lu5tIfS587bQePKqSUIWHRIATmlPycVGpU_aa4FmAuio7MquobSV_ywCgZicVFy3N5V7RBlp_HbbGO_l2Zkqt92jTI9_3PXkLbm1cvXfRZk8vA9LtoncC9lHXPTNzLR0bmKCCluRy1i4QDgDvAxI4MiuoEBeg2Ktqa45F6xQBB-8UGDujf2ENpeLAT_98xuLniwJhERS2X7jigCdfGko6SA",
+      image:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuA9auz0nMBA4KRXGYite_AL45bw5Dhivt2lu5tIfS587bQePKqSUIWHRIATmlPycVGpU_aa4FmAuio7MquobSV_ywCgZicVFy3N5V7RBlp_HbbGO_l2Zkqt92jTI9_3PXkLbm1cvXfRZk8vA9LtoncC9lHXPTNzLR0bmKCCluRy1i4QDgDvAxI4MiuoEBeg2Ktqa45F6xQBB-8UGDujf2ENpeLAT_98xuLniwJhERS2X7jigCdfGko6SA",
       stops: [
-        { id: "ist-1", label: "Sultanahmet Meydanı & Dikilitaş", lat: 41.0064, lng: 28.9768, note: "Erken sabah sessizliğinde Bizans ve Osmanlı mirası." },
-        { id: "ist-2", label: "Büyük Valide Han Çatısı", lat: 41.0145, lng: 28.9692, note: "Haliç panoraması ve tarihi kubbe manzaraları." },
-        { id: "ist-3", label: "Süleymaniye Külliyesi & Çay Terasları", lat: 41.0165, lng: 28.9639, note: "Mimar Sinan'ın şaheseri ve boğaz rüzgarı." },
-        { id: "ist-4", label: "Balat Antika Mezatları & Fener Rum Patrikhanesi", lat: 41.0298, lng: 28.9515, note: "Renkli cumbalı evler ve geleneksel lezzetler." },
+        {
+          id: "ist-1",
+          label: "Sultanahmet Meydanı & Dikilitaş",
+          lat: 41.0064,
+          lng: 28.9768,
+          note: "Erken sabah sessizliğinde Bizans ve Osmanlı mirası.",
+        },
+        {
+          id: "ist-2",
+          label: "Büyük Valide Han Çatısı",
+          lat: 41.0145,
+          lng: 28.9692,
+          note: "Haliç panoraması ve tarihi kubbe manzaraları.",
+        },
+        {
+          id: "ist-3",
+          label: "Süleymaniye Külliyesi & Çay Terasları",
+          lat: 41.0165,
+          lng: 28.9639,
+          note: "Mimar Sinan'ın şaheseri ve boğaz rüzgarı.",
+        },
+        {
+          id: "ist-4",
+          label: "Balat Antika Mezatları & Fener Rum Patrikhanesi",
+          lat: 41.0298,
+          lng: 28.9515,
+          note: "Renkli cumbalı evler ve geleneksel lezzetler.",
+        },
       ],
     },
     {
@@ -219,15 +255,35 @@ export default function PublicProfileClient({
       duration: "2 Günlük",
       stopsCount: 9,
       category: "Doğa & Fotoğraf",
-      description: "Aşk Vadisi ve Kızılçukur'da en berrak balon izleme koordinatları ve mağara kahvaltı noktaları.",
+      description:
+        "Aşk Vadisi ve Kızılçukur'da en berrak balon izleme koordinatları ve mağara kahvaltı noktaları.",
       priceTag: "KP-302",
       priceLabel: "ROTA KODU",
       routeCode: "KP-302",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDj77hONrKmR8Fj8zu5NotnVeEZKEbBCjiHWPDDdPNHXPfNBawa4jOVv4lb0DULeshMOo9EYfGUBuB93gFvv2Y4_bY3Mt04r0050Hxm-540eN8ryevPBa-s65G8oYTJJIQHd-_Okm8socXdtFrxC3Ky55ADOpJPQLP8lKS3CUAR5TX5SoBr7ula4ikR9mbmpFOl0Zn6Z4MISYycRfOK7ZvKNBnCxDHgfEpBv7jtfwSEXJQmN93daNsUrA",
+      image:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDj77hONrKmR8Fj8zu5NotnVeEZKEbBCjiHWPDDdPNHXPfNBawa4jOVv4lb0DULeshMOo9EYfGUBuB93gFvv2Y4_bY3Mt04r0050Hxm-540eN8ryevPBa-s65G8oYTJJIQHd-_Okm8socXdtFrxC3Ky55ADOpJPQLP8lKS3CUAR5TX5SoBr7ula4ikR9mbmpFOl0Zn6Z4MISYycRfOK7ZvKNBnCxDHgfEpBv7jtfwSEXJQmN93daNsUrA",
       stops: [
-        { id: "kap-1", label: "Aşk Vadisi Gün Doğumu Seyir Tepesi", lat: 38.6655, lng: 34.8234, note: "Yüzlerce sıcak hava balonunun kalkış anı." },
-        { id: "kap-2", label: "Kızılçukur (Red Valley) Gün Batımı", lat: 38.6534, lng: 34.8623, note: "Kızıl tüf kayalarında eşsiz ışık kırılmaları." },
-        { id: "kap-3", label: "Çavuşin Eski Rum Köyü ve Kaya Kilisesi", lat: 38.6732, lng: 34.8412, note: "Tarihi freskler ve teras kafeler." },
+        {
+          id: "kap-1",
+          label: "Aşk Vadisi Gün Doğumu Seyir Tepesi",
+          lat: 38.6655,
+          lng: 34.8234,
+          note: "Yüzlerce sıcak hava balonunun kalkış anı.",
+        },
+        {
+          id: "kap-2",
+          label: "Kızılçukur (Red Valley) Gün Batımı",
+          lat: 38.6534,
+          lng: 34.8623,
+          note: "Kızıl tüf kayalarında eşsiz ışık kırılmaları.",
+        },
+        {
+          id: "kap-3",
+          label: "Çavuşin Eski Rum Köyü ve Kaya Kilisesi",
+          lat: 38.6732,
+          lng: 34.8412,
+          note: "Tarihi freskler ve teras kafeler.",
+        },
       ],
     },
     {
@@ -240,15 +296,35 @@ export default function PublicProfileClient({
       duration: "4 Günlük",
       stopsCount: 18,
       category: "Gastronomi",
-      description: "Pantheon civarındaki en eski fırınlar, Testaccio pazar turu ve Trastevere akşam trattoria rotası.",
+      description:
+        "Pantheon civarındaki en eski fırınlar, Testaccio pazar turu ve Trastevere akşam trattoria rotası.",
       priceTag: "RM-408",
       priceLabel: "ROTA KODU",
       routeCode: "RM-408",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDz5hKKLgZz2HEqo4RXPFdclKdZAUotPOUCJyIiFHGoEZ0HKCg7Gt91-pbyU6XcH1PV-uepmwupLCyqXL18UoxQ9W1k8zSa-nuNCZ6WlZn2p8VyvB04eeHvguxhuOXaLwf4KNdRzvmPJ10nHjkGYM3OShinvgnjjEtwoLQAW5APi75hzUXu4bqerJannuLp2w1-a8rWwll8xzWeTZyZ8tQN8K6uAi6DcPN0xeie2Cc-1RFwDJNwpqRD6w",
+      image:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDz5hKKLgZz2HEqo4RXPFdclKdZAUotPOUCJyIiFHGoEZ0HKCg7Gt91-pbyU6XcH1PV-uepmwupLCyqXL18UoxQ9W1k8zSa-nuNCZ6WlZn2p8VyvB04eeHvguxhuOXaLwf4KNdRzvmPJ10nHjkGYM3OShinvgnjjEtwoLQAW5APi75hzUXu4bqerJannuLp2w1-a8rWwll8xzWeTZyZ8tQN8K6uAi6DcPN0xeie2Cc-1RFwDJNwpqRD6w",
       stops: [
-        { id: "rm-1", label: "Pantheon & Piazza Navona", lat: 41.8986, lng: 12.4769, note: "Rönesans heykelleri ve yüzyıllık espresso barları." },
-        { id: "rm-2", label: "Trastevere Dar Sokaklar & Trattorialar", lat: 41.8885, lng: 12.4705, note: "Otantik Roma cacio e pepe ve fırın lezzetleri." },
-        { id: "rm-3", label: "Campo de' Fiori Sabah Pazarı", lat: 41.8956, lng: 12.4722, note: "Taze peynirler, zeytinyağı ve el yapımı makarnalar." },
+        {
+          id: "rm-1",
+          label: "Pantheon & Piazza Navona",
+          lat: 41.8986,
+          lng: 12.4769,
+          note: "Rönesans heykelleri ve yüzyıllık espresso barları.",
+        },
+        {
+          id: "rm-2",
+          label: "Trastevere Dar Sokaklar & Trattorialar",
+          lat: 41.8885,
+          lng: 12.4705,
+          note: "Otantik Roma cacio e pepe ve fırın lezzetleri.",
+        },
+        {
+          id: "rm-3",
+          label: "Campo de' Fiori Sabah Pazarı",
+          lat: 41.8956,
+          lng: 12.4722,
+          note: "Taze peynirler, zeytinyağı ve el yapımı makarnalar.",
+        },
       ],
     },
     {
@@ -261,14 +337,34 @@ export default function PublicProfileClient({
       duration: "3 Günlük",
       stopsCount: 11,
       category: "Trekking",
-      description: "Kabak Koyu, Cennet Koyu ve Kelebekler Vadisi zirvesinden geçen, su kaynakları işaretli 42 km etap.",
+      description:
+        "Kabak Koyu, Cennet Koyu ve Kelebekler Vadisi zirvesinden geçen, su kaynakları işaretli 42 km etap.",
       priceTag: "₺95",
       priceLabel: "ROTA ERİŞİMİ",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAGcSmACLBMWI88qVo2gw7LDCnJq-siLZSBHZzr38vCYPXLCF82kxB4tcI4axfC_Y-NvCr2FGZGuTyR11_stFP0P5iyu_V3wR_yRxjZOwwJ4ykc4uEULf3_fea_j4r78ka7V6oNOMdh27KJRc4TovJrHfBhb7tf4wU94HfJb50KLpMdLa-EwY_Tdd3ZRa_NlJsLsWcouW_D2lum1viu0Wh8L8aT_isPH5xIjhxAubARC5XZU12Fk3XHqA",
+      image:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuAGcSmACLBMWI88qVo2gw7LDCnJq-siLZSBHZzr38vCYPXLCF82kxB4tcI4axfC_Y-NvCr2FGZGuTyR11_stFP0P5iyu_V3wR_yRxjZOwwJ4ykc4uEULf3_fea_j4r78ka7V6oNOMdh27KJRc4TovJrHfBhb7tf4wU94HfJb50KLpMdLa-EwY_Tdd3ZRa_NlJsLsWcouW_D2lum1viu0Wh8L8aT_isPH5xIjhxAubARC5XZU12Fk3XHqA",
       stops: [
-        { id: "lyk-1", label: "Ölüdeniz - Ovacık Likya Başlangıç Kapısı", lat: 36.5742, lng: 29.1415, note: "Akdeniz'in turkuaz manzarasına tırmanış." },
-        { id: "lyk-2", label: "Kelebekler Vadisi Zirve Patikası", lat: 36.4952, lng: 29.1311, note: "Kanyon manzarası ve çam kokulu orman yolu." },
-        { id: "lyk-3", label: "Kabak Koyu & Cennet Koyu Kamping", lat: 36.4621, lng: 29.1245, note: "Deniz kenarı dinlenme ve doğal su kaynakları." },
+        {
+          id: "lyk-1",
+          label: "Ölüdeniz - Ovacık Likya Başlangıç Kapısı",
+          lat: 36.5742,
+          lng: 29.1415,
+          note: "Akdeniz'in turkuaz manzarasına tırmanış.",
+        },
+        {
+          id: "lyk-2",
+          label: "Kelebekler Vadisi Zirve Patikası",
+          lat: 36.4952,
+          lng: 29.1311,
+          note: "Kanyon manzarası ve çam kokulu orman yolu.",
+        },
+        {
+          id: "lyk-3",
+          label: "Kabak Koyu & Cennet Koyu Kamping",
+          lat: 36.4621,
+          lng: 29.1245,
+          note: "Deniz kenarı dinlenme ve doğal su kaynakları.",
+        },
       ],
     },
   ];
@@ -318,7 +414,7 @@ export default function PublicProfileClient({
       L.tileLayer("https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=tr", {
         maxZoom: 20,
         subdomains: ["0", "1", "2", "3"],
-        attribution: '&copy; Google Maps',
+        attribution: "&copy; Google Maps",
       }).addTo(map);
 
       const latlngs: [number, number][] = [];
@@ -452,16 +548,22 @@ export default function PublicProfileClient({
           <div className="pub-preview-banner-inner">
             <div className="pub-preview-banner-left">
               <span className="pub-pulse-dot" />
-              <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "var(--stitch-mint-glow)" }}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "18px", color: "var(--stitch-mint-glow)" }}
+              >
                 visibility
               </span>
               <span>
-                <strong>Ön İzleme Modu:</strong> Şu anda profilinizin diğer topluluk üyelerine nasıl göründüğünü inceliyorsunuz.
+                <strong>Ön İzleme Modu:</strong> Şu anda profilinizin diğer topluluk üyelerine nasıl
+                göründüğünü inceliyorsunuz.
               </span>
             </div>
             <div>
               <Link href="/profile/edit" className="pub-banner-btn">
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>edit</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  edit
+                </span>
                 <span>Düzenlemeye Dön</span>
               </Link>
             </div>
@@ -471,13 +573,13 @@ export default function PublicProfileClient({
         {/* 3. Panoramic Nature Cover Hero */}
         <section className="pub-hero-section">
           <div className="pub-panoramic-cover">
-            <div
-              className="pub-cover-image"
-              style={{ backgroundImage: `url('${coverUrl}')` }}
-            />
+            <div className="pub-cover-image" style={{ backgroundImage: `url('${coverUrl}')` }} />
             <div className="pub-cover-overlay" />
             <div className="pub-floating-location-chip">
-              <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--stitch-mint-glow)" }}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "16px", color: "var(--stitch-mint-glow)" }}
+              >
                 photo_camera
               </span>
               <span>Dolomitler Alpleri, İtalya • Son Sefer</span>
@@ -498,7 +600,9 @@ export default function PublicProfileClient({
                       )}
                     </div>
                     <span className="pub-status-badge" title="Aktif Gezgin">
-                      <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>check</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                        check
+                      </span>
                     </span>
                   </div>
 
@@ -506,13 +610,19 @@ export default function PublicProfileClient({
                     <div className="pub-name-row">
                       <h1 className="pub-user-name">{displayName}</h1>
                       <span className="pub-badge-pill pro">
-                        <span className="material-symbols-outlined fill" style={{ fontSize: "13px", color: "var(--stitch-emerald-accent)" }}>
+                        <span
+                          className="material-symbols-outlined fill"
+                          style={{ fontSize: "13px", color: "var(--stitch-emerald-accent)" }}
+                        >
                           workspace_premium
                         </span>
                         PRO KAŞİF
                       </span>
                       <span className="pub-badge-pill verified">
-                        <span className="material-symbols-outlined" style={{ fontSize: "13px", color: "var(--stitch-secondary)" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "13px", color: "var(--stitch-secondary)" }}
+                        >
                           verified
                         </span>
                         DOĞRULANMIŞ ROTA MİMARI
@@ -522,13 +632,18 @@ export default function PublicProfileClient({
                     <div className="pub-meta-row">
                       <span className="pub-handle-link">{userHandle}</span>
                       <span className="pub-meta-item">
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--stitch-emerald-accent)" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "16px", color: "var(--stitch-emerald-accent)" }}
+                        >
                           location_on
                         </span>
                         {locationText}
                       </span>
                       <span className="pub-meta-item">
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>calendar_today</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                          calendar_today
+                        </span>
                         {joinDate}
                       </span>
                     </div>
@@ -544,15 +659,21 @@ export default function PublicProfileClient({
                       title="Gezgin Portfolyosu"
                       onClick={() => showToastMessage("Gezgin harita portföyü")}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>travel_explore</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                        travel_explore
+                      </span>
                     </button>
                     <button
                       type="button"
                       className="pub-social-btn"
                       title="Kişisel Seyahat Bloğu"
-                      onClick={() => showToastMessage("Kişisel web sitesi bağlantısı henüz eklenmemiş.")}
+                      onClick={() =>
+                        showToastMessage("Kişisel web sitesi bağlantısı henüz eklenmemiş.")
+                      }
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>language</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                        language
+                      </span>
                     </button>
                   </div>
 
@@ -562,7 +683,10 @@ export default function PublicProfileClient({
                     title="Favorilere Ekle"
                     onClick={handleBookmarkToggle}
                   >
-                    <span className={`material-symbols-outlined ${isBookmarked ? "fill" : ""}`} style={{ fontSize: "20px", color: isBookmarked ? "#f59e0b" : "inherit" }}>
+                    <span
+                      className={`material-symbols-outlined ${isBookmarked ? "fill" : ""}`}
+                      style={{ fontSize: "20px", color: isBookmarked ? "#f59e0b" : "inherit" }}
+                    >
                       bookmark
                     </span>
                   </button>
@@ -573,7 +697,9 @@ export default function PublicProfileClient({
                     title="Profili Paylaş"
                     onClick={handleShareProfile}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>share</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      share
+                    </span>
                   </button>
 
                   <button
@@ -584,7 +710,9 @@ export default function PublicProfileClient({
                       setShowMessageModal(true);
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>chat_bubble_outline</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      chat_bubble_outline
+                    </span>
                     <span>Mesaj Gönder</span>
                   </button>
 
@@ -607,7 +735,11 @@ export default function PublicProfileClient({
               {/* Community Stat Bar Ribbon */}
               <div className="pub-stats-ribbon">
                 <div className="pub-stat-item">
-                  <span className="pub-stat-num">{followerCount >= 1000 ? `${(followerCount / 1000).toFixed(1)}K` : followerCount}</span>
+                  <span className="pub-stat-num">
+                    {followerCount >= 1000
+                      ? `${(followerCount / 1000).toFixed(1)}K`
+                      : followerCount}
+                  </span>
                   <span className="pub-stat-label">Takipçi • 340 Takip</span>
                 </div>
                 <div className="pub-stat-item">
@@ -621,10 +753,21 @@ export default function PublicProfileClient({
                 <div className="pub-stat-item">
                   <span className="pub-stat-num">
                     4.9
-                    <span className="material-symbols-outlined fill" style={{ fontSize: "18px", color: "#f59e0b" }}>
+                    <span
+                      className="material-symbols-outlined fill"
+                      style={{ fontSize: "18px", color: "#f59e0b" }}
+                    >
                       star
                     </span>
-                    <span style={{ fontSize: "12px", color: "var(--stitch-on-surface-variant)", fontWeight: 500 }}>/ 5.0</span>
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--stitch-on-surface-variant)",
+                        fontWeight: 500,
+                      }}
+                    >
+                      / 5.0
+                    </span>
                   </span>
                   <span className="pub-stat-label">186 Gezgin Değerlendirmesi</span>
                 </div>
@@ -645,7 +788,9 @@ export default function PublicProfileClient({
                   className={`pub-tab-pill ${activeTab === "rotalar" ? "active" : ""}`}
                   onClick={() => setActiveTab("rotalar")}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>route</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    route
+                  </span>
                   <span>Yayınlanan Rotalar ({routeCards.length})</span>
                 </button>
                 <button
@@ -653,7 +798,9 @@ export default function PublicProfileClient({
                   className={`pub-tab-pill ${activeTab === "rehberler" ? "active" : ""}`}
                   onClick={() => setActiveTab("rehberler")}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>menu_book</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    menu_book
+                  </span>
                   <span>Topluluk Rehberleri & Notlar (8)</span>
                 </button>
                 <button
@@ -661,7 +808,9 @@ export default function PublicProfileClient({
                   className={`pub-tab-pill ${activeTab === "galeri" ? "active" : ""}`}
                   onClick={() => setActiveTab("galeri")}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>photo_library</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    photo_library
+                  </span>
                   <span>Fotoğraf Galerisi (124)</span>
                 </button>
                 <button
@@ -669,7 +818,9 @@ export default function PublicProfileClient({
                   className={`pub-tab-pill ${activeTab === "yorumlar" ? "active" : ""}`}
                   onClick={() => setActiveTab("yorumlar")}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>reviews</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    reviews
+                  </span>
                   <span>Gezgin Yorumları (186)</span>
                 </button>
               </div>
@@ -704,19 +855,28 @@ export default function PublicProfileClient({
                     </div>
 
                     <div className="pub-filter-right">
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "var(--stitch-outline)" }}>tune</span>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "18px", color: "var(--stitch-outline)" }}
+                      >
+                        tune
+                      </span>
                       <span>Şehir Filtrele:</span>
                       <button
                         type="button"
                         className={`pub-city-chip ${cityFilter === "İstanbul" ? "active" : ""}`}
-                        onClick={() => setCityFilter(cityFilter === "İstanbul" ? "all" : "İstanbul")}
+                        onClick={() =>
+                          setCityFilter(cityFilter === "İstanbul" ? "all" : "İstanbul")
+                        }
                       >
                         İstanbul
                       </button>
                       <button
                         type="button"
                         className={`pub-city-chip ${cityFilter === "Kapadokya" ? "active" : ""}`}
-                        onClick={() => setCityFilter(cityFilter === "Kapadokya" ? "all" : "Kapadokya")}
+                        onClick={() =>
+                          setCityFilter(cityFilter === "Kapadokya" ? "all" : "Kapadokya")
+                        }
                       >
                         Kapadokya
                       </button>
@@ -754,7 +914,12 @@ export default function PublicProfileClient({
                                   gap: "3px",
                                 }}
                               >
-                                <span className="material-symbols-outlined fill" style={{ fontSize: "13px" }}>star</span>
+                                <span
+                                  className="material-symbols-outlined fill"
+                                  style={{ fontSize: "13px" }}
+                                >
+                                  star
+                                </span>
                                 {route.badgeTag}
                               </span>
                             )}
@@ -790,33 +955,67 @@ export default function PublicProfileClient({
                                   gap: "3px",
                                 }}
                               >
-                                <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>landscape</span>
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "13px" }}
+                                >
+                                  landscape
+                                </span>
                                 {route.badgeTag}
                               </span>
                             )}
                           </div>
 
                           <div className="pub-route-rating-right">
-                            <span className="material-symbols-outlined fill" style={{ fontSize: "15px", color: "#f59e0b" }}>star</span>
+                            <span
+                              className="material-symbols-outlined fill"
+                              style={{ fontSize: "15px", color: "#f59e0b" }}
+                            >
+                              star
+                            </span>
                             <span>{route.rating.toFixed(1)}</span>
-                            <span style={{ color: "var(--stitch-outline)", fontSize: "11px", fontWeight: 400 }}>({route.ratingCount})</span>
+                            <span
+                              style={{
+                                color: "var(--stitch-outline)",
+                                fontSize: "11px",
+                                fontWeight: 400,
+                              }}
+                            >
+                              ({route.ratingCount})
+                            </span>
                           </div>
                         </div>
 
                         <div className="pub-route-content">
                           <div>
                             <div className="pub-route-meta-row">
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: "15px", color: "var(--stitch-secondary)" }}>schedule</span>
+                              <span
+                                style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}
+                              >
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "15px", color: "var(--stitch-secondary)" }}
+                                >
+                                  schedule
+                                </span>
                                 {route.duration}
                               </span>
                               <span>•</span>
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: "15px", color: "var(--stitch-secondary)" }}>pin_drop</span>
+                              <span
+                                style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}
+                              >
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "15px", color: "var(--stitch-secondary)" }}
+                                >
+                                  pin_drop
+                                </span>
                                 {route.stopsCount} Durak
                               </span>
                               <span>•</span>
-                              <span style={{ color: "var(--stitch-secondary)", fontWeight: 600 }}>{route.category}</span>
+                              <span style={{ color: "var(--stitch-secondary)", fontWeight: 600 }}>
+                                {route.category}
+                              </span>
                             </div>
 
                             <h2 className="pub-route-title">{route.title}</h2>
@@ -837,15 +1036,30 @@ export default function PublicProfileClient({
                                   onClick={() => setSelectedPlanRoute(route)}
                                 >
                                   <span>Planı İncele</span>
-                                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    arrow_forward
+                                  </span>
                                 </button>
                               ) : (
                                 <button
                                   type="button"
                                   className="pub-route-cta-btn secondary"
-                                  onClick={() => setPreviewRoute({ name: route.title, stops: route.stops })}
+                                  onClick={() =>
+                                    setPreviewRoute({ name: route.title, stops: route.stops })
+                                  }
                                 >
-                                  <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--stitch-emerald-accent)" }}>map</span>
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{
+                                      fontSize: "16px",
+                                      color: "var(--stitch-emerald-accent)",
+                                    }}
+                                  >
+                                    map
+                                  </span>
                                   <span>Haritada Aç</span>
                                 </button>
                               )}
@@ -861,10 +1075,16 @@ export default function PublicProfileClient({
                     <button
                       type="button"
                       className="pub-load-more-btn"
-                      onClick={() => showToastMessage("Tüm rotalar listelendi (12 arşivlenmiş rota daha mevcut).")}
+                      onClick={() =>
+                        showToastMessage(
+                          "Tüm rotalar listelendi (12 arşivlenmiş rota daha mevcut).",
+                        )
+                      }
                     >
                       <span>Daha Fazla Rota Yükle (12 Kalan)</span>
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>expand_more</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                        expand_more
+                      </span>
                     </button>
                   </div>
                 </>
@@ -875,16 +1095,46 @@ export default function PublicProfileClient({
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   <div className="pub-sidebar-card">
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}>menu_book</span>
-                      <h3 style={{ margin: 0, fontSize: "1.1rem", color: "var(--stitch-primary)", fontWeight: 700 }}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}
+                      >
+                        menu_book
+                      </span>
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "1.1rem",
+                          color: "var(--stitch-primary)",
+                          fontWeight: 700,
+                        }}
+                      >
                         Roma'da 48 Saatte Ne Yenir? Gastronomi Rehberi
                       </h3>
                     </div>
-                    <p style={{ fontSize: "14px", color: "var(--stitch-on-surface-variant)", margin: 0, lineHeight: 1.6 }}>
-                      Trastevere fırınlarından Testaccio şarküterilerine, Roma sokaklarının en iyi cacio e pepe ve tiramisu durakları. Rezervasyonsuz gidilebilecek yerel adresler.
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        color: "var(--stitch-on-surface-variant)",
+                        margin: 0,
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      Trastevere fırınlarından Testaccio şarküterilerine, Roma sokaklarının en iyi
+                      cacio e pepe ve tiramisu durakları. Rezervasyonsuz gidilebilecek yerel
+                      adresler.
                     </p>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.5rem" }}>
-                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>4 gün önce güncellendi • 1.2K Okuma</span>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        paddingTop: "0.5rem",
+                      }}
+                    >
+                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>
+                        4 gün önce güncellendi • 1.2K Okuma
+                      </span>
                       <button
                         type="button"
                         className="pub-route-cta-btn secondary"
@@ -897,16 +1147,45 @@ export default function PublicProfileClient({
 
                   <div className="pub-sidebar-card">
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}>tips_and_updates</span>
-                      <h3 style={{ margin: 0, fontSize: "1.1rem", color: "var(--stitch-primary)", fontWeight: 700 }}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}
+                      >
+                        tips_and_updates
+                      </span>
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "1.1rem",
+                          color: "var(--stitch-primary)",
+                          fontWeight: 700,
+                        }}
+                      >
                         Kapadokya'da Balon Kaçırmama & En İyi Vadi Konumları
                       </h3>
                     </div>
-                    <p style={{ fontSize: "14px", color: "var(--stitch-on-surface-variant)", margin: 0, lineHeight: 1.6 }}>
-                      Hava durumu ve rüzgar yönüne göre balonların hangi vadide uçacağını anlama formülü. Gün doğumu için en sakin kaya terasları.
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        color: "var(--stitch-on-surface-variant)",
+                        margin: 0,
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      Hava durumu ve rüzgar yönüne göre balonların hangi vadide uçacağını anlama
+                      formülü. Gün doğumu için en sakin kaya terasları.
                     </p>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.5rem" }}>
-                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>2 hafta önce • 3.4K Okuma</span>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        paddingTop: "0.5rem",
+                      }}
+                    >
+                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>
+                        2 hafta önce • 3.4K Okuma
+                      </span>
                       <button
                         type="button"
                         className="pub-route-cta-btn secondary"
@@ -919,16 +1198,45 @@ export default function PublicProfileClient({
 
                   <div className="pub-sidebar-card">
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}>backpack</span>
-                      <h3 style={{ margin: 0, fontSize: "1.1rem", color: "var(--stitch-primary)", fontWeight: 700 }}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}
+                      >
+                        backpack
+                      </span>
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "1.1rem",
+                          color: "var(--stitch-primary)",
+                          fontWeight: 700,
+                        }}
+                      >
                         Likya Yolu Sırt Çantası & Su Kaynakları Kontrol Listesi
                       </h3>
                     </div>
-                    <p style={{ fontSize: "14px", color: "var(--stitch-on-surface-variant)", margin: 0, lineHeight: 1.6 }}>
-                      Kabak Koyu - Cennet Koyu etabında çalışan su çeşmeleri, hafif kamp ekipmanı ve acil durum GPS koordinatları listesi.
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        color: "var(--stitch-on-surface-variant)",
+                        margin: 0,
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      Kabak Koyu - Cennet Koyu etabında çalışan su çeşmeleri, hafif kamp ekipmanı ve
+                      acil durum GPS koordinatları listesi.
                     </p>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.5rem" }}>
-                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>1 ay önce • 2.8K Okuma</span>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        paddingTop: "0.5rem",
+                      }}
+                    >
+                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>
+                        1 ay önce • 2.8K Okuma
+                      </span>
                       <button
                         type="button"
                         className="pub-route-cta-btn secondary"
@@ -943,17 +1251,62 @@ export default function PublicProfileClient({
 
               {/* Tab 3: Fotoğraf Galerisi */}
               {activeTab === "galeri" && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                    gap: "1rem",
+                  }}
+                >
                   {[
-                    { title: "Kapadokya Gün Doğumu", src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDj77hONrKmR8Fj8zu5NotnVeEZKEbBCjiHWPDDdPNHXPfNBawa4jOVv4lb0DULeshMOo9EYfGUBuB93gFvv2Y4_bY3Mt04r0050Hxm-540eN8ryevPBa-s65G8oYTJJIQHd-_Okm8socXdtFrxC3Ky55ADOpJPQLP8lKS3CUAR5TX5SoBr7ula4ikR9mbmpFOl0Zn6Z4MISYycRfOK7ZvKNBnCxDHgfEpBv7jtfwSEXJQmN93daNsUrA" },
-                    { title: "Dolomitler Alpleri Geçidi", src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBRa6IhHenaRkLdslFsWnaGz58pf3b5RlZpMP1M2Gb9jjsmqm5RO0v-5S7gQLJlKJcQTQINNvDCXBWmytQI5vUBU_9fPg5IXclDuicY7Sv4S-7xQk4qXPJ6KL3FuMemW2Xg3knuWeoEas2arWPN_WLKfQLgQ3tZMwaeV3A8CTGblnjk-6uEw7V0y7eO9sbYS5kHjqBHimT7FDBmQi7U-N4X4ufmwcRDFpgAZdiHSrzL3jpte-ZhYEQA7w" },
-                    { title: "İstanbul Tarihi Yarımada", src: "https://lh3.googleusercontent.com/aida-public/AB6AXuA9auz0nMBA4KRXGYite_AL45bw5Dhivt2lu5tIfS587bQePKqSUIWHRIATmlPycVGpU_aa4FmAuio7MquobSV_ywCgZicVFy3N5V7RBlp_HbbGO_l2Zkqt92jTI9_3PXkLbm1cvXfRZk8vA9LtoncC9lHXPTNzLR0bmKCCluRy1i4QDgDvAxI4MiuoEBeg2Ktqa45F6xQBB-8UGDujf2ENpeLAT_98xuLniwJhERS2X7jigCdfGko6SA" },
-                    { title: "Roma Trastevere Sokakları", src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDz5hKKLgZz2HEqo4RXPFdclKdZAUotPOUCJyIiFHGoEZ0HKCg7Gt91-pbyU6XcH1PV-uepmwupLCyqXL18UoxQ9W1k8zSa-nuNCZ6WlZn2p8VyvB04eeHvguxhuOXaLwf4KNdRzvmPJ10nHjkGYM3OShinvgnjjEtwoLQAW5APi75hzUXu4bqerJannuLp2w1-a8rWwll8xzWeTZyZ8tQN8K6uAi6DcPN0xeie2Cc-1RFwDJNwpqRD6w" },
-                    { title: "Likya Yolu Akdeniz Patikası", src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAGcSmACLBMWI88qVo2gw7LDCnJq-siLZSBHZzr38vCYPXLCF82kxB4tcI4axfC_Y-NvCr2FGZGuTyR11_stFP0P5iyu_V3wR_yRxjZOwwJ4ykc4uEULf3_fea_j4r78ka7V6oNOMdh27KJRc4TovJrHfBhb7tf4wU94HfJb50KLpMdLa-EwY_Tdd3ZRa_NlJsLsWcouW_D2lum1viu0Wh8L8aT_isPH5xIjhxAubARC5XZU12Fk3XHqA" },
+                    {
+                      title: "Kapadokya Gün Doğumu",
+                      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDj77hONrKmR8Fj8zu5NotnVeEZKEbBCjiHWPDDdPNHXPfNBawa4jOVv4lb0DULeshMOo9EYfGUBuB93gFvv2Y4_bY3Mt04r0050Hxm-540eN8ryevPBa-s65G8oYTJJIQHd-_Okm8socXdtFrxC3Ky55ADOpJPQLP8lKS3CUAR5TX5SoBr7ula4ikR9mbmpFOl0Zn6Z4MISYycRfOK7ZvKNBnCxDHgfEpBv7jtfwSEXJQmN93daNsUrA",
+                    },
+                    {
+                      title: "Dolomitler Alpleri Geçidi",
+                      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBRa6IhHenaRkLdslFsWnaGz58pf3b5RlZpMP1M2Gb9jjsmqm5RO0v-5S7gQLJlKJcQTQINNvDCXBWmytQI5vUBU_9fPg5IXclDuicY7Sv4S-7xQk4qXPJ6KL3FuMemW2Xg3knuWeoEas2arWPN_WLKfQLgQ3tZMwaeV3A8CTGblnjk-6uEw7V0y7eO9sbYS5kHjqBHimT7FDBmQi7U-N4X4ufmwcRDFpgAZdiHSrzL3jpte-ZhYEQA7w",
+                    },
+                    {
+                      title: "İstanbul Tarihi Yarımada",
+                      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuA9auz0nMBA4KRXGYite_AL45bw5Dhivt2lu5tIfS587bQePKqSUIWHRIATmlPycVGpU_aa4FmAuio7MquobSV_ywCgZicVFy3N5V7RBlp_HbbGO_l2Zkqt92jTI9_3PXkLbm1cvXfRZk8vA9LtoncC9lHXPTNzLR0bmKCCluRy1i4QDgDvAxI4MiuoEBeg2Ktqa45F6xQBB-8UGDujf2ENpeLAT_98xuLniwJhERS2X7jigCdfGko6SA",
+                    },
+                    {
+                      title: "Roma Trastevere Sokakları",
+                      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDz5hKKLgZz2HEqo4RXPFdclKdZAUotPOUCJyIiFHGoEZ0HKCg7Gt91-pbyU6XcH1PV-uepmwupLCyqXL18UoxQ9W1k8zSa-nuNCZ6WlZn2p8VyvB04eeHvguxhuOXaLwf4KNdRzvmPJ10nHjkGYM3OShinvgnjjEtwoLQAW5APi75hzUXu4bqerJannuLp2w1-a8rWwll8xzWeTZyZ8tQN8K6uAi6DcPN0xeie2Cc-1RFwDJNwpqRD6w",
+                    },
+                    {
+                      title: "Likya Yolu Akdeniz Patikası",
+                      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAGcSmACLBMWI88qVo2gw7LDCnJq-siLZSBHZzr38vCYPXLCF82kxB4tcI4axfC_Y-NvCr2FGZGuTyR11_stFP0P5iyu_V3wR_yRxjZOwwJ4ykc4uEULf3_fea_j4r78ka7V6oNOMdh27KJRc4TovJrHfBhb7tf4wU94HfJb50KLpMdLa-EwY_Tdd3ZRa_NlJsLsWcouW_D2lum1viu0Wh8L8aT_isPH5xIjhxAubARC5XZU12Fk3XHqA",
+                    },
                   ].map((img, i) => (
-                    <div key={i} style={{ borderRadius: "18px", overflow: "hidden", height: "180px", position: "relative", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}>
-                      <img src={img.src} alt={img.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      <div style={{ position: "absolute", bottom: 0, insetInline: 0, padding: "0.5rem 0.75rem", background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)", color: "#fff", fontSize: "11px", fontWeight: 600 }}>
+                    <div
+                      key={i}
+                      style={{
+                        borderRadius: "18px",
+                        overflow: "hidden",
+                        height: "180px",
+                        position: "relative",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      }}
+                    >
+                      <img
+                        src={img.src}
+                        alt={img.title}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: 0,
+                          insetInline: 0,
+                          padding: "0.5rem 0.75rem",
+                          background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
+                          color: "#fff",
+                          fontSize: "11px",
+                          fontWeight: 600,
+                        }}
+                      >
                         {img.title}
                       </div>
                     </div>
@@ -965,22 +1318,67 @@ export default function PublicProfileClient({
               {activeTab === "yorumlar" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {[
-                    { name: "Canberk Y.", route: "Kapadokya Vadi Gezgini", stars: 5, time: "3 gün önce", text: "Bu özenle hazırlanmış rota sayesinde klasik turların hiç bilmediği gizli vadileri keşfettik. Gün doğumu koordinatı tek kelimeyle mükemmeldi. Kesinlikle tavsiye ederim!" },
-                    { name: "Selin D.", route: "İstanbul Tarihi Yarımada", stars: 5, time: "1 hafta önce", text: "Yıllardır İstanbul'da yaşamama rağmen bilmediğim hanları ve çatı geçitlerini bu rotayla öğrendim. ₺120 fazlasıyla hak ediliyor." },
-                    { name: "Mehmet K.", route: "Likya Yolu Trekking", stars: 5, time: "2 hafta önce", text: "Su kaynakları koordinatları hayat kurtardı. Patika açıklamaları ve kamp noktası tavsiyeleri kusursuzdu." },
+                    {
+                      name: "Canberk Y.",
+                      route: "Kapadokya Vadi Gezgini",
+                      stars: 5,
+                      time: "3 gün önce",
+                      text: "Bu özenle hazırlanmış rota sayesinde klasik turların hiç bilmediği gizli vadileri keşfettik. Gün doğumu koordinatı tek kelimeyle mükemmeldi. Kesinlikle tavsiye ederim!",
+                    },
+                    {
+                      name: "Selin D.",
+                      route: "İstanbul Tarihi Yarımada",
+                      stars: 5,
+                      time: "1 hafta önce",
+                      text: "Yıllardır İstanbul'da yaşamama rağmen bilmediğim hanları ve çatı geçitlerini bu rotayla öğrendim. ₺120 fazlasıyla hak ediliyor.",
+                    },
+                    {
+                      name: "Mehmet K.",
+                      route: "Likya Yolu Trekking",
+                      stars: 5,
+                      time: "2 hafta önce",
+                      text: "Su kaynakları koordinatları hayat kurtardı. Patika açıklamaları ve kamp noktası tavsiyeleri kusursuzdu.",
+                    },
                   ].map((rev, i) => (
                     <div key={i} className="pub-sidebar-card">
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
                         <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
                           <div className="pub-reviewer-avatar">{rev.name.charAt(0)}</div>
                           <div>
-                            <div style={{ fontWeight: 700, fontSize: "14px", color: "var(--stitch-primary)" }}>{rev.name}</div>
-                            <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>{rev.route} • {rev.time}</div>
+                            <div
+                              style={{
+                                fontWeight: 700,
+                                fontSize: "14px",
+                                color: "var(--stitch-primary)",
+                              }}
+                            >
+                              {rev.name}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "11px",
+                                color: "var(--stitch-on-surface-variant)",
+                              }}
+                            >
+                              {rev.route} • {rev.time}
+                            </div>
                           </div>
                         </div>
                         <div style={{ display: "flex", color: "#f59e0b" }}>
                           {[...Array(rev.stars)].map((_, s) => (
-                            <span key={s} className="material-symbols-outlined fill" style={{ fontSize: "16px" }}>star</span>
+                            <span
+                              key={s}
+                              className="material-symbols-outlined fill"
+                              style={{ fontSize: "16px" }}
+                            >
+                              star
+                            </span>
                           ))}
                         </div>
                       </div>
@@ -997,10 +1395,22 @@ export default function PublicProfileClient({
               <div className="pub-sidebar-card">
                 <div className="pub-sidebar-card-header">
                   <h3 className="pub-sidebar-card-title">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--stitch-secondary)" }}>military_tech</span>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "20px", color: "var(--stitch-secondary)" }}
+                    >
+                      military_tech
+                    </span>
                     <span>Gezgin Rozetleri</span>
                   </h3>
-                  <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em", color: "var(--stitch-on-surface-variant)" }}>
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      letterSpacing: "0.04em",
+                      color: "var(--stitch-on-surface-variant)",
+                    }}
+                  >
                     4 KAZANILDI
                   </span>
                 </div>
@@ -1008,7 +1418,9 @@ export default function PublicProfileClient({
                 <div className="pub-badges-grid">
                   <div className="pub-badge-item">
                     <div className="pub-badge-icon-box">
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>public</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                        public
+                      </span>
                     </div>
                     <span className="pub-badge-title">18 Ülke Gezgini</span>
                     <span className="pub-badge-sub">Global Kaşif</span>
@@ -1016,7 +1428,9 @@ export default function PublicProfileClient({
 
                   <div className="pub-badge-item">
                     <div className="pub-badge-icon-box">
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>architecture</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                        architecture
+                      </span>
                     </div>
                     <span className="pub-badge-title">Usta Rota Mimarı</span>
                     <span className="pub-badge-sub">20+ Tamamlanan</span>
@@ -1024,7 +1438,9 @@ export default function PublicProfileClient({
 
                   <div className="pub-badge-item">
                     <div className="pub-badge-icon-box">
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>tips_and_updates</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                        tips_and_updates
+                      </span>
                     </div>
                     <span className="pub-badge-title">50+ Yerel Tavsiye</span>
                     <span className="pub-badge-sub">Küratör</span>
@@ -1032,7 +1448,9 @@ export default function PublicProfileClient({
 
                   <div className="pub-badge-item">
                     <div className="pub-badge-icon-box">
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>recommend</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                        recommend
+                      </span>
                     </div>
                     <span className="pub-badge-title">Topluluk Yıldızı</span>
                     <span className="pub-badge-sub">%98 Memnuniyet</span>
@@ -1043,25 +1461,38 @@ export default function PublicProfileClient({
               {/* Favori Seyahat Tarzı */}
               <div className="pub-sidebar-card">
                 <h3 className="pub-sidebar-card-title">
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "var(--stitch-secondary)" }}>loyalty</span>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "20px", color: "var(--stitch-secondary)" }}
+                  >
+                    loyalty
+                  </span>
                   <span>Favori Seyahat Tarzı</span>
                 </h3>
 
                 <div className="pub-styles-chips">
                   <span className="pub-style-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>museum</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                      museum
+                    </span>
                     Tarih & Kültür
                   </span>
                   <span className="pub-style-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>hiking</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                      hiking
+                    </span>
                     Doğa Yürüyüşü
                   </span>
                   <span className="pub-style-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>restaurant</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                      restaurant
+                    </span>
                     Yerel Gastronomi
                   </span>
                   <span className="pub-style-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>nordic_walking</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                      nordic_walking
+                    </span>
                     Solo Macera
                   </span>
                 </div>
@@ -1073,7 +1504,8 @@ export default function PublicProfileClient({
                   <span className="pub-collab-tag">TOPLULUK DENEYİMİ</span>
                   <h3 className="pub-collab-title">{displayName.split(" ")[0]} ile Birlikte Gez</h3>
                   <p className="pub-collab-desc">
-                    Gelecek rotalarında ortak gezi grubuna dahil olabilir veya planın için doğrudan özel danışmanlık talep edebilirsin.
+                    Gelecek rotalarında ortak gezi grubuna dahil olabilir veya planın için doğrudan
+                    özel danışmanlık talep edebilirsin.
                   </p>
                 </div>
 
@@ -1083,7 +1515,9 @@ export default function PublicProfileClient({
                     className="pub-collab-btn-highlight"
                     onClick={() => setShowGroupModal(true)}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>group_add</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      group_add
+                    </span>
                     <span>Ortak Gezi Grubu Oluştur</span>
                   </button>
 
@@ -1095,7 +1529,9 @@ export default function PublicProfileClient({
                       setShowMessageModal(true);
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>help_outline</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                      help_outline
+                    </span>
                     <span>Rotalar Hakkında Soru Sor</span>
                   </button>
                 </div>
@@ -1103,26 +1539,53 @@ export default function PublicProfileClient({
 
               {/* Son Gezgin İncelemesi */}
               <div className="pub-sidebar-card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em", color: "var(--stitch-on-surface-variant)" }}>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      letterSpacing: "0.04em",
+                      color: "var(--stitch-on-surface-variant)",
+                    }}
+                  >
                     SON GEZGİN İNCELEMESİ
                   </span>
                   <div style={{ display: "flex", color: "#f59e0b" }}>
                     {[...Array(5)].map((_, i) => (
-                      <span key={i} className="material-symbols-outlined fill" style={{ fontSize: "15px" }}>star</span>
+                      <span
+                        key={i}
+                        className="material-symbols-outlined fill"
+                        style={{ fontSize: "15px" }}
+                      >
+                        star
+                      </span>
                     ))}
                   </div>
                 </div>
 
                 <blockquote className="pub-review-quote">
-                  “Bu özenle hazırlanmış rota sayesinde klasik turların hiç bilmediği gizli vadileri keşfettik. Gün doğumu koordinatı tek kelimeyle mükemmeldi. Kesinlikle tavsiye ederim!”
+                  “Bu özenle hazırlanmış rota sayesinde klasik turların hiç bilmediği gizli vadileri
+                  keşfettik. Gün doğumu koordinatı tek kelimeyle mükemmeldi. Kesinlikle tavsiye
+                  ederim!”
                 </blockquote>
 
                 <div className="pub-reviewer-meta">
                   <div className="pub-reviewer-avatar">CY</div>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: "13px", color: "var(--stitch-on-surface)" }}>Canberk Y.</div>
-                    <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>Kapadokya Vadi Gezgini • 3 gün önce</div>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        fontSize: "13px",
+                        color: "var(--stitch-on-surface)",
+                      }}
+                    >
+                      Canberk Y.
+                    </div>
+                    <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>
+                      Kapadokya Vadi Gezgini • 3 gün önce
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1135,23 +1598,50 @@ export default function PublicProfileClient({
       <footer className="pub-page-footer">
         <div className="pub-footer-inner">
           <div className="pub-footer-brand">
-            <div className="pub-brand-icon" style={{ width: "28px", height: "28px", borderRadius: "8px" }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>polyline</span>
+            <div
+              className="pub-brand-icon"
+              style={{ width: "28px", height: "28px", borderRadius: "8px" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                polyline
+              </span>
             </div>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--stitch-primary)" }}>MapsBridge</span>
-            <span style={{ fontSize: "13px", color: "var(--stitch-on-surface-variant)" }}>© 2025 Tüm Hakları Saklıdır.</span>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--stitch-primary)" }}>
+              MapsBridge
+            </span>
+            <span style={{ fontSize: "13px", color: "var(--stitch-on-surface-variant)" }}>
+              © 2025 Tüm Hakları Saklıdır.
+            </span>
           </div>
 
           <div className="pub-footer-links">
-            <Link href="/terms" className="pub-footer-link">Kullanım Koşulları</Link>
-            <Link href="/privacy" className="pub-footer-link">Gizlilik Politikası</Link>
-            <Link href="/guvenlik" className="pub-footer-link">Güvenlik</Link>
-            <Link href="/yardim" className="pub-footer-link">Yardım Merkezi</Link>
+            <Link href="/terms" className="pub-footer-link">
+              Kullanım Koşulları
+            </Link>
+            <Link href="/privacy" className="pub-footer-link">
+              Gizlilik Politikası
+            </Link>
+            <Link href="/guvenlik" className="pub-footer-link">
+              Güvenlik
+            </Link>
+            <Link href="/yardim" className="pub-footer-link">
+              Yardım Merkezi
+            </Link>
           </div>
 
           <div>
-            <span style={{ fontSize: "13px", color: "var(--stitch-on-surface-variant)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>language</span>
+            <span
+              style={{
+                fontSize: "13px",
+                color: "var(--stitch-on-surface-variant)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                language
+              </span>
               TR - Türkçe
             </span>
           </div>
@@ -1161,7 +1651,12 @@ export default function PublicProfileClient({
       {/* Toast Notification */}
       {toast && (
         <div className="pub-toast" role="status">
-          <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "var(--stitch-mint-glow)" }}>check_circle</span>
+          <span
+            className="material-symbols-outlined"
+            style={{ fontSize: "18px", color: "var(--stitch-mint-glow)" }}
+          >
+            check_circle
+          </span>
           <span>{toast}</span>
         </div>
       )}
@@ -1172,11 +1667,7 @@ export default function PublicProfileClient({
           <div className="pub-modal-window" onClick={(e) => e.stopPropagation()}>
             <div className="pub-modal-header">
               <h3 className="pub-modal-title">{previewRoute.name} — Harita Önizlemesi</h3>
-              <button
-                type="button"
-                className="pub-icon-btn"
-                onClick={() => setPreviewRoute(null)}
-              >
+              <button type="button" className="pub-icon-btn" onClick={() => setPreviewRoute(null)}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -1192,7 +1683,14 @@ export default function PublicProfileClient({
                 }}
               />
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "var(--stitch-primary)" }}>
+                <h4
+                  style={{
+                    margin: 0,
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    color: "var(--stitch-primary)",
+                  }}
+                >
                   Rota Durakları ({previewRoute.stops.length})
                 </h4>
                 {previewRoute.stops.map((s, idx) => (
@@ -1224,8 +1722,20 @@ export default function PublicProfileClient({
                       {idx + 1}
                     </span>
                     <div>
-                      <strong style={{ fontSize: "13px", color: "var(--stitch-on-surface)" }}>{s.label}</strong>
-                      {s.note && <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--stitch-on-surface-variant)" }}>{s.note}</p>}
+                      <strong style={{ fontSize: "13px", color: "var(--stitch-on-surface)" }}>
+                        {s.label}
+                      </strong>
+                      {s.note && (
+                        <p
+                          style={{
+                            margin: "2px 0 0",
+                            fontSize: "12px",
+                            color: "var(--stitch-on-surface-variant)",
+                          }}
+                        >
+                          {s.note}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1243,7 +1753,9 @@ export default function PublicProfileClient({
                 href={`/desk/?route=${encodeURIComponent(previewRoute.name)}`}
                 className="pub-btn-primary"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>edit_location_alt</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  edit_location_alt
+                </span>
                 <span>Bu Rotayı Harita Masama Aktar</span>
               </Link>
             </div>
@@ -1271,38 +1783,92 @@ export default function PublicProfileClient({
                 alt={selectedPlanRoute.title}
                 style={{ width: "100%", height: "200px", objectFit: "cover", borderRadius: "16px" }}
               />
-              <p style={{ fontSize: "14px", color: "var(--stitch-on-surface-variant)", lineHeight: 1.6, margin: 0 }}>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "var(--stitch-on-surface-variant)",
+                  lineHeight: 1.6,
+                  margin: 0,
+                }}
+              >
                 {selectedPlanRoute.description}
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem", background: "var(--stitch-canvas-base)", padding: "1rem", borderRadius: "16px" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "0.75rem",
+                  background: "var(--stitch-canvas-base)",
+                  padding: "1rem",
+                  borderRadius: "16px",
+                }}
+              >
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>Süre</div>
-                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>{selectedPlanRoute.duration}</div>
+                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>
+                    Süre
+                  </div>
+                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>
+                    {selectedPlanRoute.duration}
+                  </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>Durak Sayısı</div>
-                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>{selectedPlanRoute.stopsCount} Durak</div>
+                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>
+                    Durak Sayısı
+                  </div>
+                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>
+                    {selectedPlanRoute.stopsCount} Durak
+                  </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>Kategori</div>
-                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>{selectedPlanRoute.category}</div>
+                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>
+                    Kategori
+                  </div>
+                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>
+                    {selectedPlanRoute.category}
+                  </div>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "0.5rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingTop: "0.5rem",
+                }}
+              >
                 <div>
-                  <span style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)", display: "block" }}>ROTA PAKETİ ÜCRETİ</span>
-                  <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--stitch-primary)" }}>{selectedPlanRoute.priceTag}</span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "var(--stitch-on-surface-variant)",
+                      display: "block",
+                    }}
+                  >
+                    ROTA PAKETİ ÜCRETİ
+                  </span>
+                  <span
+                    style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--stitch-primary)" }}
+                  >
+                    {selectedPlanRoute.priceTag}
+                  </span>
                 </div>
                 <button
                   type="button"
                   className="pub-btn-primary"
                   onClick={() => {
-                    if (!requireAuth("Rota Satın Al", "Özel seyahat rotasını kütüphanenize eklemek")) return;
-                    showToastMessage(`✓ "${selectedPlanRoute.title}" rotası satın alındı ve kütüphanenize eklendi!`);
+                    if (
+                      !requireAuth("Rota Satın Al", "Özel seyahat rotasını kütüphanenize eklemek")
+                    )
+                      return;
+                    showToastMessage(
+                      `✓ "${selectedPlanRoute.title}" rotası satın alındı ve kütüphanenize eklendi!`,
+                    );
                     setSelectedPlanRoute(null);
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>shopping_bag</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    shopping_bag
+                  </span>
                   <span>Rotayı Hemen Al & Haritaya Ekle</span>
                 </button>
               </div>
@@ -1328,7 +1894,15 @@ export default function PublicProfileClient({
             <form onSubmit={handleSendMessage}>
               <div className="pub-modal-body">
                 <div>
-                  <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--stitch-on-surface)", display: "block", marginBottom: "4px" }}>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "var(--stitch-on-surface)",
+                      display: "block",
+                      marginBottom: "4px",
+                    }}
+                  >
                     İlgili Rota veya Konu
                   </label>
                   <input
@@ -1346,7 +1920,15 @@ export default function PublicProfileClient({
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--stitch-on-surface)", display: "block", marginBottom: "4px" }}>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "var(--stitch-on-surface)",
+                      display: "block",
+                      marginBottom: "4px",
+                    }}
+                  >
                     Mesajınız
                   </label>
                   <textarea
@@ -1375,7 +1957,9 @@ export default function PublicProfileClient({
                   İptal
                 </button>
                 <button type="submit" className="pub-btn-primary">
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>send</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    send
+                  </span>
                   <span>Mesajı İlet</span>
                 </button>
               </div>
@@ -1400,11 +1984,27 @@ export default function PublicProfileClient({
             </div>
             <form onSubmit={handleGroupRequest}>
               <div className="pub-modal-body">
-                <p style={{ fontSize: "14px", color: "var(--stitch-on-surface-variant)", lineHeight: 1.6, margin: 0 }}>
-                  {displayName} tarafından planlanan gelecek gezilere ve ortak keşif etkinliklerine dahil olmak için katılım talebi oluşturun.
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "var(--stitch-on-surface-variant)",
+                    lineHeight: 1.6,
+                    margin: 0,
+                  }}
+                >
+                  {displayName} tarafından planlanan gelecek gezilere ve ortak keşif etkinliklerine
+                  dahil olmak için katılım talebi oluşturun.
                 </p>
                 <div>
-                  <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--stitch-on-surface)", display: "block", marginBottom: "4px" }}>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "var(--stitch-on-surface)",
+                      display: "block",
+                      marginBottom: "4px",
+                    }}
+                  >
                     Tercih Ettiğin Bölge ve Notun
                   </label>
                   <textarea
@@ -1433,7 +2033,9 @@ export default function PublicProfileClient({
                   Vazgeç
                 </button>
                 <button type="submit" className="pub-btn-primary">
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>check</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    check
+                  </span>
                   <span>Talebi Gönder</span>
                 </button>
               </div>

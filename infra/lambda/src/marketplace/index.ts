@@ -18,7 +18,18 @@ import { verifiedUserId } from "../shared/auth";
  */
 
 import type { ApiGatewayEvent } from "../shared/http";
-import { ok, created, badRequest, unauthorized, notFound, forbidden, serverError, handlePreflight, extractBearerToken, parseBody } from "../shared/http";
+import {
+  ok,
+  created,
+  badRequest,
+  unauthorized,
+  notFound,
+  forbidden,
+  serverError,
+  handlePreflight,
+  extractBearerToken,
+  parseBody,
+} from "../shared/http";
 import { Router } from "../shared/router";
 
 const router = new Router();
@@ -46,8 +57,6 @@ function getTableName(): string {
   return process.env.DYNAMODB_TABLE || `adreskopru-${process.env.ENVIRONMENT}-data`;
 }
 
-
-
 async function getDdb() {
   const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   return new DynamoDBClient({ region: process.env.AWS_REGION });
@@ -62,16 +71,20 @@ async function handleListGuides(event: ApiGatewayEvent) {
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 20, 100);
   const category = event.queryStringParameters?.category;
 
-  const result = await ddb.send(new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: category ? "begins_with(PK, :pk) AND category = :cat" : "begins_with(PK, :pk)",
-    ExpressionAttributeValues: category
-      ? { ":pk": { S: "GUIDE#" }, ":cat": { S: category } }
-      : { ":pk": { S: "GUIDE#" } },
-    Limit: limit,
-  }));
+  const result = await ddb.send(
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: category
+        ? "begins_with(PK, :pk) AND category = :cat"
+        : "begins_with(PK, :pk)",
+      ExpressionAttributeValues: category
+        ? { ":pk": { S: "GUIDE#" }, ":cat": { S: category } }
+        : { ":pk": { S: "GUIDE#" } },
+      Limit: limit,
+    }),
+  );
 
-  const guides = (result.Items || []).map(i => {
+  const guides = (result.Items || []).map((i) => {
     const item = unmarshall(i);
     // Don't expose file path in listing
     const { filePath, ...safe } = item;
@@ -90,10 +103,12 @@ async function handleGetGuide(event: ApiGatewayEvent) {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const result = await ddb.send(new GetItemCommand({
-    TableName: getTableName(),
-    Key: { PK: { S: `GUIDE#${guideId}` }, SK: { S: "META" } },
-  }));
+  const result = await ddb.send(
+    new GetItemCommand({
+      TableName: getTableName(),
+      Key: { PK: { S: `GUIDE#${guideId}` }, SK: { S: "META" } },
+    }),
+  );
 
   if (!result.Item) return notFound("Rehber bulunamadı.");
   const item = unmarshall(result.Item);
@@ -110,8 +125,12 @@ async function handleCreateGuide(event: ApiGatewayEvent) {
   if (!userId) return unauthorized();
 
   const body = parseBody<{
-    title?: string; description?: string; price?: number;
-    category?: string; fileContent?: string; fileName?: string;
+    title?: string;
+    description?: string;
+    price?: number;
+    category?: string;
+    fileContent?: string;
+    fileName?: string;
   }>(event);
   if (!body?.title || body.price === undefined) return badRequest("Başlık ve fiyat zorunludur.");
 
@@ -125,24 +144,26 @@ async function handleCreateGuide(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   // Store guide metadata
-  await ddb.send(new PutItemCommand({
-    TableName: getTableName(),
-    Item: marshall({
-      PK: `GUIDE#${guideId}`,
-      SK: "META",
-      guideId,
-      title: body.title.slice(0, 200),
-      description: (body.description || "").slice(0, 2000),
-      price: Math.round(body.price * 100), // store in cents
-      currency: "try",
-      category: body.category || "general",
-      sellerId: userId,
-      filePath: fileKey,
-      createdAt: now,
-      updatedAt: now,
-      purchaseCount: 0,
+  await ddb.send(
+    new PutItemCommand({
+      TableName: getTableName(),
+      Item: marshall({
+        PK: `GUIDE#${guideId}`,
+        SK: "META",
+        guideId,
+        title: body.title.slice(0, 200),
+        description: (body.description || "").slice(0, 2000),
+        price: Math.round(body.price * 100), // store in cents
+        currency: "try",
+        category: body.category || "general",
+        sellerId: userId,
+        filePath: fileKey,
+        createdAt: now,
+        updatedAt: now,
+        purchaseCount: 0,
+      }),
     }),
-  }));
+  );
 
   // Upload file to S3 if provided
   if (body.fileContent) {
@@ -150,12 +171,14 @@ async function handleCreateGuide(event: ApiGatewayEvent) {
     const s3 = new S3Client({ region: process.env.AWS_REGION });
     const fileBuffer = Buffer.from(body.fileContent, "base64");
 
-    await s3.send(new PutObjectCommand({
-      Bucket: guidesBucket,
-      Key: fileKey,
-      Body: fileBuffer,
-      ContentType: "application/pdf",
-    }));
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: guidesBucket,
+        Key: fileKey,
+        Body: fileBuffer,
+        ContentType: "application/pdf",
+      }),
+    );
   }
 
   return created({ guideId, title: body.title });
@@ -171,7 +194,11 @@ async function handlePurchaseGuide(event: ApiGatewayEvent) {
 
   // The old endpoint accepted any paymentIntentId as proof and issued downloads.
   // Guide commerce is disabled until a server-owned order + verified fulfillment path is available.
-  return { statusCode: 503, headers: { "content-type": "application/json" }, body: JSON.stringify({ error: "Rehber satın alma servisi henüz kullanıma açık değil." }) };
+  return {
+    statusCode: 503,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ error: "Rehber satın alma servisi henüz kullanıma açık değil." }),
+  };
 }
 
 // ─── Download Guide (Pre-signed URL) — Requirement #3 ────────────────────
@@ -190,20 +217,24 @@ async function handleDownloadGuide(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   // 1. Verify purchase
-  const purchaseResult = await ddb.send(new GetItemCommand({
-    TableName: getTableName(),
-    Key: marshall({ PK: `PURCHASE#${userId}`, SK: `GUIDE#${guideId}` }),
-  }));
+  const purchaseResult = await ddb.send(
+    new GetItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: `PURCHASE#${userId}`, SK: `GUIDE#${guideId}` }),
+    }),
+  );
 
   if (!purchaseResult.Item || unmarshall(purchaseResult.Item).verifiedPaymentVersion !== 1) {
     return forbidden("Bu rehberi satın almadınız.");
   }
 
   // 2. Get guide metadata for file path
-  const guideResult = await ddb.send(new GetItemCommand({
-    TableName: getTableName(),
-    Key: marshall({ PK: `GUIDE#${guideId}`, SK: "META" }),
-  }));
+  const guideResult = await ddb.send(
+    new GetItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: `GUIDE#${guideId}`, SK: "META" }),
+    }),
+  );
 
   if (!guideResult.Item) return notFound("Rehber bulunamadı.");
   const guide = unmarshall(guideResult.Item);
@@ -230,18 +261,22 @@ async function handleDownloadGuide(event: ApiGatewayEvent) {
   try {
     const { FirehoseClient, PutRecordCommand } = await import("@aws-sdk/client-firehose");
     const firehose = new FirehoseClient({ region: process.env.AWS_REGION });
-    await firehose.send(new PutRecordCommand({
-      DeliveryStreamName: process.env.FIREHOSE_STREAM || "",
-      Record: {
-        Data: Buffer.from(JSON.stringify({
-          userId,
-          action: "guide_download",
-          guideId,
-          timestamp: Date.now(),
-          metadata: JSON.stringify({ fileKey }),
-        }) + "\n"),
-      },
-    }));
+    await firehose.send(
+      new PutRecordCommand({
+        DeliveryStreamName: process.env.FIREHOSE_STREAM || "",
+        Record: {
+          Data: Buffer.from(
+            JSON.stringify({
+              userId,
+              action: "guide_download",
+              guideId,
+              timestamp: Date.now(),
+              metadata: JSON.stringify({ fileKey }),
+            }) + "\n",
+          ),
+        },
+      }),
+    );
   } catch {
     // Non-critical
   }
@@ -271,21 +306,23 @@ async function handleCreateBlog(event: ApiGatewayEvent) {
   const { marshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  await ddb.send(new PutItemCommand({
-    TableName: getTableName(),
-    Item: marshall({
-      PK: `BLOG#${blogId}`,
-      SK: "META",
-      blogId,
-      title: body.title.slice(0, 200),
-      content: body.content.slice(0, 50000),
-      tags: (body.tags || []).slice(0, 10),
-      authorId: userId,
-      createdAt: now,
-      updatedAt: now,
-      published: true,
+  await ddb.send(
+    new PutItemCommand({
+      TableName: getTableName(),
+      Item: marshall({
+        PK: `BLOG#${blogId}`,
+        SK: "META",
+        blogId,
+        title: body.title.slice(0, 200),
+        content: body.content.slice(0, 50000),
+        tags: (body.tags || []).slice(0, 10),
+        authorId: userId,
+        createdAt: now,
+        updatedAt: now,
+        published: true,
+      }),
     }),
-  }));
+  );
 
   return created({ blogId, title: body.title });
 }
@@ -298,16 +335,20 @@ async function handleListBlogs(event: ApiGatewayEvent) {
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 20, 100);
   const tag = event.queryStringParameters?.tag;
 
-  const result = await ddb.send(new ScanCommand({
-    TableName: getTableName(),
-    FilterExpression: tag ? "begins_with(PK, :pk) AND contains(tags, :tag)" : "begins_with(PK, :pk)",
-    ExpressionAttributeValues: tag
-      ? { ":pk": { S: "BLOG#" }, ":tag": { S: tag } }
-      : { ":pk": { S: "BLOG#" } },
-    Limit: limit,
-  }));
+  const result = await ddb.send(
+    new ScanCommand({
+      TableName: getTableName(),
+      FilterExpression: tag
+        ? "begins_with(PK, :pk) AND contains(tags, :tag)"
+        : "begins_with(PK, :pk)",
+      ExpressionAttributeValues: tag
+        ? { ":pk": { S: "BLOG#" }, ":tag": { S: tag } }
+        : { ":pk": { S: "BLOG#" } },
+      Limit: limit,
+    }),
+  );
 
-  const blogs = (result.Items || []).map(i => {
+  const blogs = (result.Items || []).map((i) => {
     const item = unmarshall(i);
     // Truncate content for listing
     if (item.content && item.content.length > 300) {
@@ -327,10 +368,12 @@ async function handleGetBlog(event: ApiGatewayEvent) {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-  const result = await ddb.send(new GetItemCommand({
-    TableName: getTableName(),
-    Key: { PK: { S: `BLOG#${blogId}` }, SK: { S: "META" } },
-  }));
+  const result = await ddb.send(
+    new GetItemCommand({
+      TableName: getTableName(),
+      Key: { PK: { S: `BLOG#${blogId}` }, SK: { S: "META" } },
+    }),
+  );
 
   if (!result.Item) return notFound("Blog yazısı bulunamadı.");
   return ok(unmarshall(result.Item));

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   StyleSheet,
   Text,
@@ -7,8 +7,8 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-} from 'react-native';
-import Svg, { Path, Circle, Defs, Pattern, Rect, Text as SvgText, G } from 'react-native-svg';
+} from "react-native";
+import Svg, { Path, Circle, Defs, Pattern, Rect, Text as SvgText, G } from "react-native-svg";
 
 interface RouteLoadingModalProps {
   visible: boolean;
@@ -23,14 +23,17 @@ export function RouteLoadingModal({
   onCancel,
   onRunInBackground,
   progressPercent = 64,
-  routeTitle = 'Rotanız Haritaya İşleniyor',
+  routeTitle = "Rotanız Haritaya İşleniyor",
 }: RouteLoadingModalProps) {
   if (!visible) return null;
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
       <SafeAreaView style={styles.safeContainer}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Minimal Header / Cancellation Bar */}
           <View style={styles.headerBar}>
             <View style={styles.headerLeft}>
@@ -110,7 +113,8 @@ export function RouteLoadingModal({
                 <Text style={styles.syncSpin}>🔄</Text>
               </View>
               <Text style={styles.cardDesc}>
-                Yapay zeka durak sıralamasını, eğim analizini ve çevrimdışı yürüyüş verilerini optimize ediyor.
+                Yapay zeka durak sıralamasını, eğim analizini ve çevrimdışı yürüyüş verilerini
+                optimize ediyor.
               </Text>
             </View>
 
@@ -122,7 +126,7 @@ export function RouteLoadingModal({
                   <View style={[styles.stepCircle, styles.stepCircleCompleted]}>
                     <Text style={styles.stepCheck}>✓</Text>
                   </View>
-                  <View style={[styles.stepConnector, { backgroundColor: '#10B981' }]} />
+                  <View style={[styles.stepConnector, { backgroundColor: "#10B981" }]} />
                 </View>
                 <View style={styles.stepInfo}>
                   <View style={styles.stepHeaderRow}>
@@ -131,7 +135,9 @@ export function RouteLoadingModal({
                       <Text style={styles.completedTagText}>Tamamlandı</Text>
                     </View>
                   </View>
-                  <Text style={styles.stepDesc}>İlgi noktaları ve ara mola noktaları doğrulandı.</Text>
+                  <Text style={styles.stepDesc}>
+                    İlgi noktaları ve ara mola noktaları doğrulandı.
+                  </Text>
                 </View>
               </View>
 
@@ -139,18 +145,22 @@ export function RouteLoadingModal({
               <View style={styles.milestoneItem}>
                 <View style={styles.stepIndicatorCol}>
                   <View style={[styles.stepCircle, styles.stepCircleActive]}>
-                    <Text style={{ fontSize: 11, color: '#fff' }}>⚡</Text>
+                    <Text style={{ fontSize: 11, color: "#fff" }}>⚡</Text>
                   </View>
                   <View style={styles.stepConnector} />
                 </View>
                 <View style={styles.stepInfo}>
                   <View style={styles.stepHeaderRow}>
-                    <Text style={[styles.stepTitle, { fontWeight: '800' }]}>En Hızlı Yürüyüş Yolu Analizi</Text>
+                    <Text style={[styles.stepTitle, { fontWeight: "800" }]}>
+                      En Hızlı Yürüyüş Yolu Analizi
+                    </Text>
                     <View style={styles.activeTag}>
                       <Text style={styles.activeTagText}>İşleniyor</Text>
                     </View>
                   </View>
-                  <Text style={styles.stepDesc}>Trafik, yaya kalabalığı ve güncel yol çalışmaları taranıyor.</Text>
+                  <Text style={styles.stepDesc}>
+                    Trafik, yaya kalabalığı ve güncel yol çalışmaları taranıyor.
+                  </Text>
                 </View>
               </View>
 
@@ -158,7 +168,7 @@ export function RouteLoadingModal({
               <View style={[styles.milestoneItem, { opacity: 0.65 }]}>
                 <View style={styles.stepIndicatorCol}>
                   <View style={styles.stepCircle}>
-                    <Text style={{ fontSize: 10, color: '#717974' }}>⏳</Text>
+                    <Text style={{ fontSize: 10, color: "#717974" }}>⏳</Text>
                   </View>
                   <View style={styles.stepConnector} />
                 </View>
@@ -169,7 +179,9 @@ export function RouteLoadingModal({
                       <Text style={styles.pendingTagText}>Sırada</Text>
                     </View>
                   </View>
-                  <Text style={styles.stepDesc}>Gizli sokak lezzetleri ve manzara seyir noktaları eklenecek.</Text>
+                  <Text style={styles.stepDesc}>
+                    Gizli sokak lezzetleri ve manzara seyir noktaları eklenecek.
+                  </Text>
                 </View>
               </View>
 
@@ -177,7 +189,7 @@ export function RouteLoadingModal({
               <View style={[styles.milestoneItem, { opacity: 0.45 }]}>
                 <View style={styles.stepIndicatorCol}>
                   <View style={styles.stepCircle}>
-                    <Text style={{ fontSize: 10, color: '#717974' }}>☁️</Text>
+                    <Text style={{ fontSize: 10, color: "#717974" }}>☁️</Text>
                   </View>
                 </View>
                 <View style={styles.stepInfo}>
@@ -187,7 +199,9 @@ export function RouteLoadingModal({
                       <Text style={styles.pendingTagText}>Bekliyor</Text>
                     </View>
                   </View>
-                  <Text style={styles.stepDesc}>Sinyalsiz dağ ve ara sokak moduna uygun paketleniyor.</Text>
+                  <Text style={styles.stepDesc}>
+                    Sinyalsiz dağ ve ara sokak moduna uygun paketleniyor.
+                  </Text>
                 </View>
               </View>
             </View>
@@ -201,7 +215,8 @@ export function RouteLoadingModal({
             <View style={{ flex: 1 }}>
               <Text style={styles.tipHeading}>Gezgin İpucu</Text>
               <Text style={styles.tipBody}>
-                MapsBridge ile oluşturulan rotaları internet bağlantınız kesildiğinde de GPS üzerinden rota sapması uyarısıyla kullanabilirsiniz.
+                MapsBridge ile oluşturulan rotaları internet bağlantınız kesildiğinde de GPS
+                üzerinden rota sapması uyarısıyla kullanabilirsiniz.
               </Text>
             </View>
           </View>
@@ -225,7 +240,7 @@ export function RouteLoadingModal({
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: '#faf8ff',
+    backgroundColor: "#faf8ff",
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -233,92 +248,92 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 10,
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   headerIconCircle: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#1e4d3e',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#1e4d3e",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   headerSub: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#286954',
+    fontWeight: "800",
+    color: "#286954",
     letterSpacing: 0.8,
   },
   cancelBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
-    backgroundColor: '#eaedff',
+    backgroundColor: "#eaedff",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
   },
   cancelBtnText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#404945',
+    fontWeight: "600",
+    color: "#404945",
   },
   cancelBtnCross: {
     fontSize: 11,
-    color: '#717974',
+    color: "#717974",
   },
   radarCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderRadius: 22,
     padding: 18,
-    shadowColor: '#013628',
+    shadowColor: "#013628",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
     elevation: 4,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   ambientGlow: {
-    position: 'absolute',
+    position: "absolute",
     top: -20,
     right: -20,
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: 'rgba(52, 211, 153, 0.12)',
+    backgroundColor: "rgba(52, 211, 153, 0.12)",
   },
   radarGraphicBox: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: "#F8FAFC",
     borderRadius: 16,
-    overflow: 'hidden',
-    position: 'relative',
+    overflow: "hidden",
+    position: "relative",
     marginBottom: 16,
   },
   liveOptimizationBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 999,
     gap: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -327,180 +342,180 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   liveOptimizationText: {
     fontSize: 9,
-    fontWeight: '800',
-    color: '#286954',
+    fontWeight: "800",
+    color: "#286954",
   },
   percentBadge: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 10,
     left: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
     gap: 4,
   },
   percentNum: {
     fontSize: 16,
-    fontWeight: '900',
-    color: '#013628',
+    fontWeight: "900",
+    color: "#013628",
   },
   percentLabel: {
     fontSize: 8,
-    fontWeight: '800',
-    color: '#717974',
+    fontWeight: "800",
+    color: "#717974",
   },
   cardTextBox: {
     marginBottom: 16,
   },
   titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 4,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   syncSpin: {
     fontSize: 16,
   },
   cardDesc: {
     fontSize: 12,
-    color: '#717974',
+    color: "#717974",
     lineHeight: 18,
   },
   milestonesList: {
     gap: 12,
   },
   milestoneItem: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   stepIndicatorCol: {
-    alignItems: 'center',
+    alignItems: "center",
     width: 26,
   },
   stepCircle: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#eaedff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#eaedff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   stepCircleCompleted: {
-    backgroundColor: '#ecfdf5',
+    backgroundColor: "#ecfdf5",
   },
   stepCircleActive: {
-    backgroundColor: '#013628',
+    backgroundColor: "#013628",
   },
   stepCheck: {
     fontSize: 12,
-    fontWeight: '900',
-    color: '#10B981',
+    fontWeight: "900",
+    color: "#10B981",
   },
   stepConnector: {
     width: 2,
     flex: 1,
     minHeight: 20,
-    backgroundColor: '#e2e8f0',
+    backgroundColor: "#e2e8f0",
     marginVertical: 2,
   },
   stepInfo: {
     flex: 1,
   },
   stepHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 2,
   },
   stepTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#013628',
+    fontWeight: "700",
+    color: "#013628",
   },
   completedTag: {
-    backgroundColor: '#ecfdf5',
+    backgroundColor: "#ecfdf5",
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
   },
   completedTagText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#286954',
+    fontWeight: "700",
+    color: "#286954",
   },
   activeTag: {
-    backgroundColor: '#abedd3',
+    backgroundColor: "#abedd3",
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
   },
   activeTagText: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#005236',
+    fontWeight: "800",
+    color: "#005236",
   },
   pendingTag: {
-    backgroundColor: '#f2f3ff',
+    backgroundColor: "#f2f3ff",
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
   },
   pendingTagText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#717974',
+    fontWeight: "700",
+    color: "#717974",
   },
   stepDesc: {
     fontSize: 11,
-    color: '#717974',
+    color: "#717974",
   },
   tipBanner: {
-    backgroundColor: '#ecfdf5',
+    backgroundColor: "#ecfdf5",
     borderRadius: 16,
     padding: 14,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   tipIconWrap: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   tipHeading: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
     marginBottom: 2,
   },
   tipBody: {
     fontSize: 11,
-    color: '#286954',
+    color: "#286954",
     lineHeight: 16,
   },
   backgroundCtaBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     paddingVertical: 14,
     borderRadius: 999,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -508,14 +523,14 @@ const styles = StyleSheet.create({
   },
   backgroundCtaText: {
     fontSize: 13,
-    fontWeight: '800',
-    color: '#013628',
+    fontWeight: "800",
+    color: "#013628",
   },
   footnote: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 9,
-    fontWeight: '800',
-    color: '#717974',
+    fontWeight: "800",
+    color: "#717974",
     letterSpacing: 0.6,
   },
 });

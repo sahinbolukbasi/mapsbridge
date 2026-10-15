@@ -11,10 +11,7 @@ export async function OPTIONS(request: NextRequest) {
   });
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const corsHeaders = getCorsHeaders(request);
   const { id } = await params;
   const { searchParams } = new URL(request.url);
@@ -29,20 +26,14 @@ export async function GET(
   if (!post) {
     return NextResponse.json(
       { error: "Gönderi bulunamadı." },
-      { status: 404, headers: corsHeaders }
+      { status: 404, headers: corsHeaders },
     );
   }
 
-  return NextResponse.json(
-    { success: true, post },
-    { headers: corsHeaders }
-  );
+  return NextResponse.json({ success: true, post }, { headers: corsHeaders });
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const corsHeaders = getCorsHeaders(request);
   const auth = await authenticateRequest(request, corsHeaders);
   if (auth instanceof NextResponse) return auth;
@@ -54,13 +45,13 @@ export async function PUT(
   if (!existing) {
     return NextResponse.json(
       { error: "Güncellenecek gönderi bulunamadı." },
-      { status: 404, headers: corsHeaders }
+      { status: 404, headers: corsHeaders },
     );
   }
   if (existing.authorUsername !== auth.username) {
     return NextResponse.json(
       { error: "Bu gönderiyi düzenleme yetkiniz yok." },
-      { status: 403, headers: corsHeaders }
+      { status: 403, headers: corsHeaders },
     );
   }
 
@@ -71,25 +62,22 @@ export async function PUT(
     if (!updated) {
       return NextResponse.json(
         { error: "Güncellenecek gönderi bulunamadı." },
-        { status: 404, headers: corsHeaders }
+        { status: 404, headers: corsHeaders },
       );
     }
 
-    return NextResponse.json(
-      { success: true, post: updated },
-      { headers: corsHeaders }
-    );
+    return NextResponse.json({ success: true, post: updated }, { headers: corsHeaders });
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message || "Sunucu hatası" },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders },
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const corsHeaders = getCorsHeaders(request);
   const auth = await authenticateRequest(request, corsHeaders);
@@ -102,13 +90,13 @@ export async function DELETE(
   if (!existing) {
     return NextResponse.json(
       { error: "Silinecek gönderi bulunamadı." },
-      { status: 404, headers: corsHeaders }
+      { status: 404, headers: corsHeaders },
     );
   }
   if (existing.authorUsername !== auth.username) {
     return NextResponse.json(
       { error: "Bu gönderiyi silme yetkiniz yok." },
-      { status: 403, headers: corsHeaders }
+      { status: 403, headers: corsHeaders },
     );
   }
 
@@ -117,12 +105,12 @@ export async function DELETE(
   if (!deleted) {
     return NextResponse.json(
       { error: "Silinecek gönderi bulunamadı." },
-      { status: 404, headers: corsHeaders }
+      { status: 404, headers: corsHeaders },
     );
   }
 
   return NextResponse.json(
     { success: true, message: "Gönderi silindi." },
-    { headers: corsHeaders }
+    { headers: corsHeaders },
   );
 }

@@ -81,8 +81,12 @@ export default function EditProfilePage() {
 
   // Billing, Monetization & Transactions State
   const [wallet, setWallet] = useState<WalletData>(() => billingService.getWallet());
-  const [billingDetails, setBillingDetails] = useState<BillingDetails>(() => billingService.getBillingDetails());
-  const [transactions, setTransactions] = useState<BillingTransaction[]>(() => billingService.getTransactions());
+  const [billingDetails, setBillingDetails] = useState<BillingDetails>(() =>
+    billingService.getBillingDetails(),
+  );
+  const [transactions, setTransactions] = useState<BillingTransaction[]>(() =>
+    billingService.getTransactions(),
+  );
   const [payoutAmount, setPayoutAmount] = useState<string>("");
   const [payoutIban, setPayoutIban] = useState<string>(wallet.payoutIban || "");
   const [payoutHolder, setPayoutHolder] = useState<string>(wallet.payoutAccountHolder || "");
@@ -151,8 +155,10 @@ export default function EditProfilePage() {
       const prefs = userStorage.getItem("mapsbridge.userPreferences");
       if (prefs) {
         const p = JSON.parse(prefs);
-        if (typeof p.notifTravelReminders === "boolean") setNotifTravelReminders(p.notifTravelReminders);
-        if (typeof p.notifEmailSummaries === "boolean") setNotifEmailSummaries(p.notifEmailSummaries);
+        if (typeof p.notifTravelReminders === "boolean")
+          setNotifTravelReminders(p.notifTravelReminders);
+        if (typeof p.notifEmailSummaries === "boolean")
+          setNotifEmailSummaries(p.notifEmailSummaries);
         if (typeof p.notifCommunityTips === "boolean") setNotifCommunityTips(p.notifCommunityTips);
       }
     } catch {}
@@ -160,7 +166,10 @@ export default function EditProfilePage() {
     // URL tab check
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get("tab") as SidebarTab;
-    if (tabParam && ["genel", "guvenlik", "bildirimler", "entegrasyonlar", "odeme", "tehlike"].includes(tabParam)) {
+    if (
+      tabParam &&
+      ["genel", "guvenlik", "bildirimler", "entegrasyonlar", "odeme", "tehlike"].includes(tabParam)
+    ) {
       setActiveTab(tabParam);
     }
 
@@ -228,7 +237,9 @@ export default function EditProfilePage() {
   async function openWebcam() {
     setIsWebcamOpen(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 },
+      });
       mediaStreamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -408,12 +419,14 @@ export default function EditProfilePage() {
           {
             icon: "👤",
             title: "Gezgin Kimliği",
-            description: "Ad, soyad, biyografi ve özel kullanıcı adınızı dilediğiniz gibi belirleyin.",
+            description:
+              "Ad, soyad, biyografi ve özel kullanıcı adınızı dilediğiniz gibi belirleyin.",
           },
           {
             icon: "🎨",
             title: "Görsel ve Kapak Yönetimi",
-            description: "Manzara kapak fotoğrafınız ve seyyah profil avatarınızla profilinizi kişiselleştirin.",
+            description:
+              "Manzara kapak fotoğrafınız ve seyyah profil avatarınızla profilinizi kişiselleştirin.",
           },
           {
             icon: "🔑",
@@ -423,7 +436,8 @@ export default function EditProfilePage() {
           {
             icon: "🛡️",
             title: "Gizlilik & Sosyal Bağlantılar",
-            description: "Hangi sosyal bağlantılarınızın ve e-posta bilgilerinizin paylaşılacağını kontrol edin.",
+            description:
+              "Hangi sosyal bağlantılarınızın ve e-posta bilgilerinizin paylaşılacağını kontrol edin.",
           },
         ]}
       />
@@ -515,12 +529,17 @@ export default function EditProfilePage() {
               <div className="stitch-explorer-info">
                 <div className="stitch-explorer-name-row">
                   <span className="stitch-explorer-name">{fullName || "Gezgin"}</span>
-                  <span className="material-symbols-outlined stitch-verified-badge" title="Doğrulanmış Rota Küratörü">
+                  <span
+                    className="material-symbols-outlined stitch-verified-badge"
+                    title="Doğrulanmış Rota Küratörü"
+                  >
                     verified
                   </span>
                 </div>
                 <span className="stitch-explorer-handle">@{username || "gezgin"}</span>
-                <span className="stitch-explorer-tagline">{wallet.subscriptionTier === "free" ? "GEZGİN" : "PRO KAŞİF"}</span>
+                <span className="stitch-explorer-tagline">
+                  {wallet.subscriptionTier === "free" ? "GEZGİN" : "PRO KAŞİF"}
+                </span>
               </div>
             </div>
 
@@ -549,7 +568,9 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined stitch-nav-item-icon">lock</span>
                   <span>Hesap Güvenliği & Şifre</span>
                 </div>
-                <span className="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+                <span className="material-symbols-outlined text-[16px] text-outline">
+                  chevron_right
+                </span>
               </button>
 
               <button
@@ -558,7 +579,9 @@ export default function EditProfilePage() {
                 onClick={() => setActiveTab("bildirimler")}
               >
                 <div className="stitch-nav-item-left">
-                  <span className="material-symbols-outlined stitch-nav-item-icon">notifications_active</span>
+                  <span className="material-symbols-outlined stitch-nav-item-icon">
+                    notifications_active
+                  </span>
                   <span>Bildirim & E-posta Tercihleri</span>
                 </div>
                 <span className="stitch-nav-badge">2 YENİ</span>
@@ -573,7 +596,9 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined stitch-nav-item-icon">hub</span>
                   <span>Sosyal Hesaplar & Entegrasyonlar</span>
                 </div>
-                <span className="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+                <span className="material-symbols-outlined text-[16px] text-outline">
+                  chevron_right
+                </span>
               </button>
 
               <button
@@ -585,7 +610,9 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined stitch-nav-item-icon">payments</span>
                   <span>Ödeme & Rota Satış Ayarları</span>
                 </div>
-                <span className="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+                <span className="material-symbols-outlined text-[16px] text-outline">
+                  chevron_right
+                </span>
               </button>
 
               <div className="stitch-nav-divider" />
@@ -610,7 +637,10 @@ export default function EditProfilePage() {
                 <span className="stitch-completion-pct">%{completionPercentage}</span>
               </div>
               <div className="stitch-progress-track">
-                <div className="stitch-progress-bar" style={{ width: `${completionPercentage}%` }} />
+                <div
+                  className="stitch-progress-bar"
+                  style={{ width: `${completionPercentage}%` }}
+                />
               </div>
               <p className="stitch-completion-tip">
                 {completionPercentage >= 90
@@ -638,7 +668,11 @@ export default function EditProfilePage() {
                   <div className="stitch-cover-block">
                     <label className="stitch-field-label">Profil Kapak Fotoğrafı</label>
                     <div className="stitch-cover-container">
-                      <img src={coverPhoto} alt="Profil Kapak Fotoğrafı" className="stitch-cover-img" />
+                      <img
+                        src={coverPhoto}
+                        alt="Profil Kapak Fotoğrafı"
+                        className="stitch-cover-img"
+                      />
                       <div className="stitch-cover-overlay">
                         <button
                           type="button"
@@ -660,7 +694,8 @@ export default function EditProfilePage() {
                     </div>
                     <p className="stitch-helper-text">
                       <span className="material-symbols-outlined text-[14px]">info</span>
-                      En iyi sonuç için yatay, yüksek çözünürlüklü manzara fotoğrafları (PNG veya JPG, maks. 5MB) tercih edin.
+                      En iyi sonuç için yatay, yüksek çözünürlüklü manzara fotoğrafları (PNG veya
+                      JPG, maks. 5MB) tercih edin.
                     </p>
                   </div>
 
@@ -678,7 +713,8 @@ export default function EditProfilePage() {
                     <div className="stitch-avatar-controls">
                       <span className="stitch-avatar-title">Profil Fotoğrafı</span>
                       <p className="stitch-helper-text">
-                        Topluluk yorumlarında, paylaşılan rotalarda ve seyahat haritalarında görünür.
+                        Topluluk yorumlarında, paylaşılan rotalarda ve seyahat haritalarında
+                        görünür.
                       </p>
                       <div className="stitch-avatar-buttons-row">
                         <button
@@ -744,7 +780,9 @@ export default function EditProfilePage() {
                           Kullanıcı Adı
                         </label>
                         <span className="stitch-username-status">
-                          <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                          <span className="material-symbols-outlined text-[14px]">
+                            check_circle
+                          </span>
                           MÜSAİT
                         </span>
                       </div>
@@ -757,12 +795,17 @@ export default function EditProfilePage() {
                           type="text"
                           className="stitch-text-input mint-highlight"
                           value={username}
-                          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                          onChange={(e) =>
+                            setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
+                          }
                           placeholder="kullanici_adi"
                         />
                       </div>
                       <p className="stitch-input-preview-note">
-                        Önizleme: <span className="font-semibold text-secondary">mapsbridge.com/@{username || "gezgin"}</span>
+                        Önizleme:{" "}
+                        <span className="font-semibold text-secondary">
+                          mapsbridge.com/@{username || "gezgin"}
+                        </span>
                       </p>
                     </div>
 
@@ -809,7 +852,9 @@ export default function EditProfilePage() {
                         Mevcut Konum
                       </label>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon">location_on</span>
+                        <span className="material-symbols-outlined stitch-input-icon">
+                          location_on
+                        </span>
                         <input
                           id="location"
                           type="text"
@@ -881,7 +926,9 @@ export default function EditProfilePage() {
                   <div className="stitch-section-header">
                     <div className="stitch-section-title-wrap">
                       <span className="stitch-section-dot" />
-                      <h2 className="stitch-section-title">Gezgin İlgi Alanları & Rozet Tercihleri</h2>
+                      <h2 className="stitch-section-title">
+                        Gezgin İlgi Alanları & Rozet Tercihleri
+                      </h2>
                     </div>
                     <span className="stitch-section-badge highlight">
                       {selectedInterests.length} SEÇİLDİ
@@ -902,7 +949,9 @@ export default function EditProfilePage() {
                             className={`stitch-interest-pill ${isSelected ? "active" : "inactive"}`}
                             onClick={() => toggleInterest(item.label)}
                           >
-                            <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
+                            <span className="material-symbols-outlined text-[18px]">
+                              {item.icon}
+                            </span>
                             <span>{item.label}</span>
                           </button>
                         );
@@ -922,9 +971,12 @@ export default function EditProfilePage() {
                         </span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="stitch-toggle-title">PRO Kaşif Rozetini Profilde Göster</span>
+                        <span className="stitch-toggle-title">
+                          PRO Kaşif Rozetini Profilde Göster
+                        </span>
                         <p className="stitch-toggle-desc">
-                          Doğrulanmış küratör simgesi harita rotalarınızda ve topluluk yayınlarınızda görünür.
+                          Doğrulanmış küratör simgesi harita rotalarınızda ve topluluk
+                          yayınlarınızda görünür.
                         </p>
                       </div>
                     </div>
@@ -956,7 +1008,9 @@ export default function EditProfilePage() {
                         Instagram Kullanıcı Adı
                       </label>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon">photo_camera_front</span>
+                        <span className="material-symbols-outlined stitch-input-icon">
+                          photo_camera_front
+                        </span>
                         <input
                           id="instagram"
                           type="text"
@@ -974,7 +1028,9 @@ export default function EditProfilePage() {
                         YouTube / Kişisel Blog URL
                       </label>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon">language</span>
+                        <span className="material-symbols-outlined stitch-input-icon">
+                          language
+                        </span>
                         <input
                           id="youtube"
                           type="url"
@@ -1020,7 +1076,9 @@ export default function EditProfilePage() {
                           onChange={() => setEmailPrivacy("friends")}
                         />
                         <div className="flex flex-col">
-                          <span className="stitch-radio-title">Yalnızca Seyahat Arkadaşlarıma Açık</span>
+                          <span className="stitch-radio-title">
+                            Yalnızca Seyahat Arkadaşlarıma Açık
+                          </span>
                           <span className="stitch-radio-desc">
                             Sadece karşılıklı takipleştiğiniz kaşifler iletişim kurabilir.
                           </span>
@@ -1115,7 +1173,9 @@ export default function EditProfilePage() {
                       Yeni Şifre (Tekrar)
                     </label>
                     <div className="stitch-input-wrapper">
-                      <span className="material-symbols-outlined stitch-input-icon">lock_reset</span>
+                      <span className="material-symbols-outlined stitch-input-icon">
+                        lock_reset
+                      </span>
                       <input
                         id="confirm-pass"
                         type={showPassword ? "text" : "password"}
@@ -1171,10 +1231,14 @@ export default function EditProfilePage() {
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
                       <div className="stitch-badge-icon-box">
-                        <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+                        <span className="material-symbols-outlined text-[20px]">
+                          calendar_month
+                        </span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="stitch-toggle-title">Seyahat ve Durak Hatırlatıcıları</span>
+                        <span className="stitch-toggle-title">
+                          Seyahat ve Durak Hatırlatıcıları
+                        </span>
                         <p className="stitch-toggle-desc">
                           Yaklaşan gezi günleri ve planlanan durak saatleri öncesinde bildirim alın.
                         </p>
@@ -1198,7 +1262,8 @@ export default function EditProfilePage() {
                       <div className="flex flex-col">
                         <span className="stitch-toggle-title">Haftalık Rota ve İlham Bülteni</span>
                         <p className="stitch-toggle-desc">
-                          Haftanın en popüler rotaları ve gezgin topluluğunun yeni keşifleri e-postanıza gelsin.
+                          Haftanın en popüler rotaları ve gezgin topluluğunun yeni keşifleri
+                          e-postanıza gelsin.
                         </p>
                       </div>
                     </div>
@@ -1215,10 +1280,14 @@ export default function EditProfilePage() {
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
                       <div className="stitch-badge-icon-box">
-                        <span className="material-symbols-outlined text-[20px]">tips_and_updates</span>
+                        <span className="material-symbols-outlined text-[20px]">
+                          tips_and_updates
+                        </span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="stitch-toggle-title">Topluluk Yorumları & Bahsetmeler</span>
+                        <span className="stitch-toggle-title">
+                          Topluluk Yorumları & Bahsetmeler
+                        </span>
                         <p className="stitch-toggle-desc">
                           Rotalarınıza yapılan yorumlar ve topluluk etkileşimleri anlık bildirilsin.
                         </p>
@@ -1265,7 +1334,9 @@ export default function EditProfilePage() {
                       </div>
                       <div>
                         <span className="font-bold text-main block text-sm">Google Hesabı</span>
-                        <span className="text-xs text-muted">Hızlı oturum açma ve Maps senkronizasyonu aktif</span>
+                        <span className="text-xs text-muted">
+                          Hızlı oturum açma ve Maps senkronizasyonu aktif
+                        </span>
                       </div>
                     </div>
                     <span className="stitch-draft-badge">BAĞLI</span>
@@ -1277,8 +1348,12 @@ export default function EditProfilePage() {
                         <span className="text-xl">🗺️</span>
                       </div>
                       <div>
-                        <span className="font-bold text-main block text-sm">Strava & GPX Aktarımı</span>
-                        <span className="text-xs text-muted">Doğa yürüyüşü ve bisiklet rotalarını doğrudan aktar</span>
+                        <span className="font-bold text-main block text-sm">
+                          Strava & GPX Aktarımı
+                        </span>
+                        <span className="text-xs text-muted">
+                          Doğa yürüyüşü ve bisiklet rotalarını doğrudan aktar
+                        </span>
                       </div>
                     </div>
                     <button
@@ -1295,7 +1370,10 @@ export default function EditProfilePage() {
 
             {/* Tab 5: Payment, Subscription & Billing Hub */}
             {activeTab === "odeme" && (
-              <div className="stitch-form-section" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <div
+                className="stitch-form-section"
+                style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+              >
                 <div className="stitch-section-header">
                   <div className="stitch-section-title-wrap">
                     <span className="stitch-section-dot" />
@@ -1314,7 +1392,9 @@ export default function EditProfilePage() {
                     }}
                   >
                     <span>Ödeme Masasını Aç</span>
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>open_in_new</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                      open_in_new
+                    </span>
                   </a>
                 </div>
 
@@ -1330,7 +1410,15 @@ export default function EditProfilePage() {
                     gap: "14px",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: "10px",
+                    }}
+                  >
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <div
                         style={{
@@ -1345,7 +1433,9 @@ export default function EditProfilePage() {
                           fontWeight: 800,
                         }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>verified</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
+                          verified
+                        </span>
                       </div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -1353,10 +1443,10 @@ export default function EditProfilePage() {
                             {wallet.subscriptionTier === "pro"
                               ? "PRO KAŞİF (Pro Traveler)"
                               : wallet.subscriptionTier === "agency"
-                              ? "TUR LİDERİ & ACENTA"
-                              : wallet.subscriptionTier === "explorer"
-                              ? "KAŞİF (Explorer)"
-                              : "GEZGİN (Ücretsiz Plan)"}
+                                ? "TUR LİDERİ & ACENTA"
+                                : wallet.subscriptionTier === "explorer"
+                                  ? "KAŞİF (Explorer)"
+                                  : "GEZGİN (Ücretsiz Plan)"}
                           </span>
                           <span
                             style={{
@@ -1373,7 +1463,11 @@ export default function EditProfilePage() {
                           </span>
                         </div>
                         <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>
-                          Dönem: {wallet.subscriptionCycle === "yearly" ? "Yıllık Taahhüt (%20 İndirimli)" : "Aylık"} · Yenilenme: 30 Gün Sonra
+                          Dönem:{" "}
+                          {wallet.subscriptionCycle === "yearly"
+                            ? "Yıllık Taahhüt (%20 İndirimli)"
+                            : "Aylık"}{" "}
+                          · Yenilenme: 30 Gün Sonra
                         </span>
                       </div>
                     </div>
@@ -1411,117 +1505,291 @@ export default function EditProfilePage() {
                     </div>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", paddingTop: "10px", borderTop: "1px solid rgba(16, 185, 129, 0.15)" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                      gap: "12px",
+                      paddingTop: "10px",
+                      borderTop: "1px solid rgba(16, 185, 129, 0.15)",
+                    }}
+                  >
                     <div>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>Kalan AI Kredisi:</span>
-                      <div style={{ fontSize: "15px", fontWeight: 800, color: "#10b981" }}>⚡ {wallet.credits} Kredi</div>
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                        Kalan AI Kredisi:
+                      </span>
+                      <div style={{ fontSize: "15px", fontWeight: 800, color: "#10b981" }}>
+                        ⚡ {wallet.credits} Kredi
+                      </div>
                     </div>
                     <div>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>Pazar Yeri Komisyonu:</span>
-                      <div style={{ fontSize: "15px", fontWeight: 700, color: "#fff" }}>%10 (Kazancınız %90 Net)</div>
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                        Pazar Yeri Komisyonu:
+                      </span>
+                      <div style={{ fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                        %10 (Kazancınız %90 Net)
+                      </div>
                     </div>
                     <div>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>Öncelikli AI &amp; OSRM:</span>
-                      <div style={{ fontSize: "15px", fontWeight: 700, color: "#fff" }}>Açık / Aktif</div>
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                        Öncelikli AI &amp; OSRM:
+                      </span>
+                      <div style={{ fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                        Açık / Aktif
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* 2. Fatura ve Vergi Bilgileri Formu */}
-                <div style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#10b981" }}>receipt_long</span>
-                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>Fatura &amp; Yasal Bilgiler</h3>
+                <div
+                  style={{
+                    padding: "20px",
+                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "20px", color: "#10b981" }}
+                    >
+                      receipt_long
+                    </span>
+                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                      Fatura &amp; Yasal Bilgiler
+                    </h3>
                   </div>
 
                   <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", cursor: "pointer", color: "#fff" }}>
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        color: "#fff",
+                      }}
+                    >
                       <input
                         type="radio"
                         name="invoiceType"
                         checked={billingDetails.invoiceType === "individual"}
-                        onChange={() => setBillingDetails({ ...billingDetails, invoiceType: "individual" })}
+                        onChange={() =>
+                          setBillingDetails({ ...billingDetails, invoiceType: "individual" })
+                        }
                       />
                       <span>Bireysel Fatura</span>
                     </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", cursor: "pointer", color: "#fff" }}>
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        color: "#fff",
+                      }}
+                    >
                       <input
                         type="radio"
                         name="invoiceType"
                         checked={billingDetails.invoiceType === "corporate"}
-                        onChange={() => setBillingDetails({ ...billingDetails, invoiceType: "corporate" })}
+                        onChange={() =>
+                          setBillingDetails({ ...billingDetails, invoiceType: "corporate" })
+                        }
                       />
                       <span>Kurumsal / Şirket Faturası</span>
                     </label>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "14px",
+                      marginBottom: "14px",
+                    }}
+                  >
                     <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: "4px" }}>
-                        {billingDetails.invoiceType === "corporate" ? "Şirket Unvanı *" : "Ad Soyad *"}
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.7)",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        {billingDetails.invoiceType === "corporate"
+                          ? "Şirket Unvanı *"
+                          : "Ad Soyad *"}
                       </label>
                       <input
                         type="text"
                         value={billingDetails.fullNameOrCompany}
-                        onChange={(e) => setBillingDetails({ ...billingDetails, fullNameOrCompany: e.target.value })}
+                        onChange={(e) =>
+                          setBillingDetails({
+                            ...billingDetails,
+                            fullNameOrCompany: e.target.value,
+                          })
+                        }
                         className="form-input"
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "13px" }}
+                        style={{
+                          width: "100%",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          color: "#fff",
+                          fontSize: "13px",
+                        }}
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: "4px" }}>
-                        {billingDetails.invoiceType === "corporate" ? "Vergi Numarası *" : "T.C. Kimlik No *"}
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.7)",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        {billingDetails.invoiceType === "corporate"
+                          ? "Vergi Numarası *"
+                          : "T.C. Kimlik No *"}
                       </label>
                       <input
                         type="text"
                         value={billingDetails.taxOrIdNumber}
-                        onChange={(e) => setBillingDetails({ ...billingDetails, taxOrIdNumber: e.target.value })}
+                        onChange={(e) =>
+                          setBillingDetails({ ...billingDetails, taxOrIdNumber: e.target.value })
+                        }
                         className="form-input"
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "13px" }}
+                        style={{
+                          width: "100%",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          color: "#fff",
+                          fontSize: "13px",
+                        }}
                       />
                     </div>
                   </div>
 
                   {billingDetails.invoiceType === "corporate" && (
                     <div style={{ marginBottom: "14px" }}>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: "4px" }}>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.7)",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Vergi Dairesi
                       </label>
                       <input
                         type="text"
                         value={billingDetails.taxOffice || ""}
-                        onChange={(e) => setBillingDetails({ ...billingDetails, taxOffice: e.target.value })}
+                        onChange={(e) =>
+                          setBillingDetails({ ...billingDetails, taxOffice: e.target.value })
+                        }
                         className="form-input"
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "13px" }}
+                        style={{
+                          width: "100%",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          color: "#fff",
+                          fontSize: "13px",
+                        }}
                       />
                     </div>
                   )}
 
-                  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "14px", marginBottom: "16px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "2fr 1fr",
+                      gap: "14px",
+                      marginBottom: "16px",
+                    }}
+                  >
                     <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: "4px" }}>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.7)",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Fatura Adresi
                       </label>
                       <input
                         type="text"
                         value={billingDetails.address}
-                        onChange={(e) => setBillingDetails({ ...billingDetails, address: e.target.value })}
+                        onChange={(e) =>
+                          setBillingDetails({ ...billingDetails, address: e.target.value })
+                        }
                         className="form-input"
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "13px" }}
+                        style={{
+                          width: "100%",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          color: "#fff",
+                          fontSize: "13px",
+                        }}
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: "4px" }}>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.7)",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Şehir / Ülke
                       </label>
                       <input
                         type="text"
                         value={billingDetails.city}
-                        onChange={(e) => setBillingDetails({ ...billingDetails, city: e.target.value })}
+                        onChange={(e) =>
+                          setBillingDetails({ ...billingDetails, city: e.target.value })
+                        }
                         className="form-input"
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "13px" }}
+                        style={{
+                          width: "100%",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          color: "#fff",
+                          fontSize: "13px",
+                        }}
                       />
                     </div>
                   </div>
@@ -1548,30 +1816,106 @@ export default function EditProfilePage() {
                 </div>
 
                 {/* 3. Gezgin Cüzdanı & Gelir Çekme (IBAN) */}
-                <div style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#10b981" }}>account_balance_wallet</span>
-                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>Gezgin Cüzdanı &amp; Gelir Çekme</h3>
+                <div
+                  style={{
+                    padding: "20px",
+                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "20px", color: "#10b981" }}
+                    >
+                      account_balance_wallet
+                    </span>
+                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                      Gezgin Cüzdanı &amp; Gelir Çekme
+                    </h3>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "18px" }}>
-                    <div style={{ background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.25)", padding: "14px", borderRadius: "10px" }}>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>Çekilebilir Bakiye</span>
-                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#10b981" }}>₺{wallet.creatorEarningsTry.toLocaleString("tr-TR")}</div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3, 1fr)",
+                      gap: "12px",
+                      marginBottom: "18px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "rgba(16, 185, 129, 0.08)",
+                        border: "1px solid rgba(16, 185, 129, 0.25)",
+                        padding: "14px",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
+                        Çekilebilir Bakiye
+                      </span>
+                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#10b981" }}>
+                        ₺{wallet.creatorEarningsTry.toLocaleString("tr-TR")}
+                      </div>
                     </div>
-                    <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: "14px", borderRadius: "10px" }}>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>Bekleyen Transfer</span>
-                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#fff" }}>₺{wallet.creatorPendingPayoutTry.toLocaleString("tr-TR")}</div>
+                    <div
+                      style={{
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        padding: "14px",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
+                        Bekleyen Transfer
+                      </span>
+                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#fff" }}>
+                        ₺{wallet.creatorPendingPayoutTry.toLocaleString("tr-TR")}
+                      </div>
                     </div>
-                    <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: "14px", borderRadius: "10px" }}>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>Toplam Çekilen</span>
-                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#fff" }}>₺{wallet.totalWithdrawnTry.toLocaleString("tr-TR")}</div>
+                    <div
+                      style={{
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        padding: "14px",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
+                        Toplam Çekilen
+                      </span>
+                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#fff" }}>
+                        ₺{wallet.totalWithdrawnTry.toLocaleString("tr-TR")}
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "12px", marginBottom: "14px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "2fr 1fr 1fr",
+                      gap: "12px",
+                      marginBottom: "14px",
+                    }}
+                  >
                     <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: "4px" }}>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.7)",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Banka IBAN Numarası
                       </label>
                       <input
@@ -1579,11 +1923,27 @@ export default function EditProfilePage() {
                         value={payoutIban}
                         onChange={(e) => setPayoutIban(e.target.value)}
                         placeholder="TR00 0000 0000 0000 0000 0000 00"
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "13px" }}
+                        style={{
+                          width: "100%",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          color: "#fff",
+                          fontSize: "13px",
+                        }}
                       />
                     </div>
                     <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: "4px" }}>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.7)",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Hesap Sahibi
                       </label>
                       <input
@@ -1591,11 +1951,27 @@ export default function EditProfilePage() {
                         value={payoutHolder}
                         onChange={(e) => setPayoutHolder(e.target.value)}
                         placeholder="Ad Soyad"
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "13px" }}
+                        style={{
+                          width: "100%",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          color: "#fff",
+                          fontSize: "13px",
+                        }}
                       />
                     </div>
                     <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: "4px" }}>
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "rgba(255,255,255,0.7)",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Çekim Tutarı (₺)
                       </label>
                       <input
@@ -1604,7 +1980,15 @@ export default function EditProfilePage() {
                         value={payoutAmount}
                         onChange={(e) => setPayoutAmount(e.target.value)}
                         placeholder="Min ₺250"
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "13px" }}
+                        style={{
+                          width: "100%",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          color: "#fff",
+                          fontSize: "13px",
+                        }}
                       />
                     </div>
                   </div>
@@ -1617,7 +2001,11 @@ export default function EditProfilePage() {
                         showToast("⚠️ Minimum çekim tutarı ₺250 olmalıdır.");
                         return;
                       }
-                      const res = await billingService.requestPayout(amount, payoutIban, payoutHolder);
+                      const res = await billingService.requestPayout(
+                        amount,
+                        payoutIban,
+                        payoutHolder,
+                      );
                       if (res.success) {
                         setPayoutAmount("");
                         showToast(`✓ ${res.message}`);
@@ -1641,39 +2029,140 @@ export default function EditProfilePage() {
                 </div>
 
                 {/* 4. Satın Alma ve Fatura Geçmişi Tablosu */}
-                <div style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                <div
+                  style={{
+                    padding: "20px",
+                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginBottom: "16px",
+                    }}
+                  >
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#10b981" }}>history</span>
-                      <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>Satın Alma &amp; Fatura Geçmişi</h3>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "20px", color: "#10b981" }}
+                      >
+                        history
+                      </span>
+                      <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                        Satın Alma &amp; Fatura Geçmişi
+                      </h3>
                     </div>
-                    <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{transactions.length} Kayıt</span>
+                    <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
+                      {transactions.length} Kayıt
+                    </span>
                   </div>
 
                   <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", color: "#fff" }}>
+                    <table
+                      style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        fontSize: "12.5px",
+                        color: "#fff",
+                      }}
+                    >
                       <thead>
-                        <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left" }}>
-                          <th style={{ padding: "10px 8px", color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Tarih</th>
-                          <th style={{ padding: "10px 8px", color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Hizmet / Açıklama</th>
-                          <th style={{ padding: "10px 8px", color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Tutar (₺)</th>
-                          <th style={{ padding: "10px 8px", color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Kredi</th>
-                          <th style={{ padding: "10px 8px", color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Durum</th>
-                          <th style={{ padding: "10px 8px", color: "rgba(255,255,255,0.5)", fontWeight: 600, textAlign: "right" }}>Belge</th>
+                        <tr
+                          style={{
+                            borderBottom: "1px solid rgba(255,255,255,0.1)",
+                            textAlign: "left",
+                          }}
+                        >
+                          <th
+                            style={{
+                              padding: "10px 8px",
+                              color: "rgba(255,255,255,0.5)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Tarih
+                          </th>
+                          <th
+                            style={{
+                              padding: "10px 8px",
+                              color: "rgba(255,255,255,0.5)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Hizmet / Açıklama
+                          </th>
+                          <th
+                            style={{
+                              padding: "10px 8px",
+                              color: "rgba(255,255,255,0.5)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Tutar (₺)
+                          </th>
+                          <th
+                            style={{
+                              padding: "10px 8px",
+                              color: "rgba(255,255,255,0.5)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Kredi
+                          </th>
+                          <th
+                            style={{
+                              padding: "10px 8px",
+                              color: "rgba(255,255,255,0.5)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Durum
+                          </th>
+                          <th
+                            style={{
+                              padding: "10px 8px",
+                              color: "rgba(255,255,255,0.5)",
+                              fontWeight: 600,
+                              textAlign: "right",
+                            }}
+                          >
+                            Belge
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {transactions.map((tx) => (
-                          <tr key={tx.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                          <tr
+                            key={tx.id}
+                            style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                          >
                             <td style={{ padding: "10px 8px", color: "rgba(255,255,255,0.6)" }}>
                               {new Date(tx.date).toLocaleDateString("tr-TR")}
                             </td>
-                            <td style={{ padding: "10px 8px", fontWeight: 600 }}>{tx.description}</td>
-                            <td style={{ padding: "10px 8px" }}>
-                              {tx.amountTry !== undefined ? `₺${Math.abs(tx.amountTry).toLocaleString("tr-TR")}` : "—"}
+                            <td style={{ padding: "10px 8px", fontWeight: 600 }}>
+                              {tx.description}
                             </td>
-                            <td style={{ padding: "10px 8px", color: tx.creditsDelta && tx.creditsDelta > 0 ? "#10b981" : "inherit" }}>
-                              {tx.creditsDelta ? (tx.creditsDelta > 0 ? `+${tx.creditsDelta}` : `${tx.creditsDelta}`) : "—"}
+                            <td style={{ padding: "10px 8px" }}>
+                              {tx.amountTry !== undefined
+                                ? `₺${Math.abs(tx.amountTry).toLocaleString("tr-TR")}`
+                                : "—"}
+                            </td>
+                            <td
+                              style={{
+                                padding: "10px 8px",
+                                color:
+                                  tx.creditsDelta && tx.creditsDelta > 0 ? "#10b981" : "inherit",
+                              }}
+                            >
+                              {tx.creditsDelta
+                                ? tx.creditsDelta > 0
+                                  ? `+${tx.creditsDelta}`
+                                  : `${tx.creditsDelta}`
+                                : "—"}
                             </td>
                             <td style={{ padding: "10px 8px" }}>
                               <span
@@ -1682,7 +2171,10 @@ export default function EditProfilePage() {
                                   fontWeight: 700,
                                   padding: "2px 6px",
                                   borderRadius: "4px",
-                                  background: tx.status === "completed" ? "rgba(16, 185, 129, 0.15)" : "rgba(234, 179, 8, 0.15)",
+                                  background:
+                                    tx.status === "completed"
+                                      ? "rgba(16, 185, 129, 0.15)"
+                                      : "rgba(234, 179, 8, 0.15)",
                                   color: tx.status === "completed" ? "#10b981" : "#eab308",
                                 }}
                               >
@@ -1728,15 +2220,22 @@ export default function EditProfilePage() {
                 </div>
 
                 <div className="p-4 rounded-xl bg-error-container/30 border border-error/20 flex flex-col gap-3">
-                  <span className="font-bold text-error text-sm">Hesabı Dondur veya Kalıcı Olarak Sil</span>
+                  <span className="font-bold text-error text-sm">
+                    Hesabı Dondur veya Kalıcı Olarak Sil
+                  </span>
                   <p className="text-xs text-muted">
-                    Hesabınızı sildiğinizde yayınladığınız tüm rotalar, favori duraklarınız ve harita masası verileriniz geri döndürülemez biçimde silinir.
+                    Hesabınızı sildiğinizde yayınladığınız tüm rotalar, favori duraklarınız ve
+                    harita masası verileriniz geri döndürülemez biçimde silinir.
                   </p>
                   <div className="pt-2 flex gap-3">
                     <button
                       type="button"
                       className="stitch-avatar-btn secondary"
-                      onClick={() => showToast("Hesabınız geçici olarak donduruldu. Giriş yaparak istediğiniz zaman açabilirsiniz.")}
+                      onClick={() =>
+                        showToast(
+                          "Hesabınız geçici olarak donduruldu. Giriş yaparak istediğiniz zaman açabilirsiniz.",
+                        )
+                      }
                     >
                       Hesabı Geçici Dondur
                     </button>
@@ -1761,28 +2260,16 @@ export default function EditProfilePage() {
           <div className="stitch-modal-card">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-main text-base">Webcam ile Fotoğraf Çek</h3>
-              <button
-                type="button"
-                onClick={closeWebcam}
-                className="text-muted hover:text-main"
-              >
+              <button type="button" onClick={closeWebcam} className="text-muted hover:text-main">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
             <video ref={videoRef} className="stitch-webcam-preview" autoPlay playsInline />
             <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                className="stitch-btn-cancel"
-                onClick={closeWebcam}
-              >
+              <button type="button" className="stitch-btn-cancel" onClick={closeWebcam}>
                 İptal
               </button>
-              <button
-                type="button"
-                className="stitch-btn-save"
-                onClick={captureWebcamPhoto}
-              >
+              <button type="button" className="stitch-btn-save" onClick={captureWebcamPhoto}>
                 <span className="material-symbols-outlined text-[18px]">camera</span>
                 <span>Fotoğrafı Çek</span>
               </button>
@@ -1800,7 +2287,8 @@ export default function EditProfilePage() {
               <h3 className="font-bold text-base">Hesabı Silmek İstediğinizden Emin misiniz?</h3>
             </div>
             <p className="text-xs text-muted leading-relaxed">
-              Bu işlem geri alınamaz. Profiliniz, rotalarınız ve seyahat verileriniz kalıcı olarak silinecektir. Devam etmek istiyor musunuz?
+              Bu işlem geri alınamaz. Profiliniz, rotalarınız ve seyahat verileriniz kalıcı olarak
+              silinecektir. Devam etmek istiyor musunuz?
             </p>
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
@@ -1835,18 +2323,51 @@ export default function EditProfilePage() {
         <div className="stitch-modal-overlay" onClick={() => setSelectedReceiptTx(null)}>
           <div
             className="stitch-modal-card"
-            style={{ maxWidth: "480px", width: "100%", padding: "24px", color: "#fff", background: "#0d281e", border: "1px solid rgba(16, 185, 129, 0.4)" }}
+            style={{
+              maxWidth: "480px",
+              width: "100%",
+              padding: "24px",
+              color: "#fff",
+              background: "#0d281e",
+              border: "1px solid rgba(16, 185, 129, 0.4)",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "12px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "16px",
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
+                paddingBottom: "12px",
+              }}
+            >
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "24px", color: "#10b981" }}>receipt</span>
-                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700 }}>Resmi Ödeme Makbuzu</h3>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "24px", color: "#10b981" }}
+                >
+                  receipt
+                </span>
+                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700 }}>
+                  Resmi Ödeme Makbuzu
+                </h3>
               </div>
-              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>#{selectedReceiptTx.id}</span>
+              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                #{selectedReceiptTx.id}
+              </span>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px", marginBottom: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                fontSize: "13px",
+                marginBottom: "20px",
+              }}
+            >
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "rgba(255,255,255,0.6)" }}>Hizmet:</span>
                 <span style={{ fontWeight: 600 }}>{selectedReceiptTx.description}</span>
@@ -1858,24 +2379,49 @@ export default function EditProfilePage() {
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "rgba(255,255,255,0.6)" }}>Tutar:</span>
                 <span style={{ fontSize: "15px", fontWeight: 800, color: "#10b981" }}>
-                  {selectedReceiptTx.amountTry !== undefined ? `₺${Math.abs(selectedReceiptTx.amountTry).toLocaleString("tr-TR")}` : "0 ₺"}
+                  {selectedReceiptTx.amountTry !== undefined
+                    ? `₺${Math.abs(selectedReceiptTx.amountTry).toLocaleString("tr-TR")}`
+                    : "0 ₺"}
                 </span>
               </div>
-              {selectedReceiptTx.creditsDelta !== undefined && selectedReceiptTx.creditsDelta !== 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "rgba(255,255,255,0.6)" }}>Kredi Hareketi:</span>
-                  <span style={{ fontWeight: 700, color: selectedReceiptTx.creditsDelta > 0 ? "#10b981" : "#fff" }}>
-                    {selectedReceiptTx.creditsDelta > 0 ? `+${selectedReceiptTx.creditsDelta}` : `${selectedReceiptTx.creditsDelta}`} Kredi
-                  </span>
+              {selectedReceiptTx.creditsDelta !== undefined &&
+                selectedReceiptTx.creditsDelta !== 0 && (
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "rgba(255,255,255,0.6)" }}>Kredi Hareketi:</span>
+                    <span
+                      style={{
+                        fontWeight: 700,
+                        color: selectedReceiptTx.creditsDelta > 0 ? "#10b981" : "#fff",
+                      }}
+                    >
+                      {selectedReceiptTx.creditsDelta > 0
+                        ? `+${selectedReceiptTx.creditsDelta}`
+                        : `${selectedReceiptTx.creditsDelta}`}{" "}
+                      Kredi
+                    </span>
+                  </div>
+                )}
+              <div
+                style={{
+                  borderTop: "1px solid rgba(255,255,255,0.08)",
+                  paddingTop: "10px",
+                  marginTop: "4px",
+                }}
+              >
+                <div
+                  style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", marginBottom: "4px" }}
+                >
+                  Fatura Sahibi:
                 </div>
-              )}
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "10px", marginTop: "4px" }}>
-                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", marginBottom: "4px" }}>Fatura Sahibi:</div>
                 <div style={{ fontWeight: 600 }}>{billingDetails.fullNameOrCompany}</div>
                 <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
-                  {billingDetails.invoiceType === "corporate" ? `Vergi No: ${billingDetails.taxOrIdNumber}` : `TCKN: ${billingDetails.taxOrIdNumber}`}
+                  {billingDetails.invoiceType === "corporate"
+                    ? `Vergi No: ${billingDetails.taxOrIdNumber}`
+                    : `TCKN: ${billingDetails.taxOrIdNumber}`}
                 </div>
-                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>{billingDetails.address}, {billingDetails.city}</div>
+                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                  {billingDetails.address}, {billingDetails.city}
+                </div>
               </div>
             </div>
 
@@ -1899,7 +2445,9 @@ export default function EditProfilePage() {
                   gap: "6px",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>print</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  print
+                </span>
                 Yazdır / PDF Kaydet
               </button>
               <button

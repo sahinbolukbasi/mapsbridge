@@ -1,6 +1,6 @@
-import { invokeBedrockJSON } from '../bedrock-client';
-import { buildVisaContext } from '../../visa/formatter';
-import { DISCLAIMER_TR } from '../../visa/rules';
+import { invokeBedrockJSON } from "../bedrock-client";
+import { buildVisaContext } from "../../visa/formatter";
+import { DISCLAIMER_TR } from "../../visa/rules";
 
 export interface VisaRequirement {
   visaType: string;
@@ -73,46 +73,54 @@ JSON formatı:
 }`;
 
 const VISA_AGENT_OUTPUT_SCHEMA = {
-  type: 'object' as const,
+  type: "object" as const,
   properties: {
-    nationality: { type: 'string' },
-    destination: { type: 'string' },
-    destinationCountry: { type: 'string' },
+    nationality: { type: "string" },
+    destination: { type: "string" },
+    destinationCountry: { type: "string" },
     requirement: {
-      type: 'object' as const,
+      type: "object" as const,
       properties: {
-        visaType: { type: 'string' },
-        isRequired: { type: 'boolean' },
-        maxStayDays: { type: 'number' },
-        processingDays: { type: 'string' },
-        estimatedFee: { type: 'string' },
-        applicationChannel: { type: 'string' },
+        visaType: { type: "string" },
+        isRequired: { type: "boolean" },
+        maxStayDays: { type: "number" },
+        processingDays: { type: "string" },
+        estimatedFee: { type: "string" },
+        applicationChannel: { type: "string" },
       },
-      required: ['visaType', 'isRequired', 'applicationChannel'],
+      required: ["visaType", "isRequired", "applicationChannel"],
     },
     documents: {
-      type: 'array' as const,
+      type: "array" as const,
       items: {
-        type: 'object' as const,
+        type: "object" as const,
         properties: {
-          name: { type: 'string' },
-          required: { type: 'boolean' },
-          notes: { type: 'string' },
+          name: { type: "string" },
+          required: { type: "boolean" },
+          notes: { type: "string" },
         },
-        required: ['name', 'required'],
+        required: ["name", "required"],
       },
     },
-    processSteps: { type: 'array' as const, items: { type: 'string' } },
-    officialSourceUrl: { type: 'string' },
-    officialSourceName: { type: 'string' },
-    lastUpdated: { type: 'string' },
-    disclaimer: { type: 'string' },
-    warnings: { type: 'array' as const, items: { type: 'string' } },
+    processSteps: { type: "array" as const, items: { type: "string" } },
+    officialSourceUrl: { type: "string" },
+    officialSourceName: { type: "string" },
+    lastUpdated: { type: "string" },
+    disclaimer: { type: "string" },
+    warnings: { type: "array" as const, items: { type: "string" } },
   },
   required: [
-    'nationality', 'destination', 'destinationCountry', 'requirement',
-    'documents', 'processSteps', 'officialSourceUrl', 'officialSourceName',
-    'lastUpdated', 'disclaimer', 'warnings',
+    "nationality",
+    "destination",
+    "destinationCountry",
+    "requirement",
+    "documents",
+    "processSteps",
+    "officialSourceUrl",
+    "officialSourceName",
+    "lastUpdated",
+    "disclaimer",
+    "warnings",
   ],
 };
 
@@ -131,9 +139,9 @@ function buildVisaUserQuery(
     parts.push(`Mevcut vize bilgisi (doğrula ve genişlet):\n${existingVisaContext}`);
   }
   parts.push(
-    'Vize gereksinimi, gerekli belgeler, başvuru adımları, resmi kaynak ve uyarıları içeren detaylı bilgi hazırla.',
+    "Vize gereksinimi, gerekli belgeler, başvuru adımları, resmi kaynak ve uyarıları içeren detaylı bilgi hazırla.",
   );
-  return parts.join('\n');
+  return parts.join("\n");
 }
 
 function ensureDisclaimer(output: VisaAgentOutput): VisaAgentOutput {
@@ -145,8 +153,8 @@ function ensureDisclaimer(output: VisaAgentOutput): VisaAgentOutput {
 
 function ensureOfficialSource(output: VisaAgentOutput): VisaAgentOutput {
   if (!output.officialSourceUrl || output.officialSourceUrl.trim().length === 0) {
-    output.officialSourceUrl = 'https://www.mfa.gov.tr/vizeler.tr.mfa';
-    output.officialSourceName = 'T.C. Dışişleri Bakanlığı';
+    output.officialSourceUrl = "https://www.mfa.gov.tr/vizeler.tr.mfa";
+    output.officialSourceName = "T.C. Dışişleri Bakanlığı";
   }
   return output;
 }
@@ -155,12 +163,10 @@ function ensureWarnings(output: VisaAgentOutput): VisaAgentOutput {
   if (!Array.isArray(output.warnings)) {
     output.warnings = [];
   }
-  const hasOfficialWarning = output.warnings.some(w =>
-    /resmi|official|kaynak|kontrol/iu.test(w),
-  );
+  const hasOfficialWarning = output.warnings.some((w) => /resmi|official|kaynak|kontrol/iu.test(w));
   if (!hasOfficialWarning) {
     output.warnings.push(
-      'Seyahat öncesinde mutlaka resmi kaynakları (büyükelçilik/konsolosluk) kontrol edin.',
+      "Seyahat öncesinde mutlaka resmi kaynakları (büyükelçilik/konsolosluk) kontrol edin.",
     );
   }
   return output;
@@ -168,23 +174,28 @@ function ensureWarnings(output: VisaAgentOutput): VisaAgentOutput {
 
 export async function runVisaAgent(
   destination: string,
-  nationality = 'TR',
-  travelPurpose = 'tourism',
+  nationality = "TR",
+  travelPurpose = "tourism",
   timeoutMs = 8000,
-): Promise<{ output: VisaAgentOutput; source: 'bedrock'; durationMs: number }> {
+): Promise<{ output: VisaAgentOutput; source: "bedrock"; durationMs: number }> {
   const startTime = Date.now();
 
   const existingVisaContext = buildVisaContext({
     destinationId: destination,
     passportIso2: nationality,
-    surface: 'chat',
+    surface: "chat",
   });
 
-  const purposeLabel = travelPurpose === 'tourism' ? 'turizm'
-    : travelPurpose === 'business' ? 'iş'
-    : travelPurpose === 'transit' ? 'transit geçiş'
-    : travelPurpose === 'study' ? 'eğitim'
-    : travelPurpose;
+  const purposeLabel =
+    travelPurpose === "tourism"
+      ? "turizm"
+      : travelPurpose === "business"
+        ? "iş"
+        : travelPurpose === "transit"
+          ? "transit geçiş"
+          : travelPurpose === "study"
+            ? "eğitim"
+            : travelPurpose;
 
   const userQuery = buildVisaUserQuery(destination, nationality, purposeLabel, existingVisaContext);
 
@@ -206,13 +217,13 @@ export async function runVisaAgent(
 
     return {
       output,
-      source: 'bedrock',
+      source: "bedrock",
       durationMs: Date.now() - startTime,
     };
   }
 
   throw new Error(
     `Vize bilgisi alınamadı: ${destination} (${nationality}). ` +
-    'Lütfen resmi kaynakları kontrol edin: https://www.mfa.gov.tr/vizeler.tr.mfa',
+      "Lütfen resmi kaynakları kontrol edin: https://www.mfa.gov.tr/vizeler.tr.mfa",
   );
 }

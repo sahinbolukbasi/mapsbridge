@@ -16,8 +16,8 @@ interface CacheEntry<T> {
 const MEMORY_CACHE = new Map<string, CacheEntry<any>>();
 
 const PLACE_DETAILS_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days for place details
-const SEARCH_TTL = 24 * 60 * 60 * 1000;             // 24 hours for place searches
-const GEOCODE_TTL = 30 * 24 * 60 * 60 * 1000;        // 30 days for coordinates -> address
+const SEARCH_TTL = 24 * 60 * 60 * 1000; // 24 hours for place searches
+const GEOCODE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days for coordinates -> address
 
 const STORAGE_PREFIX = "mapsbridge.cache.";
 

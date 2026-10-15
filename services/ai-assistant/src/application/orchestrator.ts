@@ -30,7 +30,8 @@ export class AIOrchestrator {
     if (!request.destination && !request.prompt.trim()) {
       return {
         needsClarification: true,
-        clarificationPrompt: "Nereye seyahat etmek istediğinizi ve kaç günlük bir plan düşündüğünüzü belirtir misiniz?",
+        clarificationPrompt:
+          "Nereye seyahat etmek istediğinizi ve kaç günlük bir plan düşündüğünüzü belirtir misiniz?",
       };
     }
     return { needsClarification: false };

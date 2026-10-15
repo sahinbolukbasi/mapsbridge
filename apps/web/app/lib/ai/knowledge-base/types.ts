@@ -1,12 +1,12 @@
 export type KBEntityType =
-  | 'city'
-  | 'place'
-  | 'airport'
-  | 'transit_system'
-  | 'visa_rule'
-  | 'rental_info'
-  | 'customs_rule'
-  | 'payment_info';
+  | "city"
+  | "place"
+  | "airport"
+  | "transit_system"
+  | "visa_rule"
+  | "rental_info"
+  | "customs_rule"
+  | "payment_info";
 
 export interface KBEntity {
   id: string;
@@ -30,7 +30,7 @@ export interface KBSource {
   publisher: string;
   fetchedAt: string;
   contentHash: string;
-  reliability: 'official' | 'institutional' | 'major_publication' | 'ugc';
+  reliability: "official" | "institutional" | "major_publication" | "ugc";
 }
 
 export interface KBConflict {
@@ -56,7 +56,7 @@ export const KB_TTL_DAYS: Record<KBEntityType, number> = {
 
 /** DynamoDB PK/SK patterns for knowledge base entities. */
 export const KB_PATTERNS = {
-  entity: (id: string) => ({ PK: `KB#${id}`, SK: 'META' }),
+  entity: (id: string) => ({ PK: `KB#${id}`, SK: "META" }),
   source: (entityId: string, sourceId: string) => ({
     PK: `KB#${entityId}`,
     SK: `SOURCE#${sourceId}`,
@@ -67,6 +67,6 @@ export const KB_PATTERNS = {
   }),
   byCity: (city: string) => ({
     PK: `KBCITY#${city.toLowerCase()}`,
-    SK: '',
+    SK: "",
   }),
 } as const;
