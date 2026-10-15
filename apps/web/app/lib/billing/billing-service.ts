@@ -1,6 +1,6 @@
 import { apiFetch } from "../api-client";
 import { getStoredSession } from "../cognito";
-import { createStripeCheckoutSession } from "./stripe-client";
+import { createRevenueCatCheckout } from "./revenuecat-client";
 import {
   getActionCreditCost,
   SUBSCRIPTION_PLAN_DEFS,
@@ -210,7 +210,7 @@ export class BillingService {
       tier: SubscriptionTierId;
       currentPeriodEnd?: string;
       welcomeGift?: WalletData["welcomeGift"];
-    }>("/stripe/wallet");
+    }>("/revenuecat/wallet");
     if (getStoredSession()?.token !== owner) return this.getWallet();
     this.walletOwner = owner;
     this.serverWallet = {
@@ -242,7 +242,7 @@ export class BillingService {
     throw new Error("Kredi yalnız doğrulanmış ödeme ile eklenebilir.");
   }
   public async processCheckout(payload: CheckoutPayload): Promise<CheckoutResult> {
-    return createStripeCheckoutSession(payload);
+    return createRevenueCatCheckout(payload);
   }
   public recordRouteSale(_title: string, _price: number): void {
     throw new Error("Satış sunucu doğrulaması gerektirir.");

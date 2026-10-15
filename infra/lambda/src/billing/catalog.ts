@@ -1,9 +1,13 @@
+// RevenueCat product IDs are the primary payment method.
+// Stripe price IDs are kept for the transition period (existing subscribers).
 export const catalog = () => [
   {
     id: "explorer",
     mode: "subscription",
     credits: 100,
     amount: 19900,
+    productId: process.env.RC_EXPLORER_PRODUCT_ID,
+    entitlementId: "explorer",
     priceId: process.env.STRIPE_EXPLORER_PRICE_ID,
   },
   {
@@ -11,6 +15,8 @@ export const catalog = () => [
     mode: "subscription",
     credits: 500,
     amount: 49900,
+    productId: process.env.RC_PRO_PRODUCT_ID,
+    entitlementId: "pro",
     priceId: process.env.STRIPE_PRO_PRICE_ID,
   },
   {
@@ -18,6 +24,8 @@ export const catalog = () => [
     mode: "subscription",
     credits: 2500,
     amount: 149900,
+    productId: process.env.RC_AGENCY_PRODUCT_ID,
+    entitlementId: "agency",
     priceId: process.env.STRIPE_AGENCY_PRICE_ID,
   },
   {
@@ -25,6 +33,8 @@ export const catalog = () => [
     mode: "credit_pack",
     credits: 50,
     amount: 8900,
+    productId: process.env.RC_PACK_STARTER_PRODUCT_ID,
+    entitlementId: null,
     priceId: process.env.STRIPE_PACK_STARTER_PRICE_ID,
   },
   {
@@ -32,6 +42,8 @@ export const catalog = () => [
     mode: "credit_pack",
     credits: 300,
     amount: 29900,
+    productId: process.env.RC_PACK_POPULAR_PRODUCT_ID,
+    entitlementId: null,
     priceId: process.env.STRIPE_PACK_POPULAR_PRICE_ID,
   },
   {
@@ -39,6 +51,8 @@ export const catalog = () => [
     mode: "credit_pack",
     credits: 1000,
     amount: 74900,
+    productId: process.env.RC_PACK_MASTER_PRODUCT_ID,
+    entitlementId: null,
     priceId: process.env.STRIPE_PACK_MASTER_PRICE_ID,
   },
   {
@@ -46,6 +60,8 @@ export const catalog = () => [
     mode: "credit_pack",
     credits: 3000,
     amount: 189900,
+    productId: process.env.RC_PACK_PRO_PRODUCT_ID,
+    entitlementId: null,
     priceId: process.env.STRIPE_PACK_PRO_PRICE_ID,
   },
 ];

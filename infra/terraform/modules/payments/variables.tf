@@ -28,4 +28,12 @@ variable "stripe_webhook_secret" {
   type        = string
   description = "Stripe webhook signing secret (sensitive) — stored in SSM Parameter Store"
   sensitive   = true
+  default     = ""
+}
+
+variable "stripe_secret_key" {
+  type        = string
+  description = "Stripe secret key — kept for transition period"
+  sensitive   = true
+  default     = ""
 }

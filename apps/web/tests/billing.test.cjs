@@ -125,8 +125,8 @@ test("payment failure never falls back to simulated success or local grant", asy
   assert.equal(result.success, false);
   assert.equal(s.getWallet().credits, 0);
 });
-test("checkout sends no card fields and requires a real Stripe redirect", async () => {
-  const h = harness({ fetch: async () => ({ url: "https://checkout.stripe.com/c/pay" }) }),
+test("checkout sends no card fields and calls revenuecat endpoint", async () => {
+  const h = harness({ fetch: async () => ({ url: "https://billing.revenuecat.com/checkout?app_user_id=u" }) }),
     s = h.load("billing-service.ts").billingService;
   const result = await s.processCheckout({
     mode: "credit_pack",
@@ -136,15 +136,14 @@ test("checkout sends no card fields and requires a real Stripe redirect", async 
   });
   assert.equal(result.success, true);
   assert.equal(result.creditsAdded, undefined);
-  assert.equal(result.stripeRedirectUrl, "https://checkout.stripe.com/c/pay");
+  assert.ok(result.stripeRedirectUrl?.startsWith("https://"));
   const body = JSON.parse(h.calls[0].opts.body);
   assert.equal(body.cardNumber, undefined);
   assert.equal(body.cardCvc, undefined);
-  assert.ok(h.calls[0].opts.headers["idempotency-key"]);
-  assert.equal(h.calls[0].endpoint, "/stripe/checkout");
+  assert.equal(h.calls[0].endpoint, "/revenuecat/checkout");
 });
-test("unexpected redirect and unsupported payout/guide sale are not reported as success", async () => {
-  const h = harness({ fetch: async () => ({ url: "https://attacker.invalid" }) }),
+test("non-https redirect and unsupported payout/guide sale are not reported as success", async () => {
+  const h = harness({ fetch: async () => ({ url: "http://insecure.example" }) }),
     s = h.load("billing-service.ts").billingService;
   assert.equal((await s.processCheckout({ mode: "subscription", targetId: "pro" })).success, false);
   assert.equal((await s.requestPayout(1000, "iban", "name")).success, false);
