@@ -43,6 +43,8 @@ router.add("POST /chat/threads/{id}/messages", handleSendMessage);
 
 export const handler = async (event: ApiGatewayEvent) => {
   try {
+    if (event.requestContext.http.path === "/health" && event.requestContext.http.method === "GET")
+      return ok({ status: "ok", service: "chat", timestamp: new Date().toISOString() });
     return await router.dispatch(event);
   } catch (err) {
     console.error(`[Chat] Error:`, err);

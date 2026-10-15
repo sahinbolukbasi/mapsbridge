@@ -47,3 +47,11 @@ output "website_url" {
 output "cloudfront_distribution_id" {
   value = aws_cloudfront_distribution.web.id
 }
+
+output "monitoring_dashboard_url" {
+  value = "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#dashboards/dashboard/${local.name}-overview"
+}
+
+output "alarms_sns_topic_arn" {
+  value = aws_sns_topic.alarms.arn
+}

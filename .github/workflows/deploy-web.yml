@@ -1,0 +1,116 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+  deployments: write
+
+env:
+  AWS_REGION: eu-central-1
+  NODE_VERSION: "22"
+
+jobs:
+  build:
+    name: Build Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_COGNITO_REGION: eu-central-1
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          NEXT_PUBLIC_AI_STREAM_URL: ${{ secrets.AI_STREAM_URL }}
+          NEXT_PUBLIC_SITE_URL: https://mapsbridge.com
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          NEXT_PUBLIC_TP_MARKER: "585085"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: apps/web/out/
+          retention-days: 1
+
+  deploy:
+    name: Deploy to S3 + CloudFront
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment: production
+    steps:
+      - name: Check AWS secrets
+        id: check
+        run: |
+          if [ -z "${{ secrets.AWS_DEPLOY_ROLE_ARN }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⚠️ AWS_DEPLOY_ROLE_ARN not set — skipping"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: steps.check.outputs.skip == 'false'
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: actions/download-artifact@v4
+        if: steps.check.outputs.skip == 'false'
+        with:
+          name: web-build
+          path: out/
+
+      - name: Sync to S3
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          aws s3 sync out/ s3://${{ secrets.WEB_BUCKET }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable"
+          aws s3 cp s3://${{ secrets.WEB_BUCKET }}/ s3://${{ secrets.WEB_BUCKET }}/ \
+            --recursive --exclude "*" --include "*.html" \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --metadata-directive REPLACE --content-type "text/html"
+
+      - name: Invalidate CloudFront
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
+
+  smoke:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    steps:
+      - name: Check site
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://mapsbridge.com || echo "0")
+          echo "Site status: $STATUS"
+          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 400 ]; then
+            echo "::error::Site returned $STATUS"
+            exit 1
+          fi

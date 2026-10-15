@@ -46,6 +46,8 @@ router.add("GET /marketplace/blogs/{id}", handleGetBlog);
 
 export const handler = async (event: ApiGatewayEvent) => {
   try {
+    if (event.requestContext.http.path === "/health" && event.requestContext.http.method === "GET")
+      return ok({ status: "ok", service: "marketplace", timestamp: new Date().toISOString() });
     return await router.dispatch(event);
   } catch (err) {
     console.error(`[Marketplace] Error:`, err);

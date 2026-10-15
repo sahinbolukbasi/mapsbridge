@@ -1,295 +1,77 @@
-name: Deploy
+name: Deploy All
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
-      skip_mobile:
-        description: "Skip mobile EAS build (faster)"
-        required: false
-        default: "false"
-        type: boolean
-
-concurrency:
-  group: deploy-production
-  cancel-in-progress: false
+      components:
+        description: "Deploy which components"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - web
+          - api
+          - ios
+          - android
 
 permissions:
   contents: read
-  id-token: write
-  deployments: write
-
-env:
-  AWS_REGION: eu-central-1
-  NODE_VERSION: "22"
+  actions: write
 
 jobs:
-  # ── Build web app ──────────────────────────────────────────────
-  build:
-    name: Build
+  trigger:
+    name: Trigger Deployments
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Trigger Web
+        if: inputs.components == 'all' || inputs.components == 'web'
+        uses: actions/github-script@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
-      - run: npm ci --prefix infra/lambda --ignore-scripts
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-web.yml',
+              ref: 'main'
+            });
+            console.log('✓ Triggered Deploy Web');
 
-      - name: Build Web
-        run: npm run build
-        env:
-          NEXT_PUBLIC_COGNITO_REGION: eu-central-1
-          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
-          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
-          NEXT_PUBLIC_AI_STREAM_URL: ${{ secrets.AI_STREAM_URL }}
-          NEXT_PUBLIC_SITE_URL: https://mapsbridge.com
-          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          NEXT_PUBLIC_TP_MARKER: "585085"
-
-      - uses: actions/upload-artifact@v4
+      - name: Trigger API
+        if: inputs.components == 'all' || inputs.components == 'api'
+        uses: actions/github-script@v7
         with:
-          name: web-build
-          path: apps/web/out/
-          retention-days: 1
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-api.yml',
+              ref: 'main'
+            });
+            console.log('✓ Triggered Deploy API');
 
-  # ── Infrastructure (Terraform validate only — apply via manual workflow) ──
-  terraform:
-    name: Infrastructure
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-
-      - name: Create Lambda zip placeholders
-        run: |
-          mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
-          for name in auth routes chat marketplace ai stripe admin cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
-            echo "placeholder" | zip -q infra/terraform/.build/lambdas/${name}.zip -
-          done
-          echo "placeholder" | zip -q infra/terraform/.build/layer/shared.zip -
-
-      - name: Terraform Validate
-        working-directory: infra/terraform
-        run: |
-          terraform init -backend=false
-          terraform validate
-        continue-on-error: true
-
-  # ── Deploy web to S3 + CloudFront ─────────────────────────────
-  deploy-web:
-    name: Deploy Web
-    runs-on: ubuntu-latest
-    needs: [build, terraform]
-    environment: production
-    steps:
-      - name: Check AWS secrets
-        id: check-secrets
-        run: |
-          if [ -z "${{ secrets.AWS_DEPLOY_ROLE_ARN }}" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "⚠️ AWS_DEPLOY_ROLE_ARN not set — skipping web deploy"
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
-
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: steps.check-secrets.outputs.skip == 'false'
+      - name: Trigger iOS
+        if: inputs.components == 'all' || inputs.components == 'ios'
+        uses: actions/github-script@v7
         with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-ios.yml',
+              ref: 'main'
+            });
+            console.log('✓ Triggered Deploy iOS');
 
-      - uses: actions/download-artifact@v4
-        if: steps.check-secrets.outputs.skip == 'false'
+      - name: Trigger Android
+        if: inputs.components == 'all' || inputs.components == 'android'
+        uses: actions/github-script@v7
         with:
-          name: web-build
-          path: out/
-
-      - name: Sync to S3
-        if: steps.check-secrets.outputs.skip == 'false'
-        run: |
-          aws s3 sync out/ s3://${{ secrets.WEB_BUCKET }}/ \
-            --delete \
-            --cache-control "public, max-age=31536000, immutable"
-          aws s3 cp s3://${{ secrets.WEB_BUCKET }}/ s3://${{ secrets.WEB_BUCKET }}/ \
-            --recursive --exclude "*" --include "*.html" \
-            --cache-control "public, max-age=0, must-revalidate" \
-            --metadata-directive REPLACE --content-type "text/html"
-
-      - name: Invalidate CloudFront
-        if: steps.check-secrets.outputs.skip == 'false'
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
-
-  # ── Deploy Lambda functions ────────────────────────────────────
-  deploy-lambda:
-    name: Deploy Lambda
-    runs-on: ubuntu-latest
-    needs: [build, terraform]
-    environment: production
-    steps:
-      - name: Check AWS secrets
-        id: check-secrets
-        run: |
-          if [ -z "${{ secrets.AWS_DEPLOY_ROLE_ARN }}" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "⚠️ AWS_DEPLOY_ROLE_ARN not set — skipping lambda deploy"
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
-
-      - uses: actions/checkout@v4
-        if: steps.check-secrets.outputs.skip == 'false'
-      - uses: actions/setup-node@v4
-        if: steps.check-secrets.outputs.skip == 'false'
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: steps.check-secrets.outputs.skip == 'false'
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Package Lambda
-        if: steps.check-secrets.outputs.skip == 'false'
-        working-directory: infra/lambda
-        run: |
-          npm ci --ignore-scripts
-          zip -r /tmp/lambda.zip src/ node_modules/ package.json
-
-      - name: Update Lambda functions
-        if: steps.check-secrets.outputs.skip == 'false'
-        continue-on-error: true
-        run: |
-          # Collect all functions matching mapsbridge- prefix (paginated)
-          FUNCTIONS=""
-          NEXT_TOKEN=""
-          while true; do
-            if [ -z "$NEXT_TOKEN" ]; then
-              RESULT=$(aws lambda list-functions --output json 2>/dev/null) || break
-            else
-              RESULT=$(aws lambda list-functions --marker "$NEXT_TOKEN" --output json 2>/dev/null) || break
-            fi
-            PAGE=$(echo "$RESULT" | python3 -c "import sys,json; fns=json.load(sys.stdin); print('\n'.join(f['FunctionName'] for f in fns.get('Functions',[]) if f['FunctionName'].startswith('mapsbridge-')))" 2>/dev/null)
-            FUNCTIONS="$FUNCTIONS $PAGE"
-            NEXT_TOKEN=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('NextMarker',''))" 2>/dev/null)
-            [ -z "$NEXT_TOKEN" ] && break
-          done
-          FUNCTIONS=$(echo "$FUNCTIONS" | tr ' ' '\n' | grep -v '^$' | sort -u)
-          if [ -z "$FUNCTIONS" ]; then
-            echo "⚠️  No Lambda functions found with prefix 'mapsbridge-'"
-            echo "    Run the Terraform Apply workflow to provision infrastructure first."
-            exit 0
-          fi
-          echo "Found functions: $(echo "$FUNCTIONS" | wc -l | tr -d ' ')"
-          FAILED=0
-          for fn in $FUNCTIONS; do
-            echo "Updating $fn..."
-            aws lambda update-function-code \
-              --function-name "$fn" \
-              --zip-file fileb:///tmp/lambda.zip \
-              --publish > /dev/null || { echo "  ⚠️  Failed: $fn"; FAILED=$((FAILED+1)); }
-          done
-          [ $FAILED -gt 0 ] && echo "⚠️  $FAILED function(s) failed to update" || echo "✓ All Lambda functions updated"
-
-  # ── Deploy mobile via EAS ──────────────────────────────────────
-  deploy-mobile:
-    name: Deploy Mobile (EAS)
-    runs-on: ubuntu-latest
-    needs: [build, terraform]
-    environment: production
-    if: github.event.inputs.skip_mobile != 'true'
-    steps:
-      - name: Check EAS token
-        id: check-eas
-        run: |
-          if [ -z "${{ secrets.EAS_TOKEN }}" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "⚠️ EAS_TOKEN not set — skipping mobile deploy"
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
-
-      - uses: actions/checkout@v4
-        if: steps.check-eas.outputs.skip == 'false'
-      - uses: actions/setup-node@v4
-        if: steps.check-eas.outputs.skip == 'false'
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install EAS CLI
-        if: steps.check-eas.outputs.skip == 'false'
-        run: npm install -g eas-cli
-
-      - name: Install mobile dependencies
-        if: steps.check-eas.outputs.skip == 'false'
-        working-directory: apps/mobile
-        run: npm install
-
-      - name: Build & Submit iOS
-        if: steps.check-eas.outputs.skip == 'false'
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
-        run: eas build --platform ios --non-interactive --auto-submit
-        continue-on-error: true
-
-      - name: Build & Submit Android
-        if: steps.check-eas.outputs.skip == 'false'
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
-        run: eas build --platform android --non-interactive --auto-submit
-        continue-on-error: true
-
-  # ── Smoke test & notify ────────────────────────────────────────
-  smoke-test:
-    name: Smoke Test
-    runs-on: ubuntu-latest
-    needs: [deploy-web, deploy-lambda, deploy-mobile]
-    if: always()
-    steps:
-      - name: Check site
-        id: site-check
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://mapsbridge.com || echo "0")
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "Site status: $STATUS"
-          if [ "$STATUS" != "200" ]; then
-            echo "⚠️ Site returned $STATUS (may not be deployed yet)"
-          fi
-        continue-on-error: true
-
-      - name: Check API
-        id: api-check
-        run: |
-          if [ -n "${{ secrets.API_BASE_URL }}" ]; then
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 ${{ secrets.API_BASE_URL }}/health || echo "0")
-            echo "API status: $STATUS"
-          else
-            echo "API_BASE_URL not configured"
-          fi
-        continue-on-error: true
-
-      - name: Deployment Summary
-        run: |
-          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Web Deploy | ${{ needs.deploy-web.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lambda Deploy | ${{ needs.deploy-lambda.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mobile Deploy | ${{ needs.deploy-mobile.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Site HTTP | ${{ steps.site-check.outputs.status }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** \`${GITHUB_SHA::7}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-android.yml',
+              ref: 'main'
+            });
+            console.log('✓ Triggered Deploy Android');

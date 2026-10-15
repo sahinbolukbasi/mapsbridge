@@ -31,6 +31,8 @@ router.add("GET /profiles/{username}", handleGetProfile);
 
 export const handler = async (event: ApiGatewayEvent) => {
   try {
+    if (event.requestContext.http.path === "/health" && event.requestContext.http.method === "GET")
+      return ok({ status: "ok", service: "auth", timestamp: new Date().toISOString() });
     return await router.dispatch(event);
   } catch (err) {
     console.error(`[Auth] Error:`, err);

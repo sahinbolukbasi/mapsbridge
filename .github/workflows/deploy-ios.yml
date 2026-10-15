@@ -1,0 +1,58 @@
+name: Deploy iOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/deploy-ios.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ios
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  build:
+    name: Build & Submit iOS
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check EAS token
+        id: check
+        run: |
+          if [ -z "${{ secrets.EAS_TOKEN }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⚠️ EAS_TOKEN not set — skipping"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.skip == 'false'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip == 'false'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install EAS CLI
+        if: steps.check.outputs.skip == 'false'
+        run: npm install -g eas-cli
+
+      - name: Install dependencies
+        if: steps.check.outputs.skip == 'false'
+        working-directory: apps/mobile
+        run: npm install
+
+      - name: Build & Submit
+        if: steps.check.outputs.skip == 'false'
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: eas build --platform ios --profile production --non-interactive --auto-submit

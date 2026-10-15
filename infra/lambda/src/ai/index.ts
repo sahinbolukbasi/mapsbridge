@@ -81,6 +81,8 @@ export async function handler(event: Event) {
 async function handleRequest(event: Event) {
   const method = event.requestContext?.http?.method;
   if (method === "OPTIONS") return reply(204, {});
+  if (event.requestContext?.http?.path === "/health" && method === "GET")
+    return reply(200, { status: "ok", service: "ai", timestamp: new Date().toISOString() });
   const authorization = getAuthHeader(event.headers);
   if (method === "GET") {
     const user = await resolveUser(

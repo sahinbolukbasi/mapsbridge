@@ -127,6 +127,8 @@ for (const [key, value] of Object.entries(routes)) router.add(key, value);
 
 export const handler = async (event: ApiGatewayEvent) => {
   if (event.requestContext?.http?.method === "OPTIONS") return handlePreflight();
+  if (event.requestContext.http.path === "/health" && event.requestContext.http.method === "GET")
+    return ok({ status: "ok", service: "admin", timestamp: new Date().toISOString() });
 
   const token = extractBearerToken(event);
   if (!token) return unauthorized();

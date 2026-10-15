@@ -55,6 +55,10 @@ export const handler = async (event: ApiGatewayEvent) => {
   try {
     const method = event.requestContext.http.method;
     const path = event.requestContext.http.path;
+
+    if (path === "/health" && method === "GET") {
+      return ok({ status: "ok", service: "routes", timestamp: new Date().toISOString() });
+    }
     if (path === "/routes/telemetry" && method === "POST") {
       const token = extractBearerToken(event);
       const sub = token ? await verifiedUserId(token) : null;

@@ -1,0 +1,102 @@
+name: Deploy API (Lambda)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infra/lambda/**"
+      - ".github/workflows/deploy-api.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+  deployments: write
+
+env:
+  AWS_REGION: eu-central-1
+  NODE_VERSION: "22"
+
+jobs:
+  deploy:
+    name: Package & Deploy Lambda
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check AWS secrets
+        id: check
+        run: |
+          if [ -z "${{ secrets.AWS_DEPLOY_ROLE_ARN }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⚠️ AWS_DEPLOY_ROLE_ARN not set — skipping"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.skip == 'false'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip == 'false'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: steps.check.outputs.skip == 'false'
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package Lambda
+        if: steps.check.outputs.skip == 'false'
+        working-directory: infra/lambda
+        run: |
+          npm ci --ignore-scripts
+          zip -r /tmp/lambda.zip src/ node_modules/ package.json
+
+      - name: Update Lambda functions
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          FUNCTIONS=""
+          NEXT_TOKEN=""
+          while true; do
+            if [ -z "$NEXT_TOKEN" ]; then
+              RESULT=$(aws lambda list-functions --output json 2>/dev/null) || break
+            else
+              RESULT=$(aws lambda list-functions --marker "$NEXT_TOKEN" --output json 2>/dev/null) || break
+            fi
+            PAGE=$(echo "$RESULT" | python3 -c "import sys,json; fns=json.load(sys.stdin); print('\n'.join(f['FunctionName'] for f in fns.get('Functions',[]) if f['FunctionName'].startswith('mapsbridge-')))" 2>/dev/null)
+            FUNCTIONS="$FUNCTIONS $PAGE"
+            NEXT_TOKEN=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('NextMarker',''))" 2>/dev/null)
+            [ -z "$NEXT_TOKEN" ] && break
+          done
+          FUNCTIONS=$(echo "$FUNCTIONS" | tr ' ' '\n' | grep -v '^$' | sort -u)
+          if [ -z "$FUNCTIONS" ]; then
+            echo "⚠️  No Lambda functions found with prefix 'mapsbridge-'"
+            echo "    Run the Terraform Apply workflow first."
+            exit 0
+          fi
+          echo "Found $(echo "$FUNCTIONS" | wc -l | tr -d ' ') functions"
+          FAILED=0
+          for fn in $FUNCTIONS; do
+            echo "Updating $fn..."
+            aws lambda update-function-code \
+              --function-name "$fn" \
+              --zip-file fileb:///tmp/lambda.zip \
+              --publish > /dev/null || { echo "  ⚠️  Failed: $fn"; FAILED=$((FAILED+1)); }
+          done
+          [ $FAILED -gt 0 ] && echo "::error::$FAILED function(s) failed" && exit 1
+          echo "✓ All Lambda functions updated"
+
+      - name: Health check
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          if [ -n "${{ secrets.API_BASE_URL }}" ]; then
+            sleep 5
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "${{ secrets.API_BASE_URL }}/health" || echo "0")
+            echo "API health: $STATUS"
+          fi
