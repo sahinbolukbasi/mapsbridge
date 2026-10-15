@@ -337,6 +337,10 @@ async function handleShareRoute(event: ApiGatewayEvent) {
 
 // ─── OSRM Route (real road routing) ───────────────────────────────────────
 async function handleOsrmRoute(event: ApiGatewayEvent) {
+  const token = extractBearerToken(event);
+  const userId = token ? await verifiedUserId(token) : null;
+  if (!userId) return unauthorized();
+
   const profile = event.pathParameters?.profile || "driving";
   const validProfiles = ["driving", "walking", "cycling"];
   if (!validProfiles.includes(profile)) {

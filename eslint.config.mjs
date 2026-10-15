@@ -42,4 +42,25 @@ export default tseslint.config(
       "preserve-caught-error": "off",
     },
   },
+
+  // Architectural boundary: infra/lambda must not import from apps/.
+  // Shared types/utilities belong in packages/. Existing violations are warned
+  // (not errored) until imports are migrated to packages/ai-runtime or similar.
+  {
+    files: ["infra/lambda/src/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "warn",
+        {
+          patterns: [
+            {
+              group: ["../../../../apps/**", "../../../apps/**", "../../apps/**", "../apps/**"],
+              message:
+                "Lambda code must not import from apps/. Move shared types to packages/ instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

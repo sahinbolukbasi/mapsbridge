@@ -12,7 +12,7 @@
  *   POST /places/batch-discover    — Batch discover multiple cities
  */
 
-import { verifiedUserId } from "../shared/auth";
+import { verifiedUserId, getVerifiedUser } from "../shared/auth";
 import type { ApiGatewayEvent } from "../shared/http";
 import {
   ok,
@@ -52,10 +52,10 @@ async function requireAuth(event: ApiGatewayEvent): Promise<string | null> {
 }
 
 async function requireAdmin(event: ApiGatewayEvent): Promise<boolean> {
-  const userId = await requireAuth(event);
-  if (!userId) return false;
-  const user = await read(`USER#${userId}`, "PROFILE");
-  return user?.role === "admin" || user?.role === "super_admin";
+  const token = extractBearerToken(event);
+  if (!token) return false;
+  const user = await getVerifiedUser(token);
+  return user?.isAdmin === true;
 }
 
 // ─── Discover Places in a City ───────────────────────────────────────────
@@ -74,6 +74,14 @@ async function handleDiscover(event: ApiGatewayEvent) {
 
   if (!body?.city) return badRequest("Şehir adı zorunludur.");
   if (body.city.length > 100) return badRequest("Şehir adı çok uzun.");
+  // Reject URL schemes and injection chars before city reaches external collector URLs
+  if (/[<>"{}|\\^`\x00-\x1f]|https?:\/\//i.test(body.city))
+    return badRequest("Şehir adı geçersiz karakter içeriyor.");
+  if (
+    body.country &&
+    (body.country.length > 60 || /[<>"{}|\\^`\x00-\x1f]|https?:\/\//i.test(body.country))
+  )
+    return badRequest("Ülke adı geçersiz.");
 
   const { discoverCity } =
     await import("../../../../services/place-intelligence/src/application/discovery-service");
@@ -229,6 +237,13 @@ async function handleBatchDiscover(event: ApiGatewayEvent) {
 
   if (!body?.cities?.length) return badRequest("En az bir şehir gerekli.");
   if (body.cities.length > 10) return badRequest("Tek seferde en fazla 10 şehir.");
+  const CITY_INVALID = /[<>"{}|\\^`\x00-\x1f]|https?:\/\//i;
+  for (const entry of body.cities) {
+    if (!entry.city || entry.city.length > 100 || CITY_INVALID.test(entry.city))
+      return badRequest(`Geçersiz şehir adı: ${entry.city?.slice(0, 20)}`);
+    if (entry.country && (entry.country.length > 60 || CITY_INVALID.test(entry.country)))
+      return badRequest(`Geçersiz ülke adı: ${entry.country?.slice(0, 20)}`);
+  }
 
   const { discoverCity } =
     await import("../../../../services/place-intelligence/src/application/discovery-service");

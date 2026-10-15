@@ -251,6 +251,22 @@ resource "aws_dynamodb_table" "data" {
     name = "SK"
     type = "S"
   }
+  attribute {
+    name = "GSI1PK"
+    type = "S"
+  }
+  attribute {
+    name = "GSI1SK"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "GSI1"
+    hash_key        = "GSI1PK"
+    range_key       = "GSI1SK"
+    projection_type = "ALL"
+  }
+
   ttl {
     attribute_name = "expiresAt"
     enabled        = true
@@ -263,11 +279,6 @@ resource "aws_dynamodb_table" "data" {
 
 
 # ─── Legacy DynamoDB IAM for existing Python Lambda (smooth migration path) ──
-# The .build/mapsbridge-api.zip Python Lambda can be imported into the new
-# module structure by adding a "legacy" domain to lambda_domains in locals.
-# Until then, its data_access policy is handled by the API module's IAM.
-# The old Python handler.py remains in infra/lambda/ for reference.
-
 resource "aws_cognito_user_pool" "users" {
   name                     = "${local.name}-users"
   auto_verified_attributes = ["email"]

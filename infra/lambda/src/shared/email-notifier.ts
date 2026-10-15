@@ -4,6 +4,7 @@
  * Delivers price alert emails to users when ticket or hotel deals are discovered.
  * Designed for high concurrency (10k+ users) with batching and error-isolation.
  */
+import { getDynamoClient } from "./dynamo";
 
 export interface DealNotificationPayload {
   toEmail: string;
@@ -159,9 +160,9 @@ export async function sendDealNotificationEmail(
   let fallbackStored = false;
   try {
     const tableName = process.env.DYNAMODB_TABLE || "mapsbridge-prod-data";
-    const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+    const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
     const { marshall } = await import("@aws-sdk/util-dynamodb");
-    const ddb = new DynamoDBClient({ region: process.env.AWS_REGION || "eu-central-1" });
+    const ddb = getDynamoClient();
 
     const notifId = `notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const pk = payload.userId ? `USER#${payload.userId}` : `EMAIL#${payload.toEmail.toLowerCase()}`;

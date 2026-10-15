@@ -1,14 +1,7 @@
 import { getVerifiedUser } from "../shared/auth";
 import { resolveEnvSecret } from "../shared/http";
-import {
-  BillingError,
-  db,
-  table,
-  read,
-  wallet,
-  grantCredits,
-  initializeTrial,
-} from "../billing/store";
+import { BillingError, table, read, wallet, grantCredits, initializeTrial } from "../billing/store";
+import { getDynamoClient } from "../shared/dynamo";
 import { catalog } from "../billing/catalog";
 import { UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
@@ -194,7 +187,7 @@ async function handleWebhook(event: any) {
         await syncSubscriptionStatus(userId, "billing_issue", ev.id, eventTime);
         break;
       case "REFUND": {
-        await db().send(
+        await getDynamoClient().send(
           new UpdateItemCommand({
             TableName: table(),
             Key: marshall({ PK: `USER#${userId}`, SK: "CREDITS" }),
@@ -229,7 +222,7 @@ async function syncSubscription(
   eventTime: number,
 ) {
   try {
-    await db().send(
+    await getDynamoClient().send(
       new UpdateItemCommand({
         TableName: table(),
         Key: marshall({ PK: `USER#${userId}`, SK: "SUBSCRIPTION" }),
@@ -258,7 +251,7 @@ async function syncSubscriptionStatus(
   eventTime: number,
 ) {
   try {
-    await db().send(
+    await getDynamoClient().send(
       new UpdateItemCommand({
         TableName: table(),
         Key: marshall({ PK: `USER#${userId}`, SK: "SUBSCRIPTION" }),

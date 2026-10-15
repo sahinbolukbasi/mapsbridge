@@ -192,9 +192,18 @@ function harness(options = {}) {
       createRemoteJWKSet: () => () => ({}),
       jwtVerify: async () => ({ payload: {}, protectedHeader: {} }),
     },
+    "node:crypto": require("node:crypto"),
+    "node:fs": require("node:fs"),
+    "node:path": require("node:path"),
   };
   function load(relative) {
-    const filename = path.resolve(sourceRoot, relative);
+    let filename = path.resolve(sourceRoot, relative);
+    if (
+      !require("node:fs").existsSync(filename) &&
+      require("node:fs").existsSync(filename.replace(/\.ts$/, "/index.ts"))
+    ) {
+      filename = filename.replace(/\.ts$/, "/index.ts");
+    }
     if (cache.has(filename)) return cache.get(filename).exports;
     const module = { exports: {} };
     cache.set(filename, module);

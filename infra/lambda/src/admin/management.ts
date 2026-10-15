@@ -1,6 +1,5 @@
 import { stripeClient } from "../billing/stripe-client";
 import {
-  DynamoDBClient,
   GetItemCommand,
   ScanCommand,
   QueryCommand,
@@ -8,6 +7,7 @@ import {
   PutItemCommand,
   type AttributeValue,
 } from "@aws-sdk/client-dynamodb";
+import { getDynamoClient } from "../shared/dynamo";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import {
   CognitoIdentityProviderClient,
@@ -32,7 +32,6 @@ export class AdminError extends Error {
     super(message);
   }
 }
-export const db = () => new DynamoDBClient({ region: process.env.AWS_REGION });
 export const table = () => process.env.DYNAMODB_TABLE!;
 const cognito = () => new CognitoIdentityProviderClient({ region: process.env.AWS_REGION });
 const pool = () => process.env.COGNITO_USER_POOL_ID!;
@@ -49,7 +48,7 @@ export function bodyOf(event: ApiGatewayEvent): Row {
   return body;
 }
 export async function get(PK: string, SK = "META"): Promise<Row | null> {
-  const result = await db().send(
+  const result = await getDynamoClient().send(
     new GetItemCommand({ TableName: table(), Key: marshall({ PK, SK }), ConsistentRead: true }),
   );
   return result.Item ? unmarshall(result.Item) : null;
@@ -62,7 +61,7 @@ export async function scan(
   const rows: Row[] = [];
   let cursor: Record<string, AttributeValue> | undefined;
   do {
-    const result = await db().send(
+    const result = await getDynamoClient().send(
       new ScanCommand({
         TableName: table(),
         FilterExpression: filter,
@@ -80,7 +79,7 @@ export async function userRows(id: string): Promise<Row[]> {
   const rows: Row[] = [];
   let cursor: Record<string, AttributeValue> | undefined;
   do {
-    const result = await db().send(
+    const result = await getDynamoClient().send(
       new QueryCommand({
         TableName: table(),
         KeyConditionExpression: "PK = :pk",
@@ -171,7 +170,7 @@ export async function commit(
         }
       : null;
   try {
-    await db().send(
+    await getDynamoClient().send(
       new TransactWriteItemsCommand({
         TransactItems: [
           patch || {
@@ -208,7 +207,7 @@ export async function commit(
   return next;
 }
 async function log(event: ApiGatewayEvent, action: string, targetId: string, reason: string) {
-  await db().send(
+  await getDynamoClient().send(
     new PutItemCommand({
       TableName: table(),
       Item: marshall(audit(event, action, targetId, reason)),
@@ -255,6 +254,79 @@ async function account(id: string) {
     throw error;
   }
 }
+export function getTableName(): string {
+  return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "prod"}-data`;
+}
+
+export async function scanAllRaw(
+  ddb: any,
+  input: Record<string, any>,
+): Promise<{ Items: any[]; Count: number }> {
+  const { ScanCommand } = await import("@aws-sdk/client-dynamodb");
+  const Items: any[] = [];
+  let Count = 0;
+  let cursor = input.ExclusiveStartKey;
+  do {
+    const page = await ddb.send(new ScanCommand({ ...input, ExclusiveStartKey: cursor }));
+    Items.push(...(page.Items || []));
+    Count += page.Count || 0;
+    cursor = page.LastEvaluatedKey;
+  } while (cursor);
+  return { Items, Count };
+}
+
+export async function findRouteRecord(routeId: string): Promise<Row | null> {
+  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
+  const { unmarshall } = await import("@aws-sdk/util-dynamodb");
+  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const result = await scanAllRaw(ddb, {
+    TableName: getTableName(),
+    FilterExpression: "(PK = :route AND SK = :meta) OR (begins_with(PK, :user) AND SK = :route)",
+    ExpressionAttributeValues: {
+      ":route": { S: `ROUTE#${routeId}` },
+      ":meta": { S: "META" },
+      ":user": { S: "USER#" },
+    },
+  });
+  return result.Items.length === 1 ? unmarshall(result.Items[0]) : null;
+}
+
+export async function recordAuditLog(
+  actorSub: string,
+  action: string,
+  targetId: string,
+  reason: string,
+  details?: Record<string, unknown>,
+): Promise<string | null> {
+  try {
+    const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+    const { marshall } = await import("@aws-sdk/util-dynamodb");
+    const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+    const auditId = `aud_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const now = new Date().toISOString();
+    await ddb.send(
+      new PutItemCommand({
+        TableName: getTableName(),
+        Item: marshall({
+          PK: `AUDIT#${auditId}`,
+          SK: "META",
+          auditId,
+          actorSub,
+          action,
+          targetId,
+          reason: reason || "Belirtilmedi",
+          details: details || {},
+          createdAt: now,
+        }),
+      }),
+    );
+    return auditId;
+  } catch (err) {
+    console.error("[Admin] Audit log recording failed:", err);
+    return null;
+  }
+}
+
 export async function protectAccount(event: ApiGatewayEvent, id: string) {
   if (id === process.env.PROTECTED_ADMIN_SUB)
     throw new AdminError(403, "Birincil yönetici hesabı korunuyor.");
@@ -418,7 +490,7 @@ export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<an
     if (wallet?.frozen) throw new AdminError(409, "Dondurulmuş cüzdanın incelemesini tamamlayın.");
     if (balance + b.delta < 0) throw new AdminError(400, "Bakiye negatif olamaz.");
     try {
-      await db().send(
+      await getDynamoClient().send(
         new TransactWriteItemsCommand({
           TransactItems: [
             {
@@ -479,7 +551,7 @@ export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<an
     if (typeof b.frozen !== "boolean") throw new AdminError(400, "Cüzdan durumu gerekli.");
     await account(id);
     const previous = await get(`USER#${id}`, "CREDITS");
-    await db().send(
+    await getDynamoClient().send(
       new TransactWriteItemsCommand({
         TransactItems: [
           {

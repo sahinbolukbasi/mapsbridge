@@ -5,17 +5,13 @@
  * when the advisory level changes.
  */
 
-import {
-  DynamoDBClient,
-  ScanCommand,
-  PutItemCommand,
-  GetItemCommand,
-} from "@aws-sdk/client-dynamodb";
+import { ScanCommand, PutItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { getDynamoClient } from "../shared/dynamo";
 
 const TABLE = process.env.DYNAMODB_TABLE!;
 const FCDO_BASE = "https://www.gov.uk/api/content/foreign-travel-advice";
-const dynamo = new DynamoDBClient({ region: process.env.AWS_REGION || "eu-central-1" });
+const dynamo = getDynamoClient();
 
 const ADVISORY_LABELS: Record<string, string> = {
   normal: "Normal seyahat tavsiyesi",

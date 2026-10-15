@@ -17,7 +17,7 @@ resource "aws_iam_role" "github_deploy" {
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:sahinbolukbasi/mapsbridge:*"
+          "token.actions.githubusercontent.com:sub" = "repo:sahinbolukbasi/mapsbridge:ref:refs/heads/main"
         }
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
@@ -44,7 +44,7 @@ resource "aws_iam_role_policy" "github_deploy" {
         Sid      = "CloudFrontInvalidate"
         Effect   = "Allow"
         Action   = ["cloudfront:CreateInvalidation", "cloudfront:GetDistribution"]
-        Resource = "*"
+        Resource = [aws_cloudfront_distribution.web.arn]
       },
       {
         Sid    = "LambdaDeploy"

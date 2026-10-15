@@ -1,12 +1,12 @@
 import type { TrainingJob } from "../../../../apps/web/server/ai/training-outbox";
 import type { MemorySettings, MemoryJob } from "../../../../apps/web/server/ai/memory-service";
 import {
-  DynamoDBClient,
   GetItemCommand,
   TransactWriteItemsCommand,
   PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { getDynamoClient } from "../shared/dynamo";
 
 export class BillingError extends Error {
   constructor(
@@ -22,9 +22,8 @@ export const table = () => {
     throw new BillingError(503, "BILLING_UNAVAILABLE", "Kredi servisi yapılandırılmadı.");
   return process.env.DYNAMODB_TABLE;
 };
-export const db = () => new DynamoDBClient({ region: process.env.AWS_REGION });
 export async function read(PK: string, SK: string) {
-  const result = await db().send(
+  const result = await getDynamoClient().send(
     new GetItemCommand({ TableName: table(), Key: marshall({ PK, SK }), ConsistentRead: true }),
   );
   return result.Item ? unmarshall(result.Item) : null;
@@ -53,7 +52,7 @@ export async function wallet(userId: string) {
 // Free credits are granted only by the verified-email AI entry point, once per subject.
 export async function initializeTrial(userId: string) {
   try {
-    await db().send(
+    await getDynamoClient().send(
       new PutItemCommand({
         TableName: table(),
         Item: marshall({
@@ -80,7 +79,7 @@ export async function grantCredits(
     throw new Error("Invalid grant");
   const PK = `BILLING#${receipt}`;
   try {
-    await db().send(
+    await getDynamoClient().send(
       new TransactWriteItemsCommand({
         TransactItems: [
           {
@@ -124,7 +123,7 @@ export async function reserveAI(
   const PK = `USER#${userId}`,
     SK = `AI#${requestId}`;
   try {
-    await db().send(
+    await getDynamoClient().send(
       new TransactWriteItemsCommand({
         TransactItems: [
           {
@@ -212,7 +211,7 @@ export async function authorizeAI(
     SK = `AI#${reservation.requestId}`;
   if (![1, 5].includes(cost)) throw new BillingError(500, "INVALID_COST", "Geçersiz kredi işlemi.");
   try {
-    await db().send(
+    await getDynamoClient().send(
       new TransactWriteItemsCommand({
         TransactItems: [
           {
@@ -255,7 +254,7 @@ export async function authorizeAI(
       if (cost === 5 && current.credits > 0) {
         const flexCost = current.credits;
         try {
-          await db().send(
+          await getDynamoClient().send(
             new TransactWriteItemsCommand({
               TransactItems: [
                 {
@@ -467,7 +466,7 @@ export async function finishAI(
       },
     });
   try {
-    await db().send(new TransactWriteItemsCommand({ TransactItems: items }));
+    await getDynamoClient().send(new TransactWriteItemsCommand({ TransactItems: items }));
   } catch (err) {
     const existing = await read(PK, SK);
     if (existing?.state === (success ? "succeeded" : "failed")) return;
@@ -495,7 +494,7 @@ export async function finishAI(
 }
 
 export async function forgetAIPreferences(userId: string) {
-  await db().send(
+  await getDynamoClient().send(
     new PutItemCommand({
       TableName: table(),
       Item: marshall({ PK: `USER#${userId}`, SK: "AI_PREFERENCES" }),

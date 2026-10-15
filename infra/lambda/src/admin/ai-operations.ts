@@ -17,7 +17,8 @@ import {
   AI_EVENTS_KEY,
   defaultControl,
 } from "../shared/ai-operations";
-import { AdminError, bodyOf, commit, db, get, table, text } from "./management";
+import { AdminError, bodyOf, commit, get, table, text } from "./management";
+import { getDynamoClient } from "../shared/dynamo";
 import { ok, type ApiGatewayEvent } from "../shared/http";
 const TRAINING_PARTITION = "AI#TRAINING_PENDING";
 const AI_RELEASE_KEY = "SYSTEM#AI_RELEASE";
@@ -33,7 +34,7 @@ export async function aiOverview() {
   const [stored, runtime, result] = await Promise.all([
     get(AI_CONTROL_KEY),
     get(AI_RUNTIME_KEY),
-    db().send(
+    getDynamoClient().send(
       new QueryCommand({
         TableName: table(),
         KeyConditionExpression: "PK = :pk AND SK >= :since",
@@ -138,7 +139,7 @@ function safeTrainingRecord(item: Record<string, any>) {
 }
 
 export async function aiTrainingQueue() {
-  const result = await db().send(
+  const result = await getDynamoClient().send(
     new QueryCommand({
       TableName: table(),
       KeyConditionExpression: "PK = :pk",
@@ -169,7 +170,7 @@ export async function reviewAITraining(event: ApiGatewayEvent) {
   const reason = text(body.reason, "Eğitim verisi inceleme kararı");
   if (!key || !["approve", "reject", "hold"].includes(action))
     throw new AdminError(400, "Geçerli bir kayıt ve karar gerekli.");
-  const existing = await db().send(
+  const existing = await getDynamoClient().send(
     new QueryCommand({
       TableName: table(),
       KeyConditionExpression: "PK = :pk AND SK = :sk",
@@ -183,7 +184,7 @@ export async function reviewAITraining(event: ApiGatewayEvent) {
   const reviewed = action === "reject";
   const privacyReview =
     action === "approve" ? "approved" : action === "reject" ? "rejected" : "required";
-  await db().send(
+  await getDynamoClient().send(
     new UpdateItemCommand({
       TableName: table(),
       Key: marshall({ PK: TRAINING_PARTITION, SK: key }),

@@ -392,6 +392,6 @@ module "security" {
   environment           = var.environment
   tags                  = local.tags
   api_gateway_stage_arn = module.api.http_stage_arn
-  enable_waf            = var.environment == "prod" || var.environment == "staging"
+  enable_waf            = true
   waf_rate_limit        = var.waf_rate_limit
 }

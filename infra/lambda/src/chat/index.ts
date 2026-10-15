@@ -16,6 +16,7 @@ import { verifiedUserId } from "../shared/auth";
  */
 
 import type { ApiGatewayEvent } from "../shared/http";
+import { getDynamoClient } from "../shared/dynamo";
 import {
   ok,
   created,
@@ -54,11 +55,6 @@ function getTableName(): string {
   return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT}-data`;
 }
 
-async function getDdb() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
-  return new DynamoDBClient({ region: process.env.AWS_REGION });
-}
-
 // ─── List Threads (user's conversations) ──────────────────────────────────
 async function handleListThreads(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
@@ -67,9 +63,9 @@ async function handleListThreads(event: ApiGatewayEvent) {
   const userId = await verifiedUserId(token);
   if (!userId) return unauthorized();
 
-  const { DynamoDBClient, QueryCommand } = await import("@aws-sdk/client-dynamodb");
+  const { QueryCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall, unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   // Query GSI by participant
   const result = await ddb.send(
@@ -102,9 +98,9 @@ async function handleCreateThread(event: ApiGatewayEvent) {
   const now = new Date().toISOString();
   const participants = [userId, body.participantId].sort();
 
-  const { DynamoDBClient, TransactWriteItemsCommand } = await import("@aws-sdk/client-dynamodb");
+  const { TransactWriteItemsCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const transactItems: any[] = [
     {
@@ -170,12 +166,12 @@ async function handleGetMessages(event: ApiGatewayEvent) {
   const threadId = event.pathParameters?.id;
   if (!threadId) return badRequest("Thread ID gerekli.");
 
-  if (!(await threadParticipants(await getDdb(), getTableName(), threadId, userId)))
+  if (!(await threadParticipants(getDynamoClient(), getTableName(), threadId, userId)))
     return notFound();
 
-  const { DynamoDBClient, QueryCommand } = await import("@aws-sdk/client-dynamodb");
+  const { QueryCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall, unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const limit = Math.min(
     Number(event.queryStringParameters?.limit) || ChatService.MAX_THREAD_LIST,
@@ -227,7 +223,7 @@ async function handleSendMessage(event: ApiGatewayEvent) {
   const threadId = event.pathParameters?.id;
   if (!threadId) return badRequest("Thread ID gerekli.");
 
-  if (!(await threadParticipants(await getDdb(), getTableName(), threadId, userId)))
+  if (!(await threadParticipants(getDynamoClient(), getTableName(), threadId, userId)))
     return notFound();
 
   const body = parseBody<{ content?: string }>(event);
@@ -236,10 +232,9 @@ async function handleSendMessage(event: ApiGatewayEvent) {
 
   const now = new Date().toISOString();
 
-  const { DynamoDBClient, PutItemCommand, UpdateItemCommand } =
-    await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   // Put message
   await ddb.send(

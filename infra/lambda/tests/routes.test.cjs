@@ -185,9 +185,19 @@ function harness(options = {}) {
       createRemoteJWKSet: () => () => ({}),
       jwtVerify: async () => ({ payload: {}, protectedHeader: {} }),
     },
+    "node:crypto": require("node:crypto"),
+    "node:fs": require("node:fs"),
+    "node:path": require("node:path"),
   };
   function load(relative) {
-    const filename = path.resolve(sourceRoot, relative);
+    let filename = path.resolve(sourceRoot, relative);
+    // Fall back to index.ts when the path points to a directory
+    if (
+      !require("node:fs").existsSync(filename) &&
+      require("node:fs").existsSync(filename.replace(/\.ts$/, "/index.ts"))
+    ) {
+      filename = filename.replace(/\.ts$/, "/index.ts");
+    }
     if (cache.has(filename)) return cache.get(filename).exports;
     const module = { exports: {} };
     cache.set(filename, module);
@@ -294,14 +304,27 @@ test("DELETE /routes/{id} returns 200 and issues DeleteItemCommand for the corre
   assert.equal(del.input.Key.SK.S, "ROUTE#my-route");
 });
 
-test("GET /routes/{id}/osrm/{profile} rejects unsupported profiles without data access", async () => {
+test("GET /routes/{id}/osrm/{profile} rejects unauthenticated requests", async () => {
   const h = harness();
   const result = await h
     .load("routes/index.ts")
     .handler(event("GET", "/routes/r1/osrm/helicopter"));
+  assert.equal(result.statusCode, 401);
+  assert.equal(h.calls.data.length, 0);
+});
+
+test("GET /routes/{id}/osrm/{profile} rejects unsupported profiles for authenticated user", async () => {
+  const h = harness();
+  const result = await h
+    .load("routes/index.ts")
+    .handler(event("GET", "/routes/r1/osrm/helicopter", token()));
   assert.equal(result.statusCode, 400);
   assert.ok(JSON.parse(result.body).error.includes("Geçersiz"));
-  assert.equal(h.calls.data.length, 0);
+  // Auth suspension check makes 1 DynamoDB call; no route data is accessed
+  const routeDataCalls = h.calls.data.filter(
+    (c) => c.name !== "GetItemCommand" || !c.input?.Key?.PK?.S?.startsWith("USER#"),
+  );
+  assert.equal(routeDataCalls.length, 0);
 });
 
 test("POST /routes/{id}/share creates a share record owned by the verified user", async () => {

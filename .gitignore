@@ -56,3 +56,6 @@ coverage/
 # Legacy / generated
 docs-legacy/
 .agent-advisor/
+
+# Local MCP/agent configurations (may contain API keys)
+.agents/

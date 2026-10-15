@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "npm run build:ai && next build",
     "typecheck": "next typegen && tsc --noEmit --incremental false",
-    "build:ai": "esbuild ../../infra/lambda/src/ai/index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=../../infra/terraform/.build/ai/handler.cjs",
+    "build:ai": "esbuild ../../infra/lambda/src/ai/index.ts --bundle --platform=node --target=node22 --format=cjs --external:@aws-sdk/* --outfile=../../infra/terraform/.build/ai/handler.cjs",
     "test": "node --test tests/*.test.cjs",
     "test:mobile": "playwright test"
   },
@@ -23,7 +23,8 @@
     "@smithy/hash-node": "^4.5.2",
     "@smithy/protocol-http": "^5.6.2",
     "@smithy/signature-v4": "^5.7.4",
-    "next": "16.3.4",
+    "leaflet": "^1.9.4",
+    "next": "16.4.1",
     "qrcode.react": "^4.2.0",
     "react": "19.0.0",
     "react-dom": "19.0.0"
@@ -34,7 +35,6 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "esbuild": "^0.28.2",
-    "leaflet": "^1.9.4",
     "typescript": "^5"
   }
 }

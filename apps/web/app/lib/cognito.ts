@@ -1,4 +1,4 @@
-const region = "eu-central-1";
+const region = process.env.NEXT_PUBLIC_COGNITO_REGION || "eu-central-1";
 const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? "";
 const endpoint = `https://cognito-idp.${region}.amazonaws.com/`;
 
@@ -254,7 +254,7 @@ export async function changePasswordDirect(newPassword: string) {
     throw new Error("Oturumunuz bulunamadı. Lütfen tekrar giriş yapın.");
   }
 
-  const endpoint = "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com/auth/change-password";
+  const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com"}/auth/change-password`;
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
