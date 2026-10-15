@@ -57,6 +57,12 @@ locals {
       "DELETE /routes/{id}",
       "POST /routes/{id}/share",
       "GET /routes/{id}/osrm/{profile}",
+      "POST /slack-bot/deploy",
+      "POST /slack-bot/status",
+      "POST /slack-bot/health",
+      "POST /slack-bot/logs",
+      "POST /slack-bot/rollback",
+      "POST /slack-bot/interactive",
     ]
     marketplace = [
       "GET /marketplace/guides",
