@@ -126,7 +126,9 @@ test("payment failure never falls back to simulated success or local grant", asy
   assert.equal(s.getWallet().credits, 0);
 });
 test("checkout sends no card fields and calls revenuecat endpoint", async () => {
-  const h = harness({ fetch: async () => ({ url: "https://billing.revenuecat.com/checkout?app_user_id=u" }) }),
+  const h = harness({
+      fetch: async () => ({ url: "https://billing.revenuecat.com/checkout?app_user_id=u" }),
+    }),
     s = h.load("billing-service.ts").billingService;
   const result = await s.processCheckout({
     mode: "credit_pack",

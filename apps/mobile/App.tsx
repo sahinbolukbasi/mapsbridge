@@ -171,7 +171,7 @@ export function App() {
 
           // Initialize RevenueCat with user ID after session is set
           initRevenueCat(effectiveEmail).catch((err: any) =>
-            console.warn("[RevenueCat] Init failed:", err)
+            console.warn("[RevenueCat] Init failed:", err),
           );
 
           tripStore

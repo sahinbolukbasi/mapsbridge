@@ -9,7 +9,7 @@ Tüm CI/CD workflows Slack'a bildirim gönderiyor. Her kanal kendi webhook'u al�
 ```bash
 # Slack workspace'inde şu channels'ları oluştur:
 #deployments     → Deployment success/fail events
-#ci-status       → CI pass/fail events  
+#ci-status       → CI pass/fail events
 #health-alerts   → Health check warnings
 #incidents       → Critical failures
 #dashboard       → Status updates every 15 min
@@ -20,6 +20,7 @@ Tüm CI/CD workflows Slack'a bildirim gönderiyor. Her kanal kendi webhook'u al�
 **Her kanal için webhook oluştur:**
 
 #### Webhook 1: #deployments
+
 1. https://api.slack.com/apps
 2. **Create New App** → **From scratch**
 3. App name: `mapsbridge-deployments`
@@ -30,19 +31,24 @@ Tüm CI/CD workflows Slack'a bildirim gönderiyor. Her kanal kendi webhook'u al�
 8. URL'yi kopyala
 
 #### Webhook 2: #ci-status
+
 Aynı şekilde repeat:
+
 - App name: `mapsbridge-ci`
 - Channel: `#ci-status`
 
-#### Webhook 3: #health-alerts  
+#### Webhook 3: #health-alerts
+
 - App name: `mapsbridge-health`
 - Channel: `#health-alerts`
 
 #### Webhook 4: #incidents
+
 - App name: `mapsbridge-incidents`
 - Channel: `#incidents`
 
 #### Webhook 5: #dashboard
+
 - App name: `mapsbridge-dashboard`
 - Channel: `#dashboard`
 
@@ -71,16 +77,16 @@ SLACK_WEBHOOK_DASHBOARD=https://hooks.slack.com/services/YOUR/WEBHOOK/DASHBOARD
 
 ## 📊 Notification Mapping
 
-| Event | Webhook | Payload |
-|-------|---------|---------|
-| CI Pass | SLACK_WEBHOOK_CI | ✅ CI Passed - Ready to Deploy |
-| CI Fail | SLACK_WEBHOOK_CI | ❌ CI Failed + test failures + auto-fix status |
-| Deploy Success | SLACK_WEBHOOK_DEPLOYMENTS | 🚀 Deployment Complete - All Systems Live |
-| Deploy Failed | SLACK_WEBHOOK_INCIDENTS | ❌ Deployment Failed + logs link |
-| Site Healthy | SLACK_WEBHOOK_ALERTS | ✅ All Systems Healthy |
-| Issues Detected | SLACK_WEBHOOK_ALERTS | ⚠️ Deployment Issues Detected + recovery status |
-| Failure Detected | SLACK_WEBHOOK_INCIDENTS | 🚨 Workflow Failure - Auto-Diagnostic + suggestions |
-| Status Update | SLACK_WEBHOOK_DASHBOARD | 📊 System Status Dashboard |
+| Event            | Webhook                   | Payload                                             |
+| ---------------- | ------------------------- | --------------------------------------------------- |
+| CI Pass          | SLACK_WEBHOOK_CI          | ✅ CI Passed - Ready to Deploy                      |
+| CI Fail          | SLACK_WEBHOOK_CI          | ❌ CI Failed + test failures + auto-fix status      |
+| Deploy Success   | SLACK_WEBHOOK_DEPLOYMENTS | 🚀 Deployment Complete - All Systems Live           |
+| Deploy Failed    | SLACK_WEBHOOK_INCIDENTS   | ❌ Deployment Failed + logs link                    |
+| Site Healthy     | SLACK_WEBHOOK_ALERTS      | ✅ All Systems Healthy                              |
+| Issues Detected  | SLACK_WEBHOOK_ALERTS      | ⚠️ Deployment Issues Detected + recovery status     |
+| Failure Detected | SLACK_WEBHOOK_INCIDENTS   | 🚨 Workflow Failure - Auto-Diagnostic + suggestions |
+| Status Update    | SLACK_WEBHOOK_DASHBOARD   | 📊 System Status Dashboard                          |
 
 ## 🔄 Workflow Timeline
 
@@ -127,7 +133,7 @@ Check site, API, Lambda
    ↓
 If OK: #health-alerts: ✅ All Systems Healthy (quiet)
    ↓
-If Issue: 
+If Issue:
    → #health-alerts: ⚠️ Issues Detected + recovery status
    → Auto-recovery attempts
    → If fails → #incidents: Manual intervention needed
@@ -163,26 +169,32 @@ git push origin develop
 ## 📋 Workflows & Their Notifications
 
 ### 1. **CI Workflow** (on develop push)
+
 - **Success** → #ci-status: ✅ CI Passed
 - **Failure** → #ci-status: ❌ CI Failed
 
 ### 2. **CI Monitor** (on CI complete)
+
 - **Auto-fixed** → #ci-status: ✅ Auto-Fixed
 - **Still failing** → #incidents: 🔍 Issues Need Manual Fix
 
 ### 3. **Deploy Workflow** (on main push)
+
 - **Success** → #deployments: 🚀 Deployment Complete
 - **Failure** → #incidents: ❌ Deployment Failed
 
 ### 4. **Deployment Monitor** (every 5 min)
+
 - **Healthy** → #health-alerts: ✅ All Systems Healthy
 - **Issues** → #health-alerts: ⚠️ Issues Detected
 - **Recovery failed** → #incidents: 🚨 Manual Intervention
 
 ### 5. **Auto Troubleshoot** (on failures)
+
 - **Diagnosed** → #incidents: 🔍 Auto-Diagnostic Report
 
 ### 6. **Status Dashboard** (every 15 min)
+
 - **Always** → #dashboard: 📊 System Status Update
 
 ## 🔧 Customization
@@ -194,11 +206,11 @@ Edit workflow `.yml` files:
 ```yaml
 # deployment-monitor.yml - change from 5 min to 10 min
 schedule:
-  - cron: '*/10 * * * *'  # Every 10 minutes
+  - cron: "*/10 * * * *" # Every 10 minutes
 
 # status-dashboard.yml - change from 15 min to 30 min
 schedule:
-  - cron: '*/30 * * * *'  # Every 30 minutes
+  - cron: "*/30 * * * *" # Every 30 minutes
 ```
 
 ### Add More Channels
@@ -227,6 +239,7 @@ Comment out the Slack notification steps in workflows:
 ```
 
 Or disable workflow:
+
 ```bash
 gh workflow disable deployment-monitor.yml
 ```
@@ -234,22 +247,26 @@ gh workflow disable deployment-monitor.yml
 ## 🐛 Troubleshooting
 
 ### Webhook not working
+
 - Check webhook URL format
 - Verify secret is set correctly
 - Test with curl
 - Check Slack app channel permissions
 
 ### Too many notifications
+
 - Increase schedule interval
 - Mute channel notifications
 - Disable specific workflows
 
 ### Missing some notifications
+
 - Check webhook URL in GitHub Secrets
 - Verify workflow `.yml` has correct webhook reference
 - Check Slack app permissions for channel
 
 ### Webhook expired
+
 - Webhooks don't expire
 - If not working, regenerate new one in Slack portal
 - Update GitHub secret with new URL
@@ -257,8 +274,8 @@ gh workflow disable deployment-monitor.yml
 ## 📞 Support
 
 For issues:
+
 1. Check GitHub Actions logs: Actions tab
 2. Check Slack app logs: https://api.slack.com/apps
 3. Verify webhook URL format
 4. Test webhook with curl command above
-

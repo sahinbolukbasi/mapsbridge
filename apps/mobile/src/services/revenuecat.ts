@@ -34,9 +34,7 @@ export async function getCustomerInfo(): Promise<CustomerInfo | null> {
   }
 }
 
-export function getActiveEntitlement(
-  info: CustomerInfo,
-): EntitlementId | "free" {
+export function getActiveEntitlement(info: CustomerInfo): EntitlementId | "free" {
   const tiers: EntitlementId[] = ["agency", "pro", "explorer"];
   for (const tier of tiers) {
     const ent = info.entitlements.active[tier];
@@ -53,9 +51,7 @@ export async function purchasePackage(pkg: {
     const offerings = await Purchases.getOfferings();
     const offering = offerings.current;
     if (!offering) return { success: false, error: "Paketler yüklenemedi." };
-    const rcPackage = offering.availablePackages.find(
-      (p) => p.identifier === pkg.identifier,
-    );
+    const rcPackage = offering.availablePackages.find((p) => p.identifier === pkg.identifier);
     if (!rcPackage) return { success: false, error: "Paket bulunamadı." };
     const { customerInfo } = await Purchases.purchasePackage(rcPackage);
     return { success: true, customerInfo };

@@ -78,7 +78,8 @@ export async function handler(event: any) {
         return reply(403, { error: "Satın almadan önce e-postanızı doğrulayın." });
       await initializeTrial(userId);
       const product = catalog().find(
-        (p) => p.productId && (body.productId ? p.productId === body.productId : p.id === body.targetId),
+        (p) =>
+          p.productId && (body.productId ? p.productId === body.productId : p.id === body.targetId),
       );
       if (!product) return reply(400, { error: "Satışa açık bir paket seçin." });
       const url = await createWebCheckoutUrl(userId, product, user.email);
@@ -88,15 +89,15 @@ export async function handler(event: any) {
     if (method === "POST" && path === "/revenuecat/verify") {
       // After a mobile purchase, sync the subscriber's entitlements to DynamoDB
       const subscriber = await getRcSubscriber(userId);
-      if (!subscriber)
-        return reply(404, { error: "RevenueCat abonelik bilgisi bulunamadı." });
+      if (!subscriber) return reply(404, { error: "RevenueCat abonelik bilgisi bulunamadı." });
       await syncFromSubscriber(userId, subscriber, Math.floor(Date.now() / 1000));
       return reply(200, await wallet(userId));
     }
 
     return reply(404, { error: "Uç nokta bulunamadı." });
   } catch (err) {
-    if (err instanceof BillingError) return reply(err.status, { error: err.message, code: err.code });
+    if (err instanceof BillingError)
+      return reply(err.status, { error: err.message, code: err.code });
     console.error("[RevenueCat] Unhandled error:", err);
     return reply(503, { error: "Ödeme veya kredi servisine şu anda erişilemiyor." });
   }
@@ -106,8 +107,7 @@ export async function handler(event: any) {
 
 async function handleWebhook(event: any) {
   // RevenueCat sends Authorization: Bearer <secret>
-  const authHeader =
-    event.headers?.authorization || event.headers?.Authorization || "";
+  const authHeader = event.headers?.authorization || event.headers?.Authorization || "";
   const secret = await resolveEnvSecret(process.env.RC_WEBHOOK_AUTH_SECRET);
   if (!secret || `Bearer ${secret}` !== authHeader)
     return reply(401, { error: "Geçersiz webhook kimlik doğrulama." });
@@ -174,7 +174,9 @@ async function handleWebhook(event: any) {
         break;
       }
       case "PRODUCT_CHANGE": {
-        const product = catalog().find((p) => p.productId === ev.new_product_id || p.productId === productId);
+        const product = catalog().find(
+          (p) => p.productId === ev.new_product_id || p.productId === productId,
+        );
         if (!product) break;
         await syncSubscription(userId, product.id, "active", expiresAt, ev.id, eventTime);
         break;
@@ -261,7 +263,8 @@ async function syncSubscriptionStatus(
         TableName: table(),
         Key: marshall({ PK: `USER#${userId}`, SK: "SUBSCRIPTION" }),
         UpdateExpression: "SET #status = :status, eventTime = :time, rcEventId = :evId",
-        ConditionExpression: "attribute_exists(PK) AND (attribute_not_exists(eventTime) OR eventTime < :time)",
+        ConditionExpression:
+          "attribute_exists(PK) AND (attribute_not_exists(eventTime) OR eventTime < :time)",
         ExpressionAttributeNames: { "#status": "status" },
         ExpressionAttributeValues: marshall({
           ":status": status,
@@ -286,9 +289,12 @@ async function rcSecretKey(): Promise<string> {
 
 async function getRcSubscriber(userId: string): Promise<any | null> {
   const key = await rcSecretKey();
-  const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`, {
-    headers: { Authorization: `Bearer ${key}` },
-  });
+  const res = await fetch(
+    `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`,
+    {
+      headers: { Authorization: `Bearer ${key}` },
+    },
+  );
   if (res.status === 404) return null;
   if (!res.ok) throw new BillingError(502, "RC_API_ERROR", "RevenueCat bağlantı hatası.");
   const data = await res.json();
@@ -328,6 +334,13 @@ async function syncFromSubscriber(userId: string, subscriber: any, eventTime: nu
   }
 
   if (activeTier !== "free") {
-    await syncSubscription(userId, activeTier, "active", periodEnd, `rc-verify-${Date.now()}`, eventTime);
+    await syncSubscription(
+      userId,
+      activeTier,
+      "active",
+      periodEnd,
+      `rc-verify-${Date.now()}`,
+      eventTime,
+    );
   }
 }

@@ -1,9 +1,7 @@
 import { apiFetch } from "../api-client";
 import { CheckoutPayload, CheckoutResult } from "./billing-types";
 
-export async function createRevenueCatCheckout(
-  payload: CheckoutPayload,
-): Promise<CheckoutResult> {
+export async function createRevenueCatCheckout(payload: CheckoutPayload): Promise<CheckoutResult> {
   try {
     const session = await apiFetch<{ url: string }>("/revenuecat/checkout", {
       method: "POST",
@@ -13,8 +11,7 @@ export async function createRevenueCatCheckout(
       }),
     });
     const url = new URL(session.url);
-    if (url.protocol !== "https:")
-      throw new Error("Ödeme adresi doğrulanamadı.");
+    if (url.protocol !== "https:") throw new Error("Ödeme adresi doğrulanamadı.");
     return {
       success: true,
       message: "Güvenli ödeme sayfasına yönlendiriliyorsunuz.",

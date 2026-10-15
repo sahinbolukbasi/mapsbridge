@@ -116,7 +116,7 @@ test("Slack webhook signatures are verified", async () => {
   // Should reject requests older than 5 minutes
   assert.ok(
     Math.abs(Math.floor(Date.now() / 1000) - parseInt(tooOldSignature.timestamp)) > 300,
-    "Should reject requests older than 5 minutes"
+    "Should reject requests older than 5 minutes",
   );
 });
 

@@ -397,8 +397,8 @@ export default function CheckoutPage() {
         )}
 
         <p className="billing-explain">
-          Ödemeler RevenueCat üzerinden güvenli biçimde gerçekleşir. Krediler
-          yalnızca ödeme sunucuda doğrulandıktan sonra anında hesabınıza yüklenir.
+          Ödemeler RevenueCat üzerinden güvenli biçimde gerçekleşir. Krediler yalnızca ödeme
+          sunucuda doğrulandıktan sonra anında hesabınıza yüklenir.
         </p>
       </main>
     </div>

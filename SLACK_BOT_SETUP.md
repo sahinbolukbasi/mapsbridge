@@ -13,6 +13,7 @@ Interactive Slack bot'u Slack kanalında komutlarla sistemi yönet.
 ```
 
 Interactive buttons:
+
 - View Logs
 - Refresh Status
 - Auto-Recover
@@ -32,6 +33,7 @@ Interactive buttons:
 **Settings** → **OAuth & Permissions**
 
 **Bot Token Scopes Ekle:**
+
 ```
 chat:write              - Messages gönder
 commands:write          - Slash commands
@@ -46,28 +48,33 @@ chat:write.public       - Public channels'a yaz
 Şu komutları ekle:
 
 **Command 1: /deploy**
+
 - Command: `/deploy`
 - Request URL: `https://api.mapsbridge.com/slack-bot/deploy`
 - Short Description: `Trigger deployment`
 - Usage hint: `[main|develop]`
 
 **Command 2: /status**
+
 - Command: `/status`
 - Request URL: `https://api.mapsbridge.com/slack-bot/status`
 - Short Description: `System status report`
 
 **Command 3: /health**
+
 - Command: `/health`
 - Request URL: `https://api.mapsbridge.com/slack-bot/health`
 - Short Description: `Health check`
 
 **Command 4: /logs**
+
 - Command: `/logs`
 - Request URL: `https://api.mapsbridge.com/slack-bot/logs`
 - Short Description: `View deployment logs`
 - Usage hint: `[deploy|ci|monitor]`
 
 **Command 5: /rollback**
+
 - Command: `/rollback`
 - Request URL: `https://api.mapsbridge.com/slack-bot/rollback`
 - Short Description: `Rollback last deployment`
@@ -77,6 +84,7 @@ chat:write.public       - Public channels'a yaz
 **Features** → **Interactivity & Shortcuts**
 
 **Interactivity ON**
+
 - Request URL: `https://api.mapsbridge.com/slack-bot/interactive`
 
 ### 5. Event Subscriptions
@@ -84,9 +92,11 @@ chat:write.public       - Public channels'a yaz
 **Features** → **Event Subscriptions**
 
 Enable Events: ON
+
 - Request URL: `https://api.mapsbridge.com/slack-bot/events`
 
 Subscribe to bot events:
+
 - `message.channels`
 - `app_mention`
 
@@ -100,11 +110,13 @@ Subscribe to bot events:
 ### 7. Invite Bot to Channels
 
 Slack workspace'de:
+
 ```
 /invite @mapsbridge-bot
 ```
 
 Şu channels'a invite et:
+
 - #deployments
 - #ci-status
 - #health-alerts
@@ -141,6 +153,7 @@ slack_bot_user_id = "U..."
 ```
 
 Response:
+
 ```
 🚀 Deployment Triggered by @your-name
 
@@ -158,6 +171,7 @@ Duration: 25-35 min
 ```
 
 Response:
+
 ```
 📊 System Status Report
 
@@ -176,6 +190,7 @@ Last Deploy: success
 ```
 
 Response (if all good):
+
 ```
 ✅ All Systems Healthy
 
@@ -186,6 +201,7 @@ Time: 2:34 PM
 ```
 
 Response (if issues):
+
 ```
 ⚠️ Issues Detected
 
@@ -204,6 +220,7 @@ Time: 2:34 PM
 ```
 
 Response:
+
 ```
 📋 Logs: deploy
 
@@ -217,6 +234,7 @@ Response:
 ```
 
 Response:
+
 ```
 🔄 Rollback Initiated by @your-name
 
@@ -231,6 +249,7 @@ Status: In Progress
 ### Incoming Messages
 
 Bot listens to:
+
 - Commands starting with `/`
 - @mapsbridge-bot mentions
 - Deployments in threads
@@ -238,6 +257,7 @@ Bot listens to:
 ### Automatic Responses
 
 Bot automatically posts to channels:
+
 - Deployment updates (via webhooks)
 - Health check results
 - CI/CD status
@@ -246,6 +266,7 @@ Bot automatically posts to channels:
 ### Action Buttons
 
 Rich message formatting:
+
 - Blue buttons: info/status
 - Red buttons: critical/recovery
 - All buttons are clickable & interactive
@@ -280,22 +301,26 @@ If issue: Bot posts to #incidents
 ## 🐛 Troubleshooting
 
 ### Bot not responding
+
 - Check Request URL is correct
 - Verify Signing Secret in Lambda env
 - Check Bot Token scope
 - Verify Slack command syntax
 
 ### 404 Not Found
+
 - Ensure endpoint exists: `/slack-bot/[command]`
 - Check Lambda routes are registered
 - Verify API Gateway paths
 
 ### Signature verification failed
+
 - Check SLACK_SIGNING_SECRET is correct
 - Verify timestamp isn't too old
 - Check request body isn't modified
 
 ### Bot not in channel
+
 - Invite bot: `/invite @mapsbridge-bot`
 - Check channel permissions
 - Verify bot has `chat:write` scope
@@ -333,13 +358,13 @@ If issue: Bot posts to #incidents
 
 ## 📞 Commands Reference
 
-| Command | Usage | Response |
-|---------|-------|----------|
-| /deploy | /deploy [branch] | 🚀 Deployment Triggered |
-| /status | /status | 📊 System Status Report |
-| /health | /health | ✅ Health Status |
-| /logs | /logs [type] | 📋 Log Links |
-| /rollback | /rollback | 🔄 Rollback Started |
+| Command   | Usage            | Response                |
+| --------- | ---------------- | ----------------------- |
+| /deploy   | /deploy [branch] | 🚀 Deployment Triggered |
+| /status   | /status          | 📊 System Status Report |
+| /health   | /health          | ✅ Health Status        |
+| /logs     | /logs [type]     | 📋 Log Links            |
+| /rollback | /rollback        | 🔄 Rollback Started     |
 
 ## 🔄 Conversation Flow
 
@@ -389,6 +414,7 @@ Keep Slack open and watch:
 ```
 
 Talk to bot via commands:
+
 ```
 /status         → Current system state
 /health         → Health check
@@ -401,4 +427,3 @@ Talk to bot via commands:
 - [Slash Commands](https://api.slack.com/interactivity/slash-commands)
 - [Interactivity](https://api.slack.com/interactivity)
 - [Slack Bot Best Practices](https://api.slack.com/bot-users)
-

@@ -11,20 +11,34 @@ const key = (x) => `${x?.PK}|${x?.SK}`;
 const WEBHOOK_SECRET = "test-rc-webhook-secret";
 
 function harness(options = {}) {
-  const rows = new Map(), calls = [];
+  const rows = new Map(),
+    calls = [];
   const names = [
-    "GetItemCommand", "PutItemCommand", "UpdateItemCommand",
-    "TransactWriteItemsCommand", "QueryCommand",
+    "GetItemCommand",
+    "PutItemCommand",
+    "UpdateItemCommand",
+    "TransactWriteItemsCommand",
+    "QueryCommand",
   ];
   const commands = Object.fromEntries(
-    names.map((n) => [n, class { constructor(i) { this.name = n; this.input = i; } }]),
+    names.map((n) => [
+      n,
+      class {
+        constructor(i) {
+          this.name = n;
+          this.input = i;
+        }
+      },
+    ]),
   );
 
   function allowed(input, old) {
-    const c = input.ConditionExpression, v = input.ExpressionAttributeValues || {};
+    const c = input.ConditionExpression,
+      v = input.ExpressionAttributeValues || {};
     if (!c) return true;
     if (c === "attribute_not_exists(PK)") return !old;
-    if (c.startsWith("credits >=")) return old?.credits >= (v[":cost"] ?? v[":required"]) && old?.frozen !== true;
+    if (c.startsWith("credits >="))
+      return old?.credits >= (v[":cost"] ?? v[":required"]) && old?.frozen !== true;
     if (c.includes("eventTime <")) return !old?.eventTime || old.eventTime < v[":time"];
     if (c.includes("attribute_not_exists(eventTime)") || c.includes("OR eventTime < :time"))
       return !old?.eventTime || old.eventTime < v[":time"];
@@ -34,8 +48,12 @@ function harness(options = {}) {
   }
 
   function apply(input) {
-    const k = key(input.Item || input.Key), old = rows.get(k);
-    if (input.Item) { rows.set(k, clone(input.Item)); return; }
+    const k = key(input.Item || input.Key),
+      old = rows.get(k);
+    if (input.Item) {
+      rows.set(k, clone(input.Item));
+      return;
+    }
     const next = { ...input.Key, ...old };
     const values = input.ExpressionAttributeValues || {};
     const attrNames = input.ExpressionAttributeNames || {};
@@ -61,18 +79,24 @@ function harness(options = {}) {
           if (command.name === "GetItemCommand")
             return Promise.resolve({ Item: old ? clone(old) : undefined });
           if (command.name === "TransactWriteItemsCommand") {
-            const ops = (command.input.TransactItems || []).map((t) => t.Put || t.Update || t.ConditionCheck).filter(Boolean);
+            const ops = (command.input.TransactItems || [])
+              .map((t) => t.Put || t.Update || t.ConditionCheck)
+              .filter(Boolean);
             const checks = ops.map((o) => allowed(o, rows.get(key(o.Item || o.Key))));
             if (checks.some((x) => !x))
               throw Object.assign(new Error("condition"), {
                 name: "TransactionCanceledException",
-                CancellationReasons: checks.map((ok) => ({ Code: ok ? "None" : "ConditionalCheckFailed" })),
+                CancellationReasons: checks.map((ok) => ({
+                  Code: ok ? "None" : "ConditionalCheckFailed",
+                })),
               });
             ops.filter((o) => o.Item || o.UpdateExpression).forEach(apply);
             return Promise.resolve({});
           }
           if (!allowed(command.input, old))
-            throw Object.assign(new Error("condition"), { name: "ConditionalCheckFailedException" });
+            throw Object.assign(new Error("condition"), {
+              name: "ConditionalCheckFailedException",
+            });
           apply(command.input);
           return Promise.resolve({});
         }
@@ -93,61 +117,77 @@ function harness(options = {}) {
     const module = { exports: {} };
     cache.set(filename, module);
     const code = transformSync(readFileSync(filename, "utf8"), {
-      loader: "ts", format: "cjs", target: "node22",
+      loader: "ts",
+      format: "cjs",
+      target: "node22",
       supported: { "dynamic-import": false },
     }).code;
-    vm.runInNewContext(code, {
-      module, exports: module.exports,
-      Buffer, URL, console, AbortSignal,
-      crypto: require("node:crypto").webcrypto,
-      process: {
-        env: {
-          BILLING_ENABLED: "true",
-          AWS_REGION: "eu-central-1",
-          COGNITO_USER_POOL_ID: "eu-central-1_test",
-          COGNITO_CLIENT_ID: "test-client",
-          DYNAMODB_TABLE: "data",
-          RC_SECRET_API_KEY: "placeholder-skipped",
-          RC_WEBHOOK_AUTH_SECRET: WEBHOOK_SECRET,
-          RC_BILLING_CHECKOUT_URL: "https://billing.revenuecat.com/checkout",
-          RC_EXPLORER_PRODUCT_ID: "prode1930276ca",
-          RC_PRO_PRODUCT_ID: "prod99e16b0cb7",
-          RC_PACK_STARTER_PRODUCT_ID: "mapsbridge_pack_starter",
-          APP_ORIGIN: "https://mapsbridge.com",
-          ...options.env,
+    vm.runInNewContext(
+      code,
+      {
+        module,
+        exports: module.exports,
+        Buffer,
+        URL,
+        console,
+        AbortSignal,
+        crypto: require("node:crypto").webcrypto,
+        process: {
+          env: {
+            BILLING_ENABLED: "true",
+            AWS_REGION: "eu-central-1",
+            COGNITO_USER_POOL_ID: "eu-central-1_test",
+            COGNITO_CLIENT_ID: "test-client",
+            DYNAMODB_TABLE: "data",
+            RC_SECRET_API_KEY: "placeholder-skipped",
+            RC_WEBHOOK_AUTH_SECRET: WEBHOOK_SECRET,
+            RC_BILLING_CHECKOUT_URL: "https://billing.revenuecat.com/checkout",
+            RC_EXPLORER_PRODUCT_ID: "prode1930276ca",
+            RC_PRO_PRODUCT_ID: "prod99e16b0cb7",
+            RC_PACK_STARTER_PRODUCT_ID: "mapsbridge_pack_starter",
+            APP_ORIGIN: "https://mapsbridge.com",
+            ...options.env,
+          },
+        },
+        fetch:
+          options.fetch ||
+          (async () => ({
+            ok: !options.authFailure,
+            json: async () => ({
+              UserAttributes: [
+                { Name: "sub", Value: "user-a" },
+                { Name: "email_verified", Value: "true" },
+                { Name: "email", Value: "user-a@example.com" },
+              ],
+            }),
+          })),
+        require(spec) {
+          if (spec.startsWith(".")) return load(path.resolve(path.dirname(filename), spec + ".ts"));
+          if (external[spec]) return external[spec];
+          throw new Error("Unexpected dependency: " + spec);
         },
       },
-      fetch: options.fetch || (async () => ({
-        ok: !options.authFailure,
-        json: async () => ({
-          UserAttributes: [
-            { Name: "sub", Value: "user-a" },
-            { Name: "email_verified", Value: "true" },
-            { Name: "email", Value: "user-a@example.com" },
-          ],
-        }),
-      })),
-      require(spec) {
-        if (spec.startsWith(".")) return load(path.resolve(path.dirname(filename), spec + ".ts"));
-        if (external[spec]) return external[spec];
-        throw new Error("Unexpected dependency: " + spec);
-      },
-    }, { filename });
+      { filename },
+    );
     return module.exports;
   }
   return { load, rows, calls };
 }
 
 const token = () =>
-  ["header",
-    Buffer.from(JSON.stringify({
-      sub: "user-a",
-      iss: "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_test",
-      client_id: "test-client",
-      token_use: "access",
-      exp: Math.floor(Date.now() / 1000) + 300,
-    })).toString("base64url"),
-    "signature"].join(".");
+  [
+    "header",
+    Buffer.from(
+      JSON.stringify({
+        sub: "user-a",
+        iss: "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_test",
+        client_id: "test-client",
+        token_use: "access",
+        exp: Math.floor(Date.now() / 1000) + 300,
+      }),
+    ).toString("base64url"),
+    "signature",
+  ].join(".");
 
 function webhookEvent(type, overrides = {}) {
   return {
@@ -205,8 +245,19 @@ test("INITIAL_PURCHASE grants credits and sets subscription", async () => {
 
 test("RENEWAL grants another month of credits", async () => {
   const { load, rows } = harness();
-  rows.set("USER#user-a|CREDITS", { PK: "USER#user-a", SK: "CREDITS", credits: 100, welcomeGift: null });
-  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "pro", status: "active", eventTime: 1 });
+  rows.set("USER#user-a|CREDITS", {
+    PK: "USER#user-a",
+    SK: "CREDITS",
+    credits: 100,
+    welcomeGift: null,
+  });
+  rows.set("USER#user-a|SUBSCRIPTION", {
+    PK: "USER#user-a",
+    SK: "SUBSCRIPTION",
+    tier: "pro",
+    status: "active",
+    eventTime: 1,
+  });
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("RENEWAL", { transaction_id: "txn-renewal" }));
   assert.equal(res.statusCode, 200);
@@ -216,7 +267,13 @@ test("RENEWAL grants another month of credits", async () => {
 
 test("CANCELLATION sets status to cancelled", async () => {
   const { load, rows } = harness();
-  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "pro", status: "active", eventTime: 1 });
+  rows.set("USER#user-a|SUBSCRIPTION", {
+    PK: "USER#user-a",
+    SK: "SUBSCRIPTION",
+    tier: "pro",
+    status: "active",
+    eventTime: 1,
+  });
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("CANCELLATION"));
   assert.equal(res.statusCode, 200);
@@ -226,7 +283,13 @@ test("CANCELLATION sets status to cancelled", async () => {
 
 test("EXPIRATION downgrades to free", async () => {
   const { load, rows } = harness();
-  rows.set("USER#user-a|SUBSCRIPTION", { PK: "USER#user-a", SK: "SUBSCRIPTION", tier: "pro", status: "active", eventTime: 1 });
+  rows.set("USER#user-a|SUBSCRIPTION", {
+    PK: "USER#user-a",
+    SK: "SUBSCRIPTION",
+    tier: "pro",
+    status: "active",
+    eventTime: 1,
+  });
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("EXPIRATION"));
   assert.equal(res.statusCode, 200);
@@ -237,7 +300,12 @@ test("EXPIRATION downgrades to free", async () => {
 
 test("REFUND freezes user credits", async () => {
   const { load, rows } = harness();
-  rows.set("USER#user-a|CREDITS", { PK: "USER#user-a", SK: "CREDITS", credits: 100, frozen: false });
+  rows.set("USER#user-a|CREDITS", {
+    PK: "USER#user-a",
+    SK: "CREDITS",
+    credits: 100,
+    frozen: false,
+  });
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("REFUND"));
   assert.equal(res.statusCode, 200);
@@ -272,7 +340,12 @@ test("GET /revenuecat/wallet requires auth", async () => {
 
 test("GET /revenuecat/wallet returns wallet for authenticated user", async () => {
   const { load, rows } = harness();
-  rows.set("USER#user-a|CREDITS", { PK: "USER#user-a", SK: "CREDITS", credits: 42, welcomeGift: null });
+  rows.set("USER#user-a|CREDITS", {
+    PK: "USER#user-a",
+    SK: "CREDITS",
+    credits: 42,
+    welcomeGift: null,
+  });
   const { handler } = load("revenuecat/index.ts");
   const res = await handler({
     rawPath: "/revenuecat/wallet",
@@ -287,10 +360,12 @@ test("GET /revenuecat/wallet returns wallet for authenticated user", async () =>
 test("pro-yearly subscription purchase works", async () => {
   const { load, rows } = harness();
   const { handler } = load("revenuecat/index.ts");
-  const res = await handler(webhookEvent("INITIAL_PURCHASE", {
-    product_id: "prod99e16b0cb7",
-    transaction_id: "txn-pro",
-  }));
+  const res = await handler(
+    webhookEvent("INITIAL_PURCHASE", {
+      product_id: "prod99e16b0cb7",
+      transaction_id: "txn-pro",
+    }),
+  );
   assert.equal(res.statusCode, 200);
   const sub = rows.get("USER#user-a|SUBSCRIPTION");
   assert.equal(sub?.tier, "pro-yearly");
@@ -303,5 +378,8 @@ test("unknown product_id is silently ignored", async () => {
   const { handler } = load("revenuecat/index.ts");
   const res = await handler(webhookEvent("INITIAL_PURCHASE", { product_id: "unknown_product" }));
   assert.equal(res.statusCode, 200);
-  assert.ok(!rows.get("USER#user-a|SUBSCRIPTION"), "no subscription row created for unknown product");
+  assert.ok(
+    !rows.get("USER#user-a|SUBSCRIPTION"),
+    "no subscription row created for unknown product",
+  );
 });

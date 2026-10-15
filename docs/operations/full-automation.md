@@ -92,6 +92,7 @@ Tamamen otomatik deployment, monitoring, troubleshooting ve recovery sistemi.
 ## 🔄 Workflows
 
 ### 1. **CI Workflow** (ci.yml)
+
 **Trigger:** Push to develop
 **Duration:** 5-10 min
 
@@ -105,12 +106,14 @@ Tamamen otomatik deployment, monitoring, troubleshooting ve recovery sistemi.
 ```
 
 **Auto-Fix Capabilities:**
+
 - Prettier formatting
 - ESLint auto-fix
 - Import sort
 - Lint rule fixes
 
 ### 2. **Auto-Merge Workflow** (auto-merge.yml)
+
 **Trigger:** CI success on develop
 **Duration:** 1 min
 
@@ -122,37 +125,39 @@ Tamamen otomatik deployment, monitoring, troubleshooting ve recovery sistemi.
 ```
 
 ### 3. **Deploy Workflow** (deploy.yml)
+
 **Trigger:** Push to main
 **Duration:** 25-35 min
 
 ```yaml
 PARALLEL:
-- Build (web + lambda)
-  ├─ npm ci
-  ├─ Next.js build
-  └─ Upload artifact
-- Terraform
-  ├─ Init
-  ├─ Validate
-  └─ Apply (infrastructure)
-- Deploy Web
-  ├─ Download artifact
-  ├─ S3 sync
-  └─ CloudFront invalidate
-- Deploy Lambda
-  ├─ Package ZIP
-  └─ Update functions
-- Deploy Mobile (EAS)
-  ├─ Build iOS
-  ├─ Build Android
-  └─ Auto-submit to stores
-- Smoke Test
-  ├─ Check site
-  ├─ Check API
-  └─ Report
+  - Build (web + lambda)
+    ├─ npm ci
+    ├─ Next.js build
+    └─ Upload artifact
+  - Terraform
+    ├─ Init
+    ├─ Validate
+    └─ Apply (infrastructure)
+  - Deploy Web
+    ├─ Download artifact
+    ├─ S3 sync
+    └─ CloudFront invalidate
+  - Deploy Lambda
+    ├─ Package ZIP
+    └─ Update functions
+  - Deploy Mobile (EAS)
+    ├─ Build iOS
+    ├─ Build Android
+    └─ Auto-submit to stores
+  - Smoke Test
+    ├─ Check site
+    ├─ Check API
+    └─ Report
 ```
 
 ### 4. **Deployment Monitor** (deployment-monitor.yml)
+
 **Trigger:** Every 5 minutes (scheduled)
 **Duration:** 30 sec
 
@@ -169,6 +174,7 @@ PARALLEL:
 ```
 
 ### 5. **CI Monitor** (ci-monitor.yml)
+
 **Trigger:** CI workflow completion
 **Duration:** 2-5 min
 
@@ -183,6 +189,7 @@ PARALLEL:
 ```
 
 ### 6. **Auto Troubleshoot** (auto-troubleshoot.yml)
+
 **Trigger:** Deploy/CI failure
 **Duration:** 1 min
 
@@ -201,6 +208,7 @@ PARALLEL:
 ```
 
 ### 7. **Status Dashboard** (status-dashboard.yml)
+
 **Trigger:** Every 15 minutes (scheduled)
 **Duration:** 30 sec
 
@@ -221,6 +229,7 @@ PARALLEL:
 ### Slack Integration
 
 **Required Setup:**
+
 ```bash
 # 1. Create Slack app: https://api.slack.com/apps
 # 2. Enable Incoming Webhooks
@@ -237,17 +246,17 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK
 
 ### Notification Types
 
-| Event | Channel | Format |
-|-------|---------|--------|
-| CI Pass | #ci-status | ✅ CI Passed |
-| CI Fail | #ci-status | ❌ CI Failed + auto-fix status |
-| Deploy Start | #deployments | 🚀 Deploy Started |
-| Deploy Success | #deployments | ✅ Deploy Complete |
-| Deploy Fail | #deployments + #incidents | ❌ Deploy Failed + auto-troubleshoot |
-| Site Down | #health-alerts | ❌ Site Down + recovery status |
-| Recovery Success | #health-alerts | ✅ Issue Resolved |
-| Recovery Failed | #incidents | 🚨 Manual Intervention Needed |
-| Status Update | #deployments | 📊 System Status Report |
+| Event            | Channel                   | Format                               |
+| ---------------- | ------------------------- | ------------------------------------ |
+| CI Pass          | #ci-status                | ✅ CI Passed                         |
+| CI Fail          | #ci-status                | ❌ CI Failed + auto-fix status       |
+| Deploy Start     | #deployments              | 🚀 Deploy Started                    |
+| Deploy Success   | #deployments              | ✅ Deploy Complete                   |
+| Deploy Fail      | #deployments + #incidents | ❌ Deploy Failed + auto-troubleshoot |
+| Site Down        | #health-alerts            | ❌ Site Down + recovery status       |
+| Recovery Success | #health-alerts            | ✅ Issue Resolved                    |
+| Recovery Failed  | #incidents                | 🚨 Manual Intervention Needed        |
+| Status Update    | #deployments              | 📊 System Status Report              |
 
 ## 🛠️ Auto-Recovery
 
@@ -276,6 +285,7 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK
 ### Manual Intervention
 
 If auto-recovery fails:
+
 1. GitHub issue created with diagnostics
 2. Slack #incidents notification
 3. Suggested fixes in issue
@@ -318,6 +328,7 @@ If auto-recovery fails:
 ### Dashboard
 
 Auto-updated every 15 minutes in README:
+
 - System health (site, API, database)
 - Recent deployments status
 - Quick links to logs
@@ -327,12 +338,12 @@ Auto-updated every 15 minutes in README:
 
 ### Alert Levels
 
-| Level | Condition | Action | Notification |
-|-------|-----------|--------|--------------|
-| 🟢 Info | Deploy success | Log only | #deployments |
-| 🟡 Warning | Health check fail | Auto-recover + monitor | #health-alerts |
-| 🔴 Error | Auto-recovery fails | Create issue + escalate | #incidents |
-| 🚨 Critical | Site down > 10 min | Page oncall + page | @channel |
+| Level       | Condition           | Action                  | Notification   |
+| ----------- | ------------------- | ----------------------- | -------------- |
+| 🟢 Info     | Deploy success      | Log only                | #deployments   |
+| 🟡 Warning  | Health check fail   | Auto-recover + monitor  | #health-alerts |
+| 🔴 Error    | Auto-recovery fails | Create issue + escalate | #incidents     |
+| 🚨 Critical | Site down > 10 min  | Page oncall + page      | @channel       |
 
 ### Escalation Timeline
 
@@ -376,6 +387,7 @@ SLACK_WEBHOOK_URL  ← ADD THIS
 ### Terraform Config
 
 Create `infra/terraform/prod.tfvars`:
+
 ```hcl
 rc_secret_api_key       = "sk_..."
 rc_webhook_auth_secret  = "webhook_..."
@@ -385,30 +397,35 @@ rc_webhook_auth_secret  = "webhook_..."
 ## 🎯 Key Features
 
 ✅ **Fully Automated**
+
 - No manual trigger needed
 - develop push → full deployment pipeline
 - Auto-merge on CI success
 - Auto-fix on common issues
 
 ✅ **Self-Healing**
+
 - Detect failures automatically
 - Attempt recovery automatically
 - Create diagnostic issues
 - Escalate if needed
 
 ✅ **Observable**
+
 - Real-time Slack notifications
 - Status dashboard in README
 - GitHub issues for diagnostics
 - Workflow logs with details
 
 ✅ **Fast Feedback**
+
 - CI: 5-10 min
 - Deploy: 25-35 min
 - Monitor: 5 min intervals
 - Alert: < 1 min
 
 ✅ **No Manual Work**
+
 - Formatting auto-fixed
 - Tests auto-analyzed
 - Failures auto-diagnosed
@@ -436,22 +453,25 @@ rc_webhook_auth_secret  = "webhook_..."
 ## 🐛 Troubleshooting
 
 ### Workflows not triggering
+
 - Check branch protection rules
 - Verify GitHub Actions enabled
 - Check workflow syntax
 
 ### Slack notifications not working
+
 - Verify SLACK_WEBHOOK_URL is correct
 - Test webhook with curl
 - Check Slack channel permissions
 
 ### Auto-fix not working
+
 - Check if issue is auto-fixable
 - Review CI logs
 - May require manual fix
 
 ### Too many notifications
+
 - Adjust schedule intervals
 - Disable non-critical workflows
 - Mute Slack channels
-

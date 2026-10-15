@@ -1,533 +1,313 @@
-import { Router } from '../shared/router';
-import crypto from 'node:crypto';
-import { verifyAuth } from '../shared/auth';
+import crypto from "node:crypto";
 
 interface SlackRequest {
-  type: string;
-  trigger_id?: string;
+  type?: string;
   user_id?: string;
   command?: string;
   text?: string;
-  channel_id?: string;
   response_url?: string;
-  actions?: Array<{ action_id: string; value?: string }>;
+  payload?: string;
 }
 
-interface SlackResponse {
-  response_type?: string;
-  text?: string;
-  blocks?: any[];
-  thread_ts?: string;
-}
+function verifySlackSignature(body: string, timestamp: string, signature: string): boolean {
+  const secret = process.env.SLACK_SIGNING_SECRET;
+  if (!secret || !timestamp || !signature) return false;
 
-const router = new Router();
-
-// Verify Slack request signature
-function verifySlackSignature(
-  req: any
-): boolean {
-  const slackSigningSecret = process.env.SLACK_SIGNING_SECRET;
-  if (!slackSigningSecret) return false;
-
-  const timestamp = req.headers['x-slack-request-timestamp'];
-  const signature = req.headers['x-slack-signature'];
-
-  // Verify timestamp is not older than 5 minutes
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - parseInt(timestamp)) > 300) return false;
 
-  // Verify signature
-  const baseString = `v0:${timestamp}:${req.body}`;
-  const hmac = crypto
-    .createHmac('sha256', slackSigningSecret)
-    .update(baseString)
-    .digest('hex');
-  const computedSignature = `v0=${hmac}`;
+  const baseString = `v0:${timestamp}:${body}`;
+  const hmac = crypto.createHmac("sha256", secret).update(baseString).digest("hex");
+  const computed = `v0=${hmac}`;
 
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(computedSignature)
-  );
+  try {
+    return crypto.timingSafeEqual(Buffer.from(computed), Buffer.from(signature));
+  } catch {
+    return false;
+  }
 }
 
-// Format deployment status
-async function getDeploymentStatus(): Promise<string> {
-  try {
-    const response = await fetch(
-      `${process.env.AWS_LAMBDA_LOG_GROUP}/latest`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+async function getSystemHealth() {
+  const check = async (url: string) => {
+    try {
+      const res = await fetch(url, { method: "HEAD" });
+      return res.status < 400 ? "✅ healthy" : "⚠️ unhealthy";
+    } catch {
+      return "❌ down";
+    }
+  };
+
+  const [site, api] = await Promise.all([
+    check("https://mapsbridge.com"),
+    check(`${process.env.APP_ORIGIN ?? "https://mapsbridge.com"}/api/health`),
+  ]);
+
+  return { site, api, lambda: api };
+}
+
+async function sendSlackResponse(url: string, payload: object) {
+  await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch(console.error);
+}
+
+function reply(statusCode: number, body: object) {
+  return {
+    statusCode,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  };
+}
+
+function parseFormBody(raw: string): Record<string, string> {
+  return Object.fromEntries(new URLSearchParams(raw));
+}
+
+export async function handler(event: {
+  rawPath: string;
+  requestContext: { http: { method: string } };
+  headers: Record<string, string>;
+  body: string;
+}) {
+  const { rawPath, headers, body } = event;
+  const timestamp = headers["x-slack-request-timestamp"] ?? "";
+  const signature = headers["x-slack-signature"] ?? "";
+
+  if (!verifySlackSignature(body ?? "", timestamp, signature)) {
+    return reply(401, { error: "Unauthorized" });
+  }
+
+  if (rawPath === "/slack-bot/interactive") {
+    const params = parseFormBody(body);
+    const payload = JSON.parse(params.payload ?? "{}");
+    const actionId = payload.actions?.[0]?.action_id;
+    const responseUrl = payload.response_url;
+
+    if (actionId === "status_refresh") {
+      const health = await getSystemHealth();
+      await sendSlackResponse(responseUrl, {
+        replace_original: true,
+        blocks: [
+          {
+            type: "header",
+            text: { type: "plain_text", text: "📊 Status Refreshed" },
+          },
+          {
+            type: "section",
+            fields: [
+              { type: "mrkdwn", text: `*Site:*\n${health.site}` },
+              { type: "mrkdwn", text: `*API:*\n${health.api}` },
+            ],
+          },
+        ],
+      });
+    } else if (actionId === "health_recover") {
+      await sendSlackResponse(responseUrl, {
+        replace_original: true,
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: "🔧 *Auto-Recovery Started*\n\nAttempting to recover...",
+            },
+          },
+        ],
+      });
+    }
+
+    return reply(200, {});
+  }
+
+  const params = parseFormBody(body);
+  const command = params.command ?? rawPath.replace("/slack-bot", "");
+  const text = (params.text ?? "").trim();
+  const userId = params.user_id ?? "unknown";
+  const responseUrl = params.response_url ?? "";
+
+  if (!responseUrl) {
+    return reply(400, { error: "Missing response_url" });
+  }
+
+  // Acknowledge immediately (Slack requires <3s)
+  const ack = reply(200, {
+    response_type: "ephemeral",
+    text: "Processing...",
+  });
+
+  // Handle each command
+  setImmediate(async () => {
+    if (command === "/deploy" || rawPath === "/slack-bot/deploy") {
+      const branch = text || "main";
+      await sendSlackResponse(responseUrl, {
+        response_type: "in_channel",
+        blocks: [
+          {
+            type: "header",
+            text: { type: "plain_text", text: "🚀 Deployment Triggered" },
+          },
+          {
+            type: "section",
+            fields: [
+              { type: "mrkdwn", text: `*Branch:*\n\`${branch}\`` },
+              { type: "mrkdwn", text: `*Triggered by:*\n<@${userId}>` },
+              { type: "mrkdwn", text: `*Duration:*\n~25-35 min` },
+              {
+                type: "mrkdwn",
+                text: `*Time:*\n<!date^${Math.floor(Date.now() / 1000)}^{time_secs}|now>`,
+              },
+            ],
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: { type: "plain_text", text: "View Actions" },
+                url: "https://github.com/sahinbolukbasi/mapsbridge/actions",
+              },
+            ],
+          },
+        ],
+      });
+
+      await fetch(
+        "https://api.github.com/repos/sahinbolukbasi/mapsbridge/actions/workflows/deploy.yml/dispatches",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ref: branch }),
         },
-      }
-    );
-    const data = await response.json();
-    return data.conclusion || 'unknown';
-  } catch {
-    return 'unknown';
-  }
-}
-
-// Get system health
-async function getSystemHealth(): Promise<{
-  site: string;
-  api: string;
-  lambda: string;
-}> {
-  const results = {
-    site: 'unknown',
-    api: 'unknown',
-    lambda: 'unknown',
-  };
-
-  try {
-    // Check site
-    const siteRes = await fetch('https://mapsbridge.com', {
-      method: 'HEAD',
-    });
-    results.site = siteRes.status === 200 ? '✅ healthy' : '❌ down';
-  } catch {
-    results.site = '❌ down';
-  }
-
-  try {
-    // Check API
-    const apiRes = await fetch(`${process.env.API_BASE_URL}/health`);
-    results.api = apiRes.status === 200 ? '✅ healthy' : '⚠️ unhealthy';
-  } catch {
-    results.api = '❌ down';
-  }
-
-  try {
-    // Check Lambda
-    const lambdaRes = await fetch(`${process.env.API_BASE_URL}/health`);
-    results.lambda =
-      lambdaRes.status === 200 ? '✅ active' : '⚠️ unhealthy';
-  } catch {
-    results.lambda = '❌ down';
-  }
-
-  return results;
-}
-
-// Slash command: /deploy
-router.post('/slack-bot/deploy', async (req) => {
-  if (!verifySlackSignature(req)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  const body: SlackRequest = JSON.parse(req.body);
-  const response_url = body.response_url;
-  const user_id = body.user_id;
-  const text = body.text || 'main';
-
-  // Send acknowledge response
-  setTimeout(() => {
-    fetch(response_url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_type: 'in_channel',
+      ).catch(console.error);
+    } else if (command === "/status" || rawPath === "/slack-bot/status") {
+      const health = await getSystemHealth();
+      await sendSlackResponse(responseUrl, {
+        response_type: "in_channel",
         blocks: [
           {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `🚀 *Deployment Triggered* by <@${user_id}>\n\nBranch: \`${text}\`\nStatus: Starting deployment workflow...`,
-            },
+            type: "header",
+            text: { type: "plain_text", text: "📊 System Status" },
           },
           {
-            type: 'section',
+            type: "section",
             fields: [
+              { type: "mrkdwn", text: `*Site:*\n${health.site}` },
+              { type: "mrkdwn", text: `*API:*\n${health.api}` },
+              { type: "mrkdwn", text: `*Lambda:*\n${health.lambda}` },
               {
-                type: 'mrkdwn',
-                text: '*Workflow:*\nDeploy',
-              },
-              {
-                type: 'mrkdwn',
-                text: '*Duration:*\n25-35 min',
+                type: "mrkdwn",
+                text: `*Updated:*\n<!date^${Math.floor(Date.now() / 1000)}^{time_secs}|now>`,
               },
             ],
           },
           {
-            type: 'divider',
-          },
-          {
-            type: 'context',
+            type: "actions",
             elements: [
               {
-                type: 'mrkdwn',
-                text: `Triggered at <!date^${Math.floor(Date.now() / 1000)}^{date_pretty_short} {time_secs}|${new Date().toISOString()}>`,
+                type: "button",
+                text: { type: "plain_text", text: "View Logs" },
+                url: "https://github.com/sahinbolukbasi/mapsbridge/actions",
+              },
+              {
+                type: "button",
+                text: { type: "plain_text", text: "Refresh" },
+                action_id: "status_refresh",
               },
             ],
           },
         ],
-      }),
-    });
-
-    // Trigger GitHub deployment
-    fetch(`https://api.github.com/repos/sahinbolukbasi/mapsbridge/dispatches`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        event_type: 'manual-deploy',
-        client_payload: { branch: text, triggered_by: user_id },
-      }),
-    });
-  }, 0);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ response_type: 'ephemeral', text: 'Deployment triggered...' }),
-  };
-});
-
-// Slash command: /status
-router.post('/slack-bot/status', async (req) => {
-  if (!verifySlackSignature(req)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  const body: SlackRequest = JSON.parse(req.body);
-  const response_url = body.response_url;
-
-  const status = await getDeploymentStatus();
-  const health = await getSystemHealth();
-
-  setTimeout(() => {
-    fetch(response_url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_type: 'in_channel',
+      });
+    } else if (command === "/health" || rawPath === "/slack-bot/health") {
+      const health = await getSystemHealth();
+      const allOk = health.site.includes("✅") && health.api.includes("✅");
+      await sendSlackResponse(responseUrl, {
+        response_type: "in_channel",
         blocks: [
           {
-            type: 'header',
+            type: "header",
             text: {
-              type: 'plain_text',
-              text: '📊 System Status Report',
+              type: "plain_text",
+              text: allOk ? "✅ All Systems Healthy" : "⚠️ Issues Detected",
             },
           },
           {
-            type: 'section',
+            type: "section",
             fields: [
-              {
-                type: 'mrkdwn',
-                text: `*Site:*\n${health.site}`,
-              },
-              {
-                type: 'mrkdwn',
-                text: `*API:*\n${health.api}`,
-              },
-              {
-                type: 'mrkdwn',
-                text: `*Lambda:*\n${health.lambda}`,
-              },
-              {
-                type: 'mrkdwn',
-                text: `*Last Deploy:*\n${status}`,
-              },
+              { type: "mrkdwn", text: `*Website:*\n${health.site}` },
+              { type: "mrkdwn", text: `*API:*\n${health.api}` },
             ],
           },
-          {
-            type: 'actions',
-            elements: [
-              {
-                type: 'button',
-                text: { type: 'plain_text', text: 'View Logs' },
-                url: 'https://github.com/sahinbolukbasi/mapsbridge/actions',
-              },
-              {
-                type: 'button',
-                text: { type: 'plain_text', text: 'Refresh' },
-                action_id: 'status_refresh',
-              },
-            ],
-          },
-        ],
-      }),
-    });
-  }, 0);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ response_type: 'ephemeral', text: 'Checking status...' }),
-  };
-});
-
-// Slash command: /health
-router.post('/slack-bot/health', async (req) => {
-  if (!verifySlackSignature(req)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  const body: SlackRequest = JSON.parse(req.body);
-  const response_url = body.response_url;
-
-  const health = await getSystemHealth();
-  const allHealthy =
-    health.site.includes('✅') &&
-    health.api.includes('✅') &&
-    health.lambda.includes('✅');
-
-  setTimeout(() => {
-    fetch(response_url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_type: 'in_channel',
-        blocks: [
-          {
-            type: 'header',
-            text: {
-              type: 'plain_text',
-              text: allHealthy ? '✅ All Systems Healthy' : '⚠️ Issues Detected',
-            },
-          },
-          {
-            type: 'section',
-            fields: [
-              {
-                type: 'mrkdwn',
-                text: `*Website:*\n${health.site}`,
-              },
-              {
-                type: 'mrkdwn',
-                text: `*API:*\n${health.api}`,
-              },
-              {
-                type: 'mrkdwn',
-                text: `*Lambda:*\n${health.lambda}`,
-              },
-              {
-                type: 'mrkdwn',
-                text: `*Time:*\n${new Date().toLocaleTimeString()}`,
-              },
-            ],
-          },
-          ...(allHealthy
+          ...(allOk
             ? []
             : [
                 {
-                  type: 'actions',
+                  type: "actions",
                   elements: [
                     {
-                      type: 'button',
-                      text: { type: 'plain_text', text: 'Auto-Recover' },
-                      action_id: 'health_recover',
-                      style: 'danger',
+                      type: "button",
+                      style: "danger",
+                      text: { type: "plain_text", text: "Auto-Recover" },
+                      action_id: "health_recover",
                     },
                   ],
                 },
               ]),
         ],
-      }),
-    });
-  }, 0);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ response_type: 'ephemeral', text: 'Checking health...' }),
-  };
-});
-
-// Slash command: /logs
-router.post('/slack-bot/logs', async (req) => {
-  if (!verifySlackSignature(req)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  const body: SlackRequest = JSON.parse(req.body);
-  const response_url = body.response_url;
-  const logType = body.text || 'latest';
-
-  setTimeout(() => {
-    fetch(response_url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_type: 'in_channel',
+      });
+    } else if (command === "/logs" || rawPath === "/slack-bot/logs") {
+      await sendSlackResponse(responseUrl, {
+        response_type: "in_channel",
         blocks: [
           {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `📋 *Logs: ${logType}*\n\nGet logs from:`,
-            },
+            type: "section",
+            text: { type: "mrkdwn", text: "📋 *Deployment Logs*" },
           },
           {
-            type: 'actions',
+            type: "actions",
             elements: [
               {
-                type: 'button',
-                text: { type: 'plain_text', text: 'Deploy Logs' },
-                url: 'https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deploy.yml',
+                type: "button",
+                text: { type: "plain_text", text: "Deploy Logs" },
+                url: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deploy.yml",
               },
               {
-                type: 'button',
-                text: { type: 'plain_text', text: 'CI Logs' },
-                url: 'https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/ci.yml',
+                type: "button",
+                text: { type: "plain_text", text: "CI Logs" },
+                url: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/ci.yml",
               },
               {
-                type: 'button',
-                text: { type: 'plain_text', text: 'Monitor Logs' },
-                url: 'https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deployment-monitor.yml',
+                type: "button",
+                text: { type: "plain_text", text: "Monitor" },
+                url: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deployment-monitor.yml",
               },
             ],
           },
         ],
-      }),
-    });
-  }, 0);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ response_type: 'ephemeral', text: 'Getting logs...' }),
-  };
-});
-
-// Slash command: /rollback
-router.post('/slack-bot/rollback', async (req) => {
-  if (!verifySlackSignature(req)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  const body: SlackRequest = JSON.parse(req.body);
-  const response_url = body.response_url;
-  const user_id = body.user_id;
-
-  setTimeout(() => {
-    fetch(response_url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_type: 'in_channel',
+      });
+    } else if (command === "/rollback" || rawPath === "/slack-bot/rollback") {
+      await sendSlackResponse(responseUrl, {
+        response_type: "in_channel",
         blocks: [
           {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `🔄 *Rollback Initiated* by <@${user_id}>\n\nRolling back to previous version...`,
-            },
+            type: "header",
+            text: { type: "plain_text", text: "🔄 Rollback Initiated" },
           },
           {
-            type: 'section',
+            type: "section",
             fields: [
-              {
-                type: 'mrkdwn',
-                text: '*Action:*\nRollback Last Deploy',
-              },
-              {
-                type: 'mrkdwn',
-                text: '*Status:*\nIn Progress',
-              },
+              { type: "mrkdwn", text: `*Triggered by:*\n<@${userId}>` },
+              { type: "mrkdwn", text: `*Status:*\nIn Progress` },
             ],
           },
         ],
-      }),
-    });
-
-    // Trigger rollback (Lambda aliases, CloudFront)
-    fetch(`${process.env.API_BASE_URL}/admin/rollback`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.ADMIN_TOKEN}`,
-      },
-    });
-  }, 0);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ response_type: 'ephemeral', text: 'Rollback initiated...' }),
-  };
-};
-
-// Interactive component: button actions
-router.post('/slack-bot/interactive', async (req) => {
-  if (!verifySlackSignature(req)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  const payload = JSON.parse(req.body.payload);
-  const action_id = payload.actions?.[0]?.action_id;
-  const response_url = payload.response_url;
-
-  if (action_id === 'status_refresh') {
-    // Refresh status
-    const health = await getSystemHealth();
-    const status = await getDeploymentStatus();
-
-    setTimeout(() => {
-      fetch(response_url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          response_type: 'in_channel',
-          blocks: [
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: `✅ *Status Refreshed*\n\nSite: ${health.site}\nAPI: ${health.api}\nLambda: ${health.lambda}`,
-              },
-            },
-          ],
-        }),
       });
-    }, 0);
-  } else if (action_id === 'health_recover') {
-    // Trigger auto-recovery
-    setTimeout(() => {
-      fetch(response_url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          response_type: 'in_channel',
-          blocks: [
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: `🔧 *Auto-Recovery Started*\n\nAttempting to recover system health...`,
-              },
-            },
-          ],
-        }),
-      });
-    }, 0);
-
-    // Trigger recovery
-    fetch(`${process.env.API_BASE_URL}/admin/recover`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.ADMIN_TOKEN}`,
-      },
-    });
-  }
-
-  return { statusCode: 200, body: JSON.stringify({}) };
-});
-
-export const handler = async (event: any) => {
-  console.log('Slack Bot Event:', event);
-
-  try {
-    if (event.rawPath.startsWith('/slack-bot')) {
-      return await router.handle(event);
     }
+  });
 
-    return {
-      statusCode: 404,
-      body: JSON.stringify({ error: 'Not found' }),
-    };
-  } catch (error) {
-    console.error('Error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Internal server error' }),
-    };
-  }
-};
+  return ack;
+}
