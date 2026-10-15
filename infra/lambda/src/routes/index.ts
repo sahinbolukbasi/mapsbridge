@@ -48,6 +48,8 @@ router.add("GET /routes/{id}/osrm/{profile}", handleOsrmRoute);
 router.add("POST /ai/route-planner", handleAiRoutePlanner);
 router.add("GET /media/presign-upload", handlePresignUpload);
 router.add("POST /routes/telemetry", handleTelemetry);
+router.add("GET /user/saved-addresses", handleGetSavedAddresses);
+router.add("PUT /user/saved-addresses", handlePutSavedAddresses);
 
 export const handler = async (event: ApiGatewayEvent) => {
   try {
@@ -507,4 +509,56 @@ async function handleTelemetry(event: ApiGatewayEvent) {
     console.error("[Telemetry Error]", err);
     return ok({ received: 0, status: "fallback" });
   }
+}
+
+async function handleGetSavedAddresses(event: ApiGatewayEvent) {
+  const token = extractBearerToken(event);
+  const userId = await verifiedUserId(token);
+  if (!userId) return unauthorized();
+
+  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { unmarshall } = await import("@aws-sdk/util-dynamodb");
+  const tableName =
+    process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "prod"}-data`;
+  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+
+  const result = await ddb.send(
+    new GetItemCommand({
+      TableName: tableName,
+      Key: { PK: { S: `USER#${userId}` }, SK: { S: "SAVED_ADDRESSES" } },
+    }),
+  );
+
+  const addresses = result.Item ? (unmarshall(result.Item).addresses ?? []) : [];
+  return ok({ addresses });
+}
+
+async function handlePutSavedAddresses(event: ApiGatewayEvent) {
+  const token = extractBearerToken(event);
+  const userId = await verifiedUserId(token);
+  if (!userId) return unauthorized();
+
+  const body = parseBody<{ addresses?: unknown[] }>(event);
+  if (!body || !Array.isArray(body.addresses)) return badRequest("addresses array gerekli.");
+  if (body.addresses.length > 500) return badRequest("En fazla 500 adres kaydedilebilir.");
+
+  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall } = await import("@aws-sdk/util-dynamodb");
+  const tableName =
+    process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "prod"}-data`;
+  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+
+  await ddb.send(
+    new PutItemCommand({
+      TableName: tableName,
+      Item: marshall({
+        PK: `USER#${userId}`,
+        SK: "SAVED_ADDRESSES",
+        addresses: body.addresses,
+        updatedAt: new Date().toISOString(),
+      }),
+    }),
+  );
+
+  return ok({ status: "saved", count: body.addresses.length });
 }

@@ -1,7 +1,8 @@
 import type { ApiGatewayEvent } from "../shared/http";
-import { ok, badRequest, serverError, parseBody } from "../shared/http";
+import { ok, badRequest, notFound, serverError, parseBody } from "../shared/http";
 import { stripeClient } from "../billing/stripe-client";
 import { read } from "../shared/data";
+import { grantCredits } from "../billing/store";
 import { protectAccount, recordAuditLog, getTableName, scanAllRaw } from "./management";
 
 export async function paymentRecords() {
@@ -256,4 +257,34 @@ export async function handlePayments(event: ApiGatewayEvent) {
   const status = event.queryStringParameters?.status;
   const payments = status ? records.filter((p) => p.status === status) : records;
   return ok({ payments, count: payments.length });
+}
+
+export async function handleGrantCredits(event: ApiGatewayEvent) {
+  const userId = event.pathParameters?.id;
+  if (!userId) return badRequest("Kullanıcı ID gerekli.");
+
+  const body = parseBody<{ credits?: number; reason?: string }>(event);
+  const credits = body?.credits;
+  if (!credits || !Number.isInteger(credits) || credits <= 0 || credits > 10000)
+    return badRequest("1–10000 arasında kredi miktarı gerekli.");
+
+  const user = await read(`USER#${userId}`, "PROFILE");
+  if (!user) return notFound("Kullanıcı bulunamadı.");
+
+  const reason = body?.reason?.trim() || "Admin kredisi";
+  const receiptId = `admin-${Date.now()}-${userId.slice(-6)}`;
+
+  try {
+    await grantCredits(userId, receiptId, credits, {
+      grantedBy: (event as any).verifiedUser?.sub || "admin",
+      reason,
+    });
+  } catch (err: any) {
+    return serverError("Kredi verilemedi: " + err.message);
+  }
+
+  const actorSub = (event as any).verifiedUser?.sub || "admin";
+  await recordAuditLog(actorSub, "credits_granted", userId, reason, { credits });
+
+  return ok({ status: "granted", userId, credits, reason });
 }

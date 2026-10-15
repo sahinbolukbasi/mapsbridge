@@ -171,20 +171,36 @@ jobs:
         if: steps.check-secrets.outputs.skip == 'false'
         continue-on-error: true
         run: |
-          FUNCTIONS=$(aws lambda list-functions \
-            --query "Functions[?starts_with(FunctionName, 'mapsbridge-')].FunctionName" \
-            --output text 2>/dev/null) || true
+          # Collect all functions matching mapsbridge- prefix (paginated)
+          FUNCTIONS=""
+          NEXT_TOKEN=""
+          while true; do
+            if [ -z "$NEXT_TOKEN" ]; then
+              RESULT=$(aws lambda list-functions --output json 2>/dev/null) || break
+            else
+              RESULT=$(aws lambda list-functions --marker "$NEXT_TOKEN" --output json 2>/dev/null) || break
+            fi
+            PAGE=$(echo "$RESULT" | python3 -c "import sys,json; fns=json.load(sys.stdin); print('\n'.join(f['FunctionName'] for f in fns.get('Functions',[]) if f['FunctionName'].startswith('mapsbridge-')))" 2>/dev/null)
+            FUNCTIONS="$FUNCTIONS $PAGE"
+            NEXT_TOKEN=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('NextMarker',''))" 2>/dev/null)
+            [ -z "$NEXT_TOKEN" ] && break
+          done
+          FUNCTIONS=$(echo "$FUNCTIONS" | tr ' ' '\n' | grep -v '^$' | sort -u)
           if [ -z "$FUNCTIONS" ]; then
-            echo "No Lambda functions found with prefix 'mapsbridge-' (may not be deployed yet)"
+            echo "⚠️  No Lambda functions found with prefix 'mapsbridge-'"
+            echo "    Run the Terraform Apply workflow to provision infrastructure first."
             exit 0
           fi
+          echo "Found functions: $(echo "$FUNCTIONS" | wc -l | tr -d ' ')"
+          FAILED=0
           for fn in $FUNCTIONS; do
             echo "Updating $fn..."
             aws lambda update-function-code \
               --function-name "$fn" \
               --zip-file fileb:///tmp/lambda.zip \
-              --publish > /dev/null
+              --publish > /dev/null || { echo "  ⚠️  Failed: $fn"; FAILED=$((FAILED+1)); }
           done
+          [ $FAILED -gt 0 ] && echo "⚠️  $FAILED function(s) failed to update" || echo "✓ All Lambda functions updated"
 
   # ── Deploy mobile via EAS ──────────────────────────────────────
   deploy-mobile:
@@ -278,5 +294,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit:** \`${GITHUB_SHA::7}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
-
-

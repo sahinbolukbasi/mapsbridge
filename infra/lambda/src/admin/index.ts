@@ -31,6 +31,7 @@ import {
   handleUnsuspendUser,
   handleRefund,
   handlePayments,
+  handleGrantCredits,
 } from "./users";
 import {
   handleMetrics,
@@ -97,6 +98,7 @@ const routes: Record<string, Handler> = {
   "POST /admin/users/{id}/suspend": handleSuspendUser,
   "POST /admin/users/{id}/unsuspend": handleUnsuspendUser,
   "POST /admin/users/{id}/refund": handleRefund,
+  "POST /admin/users/{id}/grant-credits": handleGrantCredits,
   "GET /admin/payments": handlePayments,
   "GET /admin/system-health": handleSystemHealth,
   "GET /admin/agentcore-status": handleAgentCoreStatus,

@@ -248,6 +248,23 @@ export default function Panel() {
 
   // Saved Addresses & Gezi Rotaları State
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+
+  const addressesInitialized = useRef(false);
+
+  const persistAddresses = (addresses: SavedAddress[]) => {
+    setSavedAddresses(addresses);
+    try {
+      userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(addresses));
+    } catch {}
+    const session = getStoredSession();
+    if (session?.token) {
+      fetch(`${API_ENDPOINT}/user/saved-addresses`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.token}` },
+        body: JSON.stringify({ addresses }),
+      }).catch(() => {});
+    }
+  };
   const [customTabs, setCustomTabs] = useState<string[]>([]);
   const [savedSearchQuery, setSavedSearchQuery] = useState("");
   // Keşif Modu her zaman açık — gezi grupları ve rotalar daima görünür
@@ -471,21 +488,51 @@ export default function Panel() {
         setShowRouteCard(true);
       }
 
-      // Load saved addresses
-      const stored = userStorage.getItem("mapsbridge.savedAddresses");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            setSavedAddresses(parsed);
+      // Load saved addresses — try API first, fallback to localStorage
+      try {
+        const session = getStoredSession();
+        if (session?.token) {
+          const res = await fetch(`${API_ENDPOINT}/user/saved-addresses`, {
+            headers: { Authorization: `Bearer ${session.token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.addresses) && data.addresses.length > 0) {
+              addressesInitialized.current = true;
+              setSavedAddresses(data.addresses);
+              userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(data.addresses));
+            } else {
+              // API empty — try localStorage as seed, then push to server
+              const stored = userStorage.getItem("mapsbridge.savedAddresses");
+              const parsed = stored ? JSON.parse(stored) : [];
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                fetch(`${API_ENDPOINT}/user/saved-addresses`, {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${session.token}`,
+                  },
+                  body: JSON.stringify({ addresses: parsed }),
+                }).catch(() => {});
+                setSavedAddresses(parsed);
+              }
+              addressesInitialized.current = true;
+            }
           } else {
-            setSavedAddresses([]);
+            throw new Error("api-fail");
           }
+        } else {
+          throw new Error("no-session");
+        }
+      } catch {
+        const stored = userStorage.getItem("mapsbridge.savedAddresses");
+        try {
+          const parsed = stored ? JSON.parse(stored) : [];
+          setSavedAddresses(Array.isArray(parsed) ? parsed : []);
         } catch {
           setSavedAddresses([]);
         }
-      } else {
-        setSavedAddresses([]);
+        addressesInitialized.current = true;
       }
 
       // Load custom tabs
@@ -558,6 +605,21 @@ export default function Panel() {
     signOut();
     window.location.assign("/login/");
   }
+
+  // Sync savedAddresses to API whenever state changes (after initial load)
+  useEffect(() => {
+    if (!addressesInitialized.current) return;
+    const session = getStoredSession();
+    if (!session?.token) return;
+    const timer = setTimeout(() => {
+      fetch(`${API_ENDPOINT}/user/saved-addresses`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.token}` },
+        body: JSON.stringify({ addresses: savedAddresses }),
+      }).catch(() => {});
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [savedAddresses]);
 
   // Helper to escape HTML for leaflet popup
   function escapeHtml(str: string): string {
