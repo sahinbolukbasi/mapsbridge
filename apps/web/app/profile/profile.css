@@ -56,6 +56,30 @@
   flex-direction: column;
 }
 
+@media (min-width: 1024px) {
+  .stitch-main-profile-root {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  .stitch-main-profile-root > main,
+  .stitch-profile-container {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+.stitch-main-profile-root .global-site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+}
+
+.stitch-main-profile-root .global-site-header-inner {
+  max-width: 100% !important;
+}
+
 /* Top Workspace Navbar */
 .profile-top-navbar {
   position: sticky;
@@ -425,9 +449,10 @@
 /* Main Container & Profile Card */
 .stitch-profile-container {
   width: 100%;
-  max-width: min(100%, 900px);
+  max-width: min(100%, 1200px);
   margin: 0 auto;
   padding: 1.5rem clamp(1rem, 3vw, 2rem) 5rem;
+  flex: 1;
 }
 
 .stitch-profile-header-card {

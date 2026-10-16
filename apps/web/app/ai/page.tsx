@@ -29,6 +29,8 @@ import { AssistantMessage } from "./assistant-message";
 import { ThinkingSteps } from "./thinking-steps";
 import { SmartActions } from "./smart-actions";
 import { ContextualFollowups } from "./contextual-followups";
+import { TravelAffiliateCards } from "./travel-affiliate-cards";
+import { useUserMemory } from "../lib/ai/user-memory-hook";
 
 const STORAGE_KEY = "mapsbridge.ai.sessions.v5";
 interface Session {
@@ -206,6 +208,7 @@ export default function AIPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const session = sessions.find((s) => s.id === activeId) || null;
   const route = session?.route && isRoutePlan(session.route) ? session.route : null;
+  const { memory, learnFromPrompt, buildContextString, clearMemory } = useUserMemory();
 
   async function copyMessageText(msgId: string, text: string) {
     try {
@@ -443,7 +446,12 @@ export default function AIPage() {
     }
     const manifesto = currentTrip ? tripToMarkdown(currentTrip) : undefined;
     const behavioralContext = interactionTracker.getPredictiveAIPrompt();
-    const combinedManifesto = [manifesto, behavioralContext].filter(Boolean).join("\n\n---\n\n");
+    const userMemoryContext = buildContextString(memory);
+    const combinedManifesto = [manifesto, behavioralContext, userMemoryContext]
+      .filter(Boolean)
+      .join("\n\n---\n\n");
+    // Learn from this prompt to improve future context
+    learnFromPrompt(promptToSend);
     const request =
       retry && pending.current
         ? pending.current
@@ -915,6 +923,33 @@ export default function AIPage() {
                 ))}
               </div>
             )}
+            {(memory.interests.length > 0 || memory.destinations.length > 0 || memory.budgetHabit) && (
+              <div className="ai-user-memory-strip" aria-label="Kullanıcı hafızası">
+                <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#10b981" }}>
+                  psychology
+                </span>
+                <span style={{ fontWeight: 600, color: "#059669" }}>Seni tanıyorum:</span>
+                {memory.destinations.slice(-2).map((d) => (
+                  <span key={d} className="ai-user-memory-pill">{d}</span>
+                ))}
+                {memory.interests.slice(-3).map((i) => (
+                  <span key={i} className="ai-user-memory-pill">{i}</span>
+                ))}
+                {memory.budgetHabit && (
+                  <span className="ai-user-memory-pill">
+                    {memory.budgetHabit === "budget" ? "ekonomik" : memory.budgetHabit === "luxury" ? "lüks" : "orta bütçe"}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="ai-user-memory-clear"
+                  onClick={clearMemory}
+                  title="Hafızayı sıfırla"
+                >
+                  Sıfırla
+                </button>
+              </div>
+            )}
             <div
               className="ai-chat-feed ai-custom-scrollbar"
               role="log"
@@ -1100,14 +1135,17 @@ export default function AIPage() {
                       )}
 
                     {m.role === "assistant" && m.route && isRoutePlan(m.route) && (
-                      <div className="ai-route-sync-card">
-                        <span>
-                          {m.route.title} · {m.route.stops.length} durak
-                        </span>
-                        <button className="ai-small-btn" onClick={() => showRoute(m.route!, m)}>
-                          Rotayı göster
-                        </button>
-                      </div>
+                      <>
+                        <div className="ai-route-sync-card">
+                          <span>
+                            {m.route.title} · {m.route.stops.length} durak
+                          </span>
+                          <button className="ai-small-btn" onClick={() => showRoute(m.route!, m)}>
+                            Rotayı göster
+                          </button>
+                        </div>
+                        <TravelAffiliateCards route={m.route} />
+                      </>
                     )}
 
                     {m.role === "assistant" && m.quickReplies && m.quickReplies.length > 0 && (
