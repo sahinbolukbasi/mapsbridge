@@ -95,6 +95,7 @@ const routes: Record<string, Handler> = {
   "POST /admin/analytics/track": handleTrackSession,
   "GET /admin/finance": handleFinance,
   "GET /admin/token-usage": handleTokenUsageAdmin,
+  "GET /admin/ai-costs": handleTokenUsageAdmin,
   "POST /admin/users/{id}/suspend": handleSuspendUser,
   "POST /admin/users/{id}/unsuspend": handleUnsuspendUser,
   "POST /admin/users/{id}/refund": handleRefund,

@@ -48,15 +48,79 @@ export async function handleMetrics() {
 }
 
 export async function handleTokenUsageAdmin() {
-  return ok({
-    usage: {
-      note: "Token ölçüm kaynağı henüz bağlanmadı.",
-      totalInvocations: null,
-      estimatedTokensMonth: null,
-      activeModels: [],
-      quotaUtilizationPct: null,
-    },
-  });
+  const region = process.env.AWS_REGION || "eu-central-1";
+  const namespace = "MapsBridge/TravelAI";
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  try {
+    const { CloudWatchClient, GetMetricStatisticsCommand } = await import("@aws-sdk/client-cloudwatch");
+    const cw = new CloudWatchClient({ region, maxAttempts: 2 });
+
+    const metricDefs = [
+      { name: "Requests", unit: "Count" },
+      { name: "InputTokens", unit: "Count" },
+      { name: "OutputTokens", unit: "Count" },
+      { name: "EstimatedModelCostUsd", unit: "None" },
+      { name: "CompletedPlans", unit: "Count" },
+      { name: "ModelFailures", unit: "Count" },
+    ];
+
+    const results = await Promise.all(
+      metricDefs.map((m) =>
+        cw.send(
+          new GetMetricStatisticsCommand({
+            Namespace: namespace,
+            MetricName: m.name,
+            Dimensions: [{ Name: "Environment", Value: "prod" }],
+            StartTime: monthStart,
+            EndTime: now,
+            Period: Math.floor((now.getTime() - monthStart.getTime()) / 1000),
+            Statistics: ["Sum"],
+          }),
+        ).catch(() => null),
+      ),
+    );
+
+    cw.destroy();
+
+    const sum = (idx: number) => results[idx]?.Datapoints?.[0]?.Sum ?? null;
+    const totalRequests = sum(0);
+    const inputTokens = sum(1);
+    const outputTokens = sum(2);
+    const estimatedCostUsd = sum(3);
+    const completedPlans = sum(4);
+    const failures = sum(5);
+
+    return ok({
+      usage: {
+        period: { from: monthStart.toISOString(), to: now.toISOString() },
+        totalRequests,
+        inputTokens,
+        outputTokens,
+        totalTokens: inputTokens !== null && outputTokens !== null ? inputTokens + outputTokens : null,
+        estimatedCostUsd,
+        completedPlans,
+        failures,
+        successRate: totalRequests && failures !== null
+          ? Math.round(((totalRequests - failures) / totalRequests) * 1000) / 10
+          : null,
+        activeModels: [process.env.BEDROCK_MODEL_ID || "eu.anthropic.claude-haiku-4-5-20251001-v1:0"],
+        source: "cloudwatch",
+        namespace,
+      },
+    });
+  } catch {
+    return ok({
+      usage: {
+        note: "CloudWatch metrikleri alınamadı.",
+        totalInvocations: null,
+        estimatedTokensMonth: null,
+        activeModels: [],
+        quotaUtilizationPct: null,
+      },
+    });
+  }
 }
 
 export async function handleRealtimeTelemetry() {

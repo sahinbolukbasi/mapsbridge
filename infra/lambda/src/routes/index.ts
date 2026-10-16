@@ -52,6 +52,7 @@ router.add("GET /user/saved-addresses", handleGetSavedAddresses);
 router.add("PUT /user/saved-addresses", handlePutSavedAddresses);
 router.add("GET /user/ai-memory", handleGetAiMemory);
 router.add("PUT /user/ai-memory", handlePutAiMemory);
+router.add("GET /user/affiliate-stats", handleGetAffiliateStats);
 
 export const handler = async (event: ApiGatewayEvent) => {
   try {
@@ -571,6 +572,76 @@ async function handlePutSavedAddresses(event: ApiGatewayEvent) {
   );
 
   return ok({ status: "saved", count: body.addresses.length });
+}
+
+// ─── Affiliate Revenue Analytics ──────────────────────────────────────────
+async function handleGetAffiliateStats(event: ApiGatewayEvent) {
+  const token = extractBearerToken(event);
+  const userId = await verifiedUserId(token);
+  if (!userId) return unauthorized();
+
+  const { DynamoDBClient, QueryCommand } = await import("@aws-sdk/client-dynamodb");
+  const { unmarshall } = await import("@aws-sdk/util-dynamodb");
+  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  const cutoffSK = `TELEMETRY#${cutoff.getTime()}`;
+
+  const result = await ddb.send(
+    new QueryCommand({
+      TableName: getTableName(),
+      KeyConditionExpression: "PK = :pk AND SK >= :since",
+      FilterExpression: "contains(events[0].#type, :evType)",
+      ExpressionAttributeNames: { "#type": "type" },
+      ExpressionAttributeValues: {
+        ":pk": { S: `USER#${userId}` },
+        ":since": { S: cutoffSK },
+        ":evType": { S: "affiliate" },
+      },
+      Limit: 200,
+    }),
+  );
+
+  const rows = (result.Items || []).map((i) => unmarshall(i));
+
+  let totalClicks = 0;
+  const byDestination: Record<string, number> = {};
+  const byType: Record<string, number> = {};
+  const byWeek: Record<string, number> = {};
+
+  for (const row of rows) {
+    for (const ev of row.events || []) {
+      if (!ev.type?.includes("affiliate")) continue;
+      totalClicks++;
+      const dest = ev.destination || "unknown";
+      const evType = ev.type || "affiliate_click";
+      const week = ev.coarseWeek || row.updatedAt?.slice(0, 10) || "unknown";
+      byDestination[dest] = (byDestination[dest] || 0) + 1;
+      byType[evType] = (byType[evType] || 0) + 1;
+      byWeek[week] = (byWeek[week] || 0) + 1;
+    }
+  }
+
+  const topDestinations = Object.entries(byDestination)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([destination, clicks]) => ({ destination, clicks }));
+
+  const weeklyTrend = Object.entries(byWeek)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([week, clicks]) => ({ week, clicks }));
+
+  return ok({
+    affiliate: {
+      period: "last_30_days",
+      totalClicks,
+      byType,
+      topDestinations,
+      weeklyTrend,
+      note: "Gelir raporlama için Travelpayouts dashboard'unu kullanın. Bu veriler tıklama sayımlarıdır.",
+    },
+  });
 }
 
 // ─── AI User Memory ────────────────────────────────────────────────────────
