@@ -59,6 +59,10 @@ export const handler = async (event: ApiGatewayEvent) => {
     if (path === "/health" && method === "GET") {
       return ok({ status: "ok", service: "routes", timestamp: new Date().toISOString() });
     }
+    // Slack bot routes: auth handled internally via HMAC signing secret
+    if (path.startsWith("/slack-bot/")) {
+      return await router.dispatch(event);
+    }
     if (path === "/routes/telemetry" && method === "POST") {
       const token = extractBearerToken(event);
       const sub = token ? await verifiedUserId(token) : null;
