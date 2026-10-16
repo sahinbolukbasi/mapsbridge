@@ -1,13 +1,13 @@
 import crypto from "node:crypto";
+import { createDeployer, listTargets } from "./deployer";
+import { handleSlackEvent } from "./events-handler";
 
 const secretsCache: Record<string, string> = {};
 
 async function getSecret(name: string): Promise<string> {
   if (secretsCache[name]) return secretsCache[name];
-
   const secretName = process.env[name];
   if (!secretName?.startsWith("secret:/")) return secretName || "";
-
   try {
     const { SecretsManagerClient, GetSecretValueCommand } =
       await import("@aws-sdk/client-secrets-manager");
@@ -24,22 +24,13 @@ async function getSecret(name: string): Promise<string> {
   }
 }
 
-interface SlackRequest {
-  type?: string;
-  user_id?: string;
-  command?: string;
-  text?: string;
-  response_url?: string;
-  payload?: string;
-  channel_id?: string;
-}
-
 interface AppEnv {
   SLACK_SIGNING_SECRET?: string;
   SLACK_BOT_TOKEN?: string;
-  GH_TOKEN?: string;
   ALLOWED_USERS?: string;
   ALLOWED_CHANNELS?: string;
+  SLACK_ADMIN_USER_IDS?: string;
+  DEPLOY_TARGETS?: string;
 }
 
 function verifySlackSignature(
@@ -49,14 +40,11 @@ function verifySlackSignature(
   secret: string,
 ): boolean {
   if (!secret || !timestamp || !signature) return false;
-
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - parseInt(timestamp)) > 300) return false;
-
   const baseString = `v0:${timestamp}:${body}`;
   const hmac = crypto.createHmac("sha256", secret).update(baseString).digest("hex");
   const computed = `v0=${hmac}`;
-
   try {
     return crypto.timingSafeEqual(Buffer.from(computed), Buffer.from(signature));
   } catch {
@@ -67,22 +55,33 @@ function verifySlackSignature(
 function isAuthorized(userId: string, channelId: string, env: AppEnv): boolean {
   const allowed = (env.ALLOWED_USERS?.split(",").map((u) => u.trim()) || []).filter(Boolean);
   const channels = (env.ALLOWED_CHANNELS?.split(",").map((c) => c.trim()) || []).filter(Boolean);
-
   if (allowed.length > 0 && !allowed.includes(userId)) return false;
   if (channels.length > 0 && !channels.includes(channelId)) return false;
-
   return true;
+}
+
+function isAdminUser(userId: string, env: AppEnv): boolean {
+  const admins = (env.SLACK_ADMIN_USER_IDS?.split(",").map((u) => u.trim()) || []).filter(Boolean);
+  if (admins.length === 0) return true;
+  return admins.includes(userId);
+}
+
+const deployLocks = new Map<string, string>();
+
+function parseFormBody(raw: string): Record<string, string> {
+  return Object.fromEntries(new URLSearchParams(raw));
 }
 
 async function getSystemHealth() {
   try {
     const [site, api] = await Promise.all([
-      fetch("https://mapsbridge.com", { method: "HEAD" }).then((r) =>
-        r.status < 400 ? "✅" : "⚠️",
+      fetch("https://mapsbridge.com", { method: "HEAD", signal: AbortSignal.timeout(4000) }).then(
+        (r) => (r.status < 400 ? "✅" : "⚠️"),
       ),
-      fetch("https://mapsbridge.com/api/health", { method: "HEAD" }).then((r) =>
-        r.status < 400 ? "✅" : "⚠️",
-      ),
+      fetch("https://api.mapsbridge.com/health", {
+        method: "HEAD",
+        signal: AbortSignal.timeout(4000),
+      }).then((r) => (r.status < 400 ? "✅" : "⚠️")),
     ]);
     return { site, api, lambda: "✅" };
   } catch {
@@ -90,81 +89,34 @@ async function getSystemHealth() {
   }
 }
 
-async function getLatestDeploy(
-  gitHubToken: string,
-): Promise<{ status: string; timestamp: string; commit: string }> {
-  try {
-    const res = await fetch(
-      "https://api.github.com/repos/sahinbolukbasi/mapsbridge/actions/runs?limit=1&branch=main",
-      {
-        headers: { Authorization: `Bearer ${gitHubToken}` },
-      },
-    );
-    const data = (await res.json()) as any;
-    const run = data.workflow_runs?.[0];
-    return {
-      status: run?.conclusion || "pending",
-      timestamp: run?.updated_at || "N/A",
-      commit: run?.head_sha?.slice(0, 7) || "N/A",
-    };
-  } catch {
-    return { status: "unknown", timestamp: "N/A", commit: "N/A" };
-  }
+async function postToUrl(url: string, payload: Record<string, unknown>): Promise<void> {
+  await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 }
 
-function ephemeralReply(text: string) {
+function ephemeral(text: string) {
+  return { response_type: "ephemeral", text };
+}
+
+function handleDeployCommand(text: string, userId: string) {
+  const service = text.trim().split(/\s+/)[0] || "";
+  const targets = listTargets();
+  if (!service || (targets.length > 0 && !targets.includes(service))) {
+    const list = targets.length > 0 ? targets.join(", ") : "api, admin, web";
+    return ephemeral(`❌ Geçersiz servis. Kullanım: \`/deploy <servis>\`\nMevcut: ${list}`);
+  }
   return {
     response_type: "ephemeral",
-    text,
-  };
-}
-
-function richReply(blocks: any[]) {
-  return {
-    response_type: "in_channel",
-    blocks,
-  };
-}
-
-function formatHealthReply(health: any) {
-  return {
-    response_type: "in_channel",
     blocks: [
-      {
-        type: "header",
-        text: { type: "plain_text", text: "🏥 System Health Check" },
-      },
-      {
-        type: "section",
-        fields: [
-          { type: "mrkdwn", text: `*Website:*\n${health.site} Healthy` },
-          { type: "mrkdwn", text: `*API:*\n${health.api} Responsive` },
-          { type: "mrkdwn", text: `*Lambda:*\n${health.lambda} Active` },
-          { type: "mrkdwn", text: `*Time:*\n${new Date().toLocaleTimeString("en-GB")}` },
-        ],
-      },
-    ],
-  };
-}
-
-function handleDeploy(text: string, userId: string) {
-  const branch = text?.trim() || "main";
-  if (!["main", "develop"].includes(branch)) {
-    return ephemeralReply("❌ Invalid branch. Use: `/deploy main` or `/deploy develop`");
-  }
-
-  const payload = {
-    response_type: "ephemeral",
-    blocks: [
-      {
-        type: "header",
-        text: { type: "plain_text", text: "🚀 Deploy Confirmation" },
-      },
+      { type: "header", text: { type: "plain_text", text: "🚀 Deploy Onayı" } },
       {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `Deploy to **${branch}** requested by <@${userId}>\n\nThis will:\n• Run CI/CD pipeline\n• Deploy web, Lambda, mobile builds\n• Update status (25-35 min)`,
+          text: `*${service}* servisini deploy etmek istiyor musunuz?\n\nİsteyen: <@${userId}>`,
         },
       },
       {
@@ -172,101 +124,39 @@ function handleDeploy(text: string, userId: string) {
         elements: [
           {
             type: "button",
-            text: { type: "plain_text", text: "Confirm Deploy", emoji: true },
-            value: `deploy:${branch}`,
+            text: { type: "plain_text", text: "Onayla", emoji: true },
+            value: JSON.stringify({ action: "deploy", service }),
             action_id: "deploy_confirm",
             style: "danger",
           },
           {
             type: "button",
-            text: { type: "plain_text", text: "Cancel", emoji: true },
-            value: "cancel",
+            text: { type: "plain_text", text: "İptal", emoji: true },
+            value: JSON.stringify({ action: "cancel" }),
             action_id: "deploy_cancel",
           },
         ],
       },
     ],
   };
-
-  return payload;
 }
 
-function handleStatus() {
-  return {
-    response_type: "in_channel",
-    blocks: [
-      {
-        type: "header",
-        text: { type: "plain_text", text: "📊 Deployment Status" },
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: "*Status:* Checking latest runs...",
-        },
-      },
-      {
-        type: "actions",
-        elements: [
-          {
-            type: "button",
-            text: { type: "plain_text", text: "Refresh", emoji: true },
-            action_id: "status_refresh",
-          },
-          {
-            type: "button",
-            text: { type: "plain_text", text: "View Logs", emoji: true },
-            url: "https://github.com/sahinbolukbasi/mapsbridge/actions",
-          },
-        ],
-      },
-    ],
-  };
-}
-
-function handleLogs(type: string) {
-  const urls: Record<string, string> = {
-    deploy: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deploy.yml",
-    ci: "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/ci.yml",
-    monitor:
-      "https://github.com/sahinbolukbasi/mapsbridge/actions/workflows/deployment-monitor.yml",
-  };
-
-  const url = urls[type || "deploy"] || urls.deploy;
-
-  return {
-    response_type: "in_channel",
-    blocks: [
-      {
-        type: "header",
-        text: { type: "plain_text", text: "📋 Logs & Workflows" },
-      },
-      {
-        type: "section",
-        fields: [
-          { type: "mrkdwn", text: `*Deploy:*\n<${urls.deploy}|View Deploy Logs>` },
-          { type: "mrkdwn", text: `*CI:*\n<${urls.ci}|View CI Logs>` },
-          { type: "mrkdwn", text: `*Monitor:*\n<${urls.monitor}|View Monitor Logs>` },
-        ],
-      },
-    ],
-  };
-}
-
-function handleRollback(userId: string) {
+function handleRollbackCommand(text: string, userId: string) {
+  const service = text.trim().split(/\s+/)[0] || "";
+  const targets = listTargets();
+  if (!service || (targets.length > 0 && !targets.includes(service))) {
+    const list = targets.length > 0 ? targets.join(", ") : "api, admin, web";
+    return ephemeral(`❌ Geçersiz servis. Kullanım: \`/rollback <servis>\`\nMevcut: ${list}`);
+  }
   return {
     response_type: "ephemeral",
     blocks: [
-      {
-        type: "header",
-        text: { type: "plain_text", text: "🔄 Rollback Confirmation" },
-      },
+      { type: "header", text: { type: "plain_text", text: "🔄 Rollback Onayı" } },
       {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `Rollback to previous version requested by <@${userId}>\n\nThis will:\n• Revert to last stable deployment\n• Restore previous Lambda versions\n• Update CloudFront cache (5-10 min)`,
+          text: `*${service}* servisini geri almak istiyor musunuz?\n\nİsteyen: <@${userId}>`,
         },
       },
       {
@@ -274,15 +164,15 @@ function handleRollback(userId: string) {
         elements: [
           {
             type: "button",
-            text: { type: "plain_text", text: "Confirm Rollback", emoji: true },
-            value: "rollback",
+            text: { type: "plain_text", text: "Onayla", emoji: true },
+            value: JSON.stringify({ action: "rollback", service }),
             action_id: "rollback_confirm",
             style: "danger",
           },
           {
             type: "button",
-            text: { type: "plain_text", text: "Cancel", emoji: true },
-            value: "cancel",
+            text: { type: "plain_text", text: "İptal", emoji: true },
+            value: JSON.stringify({ action: "cancel" }),
             action_id: "rollback_cancel",
           },
         ],
@@ -291,23 +181,19 @@ function handleRollback(userId: string) {
   };
 }
 
-function parseFormBody(raw: string): Record<string, string> {
-  return Object.fromEntries(new URLSearchParams(raw));
-}
-
 export async function handler(event: {
   rawPath: string;
   headers: Record<string, string>;
   body: string;
   isBase64Encoded?: boolean;
-  requestContext?: { http?: { method?: string } };
+  requestContext?: { http?: { method?: string; path?: string } };
 }) {
   const { rawPath, headers } = event;
   const rawBody = event.isBase64Encoded
     ? Buffer.from(event.body || "", "base64").toString("utf-8")
-    : (event.body || "");
-  const secret = await getSecret("SLACK_SIGNING_SECRET");
+    : event.body || "";
 
+  const secret = await getSecret("SLACK_SIGNING_SECRET");
   if (!secret) {
     console.error("SLACK_SIGNING_SECRET not set");
     return { statusCode: 500, body: JSON.stringify({ error: "Configuration error" }) };
@@ -317,112 +203,282 @@ export async function handler(event: {
   const signature = headers["x-slack-signature"] || "";
 
   if (!verifySlackSignature(rawBody, timestamp, signature, secret)) {
-    console.warn("Invalid Slack signature", { timestamp, path: rawPath });
+    console.warn("Invalid Slack signature", { path: rawPath });
     return { statusCode: 401, body: JSON.stringify({ error: "Unauthorized" }) };
+  }
+
+  const env = process.env as AppEnv;
+
+  if (rawPath === "/slack-bot/events") {
+    const token = await getSecret("SLACK_BOT_TOKEN");
+    return handleSlackEvent(rawBody, headers, token);
   }
 
   const params = parseFormBody(rawBody);
   const userId = params.user_id || "";
   const channelId = params.channel_id || "";
-  const command = params.command || "";
   const text = params.text || "";
 
-  if (!isAuthorized(userId, channelId, process.env as AppEnv)) {
+  if (!isAuthorized(userId, channelId, env)) {
     console.warn("Unauthorized user/channel", { userId, channelId });
-    return { statusCode: 403, body: JSON.stringify({ error: "Forbidden" }) };
+    return {
+      statusCode: 200,
+      body: JSON.stringify(ephemeral("❌ Bu komutu kullanma yetkiniz yok.")),
+    };
   }
-
-  const env = process.env as AppEnv;
 
   try {
     if (rawPath === "/slack-bot/deploy") {
-      console.info("Deploy command", { userId, channel: channelId, branch: text });
-      const reply = handleDeploy(text, userId);
-      return { statusCode: 200, body: JSON.stringify(reply) };
-    }
-
-    if (rawPath === "/slack-bot/status") {
-      console.info("Status command", { userId });
-      const ghToken = await getSecret("GH_TOKEN");
-      const deploy = await getLatestDeploy(ghToken);
-      const reply = {
-        response_type: "in_channel" as const,
-        blocks: [
-          { type: "header", text: { type: "plain_text", text: "📊 Deployment Status" } },
-          {
-            type: "section",
-            fields: [
-              { type: "mrkdwn", text: `*Latest Deploy:*\n${deploy.status}` },
-              { type: "mrkdwn", text: `*Commit:*\n\`${deploy.commit}\`` },
-              {
-                type: "mrkdwn",
-                text: `*Updated:*\n${new Date(deploy.timestamp).toLocaleTimeString()}`,
-              },
-            ],
-          },
-        ],
-      };
-      return { statusCode: 200, body: JSON.stringify(reply) };
-    }
-
-    if (rawPath === "/slack-bot/health") {
-      console.info("Health check", { userId });
-      const health = await getSystemHealth();
-      const reply = formatHealthReply(health);
-      return { statusCode: 200, body: JSON.stringify(reply) };
-    }
-
-    if (rawPath === "/slack-bot/logs") {
-      console.info("Logs command", { userId, type: text });
-      const reply = handleLogs(text);
-      return { statusCode: 200, body: JSON.stringify(reply) };
+      if (!isAdminUser(userId, env)) {
+        return {
+          statusCode: 200,
+          body: JSON.stringify(ephemeral("❌ Deploy için admin yetkisi gereklidir.")),
+        };
+      }
+      return { statusCode: 200, body: JSON.stringify(handleDeployCommand(text, userId)) };
     }
 
     if (rawPath === "/slack-bot/rollback") {
-      console.info("Rollback command", { userId });
-      const reply = handleRollback(userId);
-      return { statusCode: 200, body: JSON.stringify(reply) };
+      if (!isAdminUser(userId, env)) {
+        return {
+          statusCode: 200,
+          body: JSON.stringify(ephemeral("❌ Rollback için admin yetkisi gereklidir.")),
+        };
+      }
+      return { statusCode: 200, body: JSON.stringify(handleRollbackCommand(text, userId)) };
+    }
+
+    if (rawPath === "/slack-bot/status") {
+      const targets = listTargets();
+      const statuses = await Promise.all(
+        targets.map(async (name) => {
+          const d = createDeployer(name);
+          if (!d) return { service: name, status: "unknown", details: "not configured" };
+          try {
+            return await d.status();
+          } catch (e: any) {
+            return { service: name, status: "error", details: e.message };
+          }
+        }),
+      );
+      const fields = statuses.map((s) => ({
+        type: "mrkdwn",
+        text: `*${s.service}:*\n${s.status === "healthy" ? "✅" : "⚠️"} ${s.details}`,
+      }));
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          response_type: "in_channel",
+          blocks: [
+            { type: "header", text: { type: "plain_text", text: "📊 Deploy Durumu" } },
+            fields.length > 0
+              ? { type: "section", fields: fields.slice(0, 10) }
+              : { type: "section", text: { type: "mrkdwn", text: "DEPLOY_TARGETS yapılandırılmamış." } },
+          ],
+        }),
+      };
+    }
+
+    if (rawPath === "/slack-bot/health") {
+      const targets = listTargets();
+      const [health, serviceStatuses] = await Promise.all([
+        getSystemHealth(),
+        Promise.all(
+          targets.map(async (name) => {
+            const d = createDeployer(name);
+            if (!d) return { service: name, status: "unknown", details: "" };
+            try {
+              return await d.status();
+            } catch (e: any) {
+              return { service: name, status: "error", details: e.message };
+            }
+          }),
+        ),
+      ]);
+      const fields = [
+        { type: "mrkdwn", text: `*Website:*\n${health.site} mapsbridge.com` },
+        { type: "mrkdwn", text: `*API:*\n${health.api} api.mapsbridge.com` },
+        { type: "mrkdwn", text: `*Lambda:*\n${health.lambda} Active` },
+        { type: "mrkdwn", text: `*Zaman:*\n${new Date().toLocaleTimeString("tr-TR")}` },
+        ...serviceStatuses.map((s) => ({
+          type: "mrkdwn",
+          text: `*${s.service}:*\n${s.status === "healthy" ? "✅" : "⚠️"} ${s.details || s.status}`,
+        })),
+      ];
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          response_type: "in_channel",
+          blocks: [
+            { type: "header", text: { type: "plain_text", text: "🏥 Sistem Sağlık Kontrolü" } },
+            { type: "section", fields: fields.slice(0, 10) },
+          ],
+        }),
+      };
+    }
+
+    if (rawPath === "/slack-bot/logs") {
+      const parts = text.trim().split(/\s+/);
+      const service = parts[0] || "";
+      const filterPattern = parts.slice(1).join(" ") || undefined;
+      const targets = listTargets();
+      if (!service || (targets.length > 0 && !targets.includes(service))) {
+        const list = targets.length > 0 ? targets.join(", ") : "api, admin, web";
+        return {
+          statusCode: 200,
+          body: JSON.stringify(ephemeral(`Kullanım: \`/logs <servis>\`\nMevcut: ${list}`)),
+        };
+      }
+      const deployer = createDeployer(service);
+      if (!deployer) {
+        return {
+          statusCode: 200,
+          body: JSON.stringify(ephemeral(`❌ ${service} servisi bulunamadı.`)),
+        };
+      }
+      const result = await deployer.logs({ since: 15 * 60 * 1000, limit: 100, filterPattern });
+      const logText =
+        result.lines.length > 0 ? result.lines.join("\n") : "(son 15 dakikada log yok)";
+      const header = `📋 *${service}* logları (${result.logGroup})\n`;
+
+      if (header.length + logText.length <= 2800) {
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            response_type: "in_channel",
+            text: header + "```" + logText + "```",
+          }),
+        };
+      }
+
+      const botToken = await getSecret("SLACK_BOT_TOKEN");
+      if (botToken && channelId) {
+        const form = new FormData();
+        form.append("channels", channelId);
+        form.append("content", logText);
+        form.append("filename", `${service}-logs.txt`);
+        form.append("title", `${service} logları`);
+        await fetch("https://slack.com/api/files.uploadV2", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${botToken}` },
+          body: form,
+        }).catch((e) => console.error("[slack-bot] file upload error", e));
+      }
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify(
+          ephemeral(`📋 ${service} logları (${result.lines.length} satır) dosya olarak gönderildi.`),
+        ),
+      };
     }
 
     if (rawPath === "/slack-bot/interactive") {
       const payload = JSON.parse(params.payload || "{}");
       const actionId = payload.actions?.[0]?.action_id || "";
-      const value = payload.actions?.[0]?.value || "";
+      const valueStr = payload.actions?.[0]?.value || "{}";
       const responseUrl = payload.response_url || "";
+      const actingUser = payload.user?.id || userId;
 
-      console.info("Interactive action", { actionId, value, userId: payload.user?.id });
+      let value: Record<string, string> = {};
+      try {
+        value = JSON.parse(valueStr);
+      } catch {
+        value = { action: valueStr };
+      }
+
+      console.info("Interactive action", { actionId, service: value.service, userId: actingUser });
+
+      if (actionId === "deploy_confirm" || actionId === "rollback_confirm") {
+        const opLabel = actionId === "deploy_confirm" ? "deploy" : "rollback";
+
+        if (!isAdminUser(actingUser, env)) {
+          if (responseUrl) {
+            await postToUrl(responseUrl, {
+              replace_original: true,
+              text: `❌ ${opLabel === "deploy" ? "Deploy" : "Rollback"} için admin yetkisi gereklidir.`,
+            });
+          }
+          return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+        }
+
+        const service = value.service || "";
+        if (deployLocks.has(service)) {
+          const lockedBy = deployLocks.get(service);
+          if (responseUrl) {
+            await postToUrl(responseUrl, {
+              replace_original: true,
+              text: `⚠️ *${service}* şu anda <@${lockedBy}> tarafından işleniyor. Lütfen bekleyin.`,
+            });
+          }
+          return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+        }
+
+        deployLocks.set(service, actingUser);
+
+        void (async () => {
+          try {
+            const d = createDeployer(service);
+            if (!d) {
+              await postToUrl(responseUrl, {
+                replace_original: true,
+                text: `❌ ${service} servisi için deployer bulunamadı.`,
+              });
+              return;
+            }
+            await postToUrl(responseUrl, {
+              replace_original: true,
+              text: `${opLabel === "deploy" ? "🚀" : "🔄"} <@${actingUser}> *${service}* ${opLabel} başlatıyor...`,
+            });
+            const result = await (opLabel === "deploy" ? d.deploy() : d.rollback());
+            await postToUrl(responseUrl, {
+              text: result.ok
+                ? `✅ *${service}* ${opLabel} başlatıldı: ${result.message}`
+                : `❌ ${opLabel} başarısız: ${result.message}`,
+            });
+          } catch (e: any) {
+            console.error(`[slack-bot] ${opLabel} error`, e);
+            if (responseUrl) {
+              await postToUrl(responseUrl, { text: `❌ ${opLabel} hatası: ${e.message}` }).catch(
+                () => {},
+              );
+            }
+          } finally {
+            deployLocks.delete(service);
+          }
+        })().catch((err) => console.error("[slack-bot] bg error", err));
+
+        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+      }
+
+      if (
+        actionId === "deploy_cancel" ||
+        actionId === "rollback_cancel" ||
+        (value.action === "cancel" && actionId.endsWith("_cancel"))
+      ) {
+        if (responseUrl) {
+          await postToUrl(responseUrl, { replace_original: true, text: "❌ İptal edildi." });
+        }
+        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+      }
 
       if (actionId === "status_refresh" && responseUrl) {
         const health = await getSystemHealth();
-        const reply = formatHealthReply(health);
-        await fetch(responseUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...reply, replace_original: true }),
-        }).catch((e) => console.error("Failed to post response", e));
-      }
-
-      if (actionId === "deploy_confirm" && value.startsWith("deploy:")) {
-        const branch = value.replace("deploy:", "");
-        const message = {
-          text: `🚀 Deploy to **${branch}** initiated by <@${payload.user?.id}>\n\nMonitor progress in #deployments`,
-        };
-        await fetch(responseUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...message, replace_original: true }),
-        }).catch((e) => console.error("Failed to post response", e));
-      }
-
-      if (actionId === "rollback_confirm" && value === "rollback") {
-        const message = {
-          text: `🔄 Rollback initiated by <@${payload.user?.id}>\n\nMonitor progress in #deployments`,
-        };
-        await fetch(responseUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...message, replace_original: true }),
-        }).catch((e) => console.error("Failed to post response", e));
+        await postToUrl(responseUrl, {
+          replace_original: true,
+          response_type: "in_channel",
+          blocks: [
+            { type: "header", text: { type: "plain_text", text: "🏥 Sistem Sağlık Kontrolü" } },
+            {
+              type: "section",
+              fields: [
+                { type: "mrkdwn", text: `*Website:*\n${health.site}` },
+                { type: "mrkdwn", text: `*API:*\n${health.api}` },
+                { type: "mrkdwn", text: `*Lambda:*\n${health.lambda}` },
+              ],
+            },
+          ],
+        });
       }
 
       return { statusCode: 200, body: JSON.stringify({ ok: true }) };

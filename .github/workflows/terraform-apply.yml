@@ -72,6 +72,11 @@ jobs:
           TF_VAR_frontend_domain: mapsbridge.com
           TF_VAR_stripe_secret_key: ${{ secrets.STRIPE_SECRET_KEY }}
           TF_VAR_stripe_webhook_secret: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          # Admin panel domain separation
+          TF_VAR_acm_certificate_arn: "arn:aws:acm:us-east-1:865369794421:certificate/d8176861-6134-4ef5-aee0-affd4b018995"
+          TF_VAR_admin_domain: "admin.mapsbridge.com"
+          TF_VAR_admin_acm_certificate_arn: "arn:aws:acm:us-east-1:865369794421:certificate/d8176861-6134-4ef5-aee0-affd4b018995"
+          TF_VAR_admin_allowed_cidrs: ${{ secrets.ADMIN_ALLOWED_CIDRS }}
         run: |
           TARGET_ARGS=""
           if [ -n "${{ github.event.inputs.target }}" ]; then
@@ -87,6 +92,11 @@ jobs:
           TF_VAR_frontend_domain: mapsbridge.com
           TF_VAR_stripe_secret_key: ${{ secrets.STRIPE_SECRET_KEY }}
           TF_VAR_stripe_webhook_secret: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          # Admin panel domain separation
+          TF_VAR_acm_certificate_arn: "arn:aws:acm:us-east-1:865369794421:certificate/d8176861-6134-4ef5-aee0-affd4b018995"
+          TF_VAR_admin_domain: "admin.mapsbridge.com"
+          TF_VAR_admin_acm_certificate_arn: "arn:aws:acm:us-east-1:865369794421:certificate/d8176861-6134-4ef5-aee0-affd4b018995"
+          TF_VAR_admin_allowed_cidrs: ${{ secrets.ADMIN_ALLOWED_CIDRS }}
         run: terraform apply -auto-approve tfplan
 
       - name: Show Outputs
@@ -130,6 +140,9 @@ jobs:
           TF_VAR_cognito_user_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
           TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
           TF_VAR_protected_admin_sub: ${{ secrets.PROTECTED_ADMIN_SUB }}
+          # Slack Bot — admin yetki ve deploy hedefleri
+          TF_VAR_slack_admin_user_ids: ${{ secrets.SLACK_ADMIN_USER_IDS }}
+          TF_VAR_deploy_targets: '{"routes":{"type":"lambda","name":"mapsbridge-prod-routes"},"admin":{"type":"lambda","name":"mapsbridge-prod-admin"},"ai":{"type":"lambda","name":"mapsbridge-prod-ai"}}'
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
@@ -143,6 +156,9 @@ jobs:
           TF_VAR_cognito_user_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
           TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
           TF_VAR_protected_admin_sub: ${{ secrets.PROTECTED_ADMIN_SUB }}
+          # Slack Bot — admin yetki ve deploy hedefleri
+          TF_VAR_slack_admin_user_ids: ${{ secrets.SLACK_ADMIN_USER_IDS }}
+          TF_VAR_deploy_targets: '{"routes":{"type":"lambda","name":"mapsbridge-prod-routes"},"admin":{"type":"lambda","name":"mapsbridge-prod-admin"},"ai":{"type":"lambda","name":"mapsbridge-prod-ai"}}'
         run: terraform apply -auto-approve tfplan
 
   # ─── AgentCore Gateway ────────────────────────────────────────────────────

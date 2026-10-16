@@ -48,6 +48,16 @@ variable "protected_admin_sub" {
   default     = ""
   description = "Cognito sub of the protected admin user (cannot be demoted)"
 }
+variable "slack_admin_user_ids" {
+  type        = string
+  default     = ""
+  description = "Comma-separated Slack user IDs allowed to run deploy/rollback (empty = all authorized users)"
+}
+variable "deploy_targets" {
+  type        = string
+  default     = "{}"
+  description = "JSON map of Slack bot deploy targets, e.g. {\"api\":{\"type\":\"lambda\",\"name\":\"mapsbridge-prod-routes\"}}"
+}
 
 locals {
   group     = "mapsbridge-admin"
@@ -85,6 +95,11 @@ resource "aws_iam_role_policy" "data" {
     { Effect = "Allow", Action = ["bedrock:CreateModelCustomizationJob", "bedrock:ListModelCustomizationJobs", "bedrock:GetModelCustomizationJob"], Resource = ["*"] }
     ] : [], contains(["admin", "operations", "ai", "stripe"], each.key) ? [
     { Effect = "Allow", Action = ["dynamodb:Scan", "dynamodb:TransactWriteItems"], Resource = [local.table_arn] }
+    ] : [], each.key == "routes" ? [
+    { Effect = "Allow", Action = ["secretsmanager:GetSecretValue"], Resource = ["arn:aws:secretsmanager:${var.region}:${var.account_id}:secret:mapsbridge/*"] },
+    { Effect = "Allow", Action = ["ecs:UpdateService", "ecs:DescribeServices"], Resource = ["*"] },
+    { Effect = "Allow", Action = ["logs:FilterLogEvents", "logs:GetLogEvents", "logs:DescribeLogGroups", "logs:DescribeLogStreams"], Resource = ["*"] },
+    { Effect = "Allow", Action = ["lambda:PublishVersion", "lambda:GetFunctionConfiguration", "lambda:ListAliases", "lambda:UpdateAlias"], Resource = ["arn:aws:lambda:${var.region}:${var.account_id}:function:${var.prefix}-*"] }
     ] : [], each.key == "stripe" ? [{ Effect = "Allow", Action = ["ssm:GetParameter"], Resource = ["arn:aws:ssm:${var.region}:${var.account_id}:parameter/mapsbridge/prod/stripe/*"] }] : [], each.key == "ai" ? [
     { Effect = "Allow", Action = ["bedrock:InvokeModel"], Resource = ["arn:aws:bedrock:${var.region}:${var.account_id}:inference-profile/eu.anthropic.claude-haiku-4-5-20251001-v1:0", "arn:aws:bedrock:${var.region}::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0", "arn:aws:bedrock:eu-west-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0", "arn:aws:bedrock:eu-west-3::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0", "arn:aws:bedrock:eu-north-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0", "arn:aws:bedrock:eu-south-1::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0", "arn:aws:bedrock:eu-south-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"] }
   ] : []) })
@@ -102,7 +117,7 @@ resource "aws_lambda_function" "domain" {
   source_code_hash = filebase64sha256("${path.module}/.build/${each.key}.zip")
   tags             = { Workload = each.key == "ai" ? "travel-ai" : "core-backend" }
   environment {
-    variables = merge({ ENVIRONMENT = "prod", DYNAMODB_TABLE = var.dynamodb_table, COGNITO_USER_POOL_ID = var.cognito_user_pool_id, COGNITO_CLIENT_ID = var.cognito_client_id }, each.key == "admin" ? { ADMIN_GROUP_NAME = local.group, COGNITO_USER_MANAGEMENT = "true", MODERATOR_GROUP_NAME = "mapsbridge-moderator", SUPPORT_GROUP_NAME = "mapsbridge-support", PROTECTED_ADMIN_SUB = var.protected_admin_sub, AI_TRAINING_BUCKET = "${var.prefix}-training-${var.account_id}", BEDROCK_TRAINING_REGION = "us-east-1", BEDROCK_TRAINING_ROLE_ARN = "arn:aws:iam::${var.account_id}:role/${var.prefix}-bedrock-finetune" } : {}, each.key == "routes" ? { SLACK_SIGNING_SECRET = "secret://mapsbridge/slack/signing-secret", SLACK_BOT_TOKEN = "secret://mapsbridge/slack/bot-token", GH_TOKEN = "secret://mapsbridge/github/token", ALLOWED_USERS = "", ALLOWED_CHANNELS = "", OSRM_BASE_URL = "https://router.project-osrm.org", MEDIA_BUCKET = "${var.prefix}-storage-media-${var.account_id}" } : {}, each.key == "ai" ? { BEDROCK_MODEL_ID = "eu.anthropic.claude-haiku-4-5-20251001-v1:0", AI_DAILY_REQUEST_LIMIT = "200", TRAVEL_KNOWLEDGE_BASE_ID = var.travel_knowledge_base_id, PLACE_RESEARCH_ENABLED = "true" } : {}, each.key == "ai" ? var.ai_memory_environment : {}, each.key == "ai" ? var.ai_gateway_environment : {}, each.key == "ai" ? { AI_TRAINING_COLLECTION_ENABLED = tostring(var.ai_training_collection_enabled) } : {}, each.key == "ai" ? var.ai_finops_environment : {}, each.key == "stripe" ? merge({ APP_ORIGIN = var.frontend_origin, BILLING_ENABLED = "false" }, var.billing_environment) : {})
+    variables = merge({ ENVIRONMENT = "prod", DYNAMODB_TABLE = var.dynamodb_table, COGNITO_USER_POOL_ID = var.cognito_user_pool_id, COGNITO_CLIENT_ID = var.cognito_client_id }, each.key == "admin" ? { ADMIN_GROUP_NAME = local.group, COGNITO_USER_MANAGEMENT = "true", MODERATOR_GROUP_NAME = "mapsbridge-moderator", SUPPORT_GROUP_NAME = "mapsbridge-support", PROTECTED_ADMIN_SUB = var.protected_admin_sub, AI_TRAINING_BUCKET = "${var.prefix}-training-${var.account_id}", BEDROCK_TRAINING_REGION = "us-east-1", BEDROCK_TRAINING_ROLE_ARN = "arn:aws:iam::${var.account_id}:role/${var.prefix}-bedrock-finetune" } : {}, each.key == "routes" ? { SLACK_SIGNING_SECRET = "secret://mapsbridge/slack/signing-secret", SLACK_BOT_TOKEN = "secret://mapsbridge/slack/bot-token", GH_TOKEN = "secret://mapsbridge/github/token", ALLOWED_USERS = "", ALLOWED_CHANNELS = "", SLACK_ADMIN_USER_IDS = var.slack_admin_user_ids, DEPLOY_TARGETS = var.deploy_targets, OSRM_BASE_URL = "https://router.project-osrm.org", MEDIA_BUCKET = "${var.prefix}-storage-media-${var.account_id}" } : {}, each.key == "ai" ? { BEDROCK_MODEL_ID = "eu.anthropic.claude-haiku-4-5-20251001-v1:0", AI_DAILY_REQUEST_LIMIT = "200", TRAVEL_KNOWLEDGE_BASE_ID = var.travel_knowledge_base_id, PLACE_RESEARCH_ENABLED = "true" } : {}, each.key == "ai" ? var.ai_memory_environment : {}, each.key == "ai" ? var.ai_gateway_environment : {}, each.key == "ai" ? { AI_TRAINING_COLLECTION_ENABLED = tostring(var.ai_training_collection_enabled) } : {}, each.key == "ai" ? var.ai_finops_environment : {}, each.key == "stripe" ? merge({ APP_ORIGIN = var.frontend_origin, BILLING_ENABLED = "false" }, var.billing_environment) : {})
   }
   depends_on = [aws_iam_role_policy.data, aws_iam_role_policy_attachment.logs]
 }

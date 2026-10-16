@@ -34,6 +34,16 @@ resource "aws_cloudfront_function" "spa_router" {
       var cookies = request.cookies || {};
       var headers = request.headers || {};
 
+      // Block admin panel routes — admin lives on its own distribution
+      if (uri.startsWith('/u/admin')) {
+        return {
+          statusCode: 404,
+          statusDescription: 'Not Found',
+          headers: { 'content-type': { value: 'text/plain' } },
+          body: 'Not Found'
+        };
+      }
+
       // On root path with no locale cookie, detect language and redirect
       if (uri === '/' || uri === '') {
         var hasLocaleCookie = cookies['locale'] && cookies['locale'].value;
@@ -214,7 +224,10 @@ data "aws_iam_policy_document" "web_bucket" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.web.arn]
+      values = concat(
+        [aws_cloudfront_distribution.web.arn],
+        length(aws_cloudfront_distribution.admin) > 0 ? [aws_cloudfront_distribution.admin[0].arn] : []
+      )
     }
   }
 }

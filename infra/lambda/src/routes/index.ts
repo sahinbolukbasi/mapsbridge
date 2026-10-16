@@ -10,7 +10,7 @@ import { verifiedUserId } from "../shared/auth";
  * self-hosted OSRM instance or use Mapbox Directions API.
  */
 
-import type { ApiGatewayEvent } from "../shared/http";
+import type { ApiGatewayEvent, ApiResponse } from "../shared/http";
 import {
   ok,
   created,
@@ -30,13 +30,18 @@ import { handler as slackBotHandler } from "../slack-bot";
 
 const router = new Router();
 
-// Slack Bot routes
-router.add("POST /slack-bot/deploy", async (event) => slackBotHandler(event));
-router.add("POST /slack-bot/status", async (event) => slackBotHandler(event));
-router.add("POST /slack-bot/health", async (event) => slackBotHandler(event));
-router.add("POST /slack-bot/logs", async (event) => slackBotHandler(event));
-router.add("POST /slack-bot/rollback", async (event) => slackBotHandler(event));
-router.add("POST /slack-bot/interactive", async (event) => slackBotHandler(event));
+// Slack Bot routes — bridge between ApiGatewayEvent and slack-bot's narrower event type
+const slackRoute = async (event: ApiGatewayEvent): Promise<ApiResponse> => {
+  const result = await slackBotHandler(event as any);
+  return { ...result, headers: { "content-type": "application/json" } };
+};
+router.add("POST /slack-bot/deploy", slackRoute);
+router.add("POST /slack-bot/status", slackRoute);
+router.add("POST /slack-bot/health", slackRoute);
+router.add("POST /slack-bot/logs", slackRoute);
+router.add("POST /slack-bot/rollback", slackRoute);
+router.add("POST /slack-bot/interactive", slackRoute);
+router.add("POST /slack-bot/events", slackRoute);
 
 router.add("GET /routes", handleListRoutes);
 router.add("POST /routes", handleCreateRoute);
