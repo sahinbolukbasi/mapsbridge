@@ -27,7 +27,18 @@ function appendMarker(base: string): string {
 // ── IATA helper ──────────────────────────────────────────────────────────────
 
 const CITY_TO_IATA: Record<string, string> = {
+  // Turkey
   istanbul: "IST",
+  ankara: "ESB",
+  izmir: "ADB",
+  antalya: "AYT",
+  bodrum: "BJV",
+  dalaman: "DLM",
+  trabzon: "TZX",
+  gaziantep: "GZT",
+  adana: "ADA",
+  kayseri: "ASR",
+  // Europe
   barcelona: "BCN",
   paris: "CDG",
   london: "LHR",
@@ -37,10 +48,92 @@ const CITY_TO_IATA: Record<string, string> = {
   berlin: "BER",
   lisbon: "LIS",
   athens: "ATH",
+  vienna: "VIE",
+  zurich: "ZRH",
+  geneva: "GVA",
+  brussels: "BRU",
+  stockholm: "ARN",
+  oslo: "OSL",
+  copenhagen: "CPH",
+  helsinki: "HEL",
+  warsaw: "WAW",
+  prague: "PRG",
+  budapest: "BUD",
+  bucharest: "OTP",
+  sofia: "SOF",
+  zagreb: "ZAG",
+  dubrovnik: "DBV",
+  split: "SPU",
+  milan: "MXP",
+  naples: "NAP",
+  venice: "VCE",
+  frankfurt: "FRA",
+  munich: "MUC",
+  hamburg: "HAM",
+  düsseldorf: "DUS",
+  dusseldorf: "DUS",
+  manchester: "MAN",
+  edinburgh: "EDI",
+  dublin: "DUB",
+  porto: "OPO",
+  seville: "SVQ",
+  valencia: "VLC",
+  malaga: "AGP",
+  tenerife: "TFS",
+  nicosia: "ECN",
+  // Middle East / North Africa
+  dubai: "DXB",
+  abudhabi: "AUH",
+  doha: "DOH",
+  kuwait: "KWI",
+  riyadh: "RUH",
+  jeddah: "JED",
+  cairo: "CAI",
+  casablanca: "CMN",
+  tunis: "TUN",
+  // Asia
+  tokyo: "NRT",
+  osaka: "KIX",
+  seoul: "ICN",
+  beijing: "PEK",
+  shanghai: "PVG",
+  hongkong: "HKG",
+  bangkok: "BKK",
+  singapore: "SIN",
+  kualalumpur: "KUL",
+  bali: "DPS",
+  jakarta: "CGK",
+  delhi: "DEL",
+  mumbai: "BOM",
+  // Americas
+  newyork: "JFK",
+  losangeles: "LAX",
+  miami: "MIA",
+  chicago: "ORD",
+  toronto: "YYZ",
+  montreal: "YUL",
+  cancun: "CUN",
+  mexicocity: "MEX",
+  bogota: "BOG",
+  lima: "LIM",
+  buenosaires: "EZE",
+  saopaulo: "GRU",
+  riojaneiro: "GIG",
 };
 
 function toIata(city: string): string | undefined {
   return CITY_TO_IATA[city.toLowerCase().replace(/\s+/g, "")];
+}
+
+/** Scan AI response text for a known destination. Returns the first match (display name). */
+export function extractDestinationFromText(text: string): string | undefined {
+  const normalized = text.toLowerCase();
+  for (const city of Object.keys(CITY_TO_IATA)) {
+    if (normalized.includes(city)) {
+      return city.charAt(0).toUpperCase() + city.slice(1);
+    }
+  }
+  return undefined;
 }
 
 /** Zero-pad to 2 digits. */

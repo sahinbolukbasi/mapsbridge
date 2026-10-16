@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { buildTripAffiliateBundle } from "../lib/affiliate/travelpayouts";
+import { buildFlightCard, buildHotelCard, buildTripAffiliateBundle } from "../lib/affiliate/travelpayouts";
 import type { AffiliateCard } from "../lib/affiliate/types";
 import type { UnifiedRoutePlan } from "../lib/ai/types";
 
@@ -104,6 +104,51 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
       <p className="tp-attribution">
         Travelpayouts ortaklık programı. Bağlantıya tıkladığınızda yönlendirilirsiniz.
       </p>
+    </div>
+  );
+}
+
+/** Compact 2-button strip for non-route messages where a destination is detected. */
+export function InlineAffiliateStrip({ destination }: { destination: string }) {
+  const flight = useMemo(() => buildFlightCard({ destination }), [destination]);
+  const hotel = useMemo(() => buildHotelCard({ destination }), [destination]);
+
+  function track(card: AffiliateCard) {
+    try {
+      window.dispatchEvent(
+        new CustomEvent("mapsbridge:affiliate_click", {
+          detail: { cardId: card.id, provider: card.provider, type: card.type, destination: card.destination, coarseWeek: getISOWeek() },
+        }),
+      );
+    } catch {}
+  }
+
+  return (
+    <div className="tp-inline-strip" aria-label="Hızlı rezervasyon">
+      <span className="tp-inline-label">
+        <span className="material-symbols-outlined" style={{ fontSize: "13px", verticalAlign: "middle" }}>sell</span>
+        {" "}<strong>{destination}</strong> için:
+      </span>
+      <a
+        href={flight.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="tp-inline-btn tp-inline-flight"
+        onClick={() => track(flight)}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>flight_takeoff</span>
+        Uçuş Ara
+      </a>
+      <a
+        href={hotel.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="tp-inline-btn tp-inline-hotel"
+        onClick={() => track(hotel)}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>hotel</span>
+        Otel Bul
+      </a>
     </div>
   );
 }

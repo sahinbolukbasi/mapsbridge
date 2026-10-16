@@ -29,7 +29,8 @@ import { AssistantMessage } from "./assistant-message";
 import { ThinkingSteps } from "./thinking-steps";
 import { SmartActions } from "./smart-actions";
 import { ContextualFollowups } from "./contextual-followups";
-import { TravelAffiliateCards } from "./travel-affiliate-cards";
+import { TravelAffiliateCards, InlineAffiliateStrip } from "./travel-affiliate-cards";
+import { extractDestinationFromText } from "../lib/affiliate/travelpayouts";
 import { useUserMemory } from "../lib/ai/user-memory-hook";
 
 const STORAGE_KEY = "mapsbridge.ai.sessions.v5";
@@ -552,6 +553,15 @@ export default function AIPage() {
       setTrainingConsent(false);
       if (!result.orchestratorSummary?.trim() || (result.route && !isRoutePlan(result.route)))
         throw Error("Yanıt tamamlanamadı.");
+      const detectedDest = !result.route ? extractDestinationFromText(result.orchestratorSummary) : undefined;
+      const travelQuickReplies = detectedDest && !result.clarification?.quickOptions?.length
+        ? [
+            { label: `${detectedDest} rotası planla`, prompt: `${detectedDest} için rota planı oluştur` },
+            { label: "Uçuş fiyatları?", prompt: `${detectedDest} uçuş biletleri ne kadar?` },
+            { label: "Otel önerileri?", prompt: `${detectedDest} otel tavsiyeleri ver` },
+          ]
+        : undefined;
+
       const message: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -559,7 +569,7 @@ export default function AIPage() {
         ...(result.decisionSummary?.length ? { decisionSummary: result.decisionSummary } : {}),
         ...(result.clarification?.quickOptions?.length
           ? { quickReplies: result.clarification.quickOptions }
-          : {}),
+          : travelQuickReplies ? { quickReplies: travelQuickReplies } : {}),
         ...(result.route
           ? {
               route: result.route,
@@ -1147,6 +1157,11 @@ export default function AIPage() {
                         <TravelAffiliateCards route={m.route} />
                       </>
                     )}
+
+                    {m.role === "assistant" && !m.route && (() => {
+                      const dest = extractDestinationFromText(m.text);
+                      return dest ? <InlineAffiliateStrip destination={dest} /> : null;
+                    })()}
 
                     {m.role === "assistant" && m.quickReplies && m.quickReplies.length > 0 && (
                       <div
