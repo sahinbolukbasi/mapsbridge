@@ -104,8 +104,5 @@
   "OPTIONS /system/{proxy+}": "operations",
   "OPTIONS /marketplace/{proxy+}": "operations",
   "OPTIONS /tracker": "operations",
-  "OPTIONS /tracker/{proxy+}": "operations",
-  "GET /user/ai-memory": "routes",
-  "PUT /user/ai-memory": "routes",
-  "GET /user/affiliate-stats": "routes"
+  "OPTIONS /tracker/{proxy+}": "operations"
 }

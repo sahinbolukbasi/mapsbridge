@@ -125,6 +125,11 @@ function toIata(city: string): string | undefined {
   return CITY_TO_IATA[city.toLowerCase().replace(/\s+/g, "")];
 }
 
+/** Public IATA lookup for external modules. */
+export function toIataPublic(city: string): string | undefined {
+  return toIata(city);
+}
+
 /**
  * Extract the first date-like mention from text and return a Date.
  * Handles: "15 Kasım", "3 January 2027", "next week", "Ocak 2027", ISO dates.
