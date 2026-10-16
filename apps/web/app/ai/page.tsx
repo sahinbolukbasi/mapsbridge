@@ -26,7 +26,7 @@ import { AIPromoLanding } from "./ai-promo-landing";
 import { DealTrackerPanel } from "../components/tracker/deal-tracker-panel";
 import "./ai.css";
 import { AssistantMessage } from "./assistant-message";
-import { ThinkingSteps } from "./thinking-steps";
+import { ThinkingSteps, sseStatusToLivePhase } from "./thinking-steps";
 import { SmartActions } from "./smart-actions";
 import { ContextualFollowups } from "./contextual-followups";
 import { TravelAffiliateCards, InlineAffiliateStrip } from "./travel-affiliate-cards";
@@ -203,6 +203,9 @@ export default function AIPage() {
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
   const [routeMode, setRouteMode] = useState<"calm" | "classic" | "explorer">("classic");
   const [streamText, setStreamText] = useState("");
+  const [streamPhase, setStreamPhase] = useState<{ icon: string; label: string } | null>(null);
+  const [retryAvailable, setRetryAvailable] = useState(false);
+  const lastPromptRef = useRef<string>("");
   const pending = useRef<Pending | null>(null);
   const inFlight = useRef(false);
   const end = useRef<HTMLDivElement>(null);
@@ -210,6 +213,22 @@ export default function AIPage() {
   const session = sessions.find((s) => s.id === activeId) || null;
   const route = session?.route && isRoutePlan(session.route) ? session.route : null;
   const { memory, learnFromPrompt, buildContextString, clearMemory } = useUserMemory();
+
+  // Affiliate click analytics
+  useEffect(() => {
+    function onAffiliateClick(e: Event) {
+      const detail = (e as CustomEvent).detail;
+      if (!detail) return;
+      apiFetch("/routes/telemetry", {
+        method: "POST",
+        body: JSON.stringify({
+          events: [{ type: "affiliate_click", ...detail, ts: Date.now() }],
+        }),
+      }).catch(() => {});
+    }
+    window.addEventListener("mapsbridge:affiliate_click", onAffiliateClick);
+    return () => window.removeEventListener("mapsbridge:affiliate_click", onAffiliateClick);
+  }, []);
 
   async function copyMessageText(msgId: string, text: string) {
     try {
@@ -526,6 +545,8 @@ export default function AIPage() {
                 if (ev.type === "token") {
                   accumulated += ev.text;
                   setStreamText(accumulated);
+                } else if (ev.type === "status") {
+                  setStreamPhase(sseStatusToLivePhase(ev.phase || "", ev.message));
                 } else if (ev.type === "complete") return ev.result;
                 else if (ev.type === "error")
                   throw Object.assign(new Error(ev.message || "Stream error"), {
@@ -545,6 +566,7 @@ export default function AIPage() {
           throw new Error("Yanıt tamamlanamadı — stream kapandı.");
         })();
         setStreamText("");
+        setStreamPhase(null);
       } else {
         result = await apiFetch<
           MultiAgentResponse & { billing?: { credits: number; cost: number }; cost?: number }
@@ -657,7 +679,15 @@ export default function AIPage() {
             }),
           );
         }
-        setError(e?.message || "Yanıt alınamadı. Tekrar deneyebilirsin.");
+        const isNetworkErr = shouldRecheckRequest(e) || e?.status === 408 || e?.status >= 500;
+        if (isNetworkErr) {
+          setError("Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.");
+          setRetryAvailable(true);
+          lastPromptRef.current = promptToSend;
+        } else {
+          setError(e?.message || "Yanıt alınamadı. Tekrar deneyebilirsin.");
+          setRetryAvailable(false);
+        }
       }
       setSessions((s) =>
         s.map((x) => (x.id === request.conversationId ? { ...x, route: null } : x)),
@@ -1160,7 +1190,7 @@ export default function AIPage() {
 
                     {m.role === "assistant" && !m.route && (() => {
                       const dest = extractDestinationFromText(m.text);
-                      return dest ? <InlineAffiliateStrip destination={dest} /> : null;
+                      return dest ? <InlineAffiliateStrip destination={dest} messageText={m.text} /> : null;
                     })()}
 
                     {m.role === "assistant" && m.quickReplies && m.quickReplies.length > 0 && (
@@ -1309,6 +1339,7 @@ export default function AIPage() {
                     <div className="ai-msg-bot-bubble ai-thinking-bubble" role="status">
                       <ThinkingSteps
                         isRoute={input.length > 20 || (session?.messages.length || 0) >= 2}
+                        livePhase={streamPhase}
                       />
                     </div>
                   </div>
@@ -1338,15 +1369,32 @@ export default function AIPage() {
                         🔑 Giriş Yap
                       </button>
                     )}
-                    {pending.current && (
+                    {(retryAvailable || pending.current) && (
                       <button
                         disabled={busy}
-                        className="ai-error-cta-btn"
-                        onClick={() => send(true)}
+                        className="ai-error-cta-btn ai-retry-btn"
+                        onClick={() => {
+                          setRetryAvailable(false);
+                          setError("");
+                          const p = lastPromptRef.current || (pending.current?.prompt);
+                          if (p) void send(false, p);
+                          else void send(true);
+                        }}
                       >
-                        🔄 Tekrar Dene
+                        <span className="material-symbols-outlined" style={{ fontSize: "14px", verticalAlign: "middle" }}>
+                          refresh
+                        </span>
+                        {" "}Tekrar Dene
                       </button>
                     )}
+                    <button
+                      type="button"
+                      className="ai-error-dismiss"
+                      onClick={() => { setError(""); setRetryAvailable(false); }}
+                      aria-label="Kapat"
+                    >
+                      ✕
+                    </button>
                   </div>
                 </div>
               )}

@@ -50,6 +50,8 @@ router.add("GET /media/presign-upload", handlePresignUpload);
 router.add("POST /routes/telemetry", handleTelemetry);
 router.add("GET /user/saved-addresses", handleGetSavedAddresses);
 router.add("PUT /user/saved-addresses", handlePutSavedAddresses);
+router.add("GET /user/ai-memory", handleGetAiMemory);
+router.add("PUT /user/ai-memory", handlePutAiMemory);
 
 export const handler = async (event: ApiGatewayEvent) => {
   try {
@@ -569,4 +571,53 @@ async function handlePutSavedAddresses(event: ApiGatewayEvent) {
   );
 
   return ok({ status: "saved", count: body.addresses.length });
+}
+
+// ─── AI User Memory ────────────────────────────────────────────────────────
+async function handleGetAiMemory(event: ApiGatewayEvent) {
+  const token = extractBearerToken(event);
+  const userId = await verifiedUserId(token);
+  if (!userId) return unauthorized();
+
+  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { unmarshall } = await import("@aws-sdk/util-dynamodb");
+  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+
+  const result = await ddb.send(
+    new GetItemCommand({
+      TableName: getTableName(),
+      Key: { PK: { S: `USER#${userId}` }, SK: { S: "AI_MEMORY" } },
+    }),
+  );
+
+  const memory = result.Item ? unmarshall(result.Item).memory ?? {} : {};
+  return ok({ memory });
+}
+
+async function handlePutAiMemory(event: ApiGatewayEvent) {
+  const token = extractBearerToken(event);
+  const userId = await verifiedUserId(token);
+  if (!userId) return unauthorized();
+
+  const body = parseBody<{ memory?: Record<string, unknown> }>(event);
+  if (!body || typeof body.memory !== "object" || Array.isArray(body.memory))
+    return badRequest("memory object gerekli.");
+
+  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall } = await import("@aws-sdk/util-dynamodb");
+  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+
+  await ddb.send(
+    new PutItemCommand({
+      TableName: getTableName(),
+      Item: marshall({
+        PK: `USER#${userId}`,
+        SK: "AI_MEMORY",
+        memory: body.memory,
+        updatedAt: new Date().toISOString(),
+      }),
+    }),
+  );
+
+  return ok({ status: "saved" });
 }

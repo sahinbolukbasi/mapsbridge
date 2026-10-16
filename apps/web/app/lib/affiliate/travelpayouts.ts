@@ -125,6 +125,41 @@ function toIata(city: string): string | undefined {
   return CITY_TO_IATA[city.toLowerCase().replace(/\s+/g, "")];
 }
 
+/**
+ * Extract the first date-like mention from text and return a Date.
+ * Handles: "15 Kasım", "3 January 2027", "next week", "Ocak 2027", ISO dates.
+ */
+export function extractDateFromText(text: string): Date | undefined {
+  const TR_MONTHS: Record<string, number> = {
+    ocak: 0, şubat: 1, mart: 2, nisan: 3, mayıs: 4, haziran: 5,
+    temmuz: 6, ağustos: 7, eylül: 8, ekim: 9, kasım: 10, aralık: 11,
+    january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
+    july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
+  };
+  // "15 Kasım" or "15 kasım 2027"
+  const dmMatch = text.match(/(\d{1,2})\s+(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık|january|february|march|april|may|june|july|august|september|october|november|december)(?:\s+(\d{4}))?/i);
+  if (dmMatch) {
+    const d = parseInt(dmMatch[1]);
+    const m = TR_MONTHS[dmMatch[2].toLowerCase()];
+    const y = dmMatch[3] ? parseInt(dmMatch[3]) : new Date().getFullYear();
+    const date = new Date(y, m, d);
+    if (!isNaN(date.getTime()) && date > new Date()) return date;
+  }
+  // ISO date YYYY-MM-DD
+  const isoMatch = text.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const date = new Date(isoMatch[0]);
+    if (!isNaN(date.getTime()) && date > new Date()) return date;
+  }
+  // "next week"
+  if (/next week|gelecek hafta/i.test(text)) {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d;
+  }
+  return undefined;
+}
+
 /** Scan AI response text for a known destination. Returns the first match (display name). */
 export function extractDestinationFromText(text: string): string | undefined {
   const normalized = text.toLowerCase();

@@ -411,7 +411,7 @@ export async function runMultiAgentSupervisor(
       : Promise.resolve(undefined);
   const dest = context.destination || "";
   const flightPromise: Promise<FlightPriceInfo | null> =
-    mode === "route" && dest
+    dest && (mode === "route" || mode === "chat")
       ? callFlightSearchTool(dest)
           .then((r) => r as FlightPriceInfo | null)
           .catch(() => null)

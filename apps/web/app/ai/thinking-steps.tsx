@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const THINKING_PHASES = [
   { icon: "psychology", label: "İsteğini analiz ediyorum...", delay: 0 },
@@ -26,20 +26,53 @@ const QUICK_FACTS = [
   "FCDO seyahat tavsiyesi kontrol ediliyor",
 ];
 
-interface ThinkingStepsProps {
-  isRoute: boolean;
+// Map SSE status phase strings to THINKING_PHASES indexes
+const PHASE_MAP: Record<string, number> = {
+  "intent": 0,
+  "research": 1,
+  "places": 1,
+  "flights": 2,
+  "advisory": 3,
+  "route": 4,
+  "stay": 5,
+  "discovery": 6,
+  "finalize": 7,
+  "complete": 7,
+};
+
+export interface LivePhase {
+  icon: string;
+  label: string;
 }
 
-export function ThinkingSteps({ isRoute }: ThinkingStepsProps) {
+interface ThinkingStepsProps {
+  isRoute: boolean;
+  livePhase?: LivePhase | null;
+}
+
+export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
   const [visiblePhases, setVisiblePhases] = useState(1);
   const [factIndex, setFactIndex] = useState(0);
+  const timersCleaned = useRef(false);
 
+  // If livePhase is provided, jump to the matching phase index
   useEffect(() => {
+    if (!livePhase) return;
+    const idx = THINKING_PHASES.findIndex(
+      (p) => p.icon === livePhase.icon || p.label === livePhase.label,
+    );
+    if (idx >= 0) setVisiblePhases(idx + 1);
+  }, [livePhase]);
+
+  // Fallback timer-based progression when no live phases come in
+  useEffect(() => {
+    if (timersCleaned.current) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
     THINKING_PHASES.forEach((phase, i) => {
       if (i === 0) return;
-      timers.push(setTimeout(() => setVisiblePhases(i + 1), phase.delay));
+      timers.push(setTimeout(() => setVisiblePhases((prev) => Math.max(prev, i + 1)), phase.delay));
     });
+    timersCleaned.current = true;
     return () => timers.forEach(clearTimeout);
   }, []);
 
@@ -52,12 +85,15 @@ export function ThinkingSteps({ isRoute }: ThinkingStepsProps) {
   }, [isRoute]);
 
   const phases = isRoute ? THINKING_PHASES : THINKING_PHASES.slice(0, 3);
+  const activeLabel = livePhase?.label || phases[visiblePhases - 1]?.label || "";
 
   return (
     <div className="ai-thinking-steps">
       <div className="ai-thinking-steps-header">
         <div className="ai-thinking-pulse" />
-        <span className="ai-thinking-title">Planlıyorum</span>
+        <span className="ai-thinking-title">
+          {livePhase ? livePhase.label : "Planlıyorum"}
+        </span>
       </div>
 
       <div className="ai-thinking-phases">
@@ -89,4 +125,13 @@ export function ThinkingSteps({ isRoute }: ThinkingStepsProps) {
       )}
     </div>
   );
+}
+
+/** Convert an SSE status event { phase, message } to a LivePhase for ThinkingSteps. */
+export function sseStatusToLivePhase(phase: string, message?: string): LivePhase {
+  const idx = PHASE_MAP[phase?.toLowerCase()] ?? 0;
+  return {
+    icon: THINKING_PHASES[idx]?.icon ?? "psychology",
+    label: message || THINKING_PHASES[idx]?.label || "İşleniyor...",
+  };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { buildFlightCard, buildHotelCard, buildTripAffiliateBundle } from "../lib/affiliate/travelpayouts";
+import { buildFlightCard, buildHotelCard, buildTripAffiliateBundle, extractDateFromText } from "../lib/affiliate/travelpayouts";
 import type { AffiliateCard } from "../lib/affiliate/types";
 import type { UnifiedRoutePlan } from "../lib/ai/types";
 
@@ -109,9 +109,10 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
 }
 
 /** Compact 2-button strip for non-route messages where a destination is detected. */
-export function InlineAffiliateStrip({ destination }: { destination: string }) {
-  const flight = useMemo(() => buildFlightCard({ destination }), [destination]);
-  const hotel = useMemo(() => buildHotelCard({ destination }), [destination]);
+export function InlineAffiliateStrip({ destination, messageText }: { destination: string; messageText?: string }) {
+  const departDate = useMemo(() => messageText ? extractDateFromText(messageText) : undefined, [messageText]);
+  const flight = useMemo(() => buildFlightCard({ destination, departDate }), [destination, departDate]);
+  const hotel = useMemo(() => buildHotelCard({ destination, checkIn: departDate }), [destination, departDate]);
 
   function track(card: AffiliateCard) {
     try {
