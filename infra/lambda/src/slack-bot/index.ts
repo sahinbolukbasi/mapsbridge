@@ -65,8 +65,8 @@ function verifySlackSignature(
 }
 
 function isAuthorized(userId: string, channelId: string, env: AppEnv): boolean {
-  const allowed = env.ALLOWED_USERS?.split(",").map((u) => u.trim()) || [];
-  const channels = env.ALLOWED_CHANNELS?.split(",").map((c) => c.trim()) || [];
+  const allowed = (env.ALLOWED_USERS?.split(",").map((u) => u.trim()) || []).filter(Boolean);
+  const channels = (env.ALLOWED_CHANNELS?.split(",").map((c) => c.trim()) || []).filter(Boolean);
 
   if (allowed.length > 0 && !allowed.includes(userId)) return false;
   if (channels.length > 0 && !channels.includes(channelId)) return false;
@@ -299,9 +299,13 @@ export async function handler(event: {
   rawPath: string;
   headers: Record<string, string>;
   body: string;
+  isBase64Encoded?: boolean;
   requestContext?: { http?: { method?: string } };
 }) {
-  const { rawPath, headers, body } = event;
+  const { rawPath, headers } = event;
+  const rawBody = event.isBase64Encoded
+    ? Buffer.from(event.body || "", "base64").toString("utf-8")
+    : (event.body || "");
   const secret = await getSecret("SLACK_SIGNING_SECRET");
 
   if (!secret) {
@@ -312,12 +316,12 @@ export async function handler(event: {
   const timestamp = headers["x-slack-request-timestamp"] || "";
   const signature = headers["x-slack-signature"] || "";
 
-  if (!verifySlackSignature(body || "", timestamp, signature, secret)) {
+  if (!verifySlackSignature(rawBody, timestamp, signature, secret)) {
     console.warn("Invalid Slack signature", { timestamp, path: rawPath });
     return { statusCode: 401, body: JSON.stringify({ error: "Unauthorized" }) };
   }
 
-  const params = parseFormBody(body || "");
+  const params = parseFormBody(rawBody);
   const userId = params.user_id || "";
   const channelId = params.channel_id || "";
   const command = params.command || "";
