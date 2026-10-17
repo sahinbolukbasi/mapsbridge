@@ -161,40 +161,35 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
             </Link>
 
             <nav className="header-nav-center">
+              {!(mounted && userEmail) && (
+                <Link
+                  className={`header-nav-pill ${
+                    pathname === "/" ||
+                    pathname === "/en" ||
+                    pathname === "/en/" ||
+                    (pathname.startsWith("/?") && !pathname.startsWith("/desk"))
+                      ? "active"
+                      : ""
+                  }`}
+                  href="/"
+                  prefetch={false}
+                >
+                  {t("nav.explore")}
+                </Link>
+              )}
               <Link
-                className={`header-nav-pill ${
-                  pathname === "/" ||
-                  pathname === "/en" ||
-                  pathname === "/en/" ||
-                  (pathname.startsWith("/?") && !pathname.startsWith("/desk"))
-                    ? "active"
-                    : ""
-                }`}
-                href="/"
-                prefetch={false}
-              >
-                {t("nav.explore")}
-              </Link>
-              <Link
-                className={`header-nav-pill ${pathname.startsWith("/harita") || pathname.startsWith("/desk") ? "active" : ""}`}
-                href="/desk/"
+                className={`header-nav-pill ${pathname.startsWith("/haritalar") || pathname.startsWith("/harita") || pathname.startsWith("/desk") ? "active" : ""}`}
+                href="/haritalar/"
                 prefetch={false}
               >
                 {t("nav.desk")}
               </Link>
               <Link
-                className={`header-nav-pill ${pathname.startsWith("/ai-asistan") || (pathname.startsWith("/ai") && !pathname.startsWith("/ai-asistan")) ? "active" : ""}`}
-                href="/ai-asistan/"
+                className={`header-nav-pill ${pathname.startsWith("/gezi-asistani") || pathname.startsWith("/ai-asistan") || (pathname.startsWith("/ai") && !pathname.startsWith("/ai-asistan")) ? "active" : ""}`}
+                href="/gezi-asistani/"
                 prefetch={false}
               >
                 {t("nav.ai")}
-              </Link>
-              <Link
-                className={`header-nav-pill ${pathname.startsWith("/mobil-uygulamalar") ? "active" : ""}`}
-                href="/mobil-uygulamalar/"
-                prefetch={false}
-              >
-                {t("nav.mobileApps")}
               </Link>
               <Link
                 className={`header-nav-pill ${pathname.startsWith("/community") ? "active" : ""}`}
@@ -204,38 +199,29 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                 {t("nav.community")}
               </Link>
               {mounted && userEmail && (
-                <>
-                  <Link
-                    className={`header-nav-pill ${pathname.startsWith("/messages") ? "active" : ""}`}
-                    href="/messages/"
-                    prefetch={false}
-                    style={{ position: "relative" }}
-                  >
-                    {t("nav.messages")}
-                    {unreadMessagesCount > 0 && (
-                      <span
-                        style={{
-                          marginLeft: "0.35rem",
-                          padding: "0.1rem 0.4rem",
-                          borderRadius: "9999px",
-                          background: "#10b981",
-                          color: "#ffffff",
-                          fontSize: "10px",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {unreadMessagesCount}
-                      </span>
-                    )}
-                  </Link>
-                  <Link
-                    className={`header-nav-pill ${pathname.startsWith("/profile") ? "active" : ""}`}
-                    href="/profile/"
-                    prefetch={false}
-                  >
-                    {t("nav.myRoutes")}
-                  </Link>
-                </>
+                <Link
+                  className={`header-nav-pill ${pathname.startsWith("/messages") ? "active" : ""}`}
+                  href="/messages/"
+                  prefetch={false}
+                  style={{ position: "relative" }}
+                >
+                  {t("nav.messages")}
+                  {unreadMessagesCount > 0 && (
+                    <span
+                      style={{
+                        marginLeft: "0.35rem",
+                        padding: "0.1rem 0.4rem",
+                        borderRadius: "9999px",
+                        background: "#10b981",
+                        color: "#ffffff",
+                        fontSize: "10px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {unreadMessagesCount}
+                    </span>
+                  )}
+                </Link>
               )}
             </nav>
           </div>
@@ -523,146 +509,6 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                           open_in_new
                         </span>
                       </a>
-
-                      <div
-                        style={{
-                          height: "1px",
-                          background: "rgba(226, 232, 240, 0.8)",
-                          margin: "0.35rem 0.25rem",
-                        }}
-                      ></div>
-
-                      {/* 4. Tercihler & Güvenlik */}
-                      <div className="header-stitch-section-label">Tercihler &amp; Güvenlik</div>
-
-                      <a
-                        href="/profile/edit/?tab=guvenlik"
-                        className="header-stitch-item"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined" style={{ color: "#717974" }}>
-                            settings
-                          </span>
-                          <span>Hesap Ayarları &amp; Güvenlik</span>
-                        </div>
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "3px",
-                            padding: "0.15rem 0.4rem",
-                            borderRadius: "4px",
-                            background: "#ecfdf5",
-                            color: "#286954",
-                            fontSize: "9px",
-                            fontWeight: 700,
-                          }}
-                        >
-                          <span
-                            style={{
-                              width: "5px",
-                              height: "5px",
-                              borderRadius: "9999px",
-                              background: "#10b981",
-                            }}
-                          ></span>
-                          2FA Aktif
-                        </span>
-                      </a>
-
-                      <a
-                        href="/mobil-uygulamalar/"
-                        className="header-stitch-item"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined" style={{ color: "#10b981" }}>
-                            phone_iphone
-                          </span>
-                          <span>Mobil Uygulama</span>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            padding: "2px 6px",
-                            borderRadius: "9999px",
-                            background: "#ecfdf5",
-                            color: "#065f46",
-                            fontWeight: 700,
-                          }}
-                        >
-                          Pek Yakında
-                        </span>
-                      </a>
-
-                      {/* Mobil Platform Tasarımı (iOS / Android) */}
-                      <button
-                        type="button"
-                        className="header-stitch-item"
-                        style={{
-                          width: "100%",
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                          textAlign: "left",
-                        }}
-                        onClick={() => setPlatform(platform === "ios" ? "android" : "ios")}
-                        title="iOS / Android Görünümünü Değiştir"
-                      >
-                        <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined" style={{ color: "#717974" }}>
-                            devices
-                          </span>
-                          <span>Mobil Tasarım</span>
-                        </div>
-                        <span style={{ fontSize: "11px", fontWeight: 700, color: "#286954" }}>
-                          {platform === "ios" ? " iOS (Cupertino)" : "🤖 Android (M3)"}
-                        </span>
-                      </button>
-
-                      {/* Mobil Karşılama & Giriş Ekranı */}
-                      <Link
-                        href="/welcome/"
-                        className="header-stitch-item"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined" style={{ color: "#717974" }}>
-                            wallpaper
-                          </span>
-                          <span>Açılış &amp; Giriş Ekranı</span>
-                        </div>
-                        <span style={{ fontSize: "11px", fontWeight: 700, color: "#286954" }}>
-                          Önizle
-                        </span>
-                      </Link>
-
-                      {/* 5. Canlı Gezgin Kodu Mini Kartı */}
-                      <div className="header-stitch-code-card">
-                        <div className="header-stitch-code-text">
-                          <span
-                            className="material-symbols-outlined"
-                            style={{ fontSize: "16px", color: "#286954" }}
-                          >
-                            qr_code_2
-                          </span>
-                          <span>
-                            Gezgin Kodun:{" "}
-                            <strong style={{ color: "#013628", fontWeight: 800 }}>#849-201</strong>
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          className="header-stitch-code-btn"
-                          title="Kodu Kopyala"
-                          onClick={handleCopyTravelerCode}
-                        >
-                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                            {copiedTravelerCode ? "check" : "content_copy"}
-                          </span>
-                        </button>
-                      </div>
                     </div>
 
                     {/* 6. Alt Aksiyonlar & Çıkış */}

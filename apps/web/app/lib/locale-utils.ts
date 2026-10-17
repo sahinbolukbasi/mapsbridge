@@ -7,14 +7,17 @@ export function getLocaleFromPath(pathname: string): AppLocale {
 const ROUTE_MAP: Record<string, string> = {
   "/": "/en/",
   "/en/": "/",
+  "/haritalar/": "/desk/",
+  "/desk/": "/haritalar/",
   "/harita/": "/desk/",
-  "/desk/": "/harita/",
-  "/ai-asistan/": "/ai/",
+  "/gezi-asistani/": "/ai-asistan/",
+  "/ai-asistan/": "/gezi-asistani/",
   "/ai/": "/ai-asistan/",
   "/mobil-uygulamalar/": "/mobile-apps/",
   "/mobile-apps/": "/mobil-uygulamalar/",
   "/sifre-sifirla/": "/reset-password/",
   "/reset-password/": "/sifre-sifirla/",
+  "/forgot-password/": "/reset-password/",
 };
 
 export function getAlternatePath(pathname: string): string {

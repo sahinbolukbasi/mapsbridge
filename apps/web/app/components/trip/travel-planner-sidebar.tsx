@@ -1127,34 +1127,8 @@ export function TravelPlannerSidebar({
                   )}
                 </div>
 
-                {/* Controls: Mode Toggle & Collapse */}
+                {/* Controls: Collapse only */}
                 <div className="stitch-header-right-ctrls">
-                  {/* Mode Segmented Bar */}
-                  <div className="stitch-mode-segmented-bar">
-                    <button
-                      type="button"
-                      onClick={() => setWorkspaceMode("edit")}
-                      className={`stitch-mode-segment-btn ${workspaceMode === "edit" ? "active" : ""}`}
-                      title="Rota Düzenleme Modu"
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                        edit_location_alt
-                      </span>
-                      <span>Düzenle</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setWorkspaceMode("travel")}
-                      className={`stitch-mode-segment-btn ${workspaceMode === "travel" ? "active" : ""}`}
-                      title="Gezi / Navigasyon Modu"
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                        navigation
-                      </span>
-                      <span>Gezi</span>
-                    </button>
-                  </div>
-
                   {/* Panel Collapse Toggle */}
                   <button
                     type="button"
@@ -1392,135 +1366,25 @@ export function TravelPlannerSidebar({
                   </div>
                 )}
 
-                {/* Quick Action Toolbar — 2 buton: Sırala + AI */}
-                <div className="stitch-quick-grid-2">
-                  {/* Action 1: Route Order Optimize */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onRunOptimize?.();
-                      showToast("⚡ Duraklar coğrafi sıraya göre optimize ediliyor...");
-                    }}
-                    className="stitch-quick-grid-btn"
-                    title="Durakları en uygun yol sırasına göre optimize et"
+                {/* Rotayı Optimize Et */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onRunOptimize?.();
+                    showToast("⚡ Duraklar coğrafi sıraya göre optimize ediliyor...");
+                  }}
+                  className="stitch-quick-grid-btn"
+                  style={{ width: "100%", justifyContent: "center", gap: "8px" }}
+                  title="Durakları en uygun yol sırasına göre optimize et"
+                >
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "15px", color: "#f59e0b" }}
                   >
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: "15px", color: "#f59e0b" }}
-                    >
-                      auto_fix_high
-                    </span>
-                    <span>Otomatik Sırala</span>
-                  </button>
-
-                  {/* Action 2: AI Modification */}
-                  <button
-                    type="button"
-                    onClick={() => setShowAiInput(!showAiInput)}
-                    className={`stitch-quick-grid-btn ${showAiInput ? "active" : ""}`}
-                    title="AI ile rotayı yeniden düzenleyin veya durak ekleyin"
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: "15px", color: showAiInput ? "#ffffff" : "#10b981" }}
-                    >
-                      smart_toy
-                    </span>
-                    <span>AI ile Düzenle</span>
-                  </button>
-                </div>
-
-                {/* Sub-Drawer: AI Route Prompt */}
-                {showAiInput && (
-                  <div className="stitch-drawer-card">
-                    <div className="stitch-drawer-header">
-                      <span className="stitch-drawer-title">
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
-                          smart_toy
-                        </span>
-                        AI ile Rota Düzenle
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setShowAiInput(false)}
-                        className="stitch-icon-action-btn"
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <input
-                        type="text"
-                        value={aiPrompt}
-                        onChange={(e) => setAiPrompt(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleAiModifyRoute();
-                          }
-                        }}
-                        placeholder="Örn: Tarihi yerleri öne al, kahve ekle..."
-                        className="stitch-drawer-input"
-                        style={{ flex: 1 }}
-                        disabled={isAiModifying}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleAiModifyRoute()}
-                        disabled={isAiModifying || !aiPrompt.trim()}
-                        className="stitch-btn-primary"
-                        style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                      >
-                        {isAiModifying ? (
-                          <span
-                            className="material-symbols-outlined animate-spin"
-                            style={{ fontSize: "14px" }}
-                          >
-                            progress_activity
-                          </span>
-                        ) : (
-                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                            send
-                          </span>
-                        )}
-                        <span>{isAiModifying ? "..." : "Uygula"}</span>
-                      </button>
-                    </div>
-
-                    <div
-                      style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}
-                    >
-                      {[
-                        "☕ Yakında kafe molası ekle",
-                        "🏛️ Tarihi yerleri öne al",
-                        "🍽️ Yerel restoran ekle",
-                        "🌿 Rotayı sakinleştir",
-                        "⏱️ Günlük süreyi kısalt",
-                      ].map((pill) => (
-                        <button
-                          key={pill}
-                          type="button"
-                          onClick={() => handleAiModifyRoute(pill)}
-                          disabled={isAiModifying}
-                          style={{
-                            fontSize: "11px",
-                            padding: "3px 8px",
-                            borderRadius: "9999px",
-                            backgroundColor: "var(--mb-mint, #ecfdf5)",
-                            color: "var(--mb-forest-dark, #064e3b)",
-                            border: "1px solid var(--mb-border, #d1fae5)",
-                            cursor: "pointer",
-                            fontWeight: 600,
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {pill}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                    auto_fix_high
+                  </span>
+                  <span>Rotayı Optimize Et</span>
+                </button>
 
                 {/* Optional Category Filter Chips (Shown when there are stops) */}
                 {pinsWithTime.length > 0 && (
@@ -1547,6 +1411,45 @@ export function TravelPlannerSidebar({
                 )}
               </div>
             )}
+
+            {/* ── Mode Toggle (always visible, below tools panel) ── */}
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                borderTop: "1px solid rgba(226,232,240,0.6)",
+                marginTop: "4px",
+                paddingTop: "8px",
+                paddingLeft: "12px",
+                paddingRight: "12px",
+                paddingBottom: "4px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setWorkspaceMode("edit")}
+                className={`stitch-mode-segment-btn ${workspaceMode === "edit" ? "active" : ""}`}
+                style={{ flex: 1, justifyContent: "center" }}
+                title="Rota Düzenleme Modu"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  edit_location_alt
+                </span>
+                <span>Düzenle</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setWorkspaceMode("travel")}
+                className={`stitch-mode-segment-btn ${workspaceMode === "travel" ? "active" : ""}`}
+                style={{ flex: 1, justifyContent: "center" }}
+                title="Gezi / Navigasyon Modu"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  navigation
+                </span>
+                <span>Gezi Modu</span>
+              </button>
+            </div>
 
             {/* ════════════════════════════════════════════════════════════════ */}
             {/* WORKSPACE MODE 2: GEZİ MODU (Navigation / Progress Mode)        */}
