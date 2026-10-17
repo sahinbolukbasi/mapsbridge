@@ -45,7 +45,7 @@ resource "aws_cloudfront_function" "spa_router" {
       }
 
       // Auth-protected routes: require mb_session cookie
-      var protectedPrefixes = ['/desk', '/profile', '/messages', '/ai'];
+      var protectedPrefixes = ['/desk', '/haritalar', '/profile', '/messages', '/ai', '/gezi-asistani'];
       var isProtected = false;
       for (var i = 0; i < protectedPrefixes.length; i++) {
         if (uri === protectedPrefixes[i] || uri.startsWith(protectedPrefixes[i] + '/')) {

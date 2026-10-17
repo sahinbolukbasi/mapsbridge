@@ -143,6 +143,8 @@ export async function signIn(email: string, password: string) {
     }
     localStorage.setItem("mapsbridge.userEmail", cleanEmail);
     localStorage.setItem("mapsbridge.loginTime", Date.now().toString());
+    // Set mb_session cookie for CloudFront edge auth check
+    document.cookie = `mb_session=1;path=/;max-age=86400;SameSite=Lax`;
   }
 
   return result;
@@ -162,6 +164,7 @@ export async function refreshSession() {
     if (result?.AccessToken && result?.IdToken) {
       localStorage.setItem("mapsbridge.accessToken", result.AccessToken);
       localStorage.setItem("mapsbridge.idToken", result.IdToken);
+      document.cookie = `mb_session=1;path=/;max-age=86400;SameSite=Lax`;
       return {
         token: result.AccessToken,
         accessToken: result.AccessToken,
@@ -200,13 +203,20 @@ export function willExpireSoon(token: string | null | undefined, windowMs = 600_
 
 export function getStoredSession() {
   if (typeof window === "undefined") return null;
-  let token =
+  const token =
     localStorage.getItem("mapsbridge.accessToken") || localStorage.getItem("mapsbridge.idToken");
   const email = localStorage.getItem("mapsbridge.userEmail");
 
   const cleanEmail = email ? email.trim().toLowerCase() : "";
 
-  return token ? { token, email: cleanEmail || "" } : null;
+  if (token) {
+    // Ensure CloudFront edge cookie is in sync with localStorage session
+    if (!document.cookie.includes("mb_session=")) {
+      document.cookie = `mb_session=1;path=/;max-age=86400;SameSite=Lax`;
+    }
+    return { token, email: cleanEmail || "" };
+  }
+  return null;
 }
 
 export function signOut() {
@@ -217,6 +227,8 @@ export function signOut() {
     localStorage.removeItem("mapsbridge.userEmail");
     localStorage.removeItem("mapsbridge.loginTime");
     localStorage.removeItem("mapsbridge.userProfileDetails");
+    // Clear CloudFront edge auth cookie
+    document.cookie = `mb_session=;path=/;max-age=0;SameSite=Lax`;
   }
 }
 
@@ -330,6 +342,7 @@ export function handleGoogleCredentialResponse(
   localStorage.setItem("mapsbridge.idToken", token);
   localStorage.setItem("mapsbridge.userEmail", cleanEmail);
   localStorage.setItem("mapsbridge.loginTime", Date.now().toString());
+  document.cookie = `mb_session=1;path=/;max-age=86400;SameSite=Lax`;
 
   // Profil detaylarını kaydet
   const nameParts = (name || cleanUsername).split(" ");
@@ -392,6 +405,7 @@ export function handleAppleCredentialResponse(
   localStorage.setItem("mapsbridge.idToken", token);
   localStorage.setItem("mapsbridge.userEmail", cleanEmail);
   localStorage.setItem("mapsbridge.loginTime", Date.now().toString());
+  document.cookie = `mb_session=1;path=/;max-age=86400;SameSite=Lax`;
 
   const nameParts = (name || cleanUsername).split(" ");
   const firstName = nameParts[0] || "";
