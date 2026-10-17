@@ -1,0 +1,65 @@
+name: CI — Infra
+
+on:
+  pull_request:
+    paths:
+      - "infra/terraform/**"
+      - "infra/admin-runtime/**"
+      - "infra/agentcore-gateway/**"
+      - "infra/ai-memory/**"
+      - ".github/workflows/ci-infra.yml"
+  push:
+    branches: [main, develop]
+    paths:
+      - "infra/terraform/**"
+      - "infra/admin-runtime/**"
+      - "infra/agentcore-gateway/**"
+      - "infra/ai-memory/**"
+
+concurrency:
+  group: ci-infra-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform-validate:
+    name: Terraform Validate (${{ matrix.stack }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stack: [terraform, admin-runtime, agentcore-gateway, ai-memory]
+    defaults:
+      run:
+        working-directory: infra/${{ matrix.stack }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Create .build placeholders
+        run: |
+          mkdir -p .build/lambdas .build/layer
+          case "${{ matrix.stack }}" in
+            terraform)
+              for name in auth routes chat marketplace ai stripe admin cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
+                echo "placeholder" | zip -q .build/lambdas/${name}.zip -
+              done
+              echo "placeholder" | zip -q .build/layer/shared.zip -
+              ;;
+            admin-runtime)
+              for name in admin routes operations ai stripe background-monitor; do
+                echo "placeholder" | zip -q .build/${name}.zip -
+              done
+              ;;
+            agentcore-gateway)
+              for name in tools data-tools; do
+                echo "placeholder" | zip -q .build/${name}.zip -
+              done
+              ;;
+            ai-memory)
+              for name in control worker; do
+                echo "placeholder" | zip -q .build/${name}.zip -
+              done
+              ;;
+          esac
+      - run: terraform init -backend=false
+        continue-on-error: true
+      - run: terraform validate

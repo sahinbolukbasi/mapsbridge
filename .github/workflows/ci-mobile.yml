@@ -1,0 +1,33 @@
+name: CI — Mobile
+
+on:
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "packages/**"
+      - ".github/workflows/ci-mobile.yml"
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/mobile/**"
+      - "packages/**"
+
+concurrency:
+  group: ci-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  typecheck:
+    name: Mobile TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run mobile:typecheck
