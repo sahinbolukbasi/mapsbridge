@@ -63,8 +63,77 @@ resource "aws_iam_role_policy" "github_deploy" {
       {
         Sid    = "SSMRead"
         Effect = "Allow"
-        Action = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"]
+        Action = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath", "ssm:DescribeParameters", "ssm:PutParameter", "ssm:DeleteParameter"]
         Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/mapsbridge/*"
+      },
+      {
+        Sid    = "EC2Read"
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeInternetGateways",
+          "ec2:DescribeRouteTables",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeNatGateways",
+          "ec2:DescribeVpcEndpoints",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DescribeAddresses",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "TerraformStateFullAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:ListBucket",
+          "s3:GetBucketVersioning", "s3:GetEncryptionConfiguration", "s3:GetBucketPolicy",
+          "s3:GetBucketAcl", "s3:GetBucketCORS", "s3:GetBucketWebsite",
+          "s3:GetBucketTagging", "s3:PutBucketTagging", "s3:GetLifecycleConfiguration",
+          "s3:GetBucketLogging", "s3:GetBucketRequestPayment", "s3:GetBucketObjectLockConfiguration",
+          "s3:GetReplicationConfiguration", "s3:GetAccelerateConfiguration",
+          "s3:GetBucketPublicAccessBlock", "s3:PutBucketPublicAccessBlock",
+          "s3:GetBucketOwnershipControls", "s3:PutBucketOwnershipControls",
+        ]
+        Resource = [
+          "arn:aws:s3:::mapsbridge-*",
+          "arn:aws:s3:::mapsbridge-*/*",
+          "arn:aws:s3:::${local.name}-terraform-state",
+          "arn:aws:s3:::${local.name}-terraform-state/*",
+        ]
+      },
+      {
+        Sid    = "TerraformFullManage"
+        Effect = "Allow"
+        Action = [
+          "cloudfront:*",
+          "wafv2:*",
+          "ce:*",
+          "budgets:*",
+          "elasticache:*",
+          "rds:*",
+          "kms:Describe*", "kms:Get*", "kms:List*", "kms:CreateKey", "kms:CreateAlias",
+          "kms:EnableKeyRotation", "kms:ScheduleKeyDeletion", "kms:TagResource",
+          "iam:GetRole", "iam:GetRolePolicy", "iam:PutRolePolicy", "iam:CreateRole",
+          "iam:AttachRolePolicy", "iam:DetachRolePolicy", "iam:DeleteRolePolicy",
+          "iam:PassRole", "iam:TagRole", "iam:ListRolePolicies", "iam:ListAttachedRolePolicies",
+          "iam:GetOpenIDConnectProvider", "iam:ListOpenIDConnectProviders",
+          "iam:CreateOpenIDConnectProvider", "iam:AddClientIDToOpenIDConnectProvider",
+          "resource-groups:*",
+          "logs:*",
+          "cognito-idp:*",
+          "dynamodb:*",
+          "firehose:*",
+          "glue:*",
+          "athena:*",
+          "sqs:*",
+          "sns:*",
+          "apigateway:*",
+          "execute-api:*",
+          "tag:*",
+        ]
+        Resource = "*"
       }
     ]
   })
