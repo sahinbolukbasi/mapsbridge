@@ -37,7 +37,8 @@ import {
   CameraIcon,
 } from "../components/Icons";
 import { ScreenTourModal } from "../components/ScreenTourModal";
-import { purchasePackage, getOfferings } from "../services/revenuecat";
+import { PaywallModal } from "../components/PaywallModal";
+import { getOfferings, isProSync } from "../services/revenuecat";
 
 interface PlanScreenProps {
   onOpenMap: (stopId?: string) => void;
@@ -222,6 +223,7 @@ export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
   const [activeDay, setActiveDay] = useState<number>(1);
   const [showPool, setShowPool] = useState<boolean>(false);
   const [offerings, setOfferings] = useState<any>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   // Modals
   const [showRoutePickerModal, setShowRoutePickerModal] = useState<boolean>(false);
@@ -401,6 +403,11 @@ export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
   };
 
   const handleApplyTemplate = (tmpl: (typeof SAMPLE_TEMPLATES)[0]) => {
+    // Gate: templates are a Pro feature
+    if (!isProSync()) {
+      setShowPaywall(true);
+      return;
+    }
     tripStore.setActiveRoute({
       id: `route-${Date.now()}`,
       name: tmpl.name,
@@ -749,10 +756,20 @@ export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
             </View>
 
             {/* Popular Starter Templates */}
-            <Text style={styles.starterTemplatesTitle}>Hızlı Başlangıç Şablonları</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+              <Text style={[styles.starterTemplatesTitle, { marginBottom: 0, flex: 1 }]}>Hızlı Başlangıç Şablonları</Text>
+              {!isProSync() && (
+                <TouchableOpacity
+                  onPress={() => setShowPaywall(true)}
+                  style={{ backgroundColor: "#34d399", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}
+                >
+                  <Text style={{ fontSize: 10, fontWeight: "800", color: "#020e0a" }}>PRO</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             <View style={styles.starterTemplatesList}>
               {SAMPLE_TEMPLATES.map((tmpl) => (
-                <View key={tmpl.id} style={styles.templateCard}>
+                <View key={tmpl.id} style={[styles.templateCard, !isProSync() && { opacity: 0.75 }]}>
                   <View style={{ flex: 1, marginRight: 8 }}>
                     <Text style={styles.templateCity}>{tmpl.city}</Text>
                     <Text style={styles.templateName}>{tmpl.name}</Text>
@@ -765,7 +782,7 @@ export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
                     onPress={() => handleApplyTemplate(tmpl)}
                     activeOpacity={0.8}
                   >
-                    <Text style={styles.templateApplyBtnText}>Kullan</Text>
+                    <Text style={styles.templateApplyBtnText}>{isProSync() ? "Kullan" : "🔒 Kullan"}</Text>
                   </TouchableOpacity>
                 </View>
               ))}
@@ -1482,6 +1499,12 @@ export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
         </View>
       </Modal>
       <ScreenTourModal screen="plan" />
+
+      {/* Paywall Modal — opened by template gate and other Pro features */}
+      <PaywallModal
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+      />
     </SafeAreaView>
   );
 }

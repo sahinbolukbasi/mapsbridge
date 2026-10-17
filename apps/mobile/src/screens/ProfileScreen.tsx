@@ -40,6 +40,8 @@ import { EditProfileModal } from "../components/EditProfileModal";
 import { EditPostModal } from "../components/EditPostModal";
 import { ChatScreen } from "./ChatScreen";
 import { ScreenTourModal } from "../components/ScreenTourModal";
+import { PaywallModal } from "../components/PaywallModal";
+import { getCustomerInfo, getActiveTier, type PlanTier } from "../services/revenuecat";
 
 interface ProfileScreenProps {
   onShowWelcome: () => void;
@@ -65,11 +67,18 @@ export function ProfileScreen({
   const [editingPost, setEditingPost] = useState<MobileCommunityPost | null>(null);
   const [renamingRoute, setRenamingRoute] = useState<ActiveRoute | null>(null);
   const [renameRouteText, setRenameRouteText] = useState<string>("");
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [planTier, setPlanTier] = useState<PlanTier>("free");
 
   useEffect(() => {
     async function loadData() {
       const currentSession = await authService.getSession();
       setSession(currentSession);
+
+      // Load RevenueCat entitlement status
+      getCustomerInfo()
+        .then((info) => { if (info) setPlanTier(getActiveTier(info)); })
+        .catch(() => {});
 
       const userProf = await socialSyncService.getUserProfile();
       setProfile(userProf);
@@ -597,6 +606,35 @@ export function ProfileScreen({
             </View>
           </TouchableOpacity>
 
+          {/* Abonelik Durumu */}
+          <TouchableOpacity
+            style={styles.toolRow}
+            onPress={() => setShowPaywall(true)}
+            activeOpacity={0.75}
+          >
+            <View style={styles.toolLeft}>
+              <View style={[styles.toolIconWrap, { backgroundColor: planTier === "pro" ? "rgba(52,211,153,0.15)" : "#fef3c7" }]}>
+                <Text style={{ fontSize: 16 }}>{planTier === "pro" ? "⭐" : "🔓"}</Text>
+              </View>
+              <View>
+                <Text style={styles.toolLabel}>
+                  {planTier === "pro" ? "MapsBridge Pro ✓" : "Ücretsiz Plan"}
+                </Text>
+                <Text style={{ fontSize: 10, color: planTier === "pro" ? "#34d399" : "#717974" }}>
+                  {planTier === "pro" ? "Tüm özellikler aktif" : "Pro'ya geçerek tüm özellikleri aç"}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.toolRight}>
+              {planTier !== "pro" && (
+                <View style={{ backgroundColor: "#34d399", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}>
+                  <Text style={{ fontSize: 10, fontWeight: "800", color: "#020e0a" }}>UPGRADE</Text>
+                </View>
+              )}
+              <Text style={styles.toolChevron}>›</Text>
+            </View>
+          </TouchableOpacity>
+
           {/* Gezgin Sohbet & Mesajlaşma */}
           <TouchableOpacity
             style={styles.toolRow}
@@ -662,6 +700,16 @@ export function ProfileScreen({
           <Text style={styles.botanicalFooterText}>MAPSBRIDGE BOTANICAL • v3.4.1</Text>
         </View>
       </ScrollView>
+
+      {/* Paywall Modal */}
+      <PaywallModal
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onProUnlocked={() => {
+          setPlanTier("pro");
+          setShowPaywall(false);
+        }}
+      />
 
       {/* Rename Route Modal */}
       <Modal visible={renamingRoute !== null} transparent animationType="fade">

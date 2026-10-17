@@ -60,7 +60,15 @@ export default {
       ],
       predictiveBackGestureEnabled: false,
     },
-    plugins: ["expo-secure-store"],
+    plugins: [
+      "expo-secure-store",
+      [
+        "react-native-purchases",
+        {
+          apiKey: process.env.EXPO_PUBLIC_RC_API_KEY_IOS ?? "",
+        },
+      ],
+    ],
     web: {
       favicon: "./assets/favicon.png",
     },
