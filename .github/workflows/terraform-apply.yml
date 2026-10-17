@@ -27,6 +27,11 @@ on:
         required: false
         default: ""
         type: string
+      refresh:
+        description: "Refresh state before plan (false = faster, skip AWS reads)"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -82,7 +87,11 @@ jobs:
           if [ -n "${{ github.event.inputs.target }}" ]; then
             TARGET_ARGS="-target=${{ github.event.inputs.target }}"
           fi
-          terraform plan -out=tfplan $TARGET_ARGS
+          REFRESH_ARG=""
+          if [ "${{ github.event.inputs.refresh }}" = "false" ]; then
+            REFRESH_ARG="-refresh=false"
+          fi
+          terraform plan -out=tfplan $TARGET_ARGS $REFRESH_ARG
 
       - name: Terraform Apply
         if: ${{ github.event.inputs.plan_only != 'true' }}
