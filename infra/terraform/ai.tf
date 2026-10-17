@@ -9,7 +9,7 @@
 # Bedrock Knowledge Base — RAG over regional travel data
 # (created via console or the bedrock module; placeholder wiring here)
 resource "aws_bedrockagent_knowledge_base" "travel" {
-  count = var.enable_bedrock ? 1 : 0
+  count = var.enable_bedrock && var.opensearch_collection_arn != "" ? 1 : 0
 
   name     = "${local.name}-travel-kb"
   role_arn = aws_iam_role.bedrock_kb[0].arn

@@ -334,8 +334,9 @@ resource "aws_iam_role_policy" "billing_data" {
 }
 
 resource "aws_iam_role_policy" "stripe_secrets" {
-  name = "stripe-secrets-and-legacy-queue"
-  role = aws_iam_role.lambda["stripe"].id
+  count = contains(keys(var.lambda_domains), "stripe") ? 1 : 0
+  name  = "stripe-secrets-and-legacy-queue"
+  role  = aws_iam_role.lambda["stripe"].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -362,8 +363,9 @@ resource "aws_iam_role_policy" "rc_secrets" {
 }
 
 resource "aws_iam_role_policy" "ai_model" {
-  name = "canonical-ai-model"
-  role = aws_iam_role.lambda["ai"].id
+  count = contains(keys(var.lambda_domains), "ai") ? 1 : 0
+  name  = "canonical-ai-model"
+  role  = aws_iam_role.lambda["ai"].id
   policy = jsonencode({
     Version   = "2012-10-17"
     Statement = [{ Effect = "Allow", Action = ["bedrock:InvokeModel"], Resource = "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.bedrock_model_id}" }]
@@ -371,6 +373,7 @@ resource "aws_iam_role_policy" "ai_model" {
 }
 
 resource "aws_iam_role_policy" "admin_stripe_secret" {
+  count  = contains(keys(var.lambda_domains), "admin") ? 1 : 0
   name   = "admin-refund-secret"
   role   = aws_iam_role.lambda["admin"].id
   policy = jsonencode({ Version = "2012-10-17", Statement = [{ Effect = "Allow", Action = ["ssm:GetParameter"], Resource = "arn:aws:ssm:${var.aws_region}:*:parameter${var.stripe_secret_ssm}" }] })
