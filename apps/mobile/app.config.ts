@@ -62,12 +62,7 @@ export default {
     },
     plugins: [
       "expo-secure-store",
-      [
-        "react-native-purchases",
-        {
-          apiKey: process.env.EXPO_PUBLIC_RC_API_KEY_IOS ?? "",
-        },
-      ],
+      "react-native-purchases",
     ],
     web: {
       favicon: "./assets/favicon.png",
