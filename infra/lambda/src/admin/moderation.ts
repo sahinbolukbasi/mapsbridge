@@ -120,8 +120,8 @@ export async function handleAdminListRoutes(event: ApiGatewayEvent) {
 
   const result = await scanAllRaw(ddb, {
     TableName: getTableName(),
-    FilterExpression: "begins_with(PK, :pk) OR begins_with(SK, :sk)",
-    ExpressionAttributeValues: { ":pk": { S: "ROUTE#" }, ":sk": { S: "ROUTE#" } },
+    FilterExpression: "begins_with(PK, :pk)",
+    ExpressionAttributeValues: { ":pk": { S: "ROUTE#" } },
     Limit: limit,
   });
 

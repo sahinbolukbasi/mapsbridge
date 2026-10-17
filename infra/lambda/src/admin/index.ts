@@ -153,7 +153,7 @@ export const handler = async (event: ApiGatewayEvent) => {
       const groupRes = await cognito.send(
         new AdminListGroupsForUserCommand({
           UserPoolId: poolId,
-          Username: user.originalSub || user.sub,
+          Username: user.sub,
         }),
       );
       const groupNames = (groupRes.Groups || []).map((g: any) => g.GroupName);

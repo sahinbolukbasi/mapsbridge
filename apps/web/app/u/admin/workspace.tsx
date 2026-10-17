@@ -361,21 +361,21 @@ export function UserInspector({
             <div className="admin-stats">
               <article className="admin-card">
                 <span>Plan</span>
-                <strong>{data.subscription.tier}</strong>
+                <strong>{data.subscription?.tier ?? "—"}</strong>
                 <small>
-                  {data.subscription.status} · {date(data.subscription.currentPeriodEnd)}
+                  {data.subscription?.status} · {date(data.subscription?.currentPeriodEnd)}
                 </small>
               </article>
               <article className="admin-card">
                 <span>Kredi bakiyesi</span>
-                <strong>{data.wallet.credits}</strong>
-                <small>{data.wallet.frozen ? "Dondurulmuş" : "Kullanılabilir"}</small>
+                <strong>{data.wallet?.credits ?? "—"}</strong>
+                <small>{data.wallet?.frozen ? "Dondurulmuş" : "Kullanılabilir"}</small>
               </article>
             </div>
             {session.permissions.includes("credits") && (
               <div className="admin-actions">
                 <button
-                  disabled={data.wallet.frozen}
+                  disabled={data.wallet?.frozen}
                   onClick={() =>
                     act(
                       "Kredi bakiyesini düzenle",
@@ -398,20 +398,20 @@ export function UserInspector({
                 <button
                   onClick={() =>
                     act(
-                      data.wallet.frozen ? "Cüzdan incelemesini tamamla" : "Cüzdanı dondur",
+                      data.wallet?.frozen ? "Cüzdan incelemesini tamamla" : "Cüzdanı dondur",
                       "wallet",
                       [],
-                      { frozen: !data.wallet.frozen },
+                      { frozen: !data.wallet?.frozen },
                     )
                   }
                 >
-                  {data.wallet.frozen ? "Dondurmayı kaldır" : "Cüzdanı dondur"}
+                  {data.wallet?.frozen ? "Dondurmayı kaldır" : "Cüzdanı dondur"}
                 </button>
               </div>
             )}
-            <h3>Rotalar ({data.routes.length})</h3>
+            <h3>Rotalar ({data.routes?.length ?? 0})</h3>
             <ul className="admin-record-list">
-              {data.routes.map((route: Row) => (
+              {(data.routes ?? []).map((route: Row) => (
                 <li key={route.routeId || route.SK}>
                   <strong>{route.name || route.title}</strong>
                   <span>
@@ -420,7 +420,7 @@ export function UserInspector({
                 </li>
               ))}
             </ul>
-            {!data.routes.length && <p>Henüz rota yok.</p>}
+            {!(data.routes?.length) && <p>Henüz rota yok.</p>}
           </>
         )}
       </dialog>
@@ -746,7 +746,7 @@ export function AdminWorkspace({
                               row.cancelAtPeriodEnd
                                 ? "Aboneliği devam ettir"
                                 : "Dönem sonunda iptal et",
-                              `users/${encodeURIComponent(row.PK.replace(/^USER#/, ""))}/subscription`,
+                              `users/${encodeURIComponent((row.PK?.replace(/^USER#/, "") ?? row.userId ?? ""))}/subscription`,
                               [],
                               { action: row.cancelAtPeriodEnd ? "resume" : "cancel" },
                               "Değişiklik ödeme sağlayıcısındaki aboneliğe uygulanır.",

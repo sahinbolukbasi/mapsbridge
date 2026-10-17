@@ -267,7 +267,7 @@ export async function scanAllRaw(
   let Count = 0;
   let cursor = input.ExclusiveStartKey;
   do {
-    const page = await ddb.send(new ScanCommand({ ...input, ExclusiveStartKey: cursor }));
+    const page = await ddb.send(new ScanCommand({ ...input, ExclusiveStartKey: cursor } as any));
     Items.push(...(page.Items || []));
     Count += page.Count || 0;
     cursor = page.LastEvaluatedKey;
@@ -288,7 +288,10 @@ export async function findRouteRecord(routeId: string): Promise<Row | null> {
       ":user": { S: "USER#" },
     },
   });
-  return result.Items.length === 1 ? unmarshall(result.Items[0]) : null;
+  if (result.Items.length === 0) return null;
+  // Prefer the canonical ROUTE# partition record; fall back to user-owned copy
+  const primary = result.Items.find((i) => i.PK?.S?.startsWith("ROUTE#"));
+  return unmarshall(primary ?? result.Items[0]);
 }
 
 export async function recordAuditLog(

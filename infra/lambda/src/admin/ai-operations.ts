@@ -181,7 +181,7 @@ export async function reviewAITraining(event: ApiGatewayEvent) {
   );
   if (!existing.Items?.[0]) throw new AdminError(404, "Eğitim kaydı bulunamadı veya süresi doldu.");
   const current = unmarshall(existing.Items[0]);
-  const reviewed = action === "reject";
+  const reviewed = action !== "hold";
   const privacyReview =
     action === "approve" ? "approved" : action === "reject" ? "rejected" : "required";
   await getDynamoClient().send(

@@ -63,7 +63,7 @@ export async function handleUpdateSystemConfig(event: ApiGatewayEvent) {
     next.maintenanceMessage = body.maintenanceMessage.trim();
   }
   const config = await commit(event, next, "system_config_updated", reason, previous);
-  return ok({ ...config, config });
+  return ok({ config });
 }
 
 export async function handleGetModuleConfig() {
@@ -136,7 +136,7 @@ export async function handleSystemHealth() {
         dynamodb: { status: ddbStatus, latencyMs: ddbLatencyMs, table: getTableName() },
         cognito: {
           status: "healthy",
-          poolId: process.env.COGNITO_USER_POOL_ID || "eu-central-1_TKABiLn5f",
+          poolId: process.env.COGNITO_USER_POOL_ID || "not-configured",
         },
         bedrock: { status: "unknown", model: bedrockModel },
         apiGateway: { status: "healthy", protocol: "HTTP API v2" },

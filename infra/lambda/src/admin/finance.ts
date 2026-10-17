@@ -128,7 +128,8 @@ export async function handleGetCreditStats() {
   }
   const dailyConsumption = Object.entries(dailyMap).map(([date, credits]) => ({
     date,
-    credits: Math.round(credits * 100) / 100,
+    consumed: Math.round(credits * 100) / 100,
+    granted: 0,
   }));
 
   return ok({

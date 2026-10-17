@@ -61,7 +61,7 @@ interface Event {
   headers?: Record<string, string>;
   queryStringParameters?: Record<string, string>;
   rawQueryString?: string;
-  requestContext?: { http?: { method?: string } };
+  requestContext?: { http?: { method?: string; path?: string } };
 }
 const reply = jsonResponse;
 const resolveUser = getVerifiedUser;
@@ -475,7 +475,7 @@ async function handleStreamRequest(
       return;
     }
 
-    await withAIRequestMeter(async () => {
+    await (withAIRequestMeter as (fn: () => Promise<void>) => Promise<void>)(async () => {
       await publishAIRuntime();
       const aiControl = await readAIControl();
       if (!aiControl.enabled) {
@@ -599,7 +599,7 @@ async function handleStreamRequest(
         await finishAI(reservation, true, {
           response,
           ...(trainingJob ? { trainingJob } : {}),
-          preferences: updates,
+          preferences: updates as Record<string, unknown>,
           finalCost: actualCost,
           ...(memoryTable()
             ? {

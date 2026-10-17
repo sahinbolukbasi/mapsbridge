@@ -152,12 +152,9 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
               );
               if (acct.Item && unmarshall(acct.Item).suspended === true) return null;
             }
-            const groups: string[] = Array.isArray(claims["cognito:groups"])
-              ? claims["cognito:groups"]
-              : [];
-            const isAdmin = process.env.ADMIN_GROUP_NAME
-              ? groups.includes(process.env.ADMIN_GROUP_NAME)
-              : role === "admin";
+            // For social logins the Google/Apple JWT has no cognito:groups —
+            // fall back to custom:role attribute set on the Cognito user record.
+            const isAdmin = role === "admin";
             return {
               sub,
               originalSub: claims.sub,

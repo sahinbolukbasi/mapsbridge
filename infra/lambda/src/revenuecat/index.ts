@@ -290,7 +290,7 @@ async function getRcSubscriber(userId: string): Promise<any | null> {
   );
   if (res.status === 404) return null;
   if (!res.ok) throw new BillingError(502, "RC_API_ERROR", "RevenueCat bağlantı hatası.");
-  const data = await res.json();
+  const data = (await res.json()) as { subscriber?: unknown };
   return data?.subscriber ?? null;
 }
 

@@ -181,6 +181,7 @@ const labels: Record<string, string> = {
   refunded: "İade edildi",
   approved: "Onaylandı",
   featured: "Öne çıkarıldı",
+  active: "Aktif",
   suspended: "Askıda",
   healthy: "Çalışıyor",
   operational: "Çalışıyor",
@@ -221,6 +222,10 @@ const DATA_SOURCES = [
   "stripeConfig",
   "plans",
   "creditPacks",
+  "deviceAnalytics",
+  "aiTopics",
+  "communityAnalytics",
+  "subscriptionAnalytics",
 ] as const;
 type DataSourceKey = (typeof DATA_SOURCES)[number];
 
@@ -431,54 +436,38 @@ export default function AdminDashboard() {
         ],
         [
           "Cihaz Analizi",
-          "metrics",
+          "deviceAnalytics",
           async () => {
-            try {
-              const r = await apiFetch<{ devices: DeviceAnalytics }>("/admin/analytics/devices");
-              return { deviceAnalytics: r.devices };
-            } catch {
-              return {};
-            }
+            const r = await apiFetch<{ devices: DeviceAnalytics }>("/admin/analytics/devices");
+            return { deviceAnalytics: r.devices };
           },
         ],
         [
           "AI Analizi",
-          "metrics",
+          "aiTopics",
           async () => {
-            try {
-              const r = await apiFetch<{ aiAnalytics: AIAnalytics }>("/admin/analytics/ai-topics");
-              return { aiAnalytics: r.aiAnalytics };
-            } catch {
-              return {};
-            }
+            const r = await apiFetch<{ aiAnalytics: AIAnalytics }>("/admin/analytics/ai-topics");
+            return { aiAnalytics: r.aiAnalytics };
           },
         ],
         [
           "Topluluk Analizi",
-          "metrics",
+          "communityAnalytics",
           async () => {
-            try {
-              const r = await apiFetch<{ community: CommunityAnalytics }>(
-                "/admin/analytics/community",
-              );
-              return { communityAnalytics: r.community };
-            } catch {
-              return {};
-            }
+            const r = await apiFetch<{ community: CommunityAnalytics }>(
+              "/admin/analytics/community",
+            );
+            return { communityAnalytics: r.community };
           },
         ],
         [
           "Abonelik Analizi",
-          "metrics",
+          "subscriptionAnalytics",
           async () => {
-            try {
-              const r = await apiFetch<{ subscriptions: SubscriptionAnalytics }>(
-                "/admin/analytics/subscriptions",
-              );
-              return { subscriptionAnalytics: r.subscriptions };
-            } catch {
-              return {};
-            }
+            const r = await apiFetch<{ subscriptions: SubscriptionAnalytics }>(
+              "/admin/analytics/subscriptions",
+            );
+            return { subscriptionAnalytics: r.subscriptions };
           },
         ],
       ];
@@ -560,7 +549,8 @@ export default function AdminDashboard() {
   };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!action || !reason.trim() || mutation.current || busy.current) return;
+    if (!action || !reason.trim() || mutation.current) return;
+    if (busy.current) { setNotice("Arka plan yenileme devam ediyor, lütfen bekleyin…"); return; }
     mutation.current = true;
     setProcessing(true);
     setNotice("");
@@ -780,7 +770,9 @@ export default function AdminDashboard() {
 
   const mc = data.moduleConfig;
   const cs = data.creditStats;
-  const maxDaily = cs ? Math.max(1, ...cs.dailyConsumption.map((d) => d.consumed + d.granted)) : 1;
+  const maxDaily = cs
+    ? Math.max(1, ...(cs.dailyConsumption ?? []).map((d) => (d.consumed ?? 0) + (d.granted ?? 0)))
+    : 1;
 
   return (
     <div className="admin-shell">
@@ -909,9 +901,8 @@ export default function AdminDashboard() {
         {tab === "analytics-devices" && (
           <div className="admin-section">
             <h2>Cihaz &amp; Kullanıcı Analizi</h2>
-            {!data.deviceAnalytics ? (
-              <p className="admin-empty">Veri yükleniyor…</p>
-            ) : (
+            <SourceAlert sourceKey="deviceAnalytics" sources={sources} label="Cihaz Analizi" />
+            {!data.deviceAnalytics ? null : (
               <>
                 <div className="admin-stats">
                   {(
@@ -957,9 +948,8 @@ export default function AdminDashboard() {
         {tab === "analytics-ai" && (
           <div className="admin-section">
             <h2>AI Sohbet Analizi — Son 30 Gün</h2>
-            {!data.aiAnalytics ? (
-              <p className="admin-empty">Veri yükleniyor…</p>
-            ) : (
+            <SourceAlert sourceKey="aiTopics" sources={sources} label="AI Analizi" />
+            {!data.aiAnalytics ? null : (
               <>
                 <div className="admin-stats">
                   {(
@@ -1039,9 +1029,8 @@ export default function AdminDashboard() {
         {tab === "analytics-community" && (
           <div className="admin-section">
             <h2>Topluluk Analizi</h2>
-            {!data.communityAnalytics ? (
-              <p className="admin-empty">Veri yükleniyor…</p>
-            ) : (
+            <SourceAlert sourceKey="communityAnalytics" sources={sources} label="Topluluk Analizi" />
+            {!data.communityAnalytics ? null : (
               <>
                 <div className="admin-stats">
                   {(
@@ -1122,9 +1111,8 @@ export default function AdminDashboard() {
         {tab === "analytics-subscriptions" && (
           <div className="admin-section">
             <h2>Abonelik &amp; Gelir Analizi</h2>
-            {!data.subscriptionAnalytics ? (
-              <p className="admin-empty">Veri yükleniyor…</p>
-            ) : (
+            <SourceAlert sourceKey="subscriptionAnalytics" sources={sources} label="Abonelik Analizi" />
+            {!data.subscriptionAnalytics ? null : (
               <>
                 <div className="admin-stats">
                   {(
@@ -2537,11 +2525,11 @@ export default function AdminDashboard() {
                               </td>
                               <td>{id}</td>
                               <td>
-                                <Badge value={u.suspended ? "suspended" : "Aktif"} />
+                                <Badge value={u.suspended ? "suspended" : "active"} />
                               </td>
                               <td>
                                 <div className="admin-actions">
-                                  <button onClick={() => setInspectedUser(id)}>Ayrıntılar</button>
+                                  <button disabled={!id} onClick={() => setInspectedUser(id)}>Ayrıntılar</button>
                                   <button
                                     disabled={disabled || !id || id === session?.userId}
                                     onClick={() =>
