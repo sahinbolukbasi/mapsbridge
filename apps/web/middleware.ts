@@ -1,3 +1,9 @@
+// Server-side route protection — active in SSR (Lambda) mode only.
+// Static export mode: route protection is handled by the CloudFront spa_router function
+// which checks mb_session cookie before serving /desk /profile /messages /ai paths.
+//
+// To activate: remove `output: "export"` from next.config.ts and deploy via OpenNext.
+
 import { NextRequest, NextResponse } from "next/server";
 
 const PROTECTED_PREFIXES = ["/desk", "/profile", "/messages", "/ai"];

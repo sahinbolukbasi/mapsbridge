@@ -25,7 +25,7 @@ resource "aws_cloudfront_origin_access_control" "web" {
 resource "aws_cloudfront_function" "spa_router" {
   name    = "${local.name}-spa-router"
   runtime = "cloudfront-js-2.0"
-  comment = "Locale-aware SPA router: detect language, set cookie, resolve index.html"
+  comment = "Locale-aware SPA router + auth-protected routes via mb_session cookie"
   publish = true
   code    = <<-JS
     function handler(event) {
@@ -44,6 +44,30 @@ resource "aws_cloudfront_function" "spa_router" {
         };
       }
 
+      // Auth-protected routes: require mb_session cookie
+      var protectedPrefixes = ['/desk', '/profile', '/messages', '/ai'];
+      var isProtected = false;
+      for (var i = 0; i < protectedPrefixes.length; i++) {
+        if (uri === protectedPrefixes[i] || uri.startsWith(protectedPrefixes[i] + '/')) {
+          isProtected = true;
+          break;
+        }
+      }
+      if (isProtected) {
+        var hasSession = cookies['mb_session'] && cookies['mb_session'].value;
+        if (!hasSession) {
+          var loginPath = '/login/?next=' + encodeURIComponent(uri);
+          return {
+            statusCode: 302,
+            statusDescription: 'Found',
+            headers: {
+              'location': { value: loginPath },
+              'cache-control': { value: 'no-store' }
+            }
+          };
+        }
+      }
+
       // On root path with no locale cookie, detect language and redirect
       if (uri === '/' || uri === '') {
         var hasLocaleCookie = cookies['locale'] && cookies['locale'].value;
@@ -51,7 +75,6 @@ resource "aws_cloudfront_function" "spa_router" {
           var preferEn = false;
           var acceptLang = headers['accept-language'] && headers['accept-language'].value;
           if (acceptLang) {
-            // Simple Accept-Language parsing: if 'tr' appears first or alone, serve Turkish
             var langs = acceptLang.toLowerCase();
             var trIdx = langs.indexOf('tr');
             var enIdx = langs.indexOf('en');
@@ -74,7 +97,6 @@ resource "aws_cloudfront_function" "spa_router" {
               }
             };
           }
-          // Turkish visitor: set cookie, continue to Turkish homepage
           request.headers['x-locale-cookie'] = { value: 'locale=tr; Path=/; Max-Age=31536000; SameSite=Lax' };
         }
       }
@@ -138,7 +160,7 @@ resource "aws_cloudfront_cache_policy" "web_locale" {
     cookies_config {
       cookie_behavior = "whitelist"
       cookies {
-        items = ["locale"]
+        items = ["locale", "mb_session"]
       }
     }
     headers_config {
