@@ -106,6 +106,33 @@ resource "aws_budgets_budget" "monthly" {
   }
 }
 
+# ─── Cost Anomaly Detection — Tüm hesap ─────────────────────────────────
+resource "aws_ce_anomaly_monitor" "account" {
+  name              = "${local.name}-account-monitor"
+  monitor_type      = "DIMENSIONAL"
+  monitor_dimension = "SERVICE"
+}
+
+resource "aws_ce_anomaly_subscription" "account" {
+  name      = "${local.name}-account-anomaly"
+  frequency = "DAILY"
+
+  monitor_arn_list = [aws_ce_anomaly_monitor.account.arn]
+
+  subscriber {
+    type    = "EMAIL"
+    address = var.budget_alert_email
+  }
+
+  threshold_expression {
+    dimension {
+      key           = "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
+      values        = ["20"]
+      match_options = ["GREATER_THAN_OR_EQUAL"]
+    }
+  }
+}
+
 # ─── CloudWatch Log Groups ────────────────────────────────────────────────
 resource "aws_cloudwatch_log_group" "api" {
   name              = "/aws/apigateway/${local.name}-http"
@@ -142,21 +169,19 @@ module "storage" {
   cloudfront_distribution_arn = aws_cloudfront_distribution.web.arn
 }
 
-# ─── Database Module (Aurora Serverless v2 + ElastiCache Serverless) ──────
+# ─── Database Module (Aurora Serverless v2 + ElastiCache Provisioned) ─────
 module "database" {
   source = "./modules/database"
 
-  name                      = local.name
-  environment               = var.environment
-  tags                      = local.tags
-  private_subnet_ids        = module.vpc.private_subnet_ids
-  aurora_security_group_id  = module.vpc.aurora_security_group_id
-  redis_security_group_id   = module.vpc.redis_security_group_id
-  db_username               = var.db_username
-  aurora_instance_class     = var.aurora_instance_class
-  redis_max_data_storage_gb = var.redis_max_data_storage_gb
-  redis_max_ecpu_per_second = var.redis_max_ecpu_per_second
-  kms_key_arn               = aws_kms_key.main.arn
+  name                     = local.name
+  environment              = var.environment
+  tags                     = local.tags
+  private_subnet_ids       = module.vpc.private_subnet_ids
+  aurora_security_group_id = module.vpc.aurora_security_group_id
+  redis_security_group_id  = module.vpc.redis_security_group_id
+  db_username              = var.db_username
+  aurora_instance_class    = var.aurora_instance_class
+  kms_key_arn              = aws_kms_key.main.arn
 }
 
 # ─── Analytics Module (Firehose → S3 → Athena) ────────────────────────────

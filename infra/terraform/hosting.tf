@@ -155,7 +155,7 @@ resource "aws_cloudfront_cache_policy" "web_locale" {
 resource "aws_cloudfront_distribution" "web" {
   enabled             = true
   default_root_object = "index.html"
-  price_class         = "PriceClass_All"
+  price_class         = "PriceClass_100"
   aliases             = var.acm_certificate_arn != "" && var.frontend_domain != "" ? [var.frontend_domain] : []
   origin {
     domain_name              = aws_s3_bucket.web.bucket_regional_domain_name

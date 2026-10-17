@@ -102,8 +102,8 @@ export function AuthGuard({
       return <>{fallback}</>;
     }
     const currentPath = typeof window !== "undefined" ? window.location.pathname : "/desk";
-    const loginUrl = `/login/?redirect=${encodeURIComponent(currentPath)}`;
-    const signupUrl = `/register/?redirect=${encodeURIComponent(currentPath)}`;
+    const loginUrl = `/login/?next=${encodeURIComponent(currentPath)}`;
+    const signupUrl = `/register/?next=${encodeURIComponent(currentPath)}`;
 
     return (
       <div

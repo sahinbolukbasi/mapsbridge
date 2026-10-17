@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { userStorage } from "../lib/user-storage";
 import { getStoredSession } from "../lib/cognito";
+import { useAuth } from "../lib/auth-context";
+import { useWS } from "../lib/ws-context";
 import { FullPagePromotion } from "../components/auth-gate";
 import { HeaderNav } from "../components/header-nav";
 import "./messages.css";
@@ -17,6 +19,8 @@ import type {
 import { DEFAULT_TRAVELER_CONTACTS, PRESET_GROUP_ROUTES } from "../features/messaging/mock-data";
 
 export default function MessagesPage() {
+  const { user, isAuthenticated: authOk, isLoading: authLoading } = useAuth();
+  const { on: wsOn, send: wsSend } = useWS();
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [activeUserName, setActiveUserName] = useState("Gezgin");
@@ -203,6 +207,52 @@ export default function MessagesPage() {
     setMounted(true);
   }, []);
 
+  // Sync auth state from AuthContext once it resolves
+  useEffect(() => {
+    if (authLoading) return;
+    if (authOk && user) {
+      setIsAuthenticated(true);
+      const handle = user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
+      const displayName = user.profile?.name || handle || "Gezgin";
+      setActiveUserHandle(handle);
+      setActiveUserName(displayName);
+    }
+  }, [authOk, authLoading, user]);
+
+  // WebSocket — receive incoming messages in real-time
+  useEffect(() => {
+    const unsubscribe = wsOn("message", (data) => {
+      const msg = data as {
+        threadId?: string;
+        messageId?: string;
+        senderName?: string;
+        text?: string;
+      };
+      if (!msg.threadId || !msg.text) return;
+      const incoming: ChatMessage = {
+        id: msg.messageId ?? "ws-" + Date.now(),
+        senderName: msg.senderName ?? "Bilinmeyen",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        text: msg.text,
+        isOutgoing: false,
+        readStatus: "Alındı",
+      };
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === msg.threadId
+            ? {
+                ...conv,
+                lastMessage: msg.text!,
+                lastTime: incoming.time,
+                messages: [...conv.messages, incoming],
+              }
+            : conv,
+        ),
+      );
+    });
+    return unsubscribe;
+  }, [wsOn]);
+
   // Modals state
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
   const [newGroupTitle, setNewGroupTitle] = useState("");
@@ -277,6 +327,12 @@ export default function MessagesPage() {
       });
       localStorage.setItem("mapsbridge.directMessages", JSON.stringify(list));
     } catch {}
+
+    // Send via WebSocket if connected
+    wsSend("sendMessage", {
+      threadId: activeChatId,
+      text: newMsg.text,
+    });
 
     setInputText("");
   }

@@ -1,6 +1,5 @@
-# MapsBridge Database Module — Aurora Serverless v2 (PostgreSQL + PostGIS) + ElastiCache Serverless (Redis)
-# Well-Architected: Cost optimized — Aurora Serverless v2 scales to zero when idle
-# ElastiCache Serverless — no node management, pay per request
+# MapsBridge Database Module — Aurora Serverless v2 (PostgreSQL + PostGIS) + ElastiCache (Redis)
+# FinOps: Aurora min_capacity=0.0 (gerçek idle pause), ElastiCache provisioned t4g.small (~$25/ay vs Serverless $91/ay)
 
 locals {
   substack_name = "${var.name}-db"
@@ -30,7 +29,7 @@ resource "aws_rds_cluster" "aurora" {
   engine_version                  = "17.4"
   database_name                   = "mapsbridge"
   master_username                 = var.db_username
-  manage_master_user_password     = true   # Aurora stores & rotates password in Secrets Manager
+  manage_master_user_password     = true
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.aurora.name
   vpc_security_group_ids          = [var.aurora_security_group_id]
   db_subnet_group_name            = aws_db_subnet_group.aurora.name
@@ -42,7 +41,7 @@ resource "aws_rds_cluster" "aurora" {
   skip_final_snapshot             = var.environment != "prod"
 
   serverlessv2_scaling_configuration {
-    min_capacity = 0.5
+    min_capacity = 0.0   # PostgreSQL 17: gerçek idle pause, zemin ücret yok
     max_capacity = 4.0
   }
 
@@ -57,7 +56,7 @@ resource "aws_db_parameter_group" "aurora_instance" {
 }
 
 resource "aws_rds_cluster_instance" "aurora" {
-  count                      = var.environment == "prod" ? 2 : 1
+  count                      = 1   # Tek instance yeterli; reader yük gerekirse ekle
   identifier                 = "${local.substack_name}-${count.index}"
   cluster_identifier         = aws_rds_cluster.aurora.id
   instance_class             = var.aurora_instance_class
@@ -78,34 +77,29 @@ resource "aws_db_subnet_group" "aurora" {
   tags        = var.tags
 }
 
-# ─── ElastiCache Serverless (Redis) ───────────────────────────────────────
-# Serverless mode: no nodes to manage, pay-per-request, auto-scales to zero
+# ─── ElastiCache Provisioned (Redis 7.1, cache.t4g.small) ─────────────────
+# Serverless $91/ay zemin → Provisioned $25/ay (~$66/ay tasarruf)
+# t4g.small: token rate-limit, route segment cache, session cache için yeterli
 resource "aws_elasticache_subnet_group" "redis" {
   name       = "${local.substack_name}-redis"
   subnet_ids = var.private_subnet_ids
   tags       = var.tags
 }
 
-resource "aws_elasticache_serverless_cache" "redis" {
-  name        = "${local.substack_name}-redis"
-  engine      = "redis"
-  description = "MapsBridge token rate-limit, route segment cache, session cache"
-
-  cache_usage_limits {
-    data_storage {
-      maximum = var.redis_max_data_storage_gb
-      unit    = "GB"
-    }
-    ecpu_per_second {
-      maximum = var.redis_max_ecpu_per_second
-    }
-  }
-
-  security_group_ids = [var.redis_security_group_id]
-  subnet_ids         = var.private_subnet_ids
-
-  # KMS encryption at rest
-  kms_key_id = var.kms_key_arn
+resource "aws_elasticache_replication_group" "redis" {
+  replication_group_id       = "${local.substack_name}-redis"
+  description                = "MapsBridge token rate-limit, route segment cache, session cache"
+  node_type                  = "cache.t4g.small"
+  num_cache_clusters         = var.environment == "prod" ? 2 : 1
+  engine_version             = "7.1"
+  port                       = 6379
+  subnet_group_name          = aws_elasticache_subnet_group.redis.name
+  security_group_ids         = [var.redis_security_group_id]
+  at_rest_encryption_enabled = true
+  transit_encryption_enabled = true
+  automatic_failover_enabled = var.environment == "prod"
+  multi_az_enabled           = var.environment == "prod"
+  apply_immediately          = var.environment != "prod"
 
   tags = var.tags
 }
@@ -128,6 +122,6 @@ resource "aws_ssm_parameter" "aurora_writer" {
 resource "aws_ssm_parameter" "redis_endpoint" {
   name  = "/mapsbridge/${var.environment}/redis/endpoint"
   type  = "SecureString"
-  value = aws_elasticache_serverless_cache.redis.endpoint[0].address
+  value = aws_elasticache_replication_group.redis.primary_endpoint_address
   tags  = var.tags
 }

@@ -13,12 +13,12 @@ output "aurora_writer_endpoint" {
 }
 
 output "redis_endpoint" {
-  value     = aws_elasticache_serverless_cache.redis.endpoint[0].address
+  value     = aws_elasticache_replication_group.redis.primary_endpoint_address
   sensitive = true
 }
 
 output "redis_primary_endpoint" {
-  value     = aws_elasticache_serverless_cache.redis.endpoint[0].address
+  value     = aws_elasticache_replication_group.redis.primary_endpoint_address
   sensitive = true
 }
 

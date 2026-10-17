@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getStoredSession } from "./lib/cognito";
 import { HeaderNav } from "./components/header-nav";
 import { SiteFooter } from "./components/site-footer";
@@ -11,6 +12,7 @@ import { useLocale } from "./lib/locale-context";
 
 export default function Home() {
   const { t, isEnglish } = useLocale();
+  const router = useRouter();
 
   const [code, setCode] = useState("");
   const [codeModalOpen, setCodeModalOpen] = useState(false);
@@ -22,20 +24,19 @@ export default function Home() {
     const session = getStoredSession();
     if (session?.token) {
       setIsLoggedIn(true);
-      // Logged-in users go straight to the map desk, not the promo page
-      window.location.assign("/desk/");
+      router.push("/desk/");
       return;
     }
     document.documentElement.dataset.theme = "light";
-  }, []);
+  }, [router]);
 
   function handleDestinationSubmit(e: React.FormEvent) {
     e.preventDefault();
     const query = destinationQuery.trim();
     if (query) {
-      window.location.assign(`/ai/?q=${encodeURIComponent(query)}`);
+      router.push(`/ai/?q=${encodeURIComponent(query)}`);
     } else {
-      window.location.assign("/ai/");
+      router.push("/ai/");
     }
   }
 
@@ -44,7 +45,7 @@ export default function Home() {
     const clean = code.trim().toUpperCase().replace(/\s+/g, "");
     if (clean) {
       setCodeModalOpen(false);
-      window.location.assign(`/k/?kod=${encodeURIComponent(clean)}`);
+      router.push(`/k/?kod=${encodeURIComponent(clean)}`);
     }
   }
 

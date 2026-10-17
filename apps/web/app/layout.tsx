@@ -6,7 +6,8 @@ import { IconFontReady } from "./components/icon-font-ready";
 import { GoogleOneTap } from "./components/google-one-tap";
 import { MobilePlatformProvider } from "./components/mobile-platform-provider";
 import { UpgradeModal } from "./components/upgrade-modal";
-import { SessionKeepAlive } from "./components/session-keep-alive";
+import { AuthProvider } from "./lib/auth-context";
+import { WSProvider } from "./lib/ws-context";
 import { LocaleProvider } from "./lib/locale-context";
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
@@ -89,15 +90,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body>
-        <IconFontReady />
-        <DialogFocus />
-        <GoogleOneTap />
-        <SessionKeepAlive />
-        <UpgradeModal />
-        <LocaleProvider>
-          <MobilePlatformProvider>{children}</MobilePlatformProvider>
-        </LocaleProvider>
-        <OperationsBanner />
+        <AuthProvider>
+          <WSProvider>
+            <IconFontReady />
+            <DialogFocus />
+            <GoogleOneTap />
+            <UpgradeModal />
+            <LocaleProvider>
+              <MobilePlatformProvider>{children}</MobilePlatformProvider>
+            </LocaleProvider>
+            <OperationsBanner />
+          </WSProvider>
+        </AuthProvider>
       </body>
     </html>
   );

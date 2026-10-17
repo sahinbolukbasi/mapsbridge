@@ -31,7 +31,7 @@ variable "cors_origins" {
 
 variable "monthly_budget_usd" {
   type        = string
-  default     = "50"
+  default     = "400"
   description = "Monthly AWS budget guardrail (USD). Alerts at 80% and 100%."
 }
 
@@ -75,18 +75,6 @@ variable "aurora_instance_class" {
   type        = string
   default     = "db.serverless"
   description = "Aurora Serverless v2 instance class"
-}
-
-variable "redis_max_data_storage_gb" {
-  type        = number
-  default     = 10
-  description = "ElastiCache Serverless max data storage (GB)"
-}
-
-variable "redis_max_ecpu_per_second" {
-  type        = number
-  default     = 10000
-  description = "ElastiCache Serverless max ECPU per second"
 }
 
 variable "lambda_timeout" {

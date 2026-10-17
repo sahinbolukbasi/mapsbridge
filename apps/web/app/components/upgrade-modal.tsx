@@ -129,7 +129,7 @@ export function UpgradeModal() {
   const handleCheckout = async (mode: "subscription" | "credit_pack", targetId: string) => {
     const session = getStoredSession();
     if (!session?.token) {
-      window.location.assign("/login/?redirect=" + encodeURIComponent(window.location.pathname));
+      window.location.assign("/login/?next=" + encodeURIComponent(window.location.pathname));
       return;
     }
 
