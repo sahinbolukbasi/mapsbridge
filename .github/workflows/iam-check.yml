@@ -14,15 +14,24 @@ jobs:
   check:
     name: Check deploy role policies
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Resolve role name from caller identity
+        id: role
+        run: |
+          ROLE_ARN=$(aws sts get-caller-identity --query Arn --output text)
+          ROLE_NAME=$(echo "$ROLE_ARN" | sed 's/.*assumed-role\///' | sed 's/\/.*//')
+          echo "name=$ROLE_NAME" >> $GITHUB_OUTPUT
+          echo "Role: $ROLE_NAME"
+
       - name: List and show inline policies
         run: |
-          ROLE="mapsbridge-prod-github-deploy"
+          ROLE="${{ steps.role.outputs.name }}"
           echo "=== Inline policies on $ROLE ==="
           aws iam list-role-policies --role-name "$ROLE" --query 'PolicyNames' --output json
 

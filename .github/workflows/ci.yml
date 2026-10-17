@@ -23,6 +23,7 @@ jobs:
   secrets:
     name: Secret Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,55 +32,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # ── Terraform validate ───────────────────────────────────────────
-  terraform:
-    name: Terraform (${{ matrix.stack }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        stack: [terraform, admin-runtime, agentcore-gateway, ai-memory]
-    defaults:
-      run:
-        working-directory: infra/${{ matrix.stack }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - name: Create .build placeholders
-        run: |
-          mkdir -p .build/lambdas .build/layer
-          case "${{ matrix.stack }}" in
-            terraform)
-              for name in auth routes chat marketplace ai stripe admin cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
-                echo "placeholder" | zip -q .build/lambdas/${name}.zip -
-              done
-              echo "placeholder" | zip -q .build/layer/shared.zip -
-              ;;
-            admin-runtime)
-              for name in admin routes operations ai stripe background-monitor; do
-                echo "placeholder" | zip -q .build/${name}.zip -
-              done
-              ;;
-            agentcore-gateway)
-              for name in tools data-tools; do
-                echo "placeholder" | zip -q .build/${name}.zip -
-              done
-              ;;
-            ai-memory)
-              for name in control worker; do
-                echo "placeholder" | zip -q .build/${name}.zip -
-              done
-              ;;
-          esac
-      - run: terraform init -backend=false
-        continue-on-error: true
-      - run: terraform validate
-        continue-on-error: true
-
   # ── Lint + Format (auto-fix on develop) ─────────────────────────
   lint:
     name: Lint & Format
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -108,60 +65,13 @@ jobs:
         continue-on-error: true
       - run: npm run format:check
 
-  # ── Tests ────────────────────────────────────────────────────────
-  test:
-    name: Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
-      - run: npm ci --prefix infra/lambda --ignore-scripts
-      - name: Web Tests
-        run: npm test
-      - name: Backend Tests
-        run: npm run test:backend
-        continue-on-error: true
-
-  # ── Build ────────────────────────────────────────────────────────
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
-      - name: Build Web
-        run: npm run build
-        env:
-          NEXT_PUBLIC_COGNITO_REGION: eu-central-1
-          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
-          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
-          NEXT_PUBLIC_AI_STREAM_URL: ${{ secrets.AI_STREAM_URL }}
-          NEXT_PUBLIC_SITE_URL: https://mapsbridge.com
-          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          NEXT_PUBLIC_TP_MARKER: "585085"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: web-build
-          path: apps/web/out/
-          retention-days: 3
-
-  # ── Summary (auto-detect errors on PRs) ──────────────────────────
+  # ── Summary (PR comment) ─────────────────────────────────────────
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [secrets, terraform, lint, test, build]
+    needs: [secrets, lint]
     if: always() && github.event_name == 'pull_request'
+    timeout-minutes: 5
     steps:
       - name: Check results and comment
         uses: actions/github-script@v7
@@ -170,8 +80,6 @@ jobs:
             const jobs = {
               'Secret Scan': '${{ needs.secrets.result }}',
               'Lint & Format': '${{ needs.lint.result }}',
-              'Tests': '${{ needs.test.result }}',
-              'Build': '${{ needs.build.result }}',
             };
             const icon = s => s === 'success' ? '✅' : s === 'skipped' ? '⏭️' : '❌';
             const rows = Object.entries(jobs)
@@ -185,9 +93,11 @@ jobs:
               '|-----|--------|',
               rows,
               '',
+              '_Per-system checks (tests, build, infra validate) run in their own workflows._',
+              '',
               failed
                 ? '> **Action needed:** Fix the failing checks above before merging.'
-                : '> All checks passed. Ready to merge.',
+                : '> Lint and secret scan passed.',
               '',
               `_Run: [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})_`
             ].join('\n');

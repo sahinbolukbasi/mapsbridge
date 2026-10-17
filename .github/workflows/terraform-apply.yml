@@ -44,11 +44,20 @@ env:
 
 jobs:
   # ─── Main Stack ──────────────────────────────────────────────────────────
-  main:
-    name: "Stack: main"
+  main-plan:
+    name: "Plan: main"
     if: ${{ github.event.inputs.stack == 'main' || github.event.inputs.stack == 'all' }}
     runs-on: ubuntu-latest
-    environment: production
+    timeout-minutes: 30
+    env:
+      TF_VAR_environment: prod
+      TF_VAR_frontend_domain: mapsbridge.com
+      TF_VAR_stripe_secret_key: ${{ secrets.STRIPE_SECRET_KEY }}
+      TF_VAR_stripe_webhook_secret: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      TF_VAR_acm_certificate_arn: ${{ secrets.ACM_CERT_ARN }}
+      TF_VAR_admin_domain: "admin.mapsbridge.com"
+      TF_VAR_admin_acm_certificate_arn: ${{ secrets.ACM_CERT_ARN }}
+      TF_VAR_admin_allowed_cidrs: ${{ secrets.ADMIN_ALLOWED_CIDRS }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -70,25 +79,13 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        id: plan
         working-directory: infra/terraform
-        env:
-          TF_VAR_environment: prod
-          TF_VAR_frontend_domain: mapsbridge.com
-          TF_VAR_stripe_secret_key: ${{ secrets.STRIPE_SECRET_KEY }}
-          TF_VAR_stripe_webhook_secret: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          # Admin panel domain separation
-          TF_VAR_acm_certificate_arn: "arn:aws:acm:us-east-1:865369794421:certificate/d8176861-6134-4ef5-aee0-affd4b018995"
-          TF_VAR_admin_domain: "admin.mapsbridge.com"
-          TF_VAR_admin_acm_certificate_arn: "arn:aws:acm:us-east-1:865369794421:certificate/d8176861-6134-4ef5-aee0-affd4b018995"
-          TF_VAR_admin_allowed_cidrs: ${{ secrets.ADMIN_ALLOWED_CIDRS }}
         run: |
           TARGET_ARGS=""
           if [ -n "${{ github.event.inputs.target }}" ]; then
-            # Support comma-separated targets: "res.a,res.b" → "-target=res.a -target=res.b"
             IFS=',' read -ra TARGETS <<< "${{ github.event.inputs.target }}"
             for t in "${TARGETS[@]}"; do
-              t=$(echo "$t" | xargs)  # trim whitespace
+              t=$(echo "$t" | xargs)
               TARGET_ARGS="$TARGET_ARGS -target=$t"
             done
           fi
@@ -98,32 +95,81 @@ jobs:
           fi
           terraform plan -out=tfplan $TARGET_ARGS $REFRESH_ARG
 
-      - name: Terraform Apply
-        if: ${{ github.event.inputs.plan_only != 'true' }}
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-main-${{ github.run_id }}
+          path: infra/terraform/tfplan
+          retention-days: 1
+
+  main-apply:
+    name: "Apply: main"
+    needs: [main-plan]
+    if: |
+      (github.event.inputs.stack == 'main' || github.event.inputs.stack == 'all') &&
+      github.event.inputs.plan_only != 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 45
+    env:
+      TF_VAR_environment: prod
+      TF_VAR_frontend_domain: mapsbridge.com
+      TF_VAR_stripe_secret_key: ${{ secrets.STRIPE_SECRET_KEY }}
+      TF_VAR_stripe_webhook_secret: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      TF_VAR_acm_certificate_arn: ${{ secrets.ACM_CERT_ARN }}
+      TF_VAR_admin_domain: "admin.mapsbridge.com"
+      TF_VAR_admin_acm_certificate_arn: ${{ secrets.ACM_CERT_ARN }}
+      TF_VAR_admin_allowed_cidrs: ${{ secrets.ADMIN_ALLOWED_CIDRS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create Lambda zip placeholders
+        run: |
+          mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
+          for name in auth chat marketplace cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
+            echo "placeholder" | zip -q infra/terraform/.build/lambdas/${name}.zip -
+          done
+          echo "placeholder" | zip -q infra/terraform/.build/layer/shared.zip -
+
+      - name: Terraform Init
         working-directory: infra/terraform
-        env:
-          TF_VAR_environment: prod
-          TF_VAR_frontend_domain: mapsbridge.com
-          TF_VAR_stripe_secret_key: ${{ secrets.STRIPE_SECRET_KEY }}
-          TF_VAR_stripe_webhook_secret: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          # Admin panel domain separation
-          TF_VAR_acm_certificate_arn: "arn:aws:acm:us-east-1:865369794421:certificate/d8176861-6134-4ef5-aee0-affd4b018995"
-          TF_VAR_admin_domain: "admin.mapsbridge.com"
-          TF_VAR_admin_acm_certificate_arn: "arn:aws:acm:us-east-1:865369794421:certificate/d8176861-6134-4ef5-aee0-affd4b018995"
-          TF_VAR_admin_allowed_cidrs: ${{ secrets.ADMIN_ALLOWED_CIDRS }}
+        run: terraform init
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-main-${{ github.run_id }}
+          path: infra/terraform/
+
+      - name: Terraform Apply
+        working-directory: infra/terraform
         run: terraform apply -auto-approve tfplan
 
       - name: Show Outputs
-        if: ${{ github.event.inputs.plan_only != 'true' }}
         working-directory: infra/terraform
         run: terraform output -json 2>/dev/null || true
 
   # ─── Admin Runtime ────────────────────────────────────────────────────────
-  admin-runtime:
-    name: "Stack: admin-runtime"
+  admin-runtime-plan:
+    name: "Plan: admin-runtime"
     if: ${{ github.event.inputs.stack == 'admin-runtime' || github.event.inputs.stack == 'all' }}
     runs-on: ubuntu-latest
-    environment: production
+    timeout-minutes: 20
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
+      TF_VAR_dynamodb_table: ${{ secrets.DYNAMODB_TABLE }}
+      TF_VAR_cognito_user_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
+      TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
+      TF_VAR_protected_admin_sub: ${{ secrets.ADMIN_SUB }}
+      TF_VAR_slack_admin_user_ids: ${{ secrets.SLACK_ADMIN_USER_IDS }}
+      TF_VAR_deploy_targets: '{"routes":{"type":"lambda","name":"mapsbridge-prod-routes"},"admin":{"type":"lambda","name":"mapsbridge-prod-admin"},"ai":{"type":"lambda","name":"mapsbridge-prod-ai"}}'
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -144,43 +190,75 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        id: plan
         working-directory: infra/admin-runtime
-        env:
-          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
-          TF_VAR_prefix: ${{ env.PREFIX }}
-          TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
-          TF_VAR_dynamodb_table: ${{ secrets.DYNAMODB_TABLE }}
-          TF_VAR_cognito_user_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
-          TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
-          TF_VAR_protected_admin_sub: ${{ secrets.ADMIN_SUB }}
-          # Slack Bot — admin yetki ve deploy hedefleri
-          TF_VAR_slack_admin_user_ids: ${{ secrets.SLACK_ADMIN_USER_IDS }}
-          TF_VAR_deploy_targets: '{"routes":{"type":"lambda","name":"mapsbridge-prod-routes"},"admin":{"type":"lambda","name":"mapsbridge-prod-admin"},"ai":{"type":"lambda","name":"mapsbridge-prod-ai"}}'
         run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        if: ${{ github.event.inputs.plan_only != 'true' }}
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-admin-runtime-${{ github.run_id }}
+          path: infra/admin-runtime/tfplan
+          retention-days: 1
+
+  admin-runtime-apply:
+    name: "Apply: admin-runtime"
+    needs: [admin-runtime-plan]
+    if: |
+      (github.event.inputs.stack == 'admin-runtime' || github.event.inputs.stack == 'all') &&
+      github.event.inputs.plan_only != 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
+      TF_VAR_dynamodb_table: ${{ secrets.DYNAMODB_TABLE }}
+      TF_VAR_cognito_user_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
+      TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
+      TF_VAR_protected_admin_sub: ${{ secrets.ADMIN_SUB }}
+      TF_VAR_slack_admin_user_ids: ${{ secrets.SLACK_ADMIN_USER_IDS }}
+      TF_VAR_deploy_targets: '{"routes":{"type":"lambda","name":"mapsbridge-prod-routes"},"admin":{"type":"lambda","name":"mapsbridge-prod-admin"},"ai":{"type":"lambda","name":"mapsbridge-prod-ai"}}'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create Lambda zip placeholders
+        run: |
+          mkdir -p infra/admin-runtime/.build
+          for name in admin routes operations ai stripe ai-stream background-monitor; do
+            echo "placeholder" | zip -q infra/admin-runtime/.build/${name}.zip -
+          done
+
+      - name: Terraform Init
         working-directory: infra/admin-runtime
-        env:
-          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
-          TF_VAR_prefix: ${{ env.PREFIX }}
-          TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
-          TF_VAR_dynamodb_table: ${{ secrets.DYNAMODB_TABLE }}
-          TF_VAR_cognito_user_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
-          TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
-          TF_VAR_protected_admin_sub: ${{ secrets.ADMIN_SUB }}
-          # Slack Bot — admin yetki ve deploy hedefleri
-          TF_VAR_slack_admin_user_ids: ${{ secrets.SLACK_ADMIN_USER_IDS }}
-          TF_VAR_deploy_targets: '{"routes":{"type":"lambda","name":"mapsbridge-prod-routes"},"admin":{"type":"lambda","name":"mapsbridge-prod-admin"},"ai":{"type":"lambda","name":"mapsbridge-prod-ai"}}'
+        run: terraform init
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-admin-runtime-${{ github.run_id }}
+          path: infra/admin-runtime/
+
+      - name: Terraform Apply
+        working-directory: infra/admin-runtime
         run: terraform apply -auto-approve tfplan
 
   # ─── AgentCore Gateway ────────────────────────────────────────────────────
-  agentcore-gateway:
-    name: "Stack: agentcore-gateway"
+  agentcore-gateway-plan:
+    name: "Plan: agentcore-gateway"
     if: ${{ github.event.inputs.stack == 'agentcore-gateway' || github.event.inputs.stack == 'all' }}
     runs-on: ubuntu-latest
-    environment: production
+    timeout-minutes: 20
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_ai_role_name: mapsbridge-prod-ai-runtime
+      TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -201,29 +279,71 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infra/agentcore-gateway
-        env:
-          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
-          TF_VAR_prefix: ${{ env.PREFIX }}
-          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
-          TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
         run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        if: ${{ github.event.inputs.plan_only != 'true' }}
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-agentcore-gateway-${{ github.run_id }}
+          path: infra/agentcore-gateway/tfplan
+          retention-days: 1
+
+  agentcore-gateway-apply:
+    name: "Apply: agentcore-gateway"
+    needs: [agentcore-gateway-plan]
+    if: |
+      (github.event.inputs.stack == 'agentcore-gateway' || github.event.inputs.stack == 'all') &&
+      github.event.inputs.plan_only != 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_ai_role_name: mapsbridge-prod-ai-runtime
+      TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create Lambda zip placeholders
+        run: |
+          mkdir -p infra/agentcore-gateway/.build
+          echo "placeholder" | zip -q infra/agentcore-gateway/.build/tools.zip -
+          echo "placeholder" | zip -q infra/agentcore-gateway/.build/data-tools.zip -
+
+      - name: Terraform Init
         working-directory: infra/agentcore-gateway
-        env:
-          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
-          TF_VAR_prefix: ${{ env.PREFIX }}
-          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
-          TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
+        run: terraform init
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-agentcore-gateway-${{ github.run_id }}
+          path: infra/agentcore-gateway/
+
+      - name: Terraform Apply
+        working-directory: infra/agentcore-gateway
         run: terraform apply -auto-approve tfplan
 
   # ─── AI Memory ────────────────────────────────────────────────────────────
-  ai-memory:
-    name: "Stack: ai-memory"
+  ai-memory-plan:
+    name: "Plan: ai-memory"
     if: ${{ github.event.inputs.stack == 'ai-memory' || github.event.inputs.stack == 'all' }}
     runs-on: ubuntu-latest
-    environment: production
+    timeout-minutes: 20
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
+      TF_VAR_application_table: ${{ secrets.DYNAMODB_TABLE }}
+      TF_VAR_ai_role_name: mapsbridge-prod-ai-runtime
+      TF_VAR_cognito_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
+      TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -244,35 +364,72 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infra/ai-memory
-        env:
-          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
-          TF_VAR_prefix: ${{ env.PREFIX }}
-          TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
-          TF_VAR_application_table: ${{ secrets.DYNAMODB_TABLE }}
-          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
-          TF_VAR_cognito_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
-          TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
         run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        if: ${{ github.event.inputs.plan_only != 'true' }}
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-ai-memory-${{ github.run_id }}
+          path: infra/ai-memory/tfplan
+          retention-days: 1
+
+  ai-memory-apply:
+    name: "Apply: ai-memory"
+    needs: [ai-memory-plan]
+    if: |
+      (github.event.inputs.stack == 'ai-memory' || github.event.inputs.stack == 'all') &&
+      github.event.inputs.plan_only != 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
+      TF_VAR_application_table: ${{ secrets.DYNAMODB_TABLE }}
+      TF_VAR_ai_role_name: mapsbridge-prod-ai-runtime
+      TF_VAR_cognito_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
+      TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create Lambda zip placeholders
+        run: |
+          mkdir -p infra/ai-memory/.build
+          echo "placeholder" | zip -q infra/ai-memory/.build/control.zip -
+          echo "placeholder" | zip -q infra/ai-memory/.build/worker.zip -
+
+      - name: Terraform Init
         working-directory: infra/ai-memory
-        env:
-          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
-          TF_VAR_prefix: ${{ env.PREFIX }}
-          TF_VAR_api_id: ${{ secrets.API_GATEWAY_ID }}
-          TF_VAR_application_table: ${{ secrets.DYNAMODB_TABLE }}
-          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
-          TF_VAR_cognito_pool_id: ${{ secrets.COGNITO_USER_POOL_ID }}
-          TF_VAR_cognito_client_id: ${{ secrets.COGNITO_CLIENT_ID }}
+        run: terraform init
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-ai-memory-${{ github.run_id }}
+          path: infra/ai-memory/
+
+      - name: Terraform Apply
+        working-directory: infra/ai-memory
         run: terraform apply -auto-approve tfplan
 
   # ─── AI FinOps ────────────────────────────────────────────────────────────
-  ai-finops:
-    name: "Stack: ai-finops"
+  ai-finops-plan:
+    name: "Plan: ai-finops"
     if: ${{ github.event.inputs.stack == 'ai-finops' || github.event.inputs.stack == 'all' }}
     runs-on: ubuntu-latest
-    environment: production
+    timeout-minutes: 20
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_ai_role_name: mapsbridge-prod-ai-runtime
+      TF_VAR_source_inference_profile_arn: ${{ secrets.BEDROCK_SOURCE_INFERENCE_PROFILE_ARN }}
+      TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -287,31 +444,58 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infra/ai-finops
-        env:
-          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
-          TF_VAR_prefix: ${{ env.PREFIX }}
-          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
-          TF_VAR_source_inference_profile_arn: ${{ secrets.BEDROCK_SOURCE_INFERENCE_PROFILE_ARN }}
-          TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
         run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        if: ${{ github.event.inputs.plan_only != 'true' }}
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-ai-finops-${{ github.run_id }}
+          path: infra/ai-finops/tfplan
+          retention-days: 1
+
+  ai-finops-apply:
+    name: "Apply: ai-finops"
+    needs: [ai-finops-plan]
+    if: |
+      (github.event.inputs.stack == 'ai-finops' || github.event.inputs.stack == 'all') &&
+      github.event.inputs.plan_only != 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_ai_role_name: mapsbridge-prod-ai-runtime
+      TF_VAR_source_inference_profile_arn: ${{ secrets.BEDROCK_SOURCE_INFERENCE_PROFILE_ARN }}
+      TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
         working-directory: infra/ai-finops
-        env:
-          TF_VAR_account_id: ${{ env.ACCOUNT_ID }}
-          TF_VAR_prefix: ${{ env.PREFIX }}
-          TF_VAR_ai_role_name: ${{ env.PREFIX }}-ai-runtime
-          TF_VAR_source_inference_profile_arn: ${{ secrets.BEDROCK_SOURCE_INFERENCE_PROFILE_ARN }}
-          TF_VAR_alarm_topic_arn: ${{ secrets.ALARM_SNS_TOPIC_ARN }}
+        run: terraform init
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-ai-finops-${{ github.run_id }}
+          path: infra/ai-finops/
+
+      - name: Terraform Apply
+        working-directory: infra/ai-finops
         run: terraform apply -auto-approve tfplan
 
   # ─── AI Training ──────────────────────────────────────────────────────────
-  ai-training:
-    name: "Stack: ai-training"
+  ai-training-plan:
+    name: "Plan: ai-training"
     if: ${{ github.event.inputs.stack == 'ai-training' || github.event.inputs.stack == 'all' }}
     runs-on: ubuntu-latest
-    environment: production
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -328,17 +512,50 @@ jobs:
         working-directory: infra/ai-training
         run: terraform plan -out=tfplan
 
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-ai-training-${{ github.run_id }}
+          path: infra/ai-training/tfplan
+          retention-days: 1
+
+  ai-training-apply:
+    name: "Apply: ai-training"
+    needs: [ai-training-plan]
+    if: |
+      (github.event.inputs.stack == 'ai-training' || github.event.inputs.stack == 'all') &&
+      github.event.inputs.plan_only != 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infra/ai-training
+        run: terraform init
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-ai-training-${{ github.run_id }}
+          path: infra/ai-training/
+
       - name: Terraform Apply
-        if: ${{ github.event.inputs.plan_only != 'true' }}
         working-directory: infra/ai-training
         run: terraform apply -auto-approve tfplan
 
   # ─── Travel RAG ───────────────────────────────────────────────────────────
-  travel-rag:
-    name: "Stack: travel-rag"
+  travel-rag-plan:
+    name: "Plan: travel-rag"
     if: ${{ github.event.inputs.stack == 'travel-rag' || github.event.inputs.stack == 'all' }}
     runs-on: ubuntu-latest
-    environment: production
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -355,7 +572,40 @@ jobs:
         working-directory: infra/travel-rag
         run: terraform plan -out=tfplan
 
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-travel-rag-${{ github.run_id }}
+          path: infra/travel-rag/tfplan
+          retention-days: 1
+
+  travel-rag-apply:
+    name: "Apply: travel-rag"
+    needs: [travel-rag-plan]
+    if: |
+      (github.event.inputs.stack == 'travel-rag' || github.event.inputs.stack == 'all') &&
+      github.event.inputs.plan_only != 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infra/travel-rag
+        run: terraform init
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-travel-rag-${{ github.run_id }}
+          path: infra/travel-rag/
+
       - name: Terraform Apply
-        if: ${{ github.event.inputs.plan_only != 'true' }}
         working-directory: infra/travel-rag
         run: terraform apply -auto-approve tfplan
