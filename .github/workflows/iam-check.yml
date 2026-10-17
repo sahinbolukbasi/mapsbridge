@@ -1,0 +1,46 @@
+name: IAM Role Policy Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: eu-central-1
+
+jobs:
+  check:
+    name: Check deploy role policies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: List and show inline policies
+        run: |
+          ROLE="mapsbridge-prod-github-deploy"
+          echo "=== Inline policies on $ROLE ==="
+          aws iam list-role-policies --role-name "$ROLE" --query 'PolicyNames' --output json
+
+          echo ""
+          echo "=== Policy: deploy ==="
+          aws iam get-role-policy --role-name "$ROLE" --policy-name "deploy" \
+            --query 'PolicyDocument' --output json 2>/dev/null || echo "(not found)"
+
+          echo ""
+          echo "=== Policy: deploy-permissions ==="
+          aws iam get-role-policy --role-name "$ROLE" --policy-name "deploy-permissions" \
+            --query 'PolicyDocument' --output json 2>/dev/null || echo "(not found)"
+
+      - name: Test specific permissions
+        run: |
+          echo "=== Permission simulation ==="
+          aws iam simulate-principal-policy \
+            --policy-source-arn "$(aws iam get-role --role-name mapsbridge-prod-github-deploy --query 'Role.Arn' --output text)" \
+            --action-names "ec2:DescribeAvailabilityZones" "budgets:TagResource" "ce:CreateAnomalyMonitor" "elasticache:DescribeServerlessCaches" \
+            --query 'EvaluationResults[*].{Action:EvalActionName,Decision:EvalDecision}' \
+            --output table 2>/dev/null || echo "simulate-policy not available"
