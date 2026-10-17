@@ -1870,7 +1870,7 @@ export default function Panel() {
     if (sharePending.current) return;
     const session = getStoredSession();
     if (!session?.token) {
-      window.location.assign("/login/?next=/desk/");
+      window.location.assign("/login/?next=/maps/");
       return;
     }
     sharePending.current = true;
@@ -2065,7 +2065,7 @@ export default function Panel() {
         <HeaderNav savedCount={savedAddresses.length} />
 
         {/* Ziyaretçi Tanıtım Banner'ı */}
-        {!userEmail && <PanelGuestBanner nextUrl="/desk/" />}
+        {!userEmail && <PanelGuestBanner nextUrl="/maps/" />}
 
         {mapStatus !== "ready" && (
           <div className="map-load-status" role={mapStatus === "error" ? "alert" : "status"}>
@@ -2828,7 +2828,7 @@ export default function Panel() {
           title={authModalConfig.title}
           subtitle={authModalConfig.subtitle}
           featureName={authModalConfig.featureName}
-          nextUrl="/desk/"
+          nextUrl="/maps/"
         />
       </main>
     </AuthGuard>

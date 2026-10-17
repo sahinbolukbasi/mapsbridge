@@ -31,7 +31,7 @@ export default function LoginPage() {
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
   const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-  const nextUrl = params?.get("next") || params?.get("redirect") || "/desk/";
+  const nextUrl = params?.get("next") || params?.get("redirect") || "/maps/";
 
   // Google OAuth Public Client ID
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -42,10 +42,10 @@ export default function LoginPage() {
       const safeNext =
         target.origin === window.location.origin
           ? target.pathname + target.search + target.hash
-          : "/desk/";
+          : "/maps/";
       window.location.assign(safeNext);
     } catch {
-      window.location.assign("/desk/");
+      window.location.assign("/maps/");
     }
   }, [nextUrl]);
 
@@ -626,7 +626,7 @@ export default function LoginPage() {
                       gap: "0.25rem",
                     }}
                     href={
-                      nextUrl !== "/desk/"
+                      nextUrl !== "/maps/"
                         ? `/register/?next=${encodeURIComponent(nextUrl)}`
                         : "/register/"
                     }

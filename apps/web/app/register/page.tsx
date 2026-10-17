@@ -23,7 +23,7 @@ export default function SignUpPage() {
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
   const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-  const nextUrl = params?.get("next") || "/desk/";
+  const nextUrl = params?.get("next") || "/maps/";
 
   // Şifre Güvenlik Kriterleri
   const rules = [
@@ -52,10 +52,10 @@ export default function SignUpPage() {
       const safeNext =
         target.origin === window.location.origin
           ? target.pathname + target.search + target.hash
-          : "/desk/";
+          : "/maps/";
       window.location.assign(safeNext);
     } catch {
-      window.location.assign("/desk/");
+      window.location.assign("/maps/");
     }
   }, [nextUrl]);
 
@@ -792,7 +792,7 @@ export default function SignUpPage() {
                     }}
                     data-path="giris"
                     href={
-                      nextUrl !== "/desk/"
+                      nextUrl !== "/maps/"
                         ? `/login/?next=${encodeURIComponent(nextUrl)}`
                         : "/login/"
                     }

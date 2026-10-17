@@ -1170,7 +1170,7 @@ export default function MessagesPage() {
 
                                 <div className="chat-route-embed-actions">
                                   <Link
-                                    href="/desk/"
+                                    href="/maps/"
                                     style={{
                                       flex: 1,
                                       padding: "0.5rem 0.75rem",
@@ -1699,7 +1699,7 @@ export default function MessagesPage() {
                                 </span>
                               </div>
                               <Link
-                                href="/desk/"
+                                href="/maps/"
                                 style={{
                                   width: "32px",
                                   height: "32px",
@@ -1947,7 +1947,7 @@ export default function MessagesPage() {
                             }}
                           >
                             <Link
-                              href="/desk/"
+                              href="/maps/"
                               className="chat-btn-map-split"
                               style={{ justifyContent: "center", textDecoration: "none" }}
                             >

@@ -24,7 +24,7 @@ export default function Home() {
     const session = getStoredSession();
     if (session?.token) {
       setIsLoggedIn(true);
-      router.push("/desk/");
+      router.push("/maps/");
       return;
     }
     document.documentElement.dataset.theme = "light";
@@ -96,7 +96,7 @@ export default function Home() {
 
               {/* Dual Action Buttons */}
               <div className="hero-actions">
-                <a href={isLoggedIn ? "/desk/" : "/register/"} className="hero-btn-primary">
+                <a href={isLoggedIn ? "/maps/" : "/register/"} className="hero-btn-primary">
                   <span>{isLoggedIn ? t("home.hero.goToDesk") : t("home.hero.startFree")}</span>
                   <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
                     {isLoggedIn ? "map" : "bolt"}
@@ -411,7 +411,7 @@ export default function Home() {
                           {t("home.mockup.desk.shareCode")}
                         </button>
                         <a
-                          href={isLoggedIn ? "/desk/" : "/register/"}
+                          href={isLoggedIn ? "/maps/" : "/register/"}
                           className="mockup-action-btn secondary"
                         >
                           <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>

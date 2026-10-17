@@ -211,7 +211,7 @@ export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClient
                   arrow_forward
                 </span>
               </Link>
-              <Link href="/desk/" className="btn-ai-secondary" prefetch={false}>
+              <Link href="/maps/" className="btn-ai-secondary" prefetch={false}>
                 <span
                   className="material-symbols-outlined"
                   style={{ fontSize: "20px", color: "#10b981" }}
@@ -308,7 +308,7 @@ export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClient
                   </span>
                 </div>
                 <Link
-                  href="/desk/"
+                  href="/maps/"
                   className="desk-day-btn"
                   style={{ background: "#286954", color: "#ffffff" }}
                 >
@@ -604,7 +604,7 @@ export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClient
                         Toplam: <strong>{current.km}</strong>
                       </span>
                       <Link
-                        href="/desk/"
+                        href="/maps/"
                         style={{ color: "#013628", display: "flex", alignItems: "center" }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
@@ -854,7 +854,7 @@ export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClient
                         </div>
                       </div>
                       <Link
-                        href="/desk/"
+                        href="/maps/"
                         style={{
                           padding: "4px 10px",
                           borderRadius: "9999px",
@@ -1345,7 +1345,7 @@ export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClient
                 </span>
                 <span>AI Asistan ile Ücretsiz Başla</span>
               </Link>
-              <Link href="/desk/" className="btn-ai-secondary" prefetch={false}>
+              <Link href="/maps/" className="btn-ai-secondary" prefetch={false}>
                 <span
                   className="material-symbols-outlined"
                   style={{ fontSize: "18px", color: "#10b981" }}

@@ -43,7 +43,7 @@ export function GoogleOneTap() {
                   window.location.pathname.startsWith("/login") ||
                   window.location.pathname.startsWith("/register")
                 ) {
-                  window.location.assign("/desk/");
+                  window.location.assign("/maps/");
                 } else {
                   window.location.reload();
                 }

@@ -187,7 +187,7 @@ export function NotFoundView({
 
             <div className="not-found-cards-grid">
               {/* Card 1: Harita Masası */}
-              <Link href="/desk/" className="not-found-card" prefetch={false}>
+              <Link href="/maps/" className="not-found-card" prefetch={false}>
                 <div>
                   <div className="not-found-card-icon">
                     <span className="material-symbols-outlined">map</span>

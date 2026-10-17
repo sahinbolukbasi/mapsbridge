@@ -187,7 +187,7 @@ export function HaritaClient() {
             </p>
 
             <div className="harita-hero-actions">
-              <Link href="/desk/" className="btn-harita-primary" prefetch={false}>
+              <Link href="/maps/" className="btn-harita-primary" prefetch={false}>
                 <span>Harita Masasını Aç (Giriş Yapmadan Dene)</span>
                 <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
                   arrow_forward
@@ -1252,7 +1252,7 @@ export function HaritaClient() {
                   tarayıcılarında akıcı ve kesintisiz çalışır.
                 </p>
                 <div className="final-banner-actions">
-                  <Link href="/desk/" className="btn-final-emerald" prefetch={false}>
+                  <Link href="/maps/" className="btn-final-emerald" prefetch={false}>
                     <span>Ücretsiz Harita Masasına Başla</span>
                     <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
                       arrow_forward

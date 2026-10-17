@@ -74,7 +74,7 @@ export function MobileStart() {
       </section>
 
       <section className="mobile-shortcuts" aria-label="Hızlı işlemler">
-        <Link href="/desk/" prefetch={false}>
+        <Link href="/maps/" prefetch={false}>
           <span>
             <StartIcon kind="map" />
           </span>

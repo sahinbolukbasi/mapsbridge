@@ -135,7 +135,7 @@ export function AuthActionModal({
   title = "MapsBridge Üyeliği Gereklidir",
   subtitle = "Bu işlemi gerçekleştirmek, duraklarınızı kaydetmek ve güvenli paylaşım oluşturmak için lütfen ücretsiz üye olun veya giriş yapın.",
   featureName = "Özel Gezgin Özelliği",
-  nextUrl = "/desk/",
+  nextUrl = "/maps/",
 }: AuthActionModalProps) {
   if (!isOpen) return null;
 
@@ -209,7 +209,7 @@ export interface PanelGuestBannerProps {
  * Top Guest Banner for /desk/
  * Lets visitors know they are exploring as guest and guides them to register.
  */
-export function PanelGuestBanner({ nextUrl = "/desk/" }: PanelGuestBannerProps) {
+export function PanelGuestBanner({ nextUrl = "/maps/" }: PanelGuestBannerProps) {
   const signupLink = `/register/?next=${encodeURIComponent(nextUrl)}`;
   const loginLink = `/login/?next=${encodeURIComponent(nextUrl)}`;
 

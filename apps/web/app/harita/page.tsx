@@ -11,5 +11,5 @@ export const metadata = publicMetadata(
 export default function HaritaTanitimPage() {
   // Keep the legacy URL as a stable entry point to the actual map workspace.
   // The public feature page remains available through the product content links.
-  redirect("/desk/");
+  redirect("/maps/");
 }

@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
       }
 
       setTimeout(() => {
-        window.location.assign("/desk/");
+        window.location.assign("/maps/");
       }, 1000);
     } catch (err: any) {
       setMessage(err.message || "Şifre güncellenemedi. Lütfen kodu kontrol edip tekrar deneyin.");

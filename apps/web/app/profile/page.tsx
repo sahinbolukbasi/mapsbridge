@@ -514,7 +514,7 @@ export default function ProfilePage() {
                 <span>{copiedLink ? "Kopyalandı" : "Paylaş"}</span>
               </button>
 
-              <Link href="/desk/" className="stitch-action-btn-primary">
+              <Link href="/maps/" className="stitch-action-btn-primary">
                 <span className="material-symbols-outlined text-[18px]">visibility</span>
                 <span>Ön İzleme</span>
               </Link>
@@ -610,7 +610,7 @@ export default function ProfilePage() {
                     </button>
                   </div>
                   <div className="stitch-filter-actions">
-                    <Link href="/desk/" className="stitch-btn-add-quick">
+                    <Link href="/maps/" className="stitch-btn-add-quick">
                       <span className="material-symbols-outlined text-[16px]">flight_takeoff</span>
                       <span>Hızlı Rota Ekle</span>
                     </Link>
@@ -637,7 +637,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="stitch-empty-actions">
                         <Link
-                          href="/desk/"
+                          href="/maps/"
                           className="stitch-btn-add-quick"
                           style={{ padding: "0.55rem 1.1rem" }}
                         >
@@ -1093,7 +1093,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="stitch-filter-actions">
-                    <Link href="/desk/" className="stitch-btn-add-quick">
+                    <Link href="/maps/" className="stitch-btn-add-quick">
                       <span className="material-symbols-outlined text-[16px]">add_location</span>
                       <span>Haritada Nokta Ekle</span>
                     </Link>
@@ -1113,7 +1113,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="stitch-empty-actions">
                       <Link
-                        href="/desk/"
+                        href="/maps/"
                         className="stitch-btn-add-quick"
                         style={{ padding: "0.55rem 1.1rem" }}
                       >
@@ -1463,7 +1463,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="stitch-empty-actions">
                     <Link
-                      href="/desk/"
+                      href="/maps/"
                       className="stitch-btn-add-quick"
                       style={{ padding: "0.55rem 1.1rem" }}
                     >

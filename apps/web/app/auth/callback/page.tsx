@@ -27,8 +27,8 @@ export default function AuthCallbackPage() {
         handleGoogleCredentialResponse(idToken);
         setStatus("Giriş başarılı! Yönlendiriliyorsunuz...");
         setTimeout(() => {
-          const next = new URLSearchParams(window.location.search).get("next") || "/desk/";
-          window.location.assign(next.startsWith("/") ? next : "/desk/");
+          const next = new URLSearchParams(window.location.search).get("next") || "/maps/";
+          window.location.assign(next.startsWith("/") ? next : "/maps/");
         }, 300);
         return;
       }
@@ -38,14 +38,14 @@ export default function AuthCallbackPage() {
       if (code) {
         setStatus("Yetkilendirme kodu alındı. Yönlendiriliyorsunuz...");
         setTimeout(() => {
-          const next = new URLSearchParams(window.location.search).get("next") || "/desk/";
-          window.location.assign(next.startsWith("/") ? next : "/desk/");
+          const next = new URLSearchParams(window.location.search).get("next") || "/maps/";
+          window.location.assign(next.startsWith("/") ? next : "/maps/");
         }, 500);
         return;
       }
 
       // Hiçbir parametre yoksa panele yönlendir
-      window.location.assign("/desk/");
+      window.location.assign("/maps/");
     } catch (e: any) {
       console.error("Auth callback hatası:", e);
       setStatus("Giriş doğrulaması sırasında bir hata oluştu.");

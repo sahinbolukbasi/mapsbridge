@@ -89,12 +89,12 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/haritalar/" prefetch={false}>
+                  <Link href="/maps/" prefetch={false}>
                     {t("footer.mapDesk")}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/gezi-asistani/" prefetch={false}>
+                  <Link href="/travel-assistant/" prefetch={false}>
                     {t("footer.aiAssistant")}
                   </Link>
                 </li>
@@ -130,7 +130,7 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/haritalar/" prefetch={false}>
+                  <Link href="/maps/" prefetch={false}>
                     {t("footer.workspace")}
                   </Link>
                 </li>

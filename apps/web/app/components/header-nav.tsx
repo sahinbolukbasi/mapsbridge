@@ -109,7 +109,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
     if (onOpenSaved) {
       onOpenSaved();
     } else {
-      window.location.assign("/desk/?modal=saved");
+      window.location.assign("/maps/?modal=saved");
     }
   }
 
@@ -149,7 +149,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
         )}
         <div className="global-site-header-inner">
           <div style={{ display: "flex", alignItems: "center", gap: "1.75rem" }}>
-            <Link className="header-brand-link" href="/" prefetch={false}>
+            <Link className="header-brand-link" href={mounted && userEmail ? "/maps/" : "/"} prefetch={false}>
               <div className="header-brand-icon">
                 <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
                   explore
@@ -178,15 +178,15 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                 </Link>
               )}
               <Link
-                className={`header-nav-pill ${pathname.startsWith("/haritalar") || pathname.startsWith("/harita") || pathname.startsWith("/desk") ? "active" : ""}`}
-                href="/haritalar/"
+                className={`header-nav-pill ${pathname.startsWith("/maps") || pathname.startsWith("/haritalar") || pathname.startsWith("/harita") || pathname.startsWith("/desk") ? "active" : ""}`}
+                href="/maps/"
                 prefetch={false}
               >
                 {t("nav.desk")}
               </Link>
               <Link
-                className={`header-nav-pill ${pathname.startsWith("/gezi-asistani") || pathname.startsWith("/ai-asistan") || (pathname.startsWith("/ai") && !pathname.startsWith("/ai-asistan")) ? "active" : ""}`}
-                href="/gezi-asistani/"
+                className={`header-nav-pill ${pathname.startsWith("/travel-assistant") || pathname.startsWith("/gezi-asistani") || pathname.startsWith("/ai-asistan") || (pathname.startsWith("/ai") && !pathname.startsWith("/ai-asistan")) ? "active" : ""}`}
+                href="/travel-assistant/"
                 prefetch={false}
               >
                 {t("nav.ai")}
@@ -610,7 +610,7 @@ export function MobileNav({
   const path = pathname.replace(/\/$/, "") || "/";
   const items = signedIn
     ? ([
-        { href: "/desk/", label: "Harita", english: "Map", icon: "map" },
+        { href: "/maps/", label: "Harita", english: "Map", icon: "map" },
         { href: "/community/", label: "Topluluk", english: "Community", icon: "people" },
         { href: "/ai/", label: "AI Asistan", english: "AI Guide", icon: "ai" },
         { href: "/messages/", label: "Mesajlar", english: "Messages", icon: "message" },
@@ -618,7 +618,7 @@ export function MobileNav({
       ] as const)
     : ([
         { href: isEnglish ? "/en/" : "/", label: "Keşfet", english: "Explore", icon: "explore" },
-        { href: "/desk/", label: "Harita", english: "Map", icon: "map" },
+        { href: "/maps/", label: "Harita", english: "Map", icon: "map" },
         { href: "/ai/", label: "AI Asistan", english: "AI Guide", icon: "ai" },
         { href: "/community/", label: "Topluluk", english: "Community", icon: "people" },
         { href: "/login/", label: "Giriş", english: "Sign in", icon: "profile" },

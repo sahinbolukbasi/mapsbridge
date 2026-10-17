@@ -184,7 +184,7 @@ export default function MobileAppsComingSoonPage() {
               kullanabilir, rotalarınızı oluşturup Google Maps veya Apple Haritalara GPX olarak
               aktarabilirsiniz.
             </p>
-            <Link href="/desk/" className="desk-cta-btn">
+            <Link href="/maps/" className="desk-cta-btn">
               <span>Web Harita Masasını Aç</span>
               <span className="material-symbols-outlined">open_in_new</span>
             </Link>

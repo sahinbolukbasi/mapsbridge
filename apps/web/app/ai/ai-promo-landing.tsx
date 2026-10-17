@@ -447,7 +447,7 @@ export function AIPromoLanding() {
 
                     <div className="ai-promo-micro-actions">
                       <Link
-                        href="/desk/?kod=RM-841"
+                        href="/maps/?kod=RM-841"
                         className="ai-promo-sub-btn"
                         style={{ background: "#1e4d3e", color: "#ffffff", border: "none" }}
                       >
@@ -614,7 +614,7 @@ export function AIPromoLanding() {
                 </span>
               </div>
               <Link
-                href="/desk/?kod=RM-841"
+                href="/maps/?kod=RM-841"
                 className="ai-promo-sub-btn"
                 style={{ position: "absolute", top: "10px", right: "12px", padding: "6px" }}
                 title="Harita Masasını Aç"
@@ -678,7 +678,7 @@ export function AIPromoLanding() {
 
             {/* Bottom Actions Bar */}
             <div className="ai-promo-route-dock">
-              <Link href="/desk/?kod=RM-841" className="ai-promo-main-action-btn">
+              <Link href="/maps/?kod=RM-841" className="ai-promo-main-action-btn">
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
                   explore
                 </span>

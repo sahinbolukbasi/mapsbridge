@@ -771,7 +771,7 @@ export default function AIPage() {
         "mapsbridge.travelPlanner.v5",
         JSON.stringify([...trips.filter((t) => t.id !== tripId), trip]),
       );
-      window.location.assign(`/desk/?tripId=${encodeURIComponent(tripId)}`);
+      window.location.assign(`/maps/?tripId=${encodeURIComponent(tripId)}`);
     } catch (e: any) {
       setError(e.message || "Rota aktarılamadı.");
     }
@@ -1153,7 +1153,7 @@ export default function AIPage() {
                         )}
                         {currentTrip && (
                           <a
-                            href={`/desk/?tripId=${currentTrip.id}`}
+                            href={`/maps/?tripId=${currentTrip.id}`}
                             className="ai-msg-action-btn"
                             title="Haritada İncele"
                             style={{ textDecoration: "none" }}
@@ -2546,7 +2546,7 @@ export default function AIPage() {
             >
               {currentTrip && (
                 <a
-                  href={`/desk/?tripId=${currentTrip.id}`}
+                  href={`/maps/?tripId=${currentTrip.id}`}
                   style={{
                     fontSize: "12px",
                     fontWeight: 600,

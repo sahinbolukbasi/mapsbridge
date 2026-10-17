@@ -16,7 +16,7 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 export function GoogleAuthButton({
   mode = "signin",
-  nextUrl = "/desk/",
+  nextUrl = "/maps/",
   onSuccess,
   onError,
   className = "",
@@ -41,10 +41,10 @@ export function GoogleAuthButton({
       const safeNext =
         target.origin === window.location.origin
           ? target.pathname + target.search + target.hash
-          : "/desk/";
+          : "/maps/";
       window.location.assign(safeNext);
     } catch {
-      window.location.assign("/desk/");
+      window.location.assign("/maps/");
     }
   }, [nextUrl]);
 

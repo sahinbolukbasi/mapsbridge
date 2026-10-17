@@ -420,7 +420,7 @@ export default function CommunityPage() {
                 </span>
                 <span>AI Seyahat Asistanı</span>
               </a>
-              <a href="/desk/" className="community-sidebar-link">
+              <a href="/maps/" className="community-sidebar-link">
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
                   map
                 </span>
