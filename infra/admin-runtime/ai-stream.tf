@@ -27,13 +27,13 @@ resource "aws_lambda_function" "ai_stream" {
 
 resource "aws_lambda_function_url" "ai_stream" {
   function_name      = aws_lambda_function.ai_stream.function_name
-  authorization_type = "AWS_IAM"
+  authorization_type = "NONE"
   invoke_mode        = "RESPONSE_STREAM"
   cors {
-    allow_credentials = true
+    allow_credentials = false
     allow_origins     = [var.frontend_origin, "http://localhost:3000"]
     allow_methods     = ["POST"]
-    allow_headers     = ["content-type", "authorization", "x-amz-date", "x-amz-security-token"]
+    allow_headers     = ["content-type", "authorization"]
     max_age           = 300
   }
 }
