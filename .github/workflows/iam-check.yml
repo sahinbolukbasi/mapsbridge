@@ -36,11 +36,9 @@ jobs:
           aws iam get-role-policy --role-name "$ROLE" --policy-name "deploy-permissions" \
             --query 'PolicyDocument' --output json 2>/dev/null || echo "(not found)"
 
-      - name: Test specific permissions
+      - name: Check CE Anomaly Monitors
         run: |
-          echo "=== Permission simulation ==="
-          aws iam simulate-principal-policy \
-            --policy-source-arn "$(aws iam get-role --role-name mapsbridge-prod-github-deploy --query 'Role.Arn' --output text)" \
-            --action-names "ec2:DescribeAvailabilityZones" "budgets:TagResource" "ce:CreateAnomalyMonitor" "elasticache:DescribeServerlessCaches" \
-            --query 'EvaluationResults[*].{Action:EvalActionName,Decision:EvalDecision}' \
-            --output table 2>/dev/null || echo "simulate-policy not available"
+          echo "=== CE Anomaly Monitors ==="
+          aws ce get-anomaly-monitors \
+            --query 'AnomalyMonitors[*].{Arn:MonitorArn,Name:MonitorName,Type:MonitorType,Dim:MonitorDimension}' \
+            --output table 2>/dev/null || echo "(none or access denied)"
