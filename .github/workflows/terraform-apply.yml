@@ -85,7 +85,12 @@ jobs:
         run: |
           TARGET_ARGS=""
           if [ -n "${{ github.event.inputs.target }}" ]; then
-            TARGET_ARGS="-target=${{ github.event.inputs.target }}"
+            # Support comma-separated targets: "res.a,res.b" → "-target=res.a -target=res.b"
+            IFS=',' read -ra TARGETS <<< "${{ github.event.inputs.target }}"
+            for t in "${TARGETS[@]}"; do
+              t=$(echo "$t" | xargs)  # trim whitespace
+              TARGET_ARGS="$TARGET_ARGS -target=$t"
+            done
           fi
           REFRESH_ARG=""
           if [ "${{ github.event.inputs.refresh }}" = "false" ]; then
