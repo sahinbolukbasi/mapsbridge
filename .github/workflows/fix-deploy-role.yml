@@ -94,7 +94,8 @@ jobs:
                     "acm:*",
                     "route53:*",
                     "cloudwatch:*",
-                    "events:*"
+                    "events:*",
+                    "secretsmanager:*"
                   ],
                   "Resource": "*"
                 }
