@@ -107,8 +107,15 @@ resource "aws_budgets_budget" "monthly" {
 }
 
 # ─── Cost Anomaly Detection — Tüm hesap ─────────────────────────────────
+# AWS hesabında yalnızca 1 DIMENSIONAL SERVICE monitörü olabilir.
+# Varsayılan "Default-Services-Monitor" import ediliyor.
+import {
+  to = aws_ce_anomaly_monitor.account
+  id = "arn:aws:ce::865369794421:anomalymonitor/0879bc9e-6c08-4d95-987a-63e159efb8d8"
+}
+
 resource "aws_ce_anomaly_monitor" "account" {
-  name              = "${local.name}-account-monitor"
+  name              = "Default-Services-Monitor"
   monitor_type      = "DIMENSIONAL"
   monitor_dimension = "SERVICE"
 }
