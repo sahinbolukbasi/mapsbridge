@@ -64,7 +64,13 @@ import { readEnabledAIAgents } from "../../../../../infra/lambda/src/shared/ai-o
 import { validateTopicSafety, validateTravelScope } from "./guardrails";
 import { INTAKE_PROMPT, INTAKE_SCHEMA, answerSchema, PROMPT_VERSION } from "./prompts";
 import { buildAdvisorSystemPrompt, buildPreferencesSummary } from "./advisor-prompt-builder";
-import { buildTripAffiliateBundle } from "../affiliate/travelpayouts";
+import {
+  buildTripAffiliateBundle,
+  buildFlightCard,
+  buildHotelCard,
+  buildCarRentalCard,
+  buildInsuranceCard,
+} from "../affiliate/travelpayouts";
 import { buildCuratedActivityCards } from "../affiliate/getyourguide";
 import { isExpired, type AffiliateCard } from "../affiliate/types";
 import { boundedHistory } from "./model-history";
@@ -526,6 +532,15 @@ export async function runMultiAgentSupervisor(
     stateToContextPrompt(currentTripState, mergedAnsweredSlots) +
     "\n" +
     focusToPromptSnippet(currentFocus);
+  // Past destinations from user memory for "daha önce gitmiştin" references
+  // The page appends "destinations: city1, city2" to tripManifestoMarkdown
+  const pastDestinations: string[] = (() => {
+    const manifesto = payload.tripManifestoMarkdown;
+    if (!manifesto) return [];
+    const match = manifesto.match(/destinations:\s*([^\n]+)/i);
+    return match?.[1]?.split(",").map((d: string) => d.trim()).filter(Boolean) ?? [];
+  })();
+
   const answerSystemPrompt =
     buildAdvisorSystemPrompt({
       mode: "json",
@@ -533,6 +548,7 @@ export async function runMultiAgentSupervisor(
       interests: context.interests,
       preferencesSummary: prefsSummary || undefined,
       visibleAssumptions: assumptions.length ? assumptions : undefined,
+      pastDestinations: pastDestinations.length ? pastDestinations : undefined,
     }) +
     `\n${tripStatePrompt}\nKarar özeti:\n- Ham düşünce zincirini veya gizli reasoning içeriğini asla döndürme.\n- decisionSummary alanında en fazla üç kısa, kullanıcıya faydalı gerekçe ver.\n- Gerekçeler yalnızca doğrulanmış profil, açık istek, araştırma sonuçları ve rota kısıtlarına dayanmalı.\n- Alanı boş bırakmak yerine rota/yanıt seçimini açıklayan kısa maddeler üret.\n- Intent sınıfı: ${intent.intentClass} — reasoning bütçesi: ${intent.reasoningBudget}.`;
   const streamSystemPrompt =
@@ -542,30 +558,45 @@ export async function runMultiAgentSupervisor(
       interests: context.interests,
       preferencesSummary: prefsSummary || undefined,
       visibleAssumptions: assumptions.length ? assumptions : undefined,
+      pastDestinations: pastDestinations.length ? pastDestinations : undefined,
     }) + `\n${tripStatePrompt}`;
 
-  // Faz C — Build affiliate cards synchronously (URL generation, no async)
+  // Faz C — Build affiliate cards selectively (only cards relevant to this request)
+  // Gate: show hotel cards only when accommodation is explicitly discussed,
+  //        flight cards when flights mentioned or needs.flights,
+  //        car cards when car_rental mentioned,
+  //        full bundle only for route mode (trip plan).
   let affiliateCards: AffiliateCard[] | undefined;
   if (destId) {
     try {
       const checkIn = tripProfile.dates?.start ? new Date(tripProfile.dates.start) : undefined;
       const checkOut = tripProfile.dates?.end ? new Date(tripProfile.dates.end) : undefined;
-      const bundle = buildTripAffiliateBundle({
-        destination: destId,
-        checkIn,
-        checkOut,
-        adults: tripProfile.travelers?.adults,
-      });
-      const activityCards = buildCuratedActivityCards(destId);
-      // isExpired guard: filter any card that carries a stale price (should not happen for
-      // link-only cards, but defensive check for future cached-price cards)
-      affiliateCards = [
-        bundle.flight,
-        bundle.hotel,
-        bundle.carRental,
-        bundle.insurance,
-        ...activityCards,
-      ].filter((c) => !isExpired(c));
+      const reqText = request.toLowerCase();
+      const wantsHotel = /otel|konaklama|kal(?:acağım|mak|acak)|hotel|hostel|apart|butik|resort/u.test(reqText);
+      const wantsFlight = /uçuş|uçak|bilet|flight|nasıl\s*gid/u.test(reqText) || !!tripProfile.needs?.flights;
+      const wantsCar = /araba\s*kiral|araç\s*kiral|kiralık\s*araç|rent.*car/u.test(reqText) || !!tripProfile.needs?.car_rental;
+      const isFullPlan = mode === "route";
+
+      const bundle = isFullPlan
+        ? buildTripAffiliateBundle({ destination: destId, checkIn, checkOut, adults: tripProfile.travelers?.adults })
+        : null;
+
+      const selectedCards: AffiliateCard[] = [];
+
+      if (isFullPlan && bundle) {
+        selectedCards.push(bundle.flight, bundle.hotel, bundle.carRental, bundle.insurance);
+      } else {
+        if (wantsFlight) selectedCards.push(buildFlightCard({ destination: destId, departDate: checkIn, adults: tripProfile.travelers?.adults }));
+        if (wantsHotel) selectedCards.push(buildHotelCard({ destination: destId, checkIn, checkOut, adults: tripProfile.travelers?.adults }));
+        if (wantsCar) selectedCards.push(buildCarRentalCard({ destination: destId, pickupDate: checkIn, dropoffDate: checkOut }));
+        if ((wantsFlight || wantsHotel) && selectedCards.length > 0) {
+          selectedCards.push(buildInsuranceCard({ destination: destId, departDate: checkIn, returnDate: checkOut }));
+        }
+      }
+
+      const activityCards = isFullPlan ? buildCuratedActivityCards(destId) : [];
+      affiliateCards = [...selectedCards, ...activityCards].filter((c) => !isExpired(c));
+      if (!affiliateCards.length) affiliateCards = undefined;
     } catch {
       // Affiliate card generation is non-critical — never fail the main response
     }

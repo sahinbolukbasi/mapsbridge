@@ -27,6 +27,10 @@ export interface AdvisorPromptOptions {
   currentLocation?: { lat: number; lng: number; label?: string };
   /** Anonymized session ref for audit log. */
   sessionRef?: string;
+  /** Conversation flow snippet from conversation-flow.ts, injected for stage-aware behavior. */
+  flowSnippet?: string;
+  /** Past destination names from UserMemoryData.destinations. */
+  pastDestinations?: string[];
 }
 
 /**
@@ -69,6 +73,17 @@ export function buildAdvisorSystemPrompt(opts: AdvisorPromptOptions): string {
   // Proactive alerts
   if (opts.proactiveAlerts?.length) {
     parts.push(formatAlertsForPrompt(opts.proactiveAlerts));
+  }
+
+  // Past destinations memory injection ("daha önce X'e gitmiştin" style references)
+  if (opts.pastDestinations?.length) {
+    const recent = opts.pastDestinations.slice(-3).join(", ");
+    parts.push(`[KULLANICININ GEÇMİŞ SEYAHAT İLGİSİ: ${recent}. Bu bilgiyi doğal referans için kullan — aynı soruyu ikinci kez sorma.]`);
+  }
+
+  // Conversation flow snippet (stage-aware behavior hints)
+  if (opts.flowSnippet) {
+    parts.push(opts.flowSnippet);
   }
 
   // Phase-aware behaviour header (includes in-trip location if set)

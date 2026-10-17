@@ -32,6 +32,14 @@ import { ContextualFollowups } from "./contextual-followups";
 import { TravelAffiliateCards, InlineAffiliateStrip } from "./travel-affiliate-cards";
 import { extractDestinationFromText } from "../lib/affiliate/travelpayouts";
 import { useUserMemory } from "../lib/ai/user-memory-hook";
+import {
+  advanceFlow,
+  shouldSurfacePricing,
+  getFlowQuickReplies,
+  EMPTY_FLOW,
+  type ConversationFlow,
+  type FlowQuickReply,
+} from "../lib/ai/conversation-flow";
 
 const STORAGE_KEY = "mapsbridge.ai.sessions.v5";
 interface Session {
@@ -213,6 +221,7 @@ export default function AIPage() {
   const session = sessions.find((s) => s.id === activeId) || null;
   const route = session?.route && isRoutePlan(session.route) ? session.route : null;
   const { memory, learnFromPrompt, buildContextString, clearMemory } = useUserMemory();
+  const [conversationFlow, setConversationFlow] = useState<ConversationFlow>(EMPTY_FLOW);
 
   // Affiliate click analytics
   useEffect(() => {
@@ -422,6 +431,7 @@ export default function AIPage() {
     setNotice("");
     pending.current = null;
     setInput("");
+    setConversationFlow(EMPTY_FLOW);
   }
   function select(id: string) {
     if (inFlight.current) return;
@@ -431,6 +441,7 @@ export default function AIPage() {
     setDay(1);
     setError("");
     setNotice("");
+    setConversationFlow(EMPTY_FLOW);
     pending.current = sessions.find((s) => s.id === id)?.pendingRequest || null;
     if (pending.current) setError("Bu sohbette sonuç bekleyen bir istek var.");
   }
@@ -467,7 +478,12 @@ export default function AIPage() {
     const manifesto = currentTrip ? tripToMarkdown(currentTrip) : undefined;
     const behavioralContext = interactionTracker.getPredictiveAIPrompt();
     const userMemoryContext = buildContextString(memory);
-    const combinedManifesto = [manifesto, behavioralContext, userMemoryContext]
+    // Append past destinations in a format supervisor.ts can extract
+    const destMemoryLine =
+      memory?.destinations?.length
+        ? `destinations: ${memory.destinations.slice(-5).join(", ")}`
+        : "";
+    const combinedManifesto = [manifesto, behavioralContext, userMemoryContext, destMemoryLine]
       .filter(Boolean)
       .join("\n\n---\n\n");
     // Learn from this prompt to improve future context
@@ -576,13 +592,30 @@ export default function AIPage() {
       if (!result.orchestratorSummary?.trim() || (result.route && !isRoutePlan(result.route)))
         throw Error("Yanıt tamamlanamadı.");
       const detectedDest = !result.route ? extractDestinationFromText(result.orchestratorSummary) : undefined;
-      const travelQuickReplies = detectedDest && !result.clarification?.quickOptions?.length
-        ? [
-            { label: `${detectedDest} rotası planla`, prompt: `${detectedDest} için rota planı oluştur` },
-            { label: "Uçuş fiyatları?", prompt: `${detectedDest} uçuş biletleri ne kadar?` },
-            { label: "Otel önerileri?", prompt: `${detectedDest} otel tavsiyeleri ver` },
-          ]
-        : undefined;
+
+      // Advance conversation flow after each AI response
+      const updatedFlow = advanceFlow(
+        conversationFlow,
+        promptToSend,
+        result.orchestratorSummary,
+        detectedDest || result.tripContext?.destination,
+      );
+      setConversationFlow(updatedFlow);
+
+      // Use flow-aware quick replies when available, else fall back to generic ones
+      const flowReplies: FlowQuickReply[] = !result.clarification?.quickOptions?.length
+        ? getFlowQuickReplies(updatedFlow, detectedDest || result.tripContext?.destination)
+        : [];
+      const travelQuickReplies =
+        flowReplies.length > 0
+          ? flowReplies.map((r) => ({ label: r.label, prompt: r.message }))
+          : detectedDest && !result.clarification?.quickOptions?.length
+          ? [
+              { label: `${detectedDest} rotası planla`, prompt: `${detectedDest} için rota planı oluştur` },
+              { label: "Uçuş fiyatları?", prompt: `${detectedDest} uçuş biletleri ne kadar?` },
+              { label: "Otel önerileri?", prompt: `${detectedDest} otel tavsiyeleri ver` },
+            ]
+          : undefined;
 
       const message: ChatMessage = {
         id: crypto.randomUUID(),
@@ -1188,9 +1221,10 @@ export default function AIPage() {
                       </>
                     )}
 
-                    {m.role === "assistant" && !m.route && (() => {
+                    {m.role === "assistant" && !m.route && shouldSurfacePricing(conversationFlow) && (() => {
                       const dest = extractDestinationFromText(m.text);
-                      return dest ? <InlineAffiliateStrip destination={dest} messageText={m.text} /> : null;
+                      const tok = getStoredSession()?.token;
+                      return dest ? <InlineAffiliateStrip destination={dest} messageText={m.text} authToken={tok || undefined} /> : null;
                     })()}
 
                     {m.role === "assistant" && m.quickReplies && m.quickReplies.length > 0 && (
