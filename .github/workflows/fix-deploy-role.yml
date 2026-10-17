@@ -36,10 +36,12 @@ jobs:
               "Version": "2012-10-17",
               "Statement": [
                 {
-                  "Sid": "EC2Read",
+                  "Sid": "EC2Manage",
                   "Effect": "Allow",
                   "Action": [
-                    "ec2:Describe*"
+                    "ec2:Describe*",
+                    "ec2:CreateTags",
+                    "ec2:DeleteTags"
                   ],
                   "Resource": "*"
                 },
