@@ -130,7 +130,7 @@ resource "aws_cloudfront_function" "security_headers" {
       h['permissions-policy'] = { value: 'camera=(), microphone=(), geolocation=(self)' };
       h['vary'] = { value: 'Accept-Language' };
       h['strict-transport-security'] = { value: 'max-age=63072000; includeSubDomains; preload' };
-      h['content-security-policy'] = { value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.amazonaws.com https://*.execute-api.eu-central-1.amazonaws.com wss://*.execute-api.eu-central-1.amazonaws.com; frame-ancestors 'none'" };
+      h['content-security-policy'] = { value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://*.gstatic.com https://unpkg.com https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.amazonaws.com https://*.execute-api.eu-central-1.amazonaws.com wss://*.execute-api.eu-central-1.amazonaws.com https://*.tile.openstreetmap.org https://*.tiles.openrailwaymap.org https://tile.openstreetmap.org https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com https://server.arcgisonline.com; frame-ancestors 'none'" };
 
       // Pass locale cookie from request phase if set (use cookies API)
       if (request.headers['x-locale-cookie']) {

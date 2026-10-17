@@ -31,5 +31,5 @@ output "http_stage_name" {
 }
 
 output "http_stage_arn" {
-  value = "arn:aws:apigateway:${var.aws_region}::/apis/${aws_apigatewayv2_api.http.id}/stages/${aws_apigatewayv2_stage.http.name}"
+  value = aws_apigatewayv2_stage.http.arn
 }

@@ -37,7 +37,7 @@ resource "aws_bedrockagent_knowledge_base" "travel" {
 }
 
 resource "aws_iam_role" "bedrock_kb" {
-  count = var.enable_bedrock ? 1 : 0
+  count = var.enable_bedrock && var.opensearch_collection_arn != "" ? 1 : 0
 
   name = "${local.name}-bedrock-kb"
   assume_role_policy = jsonencode({
@@ -52,7 +52,7 @@ resource "aws_iam_role" "bedrock_kb" {
 }
 
 resource "aws_iam_role_policy" "bedrock_kb" {
-  count = var.enable_bedrock ? 1 : 0
+  count = var.enable_bedrock && var.opensearch_collection_arn != "" ? 1 : 0
 
   name = "bedrock-kb-access"
   role = aws_iam_role.bedrock_kb[0].id

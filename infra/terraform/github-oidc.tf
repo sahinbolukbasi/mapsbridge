@@ -37,7 +37,7 @@ resource "aws_iam_role_policy" "github_deploy" {
       {
         Sid      = "S3Deploy"
         Effect   = "Allow"
-        Action   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject", "s3:ListBucket", "s3:PutObjectAcl"]
+        Action   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject", "s3:ListBucket", "s3:PutObjectAcl", "s3:CreateBucket", "s3:PutBucketVersioning", "s3:PutBucketPolicy", "s3:DeleteBucket", "s3:PutEncryptionConfiguration", "s3:PutLifecycleConfiguration", "s3:PutBucketNotification"]
         Resource = ["arn:aws:s3:::${local.name}-*", "arn:aws:s3:::${local.name}-*/*"]
       },
       {
@@ -80,6 +80,21 @@ resource "aws_iam_role_policy" "github_deploy" {
           "ec2:DescribeVpcEndpoints",
           "ec2:DescribeNetworkInterfaces",
           "ec2:DescribeAddresses",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DetachNetworkInterface",
+          "ec2:CreateNetworkInterface",
+          "ec2:ModifyNetworkInterfaceAttribute",
+          "ec2:DeleteSecurityGroup",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress",
+          "ec2:CreateSecurityGroup",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:CreateVpcEndpoint",
+          "ec2:DeleteVpcEndpoints",
+          "ec2:ModifyVpcEndpoint",
+          "ec2:CreateTags",
+          "ec2:DeleteTags",
         ]
         Resource = "*"
       },
@@ -120,6 +135,8 @@ resource "aws_iam_role_policy" "github_deploy" {
           "iam:PassRole", "iam:TagRole", "iam:ListRolePolicies", "iam:ListAttachedRolePolicies",
           "iam:GetOpenIDConnectProvider", "iam:ListOpenIDConnectProviders",
           "iam:CreateOpenIDConnectProvider", "iam:AddClientIDToOpenIDConnectProvider",
+          "bedrock:*",
+          "aoss:*",
           "resource-groups:*",
           "logs:*",
           "cognito-idp:*",
