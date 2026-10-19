@@ -114,7 +114,7 @@ jobs:
       github.event.inputs.plan_only != 'true'
     runs-on: ubuntu-latest
     environment: production
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       TF_VAR_environment: prod
       TF_VAR_frontend_domain: mapsbridge.com
