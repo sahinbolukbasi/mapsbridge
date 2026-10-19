@@ -71,13 +71,27 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
 
+      - name: Auto-detect ACM cert from CloudFront
+        if: env.TF_VAR_acm_certificate_arn == ''
+        run: |
+          DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
+          if [ -n "$DIST_ID" ]; then
+            CERT_ARN=$(aws cloudfront get-distribution --id "$DIST_ID" --query 'Distribution.DistributionConfig.ViewerCertificate.ACMCertificateArn' --output text 2>/dev/null || true)
+            if [ -n "$CERT_ARN" ] && [ "$CERT_ARN" != "None" ] && [ "$CERT_ARN" != "null" ]; then
+              echo "Detected ACM cert: $CERT_ARN"
+              echo "TF_VAR_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
+              echo "TF_VAR_admin_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
+            fi
+          fi
+
       - name: Create Lambda zip placeholders
         run: |
           mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
+          printf 'exports.handler=async()=>({statusCode:200})' > /tmp/index.js
           for name in auth chat marketplace cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
-            echo "placeholder" | zip -q infra/terraform/.build/lambdas/${name}.zip -
+            zip -jqX infra/terraform/.build/lambdas/${name}.zip /tmp/index.js
           done
-          echo "placeholder" | zip -q infra/terraform/.build/layer/shared.zip -
+          zip -jqX infra/terraform/.build/layer/shared.zip /tmp/index.js
 
       - name: Terraform Init
         working-directory: infra/terraform
@@ -97,7 +111,8 @@ jobs:
 
       - name: Bootstrap deploy role permissions
         working-directory: infra/terraform
-        run: terraform apply -auto-approve -target=aws_iam_role_policy.github_deploy -refresh=false 2>/dev/null || true
+        continue-on-error: true
+        run: terraform apply -auto-approve -target=aws_iam_role_policy.github_deploy
 
       - name: Terraform Plan
         working-directory: infra/terraform
@@ -149,13 +164,27 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
 
+      - name: Auto-detect ACM cert from CloudFront
+        if: env.TF_VAR_acm_certificate_arn == ''
+        run: |
+          DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
+          if [ -n "$DIST_ID" ]; then
+            CERT_ARN=$(aws cloudfront get-distribution --id "$DIST_ID" --query 'Distribution.DistributionConfig.ViewerCertificate.ACMCertificateArn' --output text 2>/dev/null || true)
+            if [ -n "$CERT_ARN" ] && [ "$CERT_ARN" != "None" ] && [ "$CERT_ARN" != "null" ]; then
+              echo "Detected ACM cert: $CERT_ARN"
+              echo "TF_VAR_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
+              echo "TF_VAR_admin_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
+            fi
+          fi
+
       - name: Create Lambda zip placeholders
         run: |
           mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
+          printf 'exports.handler=async()=>({statusCode:200})' > /tmp/index.js
           for name in auth chat marketplace cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
-            echo "placeholder" | zip -q infra/terraform/.build/lambdas/${name}.zip -
+            zip -jqX infra/terraform/.build/lambdas/${name}.zip /tmp/index.js
           done
-          echo "placeholder" | zip -q infra/terraform/.build/layer/shared.zip -
+          zip -jqX infra/terraform/.build/layer/shared.zip /tmp/index.js
 
       - name: Terraform Init
         working-directory: infra/terraform
