@@ -1,12 +1,14 @@
 "use client";
 
 import React, { FormEvent, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { forgotPassword, confirmForgotPassword, signIn } from "../lib/cognito";
 import { HeaderNav } from "../components/header-nav";
 import { SiteFooter } from "../components/site-footer";
 import "./reset-password.css";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const [step, setStep] = useState<"send" | "confirm">("send");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -121,12 +123,12 @@ export default function ForgotPasswordPage() {
       try {
         await signIn(cleanEmail, newPassword);
       } catch {
-        window.location.assign("/login/?reset=success");
+        router.replace("/login/?reset=success");
         return;
       }
 
       setTimeout(() => {
-        window.location.assign("/maps/");
+        router.push("/maps/");
       }, 1000);
     } catch (err: any) {
       setMessage(err.message || "Şifre güncellenemedi. Lütfen kodu kontrol edip tekrar deneyin.");

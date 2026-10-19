@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { HeaderNav } from "../components/header-nav";
 import { SiteFooter } from "../components/site-footer";
 import { useLocale } from "../lib/locale-context";
@@ -14,6 +14,7 @@ interface AIAsistanClientProps {
 
 export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClientProps = {}) {
   const pathname = usePathname();
+  const router = useRouter();
   const { isEnglish } = useLocale();
   const [activeDay, setActiveDay] = useState<number>(1);
   const [chatInput, setChatInput] = useState<string>(
@@ -25,11 +26,11 @@ export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClient
   useEffect(() => {
     const session = getStoredSession();
     if (session?.token) {
-      window.location.replace("/ai/");
+      router.replace("/ai/");
       return;
     }
     setIsCheckingSession(false);
-  }, [pathname, initialIsEnglish]);
+  }, [pathname, initialIsEnglish, router]);
 
   if (isCheckingSession) {
     return (

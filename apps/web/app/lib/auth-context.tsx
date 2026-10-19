@@ -59,14 +59,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
         return;
       }
-      document.cookie = `mb_session=1; Max-Age=${30 * 60}; path=/; SameSite=Strict`;
+      document.cookie = `mb_session=1; Max-Age=${24 * 60 * 60}; path=/; SameSite=Strict`;
       setUser({
         token: refreshed.token,
         email: session.email,
         profile: getUserProfile(),
       });
     } else {
-      document.cookie = `mb_session=1; Max-Age=${30 * 60}; path=/; SameSite=Strict`;
+      document.cookie = `mb_session=1; Max-Age=${24 * 60 * 60}; path=/; SameSite=Strict`;
       setUser({
         token: session.token,
         email: session.email,
@@ -81,6 +81,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadSession();
   }, [loadSession]);
 
+  // api-client 401 kalıcı olduğunda kullanıcıyı login sayfasına yönlendir
+  useEffect(() => {
+    const handleExpired = () => {
+      const next = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.assign(`/login/?next=${next}`);
+    };
+    window.addEventListener("mapsbridge:session-expired", handleExpired);
+    return () => window.removeEventListener("mapsbridge:session-expired", handleExpired);
+  }, []);
+
   // 30 dakikada bir token refresh (SessionKeepAlive'ın yerini alır)
   useEffect(() => {
     intervalRef.current = setInterval(async () => {
@@ -89,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (isTokenExpired(session.token)) {
         const refreshed = await refreshSession();
         if (refreshed) {
-          document.cookie = `mb_session=1; Max-Age=${30 * 60}; path=/; SameSite=Strict`;
+          document.cookie = `mb_session=1; Max-Age=${24 * 60 * 60}; path=/; SameSite=Strict`;
           setUser((prev) => (prev ? { ...prev, token: refreshed.token } : null));
         } else {
           cognitoSignOut();

@@ -2,7 +2,7 @@
 
 import { userStorage } from "../lib/user-storage";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getStoredSession, getUserProfile, signOut } from "../lib/cognito";
 import { billingService } from "../lib/billing/billing-service";
@@ -17,6 +17,7 @@ interface HeaderNavProps {
 export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
   const [storageError, setStorageError] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { t, isEnglish } = useLocale();
   const [mounted, setMounted] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -109,7 +110,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
     if (onOpenSaved) {
       onOpenSaved();
     } else {
-      window.location.assign("/maps/?modal=saved");
+      router.push("/maps/?modal=saved");
     }
   }
 

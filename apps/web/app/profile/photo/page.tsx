@@ -3,6 +3,7 @@
 import { userStorage } from "../../lib/user-storage";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { HeaderNav } from "../../components/header-nav";
 import { FullPagePromotion } from "../../components/auth-gate";
 import { getStoredSession, getUserProfile } from "../../lib/cognito";
@@ -48,6 +49,7 @@ const PRESET_AVATARS = [
 ];
 
 export default function ProfilePhotoPage() {
+  const router = useRouter();
   const [currentAvatar, setCurrentAvatar] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -125,7 +127,7 @@ export default function ProfilePhotoPage() {
     setCurrentAvatar(previewUrl);
     triggerToast("✓ Profil fotoğrafınız başarıyla güncellendi!");
     setTimeout(() => {
-      window.location.assign("/profile/");
+      router.push("/profile/");
     }, 1000);
   }
 
