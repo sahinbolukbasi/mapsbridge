@@ -634,7 +634,7 @@ export default function AdminDashboard() {
           </p>
           {access !== "checking" && (
             <div className="admin-actions">
-              <a href="/login/">Giriş yap</a>
+              <a href="/login/?next=/u/admin/">Giriş yap</a>
               <button onClick={() => void load()} disabled={loading}>
                 Tekrar dene
               </button>

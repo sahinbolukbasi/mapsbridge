@@ -34,18 +34,8 @@ resource "aws_cloudfront_function" "spa_router" {
       var cookies = request.cookies || {};
       var headers = request.headers || {};
 
-      // Block admin panel routes — admin lives on its own distribution
-      if (uri.startsWith('/u/admin')) {
-        return {
-          statusCode: 404,
-          statusDescription: 'Not Found',
-          headers: { 'content-type': { value: 'text/plain' } },
-          body: 'Not Found'
-        };
-      }
-
       // Auth-protected routes: require mb_session cookie
-      var protectedPrefixes = ['/maps', '/desk', '/haritalar', '/travel-assistant', '/gezi-asistani', '/profile', '/messages', '/ai'];
+      var protectedPrefixes = ['/maps', '/desk', '/haritalar', '/travel-assistant', '/gezi-asistani', '/profile', '/messages', '/ai', '/u/admin'];
       var isProtected = false;
       for (var i = 0; i < protectedPrefixes.length; i++) {
         if (uri === protectedPrefixes[i] || uri.startsWith(protectedPrefixes[i] + '/')) {

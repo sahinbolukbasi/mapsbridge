@@ -9,7 +9,7 @@
 import { getStoredSession, refreshSession, isTokenExpired, signOut } from "./cognito";
 
 export const API_ENDPOINT = (
-  process.env.NEXT_PUBLIC_API_URL || "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com"
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com"
 ).replace(/\/$/, "");
 
 export interface ApiFetchOptions extends RequestInit {
