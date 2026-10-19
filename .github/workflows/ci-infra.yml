@@ -45,7 +45,7 @@ jobs:
               echo "placeholder" | zip -q .build/layer/shared.zip -
               ;;
             admin-runtime)
-              for name in admin routes operations ai stripe background-monitor; do
+              for name in admin routes operations ai stripe ai-stream background-monitor; do
                 echo "placeholder" | zip -q .build/${name}.zip -
               done
               ;;

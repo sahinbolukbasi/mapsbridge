@@ -285,6 +285,10 @@ module "messaging" {
 # Stripe webhook is managed by infra/admin-runtime via routes.json ("POST /stripe/webhook": "stripe")
 
 # ─── Security Module (WAF for API Gateway) ──────────────────────────────
+# WAFv2 WebACL Association does not support HTTP API Gateway v2 ($default
+# stage ARN is rejected).  Rate limiting is handled by API Gateway's own
+# throttle settings.  Re-enable when/if the API is fronted by CloudFront
+# or migrated to REST API.
 module "security" {
   source = "./modules/security"
 
@@ -292,6 +296,6 @@ module "security" {
   environment           = var.environment
   tags                  = local.tags
   api_gateway_stage_arn = module.api.http_stage_arn
-  enable_waf            = true
+  enable_waf            = false
   waf_rate_limit        = var.waf_rate_limit
 }

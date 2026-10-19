@@ -47,16 +47,10 @@ resource "aws_iam_role_policy" "github_deploy" {
         Resource = [aws_cloudfront_distribution.web.arn]
       },
       {
-        Sid    = "LambdaDeploy"
+        Sid    = "LambdaFullManage"
         Effect = "Allow"
         Action = [
-          "lambda:ListFunctions",
-          "lambda:UpdateFunctionCode",
-          "lambda:PublishVersion",
-          "lambda:GetFunction",
-          "lambda:GetAlias",
-          "lambda:UpdateAlias",
-          "lambda:ListAliases",
+          "lambda:*",
         ]
         Resource = "*"
       },
@@ -131,11 +125,14 @@ resource "aws_iam_role_policy" "github_deploy" {
           "kms:Describe*", "kms:Get*", "kms:List*", "kms:CreateKey", "kms:CreateAlias",
           "kms:EnableKeyRotation", "kms:ScheduleKeyDeletion", "kms:TagResource",
           "iam:GetRole", "iam:GetRolePolicy", "iam:PutRolePolicy", "iam:CreateRole",
+          "iam:DeleteRole", "iam:UpdateRole", "iam:UpdateAssumeRolePolicy",
           "iam:AttachRolePolicy", "iam:DetachRolePolicy", "iam:DeleteRolePolicy",
-          "iam:PassRole", "iam:TagRole", "iam:ListRolePolicies", "iam:ListAttachedRolePolicies",
+          "iam:PassRole", "iam:TagRole", "iam:UntagRole", "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies", "iam:ListInstanceProfilesForRole",
           "iam:GetOpenIDConnectProvider", "iam:ListOpenIDConnectProviders",
           "iam:CreateOpenIDConnectProvider", "iam:AddClientIDToOpenIDConnectProvider",
           "bedrock:*",
+          "cloudtrail:*",
           "aoss:*",
           "resource-groups:*",
           "logs:*",

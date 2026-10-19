@@ -76,7 +76,11 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init
+        run: terraform init -upgrade
+
+      - name: Bootstrap deploy role permissions
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve -target=aws_iam_role_policy.github_deploy -refresh=false 2>/dev/null || true
 
       - name: Terraform Plan
         working-directory: infra/terraform
@@ -138,7 +142,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -191,7 +195,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/admin-runtime
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Terraform Plan
         working-directory: infra/admin-runtime
@@ -241,7 +245,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/admin-runtime
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -280,7 +284,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/agentcore-gateway
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Terraform Plan
         working-directory: infra/agentcore-gateway
@@ -323,7 +327,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/agentcore-gateway
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -365,7 +369,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-memory
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Terraform Plan
         working-directory: infra/ai-memory
@@ -411,7 +415,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-memory
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -445,7 +449,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-finops
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Terraform Plan
         working-directory: infra/ai-finops
@@ -483,7 +487,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-finops
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -511,7 +515,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-training
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Terraform Plan
         working-directory: infra/ai-training
@@ -543,7 +547,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-training
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -571,7 +575,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/travel-rag
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Terraform Plan
         working-directory: infra/travel-rag
@@ -603,7 +607,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/travel-rag
-        run: terraform init
+        run: terraform init -upgrade
 
       - name: Download plan
         uses: actions/download-artifact@v4
