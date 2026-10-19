@@ -87,10 +87,12 @@ jobs:
         if: github.event.inputs.force_unlock == 'true'
         working-directory: infra/terraform
         run: |
-          LOCK_ID=$(terraform plan -lock=false -no-color 2>&1 | grep -oP 'ID:\s+\K[a-f0-9-]+' | head -1 || true)
+          LOCK_ID=$(terraform plan -lock-timeout=5s -no-color 2>&1 | grep -oP 'ID:\s+\K[a-f0-9-]+' | head -1 || true)
           if [ -n "$LOCK_ID" ]; then
             echo "Unlocking state with ID: $LOCK_ID"
             terraform force-unlock -force "$LOCK_ID"
+          else
+            echo "No stale lock found"
           fi
 
       - name: Bootstrap deploy role permissions
