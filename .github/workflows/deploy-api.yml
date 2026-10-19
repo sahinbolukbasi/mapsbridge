@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "infra/lambda/**"
+      - "apps/web/server/**"
+      - "apps/web/app/lib/ai/**"
       - ".github/workflows/deploy-api.yml"
   workflow_dispatch:
 
@@ -38,7 +40,7 @@ jobs:
         run: node --test infra/lambda/tests/*.test.cjs
 
   deploy:
-    name: Package & Deploy Lambda
+    name: Build & Deploy Lambda
     runs-on: ubuntu-latest
     needs: [test]
     environment: production
@@ -68,46 +70,132 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Package Lambda
+      - name: Install dependencies
         if: steps.check.outputs.skip == 'false'
-        working-directory: infra/lambda
         run: |
-          npm ci --ignore-scripts
-          zip -r /tmp/lambda.zip src/ node_modules/ package.json
+          npm ci
+          npm ci --prefix infra/lambda --ignore-scripts
 
-      - name: Update Lambda functions
+      - name: Build Lambda bundles with esbuild
         if: steps.check.outputs.skip == 'false'
         run: |
-          FUNCTIONS=""
-          NEXT_TOKEN=""
-          while true; do
-            if [ -z "$NEXT_TOKEN" ]; then
-              RESULT=$(aws lambda list-functions --output json 2>/dev/null) || break
-            else
-              RESULT=$(aws lambda list-functions --marker "$NEXT_TOKEN" --output json 2>/dev/null) || break
+          LAMBDA_ROOT="infra/lambda"
+          BUILD_DIR="/tmp/lambda-builds"
+          mkdir -p "$BUILD_DIR"
+
+          # Map: bundle-name → entry point (relative to repo root)
+          # auth, chat, marketplace → main terraform stack (mapsbridge-prod-api-*)
+          # ai, ai-stream, routes, admin, stripe, operations, background-monitor, kb-ingest, places → admin-runtime (mapsbridge-prod-*)
+          # ws-onconnect, ws-onmessage, ws-ondisconnect → messaging (mapsbridge-prod-*)
+          declare -A ENTRIES=(
+            ["auth"]="$LAMBDA_ROOT/src/auth/index.ts"
+            ["chat"]="$LAMBDA_ROOT/src/chat/index.ts"
+            ["marketplace"]="$LAMBDA_ROOT/src/marketplace/index.ts"
+            ["ai"]="$LAMBDA_ROOT/src/ai/index.ts"
+            ["routes"]="$LAMBDA_ROOT/src/routes/index.ts"
+            ["admin"]="$LAMBDA_ROOT/src/admin/index.ts"
+            ["stripe"]="$LAMBDA_ROOT/src/stripe/index.ts"
+            ["operations"]="$LAMBDA_ROOT/src/operations/index.ts"
+            ["background-monitor"]="$LAMBDA_ROOT/src/background-monitor/index.ts"
+            ["kb-ingest"]="$LAMBDA_ROOT/src/kb-ingest/index.ts"
+            ["places"]="$LAMBDA_ROOT/src/places/index.ts"
+            ["ws-onconnect"]="$LAMBDA_ROOT/src/ws/onconnect.ts"
+            ["ws-onmessage"]="$LAMBDA_ROOT/src/ws/onmessage.ts"
+            ["ws-ondisconnect"]="$LAMBDA_ROOT/src/ws/ondisconnect.ts"
+          )
+
+          for name in "${!ENTRIES[@]}"; do
+            entry="${ENTRIES[$name]}"
+            if [ ! -f "$entry" ]; then
+              echo "⚠️  Entry not found, skipping: $entry"
+              continue
             fi
-            PAGE=$(echo "$RESULT" | python3 -c "import sys,json; fns=json.load(sys.stdin); print('\n'.join(f['FunctionName'] for f in fns.get('Functions',[]) if f['FunctionName'].startswith('mapsbridge-')))" 2>/dev/null)
-            FUNCTIONS="$FUNCTIONS $PAGE"
-            NEXT_TOKEN=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('NextMarker',''))" 2>/dev/null)
-            [ -z "$NEXT_TOKEN" ] && break
+            echo "Building: $name ← $entry"
+            out="$BUILD_DIR/$name"
+            mkdir -p "$out"
+            infra/lambda/node_modules/.bin/esbuild "$entry" \
+              --bundle \
+              --platform=node \
+              --target=node20 \
+              --outfile="$out/index.js" \
+              --sourcemap=false \
+              --minify \
+              2>&1 | tail -3
+            zip -jq "$BUILD_DIR/$name.zip" "$out/index.js"
+            echo "  ✓ $name.zip ($(du -sh "$BUILD_DIR/$name.zip" | cut -f1))"
           done
-          FUNCTIONS=$(echo "$FUNCTIONS" | tr ' ' '\n' | grep -v '^$' | sort -u)
-          if [ -z "$FUNCTIONS" ]; then
-            echo "⚠️  No Lambda functions found with prefix 'mapsbridge-'"
-            echo "    Run the Terraform Apply workflow first."
-            exit 0
+
+          # ai-stream uses the same code as ai (different handler is set in Terraform)
+          if [ -f "$BUILD_DIR/ai.zip" ]; then
+            cp "$BUILD_DIR/ai.zip" "$BUILD_DIR/ai-stream.zip"
+            echo "  ✓ ai-stream.zip (copy of ai.zip)"
           fi
-          echo "Found $(echo "$FUNCTIONS" | wc -l | tr -d ' ') functions"
+
+      - name: Deploy to Lambda functions
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          BUILD_DIR="/tmp/lambda-builds"
+          PREFIX="mapsbridge-prod"
+
+          # Mapping: zip-name → function-name suffix (after prefix)
+          # Main stack: functions are named ${PREFIX}-api-${domain}
+          # Admin-runtime: functions are named ${PREFIX}-${domain}
+          declare -A FUNC_MAP=(
+            ["auth"]="${PREFIX}-api-auth"
+            ["chat"]="${PREFIX}-api-chat"
+            ["marketplace"]="${PREFIX}-api-marketplace"
+            ["ai"]="${PREFIX}-ai"
+            ["ai-stream"]="${PREFIX}-ai-stream"
+            ["routes"]="${PREFIX}-routes"
+            ["admin"]="${PREFIX}-admin"
+            ["stripe"]="${PREFIX}-stripe"
+            ["operations"]="${PREFIX}-operations"
+            ["background-monitor"]="${PREFIX}-background-monitor"
+            ["kb-ingest"]="${PREFIX}-kb-ingest"
+            ["places"]="${PREFIX}-places"
+            ["ws-onconnect"]="${PREFIX}-ws-onconnect"
+            ["ws-onmessage"]="${PREFIX}-ws-onmessage"
+            ["ws-ondisconnect"]="${PREFIX}-ws-ondisconnect"
+          )
+
           FAILED=0
-          for fn in $FUNCTIONS; do
-            echo "Updating $fn..."
-            aws lambda update-function-code \
+          SKIPPED=0
+          UPDATED=0
+
+          for name in "${!FUNC_MAP[@]}"; do
+            zip_file="$BUILD_DIR/$name.zip"
+            fn="${FUNC_MAP[$name]}"
+
+            if [ ! -f "$zip_file" ]; then
+              echo "⚠️  No zip for $name — skipping $fn"
+              SKIPPED=$((SKIPPED+1))
+              continue
+            fi
+
+            # Check if function exists before trying to update
+            if ! aws lambda get-function --function-name "$fn" --query 'Configuration.FunctionName' --output text > /dev/null 2>&1; then
+              echo "⚠️  Function not found (not yet deployed via Terraform): $fn"
+              SKIPPED=$((SKIPPED+1))
+              continue
+            fi
+
+            echo "Deploying $fn..."
+            if aws lambda update-function-code \
               --function-name "$fn" \
-              --zip-file fileb:///tmp/lambda.zip \
-              --publish > /dev/null || { echo "  ⚠️  Failed: $fn"; FAILED=$((FAILED+1)); }
+              --zip-file "fileb://$zip_file" \
+              --publish > /dev/null 2>&1; then
+              echo "  ✓ $fn"
+              UPDATED=$((UPDATED+1))
+            else
+              echo "  ✗ Failed: $fn"
+              FAILED=$((FAILED+1))
+            fi
           done
-          [ $FAILED -gt 0 ] && echo "::error::$FAILED function(s) failed" && exit 1
-          echo "✓ All Lambda functions updated"
+
+          echo ""
+          echo "Summary: $UPDATED updated, $SKIPPED skipped (not deployed), $FAILED failed"
+          [ $FAILED -gt 0 ] && echo "::error::$FAILED function(s) failed to update" && exit 1
+          echo "✓ Lambda deploy complete"
 
       - name: Health check
         if: steps.check.outputs.skip == 'false'

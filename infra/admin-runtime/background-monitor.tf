@@ -27,7 +27,7 @@ resource "aws_iam_role_policy" "monitor" {
 resource "aws_lambda_function" "monitor" {
   function_name    = "${var.prefix}-background-monitor"
   role             = aws_iam_role.monitor.arn
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   architectures    = ["arm64"]
   handler          = "index.handler"
   timeout          = 120

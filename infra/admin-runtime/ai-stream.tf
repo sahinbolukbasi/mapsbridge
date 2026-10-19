@@ -4,7 +4,7 @@
 resource "aws_lambda_function" "ai_stream" {
   function_name    = "${var.prefix}-ai-stream"
   role             = aws_iam_role.domain["ai"].arn
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   architectures    = ["arm64"]
   handler          = "index.streamHandler"
   timeout          = 30
