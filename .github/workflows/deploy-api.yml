@@ -102,6 +102,7 @@ jobs:
             ["ws-onconnect"]="$LAMBDA_ROOT/src/ws/onconnect.ts"
             ["ws-onmessage"]="$LAMBDA_ROOT/src/ws/onmessage.ts"
             ["ws-ondisconnect"]="$LAMBDA_ROOT/src/ws/ondisconnect.ts"
+            ["revenuecat"]="$LAMBDA_ROOT/src/revenuecat/index.ts"
           )
 
           for name in "${!ENTRIES[@]}"; do
@@ -155,6 +156,7 @@ jobs:
             ["ws-onconnect"]="${PREFIX}-ws-onconnect"
             ["ws-onmessage"]="${PREFIX}-ws-onmessage"
             ["ws-ondisconnect"]="${PREFIX}-ws-ondisconnect"
+            ["revenuecat"]="${PREFIX}-revenuecat"
           )
 
           FAILED=0
