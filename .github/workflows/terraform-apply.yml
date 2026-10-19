@@ -32,6 +32,11 @@ on:
         required: false
         default: true
         type: boolean
+      force_unlock:
+        description: "Force-unlock state before plan (use after cancelled runs)"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -77,6 +82,16 @@ jobs:
       - name: Terraform Init
         working-directory: infra/terraform
         run: terraform init -upgrade
+
+      - name: Force-unlock state (if requested)
+        if: github.event.inputs.force_unlock == 'true'
+        working-directory: infra/terraform
+        run: |
+          LOCK_ID=$(terraform plan -lock=false -no-color 2>&1 | grep -oP 'ID:\s+\K[a-f0-9-]+' | head -1 || true)
+          if [ -n "$LOCK_ID" ]; then
+            echo "Unlocking state with ID: $LOCK_ID"
+            terraform force-unlock -force "$LOCK_ID"
+          fi
 
       - name: Bootstrap deploy role permissions
         working-directory: infra/terraform
