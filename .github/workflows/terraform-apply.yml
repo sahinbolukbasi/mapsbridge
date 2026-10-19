@@ -71,17 +71,23 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Auto-detect ACM cert from CloudFront
+      - name: Auto-detect ACM cert
         if: env.TF_VAR_acm_certificate_arn == ''
         run: |
+          CERT_ARN=""
           DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
           if [ -n "$DIST_ID" ]; then
             CERT_ARN=$(aws cloudfront get-distribution --id "$DIST_ID" --query 'Distribution.DistributionConfig.ViewerCertificate.ACMCertificateArn' --output text 2>/dev/null || true)
-            if [ -n "$CERT_ARN" ] && [ "$CERT_ARN" != "None" ] && [ "$CERT_ARN" != "null" ]; then
-              echo "Detected ACM cert: $CERT_ARN"
-              echo "TF_VAR_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
-              echo "TF_VAR_admin_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
-            fi
+          fi
+          if [ -z "$CERT_ARN" ] || [ "$CERT_ARN" = "None" ] || [ "$CERT_ARN" = "null" ]; then
+            CERT_ARN=$(aws acm list-certificates --region us-east-1 --query "CertificateSummaryList[?DomainName=='mapsbridge.com'].CertificateArn | [0]" --output text 2>/dev/null || true)
+          fi
+          if [ -n "$CERT_ARN" ] && [ "$CERT_ARN" != "None" ] && [ "$CERT_ARN" != "null" ]; then
+            echo "Detected ACM cert: $CERT_ARN"
+            echo "TF_VAR_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
+            echo "TF_VAR_admin_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
+          else
+            echo "::warning::No ACM certificate found for mapsbridge.com — CloudFront will use default domain"
           fi
 
       - name: Create Lambda zip placeholders
@@ -164,17 +170,23 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Auto-detect ACM cert from CloudFront
+      - name: Auto-detect ACM cert
         if: env.TF_VAR_acm_certificate_arn == ''
         run: |
+          CERT_ARN=""
           DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
           if [ -n "$DIST_ID" ]; then
             CERT_ARN=$(aws cloudfront get-distribution --id "$DIST_ID" --query 'Distribution.DistributionConfig.ViewerCertificate.ACMCertificateArn' --output text 2>/dev/null || true)
-            if [ -n "$CERT_ARN" ] && [ "$CERT_ARN" != "None" ] && [ "$CERT_ARN" != "null" ]; then
-              echo "Detected ACM cert: $CERT_ARN"
-              echo "TF_VAR_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
-              echo "TF_VAR_admin_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
-            fi
+          fi
+          if [ -z "$CERT_ARN" ] || [ "$CERT_ARN" = "None" ] || [ "$CERT_ARN" = "null" ]; then
+            CERT_ARN=$(aws acm list-certificates --region us-east-1 --query "CertificateSummaryList[?DomainName=='mapsbridge.com'].CertificateArn | [0]" --output text 2>/dev/null || true)
+          fi
+          if [ -n "$CERT_ARN" ] && [ "$CERT_ARN" != "None" ] && [ "$CERT_ARN" != "null" ]; then
+            echo "Detected ACM cert: $CERT_ARN"
+            echo "TF_VAR_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
+            echo "TF_VAR_admin_acm_certificate_arn=$CERT_ARN" >> $GITHUB_ENV
+          else
+            echo "::warning::No ACM certificate found for mapsbridge.com — CloudFront will use default domain"
           fi
 
       - name: Create Lambda zip placeholders
