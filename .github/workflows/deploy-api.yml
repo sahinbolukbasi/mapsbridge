@@ -118,7 +118,6 @@ jobs:
               --platform=node \
               --target=node20 \
               --outfile="$out/index.js" \
-              --sourcemap=false \
               --minify \
               2>&1 | tail -3
             zip -jq "$BUILD_DIR/$name.zip" "$out/index.js"
