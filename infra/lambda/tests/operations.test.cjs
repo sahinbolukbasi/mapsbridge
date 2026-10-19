@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const { transformSync } = require("../../../apps/web/node_modules/esbuild");
+const { transformSync } = require("esbuild");
 
 const sourceRoot = path.resolve(__dirname, "../src");
 const env = {

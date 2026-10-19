@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const { transformSync } = require("../node_modules/esbuild");
+const { transformSync } = require("esbuild");
 
 function makeBase64url(obj) {
   const json = JSON.stringify(obj);

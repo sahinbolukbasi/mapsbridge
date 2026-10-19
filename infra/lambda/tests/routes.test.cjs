@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const { transformSync } = require("../../../apps/web/node_modules/esbuild");
+const { transformSync } = require("esbuild");
 
 const sourceRoot = path.resolve(__dirname, "../src");
 const env = {
@@ -171,6 +171,35 @@ function harness(options = {}) {
         }
       },
       GetFoundationModelCommand: class {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+    },
+    "@aws-sdk/client-ecs": {
+      ECSClient: class {
+        async send() {
+          return {};
+        }
+      },
+      UpdateServiceCommand: class {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+      DescribeServicesCommand: class {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+    },
+    "@aws-sdk/client-cloudwatch-logs": {
+      CloudWatchLogsClient: class {
+        async send() {
+          return { events: [] };
+        }
+      },
+      FilterLogEventsCommand: class {
         constructor(i) {
           this.input = i;
         }

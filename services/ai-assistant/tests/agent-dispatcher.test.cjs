@@ -41,7 +41,8 @@ const { AgentDispatcher } = loadModule(
 test("detectIntent returns emergency_safety for emergency keywords", () => {
   const result = AgentDispatcher.detectIntent("Acil yardım lazım!", "Istanbul");
   assert.equal(result.action, "emergency_safety");
-  assert.deepEqual(result.recommendedSubAgents, ["emergency-agent"]);
+  assert.equal(result.recommendedSubAgents.length, 1);
+  assert.equal(result.recommendedSubAgents[0], "emergency-agent");
   assert.equal(result.requiresConfirmation, false);
   assert.equal(result.targetCity, "Istanbul");
 });
@@ -56,7 +57,8 @@ test("detectIntent recognizes hospital emergency keyword", () => {
 test("detectIntent returns check_wallet for credit/balance keywords", () => {
   const result = AgentDispatcher.detectIntent("Kaç kredim kaldı?");
   assert.equal(result.action, "check_wallet");
-  assert.deepEqual(result.recommendedSubAgents, ["billing-wallet-tool"]);
+  assert.equal(result.recommendedSubAgents.length, 1);
+  assert.equal(result.recommendedSubAgents[0], "billing-wallet-tool");
 });
 
 // ── Location share intent ───────────────────────────────────────────────────
@@ -65,7 +67,8 @@ test("detectIntent returns share_location and requires confirmation", () => {
   const result = AgentDispatcher.detectIntent("konum paylaş arkadaşıma");
   assert.equal(result.action, "share_location");
   assert.equal(result.requiresConfirmation, true);
-  assert.deepEqual(result.recommendedSubAgents, ["share-token-tool"]);
+  assert.equal(result.recommendedSubAgents.length, 1);
+  assert.equal(result.recommendedSubAgents[0], "share-token-tool");
 });
 
 // ── Lodging intent ──────────────────────────────────────────────────────────
@@ -96,7 +99,8 @@ test("detectIntent falls back to general_chat for unrecognized input", () => {
     "Izmir",
   );
   assert.equal(result.action, "general_chat");
-  assert.deepEqual(result.recommendedSubAgents, ["context-agent"]);
+  assert.equal(result.recommendedSubAgents.length, 1);
+  assert.equal(result.recommendedSubAgents[0], "context-agent");
   assert.equal(result.targetCity, "Izmir");
 });
 

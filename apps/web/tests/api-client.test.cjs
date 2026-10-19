@@ -3,12 +3,14 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { transformSync } = require("esbuild");
 const vm = require("node:vm");
+const path = require("node:path");
+const WEB_ROOT = path.resolve(__dirname, "..");
 
 test("lost authenticated retry response stays uncertain instead of becoming original 401", async () => {
   const module = { exports: {} };
   let calls = 0;
   vm.runInNewContext(
-    transformSync(readFileSync("app/lib/api-client.ts", "utf8"), { loader: "ts", format: "cjs" })
+    transformSync(readFileSync(path.resolve(WEB_ROOT, "app/lib/api-client.ts"), "utf8"), { loader: "ts", format: "cjs" })
       .code,
     {
       module,

@@ -4,6 +4,7 @@
   "private": true,
   "main": "./src/index.ts",
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "typecheck": "tsc --noEmit"
   }
 }

@@ -61,11 +61,12 @@ jobs:
       - run: npm ci --prefix services/messaging --ignore-scripts
       - name: Run messaging tests
         run: node --test services/messaging/tests/*.test.cjs
-        continue-on-error: true
 
   test-place-intelligence:
+
     name: Place Intelligence Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -76,7 +77,6 @@ jobs:
       - run: npm ci --prefix services/place-intelligence --ignore-scripts
       - name: Run place-intelligence tests
         run: node --test services/place-intelligence/tests/*.test.cjs
-        continue-on-error: true
 
   typecheck-services:
     name: TypeScript Check (Services)

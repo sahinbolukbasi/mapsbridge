@@ -2,12 +2,15 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { buildSync } = require("esbuild");
 const vm = require("node:vm");
+const path = require("node:path");
+const WEB_ROOT = path.resolve(__dirname, "..");
 const output = buildSync({
-  entryPoints: ["app/lib/message-model.ts"],
+  entryPoints: [path.join(WEB_ROOT, "app/lib/message-model.ts")],
   bundle: true,
   platform: "node",
   format: "cjs",
   write: false,
+  absWorkingDir: WEB_ROOT,
 });
 const context = { module: { exports: {} } };
 vm.runInNewContext(output.outputFiles[0].text, context);

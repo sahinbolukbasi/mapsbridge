@@ -2,14 +2,17 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { buildSync } = require("esbuild");
 const vm = require("node:vm");
+const path = require("node:path");
+const WEB_ROOT = path.resolve(__dirname, "..");
 
 function loadStorage(store) {
   const result = buildSync({
-    entryPoints: ["app/lib/user-storage.ts"],
+    entryPoints: [path.join(WEB_ROOT, "app/lib/user-storage.ts")],
     bundle: true,
     platform: "node",
     format: "cjs",
     write: false,
+    absWorkingDir: WEB_ROOT,
   });
   const context = { module: { exports: {} }, window: {}, localStorage: store };
   vm.runInNewContext(result.outputFiles[0].text, context);
@@ -89,11 +92,12 @@ test(
 
 test("route output rejects impossible coordinates and invalid day numbers", () => {
   const result = buildSync({
-    entryPoints: ["app/lib/ai/types.ts"],
+    entryPoints: [path.join(WEB_ROOT, "app/lib/ai/types.ts")],
     bundle: true,
     platform: "node",
     format: "cjs",
     write: false,
+    absWorkingDir: WEB_ROOT,
   });
   const context = { module: { exports: {} } };
   vm.runInNewContext(result.outputFiles[0].text, context);

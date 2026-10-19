@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const { transformSync } = require("../../../apps/web/node_modules/esbuild");
+const { transformSync } = require("esbuild");
 
 const sourceRoot = path.resolve(__dirname, "../src");
 const env = {
@@ -474,7 +474,7 @@ test("GET /admin/system-config and POST /admin/system-config manages maintenance
   );
   assert.equal(postRes.statusCode, 200);
   const postBody = JSON.parse(postRes.body);
-  assert.equal(postBody.maintenanceMode, true);
+  assert.equal(postBody.config.maintenanceMode, true);
 
   const tx = h.calls.data.find((c) => c.name === "TransactWriteItemsCommand");
   assert.ok(tx);
@@ -604,9 +604,9 @@ test("payments include canonical billing receipts and reflect successful refunds
 
 test("every admin handler endpoint is included in the Terraform gateway routes", () => {
   const source = readFileSync(path.join(sourceRoot, "admin/index.ts"), "utf8");
-  const terraform = readFileSync(path.resolve(__dirname, "../../terraform/main.tf"), "utf8");
+  const routes = readFileSync(path.resolve(__dirname, "../../admin-runtime/routes.json"), "utf8");
   for (const [, route] of source.matchAll(/"((?:GET|POST) \/admin\/[^\"]+)": handle/g))
-    assert.ok(terraform.includes(`"${route}"`), route);
+    assert.ok(routes.includes(`"${route}"`), route);
 });
 
 test("production admin membership is read from Cognito groups and ignores custom role", async () => {

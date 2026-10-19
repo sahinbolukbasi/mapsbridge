@@ -1,5 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const path = require("node:path");
+const WEB_ROOT = path.resolve(__dirname, "..");
 
 function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -196,11 +198,12 @@ test("tripToRoute converts trip to UnifiedRoutePlan and back with routeToTrip", 
   const { buildSync } = require("esbuild");
   const vm = require("node:vm");
   const result = buildSync({
-    entryPoints: ["app/lib/trip/workspace-store.ts"],
+    entryPoints: [path.join(WEB_ROOT, "app/lib/trip/workspace-store.ts")],
     bundle: true,
     platform: "node",
     format: "cjs",
     write: false,
+    absWorkingDir: WEB_ROOT,
   });
   const context = { module: { exports: {} }, crypto };
   vm.runInNewContext(result.outputFiles[0].text, context);

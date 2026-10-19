@@ -157,7 +157,11 @@ jobs:
   # ─── Admin Runtime ────────────────────────────────────────────────────────
   admin-runtime-plan:
     name: "Plan: admin-runtime"
-    if: ${{ github.event.inputs.stack == 'admin-runtime' || github.event.inputs.stack == 'all' }}
+    needs: [main-apply]
+    if: |
+      always() &&
+      needs.main-apply.result != 'failure' &&
+      (github.event.inputs.stack == 'admin-runtime' || github.event.inputs.stack == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -204,7 +208,8 @@ jobs:
     name: "Apply: admin-runtime"
     needs: [admin-runtime-plan]
     if: |
-      (github.event.inputs.stack == 'admin-runtime' || github.event.inputs.stack == 'all') &&
+      always() &&
+      needs.admin-runtime-plan.result == 'success' &&
       github.event.inputs.plan_only != 'true'
     runs-on: ubuntu-latest
     environment: production

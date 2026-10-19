@@ -4,6 +4,7 @@ const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const { transformSync } = require("esbuild");
+const WEB_ROOT = path.resolve(__dirname, "..");
 function harness(options = {}) {
   let owner = "token-a";
   const calls = [],
@@ -12,7 +13,7 @@ function harness(options = {}) {
     ]);
   const cache = new Map();
   function load(file) {
-    const filename = path.resolve("app/lib/billing", file);
+    const filename = path.resolve(WEB_ROOT, "app/lib/billing", file);
     if (cache.has(filename)) return cache.get(filename).exports;
     const module = { exports: {} };
     cache.set(filename, module);

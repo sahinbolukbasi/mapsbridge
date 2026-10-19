@@ -3,13 +3,16 @@ const { test } = require("node:test"),
   vm = require("node:vm"),
   { readFileSync } = require("node:fs"),
   { buildSync } = require("esbuild");
+const path = require("node:path");
+const WEB_ROOT = path.resolve(__dirname, "..");
 function harness(env = {}, maps) {
   const result = buildSync({
-    entryPoints: ["app/lib/google/maps-client.ts"],
+    entryPoints: [path.join(WEB_ROOT, "app/lib/google/maps-client.ts")],
     bundle: true,
     platform: "node",
     format: "cjs",
     write: false,
+    absWorkingDir: WEB_ROOT,
   });
   const module = { exports: {} };
   const window = maps ? { google: { maps } } : {};

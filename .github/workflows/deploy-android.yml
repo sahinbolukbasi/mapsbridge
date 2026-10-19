@@ -63,4 +63,3 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: eas submit --platform android --latest --non-interactive
-        continue-on-error: true
