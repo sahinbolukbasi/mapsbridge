@@ -227,7 +227,7 @@ module "api" {
   aws_region               = var.aws_region
   private_subnet_ids       = module.vpc.private_subnet_ids
   lambda_security_group_id = module.vpc.lambda_security_group_id
-  lambda_runtime           = "nodejs22.x"
+  lambda_runtime           = "nodejs20.x"
   lambda_timeout           = var.lambda_timeout
   lambda_memory            = var.lambda_memory
   lambda_domains           = local.lambda_packages

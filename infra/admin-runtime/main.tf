@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.9.0"
-  required_providers { aws = { source = "hashicorp/aws", version = "~> 5.76.0" } }
+  required_providers { aws = { source = "hashicorp/aws", version = "~> 5.76" } }
 }
 provider "aws" {
   region              = var.region
@@ -108,7 +108,7 @@ resource "aws_lambda_function" "domain" {
   for_each         = local.domains
   function_name    = "${var.prefix}-${each.key}"
   role             = aws_iam_role.domain[each.key].arn
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   architectures    = ["arm64"]
   handler          = "index.handler"
   timeout          = 30

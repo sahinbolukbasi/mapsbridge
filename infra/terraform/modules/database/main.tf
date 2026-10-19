@@ -41,7 +41,7 @@ resource "aws_rds_cluster" "aurora" {
   skip_final_snapshot             = var.environment != "prod"
 
   serverlessv2_scaling_configuration {
-    min_capacity = 0.0   # PostgreSQL 17: gerçek idle pause, zemin ücret yok
+    min_capacity = 0.5
     max_capacity = 4.0
   }
 

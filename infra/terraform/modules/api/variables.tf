@@ -30,7 +30,7 @@ variable "lambda_security_group_id" {
 
 variable "lambda_runtime" {
   type        = string
-  default     = "nodejs22.x"
+  default     = "nodejs20.x"
   description = "Lambda runtime"
 }
 

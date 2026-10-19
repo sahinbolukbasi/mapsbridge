@@ -30,7 +30,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - run: npm ci --prefix services/ai-assistant --ignore-scripts
       - name: Run AI assistant tests
         run: node --test services/ai-assistant/tests/*.test.cjs
 
@@ -44,7 +43,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - run: npm ci --prefix services/identity-billing --ignore-scripts
       - name: Run identity-billing tests
         run: node --test services/identity-billing/tests/*.test.cjs
 
@@ -58,7 +56,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - run: npm ci --prefix services/messaging --ignore-scripts
       - name: Run messaging tests
         run: node --test services/messaging/tests/*.test.cjs
 
@@ -74,7 +71,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - run: npm ci --prefix services/place-intelligence --ignore-scripts
       - name: Run place-intelligence tests
         run: node --test services/place-intelligence/tests/*.test.cjs
 
@@ -92,6 +88,5 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - run: npm ci --prefix services/${{ matrix.service }} --ignore-scripts
       - run: npx tsc --noEmit --project services/${{ matrix.service }}/tsconfig.json
         continue-on-error: true

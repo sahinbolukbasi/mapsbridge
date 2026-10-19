@@ -45,7 +45,7 @@ resource "aws_lambda_function" "onconnect" {
   function_name    = "${local.substack_name}-onconnect"
   role             = aws_iam_role.lambda.arn
   handler          = "index.handler"
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   architectures    = ["arm64"]
   filename         = var.onconnect_zip
   source_code_hash = filebase64sha256(var.onconnect_zip)
@@ -66,7 +66,7 @@ resource "aws_lambda_function" "onmessage" {
   function_name    = "${local.substack_name}-onmessage"
   role             = aws_iam_role.lambda.arn
   handler          = "index.handler"
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   architectures    = ["arm64"]
   filename         = var.onmessage_zip
   source_code_hash = filebase64sha256(var.onmessage_zip)
@@ -86,7 +86,7 @@ resource "aws_lambda_function" "ondisconnect" {
   function_name    = "${local.substack_name}-ondisconnect"
   role             = aws_iam_role.lambda.arn
   handler          = "index.handler"
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   architectures    = ["arm64"]
   filename         = var.ondisconnect_zip
   source_code_hash = filebase64sha256(var.ondisconnect_zip)

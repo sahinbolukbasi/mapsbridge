@@ -60,6 +60,5 @@ jobs:
               done
               ;;
           esac
-      - run: terraform init -backend=false
-        continue-on-error: true
+      - run: terraform init -backend=false -upgrade
       - run: terraform validate

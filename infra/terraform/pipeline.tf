@@ -82,7 +82,7 @@ resource "aws_lambda_function" "kb_ingest" {
   count            = var.enable_bedrock ? 1 : 0
   function_name    = "${local.name}-kb-ingest"
   role             = aws_iam_role.kb_ingest[0].arn
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   architectures    = ["arm64"]
   handler          = "index.handler"
   timeout          = 300

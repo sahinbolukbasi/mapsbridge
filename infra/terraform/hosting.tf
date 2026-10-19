@@ -397,7 +397,7 @@ resource "aws_lambda_function" "cognito_custom_message" {
   function_name    = "${local.name}-cognito-custom-message"
   role             = aws_iam_role.cognito_custom_message.arn
   handler          = "index.handler"
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   filename         = "${path.module}/.build/lambdas/cognito-custom-message.zip"
   source_code_hash = filebase64sha256("${path.module}/.build/lambdas/cognito-custom-message.zip")
   timeout          = 10
