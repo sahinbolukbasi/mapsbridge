@@ -94,6 +94,7 @@ jobs:
         run: |
           mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
           printf 'exports.handler=async()=>({statusCode:200})' > /tmp/index.js
+          touch -t 202001010000.00 /tmp/index.js
           for name in auth chat marketplace cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
             zip -jqX infra/terraform/.build/lambdas/${name}.zip /tmp/index.js
           done
@@ -193,6 +194,7 @@ jobs:
         run: |
           mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
           printf 'exports.handler=async()=>({statusCode:200})' > /tmp/index.js
+          touch -t 202001010000.00 /tmp/index.js
           for name in auth chat marketplace cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
             zip -jqX infra/terraform/.build/lambdas/${name}.zip /tmp/index.js
           done
@@ -201,6 +203,19 @@ jobs:
       - name: Terraform Init
         working-directory: infra/terraform
         run: terraform init -upgrade
+
+      - name: Bootstrap deploy role and await IAM propagation
+        working-directory: infra/terraform
+        continue-on-error: true
+        run: |
+          terraform apply -auto-approve -target=aws_iam_role_policy.github_deploy
+          echo "Waiting 30s for IAM policy propagation..."
+          sleep 30
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Download plan
         uses: actions/download-artifact@v4
