@@ -1,6 +1,6 @@
 "use client";
 
-import { HeaderNav, MobileNav } from "../components/header-nav";
+import { HeaderNav } from "../components/header-nav";
 
 import { userStorage } from "../lib/user-storage";
 
@@ -33,18 +33,7 @@ import "./desk.css";
 
 import { useLocale, getAlternatePath } from "../lib/locale-context";
 import {
-  IconLocationPin,
-  IconBookmark,
-  IconShare,
-  IconClock,
-  IconSearch,
-  IconCalendar,
-  IconNote,
-  IconPlus,
-  IconCheck,
-  IconCompass,
   IconCopy,
-  IconLayers,
 } from "../components/icons";
 import {
   CATEGORIES,
@@ -187,7 +176,7 @@ export default function Panel() {
   useEffect(() => {
     isAddingPinModeRef.current = isAddingPinMode;
   }, [isAddingPinMode]);
-  const [wallet, setWallet] = useState(() => billingService.getWallet());
+  const [_wallet, setWallet] = useState(() => billingService.getWallet());
   useEffect(() => {
     const handleWalletUpdated = (e: any) => {
       if (e.detail) setWallet(e.detail);
@@ -218,10 +207,10 @@ export default function Panel() {
 
   // Hours: 0 = Sınırsız, 1, 6, 24, 168
   const [hours, setHours] = useState(24);
-  const [showDurationModal, setShowDurationModal] = useState(false);
+  const [_showDurationModal, setShowDurationModal] = useState(false);
 
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [_isSearching, setIsSearching] = useState(false);
+  const [searchQuery, _setSearchQuery] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [isCreated, setIsCreated] = useState(false);
   const [recentShares, setRecentShares] = useState<
@@ -237,12 +226,11 @@ export default function Panel() {
 
   // User & Theme State
   const [userEmail, setUserEmail] = useState("");
-  const [userName, setUserName] = useState("Gezgin");
-  const [userHandle, setUserHandle] = useState("gezgin");
-  const [userAvatar, setUserAvatar] = useState("");
-  const [copiedTravelerCode, setCopiedTravelerCode] = useState(false);
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
-  const [isDark, setIsDark] = useState(false);
+  const [_userName, setUserName] = useState("Gezgin");
+  const [_userHandle, setUserHandle] = useState("gezgin");
+  const [_userAvatar, setUserAvatar] = useState("");
+  const [_unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [_isDark, setIsDark] = useState(false);
   const { isEnglish } = useLocale();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -251,7 +239,7 @@ export default function Panel() {
 
   const addressesInitialized = useRef(false);
 
-  const persistAddresses = (addresses: SavedAddress[]) => {
+  const _persistAddresses = (addresses: SavedAddress[]) => {
     setSavedAddresses(addresses);
     try {
       userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(addresses));
@@ -266,31 +254,26 @@ export default function Panel() {
     }
   };
   const [customTabs, setCustomTabs] = useState<string[]>([]);
-  const [savedSearchQuery, setSavedSearchQuery] = useState("");
   // Keşif Modu her zaman açık — gezi grupları ve rotalar daima görünür
-  const [isDiscoveryMode] = useState<boolean>(true);
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
-  const [showRouteCard, setShowRouteCard] = useState(false);
+  const [_showRouteCard, setShowRouteCard] = useState(false);
   const [showTripManager, setShowTripManager] = useState(false);
   // Gezi Yönetim Masası durumları
   const [tripNameInput, setTripNameInput] = useState("");
-  const [tripStartDate, setTripStartDate] = useState("");
-  const [tripEndDate, setTripEndDate] = useState("");
-  const [tripTheme, setTripTheme] = useState("Kültür & Şehir");
+  const [_tripStartDate, setTripStartDate] = useState("");
+  const [_tripEndDate, setTripEndDate] = useState("");
+  const [_tripTheme, setTripTheme] = useState("Kültür & Şehir");
   const [tripIsPublic, setTripIsPublic] = useState(false);
-  const [expandedStops, setExpandedStops] = useState(true);
-  const [workspaceMode, setWorkspaceMode] = useState<"itinerary" | "travel" | "ai">("itinerary");
-  const [highlightedStopId, setHighlightedStopId] = useState<string | null>(null);
-  const [aiWorkspacePrompt, setAiWorkspacePrompt] = useState<string>("");
-  const [aiActionToast, setAiActionToast] = useState<string | null>(null);
+  const [_highlightedStopId, setHighlightedStopId] = useState<string | null>(null);
+  const [_aiActionToast, setAiActionToast] = useState<string | null>(null);
 
   // Sekme (Tab) Ekleme State
-  const [showAddTabModal, setShowAddTabModal] = useState(false);
+  const [_showAddTabModal, setShowAddTabModal] = useState(false);
   const [newTabNameInput, setNewTabNameInput] = useState("");
 
   // Alt Konum Listesi Arama & Yatay Kaydırma State
-  const [bottomSearchQuery, setBottomSearchQuery] = useState("");
-  const [isBottomSearchExpanded, setIsBottomSearchExpanded] = useState(false);
+  const [bottomSearchQuery, _setBottomSearchQuery] = useState("");
+  const [_isBottomSearchExpanded, setIsBottomSearchExpanded] = useState(false);
 
   // Harita Modları ve Özelleştirme State'leri
   const tileLayerRef = useRef<any>(null);
@@ -301,7 +284,6 @@ export default function Panel() {
   const [mapVisualFilter, setMapVisualFilter] = useState<string>("none");
   const [showMapCustomizeModal, setShowMapCustomizeModal] = useState<boolean>(false);
   const [showShareCard, setShowShareCard] = useState<boolean>(false);
-  const [showAdvancedMapSettings, setShowAdvancedMapSettings] = useState<boolean>(false);
   const [isMapHubOpen, setIsMapHubOpen] = useState<boolean>(false);
   const mapHubRef = useRef<HTMLDivElement>(null);
 
@@ -320,12 +302,12 @@ export default function Panel() {
   }, [isMapHubOpen]);
 
   // Kodla Konum Bulma (Pop-up) State'leri
-  const [showCodeLookupModal, setShowCodeLookupModal] = useState<boolean>(false);
-  const [lookupCodeInput, setLookupCodeInput] = useState<string>("");
-  const [isLookupLoading, setIsLookupLoading] = useState<boolean>(false);
-  const [lookupError, setLookupError] = useState<string>("");
+  const [_showCodeLookupModal, setShowCodeLookupModal] = useState<boolean>(false);
+  const [lookupCodeInput, _setLookupCodeInput] = useState<string>("");
+  const [_isLookupLoading, setIsLookupLoading] = useState<boolean>(false);
+  const [_lookupError, setLookupError] = useState<string>("");
 
-  function applyMapTemplate(tpl: MapTemplate) {
+  function _applyMapTemplate(tpl: MapTemplate) {
     setCurrentMapStyle(tpl.mapStyle);
     setPinColor(tpl.pinColor);
     setShowTransitOverlay(tpl.transitOverlay);
@@ -384,10 +366,10 @@ export default function Panel() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [newLabelInput, setNewLabelInput] = useState("");
   const [newNoteInput, setNewNoteInput] = useState("");
-  const [newPhotoInput, setNewPhotoInput] = useState("");
+  const [newPhotoInput, _setNewPhotoInput] = useState("");
   const [newDateInput, setNewDateInput] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory>("genel");
-  const [selectedGroupInput, setSelectedGroupInput] = useState<string>("Genel");
+  const [selectedCategory, _setSelectedCategory] = useState<PlaceCategory>("genel");
+  const [selectedGroupInput, _setSelectedGroupInput] = useState<string>("Genel");
   const [customNewGroup, setCustomNewGroup] = useState("");
   const [isCreatingNewGroup, setIsCreatingNewGroup] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
@@ -596,13 +578,13 @@ export default function Panel() {
     }
   }, [showSaveDialog]);
 
-  function toggleLanguage() {
+  function _toggleLanguage() {
     const alternate = getAlternatePath(window.location.pathname);
     document.cookie = `locale=${isEnglish ? "tr" : "en"};path=/;max-age=31536000;SameSite=Strict;Secure`;
     window.location.assign(alternate);
   }
 
-  function handleLogout() {
+  function _handleLogout() {
     signOut();
     window.location.assign("/login/");
   }
@@ -796,7 +778,7 @@ export default function Panel() {
   }, [selectedGroup, savedAddresses, location.lat, location.lng]);
 
   // Toggle "Gidildi"
-  function handleToggleVisited(id: string) {
+  function _handleToggleVisited(id: string) {
     const updated = savedAddresses.map((a) => {
       if (a.id === id) {
         return { ...a, visited: !a.visited };
@@ -847,7 +829,7 @@ export default function Panel() {
   }
 
   // Address & POI Search via Multi-tier Service
-  async function handleSearch(e: React.FormEvent) {
+  async function _handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!searchQuery.trim() || !mapInstanceRef.current) return;
     setIsSearching(true);
@@ -1459,7 +1441,7 @@ export default function Panel() {
   ]);
 
   // Özellik 4: Detaylı Konum Kaydetme / Düzenleme (Not, Kategori, Tarih vb.)
-  function handleSaveCurrentAddress() {
+  function _handleSaveCurrentAddress() {
     if (!newLabelInput.trim()) return;
     const finalGroup =
       isCreatingNewGroup && customNewGroup.trim() ? customNewGroup.trim() : selectedGroupInput;
@@ -1530,7 +1512,7 @@ export default function Panel() {
   }
 
   // Kaydedilen Gezi Grubunu Silme Özelliği
-  function handleDeleteGroup(groupName: string) {
+  function _handleDeleteGroup(groupName: string) {
     if (!groupName) return;
     if (groupName === "Genel") {
       showPanelToast(
@@ -1578,7 +1560,7 @@ export default function Panel() {
   }
 
   // Özellik 5: Üst Sekme Yönetimi — Sadece İsim Sorularak Yeni Sekme Ekleme ve Aktif Etme
-  function handleAddNewTab() {
+  function _handleAddNewTab() {
     const trimmed = newTabNameInput.trim();
     if (!trimmed) return;
     if (!customTabs.includes(trimmed)) {
@@ -1596,7 +1578,7 @@ export default function Panel() {
   }
 
   // Gezi Yönetim Masası — Seçili rotayı kaydetme / güncelleme
-  function handleSaveTripSettings() {
+  function _handleSaveTripSettings() {
     if (!selectedGroup || selectedGroup === "all") return;
     const name = tripNameInput.trim() || selectedGroup;
     if (name !== selectedGroup) {
@@ -1649,7 +1631,7 @@ export default function Panel() {
   }, [showTripManager, selectedGroup]);
 
   // Delete address
-  function handleDeleteSavedAddress(id: string) {
+  function _handleDeleteSavedAddress(id: string) {
     const updated = savedAddresses.filter((a) => a.id !== id);
     if (typeof window !== "undefined") {
       try {
@@ -1662,7 +1644,7 @@ export default function Panel() {
   }
 
   // Select address, fly to it and highlight
-  function handleSelectSavedAddress(addr: SavedAddress) {
+  function _handleSelectSavedAddress(addr: SavedAddress) {
     setHighlightedStopId(addr.id);
     if (mapInstanceRef.current && markerRef.current) {
       mapInstanceRef.current.flyTo([addr.lat, addr.lng], 16, { animate: true, duration: 1.2 });
@@ -1676,7 +1658,7 @@ export default function Panel() {
   }
 
   // Phase 8: Itinerary Reorder & Edit actions
-  function handleMoveStop(stopId: string, direction: "up" | "down") {
+  function _handleMoveStop(stopId: string, direction: "up" | "down") {
     const currentGroupStops = savedAddresses.filter((a) => (a.group || "Genel") === selectedGroup);
     const otherStops = savedAddresses.filter((a) => (a.group || "Genel") !== selectedGroup);
     const idx = currentGroupStops.findIndex((s) => s.id === stopId);
@@ -1695,7 +1677,7 @@ export default function Panel() {
     renderGroupOnMap(selectedGroup, updated, undefined, false);
   }
 
-  function handleDeleteStop(stopId: string) {
+  function _handleDeleteStop(stopId: string) {
     const updated = savedAddresses.filter((s) => s.id !== stopId);
     setSavedAddresses(updated);
     localStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
@@ -1704,7 +1686,7 @@ export default function Panel() {
     setTimeout(() => setAiActionToast(null), 2500);
   }
 
-  function handleAddFreeTime(afterIdx: number) {
+  function _handleAddFreeTime(afterIdx: number) {
     const currentGroupStops = savedAddresses.filter((a) => (a.group || "Genel") === selectedGroup);
     const baseLat = currentGroupStops[afterIdx]?.lat || location.lat;
     const baseLng = currentGroupStops[afterIdx]?.lng || location.lng;
@@ -1798,7 +1780,7 @@ export default function Panel() {
   }
 
   // Kod ile Konum Bulma ve Haritada Odaklanma
-  async function handleLookupCode(e?: React.FormEvent) {
+  async function _handleLookupCode(e?: React.FormEvent) {
     if (e) e.preventDefault();
     const clean = lookupCodeInput.trim().toUpperCase().replace(/\s+/g, "");
     if (!clean) {
@@ -1980,7 +1962,7 @@ export default function Panel() {
   }
 
   // Tüm Gruplar (Özel Sekmeler + Kayıtlı adres grupları)
-  const allGroups = Array.from(
+  const _allGroups = Array.from(
     new Set([
       "Genel",
       ...customTabs,
@@ -1995,13 +1977,13 @@ export default function Panel() {
       : savedAddresses.filter((a) => (a.group || "Genel") === selectedGroup);
 
   const visitedStopsCount = activeGroupStops.filter((a) => a.visited).length;
-  const progressPercent =
+  const _progressPercent =
     activeGroupStops.length > 0
       ? Math.round((visitedStopsCount / activeGroupStops.length) * 100)
       : 0;
 
   // Özellik 6: Alt kısım yatay konum listesi için arama filtresi (arama yapıldığında seçili grup olsa bile tüm konumlarda arar)
-  const filteredStopsForBottom = (
+  const _filteredStopsForBottom = (
     bottomSearchQuery.trim() ? savedAddresses : activeGroupStops
   ).filter((s) => {
     if (!bottomSearchQuery.trim()) return true;

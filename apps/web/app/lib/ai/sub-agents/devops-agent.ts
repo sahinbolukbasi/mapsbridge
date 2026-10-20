@@ -1,4 +1,4 @@
-import type { SystemCapacityMetrics } from "../../tracker/deal-models";
+import type { SystemCapacityMetrics as _SystemCapacityMetrics } from "../../tracker/deal-models";
 
 /**
  * DevOps & Scalability Agent for MapsBridge Bot Infrastructure

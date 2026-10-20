@@ -131,6 +131,21 @@ jobs:
             echo "  ✓ ai-stream.zip (copy of ai.zip)"
           fi
 
+          # rag-fill agent lives outside infra/lambda — use NODE_PATH for resolution
+          if [ -f "agents/rag-fill/index.ts" ]; then
+            echo "Building: rag-fill ← agents/rag-fill/index.ts"
+            mkdir -p "$BUILD_DIR/rag-fill"
+            NODE_PATH="infra/lambda/node_modules" infra/lambda/node_modules/.bin/esbuild "agents/rag-fill/index.ts" \
+              --bundle \
+              --platform=node \
+              --target=node20 \
+              --outfile="$BUILD_DIR/rag-fill/index.js" \
+              --minify \
+              2>&1 | tail -3
+            zip -jq "$BUILD_DIR/rag-fill.zip" "$BUILD_DIR/rag-fill/index.js"
+            echo "  ✓ rag-fill.zip ($(du -sh "$BUILD_DIR/rag-fill.zip" | cut -f1))"
+          fi
+
       - name: Deploy to Lambda functions
         if: steps.check.outputs.skip == 'false'
         run: |
@@ -157,6 +172,7 @@ jobs:
             ["ws-onmessage"]="${PREFIX}-ws-onmessage"
             ["ws-ondisconnect"]="${PREFIX}-ws-ondisconnect"
             ["revenuecat"]="${PREFIX}-revenuecat"
+            ["rag-fill"]="${PREFIX}-rag-fill"
           )
 
           FAILED=0

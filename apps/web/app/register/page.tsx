@@ -44,7 +44,6 @@ export default function SignUpPage() {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   const [showGoogleFallbackModal, setShowGoogleFallbackModal] = useState(false);
-  const [fallbackGmail, setFallbackGmail] = useState("");
 
   const redirectToNext = useCallback(() => {
     try {
@@ -215,14 +214,6 @@ export default function SignUpPage() {
     setShowGoogleFallbackModal(true);
   };
 
-  const handleFallbackGmailSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setShowGoogleFallbackModal(false);
-    setMessage(
-      "Google ile kayıt şu anda gerçekleştirilemedi. Lütfen aşağıdaki formu kullanarak e-posta ve şifre ile kayıt olun.",
-    );
-  };
-
   const triggerAppleSignUp = () => {
     setIsAppleLoading(true);
     setMessage("");
@@ -257,7 +248,9 @@ export default function SignUpPage() {
           phone: cleanPhone,
         }),
       );
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     try {
       await signUp(cleanEmail, password, cleanName, cleanPhone);

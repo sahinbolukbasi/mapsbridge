@@ -43,7 +43,7 @@ export function analyzeTravelerContext(context?: TravelerProfileContext): Contex
     themes.push("Kültür & Şehir Keşfi");
   }
 
-  let inferredStyle = context.travelStyle || "balanced";
+  const inferredStyle = context.travelStyle || "balanced";
   let styleDesc = "dengeli ve konforlu";
 
   if (inferredStyle === "cultural") styleDesc = "tarihi ve kültürel derinliği önceleyen";

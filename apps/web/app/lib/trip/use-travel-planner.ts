@@ -318,7 +318,7 @@ export function useTravelPlanner() {
       // son ziyaret edilen duraktan başlayıp kalan tüm gidilmemiş durakları bağlayacak şekilde yeniden çizilir
       const unvisitedPins = pinsWithTime.filter((p) => !p.visited);
       const visitedPins = pinsWithTime.filter((p) => p.visited);
-      let activeRoutePins = pinsWithTime;
+      let activeRoutePins: typeof pinsWithTime;
 
       if (unvisitedPins.length === 0) {
         // Tüm duraklar tamamlandıysa rotanın tamamını göster

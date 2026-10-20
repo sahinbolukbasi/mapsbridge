@@ -153,7 +153,7 @@ export function HaritaClient() {
 
   const currentDay = daysData[activeDay - 1] || daysData[0];
 
-  const toggleFaq = (index: number) => {
+  const _toggleFaq = (index: number) => {
     setExpandedFaq(expandedFaq === index ? null : index);
   };
 

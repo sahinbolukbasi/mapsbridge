@@ -120,7 +120,7 @@ export async function handleSystemHealth() {
     const ddb = new DynamoDBClient({ region });
     await ddb.send(new DescribeTableCommand({ TableName: getTableName() }));
     ddbLatencyMs = Math.round(performance.now() - t0);
-  } catch (err) {
+  } catch (_err) {
     ddbStatus = "degraded";
   }
 

@@ -82,7 +82,7 @@ export function DiscoverTab({
   const [composerPhoto, setComposerPhoto] = useState<string | null>(null);
   const [composerRoute, setComposerRoute] = useState("");
   const [composerLocation, setComposerLocation] = useState("");
-  const [composerCategory, setComposerCategory] = useState("Tarih & Kültür");
+  const [composerCategory, _setComposerCategory] = useState("Tarih & Kültür");
   const [showPhotoPicker, setShowPhotoPicker] = useState(false);
   const [showRoutePicker, setShowRoutePicker] = useState(false);
   const [showLocationInput, setShowLocationInput] = useState(false);

@@ -22,7 +22,7 @@ export function csvText(records: ManagedRecord[], columns: string[]): string {
         : typeof value === "object"
           ? JSON.stringify(value)
           : String(value);
-    if (/^[\s]*[=+@\-]/.test(text) || /^[\t\r\n]/.test(text)) text = "'" + text;
+    if (/^[\s]*[=+@-]/.test(text) || /^[\t\r\n]/.test(text)) text = "'" + text;
     return `"${text.replace(/"/g, '""')}"`;
   };
   return (

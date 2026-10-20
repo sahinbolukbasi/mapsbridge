@@ -27,6 +27,20 @@ export function normalizeRequest(body: any) {
         ? body.tripManifestoMarkdown.slice(0, 10000)
         : null,
     userLocation: location ? { lat: location.lat, lng: location.lng } : null,
+    conversationFlow:
+      body.conversationFlow &&
+      typeof body.conversationFlow.activeTopic === "string" &&
+      typeof body.conversationFlow.stage === "string"
+        ? {
+            activeTopic: body.conversationFlow.activeTopic as string,
+            stage: body.conversationFlow.stage as string,
+            gathered:
+              body.conversationFlow.gathered &&
+              typeof body.conversationFlow.gathered === "object"
+                ? (body.conversationFlow.gathered as Record<string, string>)
+                : undefined,
+          }
+        : undefined,
     // Client profile claims are not an authoritative source; this field is intentionally omitted.
   };
 }

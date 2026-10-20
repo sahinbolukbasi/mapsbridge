@@ -8,11 +8,6 @@
 
 import type {
   TripProfile,
-  TripInterests,
-  TripBudget,
-  TravelerInfo,
-  TripDates,
-  TripNeeds,
 } from "./types";
 
 // ---------------------------------------------------------------------------

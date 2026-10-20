@@ -105,17 +105,20 @@ resource "aws_cloudfront_function" "admin_router" {
   count   = local.admin_enabled ? 1 : 0
   name    = "${local.name}-admin-router"
   runtime = "cloudfront-js-2.0"
-  comment = "Admin SPA router — appends index.html, no locale redirect"
+  comment = "Admin SPA router — routes all HTML requests to /u/admin/index.html"
   publish = true
   code    = <<-JS
     function handler(event) {
-      var uri = event.request.uri;
-      if (uri.endsWith('/')) {
-        event.request.uri += 'index.html';
-      } else if (!uri.includes('.')) {
-        event.request.uri += '/index.html';
-      }
-      return event.request;
+      // admin.mapsbridge.com → redirect to mapsbridge.com/u/admin/
+      // Auth is localStorage-based and origin-scoped; admin panel must run on the main domain.
+      return {
+        statusCode: 301,
+        statusDescription: 'Moved Permanently',
+        headers: {
+          'location': { value: 'https://mapsbridge.com/u/admin/' },
+          'cache-control': { value: 'no-store' }
+        }
+      };
     }
   JS
 }
@@ -166,19 +169,6 @@ resource "aws_cloudfront_distribution" "admin" {
     minimum_protocol_version = "TLSv1.2_2021"
   }
 
-  custom_error_response {
-    error_code            = 403
-    response_code         = 404
-    response_page_path    = "/404.html"
-    error_caching_min_ttl = 10
-  }
-
-  custom_error_response {
-    error_code            = 404
-    response_code         = 404
-    response_page_path    = "/404.html"
-    error_caching_min_ttl = 10
-  }
 }
 
 # ── Route53: admin.mapsbridge.com ─────────────────────────────────────────

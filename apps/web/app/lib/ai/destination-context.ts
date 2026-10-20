@@ -4,7 +4,7 @@
  * The model reads this, never writes to it.
  */
 
-import type { DestinationBrief } from "../destination/types";
+import type { DestinationBrief as _DestinationBrief } from "../destination/types";
 import { getDestinationBrief } from "../destination/index";
 
 export interface DestinationContextOptions {

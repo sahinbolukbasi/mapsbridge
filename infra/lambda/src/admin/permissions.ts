@@ -7,7 +7,7 @@ export const permissions = {
 export function can(role: StaffRole | undefined, permission: string): boolean {
   return !!role && (permissions[role] as readonly string[]).includes(permission);
 }
-export function routePermission(path: string, method: string): string | null {
+export function routePermission(path: string, _method: string): string | null {
   if (["/admin/session", "/admin/metrics"].includes(path)) return null;
   if (path.includes("/role")) return "roles";
   if (/\/(credits|wallet)$/.test(path)) return "credits";

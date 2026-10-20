@@ -84,7 +84,7 @@ export function generateOnTripUpdate(
   plan: StructuredTripPlan,
   dayDate: string,
   currentTimeStr: string,
-  userLocation?: { lat: number; lng: number },
+  _userLocation?: { lat: number; lng: number },
 ): OnTripAlert[] {
   const alerts: OnTripAlert[] = [];
   const { currentBlock, nextBlock } = getCurrentAndNextBlock(plan, dayDate, currentTimeStr);

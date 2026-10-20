@@ -106,7 +106,8 @@ export default function PricingPage() {
           "mapsbridge.subscription",
           JSON.stringify({ plan: "free", cycle: billingCycle }),
         );
-      } catch {}
+      } catch { // ignore
+      }
       showToast("✓ Başlangıç planı aktive edildi!");
       return;
     }
@@ -128,7 +129,8 @@ export default function PricingPage() {
           startDate: new Date().toISOString(),
         }),
       );
-    } catch {}
+    } catch { // ignore
+    }
     setShowCheckout(false);
     setSelectedTier(null);
     showToast(

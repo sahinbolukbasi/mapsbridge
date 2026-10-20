@@ -38,19 +38,12 @@ export interface DayLiteVersion {
 /** Block types that are primarily outdoors and affected by bad weather. */
 const OUTDOOR_TYPES: ReadonlySet<DayBlock["type"]> = new Set(["park", "viewpoint"]);
 
-/** Block types that are indoors and suitable as rain alternatives. */
-const INDOOR_TYPES: ReadonlySet<DayBlock["type"]> = new Set(["museum", "cafe", "restaurant"]);
-
 /**
  * Very rough walking-time heuristic: assumes each non-transit block involves
  * ~10 minutes of walking to/from the venue.
  */
 function estimateWalkingMinutes(blocks: DayBlock[]): number {
   return blocks.filter((b) => b.type !== "transit").length * 10;
-}
-
-function nowISO(): string {
-  return new Date().toISOString();
 }
 
 // ---------------------------------------------------------------------------

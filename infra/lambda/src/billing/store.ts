@@ -1,5 +1,6 @@
 import type { TrainingJob } from "../../../../apps/web/server/ai/training-outbox";
 import type { MemorySettings, MemoryJob } from "../../../../apps/web/server/ai/memory-service";
+import type { InteractionEvent } from "../../../../apps/web/server/ai/recommendation-tracker";
 import {
   GetItemCommand,
   TransactWriteItemsCommand,
@@ -58,8 +59,8 @@ export async function initializeTrial(userId: string) {
         Item: marshall({
           PK: `USER#${userId}`,
           SK: "CREDITS",
-          credits: 5,
-          welcomeGift: { credits: 5, grantedAt: new Date().toISOString() },
+          credits: 100,
+          welcomeGift: { credits: 100, grantedAt: new Date().toISOString() },
         }),
         ConditionExpression: "attribute_not_exists(PK)",
       }),
@@ -500,6 +501,20 @@ export async function forgetAIPreferences(userId: string) {
       Item: marshall({ PK: `USER#${userId}`, SK: "AI_PREFERENCES" }),
     }),
   );
+}
+
+export async function recordInteraction(event: InteractionEvent): Promise<void> {
+  try {
+    await getDynamoClient().send(
+      new PutItemCommand({
+        TableName: table(),
+        Item: marshall(event),
+        ConditionExpression: "attribute_not_exists(PK)",
+      }),
+    );
+  } catch {
+    // Analytics writes are non-critical — never propagate errors
+  }
 }
 
 export async function aiUsage(userId: string) {

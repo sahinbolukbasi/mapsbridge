@@ -109,7 +109,7 @@ export function executeTransitCalculation(
 
 export function executeWeatherLookup(
   city: string,
-  date?: string,
+  _date?: string,
 ): { forecast: string; isRainy: boolean } {
   // Deterministic seasonal / regional weather simulation for planning
   const normCity = city.toLocaleLowerCase("tr");

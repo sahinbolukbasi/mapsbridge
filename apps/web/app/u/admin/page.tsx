@@ -369,12 +369,7 @@ export default function AdminDashboard() {
         setData({});
         return;
       }
-      let current: AdminSession;
-      try {
-        current = (await managementApi.session()).session;
-      } catch (err: any) {
-        throw err;
-      }
+      const current = (await managementApi.session()).session;
       setSession(current);
       setAccess("allowed");
       const allUsers = async () => {

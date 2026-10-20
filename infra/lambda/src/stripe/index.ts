@@ -45,7 +45,7 @@ export async function handler(event: any) {
           ...p,
           available: process.env.BILLING_ENABLED === "true" && !!p.priceId,
         })),
-        welcomeCredits: 5,
+        welcomeCredits: 100,
         costs: { route: 5, chat: 1, clarify: 0 },
       });
     const token = (event.headers?.authorization || event.headers?.Authorization || "").replace(

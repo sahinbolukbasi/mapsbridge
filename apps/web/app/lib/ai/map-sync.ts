@@ -5,8 +5,6 @@
  * No polling — events propagate changes instantly.
  */
 
-import type { TripState, TripStateEvent } from "./trip-state";
-
 // ---------------------------------------------------------------------------
 // Events
 // ---------------------------------------------------------------------------

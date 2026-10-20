@@ -3,8 +3,6 @@ import { getStoredSession } from "../cognito";
 import { createRevenueCatCheckout } from "./revenuecat-client";
 import {
   getActionCreditCost,
-  SUBSCRIPTION_PLAN_DEFS,
-  CREDIT_PACKAGE_DEFS,
   type AICreditAction,
 } from "@mapsbridge/contracts";
 // ============================================================
@@ -20,7 +18,6 @@ import {
   CheckoutPayload,
   CheckoutResult,
   SubscriptionTierId,
-  BillingCycle,
   BillingDetails,
   MarketplaceRouteItem,
 } from "./billing-types";
@@ -35,7 +32,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     monthlyCredits: 5,
     color: "#64748b",
     features: [
-      { text: "Doğrulanmış yeni hesaba tek seferlik 5 kredi", included: true },
+      { text: "Doğrulanmış yeni hesaba 100 ücretsiz kredi", included: true },
       { text: "3 Aktif Rota & 50 Kayıtlı Mekan Havuzu", included: true },
       { text: "Temel Harita Masası & OSRM Rota Çizimi", included: true },
       { text: "Gezginler Topluluğunu Keşfetme & Rota İnceleme", included: true },

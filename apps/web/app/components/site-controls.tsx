@@ -3,7 +3,7 @@
 import { useLocale, getAlternatePath } from "../lib/locale-context";
 
 export function SiteControls() {
-  const { locale, isEnglish } = useLocale();
+  const { isEnglish } = useLocale();
 
   function switchLocale() {
     const alternate = getAlternatePath(window.location.pathname);

@@ -6,12 +6,10 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   Pin,
   TripDay,
-  TripGroup,
   TripWorkspace,
   DrawerState,
   DrawerView,
   RouteSegment,
-  PinCategory,
 } from "./models";
 
 const STORAGE_KEY = "mapsbridge.tripWorkspace";
@@ -165,7 +163,7 @@ export function useTripWorkspace() {
       const updatedPins = prev.pins.map((p) => (p.id === pinId ? updatedPin : p));
 
       // If day changed, move pin between days
-      let updatedDays = prev.days;
+      let updatedDays: typeof prev.days;
       if (updates.dayIndex !== undefined && updates.dayIndex !== oldPin.dayIndex) {
         updatedDays = prev.days.map((d) => ({
           ...d,

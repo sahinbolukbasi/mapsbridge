@@ -1,10 +1,10 @@
 import type { TripProfile } from "../types";
-import { runFoodAgent, type FoodAgentOutput } from "./food-agent";
-import { runCarRentalAgent, type CarRentalAgentOutput } from "./car-rental-agent";
-import { runCityTransitAgent, type CityTransitAgentOutput } from "./city-transit-agent";
-import { runCityIntelAgent, type CityIntelAgentOutput } from "./city-intel-agent";
-import { runHotelDealAgent, type HotelDealOutput } from "./hotel-deal-agent";
-import { runFlightAgent, type FlightAgentOutput } from "./flight-agent";
+import { runFoodAgent } from "./food-agent";
+import { runCarRentalAgent } from "./car-rental-agent";
+import { runCityTransitAgent } from "./city-transit-agent";
+import { runCityIntelAgent } from "./city-intel-agent";
+import { runHotelDealAgent } from "./hotel-deal-agent";
+import { runFlightAgent } from "./flight-agent";
 
 // ---------------------------------------------------------------------------
 // Types

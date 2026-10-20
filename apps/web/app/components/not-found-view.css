@@ -86,6 +86,64 @@
   color: currentColor;
 }
 
+/* Attempted path pill */
+.not-found-path-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 10px;
+  border-radius: 8px;
+  background: rgba(186, 26, 26, 0.07);
+  border: 1px solid rgba(186, 26, 26, 0.2);
+  color: #7f1d1d;
+  font-size: 13px;
+  margin-bottom: 20px;
+  max-width: 90vw;
+  overflow: hidden;
+}
+
+.not-found-path-pill .material-symbols-outlined {
+  font-size: 16px;
+  color: #ba1a1a;
+  flex-shrink: 0;
+}
+
+.not-found-path-pill code {
+  font-family: "Fira Code", "Roboto Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  background: none;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 50vw;
+}
+
+.not-found-path-status {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ba1a1a;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .not-found-path-pill {
+  background: rgba(186, 26, 26, 0.12);
+  border-color: rgba(248, 113, 113, 0.2);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .not-found-path-pill .material-symbols-outlined {
+  color: #f87171;
+}
+
+[data-theme="dark"] .not-found-path-status {
+  color: #f87171;
+}
+
 /* 404 Centerpiece Graphic */
 .not-found-graphic-container {
   position: relative;

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { HeaderNav } from "../components/header-nav";
 import { SiteFooter } from "../components/site-footer";
-import { useLocale } from "../lib/locale-context";
 import { getStoredSession } from "../lib/cognito";
 import "./ai-asistan.css";
 
@@ -15,7 +14,6 @@ interface AIAsistanClientProps {
 export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClientProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isEnglish } = useLocale();
   const [activeDay, setActiveDay] = useState<number>(1);
   const [chatInput, setChatInput] = useState<string>(
     "Let's end the day at a wine bar with live jazz in Trastevere.",

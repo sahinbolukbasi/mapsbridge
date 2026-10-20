@@ -284,6 +284,12 @@ export interface MultiAgentResponse {
   modelUsed?: string;
 }
 
+export interface ConversationFlowSnapshot {
+  activeTopic: string;
+  stage: string;
+  gathered?: Record<string, string | undefined>;
+}
+
 export interface MultiAgentRequestPayload {
   routeMode?: "calm" | "classic" | "explorer";
   personalMemories?: Array<{ id: string; text: string; kind: string }>;
@@ -296,6 +302,7 @@ export interface MultiAgentRequestPayload {
   profileContext?: TravelerProfileContext;
   conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;
   tripManifestoMarkdown?: string;
+  conversationFlow?: ConversationFlowSnapshot;
 }
 
 export interface FlightDeal {

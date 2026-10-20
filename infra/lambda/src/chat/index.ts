@@ -24,7 +24,7 @@ import {
   unauthorized,
   notFound,
   serverError,
-  handlePreflight,
+  handlePreflight as _handlePreflight,
   extractBearerToken,
   parseBody,
 } from "../shared/http";

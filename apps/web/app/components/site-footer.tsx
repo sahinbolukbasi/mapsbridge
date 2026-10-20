@@ -9,7 +9,7 @@ const APP_STORE_URL = "https://apps.apple.com/app/mapsbridge/id6743820738";
 const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.mapsbridge.mobile";
 
 export function SiteFooter() {
-  const [mounted, setMounted] = useState(false);
+  const [_mounted, setMounted] = useState(false);
   const { t, isEnglish } = useLocale();
 
   useEffect(() => {

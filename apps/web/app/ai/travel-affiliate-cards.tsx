@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { buildFlightCard, buildHotelCard, buildTripAffiliateBundle, extractDateFromText, toIataPublic } from "../lib/affiliate/travelpayouts";
 import type { AffiliateCard } from "../lib/affiliate/types";
-import { isExpired } from "../lib/affiliate/types";
 import type { UnifiedRoutePlan } from "../lib/ai/types";
 
 interface Props {
@@ -61,7 +60,8 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("mapsbridge:affiliate_click", { detail: event }));
       }
-    } catch {}
+    } catch { // ignore
+    }
   }
 
   return (
@@ -220,7 +220,8 @@ export function InlineAffiliateStrip({
           },
         }),
       );
-    } catch {}
+    } catch { // ignore
+    }
   }
 
   const flightHref = livePrice?.flight?.link || flight.href;

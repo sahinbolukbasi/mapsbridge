@@ -160,6 +160,18 @@ variable "billing_environment" {
   description = "Stripe price IDs and secret: SSM references only; no plaintext credentials."
 }
 
+variable "kb_source_bucket" {
+  type        = string
+  description = "S3 bucket for Bedrock KB source documents (travel-rag output)"
+  default     = "mapsbridge-prod-travel-sources-865369794421"
+}
+
+variable "kb_data_source_id" {
+  type        = string
+  description = "Bedrock KB data source ID"
+  default     = "HGCTUZJ1YQ"
+}
+
 resource "aws_resourcegroups_group" "stack" {
   name = "${var.prefix}-admin-runtime"
   resource_query {

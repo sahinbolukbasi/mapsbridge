@@ -31,15 +31,28 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-require-imports": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        destructuredArrayIgnorePattern: "^_",
+      }],
       "@typescript-eslint/no-unsafe-function-type": "warn",
       "no-console": "warn",
-      "no-empty": "warn",
+      "no-empty": ["warn", { "allowEmptyCatch": true }],
       "no-useless-assignment": "warn",
       "no-useless-catch": "warn",
       "no-useless-escape": "warn",
       "prefer-const": "warn",
       "preserve-caught-error": "off",
+    },
+  },
+
+  // Lambda functions run server-side — console.log/error goes to CloudWatch.
+  {
+    files: ["infra/lambda/src/**/*.ts"],
+    rules: {
+      "no-console": "off",
     },
   },
 

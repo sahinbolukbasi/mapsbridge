@@ -439,10 +439,10 @@ test("retry cannot spend twice; refund is atomic and only once", async () => {
   await assert.rejects(s.reserveAI("user-a", r.requestId, "different"), (e) => e.status === 409);
   await s.finishAI(r, false);
   await s.finishAI(r, false);
-  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 5);
+  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 100);
   await assert.rejects(s.reserveAI("user-a", r.requestId, "a"), (e) => e.status === 409);
   await s.initializeTrial("user-a");
-  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 5);
+  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 100);
 });
 test("completed usage cannot be refunded by a late failure", async () => {
   const h = harness(),
@@ -451,7 +451,7 @@ test("completed usage cannot be refunded by a late failure", async () => {
   const r = await s.reserveAI("user-a", "request_123456789_a", "a");
   await s.finishAI(r, true);
   await assert.rejects(s.finishAI(r, false));
-  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 0);
+  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 95);
 });
 test("global limit blocks other users atomically without debiting them", async () => {
   const h = harness({ env: { AI_DAILY_REQUEST_LIMIT: "1" } }),
@@ -460,7 +460,7 @@ test("global limit blocks other users atomically without debiting them", async (
   await s.initializeTrial("user-b");
   await s.reserveAI("user-a", "request_123456789_a", "a");
   await assert.rejects(s.reserveAI("user-b", "request_123456789_b", "b"), (e) => e.status === 429);
-  assert.equal(h.rows.get("USER#user-b|CREDITS").credits, 5);
+  assert.equal(h.rows.get("USER#user-b|CREDITS").credits, 100);
 });
 test("wallet isolation and expired entitlement ignore fabricated client tier", async () => {
   const h = harness(),
@@ -516,21 +516,21 @@ test("canonical AI endpoint requires verified email and charges server cost, ign
   const result = await handler(request);
   assert.equal(result.statusCode, 200);
   assert.equal(JSON.parse(result.body).billing.cost, 5);
-  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 0);
+  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 95);
   const replay = await handler(request);
   assert.equal(replay.statusCode, 200);
   assert.equal(JSON.parse(replay.body).replayed, true);
   assert.equal(h.providerCalls.filter((x) => x.model).length, 1);
-  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 0);
+  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 95);
 });
 test("AI provider failure refunds credits once but consumes daily attempt", async () => {
   const h = harness({ aiFailure: true }),
     handler = h.load("../../../apps/web/server/ai-handler.ts").handler;
   const e = http("/ai/route-planner", { prompt: "Trip", requestId: "request_123456789_a" });
   assert.equal((await handler(e)).statusCode, 503);
-  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 5);
+  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 100);
   assert.equal((await handler(e)).statusCode, 409);
-  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 5);
+  assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 100);
   assert.equal(h.rows.get("SYSTEM#AI|" + new Date().toISOString().slice(0, 10)).requests, 1);
 });
 test.skip("paid recurring invoice grants once and subscription events do not refill credits (deprecated: using RevenueCat)", async () => {
@@ -642,10 +642,10 @@ test("clarification is free, chat costs one and route costs five regardless of c
     const first = await handler(event);
     assert.equal(first.statusCode, 200);
     assert.equal(JSON.parse(first.body).cost, cost);
-    assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 5 - cost);
+    assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 100 - cost);
     const again = await handler(event);
     assert.equal(JSON.parse(again.body).replayed, true);
-    assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 5 - cost);
+    assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 100 - cost);
   }
 });
 test("insufficient settlement credit cannot commit answer or conversation", async () => {
@@ -707,13 +707,13 @@ test("insufficient credit blocks paid provider before generation", async () => {
   assert.equal(h.providerCalls.filter((x) => x.model).length, 0);
   assert.equal(h.rows.get("USER#user-a|CREDITS").credits, 0);
 });
-test("welcome gift is five credits once and preserves existing balances", async () => {
+test("welcome gift is 100 credits once and preserves existing balances", async () => {
   const h = harness(),
     s = h.load("billing/store.ts");
   await s.initializeTrial("new");
   await s.initializeTrial("new");
-  assert.equal((await s.wallet("new")).credits, 5);
-  assert.equal((await s.wallet("new")).welcomeGift.credits, 5);
+  assert.equal((await s.wallet("new")).credits, 100);
+  assert.equal((await s.wallet("new")).welcomeGift.credits, 100);
   h.rows.set("USER#old|CREDITS", { credits: 87 });
   await s.initializeTrial("old");
   assert.equal((await s.wallet("old")).credits, 87);
@@ -753,6 +753,8 @@ test("concurrent paid authorizations cannot overspend", async () => {
   const h = harness(),
     s = h.load("billing/store.ts");
   await s.initializeTrial("user-a");
+  // Restrict to 5 credits so only one 5-credit authorization can succeed
+  h.rows.set("USER#user-a|CREDITS", { PK: "USER#user-a", SK: "CREDITS", credits: 5 });
   const a = await s.reserveAI("user-a", "authorize_request_a", "a", 0),
     b = await s.reserveAI("user-a", "authorize_request_b", "b", 0);
   const results = await Promise.allSettled([s.authorizeAI(a, 5), s.authorizeAI(b, 5)]);
@@ -767,7 +769,7 @@ test("refund uses durable receipt even when caller lost updated cost", async () 
   await s.authorizeAI(r, 5);
   await s.finishAI({ ...r, cost: 0 }, false);
   await s.finishAI({ ...r, cost: 0 }, false);
-  assert.equal((await s.wallet("user-a")).credits, 5);
+  assert.equal((await s.wallet("user-a")).credits, 100);
 });
 
 test("AI rejects unsigned JWT, plaintext email and arbitrary sessions when identity validation fails", async () => {

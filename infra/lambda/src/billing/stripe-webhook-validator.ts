@@ -85,7 +85,7 @@ export class StripeWebhookValidator {
     let event: StripeWebhookEvent;
     try {
       event = JSON.parse(payload);
-    } catch (error) {
+    } catch (_error) {
       throw new BillingError(400, "INVALID_PAYLOAD", "Unable to parse webhook payload");
     }
 
@@ -165,7 +165,7 @@ export class StripeWebhookValidator {
   static createMiddleware() {
     const validator = new StripeWebhookValidator();
 
-    return async (event: any, context: any, next: Function) => {
+    return async (event: any, context: any, next: () => Promise<void>) => {
       const signature = event.headers?.["stripe-signature"] || event.headers?.["Stripe-Signature"];
       const payload = event.body;
 

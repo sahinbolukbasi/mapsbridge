@@ -28,7 +28,7 @@ export function MobilePlatformProvider({ children }: { children: React.ReactNode
     if (typeof window === "undefined") return;
 
     const saved = localStorage.getItem("mapsbridge.mobile_platform") as MobilePlatform | null;
-    let initial: MobilePlatform = "ios";
+    let initial: MobilePlatform;
 
     if (saved === "ios" || saved === "android") {
       initial = saved;

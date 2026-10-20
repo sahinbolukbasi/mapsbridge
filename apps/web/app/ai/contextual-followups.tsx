@@ -9,7 +9,7 @@ interface FollowupChip {
   prompt: string;
 }
 
-function extractFollowups(message: ChatMessage, route: UnifiedRoutePlan | null): FollowupChip[] {
+function extractFollowups(message: ChatMessage, _route: UnifiedRoutePlan | null): FollowupChip[] {
   const chips: FollowupChip[] = [];
   const text = message.text.toLowerCase();
 

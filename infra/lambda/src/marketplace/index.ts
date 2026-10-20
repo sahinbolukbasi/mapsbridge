@@ -26,7 +26,7 @@ import {
   notFound,
   forbidden,
   serverError,
-  handlePreflight,
+  handlePreflight as _handlePreflight,
   extractBearerToken,
   parseBody,
 } from "../shared/http";
@@ -85,7 +85,7 @@ async function handleListGuides(event: ApiGatewayEvent) {
   const guides = (result.Items || []).map((i) => {
     const item = unmarshall(i);
     // Don't expose file path in listing
-    const { filePath, ...safe } = item;
+    const { filePath: _filePath, ...safe } = item;
     return safe;
   });
 
@@ -110,7 +110,7 @@ async function handleGetGuide(event: ApiGatewayEvent) {
 
   if (!result.Item) return notFound("Rehber bulunamadı.");
   const item = unmarshall(result.Item);
-  const { filePath, ...safe } = item;
+  const { filePath: _filePath, ...safe } = item;
   return ok(safe);
 }
 

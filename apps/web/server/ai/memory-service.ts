@@ -2,7 +2,6 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   DynamoDBClient,
   GetItemCommand,
-  PutItemCommand,
   QueryCommand,
   TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb";

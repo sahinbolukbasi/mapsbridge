@@ -192,11 +192,11 @@ export default function CheckoutPage() {
 
         {/* Karşılama Hediyesi */}
         <section className="billing-gift">
-          <strong>İlk rotan bizden: 5 kredi hediye</strong>
+          <strong>Hoş geldin hediyesi: 100 kredi</strong>
           <p>
             {wallet.welcomeGift
               ? "Karşılama hediyen hesabına tanımlandı. Bu hediye tek seferliktir."
-              : "Yeni hesabının e-postasını doğrula; ilk AI rotanı oluşturman için tek seferlik 5 kredi hesabına eklensin."}
+              : "Yeni hesabının e-postasını doğrula; hesabına 100 ücretsiz kredi tanımlanacak."}
           </p>
         </section>
 

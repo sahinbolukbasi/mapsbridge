@@ -20,7 +20,7 @@ import {
   forbidden,
   notFound,
   serverError,
-  handlePreflight,
+  handlePreflight as _handlePreflight,
   extractBearerToken,
   parseBody,
 } from "../shared/http";
@@ -107,7 +107,7 @@ export const handler = async (event: ApiGatewayEvent) => {
 };
 
 // ─── DynamoDB helpers ─────────────────────────────────────────────────────
-async function getDdb() {
+async function _getDdb() {
   const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   return new DynamoDBClient({ region: process.env.AWS_REGION });
 }
@@ -424,7 +424,7 @@ async function handleOsrmRoute(event: ApiGatewayEvent) {
 }
 
 // ─── AI Route Planner (Bedrock + Token Rate Limit) ────────────────────────
-async function handleAiRoutePlanner(event: ApiGatewayEvent) {
+async function handleAiRoutePlanner(_event: ApiGatewayEvent) {
   // All billable AI work belongs to the canonical handler with atomic credit reservations.
   return {
     statusCode: 410,

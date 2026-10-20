@@ -69,7 +69,7 @@ export const placesCache = {
     if (typeof window === "undefined") return;
     try {
       localStorage.setItem(getStorageKey("place", placeId), JSON.stringify(entry));
-    } catch (e) {
+    } catch (_e) {
       // If quota exceeded, clean old entries
       placesCache.pruneOldEntries();
     }

@@ -45,12 +45,12 @@ export function TravelPlannerSidebar({
   onFlyToCoords,
   selectedMapPoint,
   onClearSelectedMapPoint,
-  isAddingPinMode,
-  onToggleAddPinMode,
+  isAddingPinMode: _isAddingPinMode,
+  onToggleAddPinMode: _onToggleAddPinMode,
   isGuest = false,
   onRequireAuth,
   onRunOptimize,
-  userLocation,
+  userLocation: _userLocation,
 }: TravelPlannerSidebarProps) {
   const {
     trips,
@@ -74,7 +74,7 @@ export function TravelPlannerSidebar({
     updatePinAnywhere,
     deletePinAnywhere,
     togglePinVisitedAnywhere,
-    customGroups,
+    customGroups: _customGroups,
     addDay,
     importTrip,
   } = planner;
@@ -272,17 +272,14 @@ export function TravelPlannerSidebar({
 
   // ── AI Route Modifier Agent with Versioning ────────────────
   const [aiPrompt, setAiPrompt] = useState("");
-  const [isAiModifying, setIsAiModifying] = useState(false);
-  const [showAiInput, setShowAiInput] = useState(false);
+  const [_isAiModifying, setIsAiModifying] = useState(false);
+  const [_showAiInput, setShowAiInput] = useState(false);
   const [routeVersions, setRouteVersions] = useState<
     { id: string; versionNum: number; label: string; prompt?: string; stops: Pin[] }[]
   >([]);
-  const [activeVersionNum, setActiveVersionNum] = useState<number>(1);
+  const [_activeVersionNum, setActiveVersionNum] = useState<number>(1);
 
-  // "AI'ya Sor" — mekan hakkında anlık soru-cevap
-  const [placeAiQuestion, setPlaceAiQuestion] = useState("");
-  const [placeAiAnswer, setPlaceAiAnswer] = useState<string | null>(null);
-  const [isPlaceAiLoading, setIsPlaceAiLoading] = useState(false);
+  // "AI'ya Sor" — mekan hakkında anlık soru-cevap (reserved for future use)
 
   // Initialize v1 when activeTrip changes
   useEffect(() => {
@@ -299,7 +296,7 @@ export function TravelPlannerSidebar({
     }
   }, [activeTrip?.id]);
 
-  const handleAiModifyRoute = async (customPrompt?: string) => {
+  const _handleAiModifyRoute = async (customPrompt?: string) => {
     const promptText = (customPrompt || aiPrompt).trim();
     if (!promptText) return;
     if (guardGuest("AI ile Rota Düzenleme", "Yapay zeka ile rotanızı yeniden düzenlemek için"))
@@ -372,7 +369,7 @@ export function TravelPlannerSidebar({
     }
   };
 
-  const handleSwitchVersion = (verNum: number) => {
+  const _handleSwitchVersion = (verNum: number) => {
     const target = routeVersions.find((v) => v.versionNum === verNum);
     if (target && activeTrip) {
       importTrip({

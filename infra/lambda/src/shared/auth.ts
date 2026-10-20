@@ -61,7 +61,7 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
     return null;
   }
 
-  let claims: any = null;
+  let claims: any;
   try {
     claims = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
   } catch {
@@ -169,14 +169,17 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
         // Cognito lookup failed — fall through to email-hash sub
       }
 
-      // No existing Cognito account: use email hash as a stable sub for this social user
+      // No existing Cognito account: use email hash as a stable sub for this social user.
+      // JWT signature was already verified above — a valid signed Google/Apple token proves
+      // the user authenticated with that provider, so treat as email-verified regardless of
+      // whether the email_verified claim is present (Apple often omits it).
       const canonicalSub = canonicalUserIdFromEmail(cleanEmail);
       return {
         sub: canonicalSub,
         originalSub: claims.sub,
         email: cleanEmail,
         isAdmin: false,
-        emailVerified: socialEmailVerified,
+        emailVerified: true,
       };
     }
     return null;

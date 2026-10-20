@@ -19,7 +19,7 @@ import {
 import type { TripContext } from "../lib/ai/planning";
 import { planText, shouldRecheckRequest, type ChatMessage } from "../lib/ai/chat";
 import { routeToTrip } from "../lib/trip/workspace-store";
-import { tripToMarkdown, saveTripMarkdown, getTripMarkdown } from "../lib/trip/trip-markdown";
+import { tripToMarkdown, saveTripMarkdown } from "../lib/trip/trip-markdown";
 import type { Trip, Pin } from "../lib/trip/models";
 import { interactionTracker } from "../lib/analytics/tracker";
 import { AIPromoLanding } from "./ai-promo-landing";
@@ -168,6 +168,30 @@ const ACTIVITY_STARTERS = [
   },
 ];
 
+// Quick guides map to exact KB documents — answered with minimal tokens via RAG context.
+// Order: vary by month so the selection feels fresh across seasons.
+const KB_QUICK_GUIDES = [
+  { flag: "🇹🇷", city: "İstanbul", topic: "Semtler", prompt: "İstanbul'un semtleri hakkında bilgi ver: Beyoğlu, Kadıköy, Karaköy" },
+  { flag: "🇪🇸", city: "Barcelona", topic: "Gaudi", prompt: "Barcelona'da Gaudí eserleri: Sagrada Família ve Park Güell ziyaret rehberi" },
+  { flag: "🇫🇷", city: "Paris", topic: "Müzeler", prompt: "Paris müzeleri rehberi: Louvre, Orsay ve Paris Müze Kartı" },
+  { flag: "🇯🇵", city: "Tokyo", topic: "Ulaşım", prompt: "Tokyo toplu ulaşım rehberi: JR, metro ve Suica kart nasıl kullanılır?" },
+  { flag: "🇮🇹", city: "Roma", topic: "Mutfak", prompt: "Roma mutfağı: cacio e pepe, carbonara ve pizza al taglio nerede yenir?" },
+  { flag: "🇳🇱", city: "Amsterdam", topic: "Müzeler", prompt: "Amsterdam müzeleri: Rijksmuseum, Van Gogh ve I Amsterdam City Card" },
+  { flag: "🇦🇪", city: "Dubai", topic: "Pratik", prompt: "Dubai seyahati pratik bilgiler: iklim, kıyafet kuralları ve metro rehberi" },
+  { flag: "🇬🇧", city: "Londra", topic: "Ücretsiz", prompt: "Londra'da ücretsiz müzeler: British Museum, Natural History Museum ziyaret rehberi" },
+  { flag: "🇹🇷", city: "Antalya", topic: "Doğa", prompt: "Antalya'da doğa: Düden Şelalesi, Köprülü Kanyon ve Kaş rehberi" },
+  { flag: "🇹🇷", city: "İstanbul", topic: "Ulaşım", prompt: "İstanbul toplu ulaşım rehberi: İstanbulkart, metro, tramvay ve vapur" },
+  { flag: "🇪🇸", city: "Barcelona", topic: "Yemek", prompt: "Barcelona mutfağı: tapas, vermouth kültürü ve La Boqueria pazarı" },
+  { flag: "🇫🇷", city: "Paris", topic: "Semtler", prompt: "Paris semtleri: Marais, Montmartre, Saint-Germain ve Bastille karakterleri" },
+];
+
+function getSeasonalGuides(count = 6): typeof KB_QUICK_GUIDES {
+  const month = new Date().getMonth();
+  const offset = (month * 3) % KB_QUICK_GUIDES.length;
+  const rotated = [...KB_QUICK_GUIDES.slice(offset), ...KB_QUICK_GUIDES.slice(0, offset)];
+  return rotated.slice(0, count);
+}
+
 const ROUTE_STYLES = [
   { key: "calm" as const, icon: "🌿", label: "Sakin rota", hint: "Az yürüyüş · uzun molalar" },
   {
@@ -195,6 +219,7 @@ export default function AIPage() {
   const [listening, setListening] = useState(false);
   const speech = useRef<any>(null);
   const [error, setError] = useState("");
+  const [errorCode, setErrorCode] = useState("");
   const [notice, setNotice] = useState("");
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [authModal, setAuthModal] = useState(false);
@@ -261,7 +286,8 @@ export default function AIPage() {
     }
     try {
       userStorage.setItem(STORAGE_KEY, JSON.stringify(remaining.slice(0, 15)));
-    } catch {}
+    } catch { // ignore
+    }
   }
 
   function refreshCurrentTrip() {
@@ -278,7 +304,8 @@ export default function AIPage() {
           return;
         }
       }
-    } catch {}
+    } catch { // ignore
+    }
     setCurrentTrip(null);
   }
 
@@ -428,6 +455,7 @@ export default function AIPage() {
     setPanelOpen(false);
     setMobileTab("chat");
     setError("");
+    setErrorCode("");
     setNotice("");
     pending.current = null;
     setInput("");
@@ -440,6 +468,7 @@ export default function AIPage() {
     setMobileTab("chat");
     setDay(1);
     setError("");
+    setErrorCode("");
     setNotice("");
     setConversationFlow(EMPTY_FLOW);
     pending.current = sessions.find((s) => s.id === id)?.pendingRequest || null;
@@ -498,6 +527,13 @@ export default function AIPage() {
             conversationId: target.id,
             trainingConsent,
             tripManifestoMarkdown: combinedManifesto || undefined,
+            conversationFlow: conversationFlow.activeTopic !== "none"
+              ? {
+                  activeTopic: conversationFlow.activeTopic,
+                  stage: conversationFlow.stage,
+                  gathered: conversationFlow.gathered,
+                }
+              : undefined,
           };
     if (!retry) {
       const message: ChatMessage = { id: crypto.randomUUID(), role: "user", text: promptToSend };
@@ -521,6 +557,7 @@ export default function AIPage() {
     inFlight.current = true;
     setBusy(true);
     setError("");
+    setErrorCode("");
     setNotice("");
     try {
       const STREAM_URL = process.env.NEXT_PUBLIC_AI_STREAM_URL || "";
@@ -568,11 +605,14 @@ export default function AIPage() {
                   throw Object.assign(new Error(ev.message || "Stream error"), {
                     code: ev.code,
                     status:
-                      ev.code === "UNAUTHORIZED"
-                        ? 401
-                        : ev.code === "EMAIL_NOT_VERIFIED"
-                          ? 403
-                          : 503,
+                      ev.code === "UNAUTHORIZED" ? 401
+                      : ev.code === "EMAIL_NOT_VERIFIED" ? 403
+                      : ev.code === "WALLET_FROZEN" ? 403
+                      : ev.code === "INSUFFICIENT_CREDITS" ? 402
+                      : ev.code === "USER_DAILY_LIMIT" || ev.code === "SERVICE_DAILY_LIMIT" ? 429
+                      : ev.code === "AI_DISABLED" ? 503
+                      : ev.code === "REQUEST_IN_PROGRESS" ? 409
+                      : 503,
                   });
               } catch (parseErr) {
                 if ((parseErr as any).status) throw parseErr;
@@ -678,49 +718,50 @@ export default function AIPage() {
       pending.current = null;
       void refreshWallet();
     } catch (e: any) {
-      const isAuthErr =
-        e?.status === 401 ||
-        (typeof e?.message === "string" &&
-          (e.message.includes("Oturum") ||
-            e.message.includes("giriş") ||
-            e.message.includes("token")));
-      if (isAuthErr) {
+      const code: string = e?.code || "";
+      setErrorCode(code);
+      if (e?.status === 401 || code === "UNAUTHORIZED") {
         const refreshed = await refreshSession();
         if (refreshed?.token) {
           setError("");
+          setErrorCode("");
           setNotice("Oturum yenilendi, isteğiniz gönderiliyor...");
           inFlight.current = false;
           setBusy(false);
           return send(false, promptToSend);
         } else {
-          setError("Oturum süreniz doldu veya oturum doğrulanamadı. Lütfen giriş yapın.");
+          setError("Oturum süreniz doldu. Lütfen tekrar giriş yapın.");
           setInput(promptToSend);
           setAuthModal(true);
         }
+      } else if (code === "EMAIL_NOT_VERIFIED") {
+        setError("AI asistanı kullanmak için e-postanızı onaylamanız gerekiyor. Giriş ekranından onay maili gönderebilirsiniz.");
+      } else if (code === "WALLET_FROZEN") {
+        setError("Kredi hesabınız geçici olarak durduruldu. Detay için destek ekibine ulaşın.");
+      } else if (code === "INSUFFICIENT_CREDITS" || e?.status === 402) {
+        setError(e?.message || "Bu işlem için yeterli krediniz yok.");
+        if (typeof window !== "undefined")
+          window.dispatchEvent(new CustomEvent("mapsbridge:open_upgrade_modal", {
+            detail: { reason: e?.message || "Krediniz yetersiz." },
+          }));
+      } else if (code === "USER_DAILY_LIMIT") {
+        setError("Bugünlük 20 mesaj sınırına ulaştınız. Sayaç her gece saat 03:00'te (Türkiye saati) sıfırlanır.");
+      } else if (code === "SERVICE_DAILY_LIMIT") {
+        setError("Servis kapasitesi şu an yoğun. Birkaç dakika sonra tekrar deneyin.");
+        setRetryAvailable(true);
+        lastPromptRef.current = promptToSend;
+      } else if (code === "AI_DISABLED") {
+        setError("AI asistanı şu an bakımda. Kısa süre içinde tekrar kullanılabilir olacak.");
+      } else if (code === "REQUEST_IN_PROGRESS") {
+        setError("Önceki isteğin sonucu bekleniyor. Sonuç gelince otomatik gösterilecek.");
+        setRetryAvailable(true);
+      } else if (shouldRecheckRequest(e) || e?.status === 408 || (e?.status >= 500 && code !== "AI_RESULT_UNCONFIRMED")) {
+        setError("Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.");
+        setRetryAvailable(true);
+        lastPromptRef.current = promptToSend;
       } else {
-        const isCreditErr =
-          e?.status === 402 ||
-          (typeof e?.message === "string" &&
-            (e.message.toLowerCase().includes("kredi") ||
-              e.message.toLowerCase().includes("yetersiz")));
-        if (isCreditErr && typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("mapsbridge:open_upgrade_modal", {
-              detail: {
-                reason: e?.message || "İşlemi tamamlamak için yeterli krediniz bulunmuyor.",
-              },
-            }),
-          );
-        }
-        const isNetworkErr = shouldRecheckRequest(e) || e?.status === 408 || e?.status >= 500;
-        if (isNetworkErr) {
-          setError("Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.");
-          setRetryAvailable(true);
-          lastPromptRef.current = promptToSend;
-        } else {
-          setError(e?.message || "Yanıt alınamadı. Tekrar deneyebilirsin.");
-          setRetryAvailable(false);
-        }
+        setError(e?.message || "Yanıt alınamadı. Tekrar deneyebilirsin.");
+        setRetryAvailable(false);
       }
       setSessions((s) =>
         s.map((x) => (x.id === request.conversationId ? { ...x, route: null } : x)),
@@ -1105,6 +1146,35 @@ export default function AIPage() {
                       ))}
                     </div>
                   </div>
+
+                  <div className="ai-welcome-section">
+                    <h3 className="ai-welcome-section-title">
+                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        menu_book
+                      </span>
+                      Hızlı Rehberler
+                    </h3>
+                    <div className="ai-kb-guide-grid">
+                      {getSeasonalGuides(6).map((g) => (
+                        <button
+                          key={`${g.city}-${g.topic}`}
+                          type="button"
+                          className="ai-kb-guide-chip"
+                          onClick={() => {
+                            setInput(g.prompt);
+                            void send(false, g.prompt);
+                          }}
+                          disabled={busy}
+                        >
+                          <span className="ai-kb-guide-flag">{g.flag}</span>
+                          <div className="ai-kb-guide-text">
+                            <strong>{g.city}</strong>
+                            <span>{g.topic}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
               {session?.messages.map((m) => (
@@ -1382,56 +1452,85 @@ export default function AIPage() {
               <div ref={end} />
             </div>
             <div className="ai-chat-composer-area">
-              {error && (
-                <div className="ai-error-banner" role="alert">
-                  <div className="ai-error-content">
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ color: "#ef4444", fontSize: "18px" }}
-                    >
-                      error
-                    </span>
-                    <span className="ai-error-text">{error}</span>
-                  </div>
-                  <div className="ai-error-actions">
-                    {(error.includes("giriş") || error.includes("Oturum")) && (
+              {error && (() => {
+                const isAuth = errorCode === "UNAUTHORIZED" || errorCode === "" && (error.includes("giriş") || error.includes("Oturum"));
+                const isCreditLow = errorCode === "INSUFFICIENT_CREDITS";
+                const isWalletFrozen = errorCode === "WALLET_FROZEN";
+                const isEmailVerify = errorCode === "EMAIL_NOT_VERIFIED";
+                const isDailyLimit = errorCode === "USER_DAILY_LIMIT";
+                const isServiceLimit = errorCode === "SERVICE_DAILY_LIMIT";
+                const isMaintenance = errorCode === "AI_DISABLED";
+                const iconName =
+                  isCreditLow || isWalletFrozen ? "account_balance_wallet"
+                  : isEmailVerify ? "mark_email_unread"
+                  : isDailyLimit || isServiceLimit ? "timer"
+                  : isMaintenance ? "build_circle"
+                  : isAuth ? "lock"
+                  : "error";
+                const iconColor =
+                  isCreditLow ? "#f59e0b"
+                  : isWalletFrozen ? "#ef4444"
+                  : isEmailVerify || isDailyLimit || isServiceLimit || isMaintenance ? "#6366f1"
+                  : "#ef4444";
+                return (
+                  <div className="ai-error-banner" role="alert" data-code={errorCode || undefined}>
+                    <div className="ai-error-content">
+                      <span className="material-symbols-outlined" style={{ color: iconColor, fontSize: "18px" }}>
+                        {iconName}
+                      </span>
+                      <span className="ai-error-text">{error}</span>
+                    </div>
+                    <div className="ai-error-actions">
+                      {isAuth && (
+                        <button type="button" className="ai-error-cta-btn" onClick={() => setAuthModal(true)}>
+                          Giriş Yap
+                        </button>
+                      )}
+                      {isEmailVerify && (
+                        <button type="button" className="ai-error-cta-btn" onClick={() => setAuthModal(true)}>
+                          Hesabıma Git
+                        </button>
+                      )}
+                      {isCreditLow && (
+                        <button
+                          type="button"
+                          className="ai-error-cta-btn"
+                          onClick={() => typeof window !== "undefined" && window.dispatchEvent(
+                            new CustomEvent("mapsbridge:open_upgrade_modal", { detail: { reason: error } })
+                          )}
+                        >
+                          Kredi Satın Al
+                        </button>
+                      )}
+                      {(retryAvailable || (!isAuth && !isEmailVerify && !isCreditLow && !isWalletFrozen && !isDailyLimit && pending.current)) && (
+                        <button
+                          disabled={busy}
+                          className="ai-error-cta-btn ai-retry-btn"
+                          onClick={() => {
+                            setRetryAvailable(false);
+                            setError("");
+                            setErrorCode("");
+                            const p = lastPromptRef.current || pending.current?.prompt;
+                            if (p) void send(false, p);
+                            else void send(true);
+                          }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: "14px", verticalAlign: "middle" }}>refresh</span>
+                          {" "}Tekrar Dene
+                        </button>
+                      )}
                       <button
                         type="button"
-                        className="ai-error-cta-btn"
-                        onClick={() => setAuthModal(true)}
+                        className="ai-error-dismiss"
+                        onClick={() => { setError(""); setErrorCode(""); setRetryAvailable(false); }}
+                        aria-label="Kapat"
                       >
-                        🔑 Giriş Yap
+                        ✕
                       </button>
-                    )}
-                    {(retryAvailable || pending.current) && (
-                      <button
-                        disabled={busy}
-                        className="ai-error-cta-btn ai-retry-btn"
-                        onClick={() => {
-                          setRetryAvailable(false);
-                          setError("");
-                          const p = lastPromptRef.current || (pending.current?.prompt);
-                          if (p) void send(false, p);
-                          else void send(true);
-                        }}
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px", verticalAlign: "middle" }}>
-                          refresh
-                        </span>
-                        {" "}Tekrar Dene
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className="ai-error-dismiss"
-                      onClick={() => { setError(""); setRetryAvailable(false); }}
-                      aria-label="Kapat"
-                    >
-                      ✕
-                    </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
               {notice && (
                 <p className="ai-muted" role="status">
                   {notice}

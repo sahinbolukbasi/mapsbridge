@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { userStorage } from "../lib/user-storage";
 import { getStoredSession } from "../lib/cognito";
 import { useAuth } from "../lib/auth-context";
 import { useWS } from "../lib/ws-context";
@@ -21,7 +20,7 @@ import { DEFAULT_TRAVELER_CONTACTS, PRESET_GROUP_ROUTES } from "../features/mess
 export default function MessagesPage() {
   const { user, isAuthenticated: authOk, isLoading: authLoading } = useAuth();
   const { on: wsOn, send: wsSend } = useWS();
-  const [mounted, setMounted] = useState(false);
+  const [_mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [activeUserName, setActiveUserName] = useState("Gezgin");
   const [activeUserHandle, setActiveUserHandle] = useState("gezgin");

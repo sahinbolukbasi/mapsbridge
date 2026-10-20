@@ -25,7 +25,6 @@ import {
   parseBody,
 } from "../shared/http";
 import { Router } from "../shared/router";
-import { read } from "../shared/data";
 
 const router = new Router();
 
@@ -77,10 +76,12 @@ async function handleDiscover(event: ApiGatewayEvent) {
   if (!body?.city) return badRequest("Şehir adı zorunludur.");
   if (body.city.length > 100) return badRequest("Şehir adı çok uzun.");
   // Reject URL schemes and injection chars before city reaches external collector URLs
+  // eslint-disable-next-line no-control-regex
   if (/[<>"{}|\\^`\x00-\x1f]|https?:\/\//i.test(body.city))
     return badRequest("Şehir adı geçersiz karakter içeriyor.");
   if (
     body.country &&
+    // eslint-disable-next-line no-control-regex
     (body.country.length > 60 || /[<>"{}|\\^`\x00-\x1f]|https?:\/\//i.test(body.country))
   )
     return badRequest("Ülke adı geçersiz.");
@@ -239,6 +240,7 @@ async function handleBatchDiscover(event: ApiGatewayEvent) {
 
   if (!body?.cities?.length) return badRequest("En az bir şehir gerekli.");
   if (body.cities.length > 10) return badRequest("Tek seferde en fazla 10 şehir.");
+  // eslint-disable-next-line no-control-regex
   const CITY_INVALID = /[<>"{}|\\^`\x00-\x1f]|https?:\/\//i;
   for (const entry of body.cities) {
     if (!entry.city || entry.city.length > 100 || CITY_INVALID.test(entry.city))

@@ -49,7 +49,7 @@ export async function aiOverview() {
     ),
   ]);
   const events = (result.Items || []).map((item) => {
-    const { PK, SK, expiresAt, ...event } = unmarshall(item);
+    const { PK: _PK, SK, expiresAt: _expiresAt, ...event } = unmarshall(item);
     return { id: SK, ...event };
   });
   const base = defaultControl();
@@ -114,7 +114,7 @@ export async function updateAIControl(event: ApiGatewayEvent) {
 }
 
 function safeTrainingRecord(item: Record<string, any>) {
-  const { PK, SK, record, ...meta } = item;
+  const { PK: _PK, SK, record, ...meta } = item;
   return {
     id: String(meta.id || ""),
     key: String(SK || ""),

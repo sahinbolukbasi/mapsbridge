@@ -21,7 +21,8 @@ export default function MobileAppsComingSoonPage() {
         prev.push(email.trim());
         localStorage.setItem(key, JSON.stringify(prev));
       }
-    } catch {}
+    } catch { // ignore
+    }
     setSubmitted(true);
   }
 

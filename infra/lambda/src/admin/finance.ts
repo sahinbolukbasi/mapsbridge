@@ -65,7 +65,6 @@ export async function handleGetCreditStats() {
   });
   const usageRows = usageResult.Items.map((item: any) => unmarshall(item));
 
-  let totalGranted = 0;
   let totalConsumed = 0;
   let totalRemaining = 0;
   const activeWallets = wallets.filter((w) => (w.credits || 0) > 0).length;
@@ -84,7 +83,7 @@ export async function handleGetCreditStats() {
     else if (kind.includes("route") || kind.includes("optim")) byModule.route_optimize += cost;
     else byModule.ai_chat += cost;
   }
-  totalGranted = totalRemaining + totalConsumed;
+  const totalGranted = totalRemaining + totalConsumed;
 
   const tierCounts: Record<string, { count: number; totalCredits: number }> = {};
   for (const w of wallets) {

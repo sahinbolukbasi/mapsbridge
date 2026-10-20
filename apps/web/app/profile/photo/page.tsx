@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HeaderNav } from "../../components/header-nav";
 import { FullPagePromotion } from "../../components/auth-gate";
-import { getStoredSession, getUserProfile } from "../../lib/cognito";
+import { getStoredSession } from "../../lib/cognito";
 import "./photo.css";
 
 const PRESET_AVATARS = [

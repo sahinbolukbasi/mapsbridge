@@ -27,7 +27,7 @@ export interface PlanQualityScore {
  * `name`. We fall back to 0 and let geo scoring be neutral when coords are
  * absent.  (Real implementation would join with a PlaceRef lookup.)
  */
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+function _haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
@@ -99,7 +99,7 @@ function scoreDensityBalance(plan: StructuredTripPlan): { score: number; detail:
 
   const avgStops = stopsPerDay.reduce((a, b) => a + b, 0) / stopsPerDay.length;
 
-  let score = 100;
+  let score: number;
   let detail: string;
 
   if (avgStops > 7) {

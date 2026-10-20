@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   signIn,
   handleGoogleCredentialResponse,
-  handleAppleCredentialResponse,
   getStoredSession,
 } from "../lib/cognito";
 import { HeaderNav } from "../components/header-nav";
@@ -23,10 +22,6 @@ export default function LoginPage() {
   const [isAppleLoading, setIsAppleLoading] = useState(false);
 
   const [showGoogleFallbackModal, setShowGoogleFallbackModal] = useState(false);
-  const [fallbackGmail, setFallbackGmail] = useState("");
-
-  const [showAppleFallbackModal, setShowAppleFallbackModal] = useState(false);
-  const [fallbackAppleEmail, setFallbackAppleEmail] = useState("");
 
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
@@ -207,7 +202,7 @@ export default function LoginPage() {
     setShowGoogleFallbackModal(true);
   };
 
-  const handleFallbackGmailSubmit = (e: FormEvent) => {
+  const _handleFallbackGmailSubmit = (e: FormEvent) => {
     e.preventDefault();
     // Google OAuth popup başarısız oldu — kullanıcıyı e-posta/şifre ile giriş yapmaya yönlendir
     setShowGoogleFallbackModal(false);

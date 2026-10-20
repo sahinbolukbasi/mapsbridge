@@ -15,7 +15,7 @@ export default function AuthCallbackPage() {
       const params = new URLSearchParams(hash || window.location.search);
 
       const idToken = params.get("id_token") || params.get("credential");
-      const accessToken = params.get("access_token");
+      const _accessToken = params.get("access_token");
       const error = params.get("error_description") || params.get("error");
 
       if (error) {

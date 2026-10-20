@@ -3,11 +3,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { userStorage } from "../lib/user-storage";
-import { API_ENDPOINT } from "../lib/api";
 import { AuthActionModal } from "../components/auth-gate";
 import { HeaderNav } from "../components/header-nav";
 import { getStoredSession } from "../lib/cognito";
-import { isFollowingUser, toggleFollowUser, getFollowedUsers } from "../lib/follow-system";
+import { isFollowingUser, toggleFollowUser } from "../lib/follow-system";
 import "./public-profile.css";
 
 export interface SavedAddressItem {
@@ -53,7 +52,6 @@ export interface RouteCardItem {
 
 export default function PublicProfileClient({ initialUsername }: { initialUsername: string }) {
   const [username] = useState(initialUsername.toLowerCase());
-  const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // Profile data with Stitch defaults
@@ -62,7 +60,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
   );
   const [userHandle, setUserHandle] = useState(`@${username}`);
   const [locationText, setLocationText] = useState("İstanbul, Türkiye");
-  const [joinDate, setJoinDate] = useState("Üyelik: Mayıs 2022");
+  const [joinDate, _setJoinDate] = useState("Üyelik: Mayıs 2022");
   const [bioText, setBioText] = useState(
     "Akdeniz ve Uzak Doğu yollarında yürüyen, gastronomi ve antik kent tutkunu. Rotalarımı yerel halkın keşfedilmemiş ipuçları, optimize edilmiş toplu taşıma bağlantıları ve bizzat test edilmiş yürüyüş süreleriyle titizlikle hazırlıyorum.",
   );
@@ -109,7 +107,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
     featureName: "Gezgin Özelliği",
   });
 
-  const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [_isOwnProfile, setIsOwnProfile] = useState(false);
 
   function showToastMessage(msg: string) {
     setToast(msg);
@@ -157,7 +155,9 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
       }
 
       setIsOwnProfile(Boolean(ownUser && ownUser.toLowerCase() === username.toLowerCase()));
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     setIsFollowing(isFollowingUser(username));
   }, [username]);

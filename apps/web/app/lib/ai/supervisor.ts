@@ -27,16 +27,11 @@ import {
 } from "./planning";
 import {
   tripProfileToState,
-  tripStateToProfile,
-  mergeTripState,
-  getNextQuestion,
   stateToContextPrompt,
   computeStateDiff,
-  type TripState,
   type AnsweredSlot,
-  type TripStateEvent,
 } from "./trip-state";
-import { classifyIntent, type ClassifiedIntent } from "./intent-classifier";
+import { classifyIntent } from "./intent-classifier";
 import { researchPlaces, type PlaceResearch, type ResearchedPlace } from "./place-research";
 import { callFlightSearchTool, callAdvisoryTool } from "./agentcore-gateway";
 import type { FlightPriceInfo, TravelAdvisoryInfo } from "./types";
@@ -51,7 +46,6 @@ import { generateContextChips } from "./context-chips";
 import {
   parseItineraryToolCalls,
   assertMutationConsistency,
-  buildConfirmationMessage,
   type ItineraryActionPayload,
 } from "./itinerary-actions";
 
@@ -566,15 +560,28 @@ export async function runMultiAgentSupervisor(
   //        flight cards when flights mentioned or needs.flights,
   //        car cards when car_rental mentioned,
   //        full bundle only for route mode (trip plan).
+  // In chat mode, conversationFlow stage "pricing" signals the user is ready for affiliate cards.
   let affiliateCards: AffiliateCard[] | undefined;
   if (destId) {
     try {
       const checkIn = tripProfile.dates?.start ? new Date(tripProfile.dates.start) : undefined;
       const checkOut = tripProfile.dates?.end ? new Date(tripProfile.dates.end) : undefined;
       const reqText = request.toLowerCase();
-      const wantsHotel = /otel|konaklama|kal(?:acağım|mak|acak)|hotel|hostel|apart|butik|resort/u.test(reqText);
-      const wantsFlight = /uçuş|uçak|bilet|flight|nasıl\s*gid/u.test(reqText) || !!tripProfile.needs?.flights;
-      const wantsCar = /araba\s*kiral|araç\s*kiral|kiralık\s*araç|rent.*car/u.test(reqText) || !!tripProfile.needs?.car_rental;
+      const flow = payload.conversationFlow;
+      const flowTopic = flow?.activeTopic ?? "none";
+      const flowStage = flow?.stage ?? "none";
+      const flowIsPricing = flowStage === "pricing";
+      const wantsHotel =
+        /otel|konaklama|kal(?:acağım|mak|acak)|hotel|hostel|apart|butik|resort/u.test(reqText) ||
+        (flowIsPricing && flowTopic === "hotel");
+      const wantsFlight =
+        /uçuş|uçak|bilet|flight|nasıl\s*gid/u.test(reqText) ||
+        !!tripProfile.needs?.flights ||
+        (flowIsPricing && flowTopic === "flight");
+      const wantsCar =
+        /araba\s*kiral|araç\s*kiral|kiralık\s*araç|rent.*car/u.test(reqText) ||
+        !!tripProfile.needs?.car_rental ||
+        (flowIsPricing && flowTopic === "car_rental");
       const isFullPlan = mode === "route";
 
       const bundle = isFullPlan
@@ -734,7 +741,7 @@ export async function runMultiAgentSupervisor(
   const cited = Array.isArray(output.data.citedSourceIds) ? output.data.citedSourceIds : [];
   const sources = evidence.passages
     .filter((p) => cited.includes(p.id))
-    .map(({ text, ...source }) => source);
+    .map(({ text: _text, ...source }) => source);
   const requestedSourceIds = cited.filter((id: unknown): id is string => typeof id === "string");
   const sourceCoverage = {
     requested: requestedSourceIds.length,
@@ -748,7 +755,7 @@ export async function runMultiAgentSupervisor(
   const sourceNote = sources.length
     ? "\n\nKaynaklar:\n" +
       sources
-        .map((s) => `[${s.title.replace(/[\[\]\r\n]/g, "")}](${s.url.replace(/\)/g, "%29")})`)
+        .map((s) => `[${s.title.replace(/[[\]\r\n]/g, "")}](${s.url.replace(/\)/g, "%29")})`)
         .join("\n")
     : "";
 
@@ -978,7 +985,7 @@ export function findNearbyPlaces(
     .filter((p) => p.distanceKm <= maxDistanceKm)
     .sort((a, b) => a.distanceKm - b.distanceKm)
     .slice(0, 6)
-    .map(({ distanceKm, ...pin }) => pin);
+    .map(({ distanceKm: _distanceKm, ...pin }) => pin);
 }
 
 export function parseDurationMinutes(durationStr: string): number {

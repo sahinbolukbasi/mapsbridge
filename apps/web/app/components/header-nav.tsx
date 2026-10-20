@@ -4,9 +4,8 @@ import { userStorage } from "../lib/user-storage";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getStoredSession, getUserProfile, signOut } from "../lib/cognito";
+import { getStoredSession, signOut } from "../lib/cognito";
 import { billingService } from "../lib/billing/billing-service";
-import { useMobilePlatform } from "./mobile-platform-provider";
 import { useLocale, getAlternatePath } from "../lib/locale-context";
 
 interface HeaderNavProps {
@@ -24,13 +23,10 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
   const [userName, setUserName] = useState<string>("Traveler");
   const [userHandle, setUserHandle] = useState<string>("traveler");
   const [userAvatar, setUserAvatar] = useState<string>("");
-  const [copiedTravelerCode, setCopiedTravelerCode] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [localSavedCount, setLocalSavedCount] = useState(savedCount ?? 0);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [wallet, setWallet] = useState(() => billingService.getWallet());
-  const [codeQuery, setCodeQuery] = useState("");
-  const { platform, setPlatform } = useMobilePlatform();
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -118,23 +114,6 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
     signOut();
     setUserEmail(null);
     window.location.assign("/login/");
-  }
-
-  function handleCopyTravelerCode() {
-    try {
-      const code = userHandle ? `#MB-${userHandle.slice(0, 4).toUpperCase()}` : "#MB-GEZGIN";
-      navigator.clipboard.writeText(code);
-      setCopiedTravelerCode(true);
-      setTimeout(() => setCopiedTravelerCode(false), 2000);
-    } catch {}
-  }
-
-  function handleCodeSearch(e: React.FormEvent) {
-    e.preventDefault();
-    const clean = codeQuery.trim().toUpperCase().replace(/\s+/g, "");
-    if (clean) {
-      window.location.assign(`/k/?kod=${encodeURIComponent(clean)}`);
-    }
   }
 
   return (

@@ -39,6 +39,7 @@ import {
   read,
   forgetAIPreferences,
   aiUsage,
+  recordInteraction,
 } from "../billing/store";
 import { sanitizePreferences } from "../../../../apps/web/app/lib/ai/preferences";
 import type { ConversationState } from "../../../../apps/web/app/lib/ai/planning";
@@ -46,6 +47,7 @@ import {
   buildPersonalContext,
   normalizeRequest,
 } from "../../../../apps/web/server/ai/context-builder";
+import { createInteractionEvent, ANALYTICS_PARTITION as _ANALYTICS_PARTITION } from "../../../../apps/web/server/ai/recommendation-tracker";
 import {
   memoryTable,
   changeMemory,
@@ -223,6 +225,7 @@ async function handleRequest(event: Event) {
         conversationState: (storedConversation as ConversationState | null) || undefined,
         tripManifestoMarkdown: normalized.tripManifestoMarkdown || undefined,
         userLocation: normalized.userLocation || undefined,
+        conversationFlow: normalized.conversationFlow,
       },
       settings,
     );
@@ -332,6 +335,15 @@ async function handleRequest(event: Event) {
         : {}),
     });
     completed = true;
+    const interactionEvent = createInteractionEvent({
+      userId: user.sub,
+      requestId: body.requestId,
+      conversationId: body.conversationId,
+      destination: result.tripContext?.destination || result.route?.destination,
+      result,
+      conversationFlow: normalized.conversationFlow,
+    });
+    if (interactionEvent) void recordInteraction(interactionEvent);
     await recordAIOperation(
       {
         kind: "request",
@@ -530,6 +542,7 @@ async function handleStreamRequest(
           conversationState: (storedConversation as ConversationState | null) || undefined,
           tripManifestoMarkdown: normalized.tripManifestoMarkdown || undefined,
           userLocation: normalized.userLocation || undefined,
+          conversationFlow: normalized.conversationFlow,
         },
         settings,
       );

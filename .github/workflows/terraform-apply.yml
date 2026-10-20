@@ -259,7 +259,7 @@ jobs:
       - name: Create Lambda zip placeholders
         run: |
           mkdir -p infra/admin-runtime/.build
-          for name in admin routes operations ai stripe ai-stream background-monitor; do
+          for name in admin routes operations ai stripe ai-stream background-monitor rag-fill; do
             echo "placeholder" | zip -q infra/admin-runtime/.build/${name}.zip -
           done
 
@@ -309,7 +309,7 @@ jobs:
       - name: Create Lambda zip placeholders
         run: |
           mkdir -p infra/admin-runtime/.build
-          for name in admin routes operations ai stripe ai-stream background-monitor; do
+          for name in admin routes operations ai stripe ai-stream background-monitor rag-fill; do
             echo "placeholder" | zip -q infra/admin-runtime/.build/${name}.zip -
           done
 

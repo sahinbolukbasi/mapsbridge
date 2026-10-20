@@ -85,7 +85,7 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
   }, [isRoute]);
 
   const phases = isRoute ? THINKING_PHASES : THINKING_PHASES.slice(0, 3);
-  const activeLabel = livePhase?.label || phases[visiblePhases - 1]?.label || "";
+  const _activeLabel = livePhase?.label || phases[visiblePhases - 1]?.label || "";
 
   return (
     <div className="ai-thinking-steps">

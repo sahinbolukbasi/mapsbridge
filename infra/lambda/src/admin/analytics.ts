@@ -4,7 +4,7 @@ import { getTableName, scanAllRaw } from "./management";
 import { paymentRecords } from "./users";
 
 export async function handleMetrics() {
-  const { DynamoDBClient, ScanCommand } = await import("@aws-sdk/client-dynamodb");
+  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
   const now = new Date();
 
@@ -263,7 +263,7 @@ export async function handleAITopicAnalytics() {
 
   const topicCounts: Record<string, number> = {};
   const destCounts: Record<string, number> = {};
-  let totalRequests = rows.length;
+  const totalRequests = rows.length;
   let totalCost = 0;
   const dailyMap: Record<string, number> = {};
 
@@ -388,7 +388,7 @@ export async function handleCommunityAnalytics() {
 }
 
 export async function handleSubscriptionAnalytics() {
-  const { DynamoDBClient, ScanCommand } = await import("@aws-sdk/client-dynamodb");
+  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 

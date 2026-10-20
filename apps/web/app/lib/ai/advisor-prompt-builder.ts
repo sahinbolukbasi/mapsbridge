@@ -4,7 +4,7 @@
  * Called by the chat handler before invoking Bedrock.
  */
 
-import type { TripPhase, TempoPreference } from "../trip/domain";
+import type { TripPhase } from "../trip/domain";
 import { buildDestinationContext } from "./destination-context";
 import { formatAlertsForPrompt, type ProactiveAlert } from "./proactive-rules";
 import { CHAT_STREAM_PROMPT, ANSWER_PROMPT } from "./prompts";

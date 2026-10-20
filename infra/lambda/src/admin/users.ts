@@ -247,7 +247,7 @@ export async function handleRefund(event: ApiGatewayEvent) {
       amount: refund.amount,
       reason,
     });
-  } catch (err: any) {
+  } catch (_err: any) {
     return serverError("İade durumu doğrulanamadı. İşlem kimliğiyle tekrar kontrol edin.");
   }
 }

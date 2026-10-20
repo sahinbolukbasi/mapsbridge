@@ -2000,6 +2000,56 @@
   color: var(--mb-text-muted);
 }
 
+.ai-kb-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+.ai-kb-guide-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  background-color: var(--mb-canvas-subtle);
+  border: 1px solid var(--mb-border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+}
+.ai-kb-guide-chip:hover {
+  background-color: var(--mb-card);
+  border-color: var(--mb-emerald);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+.ai-kb-guide-flag {
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.ai-kb-guide-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+.ai-kb-guide-text strong {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--mb-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ai-kb-guide-text span {
+  font-size: 0.65rem;
+  color: var(--mb-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ─── Desktop: cleaner, more spacious layout ────────────────────────── */
 @media (min-width: 1025px) {
   .ai-welcome-hub {
@@ -2049,6 +2099,10 @@
   }
   .ai-activity-icon {
     font-size: 1.3rem;
+  }
+  .ai-kb-guide-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
   }
   .ai-chat-feed {
     padding: 1.5rem 2rem;

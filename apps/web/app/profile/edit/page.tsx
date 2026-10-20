@@ -20,14 +20,12 @@ import {
 } from "../../features/profile/constants";
 
 export default function EditProfilePage() {
-  const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState<ProfileSidebarTab>("genel");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSavedAnimation, setIsSavedAnimation] = useState(false);
 
   // User session
-  const [userEmail, setUserEmail] = useState<string>("");
 
   // Media
   const [coverPhoto, setCoverPhoto] = useState<string>(DEFAULT_COVER_IMAGE);
@@ -113,14 +111,10 @@ export default function EditProfilePage() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("demo") !== "1" && urlParams.get("auth") !== "1") {
         setIsAuthenticated(false);
-        setMounted(true);
         return;
       }
     }
     setIsAuthenticated(true);
-    if (session?.email) {
-      setUserEmail(session.email);
-    }
 
     // Load stored media
     const storedCover = userStorage.getItem("mapsbridge.userCoverPhoto");
@@ -148,7 +142,9 @@ export default function EditProfilePage() {
         if (d.youtubeOrBlog) setYoutubeOrBlog(d.youtubeOrBlog);
         if (d.emailPrivacy) setEmailPrivacy(d.emailPrivacy);
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     // Load preferences
     try {
@@ -161,7 +157,9 @@ export default function EditProfilePage() {
           setNotifEmailSummaries(p.notifEmailSummaries);
         if (typeof p.notifCommunityTips === "boolean") setNotifCommunityTips(p.notifCommunityTips);
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     // URL tab check
     const urlParams = new URLSearchParams(window.location.search);
@@ -173,7 +171,6 @@ export default function EditProfilePage() {
       setActiveTab(tabParam);
     }
 
-    setMounted(true);
   }, []);
 
   function showToast(msg: string) {

@@ -6,7 +6,7 @@
  * - Offline-first fallback resiliency
  */
 
-import { getStoredSession, refreshSession, isTokenExpired, signOut } from "./cognito";
+import { getStoredSession, refreshSession, isTokenExpired } from "./cognito";
 
 export const API_ENDPOINT = (
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com"
@@ -101,7 +101,7 @@ export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {
   }
 
   if (!response.ok) {
-    let errorData: any = {};
+    let errorData: any;
     try {
       errorData = await response.json();
     } catch {

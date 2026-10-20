@@ -21,7 +21,7 @@ export function GroupTripModal({
   onClose,
   activeUsername,
   groupMessages,
-  marketRoutes,
+  marketRoutes: _marketRoutes,
   userSavedRoutes,
   initialTab = "overview",
   onAddToMyTrip,

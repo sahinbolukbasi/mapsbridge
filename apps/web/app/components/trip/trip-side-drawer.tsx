@@ -43,7 +43,7 @@ export default function TripSideDrawer(props: TripSideDrawerProps) {
     pinsForActiveDay,
     allDaysExceptAll,
     title,
-    onClose,
+    onClose: _onClose,
     onToggle,
     onSetActiveDay,
     onOpenDrawer,
@@ -52,7 +52,7 @@ export default function TripSideDrawer(props: TripSideDrawerProps) {
     onDeletePin,
     onMovePin,
     onAddDay,
-    onRenameDay,
+    onRenameDay: _onRenameDay,
     onUpdateTrip,
     onAddGroup,
   } = props;

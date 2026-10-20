@@ -7,7 +7,6 @@ import { getStoredSession } from "../lib/cognito";
 import { getFollowedUsers } from "../lib/follow-system";
 import { trackEvent } from "../lib/analytics";
 import { webSocialSync } from "../lib/social-sync";
-import { SoftIcon } from "../components/soft-icon";
 import "./community.css";
 
 import type { CommunityPost } from "../features/community/types";
@@ -85,7 +84,9 @@ export default function CommunityPage() {
           setUserSavedRoutes(trips.map((t: any) => t.title).filter(Boolean));
         }
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     setFollowedTravelerUsernames(getFollowedUsers());
     const followHandler = () => setFollowedTravelerUsernames(getFollowedUsers());

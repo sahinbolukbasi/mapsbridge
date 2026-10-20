@@ -54,12 +54,12 @@ export async function searchDealsForJob(job: {
 
   // 2. Synthesize / scrape deal candidates based on route distance and market baseline
   const now = new Date().toISOString().slice(0, 10);
-  let generatedDeals: DealItem[] = [];
+  let generatedDeals: DealItem[];
 
   if (job.type === "flight") {
     const isInternational = !/ankara|izmir|antalya|trabzon|adana|bodrum/i.test(job.destination);
     const basePrice = isInternational ? 2850 : 850;
-    const target = job.targetPrice || basePrice * 1.2;
+    const _target = job.targetPrice || basePrice * 1.2;
 
     const discount1 = Math.round(basePrice * 0.85);
     const discount2 = Math.round(basePrice * 0.95);

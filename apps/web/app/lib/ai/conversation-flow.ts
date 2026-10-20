@@ -202,8 +202,8 @@ function initialStage(topic: FlowTopic): TopicStage {
 
 function advanceStage(
   current: ConversationFlow,
-  userMessage: string,
-  aiResponseText?: string,
+  _userMessage: string,
+  _aiResponseText?: string,
 ): TopicStage {
   // Stage advancement rules per topic
   switch (current.activeTopic) {

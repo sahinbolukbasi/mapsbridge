@@ -20,9 +20,15 @@ export function NotFoundView({
   onRetry,
 }: NotFoundViewProps) {
   const [currentCoords, setCurrentCoords] = useState("LAT: 41.0082° N • LON: 28.9784° E");
+  const [attemptedPath, setAttemptedPath] = useState<string | null>(null);
 
   useEffect(() => {
-    // Optionally update coordinates slightly or read from browser geolocation if available
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname;
+      if (path && path !== "/" && path !== "/404") {
+        setAttemptedPath(path);
+      }
+    }
     if (typeof navigator !== "undefined" && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -34,9 +40,7 @@ export function NotFoundView({
             `LAT: ${Math.abs(Number(lat))}° ${latDir} • LON: ${Math.abs(Number(lon))}° ${lonDir}`,
           );
         },
-        () => {
-          // Fallback coordinate remains Istanbul / default
-        },
+        () => {},
         { timeout: 4000 },
       );
     }
@@ -57,6 +61,15 @@ export function NotFoundView({
               {isError ? "SİSTEM UYARISI • BAĞLANTI KESİNTİSİ" : "404 • ROTA DIŞINA ÇIKILDI"}
             </span>
           </div>
+
+          {/* Attempted path pill */}
+          {attemptedPath && (
+            <div className="not-found-path-pill">
+              <span className="material-symbols-outlined">link_off</span>
+              <code>{attemptedPath}</code>
+              <span className="not-found-path-status">bulunamadı</span>
+            </div>
+          )}
 
           {/* Centerpiece Map/Coordinates Graphic & Giant Typography */}
           <div className="not-found-graphic-container">

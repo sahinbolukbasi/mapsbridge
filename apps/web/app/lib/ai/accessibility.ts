@@ -71,7 +71,7 @@ function needsStrollerAccess(profile: AccessibilityProfile): boolean {
   return profile.needs.includes("stroller") || profile.needs.includes("children_under_5");
 }
 
-function isHighMobilityDemand(profile: AccessibilityProfile): boolean {
+function _isHighMobilityDemand(profile: AccessibilityProfile): boolean {
   return needsWheelchairAccess(profile) || needsStrollerAccess(profile);
 }
 

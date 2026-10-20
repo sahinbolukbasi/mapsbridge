@@ -19,7 +19,7 @@ import {
   AdminUserGlobalSignOutCommand,
   AdminDeleteUserAttributesCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
-import { ok, created, jsonResponse, parseBody, type ApiGatewayEvent } from "../shared/http";
+import { ok, created, jsonResponse as _jsonResponse, parseBody, type ApiGatewayEvent } from "../shared/http";
 import type { AuthorizedEvent } from "../shared/types";
 import { permissions, type StaffRole } from "./permissions";
 
@@ -553,7 +553,7 @@ export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<an
     const reason = text(b.reason, "Gerekçe");
     if (typeof b.frozen !== "boolean") throw new AdminError(400, "Cüzdan durumu gerekli.");
     await account(id);
-    const previous = await get(`USER#${id}`, "CREDITS");
+    const _previous = await get(`USER#${id}`, "CREDITS");
     await getDynamoClient().send(
       new TransactWriteItemsCommand({
         TransactItems: [

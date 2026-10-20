@@ -13,7 +13,7 @@ import { EditPostModalWeb } from "../features/community";
 import type { CommunityPost } from "../features/community/types";
 import "./profile.css";
 
-const DEFAULT_PANORAMIC_COVER =
+const _DEFAULT_PANORAMIC_COVER =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDTc8C7y216cNhYVun67c1dQAQCYruzM64RWHw44AeECZKUlMYFy2BsIHfwU6-V0zxgT44lEfPZa3GmGYDUIDxkOrtonBJGDHzrNLvyOpToIF8xPDu9WmExhjeSOTQXnUS2s0eIzJXHqjHQwXt5EsZ97-rmxCzi_0dMOHHTaYcTkchmwC2yDxBpc6AOHWJdhD1P4BgTX8eY62qvHLJGGBC724h5yeydozucbvhXuB51u_TDFd-tC-Lr7g";
 
 const DEFAULT_AVATAR_IMAGE =
@@ -55,15 +55,12 @@ interface NotificationItem {
 }
 
 export default function ProfilePage() {
-  const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userEmail, setUserEmail] = useState<string>("");
 
   // Profile Information
   const [fullName, setFullName] = useState<string>("Gezgin");
   const [username, setUsername] = useState<string>("gezgin");
   const [userAvatar, setUserAvatar] = useState<string>(DEFAULT_AVATAR_IMAGE);
-  const [coverPhoto, setCoverPhoto] = useState<string>(DEFAULT_PANORAMIC_COVER);
   const [travelBio, setTravelBio] = useState<string>("");
 
   // Tabs & Filters
@@ -94,14 +91,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const session = getStoredSession();
     if (!session?.email || !session?.token) {
-      const urlParams = new URLSearchParams(window.location.search);
+      const _urlParams = new URLSearchParams(window.location.search);
       setIsAuthenticated(false);
-      setMounted(true);
       return;
     }
     setIsAuthenticated(true);
     if (session?.email) {
-      setUserEmail(session.email);
       const emailPrefix = session.email.split("@")[0] || "";
       const derivedName = emailPrefix
         ? emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1)
@@ -114,9 +109,6 @@ export default function ProfilePage() {
     const savedAvatar = userStorage.getItem("mapsbridge.userAvatar");
     if (savedAvatar) setUserAvatar(savedAvatar);
 
-    const savedCover = userStorage.getItem("mapsbridge.userCoverPhoto");
-    if (savedCover) setCoverPhoto(savedCover);
-
     // Load details
     try {
       const stored = userStorage.getItem("mapsbridge.userProfileDetails");
@@ -127,7 +119,9 @@ export default function ProfilePage() {
         if (d.username) setUsername(d.username);
         if (d.bio) setTravelBio(d.bio);
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     // Load user trips
     try {
@@ -139,7 +133,9 @@ export default function ProfilePage() {
           setSavedTrips(validTrips);
         }
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     // Load user pins/points from mapsbridge.savedAddresses or mapsbridge.generalPins
     try {
@@ -157,7 +153,9 @@ export default function ProfilePage() {
         }
       }
       setSavedPins(loadedPins);
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     // Load collections
     try {
@@ -192,7 +190,9 @@ export default function ProfilePage() {
         setCollections(defaultCollections);
         userStorage.setItem("mapsbridge.collections", JSON.stringify(defaultCollections));
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     // Load notifications
     try {
@@ -233,7 +233,9 @@ export default function ProfilePage() {
         setNotifications(initialNotifs);
         userStorage.setItem("mapsbridge.notifications", JSON.stringify(initialNotifs));
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     if (session?.token) {
       void billingService
@@ -251,7 +253,6 @@ export default function ProfilePage() {
     };
     window.addEventListener("mapsbridge:wallet_updated", handleWallet);
 
-    setMounted(true);
     return () => window.removeEventListener("mapsbridge:wallet_updated", handleWallet);
   }, []);
 
@@ -265,7 +266,6 @@ export default function ProfilePage() {
       if (p.fullName) setFullName(p.fullName);
       if (p.username) setUsername(p.username);
       if (p.avatarUrl) setUserAvatar(p.avatarUrl);
-      if (p.coverPhotoUrl) setCoverPhoto(p.coverPhotoUrl);
       if (p.bio) setTravelBio(p.bio);
     });
     return () => {
@@ -322,7 +322,9 @@ export default function ProfilePage() {
         parsed.trips = updated;
         userStorage.setItem("mapsbridge.travelPlanner", JSON.stringify(parsed));
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
     showToast("Rota başarıyla silindi.");
   }
 
@@ -332,7 +334,9 @@ export default function ProfilePage() {
     setSavedPins(updated);
     try {
       userStorage.setItem("mapsbridge.savedAddresses", JSON.stringify(updated));
-    } catch {}
+    } catch {
+      // ignore
+    }
     showToast("Nokta havuzdan kaldırıldı.");
   }
 
@@ -372,7 +376,7 @@ export default function ProfilePage() {
   const unreadNotifCount = notifications.filter((n) => n.unread).length;
 
   // Filtered trips
-  const filteredTrips = savedTrips.filter((t) => {
+  const filteredTrips = savedTrips.filter((_t) => {
     if (activeFilter === "all") return true;
     if (activeFilter === "drafts") return true; // all local trips are drafts
     if (activeFilter === "published") return false;

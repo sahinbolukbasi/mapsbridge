@@ -8,7 +8,6 @@ import {
   RouteOptimizationPreview,
   TransportMode,
   DayRouteSummary,
-  TripDay,
 } from "./models";
 
 // ── In-Memory & Local Storage Segment Cache ──────────────────

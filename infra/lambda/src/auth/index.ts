@@ -13,7 +13,7 @@ import {
   unauthorized,
   notFound,
   serverError,
-  handlePreflight,
+  handlePreflight as _handlePreflight,
   extractBearerToken,
   parseBody,
 } from "../shared/http";
@@ -68,7 +68,7 @@ async function handleResetPassword(event: ApiGatewayEvent) {
       }),
     );
     return ok({ status: "success" });
-  } catch (err: any) {
+  } catch (_err: any) {
     return badRequest("Kod hatalı veya süresi dolmuş. Yeni kod isteyin.");
   }
 }
@@ -99,7 +99,7 @@ async function handleChangePassword(event: ApiGatewayEvent) {
       }),
     );
     return ok({ status: "success", message: "Şifreniz başarıyla değiştirildi." });
-  } catch (err: any) {
+  } catch (_err: any) {
     return unauthorized("Oturumunuzun süresi dolmuş. Lütfen tekrar giriş yapınız.");
   }
 }

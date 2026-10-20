@@ -8,8 +8,6 @@ import "./how-it-works.css";
 export function HowItWorksClient() {
   const [selectedPrompt, setSelectedPrompt] = useState("3 Günlük Floransa Rönesans & Sanat Gezisi");
   const [copiedCode, setCopiedCode] = useState(false);
-  const [activeStep, setActiveStep] = useState(1);
-
   const samplePrompts = [
     "3 Günlük Floransa Rönesans & Sanat Gezisi",
     "Tokyo 4 Gün Metropol & Otantik Ramen Durakları",
