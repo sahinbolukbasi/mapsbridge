@@ -1,9 +1,8 @@
-# RevenueCat Configuration (from mapsbridge project)
+# RevenueCat Configuration — set as GitHub Secrets (REVENUECAT_SECRET_KEY, REVENUECAT_WEBHOOK_SECRET)
 # Project ID: projb29ddf07
-# Secret API Key: sk_bIaaIXgxVLEUUxawsqLCIdypxQkoB
 
-rc_secret_api_key     = "sk_bIaaIXgxVLEUUxawsqLCIdypxQkoB"
-rc_webhook_auth_secret = "WEBHOOK_SECRET_FROM_REVENUECAT_DASHBOARD"
+rc_secret_api_key     = "YOUR_REVENUECAT_SECRET_KEY_FROM_GITHUB_SECRETS"
+rc_webhook_auth_secret = "YOUR_REVENUECAT_WEBHOOK_SECRET_FROM_GITHUB_SECRETS"
 
 # RevenueCat Product IDs
 rc_explorer_product_id    = "prode1930276ca"   # Monthly
