@@ -145,6 +145,8 @@ resource "aws_iam_role_policy" "github_deploy" {
           "sns:*",
           "apigateway:*",
           "execute-api:*",
+          "scheduler:*",
+          "acm:*",
           "tag:*",
         ]
         Resource = "*"
