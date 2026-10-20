@@ -119,7 +119,7 @@ jobs:
       - name: Bootstrap deploy role permissions
         working-directory: infra/terraform
         continue-on-error: true
-        run: terraform apply -auto-approve -target=aws_iam_role_policy.github_deploy
+        run: terraform apply -auto-approve -replace=aws_iam_role_policy.github_deploy -target=aws_iam_role_policy.github_deploy
 
       - name: Terraform Plan
         working-directory: infra/terraform
@@ -206,8 +206,8 @@ jobs:
 
       - name: Await IAM propagation and refresh credentials
         run: |
-          echo "Waiting 60s for IAM policy propagation from Plan job bootstrap..."
-          sleep 60
+          echo "Waiting 90s for IAM policy propagation from Plan job bootstrap..."
+          sleep 90
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
