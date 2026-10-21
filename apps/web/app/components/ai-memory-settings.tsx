@@ -29,8 +29,8 @@ export function AIMemorySettings() {
     try {
       const value = await apiFetch<MemoryView>("/ai/memory");
       if (epoch.current === id && getStoredSession()?.token === token) setData(value);
-    } catch (e: any) {
-      if (epoch.current === id) setMessage(e.message || "Hafıza bilgisi alınamadı.");
+    } catch (e: unknown) {
+      if (epoch.current === id) setMessage(e instanceof Error ? e.message : "Hafıza bilgisi alınamadı.");
     }
   }
   useEffect(() => {
@@ -46,8 +46,8 @@ export function AIMemorySettings() {
       await apiFetch(path, { method, body: JSON.stringify(body) });
       setMessage("Kaydedildi.");
       await load();
-    } catch (e: any) {
-      setMessage(e.message || "İşlem tamamlanamadı.");
+    } catch (e: unknown) {
+      setMessage(e instanceof Error ? e.message : "İşlem tamamlanamadı.");
     } finally {
       setBusy(false);
       setConfirm(false);

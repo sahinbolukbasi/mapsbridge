@@ -36,8 +36,8 @@ export default function SupportPage() {
     setError("");
     try {
       setTickets((await apiFetch<{ tickets: Ticket[] }>("/support/tickets")).tickets);
-    } catch (error: any) {
-      setError(error.message || "Talepler yüklenemedi.");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "Talepler yüklenemedi.");
     } finally {
       setLoading(false);
     }
@@ -77,8 +77,8 @@ export default function SupportPage() {
       }
       setNotice(isReply ? "Yanıtınız kaydedildi." : "Destek talebiniz oluşturuldu.");
       await load();
-    } catch (err: any) {
-      setError(err.message || "Talep kaydedilemedi.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Talep kaydedilemedi.");
     } finally {
       sending.current = false;
       setBusy(false);

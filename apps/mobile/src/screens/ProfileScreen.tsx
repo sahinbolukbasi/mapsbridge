@@ -15,7 +15,6 @@ import {
 } from "react-native";
 import {
   ExploreIcon,
-  ArrowRightIcon,
   ChatIcon,
   BellIcon,
   SettingsIcon,
@@ -24,12 +23,8 @@ import {
   MountainIcon,
   MonumentIcon,
   BookmarkIcon,
-  SparkIcon,
-  MapIcon,
-  ShieldIcon,
   LogoutIcon,
   TrashIcon,
-  TagIcon,
   MapPinIcon,
   HeartIcon,
 } from "../components/Icons";
@@ -53,7 +48,7 @@ interface ProfileScreenProps {
 export function ProfileScreen({
   onShowWelcome,
   onOpenMap,
-  onOpenMessages,
+  onOpenMessages: _onOpenMessages,
   onOpenPlan,
 }: ProfileScreenProps) {
   const [session, setSession] = useState<UserSession | null>(null);

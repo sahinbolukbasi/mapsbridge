@@ -200,7 +200,7 @@ export const authService = {
 
 // ─── Backend API Client ──────────────────────────────────────────────────────
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  let session = await authService.getSession();
+  const session = await authService.getSession();
   const headers: Record<string, string> = {
     "content-type": "application/json",
     ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
@@ -403,9 +403,9 @@ export interface AIAskResponse {
   estimatedDays?: number;
   totalDistanceKm?: number;
   agentsInvolved?: AISubAgentExecution[];
-  stayAndTransit?: any;
-  discovery?: any;
-  emergency?: any;
+  stayAndTransit?: unknown;
+  discovery?: unknown;
+  emergency?: unknown;
   flightPrices?: {
     destination: string;
     deals: Array<{
@@ -484,101 +484,96 @@ export const aiService = {
       ...(context?.conversationState ? { conversationState: context.conversationState } : {}),
     };
 
-    let session = await authService.getSession();
+    const session = await authService.getSession();
     const headers: Record<string, string> = {
       "content-type": "application/json",
       ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
     };
 
-    try {
-      let res = await fetch(`${API_BASE}/ai/route-planner`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
+    let res = await fetch(`${API_BASE}/ai/route-planner`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
 
-      // Handle 401 silent retry
-      if (res.status === 401) {
-        const refreshedToken = await authService.refreshToken();
-        if (refreshedToken) {
-          headers["Authorization"] = `Bearer ${refreshedToken}`;
-          res = await fetch(`${API_BASE}/ai/route-planner`, {
-            method: "POST",
-            headers,
-            body: JSON.stringify(body),
-          });
-        }
-      }
-
-      if (res.ok) {
-        const json = await res.json();
-        const routeData = json.route;
-        const stops: RouteStop[] = (routeData?.stops || []).map((s: any, idx: number) => ({
-          id: s.id || `stop-${idx}`,
-          name: s.name,
-          category: s.category || "Gezi",
-          lat: s.lat,
-          lng: s.lng,
-          address: s.address || "",
-          duration: s.suggestedDuration || s.duration,
-          day: s.day,
-          timeSlot: s.timeSlot,
-        }));
-
-        const isRoute = json.responseMode === "route";
-        if (
-          isRoute &&
-          (!stops.length ||
-            stops.some(
-              (s) =>
-                !Number.isFinite(s.lat) ||
-                Math.abs(s.lat) > 90 ||
-                !Number.isFinite(s.lng) ||
-                Math.abs(s.lng) > 180,
-            ))
-        ) {
-          throw new Error("Rota koordinatları doğrulanamadı.");
-        }
-        const orchestratorAnswer =
-          json.orchestratorSummary || json.answer || json.text || "Seyahat planınız oluşturuldu.";
-
-        return {
-          answer: orchestratorAnswer,
-          responseMode: json.responseMode || (isRoute ? "route" : "chat"),
-          provider: json.provider || "aws_bedrock",
-          modelUsed: json.modelUsed,
-          stops,
-          isRoutePlan: isRoute,
-          routeTitle:
-            routeData?.title || `${routeData?.destination || context?.city || "Seyahat"} Rotası`,
-          estimatedDays: routeData?.estimatedDays || 1,
-          totalDistanceKm: routeData?.totalDistanceKm,
-          agentsInvolved: json.agentsInvolved || [],
-          stayAndTransit: json.stayAndTransit,
-          discovery: json.discovery,
-          emergency: json.emergency,
-          flightPrices: json.flightPrices,
-          travelAdvisory: json.travelAdvisory,
-          clarification: json.clarification,
-          suggestedQuestions: json.suggestedQuestions || json.clarification?.guidingQuestions || [],
-          creditsUsed: json.billing?.cost ?? json.cost,
-          remainingCredits: json.billing?.credits,
-          conversationId,
-        };
-      } else {
-        const errJson = await res.json().catch(() => ({}));
-        throw Object.assign(new Error(errJson.error || "AI yanıtı alınamadı."), {
-          status: res.status,
-          code: errJson.code,
+    // Handle 401 silent retry
+    if (res.status === 401) {
+      const refreshedToken = await authService.refreshToken();
+      if (refreshedToken) {
+        headers["Authorization"] = `Bearer ${refreshedToken}`;
+        res = await fetch(`${API_BASE}/ai/route-planner`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
         });
       }
-    } catch (error) {
-      // Preserve failures and the request ID; never invent a successful route.
-      throw error;
+    }
+
+    if (res.ok) {
+      const json = await res.json();
+      const routeData = json.route;
+      const stops: RouteStop[] = (routeData?.stops || []).map((s, idx: number) => ({
+        id: s.id || `stop-${idx}`,
+        name: s.name,
+        category: s.category || "Gezi",
+        lat: s.lat,
+        lng: s.lng,
+        address: s.address || "",
+        duration: s.suggestedDuration || s.duration,
+        day: s.day,
+        timeSlot: s.timeSlot,
+      }));
+
+      const isRoute = json.responseMode === "route";
+      if (
+        isRoute &&
+        (!stops.length ||
+          stops.some(
+            (s) =>
+              !Number.isFinite(s.lat) ||
+              Math.abs(s.lat) > 90 ||
+              !Number.isFinite(s.lng) ||
+              Math.abs(s.lng) > 180,
+          ))
+      ) {
+        throw new Error("Rota koordinatları doğrulanamadı.");
+      }
+      const orchestratorAnswer =
+        json.orchestratorSummary || json.answer || json.text || "Seyahat planınız oluşturuldu.";
+
+      return {
+        answer: orchestratorAnswer,
+        responseMode: json.responseMode || (isRoute ? "route" : "chat"),
+        provider: json.provider || "aws_bedrock",
+        modelUsed: json.modelUsed,
+        stops,
+        isRoutePlan: isRoute,
+        routeTitle:
+          routeData?.title || `${routeData?.destination || context?.city || "Seyahat"} Rotası`,
+        estimatedDays: routeData?.estimatedDays || 1,
+        totalDistanceKm: routeData?.totalDistanceKm,
+        agentsInvolved: json.agentsInvolved || [],
+        stayAndTransit: json.stayAndTransit,
+        discovery: json.discovery,
+        emergency: json.emergency,
+        flightPrices: json.flightPrices,
+        travelAdvisory: json.travelAdvisory,
+        clarification: json.clarification,
+        suggestedQuestions: json.suggestedQuestions || json.clarification?.guidingQuestions || [],
+        creditsUsed: json.billing?.cost ?? json.cost,
+        remainingCredits: json.billing?.credits,
+        conversationId,
+      };
+    } else {
+      const errJson = await res.json().catch(() => ({}));
+      throw Object.assign(new Error(errJson.error || "AI yanıtı alınamadı."), {
+        status: res.status,
+        code: errJson.code,
+      });
     }
   },
 
-  async getLatestSession(): Promise<any> {
+  async getLatestSession(): Promise<unknown> {
     try {
       return await apiRequest("/ai/route-planner");
     } catch (e) {
@@ -587,7 +582,7 @@ export const aiService = {
     }
   },
 
-  async getSession(convId: string): Promise<any> {
+  async getSession(convId: string): Promise<unknown> {
     try {
       return await apiRequest(`/ai/route-planner?conversationId=${encodeURIComponent(convId)}`);
     } catch (e) {
@@ -601,9 +596,9 @@ export const aiService = {
 export const chatService = {
   async getMessages(): Promise<ChatMessage[]> {
     try {
-      const data = await apiRequest<{ messages: any[] }>("/chat/threads/default/messages");
+      const data = await apiRequest<{ messages: Record<string, string>[] }>("/chat/threads/default/messages");
       if (data?.messages?.length) {
-        return data.messages.map((m: any) => ({
+        return data.messages.map((m) => ({
           id: m.id || m.messageId || `msg-${Math.random()}`,
           senderId: m.senderId || "user",
           senderName: m.senderName || "Gezgin",
@@ -663,7 +658,7 @@ export interface MapInteractionEvent {
   category?: string;
   action: "map_click" | "pin_select" | "route_add" | "search";
   timestamp: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export const trainingService = {

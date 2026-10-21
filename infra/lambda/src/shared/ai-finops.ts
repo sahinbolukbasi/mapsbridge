@@ -212,14 +212,15 @@ export async function withAIRequestMeter<T extends { statusCode: number; body: s
       return response;
     } finally {
       if (meter.active) {
-        let body: any;
+        let body: unknown;
         try {
           body = response && JSON.parse(response.body);
         } catch {
           /* Unknown response is not a completed plan. */
         }
-        const completed = response?.statusCode === 200 && body?.success === true;
-        const plan = completed && body?.responseMode === "route";
+        const parsed = body as { success?: boolean; responseMode?: string } | null | undefined;
+        const completed = response?.statusCode === 200 && parsed?.success === true;
+        const plan = completed && parsed?.responseMode === "route";
         emitFinOps({
           Requests: 1,
           RequestFailures: completed ? 0 : 1,

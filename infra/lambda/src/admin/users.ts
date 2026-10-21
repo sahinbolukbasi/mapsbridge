@@ -1,4 +1,5 @@
 import type { ApiGatewayEvent } from "../shared/http";
+import type { AuthorizedEvent } from "../shared/types";
 import { ok, badRequest, notFound, serverError, parseBody } from "../shared/http";
 import { stripeClient } from "../billing/stripe-client";
 import { read } from "../shared/data";
@@ -21,13 +22,13 @@ export async function paymentRecords() {
       ":refund": { S: "REFUND#" },
     },
   });
-  const records = result.Items.map((item: any) => unmarshall(item));
+  const records = result.Items.map((item) => unmarshall(item));
   const refunded = new Set(
     records
-      .filter((r: any) => r.PK?.startsWith("REFUND#") && r.status === "succeeded")
-      .map((r: any) => r.paymentIntentId),
+      .filter((r) => r.PK?.toString().startsWith("REFUND#") && r.status === "succeeded")
+      .map((r) => r.paymentIntentId),
   );
-  const payments = new Map<string, any>();
+  const payments = new Map<string, Record<string, unknown>>();
   for (const row of records) {
     if (row.PK?.startsWith("REFUND#") || (row.currency && row.currency.toLowerCase() !== "try"))
       continue;
@@ -59,7 +60,7 @@ export async function handleListUsers(event: ApiGatewayEvent) {
     Limit: limit,
   });
 
-  const grouped = new Map<string, any>();
+  const grouped = new Map<string, Record<string, unknown>>();
   for (const item of result.Items) {
     const row = unmarshall(item);
     const userId = row.PK?.replace(/^USER#/, "");
@@ -114,7 +115,7 @@ export async function handleSuspendUser(event: ApiGatewayEvent) {
   const userId = event.pathParameters?.id;
   if (!userId) return badRequest("Kullanıcı ID gerekli.");
 
-  if (userId === (event as any).verifiedUser?.sub)
+  if (userId === (event as AuthorizedEvent).verifiedUser?.sub)
     return badRequest("Kendi hesabınızın durumunu değiştiremezsiniz.");
   await protectAccount(event, userId);
   const body = parseBody<{ reason?: string }>(event);
@@ -145,7 +146,7 @@ export async function handleSuspendUser(event: ApiGatewayEvent) {
     );
   }
 
-  const actorSub = (event as any).verifiedUser?.sub || "admin";
+  const actorSub = (event as AuthorizedEvent).verifiedUser?.sub || "admin";
   await recordAuditLog(actorSub, "user_suspended", userId, reason);
 
   return ok({ status: "suspended", userId, reason, suspendedAt: now });
@@ -155,7 +156,7 @@ export async function handleUnsuspendUser(event: ApiGatewayEvent) {
   const userId = event.pathParameters?.id;
   if (!userId) return badRequest("Kullanıcı ID gerekli.");
 
-  if (userId === (event as any).verifiedUser?.sub)
+  if (userId === (event as AuthorizedEvent).verifiedUser?.sub)
     return badRequest("Kendi hesabınızın durumunu değiştiremezsiniz.");
   const body = parseBody<{ reason?: string }>(event);
   const reason = body?.reason?.trim() || "Yönetici tarafından askı kaldırıldı.";
@@ -185,7 +186,7 @@ export async function handleUnsuspendUser(event: ApiGatewayEvent) {
     );
   }
 
-  const actorSub = (event as any).verifiedUser?.sub || "admin";
+  const actorSub = (event as AuthorizedEvent).verifiedUser?.sub || "admin";
   await recordAuditLog(actorSub, "user_unsuspended", userId, reason);
 
   return ok({ status: "active", userId, unsuspendedAt: now });
@@ -235,7 +236,7 @@ export async function handleRefund(event: ApiGatewayEvent) {
       }),
     );
 
-    const actorSub = (event as any).verifiedUser?.sub || "admin";
+    const actorSub = (event as AuthorizedEvent).verifiedUser?.sub || "admin";
     await recordAuditLog(actorSub, "payment_refunded", body.paymentIntentId, reason, {
       userId,
       amount: refund.amount,
@@ -247,7 +248,7 @@ export async function handleRefund(event: ApiGatewayEvent) {
       amount: refund.amount,
       reason,
     });
-  } catch (_err: any) {
+  } catch (_err: unknown) {
     return serverError("İade durumu doğrulanamadı. İşlem kimliğiyle tekrar kontrol edin.");
   }
 }
@@ -276,14 +277,14 @@ export async function handleGrantCredits(event: ApiGatewayEvent) {
 
   try {
     await grantCredits(userId, receiptId, credits, {
-      grantedBy: (event as any).verifiedUser?.sub || "admin",
+      grantedBy: (event as AuthorizedEvent).verifiedUser?.sub || "admin",
       reason,
     });
-  } catch (err: any) {
-    return serverError("Kredi verilemedi: " + err.message);
+  } catch (err: unknown) {
+    return serverError("Kredi verilemedi: " + (err instanceof Error ? err.message : String(err)));
   }
 
-  const actorSub = (event as any).verifiedUser?.sub || "admin";
+  const actorSub = (event as AuthorizedEvent).verifiedUser?.sub || "admin";
   await recordAuditLog(actorSub, "credits_granted", userId, reason, { credits });
 
   return ok({ status: "granted", userId, credits, reason });

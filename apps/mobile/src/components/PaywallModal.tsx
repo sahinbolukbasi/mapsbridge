@@ -176,7 +176,7 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
             <ActivityIndicator size="large" color="#34d399" style={{ marginVertical: 24 }} />
           ) : (
             <View style={styles.planCards}>
-              {(packages as any[]).map((pkg) => {
+              {(packages as PurchasesPackage[]).map((pkg) => {
                 const id: string = pkg.identifier;
                 const isSelected = selectedPkg === id;
                 const badge = PLAN_BADGE[id];

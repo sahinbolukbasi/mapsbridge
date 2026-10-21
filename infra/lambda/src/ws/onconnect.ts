@@ -8,7 +8,10 @@ import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { verifiedUserId } from "../shared/auth";
 
-export const handler = async (event: any) => {
+export const handler = async (event: {
+  requestContext?: { connectionId?: string };
+  queryStringParameters?: Record<string, string>;
+}) => {
   const connectionId = event.requestContext?.connectionId;
   const queryString = event.queryStringParameters || {};
   const token = queryString.token;

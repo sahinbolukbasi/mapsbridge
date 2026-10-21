@@ -17,10 +17,10 @@ export async function createRevenueCatCheckout(payload: CheckoutPayload): Promis
       message: "Güvenli ödeme sayfasına yönlendiriliyorsunuz.",
       stripeRedirectUrl: url.href,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     return {
       success: false,
-      message: err?.message || "Ödeme başlatılamadı. Hesabınıza kredi eklenmedi.",
+      message: err instanceof Error ? err.message : "Ödeme başlatılamadı. Hesabınıza kredi eklenmedi.",
     };
   }
 }

@@ -20,13 +20,13 @@ function table(): string {
   return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "dev"}-data`;
 }
 
-function marshall(item: Record<string, any>) {
+function marshall(item: Record<string, unknown>) {
   const { marshall: m } =
     require("@aws-sdk/util-dynamodb") as typeof import("@aws-sdk/util-dynamodb");
   return m(item, { removeUndefinedValues: true });
 }
 
-function unmarshall(item: Record<string, any>) {
+function unmarshall(item: Record<string, unknown>) {
   const { unmarshall: u } =
     require("@aws-sdk/util-dynamodb") as typeof import("@aws-sdk/util-dynamodb");
   return u(item);
@@ -126,7 +126,13 @@ export async function getPlacesForCity(
 ): Promise<NormalizedPlace[]> {
   const { QueryCommand } =
     require("@aws-sdk/client-dynamodb") as typeof import("@aws-sdk/client-dynamodb");
-  const params: any = {
+  const params: {
+    TableName: string;
+    KeyConditionExpression: string;
+    ExpressionAttributeValues: ReturnType<typeof marshall>;
+    Limit: number;
+    IndexName?: string;
+  } = {
     TableName: table(),
     KeyConditionExpression: category ? "GSI1PK = :pk AND begins_with(GSI1SK, :cat)" : "PK = :pk",
     ExpressionAttributeValues: category

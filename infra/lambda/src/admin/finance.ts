@@ -44,7 +44,7 @@ export async function handleGetCreditStats() {
     FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
     ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "CREDITS" } },
   });
-  const wallets = walletResult.Items.map((item: any) => unmarshall(item));
+  const wallets = walletResult.Items.map((item) => unmarshall(item));
 
   const subResult = await scanAllRaw(ddb, {
     TableName: getTableName(),
@@ -52,7 +52,7 @@ export async function handleGetCreditStats() {
     ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "SUBSCRIPTION" } },
   });
   const subs = new Map(
-    subResult.Items.map((item: any) => {
+    subResult.Items.map((item) => {
       const r = unmarshall(item);
       return [r.PK, r];
     }),
@@ -63,7 +63,7 @@ export async function handleGetCreditStats() {
     FilterExpression: "begins_with(PK, :pk) AND begins_with(SK, :sk)",
     ExpressionAttributeValues: { ":pk": { S: "USER#" }, ":sk": { S: "AI#" } },
   });
-  const usageRows = usageResult.Items.map((item: any) => unmarshall(item));
+  const usageRows = usageResult.Items.map((item) => unmarshall(item));
 
   let totalConsumed = 0;
   let totalRemaining = 0;
@@ -174,7 +174,7 @@ export async function handleGetStripeConfig() {
 }
 
 export async function handleUpdateStripeConfig(event: ApiGatewayEvent) {
-  const body = parseBody<Record<string, any>>(event);
+  const body = parseBody<Record<string, unknown>>(event);
   if (!body) return badRequest("Geçerli yapılandırma verisi gerekli.");
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
   if (!reason || reason.length > 1000)
@@ -182,14 +182,14 @@ export async function handleUpdateStripeConfig(event: ApiGatewayEvent) {
 
   const previous = await get("STRIPE#CONFIG");
   let mode = body.mode || previous?.mode || "unconfigured";
-  if (body.publishableKey)
+  if (typeof body.publishableKey === "string")
     mode = body.publishableKey.startsWith("pk_live_")
       ? "live"
       : body.publishableKey.startsWith("pk_test_")
         ? "test"
         : mode;
 
-  const next: Record<string, any> = {
+  const next: Record<string, unknown> = {
     PK: "STRIPE#CONFIG",
     SK: "META",
     ...(previous || {}),
@@ -206,7 +206,7 @@ export async function handleUpdateStripeConfig(event: ApiGatewayEvent) {
 
   const saved = (await commit(event, next, "stripe_config_updated", reason, previous)) as Record<
     string,
-    any
+    unknown
   >;
   return ok({
     status: "updated",
@@ -345,13 +345,13 @@ export async function handleUpdatePlan(event: ApiGatewayEvent) {
   const planId = event.pathParameters?.id;
   if (!planId) return badRequest("Plan ID gerekli.");
 
-  const body = parseBody<Record<string, any>>(event);
+  const body = parseBody<Record<string, unknown>>(event);
   if (!body) return badRequest("Geçerli plan verisi gerekli.");
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
   if (!reason || reason.length > 1000) return badRequest("Gerekçe zorunludur.");
 
   const previous = await get(`PLAN#${planId}`);
-  const defaults: Record<string, any> = DEFAULT_PLANS.find((p) => p.id === planId) || {
+  const defaults: Record<string, unknown> =DEFAULT_PLANS.find((p) => p.id === planId) || {
     monthlyPriceTry: 0,
     yearlyPriceTry: 0,
     monthlyCredits: 0,
@@ -359,7 +359,7 @@ export async function handleUpdatePlan(event: ApiGatewayEvent) {
     highlight: false,
   };
 
-  const next: Record<string, any> = {
+  const next: Record<string, unknown> = {
     PK: `PLAN#${planId}`,
     SK: "META",
     planId,
@@ -395,7 +395,7 @@ export async function handleUpdatePlan(event: ApiGatewayEvent) {
     "plan_updated",
     reason,
     previous ? { ...previous } : null,
-  )) as Record<string, any>;
+  )) as Record<string, unknown>;
   return ok({ status: "updated", plan: saved });
 }
 
@@ -440,13 +440,13 @@ export async function handleUpdateCreditPack(event: ApiGatewayEvent) {
   const packId = event.pathParameters?.id;
   if (!packId) return badRequest("Paket ID gerekli.");
 
-  const body = parseBody<Record<string, any>>(event);
+  const body = parseBody<Record<string, unknown>>(event);
   if (!body) return badRequest("Geçerli paket verisi gerekli.");
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
   if (!reason || reason.length > 1000) return badRequest("Gerekçe zorunludur.");
 
   const previous = await get(`CREDITPACK#${packId}`);
-  const defaults: Record<string, any> = DEFAULT_CREDIT_PACKS.find((p) => p.id === packId) || {
+  const defaults: Record<string, unknown> =DEFAULT_CREDIT_PACKS.find((p) => p.id === packId) || {
     credits: 0,
     bonusCredits: 0,
     priceTry: 0,
@@ -456,7 +456,7 @@ export async function handleUpdateCreditPack(event: ApiGatewayEvent) {
   const credits = Number(body.credits ?? previous?.credits ?? defaults.credits);
   const priceTry = Number(body.priceTry ?? previous?.priceTry ?? defaults.priceTry);
 
-  const next: Record<string, any> = {
+  const next: Record<string, unknown> = {
     PK: `CREDITPACK#${packId}`,
     SK: "META",
     packId,
@@ -479,7 +479,7 @@ export async function handleUpdateCreditPack(event: ApiGatewayEvent) {
     "creditpack_updated",
     reason,
     previous ? { ...previous } : null,
-  )) as Record<string, any>;
+  )) as Record<string, unknown>;
   return ok({
     status: "updated",
     pack: { ...saved, totalPurchases: previous?.totalPurchases || 0 },

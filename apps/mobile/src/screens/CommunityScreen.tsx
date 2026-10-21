@@ -12,13 +12,12 @@ import {
   Alert,
   Share,
   Modal,
-  Platform,
 } from "react-native";
 import { tripStore, TripStop } from "../services/tripStore";
 import { PublicProfileView, PublicProfileUser } from "./PublicProfileView";
 import { ChatScreen } from "./ChatScreen";
 import { chatStore, ChatContact } from "../services/chatStore";
-import { socialSyncService, MobileCommunityPost } from "../services/socialSync";
+import { socialSyncService, MobileCommunityPost, MobileCommunityComment } from "../services/socialSync";
 import { EditPostModal } from "../components/EditPostModal";
 import {
   HeartIcon,
@@ -28,9 +27,6 @@ import {
   MapPinIcon,
   TagIcon,
   ExploreIcon,
-  TreesIcon,
-  SparkIcon,
-  TrashIcon,
   EditIcon,
   MapIcon,
 } from "../components/Icons";
@@ -48,33 +44,6 @@ interface CommunityComment {
   time: string;
 }
 
-interface CommunityPost {
-  id: string;
-  authorName: string;
-  authorHandle: string;
-  authorAvatar: string;
-  verified?: boolean;
-  timeAgo: string;
-  content: string;
-  hashtags: string[];
-  locationTag?: string;
-  mediaImage?: string;
-  routeAttachment?: {
-    id: string;
-    title: string;
-    stats: string;
-    icon: string;
-    stops: TripStop[];
-  };
-  commentsCount: number;
-  retweetsCount: number;
-  likesCount: number;
-  bookmarksCount: number;
-  isLiked?: boolean;
-  isBookmarked?: boolean;
-  comments?: CommunityComment[];
-}
-
 const CATEGORIES = [
   { id: "Tümü", label: "Tümü", icon: "" },
   { id: "Tarih & Kültür", label: "Tarih & Kültür", icon: "🏛️" },
@@ -85,9 +54,9 @@ const CATEGORIES = [
 export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
   const [activeTab, setActiveTab] = useState<"foryou" | "following">("foryou");
   const [selectedCat, setSelectedCat] = useState("Tümü");
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<MobileCommunityPost[]>([]);
   const [selectedProfileUser, setSelectedProfileUser] = useState<PublicProfileUser | null>(null);
-  const [editingPost, setEditingPost] = useState<any | null>(null);
+  const [editingPost, setEditingPost] = useState<MobileCommunityPost | null>(null);
 
   useEffect(() => {
     socialSyncService.getPosts().then((loaded) => {
@@ -110,7 +79,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
   const [newPostHashtags, setNewPostHashtags] = useState("");
 
   // Comment Modal State
-  const [activeCommentPost, setActiveCommentPost] = useState<any | null>(null);
+  const [activeCommentPost, setActiveCommentPost] = useState<MobileCommunityPost | null>(null);
   const [newCommentText, setNewCommentText] = useState("");
 
   // Like Toggle
@@ -134,7 +103,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
   };
 
   // Retweet / Share
-  const handleRetweet = (post: CommunityPost) => {
+  const handleRetweet = (post: MobileCommunityPost) => {
     setPosts((prev) =>
       prev.map((p) => (p.id === post.id ? { ...p, retweetsCount: p.retweetsCount + 1 } : p)),
     );
@@ -145,7 +114,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
   };
 
   // External Share
-  const handleShare = async (post: CommunityPost) => {
+  const handleShare = async (post: MobileCommunityPost) => {
     try {
       await Share.share({
         message: `${post.authorName} MapsBridge'de paylaştı:\n"${post.content}"\nhttps://mapsbridge.com`,
@@ -155,10 +124,10 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
   };
 
   // Clone Route to Active Trip
-  const handleCloneRoute = (post: CommunityPost) => {
+  const handleCloneRoute = (post: MobileCommunityPost) => {
     if (!post.routeAttachment) return;
     const attachment = post.routeAttachment;
-    attachment.stops.forEach((s) => tripStore.addStop(s));
+    attachment.stops.forEach((s) => tripStore.addStop(s as unknown as TripStop));
     Alert.alert(
       "🗺️ Rota Haritanıza Eklendi",
       `"${attachment.title}" rotasındaki ${attachment.stops.length} durak seyahat planınıza aktarıldı. Şimdi haritada inceleyebilirsiniz!`,
@@ -192,7 +161,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
       }),
     );
 
-    setActiveCommentPost((prev: any) =>
+    setActiveCommentPost((prev) =>
       prev
         ? {
             ...prev,
@@ -206,7 +175,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
   };
 
   // Post Options Menu with Authorization Check
-  const handlePostOptions = async (post: any) => {
+  const handlePostOptions = async (post: MobileCommunityPost) => {
     const userProf = await socialSyncService.getUserProfile();
     const isOwner =
       post.authorHandle === `@${userProf.username}` ||
@@ -298,7 +267,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
               title: tripStore.getActiveRoute().name || "Benim Rotam",
               stats: `${activeStops.length} Durak • Canlı Rota`,
               icon: "🗺️",
-              stops: activeStops as any,
+              stops: activeStops as TripStop[],
             }
           : undefined,
     });
@@ -788,7 +757,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
 
           <ScrollView style={styles.modalContent}>
             {activeCommentPost?.comments && activeCommentPost.comments.length > 0 ? (
-              activeCommentPost.comments.map((c: any) => (
+              activeCommentPost.comments.map((c: MobileCommunityComment) => (
                 <View key={c.id} style={styles.commentItem}>
                   <Text style={styles.commentUser}>{c.user}</Text>
                   <Text style={styles.commentText}>{c.text}</Text>

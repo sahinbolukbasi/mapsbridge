@@ -57,6 +57,58 @@ export interface MobileCommunityPost {
 const STORAGE_KEY_PROFILE = "mb_user_profile";
 const STORAGE_KEY_POSTS = "mb_community_posts";
 
+interface RawServerStop {
+  id?: string;
+  label?: string;
+  name?: string;
+  lat?: number;
+  lng?: number;
+  category?: string;
+  address?: string;
+}
+
+interface RawServerComment {
+  id?: string;
+  username?: string;
+  displayName?: string;
+  text?: string;
+  content?: string;
+  createdAt?: string;
+  time?: string;
+}
+
+interface RawServerPost {
+  id?: string;
+  authorDisplayName?: string;
+  authorUsername: string;
+  authorAvatar?: string;
+  authorEmail?: string;
+  verified?: boolean;
+  createdAt?: string;
+  content?: string;
+  hashtags?: string[];
+  tags?: string[];
+  locationTag?: string;
+  image?: string;
+  mediaImage?: string;
+  linkedRoute?: {
+    id?: string;
+    title?: string;
+    stopCount?: number;
+    stops?: RawServerStop[];
+  };
+  comments?: RawServerComment[];
+  commentsCount?: number;
+  repostCount?: number;
+  retweetsCount?: number;
+  likesCount?: number;
+  savesCount?: number;
+  bookmarksCount?: number;
+  likedByMe?: boolean;
+  savedByMe?: boolean;
+  createdAtMs?: number;
+}
+
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCQdOMegHKRlkwubsFEMHDlXU8mVoZKUlXw7A0Quos1oSmZCSZEg30fAB4aMRnCI9q8UEUkdzonH9DUfJ3dTRjIPGpEsvmdB7q2Hrn_b98XcVBeB1CNFBlpaQM33IpQEZ9Bj2TQCR_rWOyCdeIsnX_hZXhb7z1nrWj53EXbHiVov_Hx5WO-_ikQRe6lEE_jnkFjZlEF1WXEue5BMqYbUXVJqoHBc--0mvHvT89fTCsu0mllchVOc6h24A";
 
@@ -76,7 +128,7 @@ function sanitizeText(val?: string | null): string {
     .trim();
 }
 
-function mapServerPostToMobile(post: any): MobileCommunityPost {
+function mapServerPostToMobile(post: RawServerPost): MobileCommunityPost {
   return {
     id: post.id,
     authorName: post.authorDisplayName || post.authorUsername || "Gezgin",
@@ -97,7 +149,7 @@ function mapServerPostToMobile(post: any): MobileCommunityPost {
           title: post.linkedRoute.title || "Ekli Rota",
           stats: `${post.linkedRoute.stopCount || post.linkedRoute.stops?.length || 0} Durak`,
           icon: "🗺️",
-          stops: (post.linkedRoute.stops || []).map((s: any, idx: number) => ({
+          stops: (post.linkedRoute.stops || []).map((s, idx) => ({
             id: s.id || `stop-${idx}`,
             name: s.label || s.name || `Durak ${idx + 1}`,
             lat: s.lat || 0,
@@ -113,7 +165,7 @@ function mapServerPostToMobile(post: any): MobileCommunityPost {
     bookmarksCount: post.savesCount || post.bookmarksCount || 0,
     isLiked: !!post.likedByMe,
     isBookmarked: !!post.savedByMe,
-    comments: (post.comments || []).map((c: any) => ({
+    comments: (post.comments || []).map((c) => ({
       id: c.id,
       user: c.username?.startsWith("@") ? c.username : `@${c.username || "gezgin"}`,
       displayName: c.displayName,

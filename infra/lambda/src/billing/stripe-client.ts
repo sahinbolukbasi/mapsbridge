@@ -1,7 +1,8 @@
+import type { default as StripeType } from "stripe";
 import { resolveEnvSecret } from "../shared/http";
 import { BillingError } from "./store";
-let client: any;
-export async function stripeClient() {
+let client: StripeType | undefined;
+export async function stripeClient(): Promise<StripeType> {
   if (client) return client;
   const key = await resolveEnvSecret(process.env.STRIPE_SECRET_KEY);
   if (!/^sk_(test|live)_/.test(key) || key.includes("placeholder"))

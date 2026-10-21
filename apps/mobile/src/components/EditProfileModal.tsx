@@ -14,7 +14,7 @@ import {
   Image,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { CloseIcon, CheckIcon, MapPinIcon, SparkIcon, CameraIcon, TrashIcon } from "./Icons";
+import { CloseIcon, CheckIcon, MapPinIcon, CameraIcon, TrashIcon } from "./Icons";
 import { socialSyncService, MobileUserProfile } from "../services/socialSync";
 
 export const AVATAR_PRESETS = [
@@ -137,7 +137,7 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
       });
       onSaved(updated);
       onClose();
-    } catch (e: any) {
+    } catch {
       Alert.alert("Hata", "Profil güncellenirken bir sorun oluştu.");
     } finally {
       setSaving(false);
@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   presetCheckOverlay: {
-    ...(StyleSheet.absoluteFill as any),
+    ...(StyleSheet.absoluteFill as object),
     backgroundColor: "rgba(5, 150, 105, 0.65)",
     alignItems: "center",
     justifyContent: "center",

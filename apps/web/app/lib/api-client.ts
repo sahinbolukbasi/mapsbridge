@@ -67,8 +67,8 @@ export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {
       headers,
       signal: AbortSignal.timeout(timeoutMs),
     });
-  } catch (err: any) {
-    if (err?.name === "TimeoutError") {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "TimeoutError") {
       throw new Error("İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edin.");
     }
     throw new Error("Sunucuya erişilemedi. Çevrimdışı modda çalışılıyor.");
@@ -101,7 +101,7 @@ export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {
   }
 
   if (!response.ok) {
-    let errorData: any;
+    let errorData: { error?: string; code?: string; upgradeUrl?: string } | null;
     try {
       errorData = await response.json();
     } catch {
@@ -110,9 +110,9 @@ export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {
 
     const apiError: ApiResponseError = {
       status: response.status,
-      message: errorData.error || `İşlem başarısız oldu (${response.status})`,
-      code: errorData.code,
-      upgradeUrl: errorData.upgradeUrl,
+      message: errorData?.error || `İşlem başarısız oldu (${response.status})`,
+      code: errorData?.code,
+      upgradeUrl: errorData?.upgradeUrl,
     };
     throw apiError;
   }
@@ -144,7 +144,7 @@ export interface RouteEntity {
   routeId: string;
   name: string;
   stops: RouteStop[];
-  days?: any[];
+  days?: Record<string, unknown>[];
   isPublic?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -163,7 +163,7 @@ export const routesApi = {
   async create(data: {
     name: string;
     stops: RouteStop[];
-    days?: any[];
+    days?: Record<string, unknown>[];
     isPublic?: boolean;
     tier?: string;
   }): Promise<{ routeId: string; name: string }> {
@@ -175,7 +175,7 @@ export const routesApi = {
 
   async update(
     id: string,
-    data: { name?: string; stops?: RouteStop[]; days?: any[]; isPublic?: boolean },
+    data: { name?: string; stops?: RouteStop[]; days?: Record<string, unknown>[]; isPublic?: boolean },
   ): Promise<{ routeId: string; status: string }> {
     return apiFetch<{ routeId: string; status: string }>(`/routes/${encodeURIComponent(id)}`, {
       method: "PUT",
@@ -202,15 +202,15 @@ export const routesApi = {
     );
   },
 
-  async readShare(code: string): Promise<any> {
-    return apiFetch<any>(`/shares/${encodeURIComponent(code.trim())}`, { skipAuth: true });
+  async readShare(code: string): Promise<unknown> {
+    return apiFetch<unknown>(`/shares/${encodeURIComponent(code.trim())}`, { skipAuth: true });
   },
 
   async getOsrmRoute(
     profile: "driving" | "walking" | "cycling",
     coordinatesStr: string,
-  ): Promise<any> {
-    return apiFetch<any>(`/routes/osrm/${profile}?coords=${encodeURIComponent(coordinatesStr)}`, {
+  ): Promise<unknown> {
+    return apiFetch<unknown>(`/routes/osrm/${profile}?coords=${encodeURIComponent(coordinatesStr)}`, {
       skipAuth: true,
     });
   },
@@ -279,8 +279,8 @@ export interface ChatMessageItem {
   senderName?: string;
   content: string;
   timestamp: string;
-  routeEmbed?: any;
-  locationPin?: any;
+  routeEmbed?: unknown;
+  locationPin?: unknown;
 }
 
 export const chatApi = {
@@ -313,7 +313,7 @@ export const chatApi = {
   async sendMessage(
     threadId: string,
     content: string,
-    embeds?: { routeEmbed?: any; locationPin?: any },
+    embeds?: { routeEmbed?: unknown; locationPin?: unknown },
   ): Promise<{ messageId: string; timestamp: string }> {
     return apiFetch<{ messageId: string; timestamp: string }>(
       `/chat/threads/${encodeURIComponent(threadId)}/messages`,
@@ -414,7 +414,7 @@ export interface AdminAuditItem {
   action: string;
   targetId: string;
   reason: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -604,12 +604,12 @@ export const adminApi = {
     return apiFetch<{ logs: AdminAuditItem[]; count: number }>(`/admin/audit-logs?limit=${limit}`);
   },
 
-  async getRealtimeTelemetry(): Promise<{ realtime: any }> {
-    return apiFetch<{ realtime: any }>("/admin/realtime");
+  async getRealtimeTelemetry(): Promise<{ realtime: unknown }> {
+    return apiFetch<{ realtime: unknown }>("/admin/realtime");
   },
 
-  async listAdminRoutes(limit = 50): Promise<{ routes: any[]; count: number }> {
-    return apiFetch<{ routes: any[]; count: number }>(`/admin/routes?limit=${limit}`);
+  async listAdminRoutes(limit = 50): Promise<{ routes: Record<string, unknown>[]; count: number }> {
+    return apiFetch<{ routes: Record<string, unknown>[]; count: number }>(`/admin/routes?limit=${limit}`);
   },
 
   async routeAction(

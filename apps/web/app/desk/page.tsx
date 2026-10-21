@@ -19,17 +19,95 @@ import {
 } from "../components/trip/google-planner-map";
 import { googleMapsEnabled } from "../lib/google/maps-client";
 import { MobilePinSheet } from "../components/trip/mobile-pin-sheet";
-import type { Pin } from "../lib/trip/models";
+import type { Pin, PinCategory } from "../lib/trip/models";
 import { TravelPlannerSidebar } from "../components/trip/travel-planner-sidebar";
 import { useTravelPlanner } from "../lib/trip/use-travel-planner";
 import { DEFAULT_CATEGORY_META } from "../lib/trip/models";
 import { reverseGeocodeLocation, searchPlaces } from "../lib/trip/geocoding-service";
 import { tripToMarkdown } from "../lib/trip/trip-markdown";
 import { billingService } from "../lib/billing/billing-service";
+import type { WalletData } from "../lib/billing/billing-types";
 import { interactionTracker } from "../lib/analytics/tracker";
 import { DealTrackerPanel } from "../components/tracker/deal-tracker-panel";
 import "../components/trip/travel-planner.css";
 import "./desk.css";
+
+/* ── Lightweight Leaflet type stubs (loaded via dynamic <script>) ── */
+interface LeafletLatLng {
+  lat: number;
+  lng: number;
+}
+
+interface LeafletPoint {
+  x: number;
+  y: number;
+  add(offset: [number, number]): LeafletPoint;
+}
+
+interface LeafletBounds {
+  pad(ratio: number): LeafletBounds;
+}
+
+interface LeafletLayer {
+  addTo(target: LeafletMap | LeafletFeatureGroup): this;
+  on(event: string, callback: (...args: unknown[]) => void): this;
+  bringToBack?(): void;
+  style?: CSSStyleDeclaration;
+}
+
+interface LeafletFeatureGroup extends LeafletLayer {
+  getBounds(): LeafletBounds;
+}
+
+interface LeafletMarker extends LeafletLayer {
+  setLatLng(latlng: [number, number]): this;
+  getLatLng(): LeafletLatLng;
+  setIcon(icon: LeafletIcon): this;
+}
+
+type LeafletIcon = unknown;
+
+interface LeafletMouseEvent {
+  latlng: LeafletLatLng;
+}
+
+interface LeafletMap {
+  flyTo(latlng: [number, number] | LeafletLatLng, zoom: number, options?: Record<string, unknown>): this;
+  setView(center: [number, number] | LeafletLatLng, zoom: number, options?: Record<string, unknown>): this;
+  zoomIn(): this;
+  zoomOut(): this;
+  getCenter(): LeafletLatLng;
+  getZoom(): number;
+  getSize(): LeafletPoint;
+  project(latlng: [number, number], zoom: number): LeafletPoint;
+  unproject(point: LeafletPoint, zoom: number): LeafletLatLng;
+  invalidateSize(options?: Record<string, unknown>): this;
+  fitBounds(bounds: LeafletBounds, options?: Record<string, unknown>): this;
+  removeLayer(layer: LeafletLayer): this;
+  remove(): this;
+  whenReady(callback: () => void): this;
+  on(event: string, callback: (e: LeafletMouseEvent) => void): this;
+}
+
+interface LeafletTileLayerOptions {
+  attribution: string;
+  maxZoom: number;
+  subdomains?: string;
+  opacity?: number;
+}
+
+interface LeafletNamespace {
+  map(container: HTMLElement, options?: Record<string, unknown>): LeafletMap;
+  marker(latlng: [number, number], options?: Record<string, unknown>): LeafletMarker;
+  divIcon(options: Record<string, unknown>): LeafletIcon;
+  tileLayer(url: string, options?: LeafletTileLayerOptions): LeafletLayer;
+  featureGroup(): LeafletFeatureGroup;
+  polyline(latlngs: [number, number][], options?: Record<string, unknown>): LeafletLayer;
+}
+
+interface WindowWithLeaflet {
+  L?: LeafletNamespace;
+}
 
 import { useLocale, getAlternatePath } from "../lib/locale-context";
 import {
@@ -148,10 +226,10 @@ export default function Panel() {
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
   const [mapAttempt, setMapAttempt] = useState(0);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
-  const routeMarkersGroupRef = useRef<any>(null);
-  const routePolylineRef = useRef<any>(null);
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
+  const markerRef = useRef<LeafletMarker | null>(null);
+  const routeMarkersGroupRef = useRef<LeafletFeatureGroup | null>(null);
+  const routePolylineRef = useRef<LeafletLayer | null>(null);
   const saveInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -169,8 +247,8 @@ export default function Panel() {
   const [quickAddPoint, setQuickAddPoint] = useState<GooglePoint | null>(null);
   const lastPlannerFit = useRef("");
   const lastFocusedPin = useRef("");
-  const plannerMarkersGroupRef = useRef<any>(null);
-  const plannerRouteLayerRef = useRef<any>(null);
+  const plannerMarkersGroupRef = useRef<LeafletFeatureGroup | null>(null);
+  const plannerRouteLayerRef = useRef<LeafletFeatureGroup | null>(null);
   const [isAddingPinMode, setIsAddingPinMode] = useState(false);
   const isAddingPinModeRef = useRef(isAddingPinMode);
   useEffect(() => {
@@ -178,8 +256,8 @@ export default function Panel() {
   }, [isAddingPinMode]);
   const [_wallet, setWallet] = useState(() => billingService.getWallet());
   useEffect(() => {
-    const handleWalletUpdated = (e: any) => {
-      if (e.detail) setWallet(e.detail);
+    const handleWalletUpdated = (e: Event) => {
+      if (e instanceof CustomEvent && e.detail) setWallet(e.detail as WalletData);
     };
     window.addEventListener("mapsbridge:wallet_updated", handleWalletUpdated);
     return () => window.removeEventListener("mapsbridge:wallet_updated", handleWalletUpdated);
@@ -276,8 +354,8 @@ export default function Panel() {
   const [_isBottomSearchExpanded, setIsBottomSearchExpanded] = useState(false);
 
   // Harita Modları ve Özelleştirme State'leri
-  const tileLayerRef = useRef<any>(null);
-  const transitOverlayRef = useRef<any>(null);
+  const tileLayerRef = useRef<LeafletLayer | null>(null);
+  const transitOverlayRef = useRef<LeafletLayer | null>(null);
   const [currentMapStyle, setCurrentMapStyle] = useState<MapStyleId>("standart");
   const [pinColor, setPinColor] = useState<string>("#2563eb");
   const [showTransitOverlay, setShowTransitOverlay] = useState<boolean>(false);
@@ -349,8 +427,8 @@ export default function Panel() {
         address: pin.address,
         lat: pin.lat,
         lng: pin.lng,
-        tripId: (pin as any).tripId,
-        dayIndex: (pin as any).dayIndex,
+        tripId: "tripId" in pin ? pin.tripId : undefined,
+        dayIndex: "dayIndex" in pin ? pin.dayIndex : pin.day,
       });
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("mapsbridge:show-pin-detail", { detail: { id } }));
@@ -438,7 +516,7 @@ export default function Panel() {
         const parsed = JSON.parse(rawMsg);
         if (Array.isArray(parsed)) {
           setUnreadMessagesCount(
-            parsed.filter((m: any) => m.status === "unread" || !m.read).length,
+            parsed.filter((m: { status?: string; read?: boolean }) => m.status === "unread" || !m.read).length,
           );
         }
       }
@@ -642,7 +720,7 @@ export default function Panel() {
     visited: boolean = false,
     label: string = "",
   ) {
-    const L = (window as any).L;
+    const L = (window as unknown as WindowWithLeaflet).L;
     if (!L) return null;
     const meta = CATEGORIES[category] || CATEGORIES.genel;
     const bg = visited ? "#10b981" : meta.color;
@@ -676,7 +754,7 @@ export default function Panel() {
     currentLoc?: LocationState,
     shouldFitBounds: boolean = false,
   ) {
-    const L = (window as any).L;
+    const L = (window as unknown as WindowWithLeaflet).L;
     if (!L || !mapInstanceRef.current) return;
 
     const loc = currentLoc || location;
@@ -770,7 +848,7 @@ export default function Panel() {
 
   // Re-render group pins
   useEffect(() => {
-    if (mapInstanceRef.current && (window as any).L) {
+    if (mapInstanceRef.current && (window as unknown as WindowWithLeaflet).L) {
       const groupChanged = prevGroupRef.current !== selectedGroup;
       prevGroupRef.current = selectedGroup;
       renderGroupOnMap(selectedGroup, savedAddresses, location, groupChanged);
@@ -897,7 +975,7 @@ export default function Panel() {
     setMapStatus("loading");
 
     function initLeafletMap() {
-      const L = (window as any).L;
+      const L = (window as unknown as WindowWithLeaflet).L;
       if (!L || !mapContainerRef.current || mapInstanceRef.current) return;
 
       const initialLat = 40.9856;
@@ -914,13 +992,11 @@ export default function Panel() {
         currentMapStyle ||
         "standart";
       const styleConfig = MAP_STYLES.find((s) => s.id === savedStyleId) || MAP_STYLES[0];
-      const tileOpts: any = {
+      const tileOpts: LeafletTileLayerOptions = {
         attribution: styleConfig.attribution,
         maxZoom: styleConfig.maxZoom,
+        ...(styleConfig.subdomains ? { subdomains: styleConfig.subdomains } : {}),
       };
-      if (styleConfig.subdomains) {
-        tileOpts.subdomains = styleConfig.subdomains;
-      }
       const baseTile = L.tileLayer(styleConfig.url, tileOpts).addTo(map);
       tileLayerRef.current = baseTile;
       let hasVisibleTiles = false;
@@ -976,7 +1052,7 @@ export default function Panel() {
         }
       });
 
-      map.on("click", async (e: any) => {
+      map.on("click", async (e: LeafletMouseEvent) => {
         const session = getStoredSession();
         if (!session?.email || !session?.token) {
           setAuthModalConfig({
@@ -1124,7 +1200,7 @@ export default function Panel() {
       link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
       document.head.appendChild(link);
     }
-    if ((window as any).L) initialize();
+    if ((window as unknown as WindowWithLeaflet).L) initialize();
     else {
       if (mapAttempt > 0 && script) {
         script.remove();
@@ -1160,7 +1236,7 @@ export default function Panel() {
 
   // Reaktif Harita Taban Modu Değişimi
   useEffect(() => {
-    const L = (window as any).L;
+    const L = (window as unknown as WindowWithLeaflet).L;
     const map = mapInstanceRef.current;
     if (!L || !map) return;
 
@@ -1170,13 +1246,11 @@ export default function Panel() {
       map.removeLayer(tileLayerRef.current);
     }
 
-    const opts: any = {
+    const opts: LeafletTileLayerOptions = {
       attribution: style.attribution,
       maxZoom: style.maxZoom,
+      ...(style.subdomains ? { subdomains: style.subdomains } : {}),
     };
-    if (style.subdomains) {
-      opts.subdomains = style.subdomains;
-    }
 
     tileLayerRef.current = L.tileLayer(style.url, opts).addTo(map);
 
@@ -1192,7 +1266,7 @@ export default function Panel() {
 
   // Reaktif Toplu Taşıma / Raylı Sistem Katmanı
   useEffect(() => {
-    const L = (window as any).L;
+    const L = (window as unknown as WindowWithLeaflet).L;
     const map = mapInstanceRef.current;
     if (!L || !map) return;
 
@@ -1221,7 +1295,7 @@ export default function Panel() {
 
   // Reaktif Pin Rengi Değişimi
   useEffect(() => {
-    const L = (window as any).L;
+    const L = (window as unknown as WindowWithLeaflet).L;
     if (!L || !markerRef.current) return;
 
     const customPin = L.divIcon({
@@ -1245,8 +1319,8 @@ export default function Panel() {
     const filterVal = filterObj ? filterObj.css : "none";
 
     const tilePanes = mapContainerRef.current.querySelectorAll(".leaflet-tile-pane");
-    tilePanes.forEach((pane: any) => {
-      pane.style.filter = filterVal;
+    tilePanes.forEach((pane) => {
+      (pane as HTMLElement).style.filter = filterVal;
     });
 
     if (typeof window !== "undefined") {
@@ -1256,7 +1330,7 @@ export default function Panel() {
 
   // ── Travel Day Planner: Render Numbered Pins & Real Road Route on Leaflet Map ──
   useEffect(() => {
-    const L = (window as any).L;
+    const L = (window as unknown as WindowWithLeaflet).L;
     const map = mapInstanceRef.current;
     if (!L || !map) return;
 
@@ -1819,7 +1893,7 @@ export default function Panel() {
 
       // Harita ve pin odaklanması
       const map = mapInstanceRef.current;
-      const L = (window as any).L;
+      const L = (window as unknown as WindowWithLeaflet).L;
       if (map && L) {
         const customPin = L.divIcon({
           className: "custom-map-pin",
@@ -1840,8 +1914,8 @@ export default function Panel() {
         }
         map.flyTo([targetLat, targetLng], 17, { animate: true, duration: 1.4 });
       }
-    } catch (err: any) {
-      setLookupError(err.message || "Kod doğrulanamadı.");
+    } catch (err: unknown) {
+      setLookupError(err instanceof Error ? err.message : "Kod doğrulanamadı.");
     } finally {
       setIsLookupLoading(false);
     }
@@ -2147,7 +2221,7 @@ export default function Panel() {
                     address: place.address,
                     lat: place.lat,
                     lng: place.lng,
-                    category: (place.category || "genel") as any,
+                    category: (place.category || "genel") as PinCategory,
                     dayIndex: targetDay,
                     group: "Genel",
                     visited: false,

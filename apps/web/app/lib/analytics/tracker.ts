@@ -22,7 +22,7 @@ export interface UserInteractionEvent {
   type: InteractionType;
   timestamp: number;
   dateStr: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   sessionDurationSec?: number;
 }
 
@@ -41,7 +41,7 @@ const SESSION_START = Date.now();
 
 class InteractionTracker {
   private queue: UserInteractionEvent[] = [];
-  private syncTimer: any = null;
+  private syncTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     if (typeof window !== "undefined") {
@@ -74,7 +74,7 @@ class InteractionTracker {
   /**
    * Log a general interaction event
    */
-  public track(type: InteractionType, payload: Record<string, any>): void {
+  public track(type: InteractionType, payload: Record<string, unknown>): void {
     const event: UserInteractionEvent = {
       id: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       type,

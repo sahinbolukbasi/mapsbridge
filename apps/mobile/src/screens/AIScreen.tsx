@@ -22,7 +22,6 @@ import {
   routeService,
   generateUUID,
   type MobileConversationState,
-  type AIContextChip,
 } from "../services/api";
 import { agentService, TravelAgent, LanguagePhrase } from "../services/agentService";
 import type { RichAgentCard } from "../services/agentOrchestrator";
@@ -32,18 +31,14 @@ import {
   MapIcon,
   DirectionsIcon,
   BookmarkIcon,
-  PlanIcon,
   CameraIcon,
   MicIcon,
   WalkIcon,
   HotelIcon,
   CarIcon,
   FoodIcon,
-  TrainIcon,
   TranslateIcon,
   AlertCircleIcon,
-  ClockIcon,
-  CheckIcon,
 } from "../components/Icons";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import * as ImagePicker from "expo-image-picker";
@@ -160,19 +155,11 @@ const INITIAL_MESSAGES: ChatMessageItem[] = [
   },
 ];
 
-const SUGGESTIONS = [
-  "Tokyo 3 Günlük Rota",
-  "Kapadokya 2 Günlük Vadi",
-  "Roma Tarih & Lezzet",
-  "Paris 4 Gün Sanat",
-  "İstanbul Tarih & Boğaz",
-];
-
-export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
+export function AIScreen({ onOpenMap }: AIScreenProps) {
   const [messages, setMessages] = useState<ChatMessageItem[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [orchestrationStatus, setOrchestrationStatus] = useState<string>("");
+  const [_orchestrationStatus, setOrchestrationStatus] = useState<string>("");
   const [showRouteLoaderModal, setShowRouteLoaderModal] = useState(false);
   const [loadedRouteDetails, setLoadedRouteDetails] = useState<{
     title: string;
@@ -184,8 +171,8 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
   } | null>(null);
   const [showAgentsModal, setShowAgentsModal] = useState(false);
   const [agents, setAgents] = useState<TravelAgent[]>([]);
-  const [selectedAgent, setSelectedAgent] = useState<TravelAgent | null>(null);
-  const [phrases, setPhrases] = useState<LanguagePhrase[]>([]);
+  const [_selectedAgent, setSelectedAgent] = useState<TravelAgent | null>(null);
+  const [_phrases, setPhrases] = useState<LanguagePhrase[]>([]);
   const scrollRef = useRef<ScrollView>(null);
 
   // ── Conversation & context state ─────────────────────────────────────────
@@ -197,7 +184,7 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
     Array<{ id: string; title: string; date: string; messages: ChatMessageItem[] }>
   >([]);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
-  const [isRecordingVoice, setIsRecordingVoice] = useState<boolean>(false);
+  const [_isRecordingVoice, _setIsRecordingVoice] = useState<boolean>(false);
   const sending = useRef(false);
   const pendingTurn = useRef<{ text: string; requestId: string; trainingConsent: boolean } | null>(
     null,
@@ -277,7 +264,7 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
           const activeConvId = latest.latestConversationId || latest.conversationId;
           if (activeConvId) setConversationId(activeConvId);
 
-          const syncedMessages: ChatMessageItem[] = conv.messages.map((m: any, idx: number) => ({
+          const syncedMessages: ChatMessageItem[] = conv.messages.map((m: { role: string; content: string }, idx: number) => ({
             id: `sync-${idx}`,
             sender: m.role === "user" ? "user" : "bot",
             text: m.content,
@@ -286,7 +273,7 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
 
           if (conv.route && conv.route.stops?.length > 0) {
             const r = conv.route;
-            const botStops: TripStop[] = r.stops.map((s: any, idx: number) => ({
+            const botStops: TripStop[] = r.stops.map((s: { id?: string; name: string; category?: string; day?: number; timeSlot?: string; suggestedDuration?: string; duration?: string; address?: string; lat?: number; lng?: number }, idx: number) => ({
               id: s.id || `stop-${idx}`,
               name: s.name,
               category: s.category || "TARİHİ YER",
@@ -302,7 +289,7 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
               lastBot.routePlan = {
                 title: r.title || `${r.destination} Rotası`,
                 dayTitle: `${r.estimatedDays || 1} Günlük ${r.destination || ""} Planı`,
-                stops: botStops.map((bs, i) => ({
+                stops: botStops.map((bs) => ({
                   time: bs.time,
                   name: bs.name,
                   desc: bs.category,
@@ -423,20 +410,6 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
     Alert.alert("Sesli Asistan", "Sesli komut özelliği yakında kullanıma açılacak.");
   };
 
-  // Load saved route for editing
-  const handleLoadSavedRoute = () => {
-    const activeRoute = tripStore.getActiveRoute();
-    if (activeRoute.stops.length === 0) {
-      Alert.alert("Uyarı", "Yüklenecek rota bulunamadı.");
-      return;
-    }
-    setLoadedRouteDetails({
-      title: activeRoute.name,
-      stops: activeRoute.stops,
-    });
-    setShowRouteLoaderModal(true);
-  };
-
   // Add stop details (flight, transport, hotel, meals)
   const handleAddRouteDetail = (type: "flight" | "transport" | "hotel" | "meals") => {
     if (!loadedRouteDetails) return;
@@ -534,7 +507,6 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
             tripStore.removeStop(action.placeId);
           } else if (action.action === "reorder" && action.newOrder) {
             // Translate ID-order array to index swaps by applying each position sequentially
-            const stops = tripStore.getActiveRoute().stops;
             action.newOrder.forEach((id, targetIdx) => {
               const currentIdx = tripStore.getActiveRoute().stops.findIndex((s) => s.id === id);
               if (currentIdx !== -1 && currentIdx !== targetIdx) {
@@ -672,7 +644,7 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
         routePlanData = {
           title: res.routeTitle || `${detectedCity || "Seyahat"} — Akıllı Rota`,
           dayTitle: `${res.estimatedDays || 1} Günlük ${detectedCity || ""} Planı`,
-          stops: botStops.map((bs, i) => ({
+          stops: botStops.map((bs) => ({
             time: bs.time,
             name: bs.name,
             desc: bs.category,
@@ -693,7 +665,7 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
         tripStore.loadRouteFromExternal(routePlanData.title, botStops);
 
         // Save to backend routes API
-        routeService.createRoute(routePlanData.title, res.stops).catch((e: any) => {
+        routeService.createRoute(routePlanData.title, res.stops).catch((e: unknown) => {
           console.warn("[AIScreen] Background route save note:", e);
         });
       }
@@ -731,14 +703,15 @@ export function AIScreen({ onOpenMap, onOpenProfile }: AIScreenProps) {
         assumptions: res.assumptions && res.assumptions.length > 0 ? res.assumptions : undefined,
       };
       setMessages((prev) => [...prev, botMsg]);
-    } catch (error: any) {
-      if (error?.status && error.status < 500 && ![408, 409].includes(error.status))
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err?.status && err.status < 500 && ![408, 409].includes(err.status))
         pendingTurn.current = null;
       const errMsg: ChatMessageItem = {
         id: `bot-err-${Date.now()}`,
         sender: "bot",
         text:
-          error?.message ||
+          err?.message ||
           "Yanıt alınamadı. Aynı mesajı tekrar göndererek sonucu kontrol edebilirsin.",
         time: nowTime(),
       };

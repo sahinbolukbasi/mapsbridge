@@ -217,7 +217,7 @@ export default function AIPage() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
-  const speech = useRef<any>(null);
+  const speech = useRef<SpeechRecognition | null>(null);
   const [error, setError] = useState("");
   const [errorCode, setErrorCode] = useState("");
   const [notice, setNotice] = useState("");
@@ -299,7 +299,7 @@ export default function AIPage() {
         if (Array.isArray(trips) && trips.length > 0) {
           const tripIdParam = new URLSearchParams(window.location.search).get("tripId");
           const target =
-            (tripIdParam ? trips.find((t: any) => t.id === tripIdParam) : null) || trips[0];
+            (tripIdParam ? (trips as Trip[]).find((t) => t.id === tripIdParam) : null) || (trips as Trip[])[0];
           setCurrentTrip(target || null);
           return;
         }
@@ -336,7 +336,7 @@ export default function AIPage() {
           pins: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-        } as any;
+        } as Trip;
         trips.push(trip!);
       }
 
@@ -347,7 +347,7 @@ export default function AIPage() {
         address: place.address || place.label,
         lat: place.lat ?? 41.0082,
         lng: place.lng ?? 28.9784,
-        category: place.isHotel ? "otel" : (place.category as any) || "genel",
+        category: place.isHotel ? "otel" : ((place.category as import("../lib/trip/models").PinCategory) || "genel"),
         dayIndex: 1,
         order: (trip!.days?.[0]?.pins?.length || 0) + 1,
         group: place.isHotel ? "Konaklama" : "Öneriler",
@@ -382,8 +382,8 @@ export default function AIPage() {
       setNotice(
         `✓ "${place.label}" ${place.isHotel ? "otel olarak" : "durak olarak"} rotana eklendi ve .md manifestosuna işlendi!`,
       );
-    } catch (e: any) {
-      setError(`Rotaya eklenirken hata: ${e.message}`);
+    } catch (e: unknown) {
+      setError(`Rotaya eklenirken hata: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -615,7 +615,7 @@ export default function AIPage() {
                       : 503,
                   });
               } catch (parseErr) {
-                if ((parseErr as any).status) throw parseErr;
+                if ((parseErr as { status?: unknown }).status) throw parseErr;
               }
             }
           }
@@ -717,10 +717,11 @@ export default function AIPage() {
       if (result.billing) setWallet((w) => ({ ...w, credits: result.billing!.credits }));
       pending.current = null;
       void refreshWallet();
-    } catch (e: any) {
-      const code: string = e?.code || "";
+    } catch (e: unknown) {
+      const err = e as { code?: string; status?: number; message?: string };
+      const code: string = err?.code || "";
       setErrorCode(code);
-      if (e?.status === 401 || code === "UNAUTHORIZED") {
+      if (err?.status === 401 || code === "UNAUTHORIZED") {
         const refreshed = await refreshSession();
         if (refreshed?.token) {
           setError("");
@@ -738,11 +739,11 @@ export default function AIPage() {
         setError("AI asistanı kullanmak için e-postanızı onaylamanız gerekiyor. Giriş ekranından onay maili gönderebilirsiniz.");
       } else if (code === "WALLET_FROZEN") {
         setError("Kredi hesabınız geçici olarak durduruldu. Detay için destek ekibine ulaşın.");
-      } else if (code === "INSUFFICIENT_CREDITS" || e?.status === 402) {
-        setError(e?.message || "Bu işlem için yeterli krediniz yok.");
+      } else if (code === "INSUFFICIENT_CREDITS" || err?.status === 402) {
+        setError(err?.message || "Bu işlem için yeterli krediniz yok.");
         if (typeof window !== "undefined")
           window.dispatchEvent(new CustomEvent("mapsbridge:open_upgrade_modal", {
-            detail: { reason: e?.message || "Krediniz yetersiz." },
+            detail: { reason: err?.message || "Krediniz yetersiz." },
           }));
       } else if (code === "USER_DAILY_LIMIT") {
         setError("Bugünlük 20 mesaj sınırına ulaştınız. Sayaç her gece saat 03:00'te (Türkiye saati) sıfırlanır.");
@@ -755,12 +756,12 @@ export default function AIPage() {
       } else if (code === "REQUEST_IN_PROGRESS") {
         setError("Önceki isteğin sonucu bekleniyor. Sonuç gelince otomatik gösterilecek.");
         setRetryAvailable(true);
-      } else if (shouldRecheckRequest(e) || e?.status === 408 || (e?.status >= 500 && code !== "AI_RESULT_UNCONFIRMED")) {
+      } else if (shouldRecheckRequest(e) || err?.status === 408 || ((err?.status ?? 0) >= 500 && code !== "AI_RESULT_UNCONFIRMED")) {
         setError("Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.");
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;
       } else {
-        setError(e?.message || "Yanıt alınamadı. Tekrar deneyebilirsin.");
+        setError(err?.message || "Yanıt alınamadı. Tekrar deneyebilirsin.");
         setRetryAvailable(false);
       }
       setSessions((s) =>
@@ -813,13 +814,14 @@ export default function AIPage() {
         JSON.stringify([...trips.filter((t) => t.id !== tripId), trip]),
       );
       window.location.assign(`/maps/?tripId=${encodeURIComponent(tripId)}`);
-    } catch (e: any) {
-      setError(e.message || "Rota aktarılamadı.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Rota aktarılamadı.");
     }
   }
   function dictate() {
-    const Recognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    type SpeechRecognitionCtor = new () => SpeechRecognition;
+    const win = window as Window & { SpeechRecognition?: SpeechRecognitionCtor; webkitSpeechRecognition?: SpeechRecognitionCtor };
+    const Recognition = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (!Recognition) {
       setNotice("Bu tarayıcı sesli girişi desteklemiyor. Mesajını yazarak gönderebilirsin.");
       return;
@@ -833,7 +835,7 @@ export default function AIPage() {
     recognition.lang = "tr-TR";
     recognition.onstart = () => setListening(true);
     recognition.onend = () => setListening(false);
-    recognition.onresult = (event: any) =>
+    recognition.onresult = (event: SpeechRecognitionEvent) =>
       setInput((old) => `${old} ${event.results[0][0].transcript}`.trim().slice(0, 2000));
     recognition.onerror = () => {
       setListening(false);
@@ -2032,7 +2034,7 @@ export default function AIPage() {
                                       onClick={() =>
                                         addPlaceToActiveTrip({
                                           label: gem.name,
-                                          category: (gem.category as any) || "aktivite",
+                                          category: (gem.category as import("../lib/trip/models").PinCategory) || "aktivite",
                                           note: `${gem.highlight ? gem.highlight + " - " : ""}${gem.description}`,
                                         })
                                       }

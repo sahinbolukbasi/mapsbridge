@@ -21,7 +21,7 @@ export interface BedrockInvokeOptions {
   maxTokens?: number;
   temperature?: number;
   timeoutMs?: number;
-  schema?: Record<string, any>;
+  schema?: Record<string, unknown>;
   history?: DialogueMessage[];
   role?: "intake" | "answer";
   thinking?: boolean;
@@ -139,9 +139,10 @@ export async function invokeBedrockJSON<T>(
     ) as T;
     succeeded = true;
     return { success: true, data, model };
-  } catch (error: any) {
-    console.warn("AI model request failed", error?.name || "Error");
-    timedOut = ["ModelTimeoutException", "TimeoutError", "AbortError"].includes(error?.name);
+  } catch (error: unknown) {
+    const e = error as { name?: string; message?: string };
+    console.warn("AI model request failed", e?.name || "Error");
+    timedOut = ["ModelTimeoutException", "TimeoutError", "AbortError"].includes(e?.name ?? "");
     errorCode = [
       "AI_DISABLED",
       "MODEL_DISABLED",
@@ -149,8 +150,8 @@ export async function invokeBedrockJSON<T>(
       "AI_MODEL_WORK_LIMIT",
       "AI_REQUEST_WORK_LIMIT",
       "INVALID_AI_FINOPS_LIMIT",
-    ].includes(error?.message)
-      ? error.message
+    ].includes(e?.message ?? "")
+      ? e.message
       : [
             "ThrottlingException",
             "AccessDeniedException",
@@ -159,8 +160,8 @@ export async function invokeBedrockJSON<T>(
             "ModelTimeoutException",
             "TimeoutError",
             "AbortError",
-          ].includes(error?.name)
-        ? error.name
+          ].includes(e?.name ?? "")
+        ? e.name
         : "MODEL_INVOCATION_FAILED";
     return { success: false, data: null, model, error: "Model yanıtı alınamadı." };
   } finally {
@@ -247,9 +248,10 @@ export async function invokeBedrockChatStream(
     }
     succeeded = true;
     return { success: true, text: chunks.join(""), model };
-  } catch (error: any) {
-    console.warn("AI streaming request failed", error?.name || "Error");
-    timedOut = ["ModelTimeoutException", "TimeoutError", "AbortError"].includes(error?.name);
+  } catch (error: unknown) {
+    const e = error as { name?: string; message?: string };
+    console.warn("AI streaming request failed", e?.name || "Error");
+    timedOut = ["ModelTimeoutException", "TimeoutError", "AbortError"].includes(e?.name ?? "");
     errorCode = [
       "AI_DISABLED",
       "MODEL_DISABLED",
@@ -257,8 +259,8 @@ export async function invokeBedrockChatStream(
       "AI_MODEL_WORK_LIMIT",
       "AI_REQUEST_WORK_LIMIT",
       "INVALID_AI_FINOPS_LIMIT",
-    ].includes(error?.message)
-      ? error.message
+    ].includes(e?.message ?? "")
+      ? e.message
       : [
             "ThrottlingException",
             "AccessDeniedException",
@@ -267,8 +269,8 @@ export async function invokeBedrockChatStream(
             "ModelTimeoutException",
             "TimeoutError",
             "AbortError",
-          ].includes(error?.name)
-        ? error.name
+          ].includes(e?.name ?? "")
+        ? e.name
         : "MODEL_INVOCATION_FAILED";
     return { success: false, text: chunks.join(""), model, error: "Model yanıtı alınamadı." };
   } finally {
@@ -292,20 +294,23 @@ export async function invokeBedrockChatStream(
 }
 
 export function isUsableIntake(value: unknown): boolean {
-  const data = value as any;
+  if (!value || typeof value !== "object") return false;
+  const data = value as Record<string, unknown>;
+  const context = data.context;
+  if (!context || typeof context !== "object") return false;
+  const ctx = context as Record<string, unknown>;
   return (
-    !!data &&
+    typeof data.action === "string" &&
     ["clarify", "chat", "plan"].includes(data.action) &&
-    !!data.context &&
-    Array.isArray(data.context.interests) &&
-    Array.isArray(data.context.constraints) &&
-    data.context.interests.every((s: unknown) => typeof s === "string") &&
-    data.context.constraints.every((s: unknown) => typeof s === "string") &&
-    typeof data.context.planningRequested === "boolean" &&
+    Array.isArray(ctx.interests) &&
+    Array.isArray(ctx.constraints) &&
+    ctx.interests.every((s: unknown) => typeof s === "string") &&
+    ctx.constraints.every((s: unknown) => typeof s === "string") &&
+    typeof ctx.planningRequested === "boolean" &&
     typeof data.destinationMention === "string" &&
     typeof data.daysMention === "string" &&
     Array.isArray(data.queries) &&
-    data.queries.every((s: unknown) => typeof s === "string")
+    (data.queries as unknown[]).every((s: unknown) => typeof s === "string")
   );
 }
 

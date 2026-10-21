@@ -2,13 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
   StatusBar,
-  ActivityIndicator,
-  Modal,
-  Platform,
   Alert,
   Linking,
 } from "react-native";
@@ -74,7 +68,7 @@ function safeDecodeBase64(input: string): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
   let str = "";
   for (
-    let bc = 0, bs = 0, buffer = 0, idx = 0;
+    let bc = 0, bs = 0, buffer: number, idx = 0;
     (buffer = chars.indexOf(input.charAt(idx++))), ~buffer;
   ) {
     bs = bc % 4 ? bs * 64 + buffer : buffer;
@@ -104,17 +98,6 @@ function decodeJwtPayload(
   return null;
 }
 
-function isJwtExpired(jwt: string): boolean {
-  try {
-    const payload = decodeJwtPayload(jwt);
-    if (payload?.exp) {
-      // 2 minutes margin
-      return Date.now() >= payload.exp * 1000 - 120000;
-    }
-  } catch {}
-  return false;
-}
-
 export function App() {
   const [session, setSession] = useState<UserSession | null>(null);
   const [loadingSession, setLoadingSession] = useState<boolean>(true);
@@ -125,7 +108,7 @@ export function App() {
   const [showSplash, setShowSplash] = useState<boolean>(true);
 
   // Session refresh interval ref
-  const sessionRefreshIntervalRef = React.useRef<any>(null);
+  const sessionRefreshIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Check stored session on launch ──────────────────────────────────────
   useEffect(() => {
@@ -140,7 +123,7 @@ export function App() {
           "mb_last_activity",
         ]);
 
-        let token = keys["mb_token"];
+        const token = keys["mb_token"];
         const email = keys["mb_email"];
         const name = keys["mb_name"];
         const refreshToken = keys["mb_refresh_token"];
@@ -170,13 +153,13 @@ export function App() {
           startSessionRefresh();
 
           // Initialize RevenueCat with user ID after session is set
-          initRevenueCat(effectiveEmail).catch((err: any) =>
+          initRevenueCat(effectiveEmail).catch((err: unknown) =>
             console.warn("[RevenueCat] Init failed:", err),
           );
 
           tripStore
             .syncWithServer()
-            .catch((err: any) => console.warn("Initial route sync error:", err));
+            .catch((err: unknown) => console.warn("Initial route sync error:", err));
 
           // Silently refresh token in background if refresh token exists
           if (refreshToken) {
@@ -268,7 +251,7 @@ export function App() {
     setSession(newSession);
     setShowAuthScreen(false);
     setActiveTab("map");
-    tripStore.syncWithServer().catch((err: any) => console.warn("Route sync error:", err));
+    tripStore.syncWithServer().catch((err: unknown) => console.warn("Route sync error:", err));
   };
 
   // Google Sign-In: Open the real Google OAuth flow
@@ -306,7 +289,7 @@ export function App() {
     if (!url) return true;
 
     // Log URL for debugging (remove in production)
-    console.log("Google Auth URL:", url);
+    console.warn("Google Auth URL:", url);
 
     // Check for OAuth callback or tokens in URL
     const hasCallback =
@@ -331,7 +314,6 @@ export function App() {
 
       let email = "";
       let name = "";
-      let picture = "";
 
       // Extract from id_token (JWT)
       if (tokens.id_token) {
@@ -339,7 +321,6 @@ export function App() {
         if (payload?.email) {
           email = payload.email;
           name = payload.name || payload.given_name || "";
-          picture = (payload as any).picture || "";
         }
       }
 

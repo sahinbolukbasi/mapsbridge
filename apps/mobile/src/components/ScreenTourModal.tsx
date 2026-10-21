@@ -7,7 +7,6 @@ import {
   Modal,
   Dimensions,
   ScrollView,
-  Platform,
 } from "react-native";
 import { storage } from "../services/storage";
 import {
@@ -19,7 +18,6 @@ import {
   UserIcon,
   PinIcon,
   DirectionsIcon,
-  WalkIcon,
   Share2Icon,
   LightbulbIcon,
 } from "./Icons";

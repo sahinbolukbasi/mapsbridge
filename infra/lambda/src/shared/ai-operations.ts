@@ -48,9 +48,9 @@ export async function readEnabledAIAgents(): Promise<Set<string>> {
     if (!result.Item) return new Set(defaultEnabledAgents);
     const row = unmarshall(result.Item);
     const enabled = Array.isArray(row.agents)
-      ? row.agents
-          .filter((agent: any) => agent?.enabled === true && typeof agent.id === "string")
-          .map((agent: any) => agent.id)
+      ? (row.agents as Array<{ enabled?: boolean; id?: string }>)
+          .filter((agent) => agent?.enabled === true && typeof agent.id === "string")
+          .map((agent) => agent.id as string)
       : [];
     return new Set(enabled);
   } catch {

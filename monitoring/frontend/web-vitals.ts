@@ -16,7 +16,7 @@ export interface MetricPayload {
 export function reportWebVitals(metric: MetricPayload): void {
   // Log locally in development
   if (process.env.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
+     
     console.debug(`[Web Vitals] ${metric.name}: ${metric.value.toFixed(2)} (${metric.rating})`);
     return;
   }

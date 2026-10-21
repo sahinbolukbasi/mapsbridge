@@ -12,7 +12,7 @@ interface RoutesTabProps {
   onSearchChange: (query: string) => void;
   onCategoryChange: (category: string) => void;
   onCostChange: (cost: "all" | "free" | "paid") => void;
-  onAddToMyTrip: (route: { title: string; destination?: string; stops?: any[] }) => void;
+  onAddToMyTrip: (route: { title: string; destination?: string; stops?: unknown[] }) => void;
   onOpenStripeModal: (route: MarketRoute) => void;
   onOpenListRouteModal: () => void;
 }

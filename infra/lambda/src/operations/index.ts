@@ -9,9 +9,9 @@ import {
   type ApiGatewayEvent,
 } from "../shared/http";
 import type { AuthorizedEvent } from "../shared/types";
-import { AdminError, bodyOf, text, get, scan, commit } from "../admin/management";
+import { AdminError, bodyOf, text, get, scan, commit, type Row } from "../admin/management";
 const router = new Router();
-const safeTicket = (r: any) => ({
+const safeTicket = (r: Row) => ({
   id: r.id,
   subject: r.subject,
   category: r.category,
@@ -215,7 +215,7 @@ export async function handler(event: ApiGatewayEvent) {
     ) {
       const user = await getVerifiedUser(extractBearerToken(event));
       if (!user) return unauthorized();
-      (event as any).verifiedUser = user;
+      (event as AuthorizedEvent).verifiedUser = user;
     }
     return await router.dispatch(event);
   } catch (error) {

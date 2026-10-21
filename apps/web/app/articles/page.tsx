@@ -27,8 +27,8 @@ export default function ArticlesPage() {
       // Admin panelindeki content endpoint'inden veri çekiyoruz
       const response = await apiFetch<{ content: Blog[] }>("/admin/content", { skipAuth: true });
       setRows(response.content.filter((item) => item.PK?.startsWith("BLOG#")));
-    } catch (err: any) {
-      setError(err.message || "Yazılar yüklenemedi.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Yazılar yüklenemedi.");
     } finally {
       setLoading(false);
     }
@@ -234,8 +234,8 @@ export default function ArticlesPage() {
                         );
                         setSelected(detail);
                       }
-                    } catch (err: any) {
-                      setError(err.message);
+                    } catch (err: unknown) {
+                      setError(err instanceof Error ? err.message : String(err));
                     }
                   }}
                 >

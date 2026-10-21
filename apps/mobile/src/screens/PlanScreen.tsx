@@ -11,8 +11,6 @@ import {
   Linking,
   Modal,
   TextInput,
-  Dimensions,
-  Platform,
   Share,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -216,13 +214,13 @@ export const SAMPLE_TEMPLATES = [
   },
 ];
 
-export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
+export function PlanScreen({ onOpenMap }: PlanScreenProps) {
   const [activeRoute, setActiveRoute] = useState<ActiveRoute>(tripStore.getActiveRoute());
   const [allRoutes, setAllRoutes] = useState<ActiveRoute[]>(tripStore.getAllRoutes());
   const [savedPool, setSavedPool] = useState<TripStop[]>(tripStore.getSavedPool());
-  const [activeDay, setActiveDay] = useState<number>(1);
+  const [activeDay, _setActiveDay] = useState<number>(1);
   const [showPool, setShowPool] = useState<boolean>(false);
-  const [offerings, setOfferings] = useState<any>(null);
+  const [_offerings, setOfferings] = useState<unknown>(null);
   const [showPaywall, setShowPaywall] = useState(false);
 
   // Modals
@@ -1085,7 +1083,7 @@ export function PlanScreen({ onOpenMap, onOpenProfile }: PlanScreenProps) {
                 value={""}
                 onChangeText={(text) => {
                   // Filter routes based on search text - can be implemented
-                  console.log("Searching routes:", text);
+                  console.warn("Searching routes:", text);
                 }}
               />
             </View>

@@ -16,6 +16,7 @@ import { can, routePermission } from "./permissions";
 import { Router } from "../shared/router";
 import { getVerifiedUser } from "../shared/auth";
 import type { ApiGatewayEvent } from "../shared/http";
+import type { AuthorizedEvent } from "../shared/types";
 import {
   ok,
   unauthorized,
@@ -156,7 +157,7 @@ export const handler = async (event: ApiGatewayEvent) => {
           Username: user.sub,
         }),
       );
-      const groupNames = (groupRes.Groups || []).map((g: any) => g.GroupName);
+      const groupNames = (groupRes.Groups || []).map((g) => g.GroupName);
       if (process.env.ADMIN_GROUP_NAME && groupNames.includes(process.env.ADMIN_GROUP_NAME)) {
         role = "admin";
       } else if (
@@ -186,7 +187,7 @@ export const handler = async (event: ApiGatewayEvent) => {
   );
   if (needed && !can(role, needed)) return forbidden("Bu bölüm için yetkiniz bulunmuyor.");
 
-  (event as any).verifiedUser = user;
+  (event as AuthorizedEvent).verifiedUser = user;
 
   try {
     return await router.dispatch(event);

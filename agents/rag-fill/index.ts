@@ -190,8 +190,8 @@ export async function handler(event?: { force?: boolean }): Promise<FillResult> 
       result.generated++;
       // Small delay to avoid Bedrock throttling
       await new Promise((r) => setTimeout(r, 300));
-    } catch (err: any) {
-      console.error(`[error] ${topic.id}:`, err?.message || err);
+    } catch (err: unknown) {
+      console.error(`[error] ${topic.id}:`, err instanceof Error ? err.message : err);
       result.failed.push(topic.id);
     }
   }
@@ -200,8 +200,8 @@ export async function handler(event?: { force?: boolean }): Promise<FillResult> 
     try {
       result.ingestionJobId = await startIngestion(kbId, dataSourceId);
       console.log(`[ingest] Started job ${result.ingestionJobId}`);
-    } catch (err: any) {
-      console.error("[ingest] Failed to start ingestion job:", err?.message || err);
+    } catch (err: unknown) {
+      console.error("[ingest] Failed to start ingestion job:", err instanceof Error ? err.message : err);
     }
   }
 

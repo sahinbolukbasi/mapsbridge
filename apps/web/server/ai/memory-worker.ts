@@ -15,6 +15,7 @@ import {
   QueryCommand,
   DeleteItemCommand,
   UpdateItemCommand,
+  type AttributeValue,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import {
@@ -29,8 +30,8 @@ import {
 const memoryId = () => process.env.AGENTCORE_MEMORY_ID!;
 const core = () =>
   new BedrockAgentCoreClient({ region: process.env.AWS_REGION || "eu-central-1", maxAttempts: 2 });
-const missing = (error: any) => error?.name === "ResourceNotFoundException";
-async function save(job: any) {
+const missing = (error: unknown) => error instanceof Error && error.name === "ResourceNotFoundException";
+async function save(job: Record<string, unknown>) {
   await memoryDb().send(
     new PutItemCommand({
       TableName: memoryTable(),
@@ -203,7 +204,7 @@ export async function processMemoryJob(PK: string, SK: string) {
 
 async function eraseHistory(job: MemoryJob) {
   // Preserve financial accounting; erase stored response content and pre-request conversation snapshots.
-  let cursor: any;
+  let cursor: Record<string, AttributeValue> | undefined;
   do {
     const result = await memoryDb().send(
       new QueryCommand({
@@ -243,15 +244,15 @@ async function eraseHistory(job: MemoryJob) {
             }),
           );
         }
-      } catch (error: any) {
-        if (error?.name !== "ConditionalCheckFailedException") throw error;
+      } catch (error: unknown) {
+        if (!(error instanceof Error) || error.name !== "ConditionalCheckFailedException") throw error;
       }
     }
     cursor = result.LastEvaluatedKey;
   } while (cursor);
 }
 export async function sweepMemoryJobs() {
-  let cursor: any;
+  let cursor: Record<string, AttributeValue> | undefined;
   do {
     const result = await memoryDb().send(
       new ScanCommand({
@@ -266,15 +267,15 @@ export async function sweepMemoryJobs() {
       const row = unmarshall(item);
       try {
         await processMemoryJob(row.PK, row.SK);
-      } catch (error: any) {
-        console.warn("MemorySweepFailed", error?.name || "Error");
+      } catch (error: unknown) {
+        console.warn("MemorySweepFailed", error instanceof Error ? error.name : "Error");
         throw error;
       }
     }
     cursor = result.LastEvaluatedKey;
   } while (cursor);
   // Long-term records have a separate lifecycle from 30-day raw events.
-  let settingsCursor: any;
+  let settingsCursor: Record<string, AttributeValue> | undefined;
   const client = core();
   try {
     do {

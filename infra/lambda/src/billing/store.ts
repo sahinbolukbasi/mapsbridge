@@ -5,6 +5,7 @@ import {
   GetItemCommand,
   TransactWriteItemsCommand,
   PutItemCommand,
+  type TransactWriteItem,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { getDynamoClient } from "../shared/dynamo";
@@ -65,8 +66,8 @@ export async function initializeTrial(userId: string) {
         ConditionExpression: "attribute_not_exists(PK)",
       }),
     );
-  } catch (err: any) {
-    if (err.name !== "ConditionalCheckFailedException") throw err;
+  } catch (err: unknown) {
+    if ((err as { name?: string })?.name !== "ConditionalCheckFailedException") throw err;
   }
 }
 /** Permanent business receipt + balance mutation commit together; retries never grant twice. */
@@ -166,16 +167,17 @@ export async function reserveAI(
         ],
       }),
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (await read(PK, SK))
       throw new BillingError(
         409,
         "REQUEST_ALREADY_USED",
         "Bu işlem daha önce alındı; yeniden ücretlendirilmedi.",
       );
+    const txErr = err as { name?: string; CancellationReasons?: Array<{ Code?: string }> };
     if (
-      err.name === "TransactionCanceledException" &&
-      err.CancellationReasons?.some((r: any) => r.Code === "ConditionalCheckFailed")
+      txErr.name === "TransactionCanceledException" &&
+      txErr.CancellationReasons?.some((r) => r.Code === "ConditionalCheckFailed")
     ) {
       const current = await wallet(userId);
       if (current.frozen)
@@ -336,7 +338,7 @@ export async function finishAI(
     throw new BillingError(500, "INVALID_COST", "Geçersiz kredi işlemi.");
   const PK = `USER#${userId}`,
     SK = `AI#${requestId}`;
-  const items: any[] = [
+  const items: TransactWriteItem[] = [
     {
       Update: {
         TableName: table(),

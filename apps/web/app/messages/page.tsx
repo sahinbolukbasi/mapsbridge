@@ -37,7 +37,7 @@ export default function MessagesPage() {
   // Privacy Filter State: "friends" | "everyone"
   const [messagePrivacy, setMessagePrivacy] = useState<"friends" | "everyone">(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("mapsbridge.messagePrivacy") as any) || "friends";
+      return (localStorage.getItem("mapsbridge.messagePrivacy") as "friends" | "everyone") || "friends";
     }
     return "friends";
   });

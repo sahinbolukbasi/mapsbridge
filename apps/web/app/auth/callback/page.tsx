@@ -46,7 +46,7 @@ export default function AuthCallbackPage() {
 
       // Hiçbir parametre yoksa panele yönlendir
       window.location.assign("/maps/");
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Auth callback hatası:", e);
       setStatus("Giriş doğrulaması sırasında bir hata oluştu.");
     }

@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
   Animated,
   SafeAreaView,
   StatusBar,
@@ -12,7 +11,7 @@ import Svg, { Path, Circle } from "react-native-svg";
 
 import { ExploreIcon, MapIcon, LeafIcon, TreesIcon, SparkIcon, ShieldIcon } from "./Icons";
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
+
 
 interface SplashScreenProps {
   onFinish?: () => void;

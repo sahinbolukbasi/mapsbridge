@@ -27,7 +27,7 @@ export interface CommunityPost {
     stopCount: number;
     destination: string;
     stats?: string;
-    stops?: any[];
+    stops?: unknown[];
   };
   likesCount: number;
   likedByMe: boolean;

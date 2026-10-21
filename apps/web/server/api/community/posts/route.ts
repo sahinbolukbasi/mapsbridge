@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, post }, { status: 201, headers: corsHeaders });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { error: err?.message || "Sunucu hatası" },
+      { error: err instanceof Error ? err.message : "Sunucu hatası" },
       { status: 500, headers: corsHeaders },
     );
   }

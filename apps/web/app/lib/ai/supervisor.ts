@@ -70,6 +70,29 @@ import { isExpired, type AffiliateCard } from "../affiliate/types";
 import { boundedHistory } from "./model-history";
 import { routeEdit, validateRouteEdit } from "./route-edit";
 
+/** Intake model response shape — fields accessed in the supervisor */
+interface IntakeDecisionData {
+  action: string;
+  context?: unknown;
+  destinationMention?: string;
+  daysMention?: string;
+  queries?: unknown[];
+  assumptions?: unknown[];
+  preferenceUpdates?: unknown;
+  edit?: unknown;
+  [key: string]: unknown;
+}
+
+/** Answer model response shape — fields accessed in the supervisor */
+interface AnswerData {
+  orchestratorSummary: string;
+  decisionSummary?: unknown[];
+  citedSourceIds?: unknown[];
+  toolCalls?: Array<{ name: string; input: Record<string, unknown> }>;
+  route?: unknown;
+  [key: string]: unknown;
+}
+
 function safeDecisionSummary(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -176,7 +199,7 @@ export async function runMultiAgentSupervisor(
     };
   }
 
-  const decision = await invokeIntakeJSON<any>(
+  const decision = await invokeIntakeJSON<IntakeDecisionData>(
     JSON.stringify({
       request,
       routeMode: payload.routeMode,
@@ -405,7 +428,7 @@ export async function runMultiAgentSupervisor(
       ? researchPlaces(
           context,
           Array.isArray(decision.data.queries)
-            ? decision.data.queries.filter((q: any) => typeof q === "string")
+            ? decision.data.queries.filter((q: unknown): q is string => typeof q === "string")
             : [],
         )
       : Promise.resolve(undefined);
@@ -447,7 +470,7 @@ export async function runMultiAgentSupervisor(
           lng: stop.lng,
           address: stop.address || "",
           category: stop.category || "Gezi",
-          checkedAt: (stop as any).checkedAt || research.checkedAt,
+          checkedAt: (stop as RouteStop & { checkedAt?: string }).checkedAt || research.checkedAt,
         });
     }
   }
@@ -479,7 +502,7 @@ export async function runMultiAgentSupervisor(
           affiliateLink: flightPrices.affiliateLinkBase,
           deals: (flightPrices.deals || [])
             .slice(0, 2)
-            .map((d: any) => ({ price: d.price, month: d.departureMonth, link: d.affiliateLink })),
+            .map((d) => ({ price: d.price, month: d.departureMonth, link: d.affiliateLink })),
         }
       : null;
   const input = {
@@ -514,7 +537,7 @@ export async function runMultiAgentSupervisor(
   const prefsSummary = buildPreferencesSummary({
     pace: tripProfile.pace,
     budget: tripProfile.budget?.level,
-    travelStyle: (tripProfile as any).travelStyle,
+    travelStyle: tripProfile.travelStyle,
     interests: context.interests,
     constraints: context.constraints,
     travelers: tripProfile.travelers,
@@ -624,7 +647,7 @@ export async function runMultiAgentSupervisor(
         model: r.model,
       }));
     }
-    return invokeBedrockJSON<any>(
+    return invokeBedrockJSON<AnswerData>(
       JSON.stringify({
         ...input,
         ...(repair
@@ -667,7 +690,7 @@ export async function runMultiAgentSupervisor(
       const verifiedPrices = flightHint
         ? [
             String(flightHint.cheapestPrice),
-            ...(flightHint.deals || []).map((d: any) => String(d.price)),
+            ...(flightHint.deals || []).map((d) => String(d.price)),
           ]
         : [];
       const rawNum = priceMatch[0].replace(/[^0-9]/g, "");
@@ -864,10 +887,10 @@ export async function runMultiAgentSupervisor(
       for (const dr of dispatchResults) {
         if (dr.status !== "skipped") {
           involved.push({
-            agentId: dr.agentId as any,
+            agentId: dr.agentId as SubAgentExecution["agentId"],
             agentName: dr.agentName,
             icon: dr.icon,
-            status: dr.status as any,
+            status: dr.status as SubAgentExecution["status"],
             durationMs: dr.durationMs,
             ...(dr.summaryNote ? { summaryNote: dr.summaryNote } : {}),
           });
@@ -1034,30 +1057,32 @@ export function sortAndEnrichDayStops(dayStops: RouteStop[]): RouteStop[] {
 }
 
 export function buildResearchedRoute(
-  candidate: any,
+  candidate: unknown,
   context: TripContext,
   research: PlaceResearch,
 ): UnifiedRoutePlan {
-  if (!candidate || !Array.isArray(candidate.stops) || candidate.stops.length > 21)
+  const cand = candidate as Record<string, unknown>;
+  if (!cand || !Array.isArray(cand.stops) || (cand.stops as unknown[]).length > 21)
     throw Error("Rota oluşturulamadı.");
   const estimatedDays = context.days ?? 0;
   if (
     !Number.isInteger(estimatedDays) ||
     estimatedDays < 1 ||
     estimatedDays > 7 ||
-    (candidate.estimatedDays !== undefined && candidate.estimatedDays !== estimatedDays)
+    (cand.estimatedDays !== undefined && cand.estimatedDays !== estimatedDays)
   )
     throw Error("Geçersiz gün sayısı.");
   const used = new Set<string>();
-  const rawStops: RouteStop[] = candidate.stops.map((stop: any) => {
-    if (!stop || typeof stop !== "object") throw Error("Geçersiz durak.");
-    const place = research.places.find((p, i) => `P${i + 1}` === stop.placeId);
+  const rawStops: RouteStop[] = (cand.stops as unknown[]).map((stop: unknown) => {
+    const s = stop as Record<string, unknown>;
+    if (!s || typeof s !== "object") throw Error("Geçersiz durak.");
+    const place = research.places.find((p, i) => `P${i + 1}` === s.placeId);
     if (
       !place ||
       used.has(place.id) ||
-      !Number.isInteger(stop.day) ||
-      stop.day < 1 ||
-      stop.day > estimatedDays
+      !Number.isInteger(s.day) ||
+      (s.day as number) < 1 ||
+      (s.day as number) > estimatedDays
     )
       throw Error("Araştırılmamış veya tekrarlı durak.");
     used.add(place.id);
@@ -1068,32 +1093,32 @@ export function buildResearchedRoute(
       lng: place.lng,
       address: place.address,
       category: place.category,
-      checkedAt: (place as any).checkedAt,
-      day: stop.day,
-      description: typeof stop.description === "string" ? stop.description.slice(0, 500) : "",
+      checkedAt: (place as ResearchedPlace & { checkedAt?: string }).checkedAt,
+      day: s.day as number,
+      description: typeof s.description === "string" ? (s.description as string).slice(0, 500) : "",
       suggestedDuration:
-        typeof stop.suggestedDuration === "string"
-          ? stop.suggestedDuration.slice(0, 80)
+        typeof s.suggestedDuration === "string"
+          ? (s.suggestedDuration as string).slice(0, 80)
           : "Süre belirlenmedi",
       estimatedMinutes: place.typicalDurationMins,
       timeSlot:
-        stop.timeSlot && ["morning", "afternoon", "evening", "night"].includes(stop.timeSlot)
-          ? stop.timeSlot
+        s.timeSlot && ["morning", "afternoon", "evening", "night"].includes(s.timeSlot as string)
+          ? (s.timeSlot as string)
           : place.recommendedSlot || undefined,
     };
   });
 
   const enrichedStops: RouteStop[] = [];
   for (let d = 1; d <= estimatedDays; d++) {
-    const dayStops = rawStops.filter((s) => s.day === d);
+    const dayStops = rawStops.filter((stop) => stop.day === d);
     enrichedStops.push(...sortAndEnrichDayStops(dayStops));
   }
 
   const route = {
-    title: candidate.title,
-    summary: candidate.summary,
-    theme: candidate.theme,
-    destination: context.destination || candidate.destination || "",
+    title: cand.title as string,
+    summary: cand.summary as string,
+    theme: cand.theme as string | undefined,
+    destination: context.destination || (cand.destination as string) || "",
     estimatedDays,
     stops: enrichedStops,
   };
@@ -1101,7 +1126,7 @@ export function buildResearchedRoute(
     !isRoutePlan(route) ||
     route.stops.length > 21 ||
     Array.from({ length: route.estimatedDays }, (_, i) => i + 1).some(
-      (day) => !enrichedStops.some((s: any) => s.day === day),
+      (day) => !enrichedStops.some((stop) => stop.day === day),
     )
   )
     throw Error("Rota doğrulanamadı.");

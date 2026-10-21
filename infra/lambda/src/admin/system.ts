@@ -1,6 +1,7 @@
 import type { ApiGatewayEvent } from "../shared/http";
 import { ok, parseBody, badRequest } from "../shared/http";
 import { get, commit, getTableName } from "./management";
+import type { AuthorizedEvent } from "../shared/types";
 
 export async function handleGetSystemConfig() {
   const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
@@ -21,7 +22,7 @@ export async function handleGetSystemConfig() {
 }
 
 export async function handleUpdateSystemConfig(event: ApiGatewayEvent) {
-  const body = parseBody<Record<string, any>>(event);
+  const body = parseBody<Record<string, unknown>>(event);
   if (!body || typeof body.maintenanceMode !== "boolean")
     return badRequest("Bakım modu boolean olmalıdır.");
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
@@ -45,7 +46,7 @@ export async function handleUpdateSystemConfig(event: ApiGatewayEvent) {
     routeCreationEnabled: previous?.routeCreationEnabled ?? true,
     sharesEnabled: previous?.sharesEnabled ?? true,
     reason,
-    updatedBy: (event as any).verifiedUser.sub,
+    updatedBy: (event as AuthorizedEvent).verifiedUser.sub,
   };
   for (const flag of ["routeCreationEnabled", "sharesEnabled"] as const) {
     if (body[flag] !== undefined) {
@@ -78,7 +79,7 @@ export async function handleGetModuleConfig() {
 }
 
 export async function handleUpdateModuleConfig(event: ApiGatewayEvent) {
-  const body = parseBody<Record<string, any>>(event);
+  const body = parseBody<Record<string, unknown>>(event);
   if (!body) return badRequest("Geçerli istek verisi gerekli.");
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
   if (!reason || reason.length > 1000)
@@ -102,7 +103,7 @@ export async function handleUpdateModuleConfig(event: ApiGatewayEvent) {
   }
   current.PK = "SYSTEM#MODULES";
   current.SK = "META";
-  current.updatedBy = (event as any).verifiedUser.sub;
+  current.updatedBy = (event as AuthorizedEvent).verifiedUser.sub;
 
   const moduleConfig = await commit(event, current, "module_config_updated", reason, previous);
   return ok({ status: "updated", moduleConfig });
@@ -154,7 +155,7 @@ export async function handleAgentCoreStatus() {
   const gatewayId = process.env.AGENTCORE_GATEWAY_ID;
   const workerName = `${process.env.ENVIRONMENT === "prod" ? "mapsbridge-prod" : "mapsbridge-dev"}-ai-memory-worker`;
   const dlqUrl = process.env.MEMORY_DLQ_URL;
-  const result: Record<string, any> = { observedAt: new Date().toISOString(), region };
+  const result: Record<string, unknown> = { observedAt: new Date().toISOString(), region };
 
   if (gatewayId) {
     try {

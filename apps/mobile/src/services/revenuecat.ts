@@ -75,9 +75,10 @@ export async function purchasePackage(
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     _cachedCustomerInfo = customerInfo;
     return { success: true, customerInfo };
-  } catch (err: any) {
-    if (err?.userCancelled) return { success: false, error: "cancelled" };
-    return { success: false, error: err?.message || "Satın alma başarısız." };
+  } catch (err: unknown) {
+    const rcErr = err as { userCancelled?: boolean; message?: string } | null;
+    if (rcErr?.userCancelled) return { success: false, error: "cancelled" };
+    return { success: false, error: rcErr?.message || "Satın alma başarısız." };
   }
 }
 
@@ -92,7 +93,7 @@ export async function restorePurchases(): Promise<{
     _cachedCustomerInfo = customerInfo;
     const pro = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
     return { success: true, isPro: pro, customerInfo };
-  } catch (err: any) {
-    return { success: false, isPro: false, error: err?.message || "Geri yükleme başarısız." };
+  } catch (err: unknown) {
+    return { success: false, isPro: false, error: err instanceof Error ? err.message : "Geri yükleme başarısız." };
   }
 }

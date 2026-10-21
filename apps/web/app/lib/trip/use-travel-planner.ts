@@ -32,7 +32,7 @@ function routeEntityToTrip(entity: RouteEntity): Trip {
     address: s.address || "",
     lat: s.lat,
     lng: s.lng,
-    category: (s.category as any) || "genel",
+    category: (s.category as string) || "genel",
     dayIndex: s.day || 1,
     order: idx + 1,
     group: "",
@@ -215,7 +215,7 @@ export function useTravelPlanner() {
   }, []);
 
   // Debounced auto-sync of active trip to server
-  const serverSyncTimerRef = useRef<any>(null);
+  const serverSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (typeof window === "undefined" || !activeTrip) return;
     const session = getStoredSession();

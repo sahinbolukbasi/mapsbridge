@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import Svg, { Path, Circle, Defs, Pattern, Rect, Text as SvgText, G } from "react-native-svg";
+import Svg, { Path, Circle, Text as SvgText, G } from "react-native-svg";
 
 interface RouteLoadingModalProps {
   visible: boolean;

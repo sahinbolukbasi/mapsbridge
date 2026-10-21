@@ -282,7 +282,7 @@ export interface StructuredTransitCardDto {
 export interface AIAssistantActionDto {
   type:
     "ADD_PINS_TO_DAY" | "SWITCH_TO_RAIN_ALTERNATIVE" | "OPTIMIZE_ROUTE_ORDER" | "REPLAN_SCHEDULE";
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
 }
 
 export interface StructuredAIResponseDto {

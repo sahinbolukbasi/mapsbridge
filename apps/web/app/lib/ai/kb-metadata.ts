@@ -21,7 +21,7 @@ export function isDocumentStale(
 
 export function validateKBMeta(meta: unknown): meta is KnowledgeBaseMetadata {
   if (!meta || typeof meta !== "object") return false;
-  const m = meta as Record<string, any>;
+  const m = meta as Record<string, unknown>;
   const validCategories = [
     "cafe",
     "food",
@@ -44,9 +44,9 @@ export function validateKBMeta(meta: unknown): meta is KnowledgeBaseMetadata {
 }
 
 export function filterDocumentsByMetadata(
-  documents: Array<{ metadata?: KnowledgeBaseMetadata; text: string; [key: string]: any }>,
+  documents: Array<{ metadata?: KnowledgeBaseMetadata; text: string; [key: string]: unknown }>,
   filters: { sehir?: string; kategori?: string; mahalle?: string; excludeStale?: boolean },
-): Array<{ metadata?: KnowledgeBaseMetadata; text: string; [key: string]: any }> {
+): Array<{ metadata?: KnowledgeBaseMetadata; text: string; [key: string]: unknown }> {
   return documents.filter((doc) => {
     if (!doc.metadata) return false;
 
@@ -73,8 +73,8 @@ export function filterDocumentsByMetadata(
 export function buildBedrockRetrievalFilter(filters: {
   sehir?: string;
   kategori?: string;
-}): Record<string, any> | undefined {
-  const conditions: Array<Record<string, any>> = [];
+}): Record<string, unknown> | undefined {
+  const conditions: Array<Record<string, unknown>> = [];
 
   if (filters.sehir) {
     conditions.push({

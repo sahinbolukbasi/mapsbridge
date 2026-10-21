@@ -112,7 +112,7 @@ async function callDataTool(
       : undefined;
     const data =
       result.structuredContent ?? (typeof text === "string" ? JSON.parse(text) : undefined);
-    if (!data || (data as any).unavailable) return null;
+    if (!data || (data as Record<string, unknown>).unavailable) return null;
     succeeded = true;
     return data;
   } catch {

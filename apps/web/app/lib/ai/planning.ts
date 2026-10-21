@@ -59,7 +59,7 @@ export function calculateTripCompleteness(profile: Partial<TripProfile>): number
   return Math.min(1.0, Math.round(score * 100) / 100);
 }
 
-export function cleanTripProfile(value: any): TripProfile {
+export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
   const dest =
     typeof value?.destination === "string" && value.destination.trim()
       ? value.destination.trim().slice(0, 120)
@@ -71,12 +71,12 @@ export function cleanTripProfile(value: any): TripProfile {
         ? value.days
         : undefined;
 
-  const cleanList = (arr: any, maxLen = 60, maxItems = 6): string[] =>
+  const cleanList = (arr: unknown, maxLen = 60, maxItems = 6): string[] =>
     Array.isArray(arr)
       ? [
           ...new Set<string>(
             arr
-              .filter((v: any) => typeof v === "string" && v.trim())
+              .filter((v): v is string => typeof v === "string" && !!v.trim())
               .map((v: string) => v.trim().slice(0, maxLen)),
           ),
         ].slice(0, maxItems)
@@ -102,7 +102,7 @@ export function cleanTripProfile(value: any): TripProfile {
   const pace = ["relaxed", "moderate", "fast"].includes(value?.pace) ? value.pace : undefined;
   const validLodgings = ["hotel", "hostel", "apartment", "boutique", "resort"];
   const lodging_type = Array.isArray(value?.lodging_type)
-    ? value.lodging_type.filter((t: any) => validLodgings.includes(t))
+    ? value.lodging_type.filter((t: string) => validLodgings.includes(t))
     : undefined;
 
   const profile: TripProfile = {
@@ -208,7 +208,7 @@ export function profileToContext(profile: TripProfile, planningRequested = false
 
 export function mergeTripProfile(
   previous: TripProfile,
-  updates: any,
+  updates: Record<string, unknown>,
   userText: string,
 ): TripProfile {
   const cleanUpdates = cleanTripProfile(updates);
@@ -462,7 +462,7 @@ export function generateConciergeQuestion(profile: TripProfile): {
   };
 }
 
-export function cleanContext(value: any): TripContext {
+export function cleanContext(value: Record<string, unknown>): TripContext {
   return {
     ...(typeof value?.destination === "string" && value.destination.trim()
       ? { destination: value.destination.trim().slice(0, 120) }
@@ -474,7 +474,7 @@ export function cleanContext(value: any): TripContext {
       ? [
           ...new Set<string>(
             value.interests
-              .filter((v: any) => typeof v === "string" && v.trim())
+              .filter((v): v is string => typeof v === "string" && !!v.trim())
               .map((v: string) => v.trim().slice(0, 60)),
           ),
         ].slice(0, 8)
@@ -483,7 +483,7 @@ export function cleanContext(value: any): TripContext {
     ...(Array.isArray(value?.constraints)
       ? {
           constraints: value.constraints
-            .filter((v: any) => typeof v === "string" && v.trim())
+            .filter((v): v is string => typeof v === "string" && !!v.trim())
             .map((v: string) => v.trim().slice(0, 180))
             .slice(-8),
         }
@@ -491,7 +491,7 @@ export function cleanContext(value: any): TripContext {
     planningRequested: value?.planningRequested === true,
   };
 }
-export function mergeContext(previous: TripContext, decision: any, userText: string): TripContext {
+export function mergeContext(previous: TripContext, decision: Record<string, unknown>, userText: string): TripContext {
   const next = cleanContext(decision.context);
   // A destination may only change when the model identifies a literal user mention.
   const mention =

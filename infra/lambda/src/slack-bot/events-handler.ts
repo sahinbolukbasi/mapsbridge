@@ -1,3 +1,18 @@
+interface SlackEvent {
+  type?: string;
+  channel?: string;
+  text?: string;
+  bot_id?: string;
+  subtype?: string;
+}
+
+interface SlackPayload {
+  type?: string;
+  challenge?: string;
+  event_id?: string;
+  event?: SlackEvent;
+}
+
 const seenEvents = new Map<string, number>();
 const DEDUP_TTL_MS = 5 * 60 * 1000;
 
@@ -13,9 +28,9 @@ export async function handleSlackEvent(
   headers: Record<string, string>,
   botToken: string,
 ): Promise<{ statusCode: number; body: string }> {
-  let payload: any;
+  let payload: SlackPayload;
   try {
-    payload = JSON.parse(body);
+    payload = JSON.parse(body) as SlackPayload;
   } catch {
     return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON" }) };
   }
@@ -53,7 +68,7 @@ export async function handleSlackEvent(
   return { statusCode: 200, body: JSON.stringify({ ok: true }) };
 }
 
-async function processEvent(event: any, botToken: string): Promise<void> {
+async function processEvent(event: SlackEvent, botToken: string): Promise<void> {
   const channel = event.channel;
   if (!channel || !botToken) return;
 

@@ -61,14 +61,12 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
     return null;
   }
 
-  let claims: any;
+  let claims: Record<string, unknown>;
   try {
-    claims = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
+    const parsed: unknown = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    claims = parsed as Record<string, unknown>;
   } catch {
-    return null;
-  }
-
-  if (!claims || typeof claims !== "object") {
     return null;
   }
 
@@ -121,7 +119,7 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
           await import("@aws-sdk/client-cognito-identity-provider");
         const cognito = new CognitoIdentityProviderClient({
           region,
-          requestHandler: { requestTimeout: 4000 } as any,
+          requestHandler: { requestTimeout: 4000 } as unknown as ConstructorParameters<typeof CognitoIdentityProviderClient>[0]["requestHandler"],
         });
         const result = await cognito.send(
           new ListUsersCommand({

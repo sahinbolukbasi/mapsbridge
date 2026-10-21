@@ -28,7 +28,7 @@ interface DiscoverTabProps {
   onToggleLike: (postId: string) => void;
   onToggleBookmark?: (postId: string) => void;
   onRetweet?: (postId: string) => void;
-  onAddToMyTrip: (route: { title: string; destination?: string; stops?: any[] }) => void;
+  onAddToMyTrip: (route: { title: string; destination?: string; stops?: unknown[] }) => void;
   onOpenNewPost: () => void;
   onToggleFollow: (username: string) => void;
   onAddComment: (postId: string, text: string) => void;

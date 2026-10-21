@@ -13,16 +13,13 @@ import {
   Alert,
   StatusBar,
 } from "react-native";
-import { tripStore } from "../services/tripStore";
+import { tripStore, TripStop } from "../services/tripStore";
 import { authService } from "../services/api";
 import { chatStore, ChatContact, ChatBubbleItem, RouteEmbedData } from "../services/chatStore";
 import {
   ChatIcon,
   SearchIcon,
-  EditIcon,
   MapIcon,
-  PinIcon,
-  CalendarIcon,
   BalloonIcon,
   MountainIcon,
 } from "../components/Icons";
@@ -129,7 +126,7 @@ export function ChatScreen({
   };
 
   const handleCloneRouteToDesk = (route: RouteEmbedData) => {
-    tripStore.loadRouteFromExternal(route.title, route.stopsData as any);
+    tripStore.loadRouteFromExternal(route.title, route.stopsData as unknown as TripStop[]);
     Alert.alert(
       "🗺️ Masama Klonlandı",
       `"${route.title}" rotası ve ${route.stopsData.length} durak seyahat masanıza başarıyla aktarıldı!`,
@@ -137,7 +134,7 @@ export function ChatScreen({
   };
 
   const handleInspectRouteOnMap = (route: RouteEmbedData) => {
-    tripStore.loadRouteFromExternal(route.title, route.stopsData as any);
+    tripStore.loadRouteFromExternal(route.title, route.stopsData as unknown as TripStop[]);
     if (onOpenMap) onOpenMap();
   };
 

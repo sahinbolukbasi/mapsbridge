@@ -74,9 +74,9 @@ export default function ForgotPasswordPage() {
       setStatus(
         `6 haneli doğrulama kodu ${cleanEmail} adresine gönderildi. Lütfen gelen kutunuzu kontrol ediniz.`,
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       setMessage(
-        err.message || "Doğrulama kodu gönderilemedi. Lütfen e-posta adresinizi kontrol edin.",
+        (err instanceof Error ? err.message : null) || "Doğrulama kodu gönderilemedi. Lütfen e-posta adresinizi kontrol edin.",
       );
     } finally {
       setIsLoading(false);
@@ -130,8 +130,8 @@ export default function ForgotPasswordPage() {
       setTimeout(() => {
         router.push("/maps/");
       }, 1000);
-    } catch (err: any) {
-      setMessage(err.message || "Şifre güncellenemedi. Lütfen kodu kontrol edip tekrar deneyin.");
+    } catch (err: unknown) {
+      setMessage((err instanceof Error ? err.message : null) || "Şifre güncellenemedi. Lütfen kodu kontrol edip tekrar deneyin.");
       setIsLoading(false);
     }
   }
@@ -153,8 +153,8 @@ export default function ForgotPasswordPage() {
     try {
       await forgotPassword(cleanEmail);
       setStatus(`Yeni 6 haneli doğrulama kodu ${cleanEmail} adresine tekrar gönderildi.`);
-    } catch (err: any) {
-      setMessage(err.message || "Kod tekrar gönderilemedi. Lütfen biraz bekleyin.");
+    } catch (err: unknown) {
+      setMessage((err instanceof Error ? err.message : null) || "Kod tekrar gönderilemedi. Lütfen biraz bekleyin.");
     } finally {
       setIsLoading(false);
     }

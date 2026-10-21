@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   coverGradientOverlay: {
-    ...(StyleSheet.absoluteFill as any),
+    ...(StyleSheet.absoluteFill as object),
     backgroundColor: "rgba(13, 40, 30, 0.35)",
   },
   coverTopBar: {

@@ -31,7 +31,7 @@ export interface ServerCommunityPost {
     stopCount: number;
     destination: string;
     stats?: string;
-    stops?: any[];
+    stops?: Record<string, unknown>[];
   };
   likesCount: number;
   likedBy: string[]; // usernames of users who liked
@@ -89,8 +89,14 @@ function savePostsToDisk(posts: ServerCommunityPost[]): void {
   }
 }
 
+type CommunityPostWithStatus = ServerCommunityPost & {
+  likedByMe: boolean;
+  savedByMe: boolean;
+  repostedByMe: boolean;
+};
+
 export const communityStore = {
-  getAll(currentUsername?: string): any[] {
+  getAll(currentUsername?: string): CommunityPostWithStatus[] {
     if (!memoryPosts) {
       memoryPosts = loadPostsFromDisk();
     }
@@ -104,7 +110,7 @@ export const communityStore = {
     }));
   },
 
-  getById(id: string, currentUsername?: string): any | null {
+  getById(id: string, currentUsername?: string): CommunityPostWithStatus | null {
     if (!memoryPosts) {
       memoryPosts = loadPostsFromDisk();
     }

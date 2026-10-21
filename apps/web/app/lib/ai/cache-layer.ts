@@ -19,7 +19,7 @@ interface CacheEntry<T> {
 }
 
 class MemoryCacheStore {
-  private store: Map<string, CacheEntry<any>> = new Map();
+  private store: Map<string, CacheEntry<unknown>> = new Map();
 
   generateCacheKey(category: CacheCategory, ...parts: string[]): string {
     const cleanParts = parts.map((p) => p.trim().toLowerCase().replace(/\s+/g, "_"));

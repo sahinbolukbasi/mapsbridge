@@ -5,6 +5,22 @@ import { readShare } from "../lib/api";
 import { useEffect, useRef, useState } from "react";
 import "./k.css";
 
+interface LeafletMap {
+  remove(): void;
+  flyTo(latlng: [number, number], zoom: number, opts?: Record<string, unknown>): void;
+}
+
+interface LeafletMarker {
+  remove(): void;
+}
+
+interface LeafletLib {
+  map(el: HTMLElement, opts?: Record<string, unknown>): LeafletMap;
+  tileLayer(url: string, opts?: Record<string, unknown>): { addTo(map: LeafletMap): void };
+  divIcon(opts: Record<string, unknown>): unknown;
+  marker(latlng: [number, number], opts?: Record<string, unknown>): LeafletMarker;
+}
+
 interface ShareData {
   code: string;
   lat: number;
@@ -16,8 +32,8 @@ interface ShareData {
 
 export default function FindByCodePage() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
+  const markerRef = useRef<LeafletMarker | null>(null);
   const latestShare = useRef<ShareData | null>(null);
   const requestSequence = useRef(0);
 
@@ -32,7 +48,7 @@ export default function FindByCodePage() {
     let isMounted = true;
 
     function initMap() {
-      const L = (window as any).L;
+      const L = (window as Window & { L?: LeafletLib }).L;
       if (!L || !mapContainerRef.current || mapInstanceRef.current) return;
 
       const map = L.map(mapContainerRef.current, {
@@ -56,7 +72,7 @@ export default function FindByCodePage() {
       fetchLocationByCode(queryCode);
     }
 
-    if (!(window as any).L) {
+    if (!(window as Window & { L?: LeafletLib }).L) {
       if (!document.getElementById("leaflet-css")) {
         const link = document.createElement("link");
         link.id = "leaflet-css";
@@ -110,8 +126,8 @@ export default function FindByCodePage() {
       setShowLookupModal(false);
 
       renderShare(data);
-    } catch (err: any) {
-      if (sequence === requestSequence.current) setError(err.message || "Konum sorgulanamadı.");
+    } catch (err: unknown) {
+      if (sequence === requestSequence.current) setError((err instanceof Error ? err.message : null) || "Konum sorgulanamadı.");
     } finally {
       if (sequence === requestSequence.current) setLoading(false);
     }
@@ -119,7 +135,7 @@ export default function FindByCodePage() {
 
   function renderShare(data: ShareData) {
     // Render marker and fly on map
-    const L = (window as any).L;
+    const L = (window as Window & { L?: LeafletLib }).L;
     if (mapInstanceRef.current && L) {
       const customPin = L.divIcon({
         className: "custom-map-pin",

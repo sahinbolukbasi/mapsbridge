@@ -69,7 +69,7 @@ export default function ProfilePage() {
   const [poolCategoryFilter, setPoolCategoryFilter] = useState<string>("all");
 
   // Data Stores
-  const [savedTrips, setSavedTrips] = useState<any[]>([]);
+  const [savedTrips, setSavedTrips] = useState<Array<{ id?: string; pins?: unknown[] }>>([]);
   const [savedPins, setSavedPins] = useState<SavedPoint[]>([]);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -129,7 +129,7 @@ export default function ProfilePage() {
       if (tripsRaw) {
         const parsed = JSON.parse(tripsRaw);
         if (Array.isArray(parsed?.trips)) {
-          const validTrips = parsed.trips.filter((t: any) => t.pins && t.pins.length > 0);
+          const validTrips = parsed.trips.filter((t: { pins?: unknown[] }) => t.pins && t.pins.length > 0);
           setSavedTrips(validTrips);
         }
       }

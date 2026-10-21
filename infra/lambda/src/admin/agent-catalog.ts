@@ -83,10 +83,11 @@ function normalize(value: Record<string, unknown> | null): AgentDefinition[] {
   const stored = Array.isArray(value?.agents) ? value.agents : [];
   const byId = new Map(DEFAULT_AGENTS.map((agent) => [agent.id, agent]));
   for (const candidate of stored) {
-    if (!candidate || typeof candidate !== "object" || typeof (candidate as any).id !== "string")
-      continue;
-    const base = byId.get((candidate as any).id);
-    if (base) byId.set(base.id, { ...base, enabled: (candidate as any).enabled === true });
+    if (!candidate || typeof candidate !== "object") continue;
+    const c = candidate as Record<string, unknown>;
+    if (typeof c.id !== "string") continue;
+    const base = byId.get(c.id);
+    if (base) byId.set(base.id, { ...base, enabled: c.enabled === true });
   }
   return [...byId.values()];
 }

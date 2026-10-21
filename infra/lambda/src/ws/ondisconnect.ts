@@ -6,7 +6,7 @@
 import { DynamoDBClient, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 
-export const handler = async (event: any) => {
+export const handler = async (event: { requestContext?: { connectionId?: string } }) => {
   const connectionId = event.requestContext?.connectionId;
 
   if (!connectionId) {

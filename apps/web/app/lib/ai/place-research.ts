@@ -120,10 +120,11 @@ export async function researchPlaces(
     );
     if (!isPlaceResearch(result)) throw new Error("INVALID_PLACE_RESEARCH");
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Do not bypass Gateway authorization/policy failures with a direct AWS call.
-    if (["TimeoutError", "AbortError"].includes(error?.name)) emitResearchTimeoutMetric();
-    console.warn("GatewayPlaceResearchUnavailable", error?.name || "Error");
+    const errName = error instanceof Error ? error.name : "Error";
+    if (["TimeoutError", "AbortError"].includes(errName)) emitResearchTimeoutMetric();
+    console.warn("GatewayPlaceResearchUnavailable", errName);
     return {
       status: "unavailable",
       places: [],
@@ -219,9 +220,10 @@ export async function researchPlacesDirect(
           : "unavailable",
       places: [...places.values()].slice(0, 30),
     };
-  } catch (error: any) {
-    if (["TimeoutError", "AbortError"].includes(error?.name)) emitResearchTimeoutMetric();
-    console.warn("Place research unavailable", error?.name || "Error");
+  } catch (error: unknown) {
+    const errName = error instanceof Error ? error.name : "Error";
+    if (["TimeoutError", "AbortError"].includes(errName)) emitResearchTimeoutMetric();
+    console.warn("Place research unavailable", errName);
     return empty;
   }
 }

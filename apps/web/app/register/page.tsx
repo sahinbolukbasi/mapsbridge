@@ -6,6 +6,26 @@ import { HeaderNav } from "../components/header-nav";
 import { SiteFooter } from "../components/site-footer";
 import "./register.css";
 
+interface GoogleCredentialResponse { credential: string; }
+interface GoogleTokenResponse { error?: string; access_token?: string; }
+interface GooglePromptNotification {
+  isNotDisplayed(): boolean;
+  isSkippedMoment(): boolean;
+}
+interface GoogleIdService {
+  initialize(config: Record<string, unknown>): void;
+  renderButton(container: Element, options: Record<string, unknown>): void;
+  prompt(cb?: (n: GooglePromptNotification) => void): void;
+}
+interface GoogleOAuth2Service {
+  initTokenClient(config: Record<string, unknown>): { requestAccessToken(opts: Record<string, unknown>): void };
+}
+declare global {
+  interface Window {
+    google?: { accounts?: { id?: GoogleIdService; oauth2?: GoogleOAuth2Service } };
+  }
+}
+
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [fullname, setFullname] = useState("");
@@ -67,7 +87,7 @@ export default function SignUpPage() {
   }, [redirectToNext]);
 
   const handleCredential = useCallback(
-    (response: any) => {
+    (response: GoogleCredentialResponse) => {
       try {
         setIsGoogleLoading(true);
         setMessage("");
@@ -75,9 +95,9 @@ export default function SignUpPage() {
         if (res) {
           redirectToNext();
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Google kayıt hatası:", err);
-        setMessage(err.message || "Google ile kayıt başarısız oldu. Lütfen tekrar deneyin.");
+        setMessage(err instanceof Error ? err.message : "Google ile kayıt başarısız oldu. Lütfen tekrar deneyin.");
       } finally {
         setIsGoogleLoading(false);
       }
@@ -89,7 +109,7 @@ export default function SignUpPage() {
     if (typeof window === "undefined") return;
 
     const initGoogle = () => {
-      const google = (window as any).google;
+      const google = window.google;
       if (!google?.accounts?.id) return;
 
       try {
@@ -135,7 +155,7 @@ export default function SignUpPage() {
   const triggerGoogleSignUp = () => {
     setIsGoogleLoading(true);
     setMessage("");
-    const google = typeof window !== "undefined" ? (window as any).google : null;
+    const google = typeof window !== "undefined" ? window.google : null;
 
     // 1. Google OAuth 2.0 Token Client popup akışı
     if (google?.accounts?.oauth2) {
@@ -143,7 +163,7 @@ export default function SignUpPage() {
         const client = google.accounts.oauth2.initTokenClient({
           client_id: clientId,
           scope: "email profile openid",
-          callback: async (tokenResponse: any) => {
+          callback: async (tokenResponse: GoogleTokenResponse) => {
             if (tokenResponse.error) {
               setIsGoogleLoading(false);
               if (tokenResponse.error !== "popup_closed_by_user") {
@@ -157,7 +177,7 @@ export default function SignUpPage() {
                 const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
                   headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                 });
-                const profile = await userRes.json();
+                const profile = await userRes.json() as { email?: string; name?: string; given_name?: string; picture?: string };
                 if (profile?.email) {
                   handleGoogleCredentialResponse(tokenResponse.access_token, {
                     email: profile.email,
@@ -167,7 +187,7 @@ export default function SignUpPage() {
                   redirectToNext();
                   return;
                 }
-              } catch (e: any) {
+              } catch (e: unknown) {
                 console.error("Google userinfo fetch failed", e);
                 setMessage("Google profil bilgisi alınamadı. Lütfen tekrar deneyin.");
               } finally {
@@ -175,7 +195,7 @@ export default function SignUpPage() {
               }
             }
           },
-          error_callback: (err: any) => {
+          error_callback: (err: unknown) => {
             setIsGoogleLoading(false);
             console.warn("Google TokenClient error:", err);
             setShowGoogleFallbackModal(true);
@@ -183,7 +203,7 @@ export default function SignUpPage() {
         });
         client.requestAccessToken({ prompt: "select_account" });
         return;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.warn("initTokenClient failed, falling back to One Tap", err);
       }
     }
@@ -191,7 +211,7 @@ export default function SignUpPage() {
     // 2. One Tap prompt denemesi
     if (google?.accounts?.id) {
       try {
-        google.accounts.id.prompt((notification: any) => {
+        google.accounts.id.prompt((notification: GooglePromptNotification) => {
           if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
             setIsGoogleLoading(false);
             setShowGoogleFallbackModal(true);

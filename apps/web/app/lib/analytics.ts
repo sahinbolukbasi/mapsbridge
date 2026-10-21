@@ -57,7 +57,7 @@ export function trackEvent(
     }
 
     localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(events));
-    console.debug(`[Analytics] ${type}:`, payload);
+    if (process.env.NODE_ENV === "development") console.warn(`[Analytics] ${type}:`, payload);
   } catch (err) {
     console.warn("Analytics tracking error:", err);
   }

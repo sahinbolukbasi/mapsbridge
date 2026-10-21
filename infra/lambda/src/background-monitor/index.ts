@@ -5,7 +5,7 @@
  * when the advisory level changes.
  */
 
-import { ScanCommand, PutItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { ScanCommand, PutItemCommand, GetItemCommand, AttributeValue } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { getDynamoClient } from "../shared/dynamo";
 
@@ -38,9 +38,12 @@ async function fetchAdvisory(
       signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return null;
-    const data: any = await res.json();
-    const parts: any[] = Array.isArray(data.details?.parts) ? data.details.parts : [];
-    const part = parts.find((p: any) => p.slug === "summary" || p.slug === "before-you-travel");
+    const data = (await res.json()) as {
+      details?: { parts?: Array<{ slug?: string; body?: string }>; summary?: string };
+      description?: string;
+    };
+    const parts = data.details?.parts ?? [];
+    const part = parts.find((p) => p.slug === "summary" || p.slug === "before-you-travel");
     const rawSummary: string = part?.body || data.details?.summary || data.description || "";
     const summary = rawSummary
       .replace(/<[^>]+>/g, " ")
@@ -60,7 +63,7 @@ export async function handler(): Promise<{ checked: number; alerts: number }> {
   const cutoff = Math.floor((now - 7 * 24 * 3600 * 1000) / 1000); // 7 days
   const destUsers = new Map<string, Set<string>>(); // slug → set of userIds
 
-  let lastKey: Record<string, any> | undefined;
+  let lastKey: Record<string, AttributeValue> | undefined;
   do {
     const result = await dynamo.send(
       new ScanCommand({
@@ -79,7 +82,11 @@ export async function handler(): Promise<{ checked: number; alerts: number }> {
     );
 
     for (const raw of result.Items || []) {
-      const item = unmarshall(raw) as any;
+      const item = unmarshall(raw) as {
+        PK?: string;
+        route?: { destination?: string };
+        conversationState?: { context?: { destination?: string } };
+      };
       const userId = item.PK?.replace("USER#", "");
       const dest: string | undefined =
         item.route?.destination || item.conversationState?.context?.destination;
@@ -109,7 +116,7 @@ export async function handler(): Promise<{ checked: number; alerts: number }> {
         Key: marshall({ PK: `ADVISORY#${slug}`, SK: "LATEST" }),
       }),
     );
-    const prev = prevItem.Item ? (unmarshall(prevItem.Item) as any) : null;
+    const prev = prevItem.Item ? (unmarshall(prevItem.Item) as Record<string, unknown>) : null;
     const prevLevel = prev?.level as string | undefined;
 
     // Store current level

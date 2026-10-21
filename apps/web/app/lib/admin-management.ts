@@ -6,7 +6,7 @@ export type AdminSession = {
   paymentsConfigured: boolean;
   userManagement: boolean;
 };
-export type ManagedRecord = Record<string, any>;
+export type ManagedRecord = Record<string, unknown>;
 export const managementApi = {
   session: () => apiFetch<{ session: AdminSession }>("/admin/session"),
   list: (section: string) => apiFetch<Record<string, ManagedRecord[]>>(`/admin/${section}`),

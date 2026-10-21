@@ -3,6 +3,22 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { handleGoogleCredentialResponse } from "../lib/cognito";
 
+interface GoogleCredentialResponse { credential: string; }
+interface GooglePromptNotification {
+  isNotDisplayed(): boolean;
+  isSkippedMoment(): boolean;
+}
+interface GoogleIdService {
+  initialize(config: Record<string, unknown>): void;
+  renderButton(container: Element, options: Record<string, unknown>): void;
+  prompt(cb?: (n: GooglePromptNotification) => void): void;
+}
+declare global {
+  interface Window {
+    google?: { accounts?: { id?: GoogleIdService } };
+  }
+}
+
 interface GoogleAuthButtonProps {
   mode?: "signin" | "signup";
   nextUrl?: string;
@@ -49,7 +65,7 @@ export function GoogleAuthButton({
   }, [nextUrl]);
 
   const handleCredential = useCallback(
-    (response: any) => {
+    (response: GoogleCredentialResponse) => {
       try {
         setIsLoading(true);
         setErrorMessage("");
@@ -61,9 +77,9 @@ export function GoogleAuthButton({
             redirectToNext();
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Google oturum açma hatası:", err);
-        const msg = err.message || "Google ile giriş başarısız oldu. Lütfen tekrar deneyin.";
+        const msg = err instanceof Error ? err.message : "Google ile giriş başarısız oldu. Lütfen tekrar deneyin.";
         setErrorMessage(msg);
         if (onError) onError(msg);
       } finally {
@@ -74,7 +90,7 @@ export function GoogleAuthButton({
   );
 
   const initGoogleSignIn = useCallback(() => {
-    const google = (window as any).google;
+    const google = window.google;
     if (!google?.accounts?.id || !clientId) return;
 
     try {
@@ -129,13 +145,13 @@ export function GoogleAuthButton({
         initGoogleSignIn();
       };
       document.head.appendChild(script);
-    } else if ((window as any).google?.accounts?.id) {
+    } else if (window.google?.accounts?.id) {
       initGoogleSignIn();
     }
   }, [clientId, initGoogleSignIn]);
 
   const handleManualClick = () => {
-    const google = (window as any).google;
+    const google = window.google;
     if (google?.accounts?.id) {
       google.accounts.id.prompt();
     }

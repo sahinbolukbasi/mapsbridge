@@ -1,4 +1,4 @@
-import type { UserProfileDto, SubscriptionTier } from "@mapsbridge/contracts";
+import type { SubscriptionTier } from "@mapsbridge/contracts";
 
 export interface AuthenticatedUser {
   userId: string;

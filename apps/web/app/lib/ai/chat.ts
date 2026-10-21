@@ -27,7 +27,7 @@ export interface ChatMessage {
   flightPrices?: FlightPriceInfo;
   travelAdvisory?: TravelAdvisoryInfo;
   quickReplies?: Array<string | QuickReplyOption>;
-  actions?: Array<{ type: string; payload: any }>;
+  actions?: Array<{ type: string; payload: unknown }>;
 }
 
 export function conversationHistory(messages: ChatMessage[]) {

@@ -22,7 +22,12 @@ import {
   PostToConnectionCommand,
 } from "@aws-sdk/client-apigatewaymanagementapi";
 
-export const handler = async (event: any) => {
+interface WsEvent {
+  requestContext?: { connectionId?: string; domainName?: string; stage?: string };
+  body?: string;
+}
+
+export const handler = async (event: WsEvent) => {
   try {
     return await handleEvent(event);
   } catch {
@@ -30,7 +35,7 @@ export const handler = async (event: any) => {
   }
 };
 
-async function handleEvent(event: any) {
+async function handleEvent(event: WsEvent) {
   const connectionId = event.requestContext?.connectionId;
   const domain = event.requestContext?.domainName;
   const stage = event.requestContext?.stage;
@@ -41,9 +46,9 @@ async function handleEvent(event: any) {
     return { statusCode: 400, body: "Missing connectionId" };
   }
 
-  let body: any;
+  let body: Record<string, unknown>;
   try {
-    body = JSON.parse(event.body || "{}");
+    body = JSON.parse(event.body || "{}") as Record<string, unknown>;
   } catch {
     return { statusCode: 400, body: "Invalid JSON" };
   }
@@ -228,7 +233,7 @@ async function forwardToRecipient(
   domain: string,
   stage: string,
   recipientId: string,
-  payload: any,
+  payload: Record<string, unknown>,
 ) {
   // Find all connections for the recipient
   const result = await ddb.send(
@@ -265,9 +270,9 @@ async function forwardToRecipient(
           Data: Buffer.from(message),
         }),
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Connection might be stale — remove it
-      if (err.name === "GoneException") {
+      if (err instanceof Error && err.name === "GoneException") {
         await ddb.send(
           new DeleteItemCommand({
             TableName: connectionsTable,

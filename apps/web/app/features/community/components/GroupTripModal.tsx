@@ -12,7 +12,7 @@ interface GroupTripModalProps {
   marketRoutes: MarketRoute[];
   userSavedRoutes: string[];
   initialTab?: "overview" | "route" | "members" | "chat";
-  onAddToMyTrip: (route: { title: string; stops?: any[] }) => void;
+  onAddToMyTrip: (route: { title: string; stops?: unknown[] }) => void;
   onSendMessage: (text: string, attachedRouteTitle?: string, isAnnouncement?: boolean) => void;
 }
 

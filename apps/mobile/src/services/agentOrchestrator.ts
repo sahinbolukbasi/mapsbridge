@@ -33,7 +33,7 @@ export interface AgentTask {
 
 export interface AgentTaskResult {
   type: "emergency" | "food" | "lodging" | "transit" | "events" | "weather" | "chat" | "route";
-  data: any;
+  data: unknown;
   summary: string; // 1-2 cümle ozet
   richCard?: RichAgentCard;
 }
@@ -43,7 +43,7 @@ export interface RichAgentCard {
   emoji: string;
   bullets: string[];
   actionLabel?: string;
-  actionData?: any;
+  actionData?: unknown;
 }
 
 // ─── Backend-backed Agent Runners ────────────────────────────────────────────

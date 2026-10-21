@@ -77,12 +77,22 @@ export async function getCheapestFlights(params: {
     throw new Error(`TP_FLIGHTS_ERROR_${res.status}`);
   }
 
-  const data = (await res.json()) as { success: boolean; data: Record<string, any> };
+  interface RawFlightItem {
+    price: number;
+    airline: string;
+    flight_number: number;
+    departure_at: string;
+    return_at: string;
+    transfers: number;
+    duration: number;
+    link: string;
+  }
+  const data = (await res.json()) as { success: boolean; data: Record<string, Record<string, RawFlightItem>> };
   if (!data.success || !data.data) return [];
 
   return Object.values(data.data)
-    .flatMap((dest: any) => Object.values(dest))
-    .map((item: any) => ({
+    .flatMap((dest) => Object.values(dest))
+    .map((item) => ({
       origin: params.origin.toUpperCase(),
       destination: params.destination.toUpperCase(),
       price: item.price,
@@ -166,10 +176,18 @@ export async function getPopularDestinations(params: {
 
   if (!res.ok) return [];
 
-  const data = (await res.json()) as { success: boolean; data: any[] };
+  interface RawPopularItem {
+    destination: string;
+    origin: string;
+    price: number;
+    transfers: number;
+    airline: string;
+    departure_at: string;
+  }
+  const data = (await res.json()) as { success: boolean; data: RawPopularItem[] };
   if (!data.success || !Array.isArray(data.data)) return [];
 
-  return data.data.slice(0, params.limit || 10).map((item: any) => ({
+  return data.data.slice(0, params.limit || 10).map((item) => ({
     destination: item.destination,
     origin: item.origin,
     price: item.price,

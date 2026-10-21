@@ -2,7 +2,7 @@ import { createTrainingJob } from "../../../../apps/web/server/ai/training-outbo
 
 // Lambda streaming global — only available in Lambda runtime
 declare global {
-  // eslint-disable-next-line no-var
+   
   var awslambda:
     | {
         streamifyResponse: (
@@ -154,11 +154,12 @@ async function handleRequest(event: Event) {
     !Array.isArray(history) ||
     history.length > 6 ||
     history.some(
-      (m: any) =>
+      (m: unknown) =>
         !m ||
-        !["user", "assistant"].includes(m.role) ||
-        typeof m.content !== "string" ||
-        m.content.length > 1500,
+        typeof m !== "object" ||
+        !["user", "assistant"].includes((m as Record<string, unknown>).role as string) ||
+        typeof (m as Record<string, unknown>).content !== "string" ||
+        ((m as Record<string, string>).content.length > 1500),
     )
   )
     return reply(400, { error: "Konuşma geçmişi geçersiz." });
@@ -443,13 +444,13 @@ async function handleStreamRequest(
       meta.end();
       return;
     }
-    let body: any;
+    let body: Record<string, unknown>;
     try {
       body = JSON.parse(
         event.isBase64Encoded
           ? Buffer.from(event.body || "", "base64").toString()
           : event.body || "{}",
-      );
+      ) as Record<string, unknown>;
     } catch {
       writeSse(meta, "error", { message: "Geçersiz istek.", code: "BAD_REQUEST" });
       meta.end();
@@ -682,7 +683,7 @@ async function handleStreamRequest(
     }
   } finally {
     try {
-      (meta as any).end();
+      (meta as NodeJS.WritableStream).end();
     } catch (err) {
       console.error("[ai] stream end failed:", (err as Error).message);
     }

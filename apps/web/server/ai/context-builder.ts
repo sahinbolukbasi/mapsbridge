@@ -3,7 +3,17 @@ import { boundedHistory } from "../../app/lib/ai/model-history";
 import { sanitizePreferences } from "../../app/lib/ai/preferences";
 import { getMemorySettings, retrievePersonalMemory, type MemorySettings } from "./memory-service";
 
-export function normalizeRequest(body: any) {
+interface RequestBody {
+  userLocation?: { lat?: number; lng?: number };
+  trainingConsent?: boolean;
+  prompt: string;
+  conversationHistory?: unknown[];
+  conversationId?: string | null;
+  routeMode?: string;
+  tripManifestoMarkdown?: string;
+  conversationFlow?: { activeTopic?: string; stage?: string; gathered?: Record<string, string> };
+}
+export function normalizeRequest(body: RequestBody) {
   const location = body.userLocation;
   if (
     location !== undefined &&

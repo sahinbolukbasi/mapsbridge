@@ -6,7 +6,9 @@ import {
   TransactWriteItemsCommand,
   PutItemCommand,
   type AttributeValue,
+  type ScanCommandInput,
 } from "@aws-sdk/client-dynamodb";
+import type { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { getDynamoClient } from "../shared/dynamo";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import {
@@ -23,6 +25,7 @@ import { ok, created, jsonResponse as _jsonResponse, parseBody, type ApiGatewayE
 import type { AuthorizedEvent } from "../shared/types";
 import { permissions, type StaffRole } from "./permissions";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Row = Record<string, any>;
 export class AdminError extends Error {
   constructor(
@@ -199,8 +202,8 @@ export async function commit(
         ],
       }),
     );
-  } catch (error: any) {
-    if (error.name === "TransactionCanceledException")
+  } catch (error: unknown) {
+    if ((error as { name?: string }).name === "TransactionCanceledException")
       throw new AdminError(409, "Kayıt başka bir işlemle değişti. Yenileyip tekrar deneyin.");
     throw error;
   }
@@ -249,8 +252,8 @@ async function account(id: string) {
       createdAt: result.UserCreateDate?.toISOString(),
       groups: await groupsFor(result.Username!),
     };
-  } catch (error: any) {
-    if (error.name === "UserNotFoundException") throw new AdminError(404, "Kullanıcı bulunamadı.");
+  } catch (error: unknown) {
+    if ((error as { name?: string }).name === "UserNotFoundException") throw new AdminError(404, "Kullanıcı bulunamadı.");
     throw error;
   }
 }
@@ -259,15 +262,15 @@ export function getTableName(): string {
 }
 
 export async function scanAllRaw(
-  ddb: any,
-  input: Record<string, any>,
-): Promise<{ Items: any[]; Count: number }> {
+  ddb: DynamoDBClient,
+  input: ScanCommandInput,
+): Promise<{ Items: Record<string, AttributeValue>[]; Count: number }> {
   const { ScanCommand } = await import("@aws-sdk/client-dynamodb");
-  const Items: any[] = [];
+  const Items: Record<string, AttributeValue>[] = [];
   let Count = 0;
   let cursor = input.ExclusiveStartKey;
   do {
-    const page = await ddb.send(new ScanCommand({ ...input, ExclusiveStartKey: cursor } as any));
+    const page = await ddb.send(new ScanCommand({ ...input, ExclusiveStartKey: cursor }));
     Items.push(...(page.Items || []));
     Count += page.Count || 0;
     cursor = page.LastEvaluatedKey;
@@ -341,7 +344,7 @@ export async function protectAccount(event: ApiGatewayEvent, id: string) {
       "Yönetici hesabı korunuyor. Önce farklı bir yönetici tarafından rolü değiştirilmelidir.",
     );
 }
-export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<any>> = {
+export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<unknown>> = {
   "GET /admin/session": async (e) => {
     const user = (e as AuthorizedEvent).verifiedUser;
     const role: StaffRole = user.staffRole || "admin";
@@ -536,8 +539,8 @@ export const managementRoutes: Record<string, (e: ApiGatewayEvent) => Promise<an
           ],
         }),
       );
-    } catch (error: any) {
-      if (error.name === "TransactionCanceledException") {
+    } catch (error: unknown) {
+      if ((error as { name?: string }).name === "TransactionCanceledException") {
         const duplicate = await get(receiptKey);
         if (duplicate?.userId === id && duplicate?.delta === b.delta)
           return ok({ status: "applied", duplicate: true });

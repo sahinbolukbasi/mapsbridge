@@ -395,8 +395,8 @@ export default function EditProfilePage() {
       setNewPassword("");
       setConfirmPassword("");
       showToast("✓ Şifreniz başarıyla değiştirildi!");
-    } catch (err: any) {
-      setPasswordError(err.message || "Şifre güncellenemedi.");
+    } catch (err: unknown) {
+      setPasswordError(err instanceof Error ? err.message : "Şifre güncellenemedi.");
     } finally {
       setIsUpdatingPassword(false);
     }

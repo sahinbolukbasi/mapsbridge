@@ -7,9 +7,7 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
-  Platform,
   Image,
-  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AppleLogo, GoogleLogo, ArrowRightIcon, ExploreIcon } from "../components/Icons";
@@ -18,7 +16,7 @@ interface WelcomeScreenProps {
   onSelectAuth: (mode: "login" | "register" | "apple" | "google") => void;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 
 const HERO_BG_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCaPLUeaEdYQRXIb63qG6CQVE5pIsJ3pdFATx3iB93-HGlrPZfQ6s64wc_Z7beqhxGveCM4xVoGOJBKUebET4EYp8dSe1Dg2hWdnn18naZZbABJb2nXG3uwSKtTfBPHJdai8N29ElVda23JdLDmPbm4iPlFjPrBVMJBKtDHTpEf1uY6S5_1DNw_u5WTbiGVIvbpmd-qgM8k8hOyziGwozLL1E7IH4cAF88BIHfe_c_Q4kH9d33y9Um3Pw";

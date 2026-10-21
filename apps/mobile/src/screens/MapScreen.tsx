@@ -56,7 +56,7 @@ const CARD_WIDTH = Math.min(SCREEN_W - 44, 340);
 const CARD_GAP = 12;
 const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 
-const CATEGORY_FILTERS = [
+const _CATEGORY_FILTERS = [
   { id: "TÜMÜ", label: "TÜMÜ" },
   { id: "TARİHİ YER", label: "TARİHİ YER" },
   { id: "MÜZE", label: "MÜZE" },
@@ -94,7 +94,7 @@ export interface ClickedPlaceInfo {
 }
 
 export function MapScreen({
-  onOpenProfile,
+  onOpenProfile: _onOpenProfile,
   onOpenPlan,
   onOpenAi,
   focusedStopId,
@@ -102,10 +102,10 @@ export function MapScreen({
 }: MapScreenProps) {
   const [activeRoute, setActiveRoute] = useState<ActiveRoute>(tripStore.getActiveRoute());
   const [allRoutes, setAllRoutes] = useState<ActiveRoute[]>(tripStore.getAllRoutes());
-  const [selectedCategory, setSelectedCategory] = useState("TÜMÜ");
+  const [selectedCategory, _setSelectedCategory] = useState("TÜMÜ");
   const [currentStopIdx, setCurrentStopIdx] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Record<string, unknown>[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [activeTileLayer, setActiveTileLayer] = useState<"light" | "dark" | "satellite">("light");
 
@@ -113,7 +113,7 @@ export function MapScreen({
   const [showRouteLines, setShowRouteLines] = useState<boolean>(true);
   const [useRoadRouting, setUseRoadRouting] = useState<boolean>(false); // true = follow roads, false = straight lines
   const [showMyLocation, setShowMyLocation] = useState<boolean>(false);
-  const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [_myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   // Route selector modal
   const [showRouteModal, setShowRouteModal] = useState<boolean>(false);
@@ -172,7 +172,7 @@ export function MapScreen({
 
   const webViewRef = useRef<WebView>(null);
   const stopsTrackScrollRef = useRef<ScrollView>(null);
-  const stopsCarouselRef = useRef<FlatList<any>>(null);
+  const stopsCarouselRef = useRef<FlatList<unknown>>(null);
 
   // Subscribe to tripStore updates
   useEffect(() => {
@@ -187,7 +187,7 @@ export function MapScreen({
 
   // Location tracking
   useEffect(() => {
-    let locationInterval: any = null;
+    let locationInterval: ReturnType<typeof setInterval> | null = null;
 
     if (showMyLocation) {
       // Get initial location
@@ -321,7 +321,7 @@ export function MapScreen({
           } catch {}
         }
 
-        const reviews: PlaceReview[] = (topPoi.reviews || []).slice(0, 4).map((r: any) => ({
+        const reviews: PlaceReview[] = (topPoi.reviews || []).slice(0, 4).map((r: { authorAttribution?: { displayName?: string }; rating?: number; text?: { text?: string }; originalText?: { text?: string }; relativePublishTimeDescription?: string }) => ({
           author: r.authorAttribution?.displayName || "Gezgin",
           rating: r.rating || 5,
           text: r.text?.text || r.originalText?.text || "",
@@ -420,7 +420,7 @@ export function MapScreen({
   };
 
   // Handle WebView messages (pin clicks, map clicks, map ready)
-  const handleWebViewMessage = (event: any) => {
+  const handleWebViewMessage = (event: { nativeEvent: { data: string } }) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
 
@@ -519,7 +519,7 @@ export function MapScreen({
       const data = await res.json();
 
       if (data.places && data.places.length > 0) {
-        const mapped = data.places.map((p: any) => ({
+        const mapped = data.places.map((p: { displayName?: { text?: string }; formattedAddress?: string; location: { latitude: number; longitude: number }; rating?: number; primaryTypeDisplayName?: { text?: string }; types?: string[]; photos?: { name: string }[] }) => ({
           name: p.displayName?.text || "Mekan",
           formatted_address: p.formattedAddress,
           geometry: { location: { lat: p.location.latitude, lng: p.location.longitude } },
@@ -555,7 +555,7 @@ export function MapScreen({
   };
 
   // Add search result to active route
-  const handleSelectSearchResult = (place: any) => {
+  const handleSelectSearchResult = (place: { name?: string; geometry?: { location?: { lat: number; lng: number } }; types?: string[]; formatted_address?: string; rating?: number }) => {
     const loc = place.geometry?.location;
     if (!loc) return;
 
@@ -660,7 +660,7 @@ export function MapScreen({
   };
 
   const lastStopTapTime = useRef<{ [stopId: string]: number }>({});
-  const stopTapTimer = useRef<any>(null);
+  const stopTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flyToStop = (stop: TripStop, zoom = 16) => {
     webViewRef.current?.injectJavaScript(`
@@ -776,14 +776,14 @@ export function MapScreen({
   };
 
   // Toggle map tiles (light, dark, satellite)
-  const handleToggleLayers = () => {
+  const _handleToggleLayers = () => {
     const next =
       activeTileLayer === "light" ? "dark" : activeTileLayer === "dark" ? "satellite" : "light";
     handleSelectTileLayer(next);
   };
 
   // Recenter to user's location or route center
-  const handleMyLocation = () => {
+  const _handleMyLocation = () => {
     if (currentStop) {
       flyToStop(currentStop);
     } else {
@@ -2155,7 +2155,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#faf8ff",
   },
   fullMap: {
-    ...(StyleSheet.absoluteFill as any),
+    ...(StyleSheet.absoluteFill as Record<string, unknown>),
     backgroundColor: "#eaf1ec",
   },
   liveIndicatorRow: {

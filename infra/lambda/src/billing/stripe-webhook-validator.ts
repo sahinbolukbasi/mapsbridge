@@ -12,7 +12,7 @@ export interface StripeWebhookEvent {
   id: string;
   type: string;
   data: {
-    object: any;
+    object: Record<string, unknown>;
   };
   created: number;
 }
@@ -165,7 +165,11 @@ export class StripeWebhookValidator {
   static createMiddleware() {
     const validator = new StripeWebhookValidator();
 
-    return async (event: any, context: any, next: () => Promise<void>) => {
+    return async (
+      event: { headers?: Record<string, string | undefined>; body?: string },
+      context: Record<string, unknown>,
+      next: () => Promise<void>,
+    ) => {
       const signature = event.headers?.["stripe-signature"] || event.headers?.["Stripe-Signature"];
       const payload = event.body;
 
@@ -223,10 +227,10 @@ export class StripeWebhookEventValidator {
     const object = event.data.object;
     return requiredFields.every((field) => {
       const keys = field.split(".");
-      let current = object;
+      let current: Record<string, unknown> = object;
       for (const key of keys) {
         if (current?.[key] === undefined) return false;
-        current = current[key];
+        current = current[key] as Record<string, unknown>;
       }
       return true;
     });

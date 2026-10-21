@@ -93,7 +93,7 @@ export class DynamicReplanner {
     if (reason === "late_start") {
       const delay = options?.delayedHours || 2;
       // Eğer çok fazla durak varsa ve gün 8.5 saati aşacaksa en düşük öncelikli son durağı sonraki güne veya arşive kaydır
-      let adjustedStops = [...currentStops];
+      const adjustedStops = [...currentStops];
       let droppedCount = 0;
 
       if (adjustedStops.length > 4 && delay >= 2) {

@@ -96,8 +96,8 @@ export function DealTrackerPanel({ initialDestination, onClose }: DealTrackerPan
       // Reset form
       setTargetPrice("");
       setDates("");
-    } catch (err: any) {
-      setError(err?.message || "Takip başlatılamadı. Tekrar deneyin.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Takip başlatılamadı. Tekrar deneyin.");
     } finally {
       setBusy(false);
     }
@@ -112,8 +112,8 @@ export function DealTrackerPanel({ initialDestination, onClose }: DealTrackerPan
       });
       setJobs((prev) => prev.map((j) => (j.id === jobId ? res.job : j)));
       setSuccessMsg("✓ Bot fiyatları güncelledi! En uygun teklifler kontrol edildi.");
-    } catch (err: any) {
-      setError(err?.message || "Fiyat kontrolü yapılamadı.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Fiyat kontrolü yapılamadı.");
     } finally {
       setBusy(false);
     }
@@ -125,8 +125,8 @@ export function DealTrackerPanel({ initialDestination, onClose }: DealTrackerPan
       await apiFetch(`/tracker/jobs/${jobId}`, { method: "DELETE" });
       setJobs((prev) => prev.filter((j) => j.id !== jobId));
       setSuccessMsg("✓ Takip sonlandırıldı.");
-    } catch (err: any) {
-      setError(err?.message || "Takip silinemedi.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Takip silinemedi.");
     }
   }
 

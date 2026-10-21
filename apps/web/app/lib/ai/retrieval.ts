@@ -113,8 +113,8 @@ export async function retrieveTravelEvidence(
       remaining -= excerpt.length;
     }
     return { status: passages.length ? "available" : "empty", passages };
-  } catch (error: any) {
-    console.warn("Travel retrieval unavailable", error?.name || "Error");
+  } catch (error: unknown) {
+    console.warn("Travel retrieval unavailable", error instanceof Error ? error.name : "Error");
     return { status: "unavailable", passages: [] };
   }
 }

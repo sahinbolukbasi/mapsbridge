@@ -1,5 +1,6 @@
 import type { ApiGatewayEvent } from "../shared/http";
 import { ok, badRequest, notFound, parseBody } from "../shared/http";
+import type { AuthorizedEvent } from "../shared/types";
 import { read } from "../shared/data";
 import { getTableName, scanAllRaw, findRouteRecord, recordAuditLog } from "./management";
 import { handleSuspendUser } from "./users";
@@ -81,7 +82,7 @@ export async function handleResolveReport(event: ApiGatewayEvent) {
     }),
   );
 
-  const actorSub = (event as any).verifiedUser?.sub || "admin";
+  const actorSub = (event as AuthorizedEvent).verifiedUser?.sub || "admin";
   await recordAuditLog(actorSub, `report_${action}`, reportId, notes);
 
   return ok({
@@ -164,7 +165,7 @@ export async function handleAdminRouteAction(event: ApiGatewayEvent) {
     }),
   );
 
-  const actorSub = (event as any).verifiedUser?.sub || "admin";
+  const actorSub = (event as AuthorizedEvent).verifiedUser?.sub || "admin";
   await recordAuditLog(actorSub, `route_${action}`, routeId, reason);
 
   return ok({ status: "success", routeId, action, reason, timestamp: now });

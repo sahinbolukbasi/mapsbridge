@@ -17,7 +17,7 @@ import {
   AI_EVENTS_KEY,
   defaultControl,
 } from "../shared/ai-operations";
-import { AdminError, bodyOf, commit, get, table, text } from "./management";
+import { AdminError, bodyOf, commit, get, table, text, type Row } from "./management";
 import { getDynamoClient } from "../shared/dynamo";
 import { ok, type ApiGatewayEvent } from "../shared/http";
 const TRAINING_PARTITION = "AI#TRAINING_PENDING";
@@ -90,7 +90,7 @@ export async function updateAIControl(event: ApiGatewayEvent) {
     throw new AdminError(400, "Geçerli model ve açma/kapama ayarları gerekli.");
   if (body.enabled && body.disabledModels.includes(body.defaultModel))
     throw new AdminError(400, "Varsayılan model kapalı olamaz. Önce başka bir model seçin.");
-  const next: any = await commit(
+  const next = await commit(
     event,
     {
       PK: AI_CONTROL_KEY,
@@ -113,7 +113,7 @@ export async function updateAIControl(event: ApiGatewayEvent) {
   });
 }
 
-function safeTrainingRecord(item: Record<string, any>) {
+function safeTrainingRecord(item: Row) {
   const { PK: _PK, SK, record, ...meta } = item;
   return {
     id: String(meta.id || ""),
@@ -126,11 +126,11 @@ function safeTrainingRecord(item: Record<string, any>) {
     source: record?.source || "unknown",
     metadata: record?.metadata || {},
     messages: Array.isArray(record?.messages)
-      ? record.messages.map((message: any) => ({
+      ? record.messages.map((message) => ({
           role: message?.role === "assistant" ? "assistant" : "user",
           content: Array.isArray(message?.content)
             ? message.content
-                .map((part: any) => String(part?.text || "").slice(0, 12000))
+                .map((part) => String(part?.text || "").slice(0, 12000))
                 .join("\n")
             : "",
         }))
@@ -218,7 +218,7 @@ export async function reviewAITraining(event: ApiGatewayEvent) {
   return ok({ success: true, id: current.id, action });
 }
 
-function releaseMetrics(body: Record<string, any>) {
+function releaseMetrics(body: Row) {
   if (!body.metrics || typeof body.metrics !== "object" || Array.isArray(body.metrics)) {
     throw new AdminError(400, "Kalite ölçümleri gerekli.");
   }
@@ -280,7 +280,7 @@ export async function proposeAIRelease(event: ApiGatewayEvent) {
     status: "candidate",
     proposedAt: new Date().toISOString(),
   };
-  const next: any = await commit(
+  const next = await commit(
     event,
     {
       PK: AI_RELEASE_KEY,
@@ -307,7 +307,7 @@ export async function publishAIRelease(event: ApiGatewayEvent) {
   if (!existing?.candidate || existing.candidate.qualityGate !== "passed") {
     throw new AdminError(409, "Kalite kapısından geçmeyen aday yayınlanamaz.");
   }
-  const next: any = await commit(
+  const next = await commit(
     event,
     {
       PK: AI_RELEASE_KEY,
@@ -330,7 +330,7 @@ export async function rollbackAIRelease(event: ApiGatewayEvent) {
   const existing = await get(AI_RELEASE_KEY);
   if (!existing?.previousActive)
     throw new AdminError(409, "Geri alınabilecek önceki release bulunamadı.");
-  const next: any = await commit(
+  const next = await commit(
     event,
     {
       PK: AI_RELEASE_KEY,
@@ -351,16 +351,16 @@ const trainingBucket = () => process.env.AI_TRAINING_BUCKET;
 const bedrockRegion = () => process.env.BEDROCK_TRAINING_REGION || "us-east-1";
 const bedrockRoleArn = () => process.env.BEDROCK_TRAINING_ROLE_ARN;
 
-function titanLine(record: Record<string, any>): string | null {
-  const messages: any[] = record?.messages || [];
-  const userMsg = messages.find((m: any) => m.role === "user");
-  const asstMsg = messages.find((m: any) => m.role === "assistant");
+function titanLine(record: Row): string | null {
+  const messages = (record?.messages || []) as Row[];
+  const userMsg = messages.find((m) => m.role === "user");
+  const asstMsg = messages.find((m) => m.role === "assistant");
   if (!userMsg || !asstMsg) return null;
   const userText = Array.isArray(userMsg.content)
-    ? userMsg.content.map((c: any) => String(c?.text || "")).join("")
+    ? userMsg.content.map((c) => String(c?.text || "")).join("")
     : String(userMsg.content || "");
   const asstText = Array.isArray(asstMsg.content)
-    ? asstMsg.content.map((c: any) => String(c?.text || "")).join("")
+    ? asstMsg.content.map((c) => String(c?.text || "")).join("")
     : String(asstMsg.content || "");
   if (!userText.trim() || !asstText.trim()) return null;
   // Amazon Titan Text fine-tuning format

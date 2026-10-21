@@ -12,6 +12,7 @@
  *   POST /places/batch-discover    — Batch discover multiple cities
  */
 
+import type { PlaceCategory, PlaceSource } from "../../../../services/place-intelligence/src/domain/types";
 import { verifiedUserId, getVerifiedUser } from "../shared/auth";
 import type { ApiGatewayEvent } from "../shared/http";
 import {
@@ -94,8 +95,8 @@ async function handleDiscover(event: ApiGatewayEvent) {
   const result = await discoverCity({
     city: body.city,
     country: body.country,
-    categories: body.categories as any,
-    sources: body.sources as any,
+    categories: body.categories as PlaceCategory[],
+    sources: body.sources as PlaceSource[],
     maxResults: Math.min(body.maxResults || 200, 500),
   });
 
@@ -280,11 +281,11 @@ async function handleBatchDiscover(event: ApiGatewayEvent) {
         placeCount: result.places.length,
         sources: result.sources,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       results.push({
         city: entry.city,
         status: "failed",
-        error: err.message,
+        error: err instanceof Error ? err.message : String(err),
       });
     }
   }

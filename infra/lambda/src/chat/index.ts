@@ -28,6 +28,7 @@ import {
   extractBearerToken,
   parseBody,
 } from "../shared/http";
+import type { TransactWriteItem } from "@aws-sdk/client-dynamodb";
 import { Router } from "../shared/router";
 import {
   threadParticipants,
@@ -104,7 +105,7 @@ async function handleCreateThread(event: ApiGatewayEvent) {
   const { marshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = getDynamoClient();
 
-  const transactItems: any[] = [
+  const transactItems: TransactWriteItem[] = [
     {
       Put: {
         TableName: getTableName(),

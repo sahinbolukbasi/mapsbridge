@@ -146,7 +146,7 @@ export interface TripWorkspace {
   isPublic: boolean;
   days: TripDay[];
   groups: TripGroup[];
-  roadSegments?: Record<number, any[]>;
+  roadSegments?: Record<number, unknown[]>;
   pins: Pin[];
 }
 

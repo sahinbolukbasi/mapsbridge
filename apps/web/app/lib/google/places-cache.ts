@@ -13,7 +13,7 @@ interface CacheEntry<T> {
   ttlMs: number;
 }
 
-const MEMORY_CACHE = new Map<string, CacheEntry<any>>();
+const MEMORY_CACHE = new Map<string, CacheEntry<unknown>>();
 
 const PLACE_DETAILS_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days for place details
 const SEARCH_TTL = 24 * 60 * 60 * 1000; // 24 hours for place searches
@@ -31,7 +31,7 @@ export const placesCache = {
   /**
    * Get cached Google Place details
    */
-  getPlaceDetails<T = any>(placeId: string): T | null {
+  getPlaceDetails<T = unknown>(placeId: string): T | null {
     if (!placeId) return null;
     const memKey = `place:${placeId}`;
     const now = Date.now();
@@ -61,7 +61,7 @@ export const placesCache = {
   /**
    * Set cached Google Place details
    */
-  setPlaceDetails<T = any>(placeId: string, data: T, ttlMs = PLACE_DETAILS_TTL): void {
+  setPlaceDetails<T = unknown>(placeId: string, data: T, ttlMs = PLACE_DETAILS_TTL): void {
     if (!placeId || !data) return;
     const entry: CacheEntry<T> = { data, timestamp: Date.now(), ttlMs };
     MEMORY_CACHE.set(`place:${placeId}`, entry);
@@ -78,7 +78,7 @@ export const placesCache = {
   /**
    * Get cached place search results
    */
-  getSearch<T = any>(query: string, locationKey = ""): T | null {
+  getSearch<T = unknown>(query: string, locationKey = ""): T | null {
     const key = `${query.trim()}@${locationKey}`;
     const memKey = `search:${key}`;
     const now = Date.now();
@@ -105,7 +105,7 @@ export const placesCache = {
   /**
    * Set cached place search results
    */
-  setSearch<T = any>(query: string, data: T, locationKey = "", ttlMs = SEARCH_TTL): void {
+  setSearch<T = unknown>(query: string, data: T, locationKey = "", ttlMs = SEARCH_TTL): void {
     const key = `${query.trim()}@${locationKey}`;
     const entry: CacheEntry<T> = { data, timestamp: Date.now(), ttlMs };
     MEMORY_CACHE.set(`search:${key}`, entry);

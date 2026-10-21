@@ -7,7 +7,7 @@ export interface TravelAgent {
   description: string;
   icon: string;
   isActive: boolean;
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
   reminders: AgentReminder[];
 }
 
@@ -415,7 +415,7 @@ class AgentService {
   }
 
   // API Integration placeholders for external services
-  public async searchFlights(from: string, to: string, date: string) {
+  public async searchFlights(_from: string, _to: string, _date: string) {
     // Would integrate with:
     // - Skyscanner API
     // - Google Flights API
@@ -423,7 +423,7 @@ class AgentService {
     return [];
   }
 
-  public async searchHotels(city: string, checkIn: string, checkOut: string) {
+  public async searchHotels(_city: string, _checkIn: string, _checkOut: string) {
     // Would integrate with:
     // - Booking.com API
     // - Hotels.com API
@@ -431,7 +431,7 @@ class AgentService {
     return [];
   }
 
-  public async searchRestaurants(city: string, cuisine?: string) {
+  public async searchRestaurants(_city: string, _cuisine?: string) {
     // Would integrate with:
     // - Google Places API
     // - Yelp API

@@ -10,14 +10,14 @@ import type { NormalizedPlace } from "../../../place-intelligence/src/domain/typ
 
 export interface ToolExecutionRequest {
   toolName: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   correlationId?: string;
 }
 
 export interface ToolExecutionResponse {
   success: boolean;
   toolName: string;
-  data: any;
+  data: unknown;
   source: "internal_verified" | "live_api" | "fallback";
   durationMs: number;
 }
@@ -66,12 +66,13 @@ export class ToolExecutor {
             durationMs: Date.now() - started,
           };
       }
-    } catch (err: any) {
-      console.warn(`[ToolExecutor] ${toolName} failed:`, err?.message);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Bilinmeyen hata";
+      console.warn(`[ToolExecutor] ${toolName} failed:`, errMsg);
       return {
         success: false,
         toolName,
-        data: { error: err?.message || "Bilinmeyen hata" },
+        data: { error: errMsg },
         source: "fallback",
         durationMs: Date.now() - started,
       };
@@ -79,7 +80,7 @@ export class ToolExecutor {
   }
 
   private static async findRestaurants(
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
     const city = params.city || params.destination;
@@ -133,7 +134,7 @@ export class ToolExecutor {
   }
 
   private static async findPlaces(
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
     const city = params.city || params.destination;
@@ -160,7 +161,7 @@ export class ToolExecutor {
       const cats = category
         ? [category]
         : ["attraction", "museum", "park", "monument", "viewpoint"];
-      const result = await discoverCityByCategory(city, params.country || "", cats as any);
+      const result = await discoverCityByCategory(city, params.country as string || "", cats as string[]);
       places = result.places;
 
       const { storePlaces } =
@@ -178,7 +179,7 @@ export class ToolExecutor {
   }
 
   private static async getWeather(
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
     const city = params.city || "Istanbul";
@@ -226,7 +227,7 @@ export class ToolExecutor {
   }
 
   private static async findEvents(
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
     const city = params.city || "Istanbul";
@@ -244,7 +245,7 @@ export class ToolExecutor {
   }
 
   private static async getPublicTransport(
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
     const fromLat = params.fromLat;
@@ -289,7 +290,7 @@ export class ToolExecutor {
   }
 
   private static async getOpeningHours(
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
     const placeId = params.placeId;
@@ -325,7 +326,7 @@ export class ToolExecutor {
   }
 
   private static async discoverCity(
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
     const city = params.city;
@@ -367,7 +368,7 @@ export class ToolExecutor {
   }
 
   private static async getPlaceDetails(
-    params: Record<string, any>,
+    params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
     const { placeId, city } = params;

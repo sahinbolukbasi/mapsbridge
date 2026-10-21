@@ -68,7 +68,7 @@ async function handleResetPassword(event: ApiGatewayEvent) {
       }),
     );
     return ok({ status: "success" });
-  } catch (_err: any) {
+  } catch {
     return badRequest("Kod hatalı veya süresi dolmuş. Yeni kod isteyin.");
   }
 }
@@ -99,7 +99,7 @@ async function handleChangePassword(event: ApiGatewayEvent) {
       }),
     );
     return ok({ status: "success", message: "Şifreniz başarıyla değiştirildi." });
-  } catch (_err: any) {
+  } catch {
     return unauthorized("Oturumunuzun süresi dolmuş. Lütfen tekrar giriş yapınız.");
   }
 }
@@ -140,7 +140,7 @@ async function handlePublishProfile(event: ApiGatewayEvent) {
   const owner = await verifiedUserId(token);
   if (!owner) return unauthorized();
 
-  const body = parseBody<{ username?: string; profile?: any }>(event);
+  const body = parseBody<{ username?: string; profile?: Record<string, unknown> }>(event);
   if (!body?.username) return badRequest("Kullanıcı adı zorunludur.");
 
   const username = body.username.toLowerCase();
@@ -198,8 +198,8 @@ async function handlePublishProfile(event: ApiGatewayEvent) {
     );
 
     return ok({ status: "published", username });
-  } catch (err: any) {
-    if (err.name === "ConditionalCheckFailedException") {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "ConditionalCheckFailedException") {
       return badRequest(
         "Profil kaydedilemedi. Önceden yayınladığınız kullanıcı adını kullanın veya farklı bir ad deneyin.",
       );
@@ -235,8 +235,8 @@ async function handleUnpublishProfile(event: ApiGatewayEvent) {
       }),
     );
     return ok({ status: "unpublished" });
-  } catch (err: any) {
-    if (err.name === "ConditionalCheckFailedException") {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "ConditionalCheckFailedException") {
       return forbidden("Bu profil size ait değil.");
     }
     throw err;

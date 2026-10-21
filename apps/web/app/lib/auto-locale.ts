@@ -20,7 +20,7 @@ function localeFromPathname(pathname: string): AppLocale {
 
 function localeFromBrowser(): AppLocale {
   if (typeof navigator === "undefined") return "en";
-  const lang = navigator.language || (navigator as any).userLanguage || "";
+  const lang = navigator.language || (navigator as unknown as { userLanguage?: string }).userLanguage || "";
   return lang.startsWith("tr") ? "tr" : "en";
 }
 

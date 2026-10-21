@@ -38,7 +38,7 @@ export default tseslint.config(
         destructuredArrayIgnorePattern: "^_",
       }],
       "@typescript-eslint/no-unsafe-function-type": "warn",
-      "no-console": "warn",
+      "no-console": ["warn", { "allow": ["warn", "error"] }],
       "no-empty": ["warn", { "allowEmptyCatch": true }],
       "no-useless-assignment": "warn",
       "no-useless-catch": "warn",
@@ -48,11 +48,27 @@ export default tseslint.config(
     },
   },
 
-  // Lambda functions run server-side — console.log/error goes to CloudWatch.
+  // Server-side code uses console for logging — CloudWatch / Node runtime.
   {
-    files: ["infra/lambda/src/**/*.ts"],
+    files: [
+      "infra/lambda/src/**/*.ts",
+      "apps/web/server/**/*.ts",
+      "apps/web/app/lib/ai/**/*.ts",
+      "apps/web/app/lib/visa/**/*.ts",
+      "services/**/*.ts",
+      "agents/**/*.ts",
+      "monitoring/**/*.ts",
+    ],
     rules: {
       "no-console": "off",
+    },
+  },
+
+  // Lazy-loaded require() with type assertions — intentional for cold-start optimization.
+  {
+    files: ["services/place-intelligence/src/infrastructure/place-store.ts"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
     },
   },
 

@@ -127,9 +127,9 @@ async function handleRequest(event: Event) {
     !Array.isArray(history) ||
     history.length > 6 ||
     history.some(
-      (m: any) =>
+      (m: { role: unknown; content: unknown }) =>
         !m ||
-        !["user", "assistant"].includes(m.role) ||
+        !["user", "assistant"].includes(m.role as string) ||
         typeof m.content !== "string" ||
         m.content.length > 1500,
     )

@@ -81,7 +81,7 @@ export default function CommunityPage() {
       if (rawPlanner) {
         const trips = JSON.parse(rawPlanner);
         if (Array.isArray(trips)) {
-          setUserSavedRoutes(trips.map((t: any) => t.title).filter(Boolean));
+          setUserSavedRoutes(trips.map((t: { title?: string }) => t.title).filter(Boolean));
         }
       }
     } catch {
@@ -99,7 +99,7 @@ export default function CommunityPage() {
   }, []);
 
   // ── Central Action: Add to My Trip (Clone Route from Feed) ────
-  const handleAddToMyTrip = (route: { title: string; destination?: string; stops?: any[] }) => {
+  const handleAddToMyTrip = (route: { title: string; destination?: string; stops?: Array<{ label?: string; name?: string; address?: string; lat?: number; lng?: number; category?: string }> }) => {
     if (!requireAuth("Seyahate Ekle", "Bu rotayı seyahat planınıza kopyalamak için")) return;
 
     try {
@@ -121,7 +121,7 @@ export default function CommunityPage() {
               },
             ];
 
-      const clonedPins = stopsData.map((s: any, idx: number) => ({
+      const clonedPins = stopsData.map((s: { label?: string; name?: string; address?: string; lat?: number; lng?: number; category?: string }, idx: number) => ({
         id: "pin-" + Date.now() + "-" + idx,
         tripId: newTripId,
         label: s.label || s.name || `Durak ${idx + 1}`,

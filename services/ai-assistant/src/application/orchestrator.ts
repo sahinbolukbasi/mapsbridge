@@ -1,4 +1,4 @@
-import type { AIRouteRequest, AIRouteResponse, AIConversationContext } from "../domain/types.js";
+import type { AIRouteRequest } from "../domain/types.js";
 
 export class AIOrchestrator {
   /**

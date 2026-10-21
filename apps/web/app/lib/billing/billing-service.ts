@@ -409,8 +409,8 @@ export class BillingService {
       localStorage.setItem(STORAGE_KEYS.MARKETPLACE_ROUTES, JSON.stringify(updated));
       window.dispatchEvent(new CustomEvent("mapsbridge:marketplace_updated", { detail: updated }));
       return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e.message || "Rota pazara eklenemedi." };
+    } catch (e: unknown) {
+      return { success: false, error: e instanceof Error ? e.message : "Rota pazara eklenemedi." };
     }
   }
 

@@ -1,5 +1,6 @@
 import { getVerifiedUser } from "../shared/auth";
 import { resolveEnvSecret } from "../shared/http";
+import type { ApiGatewayEvent } from "../shared/http";
 import { BillingError, table, wallet, grantCredits, initializeTrial } from "../billing/store";
 import { getDynamoClient } from "../shared/dynamo";
 import { catalog } from "../billing/catalog";
@@ -22,7 +23,7 @@ function appOrigin() {
   return url.origin;
 }
 
-export async function handler(event: any) {
+export async function handler(event: ApiGatewayEvent) {
   try {
     const method = event.requestContext?.http?.method;
     const path = (event.rawPath || event.requestContext?.http?.path || "").replace(/\/$/, "");
@@ -49,7 +50,7 @@ export async function handler(event: any) {
 
     if (method === "GET" && path === "/revenuecat/wallet") return reply(200, await wallet(userId));
 
-    let body: any = {};
+    let body: Record<string, unknown> = {};
     if (event.body) {
       try {
         body = JSON.parse(
@@ -98,19 +99,33 @@ export async function handler(event: any) {
 
 // ─── Webhook ──────────────────────────────────────────────────────────────
 
-async function handleWebhook(event: any) {
+async function handleWebhook(event: ApiGatewayEvent) {
   // RevenueCat sends Authorization: Bearer <secret>
   const authHeader = event.headers?.authorization || event.headers?.Authorization || "";
   const secret = await resolveEnvSecret(process.env.RC_WEBHOOK_AUTH_SECRET);
   if (!secret || `Bearer ${secret}` !== authHeader)
     return reply(401, { error: "Geçersiz webhook kimlik doğrulama." });
 
-  let payload: any;
+  interface RCEvent {
+    id: string;
+    type: string;
+    app_user_id: string;
+    event_timestamp_ms: number;
+    product_id?: string;
+    expiration_at_ms?: number;
+    transaction_id?: string;
+    new_product_id?: string;
+    store?: string;
+    environment?: string;
+  }
+  interface RCPayload { event?: RCEvent }
+
+  let payload: RCPayload;
   try {
     const raw = event.isBase64Encoded
-      ? Buffer.from(event.body, "base64").toString("utf8")
-      : event.body;
-    payload = JSON.parse(raw);
+      ? Buffer.from(event.body!, "base64").toString("utf8")
+      : event.body!;
+    payload = JSON.parse(raw) as RCPayload;
   } catch {
     return reply(400, { error: "Geçersiz webhook gövdesi." });
   }
@@ -200,9 +215,9 @@ async function handleWebhook(event: any) {
       default:
         break;
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Log but don't fail — RC retries on non-2xx
-    if (err?.name !== "ConditionalCheckFailedException") {
+    if ((err as { name?: string })?.name !== "ConditionalCheckFailedException") {
       console.error(`[RevenueCat] Webhook processing error for ${ev.type}:`, err);
       return reply(500, { error: "İşlem hatası." });
     }
@@ -239,8 +254,8 @@ async function syncSubscription(
         }),
       }),
     );
-  } catch (err: any) {
-    if (err.name !== "ConditionalCheckFailedException") throw err;
+  } catch (err: unknown) {
+    if ((err as { name?: string })?.name !== "ConditionalCheckFailedException") throw err;
   }
 }
 
@@ -266,8 +281,8 @@ async function syncSubscriptionStatus(
         }),
       }),
     );
-  } catch (err: any) {
-    if (err.name !== "ConditionalCheckFailedException") throw err;
+  } catch (err: unknown) {
+    if ((err as { name?: string })?.name !== "ConditionalCheckFailedException") throw err;
   }
 }
 
@@ -280,7 +295,7 @@ async function rcSecretKey(): Promise<string> {
   return key;
 }
 
-async function getRcSubscriber(userId: string): Promise<any | null> {
+async function getRcSubscriber(userId: string): Promise<Record<string, unknown> | null> {
   const key = await rcSecretKey();
   const res = await fetch(
     `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`,
@@ -290,7 +305,7 @@ async function getRcSubscriber(userId: string): Promise<any | null> {
   );
   if (res.status === 404) return null;
   if (!res.ok) throw new BillingError(502, "RC_API_ERROR", "RevenueCat bağlantı hatası.");
-  const data = (await res.json()) as { subscriber?: unknown };
+  const data = (await res.json()) as { subscriber?: Record<string, unknown> };
   return data?.subscriber ?? null;
 }
 
@@ -310,8 +325,8 @@ async function createWebCheckoutUrl(
   return url.href;
 }
 
-async function syncFromSubscriber(userId: string, subscriber: any, eventTime: number) {
-  const entitlements: Record<string, any> = subscriber.entitlements || {};
+async function syncFromSubscriber(userId: string, subscriber: Record<string, unknown>, eventTime: number) {
+  const entitlements = (subscriber.entitlements as Record<string, { expires_date?: string }>) || {};
   // Find the highest-tier active entitlement
   const tiers = ["agency", "pro", "explorer"];
   let activeTier = "free";

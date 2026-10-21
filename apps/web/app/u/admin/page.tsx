@@ -62,8 +62,8 @@ type Route = {
   title?: string;
   userId?: string;
   ownerEmail?: string;
-  stops?: any[];
-  points?: any[];
+  stops?: unknown[];
+  points?: unknown[];
   description?: string;
   version?: number;
   isPublic?: boolean;

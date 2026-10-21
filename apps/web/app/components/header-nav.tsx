@@ -31,8 +31,9 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const handleWalletUpdated = (e: any) => {
-      if (e.detail) setWallet(e.detail);
+    const handleWalletUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<typeof wallet | null>).detail;
+      if (detail) setWallet(detail);
     };
     window.addEventListener("mapsbridge:wallet_updated", handleWalletUpdated);
     void billingService.refreshWallet().catch(() => setWallet(billingService.getWallet()));
@@ -47,7 +48,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed)) {
             setUnreadMessagesCount(
-              parsed.filter((m: any) => m.status === "unread" || !m.read).length,
+              parsed.filter((m: { status?: string; read?: boolean }) => m.status === "unread" || !m.read).length,
             );
           }
         }

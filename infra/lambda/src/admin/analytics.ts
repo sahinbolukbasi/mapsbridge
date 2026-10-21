@@ -1,7 +1,8 @@
 import type { ApiGatewayEvent } from "../shared/http";
 import { ok, badRequest, parseBody } from "../shared/http";
-import { getTableName, scanAllRaw } from "./management";
+import { getTableName, scanAllRaw, type Row } from "./management";
 import { paymentRecords } from "./users";
+import type { AuthorizedEvent } from "../shared/types";
 
 export async function handleMetrics() {
   const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
@@ -156,7 +157,7 @@ export async function handleDeviceAnalytics() {
     FilterExpression: "begins_with(PK, :pk) AND SK = :sk",
     ExpressionAttributeValues: { ":pk": { S: "SESSION#" }, ":sk": { S: "META" } },
   });
-  const sessions = result.Items.map((i: any) => unmarshall(i));
+  const sessions = result.Items.map((i) => unmarshall(i) as Row);
 
   let mobile = 0;
   let web = 0;
@@ -206,7 +207,7 @@ export async function handleTrackSession(event: ApiGatewayEvent) {
   const page = typeof body.page === "string" ? body.page.slice(0, 200) : "/";
   const sessionId =
     typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : `s_${Date.now()}`;
-  const user = (event as any).verifiedUser;
+  const user = (event as AuthorizedEvent).verifiedUser;
 
   const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
@@ -248,7 +249,7 @@ export async function handleAITopicAnalytics() {
     ExpressionAttributeNames: { "#prompt": "prompt" },
   });
 
-  const rows = result.Items.map((i: any) => unmarshall(i));
+  const rows = result.Items.map((i) => unmarshall(i));
 
   const topicKeywords: Record<string, string[]> = {
     Uçuş: ["uçuş", "bilet", "havalimanı", "uçak", "flight"],
@@ -336,7 +337,7 @@ export async function handleCommunityAnalytics() {
     FilterExpression: "begins_with(PK, :pk)",
     ExpressionAttributeValues: { ":pk": { S: "POST#" } },
   });
-  const posts = result.Items.map((i: any) => unmarshall(i));
+  const posts = result.Items.map((i) => unmarshall(i));
 
   const now = new Date();
   const last24h = new Date(now.getTime() - 24 * 3600_000).toISOString();
@@ -397,7 +398,7 @@ export async function handleSubscriptionAnalytics() {
     FilterExpression: "SK = :sk",
     ExpressionAttributeValues: { ":sk": { S: "SUBSCRIPTION" } },
   });
-  const subs = result.Items.map((i: any) => unmarshall(i));
+  const subs = result.Items.map((i) => unmarshall(i));
 
   const payments = await paymentRecords();
 
@@ -414,8 +415,8 @@ export async function handleSubscriptionAnalytics() {
   }
 
   for (const p of payments) {
-    if (p.status === "succeeded" && p.tier) {
-      tierRevenue[p.tier] = (tierRevenue[p.tier] || 0) + (p.amount || 0);
+    if (p.status === "succeeded" && typeof p.tier === "string" && p.tier) {
+      tierRevenue[p.tier] = (tierRevenue[p.tier] || 0) + (Number(p.amount) || 0);
     }
   }
 

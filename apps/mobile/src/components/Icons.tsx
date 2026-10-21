@@ -1,5 +1,5 @@
 import React from "react";
-import Svg, { Path, Circle, Rect, Line, Polyline, G } from "react-native-svg";
+import Svg, { Path, Circle, Rect, Line, Polyline } from "react-native-svg";
 
 export interface IconProps {
   size?: number;
@@ -588,7 +588,7 @@ export function GoogleLogo({ size = 18 }: { size?: number }) {
   );
 }
 
-function Polygon(props: any) {
+function Polygon(props: Record<string, unknown>) {
   return <Path d="M12 2 2 7l10 5 10-5-10-5z" {...props} />;
 }
 

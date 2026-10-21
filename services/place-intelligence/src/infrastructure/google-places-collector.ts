@@ -115,7 +115,7 @@ function convertOpeningHours(
       open: `${String(period.open.hour).padStart(2, "0")}:${String(period.open.minute).padStart(2, "0")}`,
       close: `${String(period.close.hour).padStart(2, "0")}:${String(period.close.minute).padStart(2, "0")}`,
     };
-    (hours as any)[dayName] = entry;
+    (hours as Record<string, DayHours | undefined>)[dayName] = entry;
   }
   return Object.keys(hours).length > 0 ? hours : undefined;
 }
@@ -208,8 +208,8 @@ export async function collectFromGoogle(request: CityDiscoveryRequest): Promise<
           ttl: Math.floor(Date.now() / 1000) + 30 * 86400,
         });
       }
-    } catch (err: any) {
-      console.warn(`[GooglePlaces] Error for "${cat}":`, err?.message);
+    } catch (err: unknown) {
+      console.warn(`[GooglePlaces] Error for "${cat}":`, (err as Error)?.message);
     }
   }
 

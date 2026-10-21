@@ -14,7 +14,13 @@ const reply = (statusCode: number, value: unknown) => ({
   headers: { "content-type": "application/json", "cache-control": "no-store" },
   body: JSON.stringify(value),
 });
-export async function handler(event: any) {
+export async function handler(event: {
+  requestContext?: { http?: { method?: string; path?: string } };
+  headers?: Record<string, string | undefined>;
+  body?: string;
+  isBase64Encoded?: boolean;
+  rawPath?: string;
+}) {
   const method = event.requestContext?.http?.method;
   if (method === "OPTIONS") return reply(204, {});
   const authorization = Object.entries(event.headers || {}).find(
@@ -54,7 +60,7 @@ export async function handler(event: any) {
       });
     }
     if ((event.body?.length || 0) > 4000) return reply(413, { error: "İstek çok uzun." });
-    let body: any = {};
+    let body: Record<string, unknown> = {};
     try {
       body = JSON.parse(
         event.isBase64Encoded
@@ -101,11 +107,12 @@ export async function handler(event: any) {
       });
     }
     return reply(405, { error: "Yöntem desteklenmiyor." });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorName = error instanceof Error ? error.name : "";
     const conflict = ["TransactionCanceledException", "ConditionalCheckFailedException"].includes(
-      error?.name,
+      errorName,
     );
-    console.warn("MemoryControlFailed", error?.name || "Error");
+    console.warn("MemoryControlFailed", errorName || "Error");
     return reply(conflict ? 409 : 503, {
       error: conflict
         ? "Tercihler değişti; yenileyip tekrar deneyin."

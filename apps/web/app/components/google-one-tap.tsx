@@ -3,6 +3,23 @@
 import { useEffect } from "react";
 import { handleGoogleCredentialResponse } from "../lib/cognito";
 
+interface GoogleCredentialResponse { credential: string; }
+interface GooglePromptNotification {
+  isNotDisplayed(): boolean;
+  isSkippedMoment(): boolean;
+  getNotDisplayedReason?(): string;
+  getSkippedReason?(): string;
+}
+interface GoogleIdService {
+  initialize(config: Record<string, unknown>): void;
+  prompt(cb?: (n: GooglePromptNotification) => void): void;
+}
+declare global {
+  interface Window {
+    google?: { accounts?: { id?: GoogleIdService } };
+  }
+}
+
 export function GoogleOneTap() {
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -28,13 +45,13 @@ export function GoogleOneTap() {
     if (!clientId) return;
 
     const initOneTap = () => {
-      const google = (window as any).google;
+      const google = window.google;
       if (!google?.accounts?.id) return;
 
       try {
         google.accounts.id.initialize({
           client_id: clientId,
-          callback: (response: any) => {
+          callback: (response: GoogleCredentialResponse) => {
             try {
               const res = handleGoogleCredentialResponse(response.credential);
               if (res) {
@@ -57,11 +74,11 @@ export function GoogleOneTap() {
         });
 
         // One Tap arayüzünü sağ üstte otomatik olarak tetikle
-        google.accounts.id.prompt((notification: any) => {
+        google.accounts.id.prompt((notification: GooglePromptNotification) => {
           if (notification.isNotDisplayed()) {
-            console.debug("Google One Tap gösterilmedi:", notification.getNotDisplayedReason());
+            console.warn("Google One Tap gösterilmedi:", notification.getNotDisplayedReason());
           } else if (notification.isSkippedMoment()) {
-            console.debug("Google One Tap atlandı:", notification.getSkippedReason());
+            console.warn("Google One Tap atlandı:", notification.getSkippedReason());
           }
         });
       } catch (e) {
@@ -78,7 +95,7 @@ export function GoogleOneTap() {
       script.defer = true;
       script.onload = initOneTap;
       document.head.appendChild(script);
-    } else if ((window as any).google?.accounts?.id) {
+    } else if (window.google?.accounts?.id) {
       initOneTap();
     }
   }, []);

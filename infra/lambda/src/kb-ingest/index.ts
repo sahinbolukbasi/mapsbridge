@@ -5,7 +5,7 @@
  * ingest:  triggers Bedrock KB StartIngestionJob
  */
 
-import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, ScanCommand, type AttributeValue } from "@aws-sdk/client-dynamodb";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { BedrockAgentClient, StartIngestionJobCommand } from "@aws-sdk/client-bedrock-agent";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
@@ -30,7 +30,7 @@ export async function handler(
 ): Promise<{ status: string; uploaded?: number; jobId?: string }> {
   if (event.action === "collect") return collectAndUpload();
   if (event.action === "ingest") return triggerIngestion();
-  throw new Error(`Unknown action: ${(event as any).action}`);
+  throw new Error(`Unknown action: ${(event as Record<string, unknown>).action}`);
 }
 
 async function collectAndUpload(): Promise<{ status: string; uploaded: number }> {
@@ -64,7 +64,7 @@ async function collectAndUpload(): Promise<{ status: string; uploaded: number }>
   }
 
   // 2. Upload approved training data from DynamoDB
-  let lastKey: Record<string, any> | undefined;
+  let lastKey: Record<string, AttributeValue> | undefined;
   do {
     const result = await dynamo.send(
       new ScanCommand({
@@ -80,7 +80,7 @@ async function collectAndUpload(): Promise<{ status: string; uploaded: number }>
     );
 
     for (const raw of result.Items || []) {
-      const item = unmarshall(raw) as any;
+      const item = unmarshall(raw) as Record<string, unknown>;
       if (!item.prompt || !item.summary) continue;
       const docText = [
         `Destination: ${item.destination || "unknown"}`,

@@ -89,8 +89,22 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
     stops: SavedAddressItem[];
   } | null>(null);
   const [selectedPlanRoute, setSelectedPlanRoute] = useState<RouteCardItem | null>(null);
+  interface LeafletMap {
+    remove(): void;
+    fitBounds(bounds: unknown, opts?: Record<string, unknown>): void;
+  }
+
+  interface LeafletLib {
+    map(el: HTMLElement, opts?: Record<string, unknown>): LeafletMap;
+    tileLayer(url: string, opts?: Record<string, unknown>): { addTo(map: LeafletMap): void };
+    divIcon(opts: Record<string, unknown>): unknown;
+    marker(latlng: [number, number], opts?: Record<string, unknown>): { addTo(map: LeafletMap): { bindPopup(html: string): unknown } };
+    polyline(latlngs: [number, number][], opts?: Record<string, unknown>): { addTo(map: LeafletMap): void };
+    latLngBounds(latlngs: [number, number][]): unknown;
+  }
+
   const mapModalRef = useRef<HTMLDivElement>(null);
-  const leafletInstanceRef = useRef<any>(null);
+  const leafletInstanceRef = useRef<LeafletMap | null>(null);
 
   // Direct Message & Group Modals
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -394,8 +408,8 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
     let isMounted = true;
 
     function initMap() {
-      if (!isMounted || !mapModalRef.current || !(window as any).L) return;
-      const L = (window as any).L;
+      if (!isMounted || !mapModalRef.current || !(window as Window & { L?: LeafletLib }).L) return;
+      const L = (window as Window & { L?: LeafletLib }).L!;
 
       if (leafletInstanceRef.current) {
         leafletInstanceRef.current.remove();
@@ -475,7 +489,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
     }
 
-    if (!(window as any).L) {
+    if (!(window as Window & { L?: LeafletLib }).L) {
       if (!document.getElementById("leaflet-css")) {
         const link = document.createElement("link");
         link.id = "leaflet-css";

@@ -111,16 +111,16 @@ export function UpgradeModal() {
         .catch(() => {});
     };
 
-    const handleWallet = (e: CustomEvent<any>) => {
-      if (e.detail) setWallet(e.detail);
+    const handleWallet = (e: CustomEvent<unknown>) => {
+      if (e.detail) setWallet(e.detail as ReturnType<typeof billingService.getWallet>);
     };
 
-    window.addEventListener("mapsbridge:open_upgrade_modal" as any, handleOpen);
-    window.addEventListener("mapsbridge:wallet_updated" as any, handleWallet);
+    window.addEventListener("mapsbridge:open_upgrade_modal", handleOpen as EventListener);
+    window.addEventListener("mapsbridge:wallet_updated", handleWallet as EventListener);
 
     return () => {
-      window.removeEventListener("mapsbridge:open_upgrade_modal" as any, handleOpen);
-      window.removeEventListener("mapsbridge:wallet_updated" as any, handleWallet);
+      window.removeEventListener("mapsbridge:open_upgrade_modal", handleOpen as EventListener);
+      window.removeEventListener("mapsbridge:wallet_updated", handleWallet as EventListener);
     };
   }, []);
 
@@ -149,8 +149,8 @@ export function UpgradeModal() {
         setErrorMessage(result.message || "Ödeme başlatılamadı. Lütfen tekrar deneyin.");
         setBusyItem(null);
       }
-    } catch (err: any) {
-      setErrorMessage(err?.message || "Ödeme servisine ulaşılamadı.");
+    } catch (err: unknown) {
+      setErrorMessage((err instanceof Error ? err.message : null) || "Ödeme servisine ulaşılamadı.");
       setBusyItem(null);
     }
   };

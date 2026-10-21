@@ -150,9 +150,9 @@ export async function sendDealNotificationEmail(
       messageId = res.MessageId;
       sesSuccess = true;
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.warn(
-      `[EmailNotifier] SES send warning: ${err?.message || err}. Saving notification to user store.`,
+      `[EmailNotifier] SES send warning: ${err instanceof Error ? err.message : String(err)}. Saving notification to user store.`,
     );
   }
 

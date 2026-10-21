@@ -74,7 +74,7 @@ class TripStore {
   private activeRouteId: string = "";
   private savedPool: TripStop[] = [];
   private listeners: Set<() => void> = new Set();
-  private syncTimeout: any = null;
+  private syncTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.init();
@@ -263,9 +263,9 @@ class TripStore {
   }
 
   public addStop(stop: TripStop) {
-    let current = this.getActiveRoute();
+    const current = this.getActiveRoute();
     if (!current || !current.id) {
-      current = this.createRoute("Yeni Keşif Rotam", [stop]);
+      this.createRoute("Yeni Keşif Rotam", [stop]);
       return;
     }
     current.stops = [...current.stops, stop];

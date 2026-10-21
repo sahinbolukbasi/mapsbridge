@@ -1,5 +1,14 @@
 import { getVerifiedUser } from "../shared/auth";
 import { resolveEnvSecret, jsonResponse } from "../shared/http";
+import type { ApiGatewayEvent } from "../shared/http";
+import type Stripe from "stripe";
+
+interface StripeWebhookEvent {
+  id: string;
+  created: number;
+  type: string;
+  data: { object: { id: string; charge?: string } };
+}
 import { stripeClient } from "../billing/stripe-client";
 import {
   BillingError,
@@ -23,16 +32,16 @@ function appOrigin() {
     throw new Error("Invalid APP_ORIGIN");
   return url.origin;
 }
-function idempotency(event: any, userId: string) {
+function idempotency(event: ApiGatewayEvent, userId: string) {
   const key = event.headers?.["idempotency-key"] || event.headers?.["Idempotency-Key"];
   if (typeof key !== "string" || !/^[a-zA-Z0-9_-]{16,100}$/.test(key))
     throw new BillingError(400, "REQUEST_ID_REQUIRED", "Ödeme işlem kimliği gerekli.");
   return `${userId}:${key}`;
 }
-export async function handler(event: any) {
+export async function handler(event: ApiGatewayEvent & { Records?: Array<{ messageId: string }> }) {
   // Old direct-to-SQS messages lack a verifiable raw body/signature. Retain for DLQ inspection, never grant rights.
   if (Array.isArray(event.Records))
-    return { batchItemFailures: event.Records.map((r: any) => ({ itemIdentifier: r.messageId })) };
+    return { batchItemFailures: event.Records.map((r) => ({ itemIdentifier: r.messageId })) };
   try {
     const method = event.requestContext?.http?.method;
     const path = (event.rawPath || event.requestContext?.http?.path || "").replace(/\/$/, "");
@@ -83,7 +92,7 @@ export async function handler(event: any) {
                 : "pending",
       });
     }
-    let body: any = {};
+    let body: Record<string, unknown> = {};
     if (event.body) {
       try {
         body = JSON.parse(
@@ -179,7 +188,7 @@ export async function handler(event: any) {
     return jsonResponse(503, { error: "Ödeme veya kredi servisine şu anda erişilemiyor." });
   }
 }
-async function webhook(event: any) {
+async function webhook(event: ApiGatewayEvent) {
   const signature = Object.entries(event.headers || {}).find(
     ([k]) => k.toLowerCase() === "stripe-signature",
   )?.[1];
@@ -189,13 +198,13 @@ async function webhook(event: any) {
   if (!secret.startsWith("whsec_"))
     throw new BillingError(503, "WEBHOOK_CONFIGURATION", "Ödeme doğrulaması yapılandırılmadı.");
   const stripe = await stripeClient();
-  let verified: any;
+  let verified: StripeWebhookEvent;
   try {
     verified = stripe.webhooks.constructEvent(
-      event.isBase64Encoded ? Buffer.from(event.body, "base64") : event.body,
+      event.isBase64Encoded ? Buffer.from(event.body!, "base64") : event.body!,
       signature,
       secret,
-    );
+    ) as unknown as StripeWebhookEvent;
   } catch {
     return jsonResponse(400, { error: "Geçersiz ödeme imzası." });
   }
@@ -266,7 +275,7 @@ async function webhook(event: any) {
           p.mode === "subscription" && p.priceId && p.priceId === sub.items?.data?.[0]?.price?.id,
       );
       const line = invoice.lines?.data?.find(
-        (l: any) => l.type === "subscription" && !l.proration && l.price?.id === product?.priceId,
+        (l) => l.type === "subscription" && !l.proration && l.price?.id === product?.priceId,
       );
       if (
         !product ||
@@ -299,7 +308,8 @@ async function webhook(event: any) {
     case "charge.refunded":
     case "charge.dispute.created": {
       const charge = await stripe.charges.retrieve(
-        verified.type === "charge.refunded" ? object.id : object.charge,
+        // object.charge is always a string when type is charge.dispute.created
+        verified.type === "charge.refunded" ? object.id : (object.charge as string),
       );
       const customerId =
         typeof charge.customer === "string" ? charge.customer : charge.customer?.id;
@@ -336,7 +346,7 @@ async function bindCustomer(userId: string, customerId: string) {
     }),
   );
 }
-async function syncSubscription(sub: any, eventTime: number) {
+async function syncSubscription(sub: Stripe.Subscription, eventTime: number) {
   const userId = sub.metadata?.userId;
   if (typeof userId !== "string" || !userId) throw new Error("Missing subscription owner");
   const product = catalog().find(
@@ -364,7 +374,7 @@ async function syncSubscription(sub: any, eventTime: number) {
         }),
       }),
     );
-  } catch (err: any) {
-    if (err.name !== "ConditionalCheckFailedException") throw err;
+  } catch (err: unknown) {
+    if ((err as { name?: string })?.name !== "ConditionalCheckFailedException") throw err;
   }
 }

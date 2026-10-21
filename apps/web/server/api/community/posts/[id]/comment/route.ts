@@ -49,9 +49,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     return NextResponse.json({ success: true, comment }, { status: 201, headers: corsHeaders });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { error: err?.message || "Sunucu hatası" },
+      { error: err instanceof Error ? err.message : "Sunucu hatası" },
       { status: 500, headers: corsHeaders },
     );
   }

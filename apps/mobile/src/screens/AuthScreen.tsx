@@ -75,17 +75,18 @@ export function AuthScreen({
     try {
       const session = await authService.signIn(email, password);
       onSuccess(session);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const e = err instanceof Error ? err : null;
       if (
-        err.message?.includes("UserNotConfirmedException") ||
-        err.message?.includes("not confirmed")
+        e?.message?.includes("UserNotConfirmedException") ||
+        e?.message?.includes("not confirmed")
       ) {
         setInfoMessage(
           "Hesabınız henüz onaylanmamış. E-postanıza gönderilen doğrulama kodunu girin.",
         );
         setMode("confirm_signup");
       } else {
-        setErrorMessage(err.message || "E-posta veya şifre hatalı.");
+        setErrorMessage(e?.message || "E-posta veya şifre hatalı.");
       }
     } finally {
       setLoading(false);
@@ -114,8 +115,8 @@ export function AuthScreen({
       await authService.signUp(cleanEmail, password, `${cleanFirst} ${cleanLast}`, cleanPhone);
       setInfoMessage(`Doğrulama kodu ${cleanEmail} adresine iletildi.`);
       setMode("confirm_signup");
-    } catch (err: any) {
-      setErrorMessage(err.message || "Kayıt işlemi tamamlanamadı.");
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Kayıt işlemi tamamlanamadı.");
     } finally {
       setLoading(false);
     }
@@ -132,8 +133,8 @@ export function AuthScreen({
       await authService.confirmSignUp(email, code);
       setInfoMessage("Hesabınız başarıyla doğrulandı! Şimdi giriş yapabilirsiniz.");
       setMode("login");
-    } catch (err: any) {
-      setErrorMessage(err.message || "Doğrulama kodu hatalı.");
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Doğrulama kodu hatalı.");
     } finally {
       setLoading(false);
     }
@@ -150,8 +151,8 @@ export function AuthScreen({
       await authService.forgotPassword(email);
       setInfoMessage(`Şifre sıfırlama kodu ${email} adresine gönderildi.`);
       setMode("reset_password");
-    } catch (err: any) {
-      setErrorMessage(err.message || "Şifre sıfırlama talebi gönderilemedi.");
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Şifre sıfırlama talebi gönderilemedi.");
     } finally {
       setLoading(false);
     }
@@ -168,8 +169,8 @@ export function AuthScreen({
       await authService.confirmForgotPassword(email, code, newPassword);
       setInfoMessage("Şifreniz başarıyla güncellendi! Yeni şifrenizle giriş yapabilirsiniz.");
       setMode("login");
-    } catch (err: any) {
-      setErrorMessage(err.message || "Şifre sıfırlanamadı.");
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Şifre sıfırlanamadı.");
     } finally {
       setLoading(false);
     }

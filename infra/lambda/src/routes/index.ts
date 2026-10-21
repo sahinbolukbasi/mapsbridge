@@ -28,11 +28,32 @@ import { Router } from "../shared/router";
 import { read, subscription } from "../shared/data";
 import { handler as slackBotHandler } from "../slack-bot";
 
+// Augmented event type used to thread the verified user across route handlers
+type EventWithUser = ApiGatewayEvent & { verifiedUser?: { sub: string } | null };
+
+// OSRM leg/step shapes for typed route responses
+type OsrmStep = {
+  distance: number;
+  duration: number;
+  maneuver?: {
+    instruction?: string;
+    bearing_after?: number;
+    type?: string;
+    modifier?: string;
+    location?: unknown;
+  };
+};
+type OsrmLeg = {
+  distance: number;
+  duration: number;
+  steps?: OsrmStep[];
+};
+
 const router = new Router();
 
 // Slack Bot routes — bridge between ApiGatewayEvent and slack-bot's narrower event type
 const slackRoute = async (event: ApiGatewayEvent): Promise<ApiResponse> => {
-  const result = await slackBotHandler(event as any);
+  const result = await slackBotHandler(event as unknown as Parameters<typeof slackBotHandler>[0]);
   return { ...result, headers: { "content-type": "application/json" } };
 };
 router.add("POST /slack-bot/deploy", slackRoute);
@@ -77,13 +98,13 @@ export const handler = async (event: ApiGatewayEvent) => {
     if (path === "/routes/telemetry" && method === "POST") {
       const token = extractBearerToken(event);
       const sub = token ? await verifiedUserId(token) : null;
-      (event as any).verifiedUser = sub ? { sub } : null;
+      (event as EventWithUser).verifiedUser = sub ? { sub } : null;
       return await handleTelemetry(event);
     }
     if (["POST", "PUT", "DELETE"].includes(method)) {
       const sub = await verifiedUserId(extractBearerToken(event));
       if (!sub) return unauthorized();
-      (event as any).verifiedUser = { sub };
+      (event as EventWithUser).verifiedUser = { sub };
       const config = await read("SYSTEM#CONFIG", "META");
       if (config?.maintenanceMode)
         return jsonResponse(503, {
@@ -121,7 +142,7 @@ async function handleListRoutes(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
   if (!token) return unauthorized();
 
-  const userId = (event as any).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
   if (!userId) return unauthorized();
 
   const { DynamoDBClient, QueryCommand } = await import("@aws-sdk/client-dynamodb");
@@ -145,10 +166,10 @@ async function handleCreateRoute(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
   if (!token) return unauthorized();
 
-  const userId = (event as any).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
   if (!userId) return unauthorized();
 
-  const body = parseBody<{ name?: string; stops?: any[]; days?: any[]; isPublic?: boolean }>(event);
+  const body = parseBody<{ name?: string; stops?: unknown[]; days?: unknown[]; isPublic?: boolean }>(event);
   if (!body?.name) return badRequest("Rota adı zorunludur.");
 
   const routeId = crypto.randomUUID();
@@ -209,7 +230,7 @@ async function handleGetRoute(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
   if (!token) return unauthorized();
 
-  const userId = (event as any).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -235,7 +256,7 @@ async function handleUpdateRoute(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
   if (!token) return unauthorized();
 
-  const userId = (event as any).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -246,7 +267,7 @@ async function handleUpdateRoute(event: ApiGatewayEvent) {
   if (current.adminStatus === "suspended")
     return forbidden("Askıdaki rota yönetici onayı olmadan değiştirilemez.");
 
-  const body = parseBody<{ name?: string; stops?: any[]; days?: any[]; isPublic?: boolean }>(event);
+  const body = parseBody<{ name?: string; stops?: unknown[]; days?: unknown[]; isPublic?: boolean }>(event);
   if (!body) return badRequest("Güncelleme verisi gerekli.");
 
   const { DynamoDBClient, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
@@ -254,7 +275,7 @@ async function handleUpdateRoute(event: ApiGatewayEvent) {
   const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
 
   const updateExpr: string[] = ["updatedAt = :now"];
-  const exprAttr: Record<string, any> = { ":now": new Date().toISOString() };
+  const exprAttr: Record<string, unknown> = { ":now": new Date().toISOString() };
   const names: Record<string, string> = {};
 
   if (body.name !== undefined) {
@@ -294,7 +315,7 @@ async function handleDeleteRoute(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
   if (!token) return unauthorized();
 
-  const userId = (event as any).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -318,7 +339,7 @@ async function handleShareRoute(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
   if (!token) return unauthorized();
 
-  const userId = (event as any).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -389,7 +410,7 @@ async function handleOsrmRoute(event: ApiGatewayEvent) {
     const data = (await response.json()) as {
       code?: string;
       message?: string;
-      routes?: Array<{ distance: number; duration: number; geometry: unknown; legs?: any[] }>;
+      routes?: Array<{ distance: number; duration: number; geometry: unknown; legs?: OsrmLeg[] }>;
     };
     if (data.code !== "Ok") {
       return badRequest(`OSRM: ${data.message || "Rota hesaplanamadı."}`);
@@ -402,10 +423,10 @@ async function handleOsrmRoute(event: ApiGatewayEvent) {
       distance: route.distance, // meters
       duration: route.duration, // seconds
       polyline: route.geometry, // GeoJSON LineString
-      legs: route.legs?.map((leg: any) => ({
+      legs: route.legs?.map((leg) => ({
         distance: leg.distance,
         duration: leg.duration,
-        steps: leg.steps?.map((step: any) => ({
+        steps: leg.steps?.map((step) => ({
           instruction: step.maneuver?.instruction || "",
           distance: step.distance,
           duration: step.duration,
@@ -417,7 +438,7 @@ async function handleOsrmRoute(event: ApiGatewayEvent) {
       })),
       profile,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[OSRM Error]", err);
     return serverError("Rota hesaplanamadı. Lütfen tekrar deneyin.");
   }
@@ -482,7 +503,7 @@ async function handleTelemetry(event: ApiGatewayEvent) {
     const rawBody = event.body || "";
     if (rawBody.length > 32768) return badRequest("Telemetry payload too large.");
 
-    const body = parseBody<{ events?: any[] }>(event);
+    const body = parseBody<{ events?: Array<Record<string, unknown>> }>(event);
     if (!body?.events || !Array.isArray(body.events) || body.events.length === 0) {
       return ok({ received: 0 });
     }
@@ -524,7 +545,7 @@ async function handleTelemetry(event: ApiGatewayEvent) {
     );
 
     return ok({ received: batch.length, status: "logged" });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Telemetry Error]", err);
     return ok({ received: 0, status: "fallback" });
   }
@@ -725,9 +746,10 @@ async function handleGetFlightPrices(event: ApiGatewayEvent) {
       returnDate: q.returnDate,
     });
     return ok({ origin, destination, prices, currency: q.currency || "usd", source: "travelpayouts_cache" });
-  } catch (err: any) {
-    if (err.message === "TP_RATE_LIMIT") return jsonResponse(429, { error: "Fiyat servisi meşgul, lütfen tekrar deneyin." });
-    console.error("[TP Flights]", err.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg === "TP_RATE_LIMIT") return jsonResponse(429, { error: "Fiyat servisi meşgul, lütfen tekrar deneyin." });
+    console.error("[TP Flights]", msg);
     return serverError("Uçuş fiyatları alınamadı.");
   }
 }
@@ -757,8 +779,8 @@ async function handleGetHotelPrices(event: ApiGatewayEvent) {
       limit: 10,
     });
     return ok({ location, checkIn, checkOut, hotels, currency: q.currency || "usd", source: "hotellook_cache" });
-  } catch (err: any) {
-    console.error("[TP Hotels]", err.message);
+  } catch (err: unknown) {
+    console.error("[TP Hotels]", err instanceof Error ? err.message : String(err));
     return serverError("Otel fiyatları alınamadı.");
   }
 }
@@ -780,8 +802,8 @@ async function handleGetPopularRoutes(event: ApiGatewayEvent) {
       limit: 10,
     });
     return ok({ origin, destinations, currency: q.currency || "usd", source: "travelpayouts_popular" });
-  } catch (err: any) {
-    console.error("[TP Popular]", err.message);
+  } catch (err: unknown) {
+    console.error("[TP Popular]", err instanceof Error ? err.message : String(err));
     return serverError("Popüler rotalar alınamadı.");
   }
 }

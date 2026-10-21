@@ -256,8 +256,8 @@ export async function handler(event: {
           if (!d) return { service: name, status: "unknown", details: "not configured" };
           try {
             return await d.status();
-          } catch (e: any) {
-            return { service: name, status: "error", details: e.message };
+          } catch (e: unknown) {
+            return { service: name, status: "error", details: e instanceof Error ? e.message : String(e) };
           }
         }),
       );
@@ -289,8 +289,8 @@ export async function handler(event: {
             if (!d) return { service: name, status: "unknown", details: "" };
             try {
               return await d.status();
-            } catch (e: any) {
-              return { service: name, status: "error", details: e.message };
+            } catch (e: unknown) {
+              return { service: name, status: "error", details: e instanceof Error ? e.message : String(e) };
             }
           }),
         ),
@@ -436,10 +436,10 @@ export async function handler(event: {
                 ? `✅ *${service}* ${opLabel} başlatıldı: ${result.message}`
                 : `❌ ${opLabel} başarısız: ${result.message}`,
             });
-          } catch (e: any) {
+          } catch (e: unknown) {
             console.error(`[slack-bot] ${opLabel} error`, e);
             if (responseUrl) {
-              await postToUrl(responseUrl, { text: `❌ ${opLabel} hatası: ${e.message}` }).catch(
+              await postToUrl(responseUrl, { text: `❌ ${opLabel} hatası: ${e instanceof Error ? e.message : String(e)}` }).catch(
                 () => {},
               );
             }

@@ -3,6 +3,7 @@ import {
   DynamoDBClient,
   GetItemCommand,
   QueryCommand,
+  TransactWriteItem,
   TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
@@ -156,8 +157,8 @@ export async function retrievePersonalMemory(
       current.version === settings.version
       ? records
       : [];
-  } catch (error: any) {
-    console.warn("PersonalMemoryUnavailable", error?.name || "Error");
+  } catch (error: unknown) {
+    console.warn("PersonalMemoryUnavailable", error instanceof Error ? error.name : "Error");
     return [];
   } finally {
     client.destroy();
@@ -187,7 +188,7 @@ export async function changeMemory(
     ...(input.eraseHistory ? { erasedAt: now } : {}),
   };
   const PK = `USER#${userId}`;
-  const operations: any[] = [
+  const operations: TransactWriteItem[] = [
     {
       Put: {
         TableName: memoryTable(),

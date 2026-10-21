@@ -116,7 +116,7 @@ export class OsrmRoutingProvider implements IRoutingProvider {
         }
       }
     } catch (err) {
-      console.debug("OSRM fetch fallback to synthetic road curves", err);
+      console.warn("OSRM fetch fallback to synthetic road curves", err);
     }
 
     // Fallback: smooth interpolated curve between coordinates

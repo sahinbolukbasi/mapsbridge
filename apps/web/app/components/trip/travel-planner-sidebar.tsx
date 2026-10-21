@@ -361,9 +361,9 @@ export function TravelPlannerSidebar({
       } else {
         throw new Error("AI rotayı güncelleyemedi.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn("AI modify error:", err);
-      showToast(`⚠️ ${err?.message || "AI yanıt veremedi. Lütfen tekrar deneyin."}`);
+      showToast(`⚠️ ${err instanceof Error ? err.message : "AI yanıt veremedi. Lütfen tekrar deneyin."}`);
     } finally {
       setIsAiModifying(false);
     }
