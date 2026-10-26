@@ -983,6 +983,7 @@ export default function Panel() {
 
       const map = L.map(mapContainerRef.current, {
         zoomControl: false,
+        doubleClickZoom: false, // çift tık = haritaya durak ekle (zoom'u devre dışı bırak)
       }).setView([initialLat, initialLng], 14);
       mapInstanceRef.current = map;
 
@@ -1111,6 +1112,60 @@ export default function Panel() {
 
         setIsAddingPinMode(false);
         fetchAddress(lat, lng);
+      });
+
+      // Çift tıklama: tıklanan konumu doğrudan aktif geziye durak olarak ekler.
+      map.on("dblclick", async (e: LeafletMouseEvent) => {
+        const session = getStoredSession();
+        if (!session?.email || !session?.token) {
+          setAuthModalConfig({
+            title: "Haritaya Durak Eklemek İçin Üye Olun",
+            subtitle:
+              "Harita üzerine çift tıklayarak durak eklemek için lütfen ücretsiz üye olun veya giriş yapın.",
+            featureName: "Harita İşlemleri",
+          });
+          setShowAuthModal(true);
+          return;
+        }
+        const { lat, lng } = e.latlng;
+        const targetTripId = planner.activeTrip?.id || planner.trips[0]?.id || "trip-istanbul";
+        const targetDay = planner.activeDayIndex || 1;
+        try {
+          const geocoded = await reverseGeocodeLocation(lat, lng);
+          planner.addPinDirectlyToTrip(
+            targetTripId,
+            {
+              label: geocoded.label || geocoded.address.split(",")[0] || "Yeni Durak",
+              address: geocoded.address,
+              lat,
+              lng,
+              category: geocoded.category || "genel",
+              dayIndex: targetDay,
+              group: "Genel",
+              visited: false,
+              durationMinutes: 60,
+            },
+            targetDay,
+          );
+          showPanelToast(`✓ Durak ${targetDay}. güne eklendi`);
+        } catch {
+          planner.addPinDirectlyToTrip(
+            targetTripId,
+            {
+              label: `Durak (${lat.toFixed(4)}, ${lng.toFixed(4)})`,
+              address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+              lat,
+              lng,
+              category: "genel",
+              dayIndex: targetDay,
+              group: "Genel",
+              visited: false,
+              durationMinutes: 60,
+            },
+            targetDay,
+          );
+          showPanelToast(`✓ Durak ${targetDay}. güne eklendi`);
+        }
       });
 
       marker.on("click", () => {

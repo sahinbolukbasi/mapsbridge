@@ -8291,3 +8291,76 @@
   background: #15241f;
   border-color: rgba(45, 110, 88, 0.4);
 }
+
+/* ── AI'ya Sor (seçili mekan soru-cevap) ─────────────────── */
+.ask-ai-hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+[data-theme="dark"] .ask-ai-hint {
+  color: #94a3b8;
+}
+.ask-ai-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.ask-ai-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.82rem;
+  color: #1e293b;
+  background: #ffffff;
+}
+.ask-ai-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+[data-theme="dark"] .ask-ai-input {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #e2e8f0;
+}
+.btn-ask-ai {
+  flex: 0 0 auto;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.btn-ask-ai:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ask-ai-loading {
+  margin-top: 0.55rem;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-style: italic;
+}
+.ask-ai-answer {
+  margin-top: 0.6rem;
+  background: #f0f7ff;
+  border-left: 3.5px solid #2563eb;
+  border-radius: 0 12px 12px 0;
+  padding: 0.8rem 1rem;
+  font-size: 0.84rem;
+  color: #1e293b;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+[data-theme="dark"] .ask-ai-answer {
+  background: rgba(30, 58, 138, 0.18);
+  border-left-color: #60a5fa;
+  color: #dbeafe;
+}

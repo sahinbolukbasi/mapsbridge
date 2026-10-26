@@ -279,8 +279,54 @@ export function TravelPlannerSidebar({
   >([]);
   const [_activeVersionNum, setActiveVersionNum] = useState<number>(1);
 
-  // "AI'ya Sor" — mekan hakkında anlık soru-cevap (reserved for future use)
+  // "AI'ya Sor" — seçili mekan hakkında anlık soru-cevap.
+  // I1: LLM olgu uydurmaz; soruyu mekan verisiyle (ad/adres/kategori/koordinat) besliyoruz,
+  // endpoint kendi grounding/retrieval katmanını uygular.
+  const [askPlaceQuestion, setAskPlaceQuestion] = useState("");
+  const [askPlaceAnswer, setAskPlaceAnswer] = useState<string | null>(null);
+  const [askPlaceLoading, setAskPlaceLoading] = useState(false);
+  const handleAskAboutPlace = async (pin: Pin) => {
+    const q = askPlaceQuestion.trim();
+    if (!q) return;
+    if (guardGuest("AI'ya Sor", "Mekan hakkında yapay zekaya soru sormak için")) return;
+    setAskPlaceLoading(true);
+    setAskPlaceAnswer(null);
+    try {
+      const requestId = crypto.randomUUID();
+      const conversationId = `ask-${pin.id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 30)}-${Date.now()}`;
+      const placeContext = `Mekan: ${pin.label}${pin.address ? ` (${pin.address})` : ""}; Kategori: ${DEFAULT_CATEGORY_META[pin.category]?.label || "Genel"}; Koordinat: ${pin.lat.toFixed(5)},${pin.lng.toFixed(5)}`;
+      const res = await apiFetch<MultiAgentResponse>("/ai/route-planner", {
+        method: "POST",
+        timeoutMs: 35000,
+        body: JSON.stringify({
+          prompt: `${placeContext}. Soru: ${q}`,
+          requestId,
+          conversationId,
+          conversationState: {
+            version: 1,
+            context: { planningRequested: false },
+            messages: [{ role: "user", content: q }],
+          },
+        }),
+      });
+      const answer = res?.orchestratorSummary?.trim();
+      if (answer) {
+        setAskPlaceAnswer(answer);
+      } else {
+        setAskPlaceAnswer("Bu mekan için şu an yeterli veri bulamadım. Farklı bir soru deneyebilirsiniz.");
+      }
+    } catch {
+      setAskPlaceAnswer("⚠ Yapay zekaya ulaşılamadı. Lütfen biraz sonra tekrar deneyin.");
+    } finally {
+      setAskPlaceLoading(false);
+    }
+  };
 
+  // Seçili pin değişince AI'ya Sor cevabını temizle (cevaplar pinler arası sızmasın).
+  useEffect(() => {
+    setAskPlaceAnswer(null);
+    setAskPlaceQuestion("");
+  }, [selectedPinId]);
   // Initialize v1 when activeTrip changes
   useEffect(() => {
     if (activeTrip && activeTrip.pins) {
@@ -743,6 +789,42 @@ export function TravelPlannerSidebar({
                   )}
                 </div>
 
+                {/* AI'ya Sor — mekan hakkında anlık soru-cevap */}
+                <div className="info-section-group">
+                  <h4 className="info-section-title">🤖 AI'ya Sor</h4>
+                  <p className="ask-ai-hint">
+                    Bu mekan hakkında merak ettiğinizi sorun. Yanıtlar mevcut mekan verisine dayanır.
+                  </p>
+                  <div className="ask-ai-input-row">
+                    <input
+                      type="text"
+                      className="ask-ai-input"
+                      placeholder="Örn: Ne zaman gitmeliyim? Çevresinde ne var?"
+                      value={askPlaceQuestion}
+                      onChange={(e) => setAskPlaceQuestion(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !askPlaceLoading) {
+                          void handleAskAboutPlace(selectedPin);
+                        }
+                      }}
+                      disabled={askPlaceLoading}
+                    />
+                    <button
+                      type="button"
+                      className="btn-ask-ai"
+                      disabled={askPlaceLoading || !askPlaceQuestion.trim()}
+                      onClick={() => void handleAskAboutPlace(selectedPin)}
+                    >
+                      {askPlaceLoading ? "…" : "Sor"}
+                    </button>
+                  </div>
+                  {askPlaceLoading && (
+                    <div className="ask-ai-loading">🤖 Yapay zeka yanıtını hazırlıyor...</div>
+                  )}
+                  {askPlaceAnswer && !askPlaceLoading && (
+                    <div className="ask-ai-answer">{askPlaceAnswer}</div>
+                  )}
+                </div>
                 {/* Fotoğraflar */}
                 <div className="info-section-group">
                   <div className="info-photos-header">
