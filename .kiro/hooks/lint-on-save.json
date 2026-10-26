@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Kaydetmede ESLint",
+      "trigger": "PostFileSave",
+      "description": "Bir .ts/.tsx dosyası kaydedildiğinde o dosyada ESLint --fix çalıştırır",
+      "matcher": "\\.(ts|tsx)$",
+      "action": {
+        "type": "command",
+        "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && npx eslint --fix --no-error-on-unmatched-pattern \"$KIRO_FILE_PATH\" 2>&1 | head -40",
+        "timeout": 90
+      }
+    }
+  ]
+}
