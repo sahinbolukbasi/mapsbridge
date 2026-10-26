@@ -26,13 +26,13 @@ import { getStoredSession } from "../cognito";
 const STORAGE_KEY = "mapsbridge.travelPlanner.v5";
 
 function routeEntityToTrip(entity: RouteEntity): Trip {
-  const pins: Pin[] = (entity.stops || []).map((s, idx) => ({
+  const pins: Pin[] = (entity.stops || []).map((s, idx): Pin => ({
     id: s.id || `pin-${idx}`,
     label: s.name,
     address: s.address || "",
     lat: s.lat,
     lng: s.lng,
-    category: (s.category as string) || "genel",
+    category: ((s.category as string) || "genel") as Pin["category"],
     dayIndex: s.day || 1,
     order: idx + 1,
     group: "",

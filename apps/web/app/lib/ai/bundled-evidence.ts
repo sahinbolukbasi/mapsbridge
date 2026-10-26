@@ -11,7 +11,7 @@ export function bundledEvidence(
 ): TravelEvidence {
   const request = normalizeText(payload.prompt);
   if (
-    !/yemek|yiy|lezzet|kahve|mutfak|restoran|gastronomi|food|cafe|coffee|monjayaki|pisco|drink/u.test(
+    !/yemek|yiy|yen|lezzet|kahve|mutfa|restoran|tapas|meze|sushi|ramen|pizza|makarna|kebap|balik|balık|ceviche|pisco|tapas|gastronomi|food|cafe|coffee|monjayaki|pisco|drink|ulasim|ulaşım|metro|tramvay|otobus|otobüs|vapur|transit|transport|nasil git|nereye|gez|rota/u.test(
       request,
     )
   )
@@ -21,6 +21,8 @@ export function bundledEvidence(
     Roma: ["roma", "rome"],
     İstanbul: ["istanbul"],
     Lima: ["lima"],
+    Paris: ["paris"],
+    Barcelona: ["barcelona", "barselona"],
   };
   let city: string | undefined;
   let last = -1;

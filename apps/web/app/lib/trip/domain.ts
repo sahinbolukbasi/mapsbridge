@@ -71,6 +71,12 @@ export interface TripDay {
   stops: TripStop[];
   totalDurationMinutes?: number;
   totalDistanceKm?: number;
+  /** I9: aktif günün programsız (buffer) dakikası. Aktif pencerenin >=%20'si olmalı. */
+  bufferMinutes?: number;
+  /** I9: programsız zamanın aktif pencereye oranı (0-1). <0.2 ise gün aşırı yoğun. */
+  bufferPct?: number;
+  /** I9: gün aktif pencerenin %80'ini aşıyorsa true — düşürülecek durak önerilir. */
+  overPacked?: boolean;
   /** Geo spread of all stops in km. Exceeding ~8km/day triggers a coherence warning. */
   geoBoundingBoxKm?: number;
 }

@@ -146,8 +146,14 @@ variable "stripe_queue_arn" {
 
 variable "bedrock_model_id" {
   type        = string
-  default     = "anthropic.claude-3-haiku-20240307-v1:0"
-  description = "Bedrock model ID for AI domain"
+  default     = "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
+  description = "Bedrock answer-tier model (inference profile)"
+}
+
+variable "bedrock_intake_model_id" {
+  type        = string
+  default     = "eu.amazon.nova-micro-v1:0"
+  description = "Bedrock intake-tier model (inference profile) — ucuz Nova Micro"
 }
 
 variable "kms_key_arn" {

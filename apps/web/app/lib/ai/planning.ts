@@ -60,15 +60,21 @@ export function calculateTripCompleteness(profile: Partial<TripProfile>): number
 }
 
 export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
+  // Güvenli daraltma: unknown değeri sayı/kayıt olarak oku (runtime davranışı değişmez).
+  const num = (v: unknown): number => (typeof v === "number" ? v : NaN);
+  const rec = (v: unknown): Record<string, unknown> =>
+    v && typeof v === "object" ? (v as Record<string, unknown>) : {};
   const dest =
     typeof value?.destination === "string" && value.destination.trim()
       ? value.destination.trim().slice(0, 120)
       : undefined;
+  const dd = num(value?.duration_days);
+  const dAlt = num(value?.days);
   const duration =
-    Number.isInteger(value?.duration_days) && value.duration_days >= 1 && value.duration_days <= 30
-      ? value.duration_days
-      : Number.isInteger(value?.days) && value.days >= 1 && value.days <= 30
-        ? value.days
+    Number.isInteger(dd) && dd >= 1 && dd <= 30
+      ? dd
+      : Number.isInteger(dAlt) && dAlt >= 1 && dAlt <= 30
+        ? dAlt
         : undefined;
 
   const cleanList = (arr: unknown, maxLen = 60, maxItems = 6): string[] =>
@@ -86,12 +92,12 @@ export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
   const isInterestsObj =
     rawInterests && typeof rawInterests === "object" && !Array.isArray(rawInterests);
   const interests: TripInterests = {
-    food: cleanList(isInterestsObj ? rawInterests.food : undefined),
-    sports: cleanList(isInterestsObj ? rawInterests.sports : undefined),
-    culture: cleanList(isInterestsObj ? rawInterests.culture : undefined),
+    food: cleanList(isInterestsObj ? rec(rawInterests).food : undefined),
+    sports: cleanList(isInterestsObj ? rec(rawInterests).sports : undefined),
+    culture: cleanList(isInterestsObj ? rec(rawInterests).culture : undefined),
     general: cleanList(
       isInterestsObj
-        ? rawInterests.general
+        ? rec(rawInterests).general
         : Array.isArray(rawInterests)
           ? rawInterests
           : undefined,
@@ -99,10 +105,14 @@ export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
   };
 
   const constraints = cleanList(value?.constraints, 180, 8);
-  const pace = ["relaxed", "moderate", "fast"].includes(value?.pace) ? value.pace : undefined;
+  const paceVal = typeof value?.pace === "string" ? value.pace : "";
+  const pace = (["relaxed", "moderate", "fast"].includes(paceVal) ? paceVal : undefined) as
+    | "relaxed" | "moderate" | "fast" | undefined;
   const validLodgings = ["hotel", "hostel", "apartment", "boutique", "resort"];
   const lodging_type = Array.isArray(value?.lodging_type)
-    ? value.lodging_type.filter((t: string) => validLodgings.includes(t))
+    ? ((value.lodging_type as unknown[]).filter(
+        (t): t is string => typeof t === "string" && validLodgings.includes(t),
+      ) as Array<"hotel" | "hostel" | "apartment" | "boutique" | "resort">)
     : undefined;
 
   const profile: TripProfile = {
@@ -111,39 +121,41 @@ export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
     ...(value?.dates && typeof value.dates === "object"
       ? {
           dates: {
-            ...(typeof value.dates.start === "string"
-              ? { start: value.dates.start.slice(0, 10) }
+            ...(typeof rec(value.dates).start === "string"
+              ? { start: (rec(value.dates).start as string).slice(0, 10) }
               : {}),
-            ...(typeof value.dates.end === "string" ? { end: value.dates.end.slice(0, 10) } : {}),
-            flexible: value.dates.flexible === true,
+            ...(typeof rec(value.dates).end === "string" ? { end: (rec(value.dates).end as string).slice(0, 10) } : {}),
+            flexible: rec(value.dates).flexible === true,
           },
         }
       : {}),
     ...(value?.travelers && typeof value.travelers === "object"
       ? {
           travelers: {
-            ...(Number.isInteger(value.travelers.adults) && value.travelers.adults > 0
-              ? { adults: Math.min(20, value.travelers.adults) }
+            ...(Number.isInteger(num(rec(value.travelers).adults)) && num(rec(value.travelers).adults) > 0
+              ? { adults: Math.min(20, num(rec(value.travelers).adults)) }
               : {}),
-            ...(Number.isInteger(value.travelers.children) && value.travelers.children >= 0
-              ? { children: Math.min(20, value.travelers.children) }
+            ...(Number.isInteger(num(rec(value.travelers).children)) && num(rec(value.travelers).children) >= 0
+              ? { children: Math.min(20, num(rec(value.travelers).children)) }
               : {}),
-            pets: value.travelers.pets === true,
+            pets: rec(value.travelers).pets === true,
           },
         }
       : {}),
     ...(value?.budget && typeof value.budget === "object"
       ? {
           budget: {
-            ...(typeof value.budget.currency === "string"
-              ? { currency: value.budget.currency.slice(0, 10) }
+            ...(typeof rec(value.budget).currency === "string"
+              ? { currency: (rec(value.budget).currency as string).slice(0, 10) }
               : {}),
-            ...(typeof value.budget.total === "number" && value.budget.total >= 0
-              ? { total: value.budget.total }
+            ...(typeof rec(value.budget).total === "number" && (rec(value.budget).total as number) >= 0
+              ? { total: rec(value.budget).total as number }
               : {}),
-            level: ["budget", "mid", "luxury", "unspecified"].includes(value.budget.level)
-              ? value.budget.level
-              : "unspecified",
+            level: (["budget", "mid", "luxury", "unspecified"].includes(
+              rec(value.budget).level as string,
+            )
+              ? (rec(value.budget).level as string)
+              : "unspecified") as "budget" | "mid" | "luxury" | "unspecified",
           },
         }
       : typeof value?.budget === "string"
@@ -156,9 +168,9 @@ export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
     ...(value?.needs && typeof value.needs === "object"
       ? {
           needs: {
-            flights: value.needs.flights === true,
-            car_rental: value.needs.car_rental === true,
-            local_transit: value.needs.local_transit === true,
+            flights: rec(value.needs).flights === true,
+            car_rental: rec(value.needs).car_rental === true,
+            local_transit: rec(value.needs).local_transit === true,
           },
         }
       : {}),
@@ -467,9 +479,10 @@ export function cleanContext(value: Record<string, unknown>): TripContext {
     ...(typeof value?.destination === "string" && value.destination.trim()
       ? { destination: value.destination.trim().slice(0, 120) }
       : {}),
-    ...(Number.isInteger(value?.days) && value.days >= 1 && value.days <= 30
-      ? { days: value.days }
-      : {}),
+    ...((): { days?: number } => {
+      const d = typeof value?.days === "number" ? value.days : NaN;
+      return Number.isInteger(d) && d >= 1 && d <= 30 ? { days: d } : {};
+    })(),
     interests: Array.isArray(value?.interests)
       ? [
           ...new Set<string>(
@@ -492,7 +505,11 @@ export function cleanContext(value: Record<string, unknown>): TripContext {
   };
 }
 export function mergeContext(previous: TripContext, decision: Record<string, unknown>, userText: string): TripContext {
-  const next = cleanContext(decision.context);
+  const next = cleanContext(
+    decision.context && typeof decision.context === "object"
+      ? (decision.context as Record<string, unknown>)
+      : {},
+  );
   // A destination may only change when the model identifies a literal user mention.
   const mention =
     typeof decision.destinationMention === "string"

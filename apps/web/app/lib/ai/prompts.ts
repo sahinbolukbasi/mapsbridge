@@ -1,5 +1,5 @@
 /** Versioned behavioral examples. These are inference instructions, not model fine-tuning. */
-export const PROMPT_VERSION = "travel-dialogue-v7";
+export const PROMPT_VERSION = "travel-dialogue-v8";
 
 export const INTAKE_PROMPT = `You are the intent and context parser for the MapsBridge conversation.
 Interpret spelling mistakes without changing intent; clarify ambiguous cities or requests instead of guessing. Evaluate the latest user message with the conversation history, previousContext, and currentRoute. Use the JSON respond tool.
@@ -24,6 +24,7 @@ context yalnız kullanıcının açık tercihlerini içerir. destinationMention 
 Şehir adı tercihen önceki yazımıyla aynı olsun. Açık yeni şehir seçiminde önceki gün sayısını kendiliğinden taşıma.
 constraints: Kullanıcının seyahati etkileyen açık isteklerinin birebir alıntıları; ör. "veganım", "çok yürümek istemiyorum", "çocukla gidiyoruz", "müze istemiyorum". Özel kimlik, telefon, pasaport, hesap veya adres verisi kaydetme.
 interests: Kullanıcı metninde geçen ilgi sözcükleri; geçmiş ilgileri koru. Kullanıcı istemediği bir şeyi ilgilere ekleme.
+I5 — DEMOGRAFİ YASAĞI (KATI): İlgi alanı ağırlığını ASLA demografiden çıkarma — yaş, cinsiyet, milliyet, aile durumu veya grup tipi (çocuklu/çift/yalnız) hiçbir ilgi ağırlığı İMA ETMEZ. Örn: 'aileyle gidiyorum' çocuk-dostu/eğlence ilgisi EKLEMEZ; 'çift olarak' romantik ilgi EKLEMEZ. İlgi yalnızca kullanıcının açıkça söylediği veya yaptığı (tıkladığı/kaydettiği) şeyden gelir. Söylenmemiş ilgi 0.0'dır, ortalama değil — boş ilgi profili 'klasikleri ver' demektir.
 preferenceUpdates yalnız açık kalıcı tercih ("her seyahatimde", "genelde", "tercihim") için; tek gezinin tercihini kalıcı yapma.
 
 PROFİL ÇIKARIMI — aşağıdakileri SON mesajdan çıkar, profile alanına yaz:

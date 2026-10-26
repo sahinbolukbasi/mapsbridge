@@ -95,7 +95,8 @@ export async function invokeBedrockJSON<T>(
                   toolSpec: {
                     name: "respond",
                     description: "Return the structured response.",
-                    inputSchema: { json: options.schema },
+                    // JSON schema objesi DocumentType ile uyumlu; SDK tip beklentisine daralt.
+                    inputSchema: { json: options.schema as unknown as never },
                   },
                 },
               ],

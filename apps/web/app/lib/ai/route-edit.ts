@@ -11,6 +11,7 @@ export function routeEdit(value: Record<string, unknown>, request: string, route
   if (
     !route ||
     !value ||
+    typeof value.operation !== "string" ||
     !["add", "remove", "replace", "reorder", "adjust"].includes(value.operation)
   )
     return empty;
@@ -32,7 +33,7 @@ export function routeEdit(value: Record<string, unknown>, request: string, route
       )
     : [];
   return {
-    operation: value.operation,
+    operation: value.operation as "none" | "replace" | "add" | "remove" | "reorder" | "adjust",
     ...(explicit ? { day } : {}),
     stopIds: [...new Set<string>(ids)],
   };

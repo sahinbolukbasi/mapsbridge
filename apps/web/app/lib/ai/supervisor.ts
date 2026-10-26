@@ -1,5 +1,6 @@
 import { retrieveTravelEvidence } from "./retrieval";
 import { bundledEvidence, mergeEvidence } from "./bundled-evidence";
+import { autoSplitPinsIntoDays } from "../trip/routing-service";
 import { invokeBedrockJSON, invokeBedrockChatStream, invokeIntakeJSON } from "./bedrock-client";
 import {
   isRoutePlan,
@@ -117,9 +118,9 @@ export async function runMultiAgentSupervisor(
   const [request, currentTripOptions] = payload.prompt.split("\nTercihler:");
   const previous = payload.conversationState;
   const conversation = boundedHistory(previous?.messages || payload.conversationHistory || []);
-  const base = cleanContext(previous?.context);
+  const base = cleanContext((previous?.context ?? {}) as Record<string, unknown>);
   const baseProfile = previous?.profile
-    ? cleanTripProfile(previous.profile)
+    ? cleanTripProfile(previous.profile as unknown as Record<string, unknown>)
     : contextToProfile(base);
 
   // 1. Topic Safety & Prompt Injection Check
@@ -335,7 +336,11 @@ export async function runMultiAgentSupervisor(
     (decision.data.action === "plan" ||
       decision.data.action === "clarify" ||
       (context.planningRequested && decision.data.action !== "chat"));
-  const edit = routeEdit(decision.data.edit, request, previous?.route);
+  const edit = routeEdit(
+    ((decision.data as Record<string, unknown>).edit ?? {}) as Record<string, unknown>,
+    request,
+    previous?.route,
+  );
   const stateContext =
     !planning && previous?.route
       ? context.destination === base.destination
@@ -537,7 +542,9 @@ export async function runMultiAgentSupervisor(
   const prefsSummary = buildPreferencesSummary({
     pace: tripProfile.pace,
     budget: tripProfile.budget?.level,
-    travelStyle: tripProfile.travelStyle,
+    // travelStyle TripProfile'da opsiyonel/harici alan — güvenli erişim
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    travelStyle: (tripProfile as any).travelStyle,
     interests: context.interests,
     constraints: context.constraints,
     travelers: tripProfile.travelers,
@@ -698,7 +705,7 @@ export async function runMultiAgentSupervisor(
         throw Error("Doğrulanmamış fiyat içeren yanıt reddedildi.");
     }
     if (mode === "route") {
-      route = buildResearchedRoute(output.data.route, context, research!);
+      route = buildResearchedRoute((output.data as Record<string, unknown>).route, context, research!);
       validateRouteEdit(route, currentRoute, edit);
     }
   };
@@ -761,7 +768,8 @@ export async function runMultiAgentSupervisor(
       );
     }
   }
-  const cited = Array.isArray(output.data.citedSourceIds) ? output.data.citedSourceIds : [];
+  const dataRec = (output.data ?? {}) as Record<string, unknown>;
+  const cited = Array.isArray(dataRec.citedSourceIds) ? (dataRec.citedSourceIds as unknown[]) : [];
   const sources = evidence.passages
     .filter((p) => cited.includes(p.id))
     .map(({ text: _text, ...source }) => source);
@@ -910,18 +918,17 @@ export async function runMultiAgentSupervisor(
     );
   }
 
-  const decisionSummary = safeDecisionSummary(output.data.decisionSummary);
+  const decisionSummary = safeDecisionSummary((output.data as Record<string, unknown>).decisionSummary);
 
   // §12.5 — Parse itinerary tool calls from model output
-  const rawToolCalls: Array<{ name: string; input: Record<string, unknown> }> = Array.isArray(
-    output.data.toolCalls,
-  )
-    ? output.data.toolCalls
+  const _td = (output.data as Record<string, unknown>).toolCalls;
+  const rawToolCalls: Array<{ name: string; input: Record<string, unknown> }> = Array.isArray(_td)
+    ? (_td as Array<{ name: string; input: Record<string, unknown> }>)
     : [];
   const itineraryActions: ItineraryActionPayload[] = parseItineraryToolCalls(rawToolCalls);
 
   // §12.5.3 — Consistency guard: if model claims a mutation but no tool call, block delivery
-  const finalSummary = output.data.orchestratorSummary.trim() + sourceNote;
+  const finalSummary = String((output.data as Record<string, unknown>).orchestratorSummary ?? "").trim() + sourceNote;
   const mutationError = assertMutationConsistency(finalSummary, itineraryActions.length > 0);
   if (mutationError) {
     // Model claimed to add/remove but no tool call was made — return an error prompt
@@ -1077,14 +1084,15 @@ export function buildResearchedRoute(
     const s = stop as Record<string, unknown>;
     if (!s || typeof s !== "object") throw Error("Geçersiz durak.");
     const place = research.places.find((p, i) => `P${i + 1}` === s.placeId);
-    if (
-      !place ||
-      used.has(place.id) ||
-      !Number.isInteger(s.day) ||
-      (s.day as number) < 1 ||
-      (s.day as number) > estimatedDays
-    )
-      throw Error("Araştırılmamış veya tekrarlı durak.");
+    // I1: POI araştırılmış ve tekrarsız olmalı.
+    if (!place || used.has(place.id)) throw Error("Araştırılmamış veya tekrarlı durak.");
+    // I2: güne-atama k-means ile deterministik yapılır. Ancak LLM bir day DEĞERİ
+    // verdiyse ve bu geçersizse (aralık dışı), sessizce düşürmek yerine reddet —
+    // bu, bozuk/paid durağın gizlice kaybolmasını önler (davranış koruması).
+    if (s.day !== undefined && s.day !== null) {
+      if (!Number.isInteger(s.day) || (s.day as number) < 1 || (s.day as number) > estimatedDays)
+        throw Error("Araştırılmamış veya tekrarlı durak.");
+    }
     used.add(place.id);
     return {
       id: place.id,
@@ -1094,24 +1102,58 @@ export function buildResearchedRoute(
       address: place.address,
       category: place.category,
       checkedAt: (place as ResearchedPlace & { checkedAt?: string }).checkedAt,
-      day: s.day as number,
+      day: Number.isInteger(s.day) ? (s.day as number) : 1, // geçici; k-means üzerine yazar
       description: typeof s.description === "string" ? (s.description as string).slice(0, 500) : "",
       suggestedDuration:
         typeof s.suggestedDuration === "string"
           ? (s.suggestedDuration as string).slice(0, 80)
           : "Süre belirlenmedi",
       estimatedMinutes: place.typicalDurationMins,
-      timeSlot:
-        s.timeSlot && ["morning", "afternoon", "evening", "night"].includes(s.timeSlot as string)
-          ? (s.timeSlot as string)
-          : place.recommendedSlot || undefined,
+      timeSlot: (s.timeSlot &&
+      ["morning", "afternoon", "evening", "night"].includes(s.timeSlot as string)
+        ? (s.timeSlot as string)
+        : place.recommendedSlot || undefined) as
+        | "morning"
+        | "afternoon"
+        | "evening"
+        | "night"
+        | undefined,
     };
   });
 
+  // I2: Güne-atama (clustering) DETERMİNİSTİK koddur, LLM çıktısı DEĞİL.
+  // LLM yalnızca hangi araştırılmış POI'lerin dahil edileceğini seçer (I1);
+  // bu POI'lerin hangi güne düşeceğine coğrafi k-means karar verir.
+  // rawStops[].day (LLM'in verdiği) yok sayılır.
+  const clusterPins = rawStops.map((st, idx) => ({
+    id: st.id,
+    label: st.name,
+    address: st.address || "",
+    lat: st.lat,
+    lng: st.lng,
+    category: st.category as unknown as import("../trip/models").PinCategory,
+    dayIndex: 0,
+    order: idx + 1,
+    group: "Genel",
+    visited: false,
+  }));
+  // Eksik gün koruması: her güne en az bir durak düşmesi için yeterli POI olmalı.
+  // (Bir gün boş kalacaksa rota geçersizdir — çağıran daha fazla POI seçmeli.)
+  if (clusterPins.length < estimatedDays)
+    throw Error("Araştırılmamış veya tekrarlı durak.");
+  const split = autoSplitPinsIntoDays(clusterPins, estimatedDays);
+  // pinId -> deterministik dayIndex eşlemesi
+  const dayByPinId = new Map<string, number>();
+  for (const d of split.days) for (const p of d.pins) dayByPinId.set(p.id, d.dayIndex);
+  const reassigned: RouteStop[] = rawStops.map((st) => ({
+    ...st,
+    day: dayByPinId.get(st.id) ?? st.day,
+  }));
+  // Gerçekleşen gün sayısı (k-means boş küme eleyebilir)
   const enrichedStops: RouteStop[] = [];
   for (let d = 1; d <= estimatedDays; d++) {
-    const dayStops = rawStops.filter((stop) => stop.day === d);
-    enrichedStops.push(...sortAndEnrichDayStops(dayStops));
+    const dayStops = reassigned.filter((stop) => stop.day === d);
+    if (dayStops.length > 0) enrichedStops.push(...sortAndEnrichDayStops(dayStops));
   }
 
   const route = {

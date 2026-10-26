@@ -38,7 +38,8 @@ locals {
     })
 
     ai = merge(local._base, {
-      BEDROCK_MODEL_ID = var.bedrock_model_id
+      BEDROCK_MODEL_ID        = var.bedrock_model_id
+      BEDROCK_INTAKE_MODEL_ID = var.bedrock_intake_model_id
     })
 
     stripe = merge(local._base, {
@@ -49,7 +50,8 @@ locals {
 
     admin = merge(local._base, {
       STRIPE_SECRET_KEY  = "secret:${var.stripe_secret_ssm}"
-      BEDROCK_MODEL_ID   = var.bedrock_model_id
+      BEDROCK_MODEL_ID        = var.bedrock_model_id
+      BEDROCK_INTAKE_MODEL_ID = var.bedrock_intake_model_id
       ANALYTICS_BUCKET   = var.analytics_bucket_id
       ATHENA_WORKGROUP   = var.athena_workgroup
     })
@@ -368,7 +370,18 @@ resource "aws_iam_role_policy" "ai_model" {
   role  = aws_iam_role.lambda["ai"].id
   policy = jsonencode({
     Version   = "2012-10-17"
-    Statement = [{ Effect = "Allow", Action = ["bedrock:InvokeModel"], Resource = "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.bedrock_model_id}" }]
+    Statement = [{
+      Effect = "Allow",
+      Action = ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+      Resource = [
+        # Inference profile'lar (answer + intake kademeleri)
+        "arn:aws:bedrock:${var.aws_region}:*:inference-profile/${var.bedrock_model_id}",
+        "arn:aws:bedrock:${var.aws_region}:*:inference-profile/${var.bedrock_intake_model_id}",
+        # Inference profile'ların wrap ettiği foundation modeller (tüm EU bölgeleri)
+        "arn:aws:bedrock:*::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0",
+        "arn:aws:bedrock:*::foundation-model/amazon.nova-micro-v1:0"
+      ]
+    }]
   })
 }
 

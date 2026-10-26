@@ -55,8 +55,14 @@ variable "enable_bedrock" {
 
 variable "bedrock_model_id" {
   type        = string
-  default     = "anthropic.claude-3-5-sonnet-20241022-v2:0"
-  description = "Bedrock foundation model ID for AI route planning (Claude 3.5 Sonnet)"
+  default     = "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
+  description = "Bedrock answer-tier model (inference profile) — rota üretimi için Claude Haiku 4.5"
+}
+
+variable "bedrock_intake_model_id" {
+  type        = string
+  default     = "eu.amazon.nova-micro-v1:0"
+  description = "Bedrock intake-tier model (inference profile) — netleştirme/tercih için ucuz Nova Micro"
 }
 
 variable "opensearch_collection_arn" {

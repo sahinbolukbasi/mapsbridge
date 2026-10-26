@@ -30,7 +30,16 @@ import {
 const memoryId = () => process.env.AGENTCORE_MEMORY_ID!;
 const core = () =>
   new BedrockAgentCoreClient({ region: process.env.AWS_REGION || "eu-central-1", maxAttempts: 2 });
-const missing = (error: unknown) => error instanceof Error && error.name === "ResourceNotFoundException";
+const missing = (error: unknown) => {
+  // instanceof Error kullanma: VM/realm sınırında (test harness) güvenilmez.
+  // Duck-typing ile name/message kontrolü yap. AgentCore "actor/namespace yok"
+  // durumu silinecek bir şey olmadığını gösterir — boş pass olarak ele alınır.
+  const e = error as { name?: unknown; message?: unknown } | null;
+  if (!e || typeof e !== "object") return false;
+  const name = typeof e.name === "string" ? e.name : "";
+  const message = typeof e.message === "string" ? e.message : "";
+  return name === "ResourceNotFoundException" || /not found|ResourceNotFound/i.test(message);
+};
 async function save(job: Record<string, unknown>) {
   await memoryDb().send(
     new PutItemCommand({
