@@ -3,7 +3,7 @@ const path = require("node:path"),
   fs = require("node:fs"),
   assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
-const { buildSync } = require("../../apps/web/node_modules/esbuild");
+const { buildSync } = require("esbuild");
 async function main() {
   const outputs = JSON.parse(
     execFileSync("terraform", ["-chdir=infra/travel-rag", "output", "-json"], { encoding: "utf8" }),

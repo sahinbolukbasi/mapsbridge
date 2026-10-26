@@ -1,4 +1,5 @@
-import { DynamoDBClient, QueryCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import { QueryCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import { getDynamoClient } from "../shared/dynamo";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import {
@@ -30,7 +31,7 @@ export async function handler(_event: unknown, context?: { getRemainingTimeInMil
   const table = process.env.DYNAMODB_TABLE,
     bucket = process.env.AI_TRAINING_BUCKET;
   if (!table || !bucket) throw new Error("TRAINING_WORKER_NOT_CONFIGURED");
-  const db = new DynamoDBClient({ maxAttempts: 2 }),
+  const db = getDynamoClient({ maxAttempts: 2 }),
     s3 = new S3Client({ maxAttempts: 2 });
   let exported = 0,
     failed = 0;

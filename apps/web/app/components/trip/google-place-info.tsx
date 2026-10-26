@@ -42,9 +42,9 @@ export function GooglePlaceInfo({
 
     setBusy(true);
     void googlePlace(placeId)
-      .then((value) => {
+      .then((value: { displayName?: string; id?: string } | null) => {
         if (active && value) {
-          setPlace(value);
+          setPlace(value as unknown as google.maps.places.Place);
           interactionTracker.logPlaceView({
             label: value.displayName || label,
             placeId: value.id,

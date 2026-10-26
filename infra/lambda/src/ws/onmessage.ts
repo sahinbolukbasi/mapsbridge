@@ -8,13 +8,14 @@
  * API to forward messages to the recipient.
  */
 
+import type { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
-  DynamoDBClient,
   GetItemCommand,
   QueryCommand,
   PutItemCommand,
   DeleteItemCommand,
 } from "@aws-sdk/client-dynamodb";
+import { getDynamoClient } from "../shared/dynamo";
 import { threadParticipants } from "../shared/thread-access";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import {
@@ -65,7 +66,7 @@ async function handleEvent(event: WsEvent) {
     return { statusCode: 400, body: "Invalid action or threadId" };
   }
 
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   // Get sender's userId from connections table
   const senderResult = await ddb.send(

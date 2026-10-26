@@ -10,8 +10,13 @@ const path = require("path");
 const configPath = path.join(__dirname, "endpoints.json");
 const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
 
+// Endpoint'ler önce ortam değişkenlerinden okunur (deploy sonrası kod değişmeden güncellenir).
+// Ortam değişkeni yoksa endpoints.json'daki değer kullanılır.
+const webBaseUrl = process.env.SYNTHETICS_WEB_URL || process.env.NEXT_PUBLIC_SITE_URL || config.webBaseUrl;
+const apiBaseUrl = process.env.SYNTHETICS_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || config.apiBaseUrl;
+
 async function checkEndpoint(check) {
-  const baseUrl = check.target === "api" ? config.apiBaseUrl : config.webBaseUrl;
+  const baseUrl = check.target === "api" ? apiBaseUrl : webBaseUrl;
   const url = `${baseUrl}${check.path}`;
   const start = Date.now();
 
@@ -31,10 +36,16 @@ async function checkEndpoint(check) {
     });
 
     req.on("error", (err) => {
+      // DNS çözümleme hatası = endpoint deploy edilmemiş veya yanlış yapılandırılmış.
+      const diagnosis =
+        err.code === "ENOTFOUND"
+          ? `DNS çözülemedi (${err.hostname || baseUrl}). Endpoint deploy edilmemiş veya SYNTHETICS_API_URL/SYNTHETICS_WEB_URL yanlış.`
+          : err.message;
       resolve({
         name: check.name,
         path: check.path,
-        error: err.message,
+        error: diagnosis,
+        code: err.code,
         passed: false,
         latencyMs: Date.now() - start,
       });
@@ -54,6 +65,7 @@ async function checkEndpoint(check) {
 }
 
 async function runCanary() {
+  console.log(`[Synthetics] Hedefler: web=${webBaseUrl} api=${apiBaseUrl}`);
   console.log(`[Synthetics] Starting health check for ${config.checks.length} endpoints...`);
   const results = [];
 
@@ -68,6 +80,14 @@ async function runCanary() {
 
   const failures = results.filter((r) => !r.passed);
   if (failures.length > 0) {
+    const allDns = failures.every((f) => f.code === "ENOTFOUND");
+    if (allDns) {
+      console.error(
+        "[Synthetics] TÜM endpoint'ler DNS ile çözülemedi — altyapı deploy edilmemiş " +
+          "veya endpoint adresleri güncel değil. SYNTHETICS_WEB_URL ve SYNTHETICS_API_URL " +
+          "ortam değişkenlerini canlı değerlerle ayarlayın.",
+      );
+    }
     console.error(`[Synthetics] ${failures.length} canary checks failed!`);
     return false;
   }

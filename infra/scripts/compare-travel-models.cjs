@@ -1,7 +1,7 @@
 // Small live, reproducible Turkish intake benchmark. No user data or production changes.
 const fs = require("node:fs");
 const path = require("node:path");
-const { buildSync } = require("../../apps/web/node_modules/esbuild");
+const { buildSync } = require("esbuild");
 const {
   BedrockRuntimeClient,
   ConverseCommand,

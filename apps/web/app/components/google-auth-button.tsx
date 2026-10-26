@@ -4,21 +4,6 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { handleGoogleCredentialResponse } from "../lib/cognito";
 
 interface GoogleCredentialResponse { credential: string; }
-interface GooglePromptNotification {
-  isNotDisplayed(): boolean;
-  isSkippedMoment(): boolean;
-}
-interface GoogleIdService {
-  initialize(config: Record<string, unknown>): void;
-  renderButton(container: Element, options: Record<string, unknown>): void;
-  prompt(cb?: (n: GooglePromptNotification) => void): void;
-}
-declare global {
-  interface Window {
-    google?: { accounts?: { id?: GoogleIdService } };
-  }
-}
-
 interface GoogleAuthButtonProps {
   mode?: "signin" | "signup";
   nextUrl?: string;

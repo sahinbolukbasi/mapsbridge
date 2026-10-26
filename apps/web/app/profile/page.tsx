@@ -664,7 +664,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   ) : (
-                    filteredTrips.map((trip) => {
+                    filteredTrips.map((trip: { id?: string; title?: string; destination?: string; days?: unknown[]; pins?: unknown[] }) => {
                       const pinCount = trip.pins?.length || 0;
                       const dayCount = trip.days?.length || 1;
                       return (
@@ -721,7 +721,7 @@ export default function ProfilePage() {
                             <div className="stitch-route-actions-bottom">
                               <div className="stitch-route-btn-group">
                                 <Link
-                                  href={`/desk/?trip=${encodeURIComponent(trip.id)}`}
+                                  href={`/desk/?trip=${encodeURIComponent(trip.id || "")}`}
                                   className="stitch-route-btn primary"
                                 >
                                   <span className="material-symbols-outlined text-[16px]">
@@ -730,7 +730,7 @@ export default function ProfilePage() {
                                   <span>Düzenle</span>
                                 </Link>
                                 <Link
-                                  href={`/desk/?trip=${encodeURIComponent(trip.id)}`}
+                                  href={`/desk/?trip=${encodeURIComponent(trip.id || "")}`}
                                   className="stitch-route-btn"
                                 >
                                   <span className="material-symbols-outlined text-[16px]">map</span>
@@ -738,7 +738,7 @@ export default function ProfilePage() {
                                 </Link>
                                 <button
                                   type="button"
-                                  onClick={() => handleDeleteTrip(trip.id)}
+                                  onClick={() => handleDeleteTrip(trip.id || "")}
                                   className="stitch-route-btn"
                                   title="Rotayı Sil"
                                   style={{ color: "#ef4444" }}

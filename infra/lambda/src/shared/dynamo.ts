@@ -4,9 +4,16 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 let clientInstance: DynamoDBClient | null = null;
 
 /**
- * Returns a singleton DynamoDBClient instance.
+ * Returns a shared singleton DynamoDBClient instance.
+ *
+ * Özel config (ör. maxAttempts) gerektiren çağrılar için `options` verilebilir;
+ * bu durumda singleton kirletilmez ve ayrı bir örnek döndürülür. Lambda runtime'da
+ * `AWS_REGION` her zaman tanımlıdır, bu yüzden bölge buradan okunur.
  */
-export function getDynamoClient(): DynamoDBClient {
+export function getDynamoClient(options?: { maxAttempts?: number }): DynamoDBClient {
+  if (options && Object.keys(options).length > 0) {
+    return new DynamoDBClient({ region: process.env.AWS_REGION, ...options });
+  }
   if (!clientInstance) {
     clientInstance = new DynamoDBClient({ region: process.env.AWS_REGION });
   }

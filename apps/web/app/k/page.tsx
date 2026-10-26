@@ -53,7 +53,8 @@ export default function FindByCodePage() {
 
       const map = L.map(mapContainerRef.current, {
         zoomControl: false,
-      }).setView([41.0082, 28.9784], 12);
+      }) as any;
+      map.setView([41.0082, 28.9784], 12);
 
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -148,7 +149,7 @@ export default function FindByCodePage() {
         markerRef.current.remove();
       }
 
-      const marker = L.marker([data.lat, data.lng], { icon: customPin }).addTo(
+      const marker = (L.marker([data.lat, data.lng], { icon: customPin }) as any).addTo(
         mapInstanceRef.current,
       );
       markerRef.current = marker;

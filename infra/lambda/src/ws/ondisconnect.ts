@@ -3,7 +3,8 @@
  * Removes the connectionId from the DynamoDB connection table.
  */
 
-import { DynamoDBClient, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import { DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import { getDynamoClient } from "../shared/dynamo";
 import { marshall } from "@aws-sdk/util-dynamodb";
 
 export const handler = async (event: { requestContext?: { connectionId?: string } }) => {
@@ -15,7 +16,7 @@ export const handler = async (event: { requestContext?: { connectionId?: string 
 
   const tableName = process.env.CONNECTIONS_TABLE || "";
 
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   await ddb.send(
     new DeleteItemCommand({

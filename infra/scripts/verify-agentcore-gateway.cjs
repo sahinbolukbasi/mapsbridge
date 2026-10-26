@@ -2,7 +2,7 @@
 const path = require("node:path");
 const fs = require("node:fs");
 const os = require("node:os");
-const { buildSync } = require("../../apps/web/node_modules/esbuild");
+const { buildSync } = require("esbuild");
 async function main() {
   if (!process.env.AGENTCORE_GATEWAY_URL) throw new Error("AGENTCORE_GATEWAY_URL is required");
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "mapsbridge-gateway-"));

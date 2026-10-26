@@ -3,10 +3,10 @@ import { ok, badRequest, parseBody } from "../shared/http";
 import { getTableName, scanAllRaw, type Row } from "./management";
 import { paymentRecords } from "./users";
 import type { AuthorizedEvent } from "../shared/types";
+import { getDynamoClient } from "../shared/dynamo";
 
 export async function handleMetrics() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
   const now = new Date();
 
   const userCountResult = await scanAllRaw(ddb, {
@@ -148,9 +148,8 @@ export async function handleRealtimeTelemetry() {
 }
 
 export async function handleDeviceAnalytics() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await scanAllRaw(ddb, {
     TableName: getTableName(),
@@ -209,9 +208,9 @@ export async function handleTrackSession(event: ApiGatewayEvent) {
     typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : `s_${Date.now()}`;
   const user = (event as AuthorizedEvent).verifiedUser;
 
-  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   await ddb.send(
     new PutItemCommand({
@@ -233,9 +232,8 @@ export async function handleTrackSession(event: ApiGatewayEvent) {
 }
 
 export async function handleAITopicAnalytics() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 30);
@@ -328,9 +326,8 @@ export async function handleAITopicAnalytics() {
 }
 
 export async function handleCommunityAnalytics() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await scanAllRaw(ddb, {
     TableName: getTableName(),
@@ -389,9 +386,8 @@ export async function handleCommunityAnalytics() {
 }
 
 export async function handleSubscriptionAnalytics() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await scanAllRaw(ddb, {
     TableName: getTableName(),

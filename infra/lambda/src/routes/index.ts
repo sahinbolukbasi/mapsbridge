@@ -27,6 +27,7 @@ import {
 import { Router } from "../shared/router";
 import { read, subscription } from "../shared/data";
 import { handler as slackBotHandler } from "../slack-bot";
+import { getDynamoClient } from "../shared/dynamo";
 
 // Augmented event type used to thread the verified user across route handlers
 type EventWithUser = ApiGatewayEvent & { verifiedUser?: { sub: string } | null };
@@ -128,11 +129,6 @@ export const handler = async (event: ApiGatewayEvent) => {
 };
 
 // ─── DynamoDB helpers ─────────────────────────────────────────────────────
-async function _getDdb() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
-  return new DynamoDBClient({ region: process.env.AWS_REGION });
-}
-
 function getTableName(): string {
   return process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT}-data`;
 }
@@ -145,9 +141,9 @@ async function handleListRoutes(event: ApiGatewayEvent) {
   const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
   if (!userId) return unauthorized();
 
-  const { DynamoDBClient, QueryCommand } = await import("@aws-sdk/client-dynamodb");
+  const { QueryCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await ddb.send(
     new QueryCommand({
@@ -175,9 +171,9 @@ async function handleCreateRoute(event: ApiGatewayEvent) {
   const routeId = crypto.randomUUID();
   const now = new Date().toISOString();
 
-  const { DynamoDBClient, PutItemCommand, QueryCommand } = await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand, QueryCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   // Free tier limit enforcement (max 3 routes)
   const userTier = (await subscription(userId)).tier;
@@ -236,9 +232,9 @@ async function handleGetRoute(event: ApiGatewayEvent) {
   const routeId = event.pathParameters?.id;
   if (!routeId) return badRequest("Rota ID gerekli.");
 
-  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await ddb.send(
     new GetItemCommand({
@@ -270,9 +266,9 @@ async function handleUpdateRoute(event: ApiGatewayEvent) {
   const body = parseBody<{ name?: string; stops?: unknown[]; days?: unknown[]; isPublic?: boolean }>(event);
   if (!body) return badRequest("Güncelleme verisi gerekli.");
 
-  const { DynamoDBClient, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const updateExpr: string[] = ["updatedAt = :now"];
   const exprAttr: Record<string, unknown> = { ":now": new Date().toISOString() };
@@ -321,8 +317,8 @@ async function handleDeleteRoute(event: ApiGatewayEvent) {
   const routeId = event.pathParameters?.id;
   if (!routeId) return badRequest("Rota ID gerekli.");
 
-  const { DynamoDBClient, DeleteItemCommand } = await import("@aws-sdk/client-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const { DeleteItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const ddb = getDynamoClient();
 
   await ddb.send(
     new DeleteItemCommand({
@@ -355,9 +351,9 @@ async function handleShareRoute(event: ApiGatewayEvent) {
   const shareCode = crypto.randomUUID().slice(0, 8);
   const expiresAt = Math.floor(Date.now() / 1000) + expiresInHours * 3600;
 
-  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   await ddb.send(
     new PutItemCommand({
@@ -399,7 +395,14 @@ async function handleOsrmRoute(event: ApiGatewayEvent) {
   if (!COORDS_RE.test(coords))
     return badRequest("coords formatı geçersiz (beklenen: lon,lat;lon,lat;...)");
 
+  // OSRM_BASE_URL ayarlı değilse public demo sunucuya düşülür. Demo sunucu
+  // rate-limit uygular ve production için uygun değildir — görünür uyarı bırak.
   const osrmBase = process.env.OSRM_BASE_URL || "https://router.project-osrm.org";
+  if (!process.env.OSRM_BASE_URL) {
+    console.warn(
+      "[routes] OSRM_BASE_URL tanımlı değil — public demo sunucu (router.project-osrm.org) kullanılıyor. Production'da rate-limit riski var; OSRM_BASE_URL ayarlayın.",
+    );
+  }
   const url = `${osrmBase}/route/v1/${profile}/${coords}?overview=full&geometries=geojson&steps=true&alternatives=false`;
 
   try {
@@ -520,9 +523,9 @@ async function handleTelemetry(event: ApiGatewayEvent) {
         return badRequest("Each event must have a valid numeric 'ts' timestamp.");
     }
 
-    const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+    const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
     const { marshall } = await import("@aws-sdk/util-dynamodb");
-    const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+    const ddb = getDynamoClient();
 
     const batch = body.events.slice(0, 10);
     const now = new Date().toISOString();
@@ -556,11 +559,11 @@ async function handleGetSavedAddresses(event: ApiGatewayEvent) {
   const userId = await verifiedUserId(token);
   if (!userId) return unauthorized();
 
-  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const tableName =
     process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "prod"}-data`;
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await ddb.send(
     new GetItemCommand({
@@ -582,11 +585,11 @@ async function handlePutSavedAddresses(event: ApiGatewayEvent) {
   if (!body || !Array.isArray(body.addresses)) return badRequest("addresses array gerekli.");
   if (body.addresses.length > 500) return badRequest("En fazla 500 adres kaydedilebilir.");
 
-  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
   const tableName =
     process.env.DYNAMODB_TABLE || `mapsbridge-${process.env.ENVIRONMENT || "prod"}-data`;
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   await ddb.send(
     new PutItemCommand({
@@ -609,9 +612,9 @@ async function handleGetAffiliateStats(event: ApiGatewayEvent) {
   const userId = await verifiedUserId(token);
   if (!userId) return unauthorized();
 
-  const { DynamoDBClient, QueryCommand } = await import("@aws-sdk/client-dynamodb");
+  const { QueryCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 30);
@@ -679,9 +682,9 @@ async function handleGetAiMemory(event: ApiGatewayEvent) {
   const userId = await verifiedUserId(token);
   if (!userId) return unauthorized();
 
-  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await ddb.send(
     new GetItemCommand({
@@ -703,9 +706,9 @@ async function handlePutAiMemory(event: ApiGatewayEvent) {
   if (!body || typeof body.memory !== "object" || Array.isArray(body.memory))
     return badRequest("memory object gerekli.");
 
-  const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   await ddb.send(
     new PutItemCommand({

@@ -4,11 +4,11 @@ import type { AuthorizedEvent } from "../shared/types";
 import { read } from "../shared/data";
 import { getTableName, scanAllRaw, findRouteRecord, recordAuditLog } from "./management";
 import { handleSuspendUser } from "./users";
+import { getDynamoClient } from "../shared/dynamo";
 
 export async function handleListReports(event: ApiGatewayEvent) {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const status = event.queryStringParameters?.status;
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 50, 100);
@@ -48,9 +48,9 @@ export async function handleResolveReport(event: ApiGatewayEvent) {
     return badRequest("Şikâyet bir kullanıcıyı hedeflemiyor.");
   const notes = body?.notes?.trim() || "Şikâyet yönetici tarafından incelendi.";
 
-  const { DynamoDBClient, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   if (action !== "dismiss") {
     const targetEvent = {
@@ -94,9 +94,8 @@ export async function handleResolveReport(event: ApiGatewayEvent) {
 }
 
 export async function handleAuditLogs(event: ApiGatewayEvent) {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 50, 100);
 
@@ -113,9 +112,8 @@ export async function handleAuditLogs(event: ApiGatewayEvent) {
 }
 
 export async function handleAdminListRoutes(event: ApiGatewayEvent) {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 50, 100);
 
@@ -142,9 +140,9 @@ export async function handleAdminRouteAction(event: ApiGatewayEvent) {
   if (!route) return notFound("Rota bulunamadı.");
   const reason = body?.reason?.trim() || `Yönetici rota işlemi: ${action}`;
 
-  const { DynamoDBClient, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const now = new Date().toISOString();
   await ddb.send(

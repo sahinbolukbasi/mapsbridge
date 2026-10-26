@@ -25,8 +25,8 @@ function getCacheKey(type: string, origin: string, destination: string, dates?: 
 }
 
 async function getDdb() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
-  return new DynamoDBClient({ region: process.env.AWS_REGION || "eu-central-1" });
+  const { getDynamoClient } = await import("../shared/dynamo");
+  return getDynamoClient();
 }
 
 function getTableName(): string {

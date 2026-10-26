@@ -2,6 +2,7 @@ import type { ApiGatewayEvent } from "../shared/http";
 import { ok, badRequest, parseBody } from "../shared/http";
 import { get, commit, scan, getTableName, scanAllRaw } from "./management";
 import { paymentRecords } from "./users";
+import { getDynamoClient } from "../shared/dynamo";
 
 export async function handleFinance() {
   const payments = await paymentRecords();
@@ -35,9 +36,8 @@ export async function handleFinance() {
 }
 
 export async function handleGetCreditStats() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const walletResult = await scanAllRaw(ddb, {
     TableName: getTableName(),

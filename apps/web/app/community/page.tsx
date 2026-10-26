@@ -81,7 +81,9 @@ export default function CommunityPage() {
       if (rawPlanner) {
         const trips = JSON.parse(rawPlanner);
         if (Array.isArray(trips)) {
-          setUserSavedRoutes(trips.map((t: { title?: string }) => t.title).filter(Boolean));
+          setUserSavedRoutes(
+            trips.map((t: { title?: string }) => t.title).filter((x): x is string => Boolean(x)),
+          );
         }
       }
     } catch {
@@ -367,7 +369,7 @@ export default function CommunityPage() {
             onToggleLike={handleToggleLike}
             onToggleBookmark={handleToggleBookmark}
             onRetweet={handleRetweet}
-            onAddToMyTrip={handleAddToMyTrip}
+            onAddToMyTrip={handleAddToMyTrip as (route: { title: string; destination?: string; stops?: unknown[] }) => void}
             onOpenNewPost={() => {
               requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
                 setShowNewPostModal(true);

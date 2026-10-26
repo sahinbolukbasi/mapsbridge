@@ -158,6 +158,30 @@ test("POST /places/discover returns 400 when city is too long", async () => {
   assert.equal(res.statusCode, 400);
 });
 
+test("POST /places/discover reddeder: şehir adında URL şeması (SSRF önleme)", async () => {
+  const h = harness();
+  const res = await h
+    .load("places/index.ts")
+    .handler(event("POST", "/places/discover", token(), { city: "http://169.254.169.254/latest" }));
+  assert.equal(res.statusCode, 400, "URL şemalı şehir reddedilmeli");
+});
+
+test("POST /places/discover reddeder: şehir adında injection karakterleri", async () => {
+  const h = harness();
+  const res = await h
+    .load("places/index.ts")
+    .handler(event("POST", "/places/discover", token(), { city: "Roma</script><img>" }));
+  assert.equal(res.statusCode, 400, "injection karakterli şehir reddedilmeli");
+});
+
+test("POST /places/discover reddeder: geçersiz ülke (URL şeması)", async () => {
+  const h = harness();
+  const res = await h
+    .load("places/index.ts")
+    .handler(event("POST", "/places/discover", token(), { city: "Roma", country: "https://evil.example" }));
+  assert.equal(res.statusCode, 400, "URL şemalı ülke reddedilmeli");
+});
+
 test("GET /places/city/{city} returns 401 without auth", async () => {
   const h = harness();
   const ev = {

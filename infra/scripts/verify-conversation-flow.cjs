@@ -1,4 +1,4 @@
-const { buildSync } = require("../../apps/web/node_modules/esbuild");
+const { buildSync } = require("esbuild");
 const path = require("node:path"),
   fs = require("node:fs"),
   assert = require("node:assert/strict");

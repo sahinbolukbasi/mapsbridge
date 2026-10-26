@@ -192,15 +192,15 @@ class InteractionTracker {
     const destinationsSet = new Set<string>();
 
     for (const evt of this.queue) {
-      const cat = evt.payload?.category;
+      const cat = evt.payload?.category as string | undefined;
       if (cat) {
         categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
       }
-      const label = evt.payload?.label;
+      const label = evt.payload?.label as string | undefined;
       if (label) {
         recentPlacesSet.add(label);
       }
-      const dest = evt.payload?.destination || evt.payload?.city;
+      const dest = (evt.payload?.destination || evt.payload?.city) as string | undefined;
       if (dest) {
         destinationsSet.add(dest);
       }

@@ -4,7 +4,8 @@
  * Authenticates the user via ?token= query param (Cognito JWT).
  */
 
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { getDynamoClient } from "../shared/dynamo";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { verifiedUserId } from "../shared/auth";
 
@@ -35,7 +36,7 @@ export const handler = async (event: {
   const tokenExpiresAt = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString()).exp;
   const expiresAt = Math.min(tokenExpiresAt, Math.floor(Date.now() / 1000) + 3600);
 
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   await ddb.send(
     new PutItemCommand({

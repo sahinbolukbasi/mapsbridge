@@ -8,23 +8,6 @@ import "./register.css";
 
 interface GoogleCredentialResponse { credential: string; }
 interface GoogleTokenResponse { error?: string; access_token?: string; }
-interface GooglePromptNotification {
-  isNotDisplayed(): boolean;
-  isSkippedMoment(): boolean;
-}
-interface GoogleIdService {
-  initialize(config: Record<string, unknown>): void;
-  renderButton(container: Element, options: Record<string, unknown>): void;
-  prompt(cb?: (n: GooglePromptNotification) => void): void;
-}
-interface GoogleOAuth2Service {
-  initTokenClient(config: Record<string, unknown>): { requestAccessToken(opts: Record<string, unknown>): void };
-}
-declare global {
-  interface Window {
-    google?: { accounts?: { id?: GoogleIdService; oauth2?: GoogleOAuth2Service } };
-  }
-}
 
 export default function SignUpPage() {
   const [username, setUsername] = useState("");

@@ -17,6 +17,8 @@ const BUCKET = process.env.KB_RAW_BUCKET!;
 const KB_ID = process.env.TRAVEL_KNOWLEDGE_BASE_ID;
 const REGION = process.env.BEDROCK_REGION || "eu-central-1";
 
+// İSTİSNA (core-architecture-hardening R1.2): shared singleton AWS_REGION kullanır;
+// bu modül BEDROCK_REGION ile aynı bölgeye bağlanmalı, bu yüzden kendi örneğini tutar.
 const dynamo = new DynamoDBClient({ region: REGION });
 const s3 = new S3Client({ region: REGION });
 const bedrock = new BedrockAgentClient({ region: REGION });

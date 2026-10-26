@@ -63,7 +63,9 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
 
   let claims: Record<string, unknown>;
   try {
-    const parsed: unknown = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
+    const parsed: unknown = JSON.parse(
+      Buffer.from(token.split(".")[1], "base64url").toString("utf8"),
+    );
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
     claims = parsed as Record<string, unknown>;
   } catch {
@@ -119,7 +121,9 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
           await import("@aws-sdk/client-cognito-identity-provider");
         const cognito = new CognitoIdentityProviderClient({
           region,
-          requestHandler: { requestTimeout: 4000 } as unknown as ConstructorParameters<typeof CognitoIdentityProviderClient>[0]["requestHandler"],
+          requestHandler: { requestTimeout: 4000 } as unknown as ConstructorParameters<
+            typeof CognitoIdentityProviderClient
+          >[0]["requestHandler"],
         });
         const result = await cognito.send(
           new ListUsersCommand({
@@ -137,9 +141,10 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
           if (sub) {
             // Check suspension
             if (process.env.DYNAMODB_TABLE) {
-              const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+              const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
               const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-              const ddb = new DynamoDBClient({ region });
+              const { getDynamoClient } = await import("./dynamo");
+              const ddb = getDynamoClient();
               const acct = await ddb.send(
                 new GetItemCommand({
                   TableName: process.env.DYNAMODB_TABLE,
@@ -227,9 +232,10 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
 
           // Check suspension on effectiveSub
           if (process.env.DYNAMODB_TABLE) {
-            const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+            const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
             const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-            const ddb = new DynamoDBClient({ region });
+            const { getDynamoClient } = await import("./dynamo");
+            const ddb = getDynamoClient();
             const account = await ddb.send(
               new GetItemCommand({
                 TableName: process.env.DYNAMODB_TABLE,

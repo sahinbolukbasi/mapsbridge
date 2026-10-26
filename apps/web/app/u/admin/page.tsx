@@ -2587,7 +2587,8 @@ export default function AdminDashboard() {
                                         description:
                                           (r.stops || r.points || [])
                                             .map(
-                                              (stop, i) =>
+                                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                              (stop: any, i: number) =>
                                                 `${i + 1}. ${stop.name || stop.label || "Durak"}`,
                                             )
                                             .join(" · ") || "Durak bulunmuyor.",

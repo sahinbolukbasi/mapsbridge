@@ -5,11 +5,11 @@ import { stripeClient } from "../billing/stripe-client";
 import { read } from "../shared/data";
 import { grantCredits } from "../billing/store";
 import { protectAccount, recordAuditLog, getTableName, scanAllRaw } from "./management";
+import { getDynamoClient } from "../shared/dynamo";
 
 export async function paymentRecords() {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
   const result = await scanAllRaw(ddb, {
     TableName: getTableName(),
     FilterExpression:
@@ -47,9 +47,8 @@ export async function paymentRecords() {
 }
 
 export async function handleListUsers(event: ApiGatewayEvent) {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const limit = Math.min(Number(event.queryStringParameters?.limit) || 50, 200);
 
@@ -121,9 +120,9 @@ export async function handleSuspendUser(event: ApiGatewayEvent) {
   const body = parseBody<{ reason?: string }>(event);
   const reason = body?.reason?.trim() || "Yönetici tarafından askıya alındı.";
 
-  const { DynamoDBClient, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const now = new Date().toISOString();
   await ddb.send(
@@ -161,9 +160,9 @@ export async function handleUnsuspendUser(event: ApiGatewayEvent) {
   const body = parseBody<{ reason?: string }>(event);
   const reason = body?.reason?.trim() || "Yönetici tarafından askı kaldırıldı.";
 
-  const { DynamoDBClient, UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const now = new Date().toISOString();
   await ddb.send(
@@ -216,9 +215,9 @@ export async function handleRefund(event: ApiGatewayEvent) {
       { idempotencyKey: `full-refund:${body.paymentIntentId}` },
     );
 
-    const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+    const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
     const { marshall } = await import("@aws-sdk/util-dynamodb");
-    const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+    const ddb = getDynamoClient();
 
     await ddb.send(
       new PutItemCommand({

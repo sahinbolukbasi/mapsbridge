@@ -2,11 +2,12 @@ import type { ApiGatewayEvent } from "../shared/http";
 import { ok, parseBody, badRequest } from "../shared/http";
 import { get, commit, getTableName } from "./management";
 import type { AuthorizedEvent } from "../shared/types";
+import { getDynamoClient } from "../shared/dynamo";
 
 export async function handleGetSystemConfig() {
-  const { DynamoDBClient, GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
 
   const result = await ddb.send(
     new GetItemCommand({
@@ -117,8 +118,8 @@ export async function handleSystemHealth() {
   let ddbLatencyMs = 0;
   try {
     const t0 = performance.now();
-    const { DynamoDBClient, DescribeTableCommand } = await import("@aws-sdk/client-dynamodb");
-    const ddb = new DynamoDBClient({ region });
+    const { DescribeTableCommand } = await import("@aws-sdk/client-dynamodb");
+    const ddb = getDynamoClient();
     await ddb.send(new DescribeTableCommand({ TableName: getTableName() }));
     ddbLatencyMs = Math.round(performance.now() - t0);
   } catch (_err) {

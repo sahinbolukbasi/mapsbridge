@@ -279,9 +279,8 @@ export async function scanAllRaw(
 }
 
 export async function findRouteRecord(routeId: string): Promise<Row | null> {
-  const { DynamoDBClient } = await import("@aws-sdk/client-dynamodb");
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
-  const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+  const ddb = getDynamoClient();
   const result = await scanAllRaw(ddb, {
     TableName: getTableName(),
     FilterExpression: "(PK = :route AND SK = :meta) OR (begins_with(PK, :user) AND SK = :route)",
@@ -305,9 +304,9 @@ export async function recordAuditLog(
   details?: Record<string, unknown>,
 ): Promise<string | null> {
   try {
-    const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+    const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
     const { marshall } = await import("@aws-sdk/util-dynamodb");
-    const ddb = new DynamoDBClient({ region: process.env.AWS_REGION });
+    const ddb = getDynamoClient();
     const auditId = `aud_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const now = new Date().toISOString();
     await ddb.send(

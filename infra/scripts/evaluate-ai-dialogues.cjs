@@ -1,6 +1,6 @@
 // Runs local source against real Bedrock/Location. No production users or billing rows are mutated.
 // AWS inference/place requests incur usage charges; no retries of the evaluation suite are automatic.
-const { buildSync } = require("../../apps/web/node_modules/esbuild");
+const { buildSync } = require("esbuild");
 const fs = require("node:fs"),
   path = require("node:path");
 const caseFile = process.argv.includes("--golden")

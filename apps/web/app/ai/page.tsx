@@ -322,7 +322,7 @@ export default function AIPage() {
     if (typeof window === "undefined") return;
     try {
       const raw = localStorage.getItem("mapsbridge.travelPlanner.v5");
-      let trips: Trip[] = raw ? JSON.parse(raw) : [];
+      let trips: Trip[] = raw ? (JSON.parse(raw) as Trip[]) : [];
       if (!Array.isArray(trips)) trips = [];
 
       let trip = currentTrip ? trips.find((t) => t.id === currentTrip.id) : trips[0];
@@ -336,7 +336,9 @@ export default function AIPage() {
           pins: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-        } as Trip;
+          // Trip tipinde opsiyonel alanlar var; runtime'da gereken tüm zorunlu
+          // alanlar yukarıda set edildi. unknown üzerinden güvenli dönüşüm.
+        } as unknown as Trip;
         trips.push(trip!);
       }
 
@@ -756,7 +758,7 @@ export default function AIPage() {
       } else if (code === "REQUEST_IN_PROGRESS") {
         setError("Önceki isteğin sonucu bekleniyor. Sonuç gelince otomatik gösterilecek.");
         setRetryAvailable(true);
-      } else if (shouldRecheckRequest(e) || err?.status === 408 || ((err?.status ?? 0) >= 500 && code !== "AI_RESULT_UNCONFIRMED")) {
+      } else if (shouldRecheckRequest(err) || err?.status === 408 || ((err?.status ?? 0) >= 500 && code !== "AI_RESULT_UNCONFIRMED")) {
         setError("Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.");
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;
@@ -769,7 +771,7 @@ export default function AIPage() {
       );
       setPanelOpen(false);
       setMobileTab("chat");
-      if (!shouldRecheckRequest(e)) {
+      if (!shouldRecheckRequest(err)) {
         pending.current = null;
         setSessions((s) =>
           s.map((x) => (x.id === request.conversationId ? { ...x, pendingRequest: undefined } : x)),

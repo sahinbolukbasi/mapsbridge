@@ -4,22 +4,6 @@ import { useEffect } from "react";
 import { handleGoogleCredentialResponse } from "../lib/cognito";
 
 interface GoogleCredentialResponse { credential: string; }
-interface GooglePromptNotification {
-  isNotDisplayed(): boolean;
-  isSkippedMoment(): boolean;
-  getNotDisplayedReason?(): string;
-  getSkippedReason?(): string;
-}
-interface GoogleIdService {
-  initialize(config: Record<string, unknown>): void;
-  prompt(cb?: (n: GooglePromptNotification) => void): void;
-}
-declare global {
-  interface Window {
-    google?: { accounts?: { id?: GoogleIdService } };
-  }
-}
-
 export function GoogleOneTap() {
   useEffect(() => {
     if (typeof window === "undefined") return;

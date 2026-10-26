@@ -407,7 +407,7 @@ export default function Panel() {
     if (!map) return;
     const center = window.matchMedia("(max-width: 767px)").matches
       ? map.unproject(map.project([lat, lng], 16).add([0, map.getSize().y * 0.22]), 16)
-      : [lat, lng];
+      : ([lat, lng] as [number, number]);
     map.flyTo(center, 16, { duration: 0.6 });
   }
   function openSavedPin(id: string) {
@@ -760,7 +760,7 @@ export default function Panel() {
     const loc = currentLoc || location;
 
     if (routeMarkersGroupRef.current) {
-      mapInstanceRef.current.removeLayer(routeMarkersGroupRef.current);
+      mapInstanceRef.current!.removeLayer(routeMarkersGroupRef.current);
       routeMarkersGroupRef.current = null;
     }
     if (routePolylineRef.current) {
@@ -954,7 +954,7 @@ export default function Panel() {
       (pos) => {
         setIsLocating(false);
         const { latitude, longitude } = pos.coords;
-        mapInstanceRef.current.flyTo([latitude, longitude], 16, { animate: true, duration: 1.2 });
+        mapInstanceRef.current?.flyTo([latitude, longitude], 16, { animate: true, duration: 1.2 });
         if (markerRef.current) {
           markerRef.current.setLatLng([latitude, longitude]);
         }
@@ -1369,7 +1369,7 @@ export default function Panel() {
         planner.activeRoadGeometry && planner.activeRoadGeometry.coordinates.length > 1;
 
       // Outer glow / contrast
-      const glowLine = L.polyline(routeCoordinates, {
+      const glowLine = L.polyline(routeCoordinates as [number, number][], {
         color: dayColor,
         weight: 9,
         opacity: 0.3,
@@ -1379,7 +1379,7 @@ export default function Panel() {
       glowLine.addTo(roadGroup);
 
       // Inner crisp path
-      const mainLine = L.polyline(routeCoordinates, {
+      const mainLine = L.polyline(routeCoordinates as [number, number][], {
         color: dayColor,
         weight: 4.5,
         opacity: 0.95,

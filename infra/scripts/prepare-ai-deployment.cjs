@@ -2,7 +2,7 @@
 const path = require("node:path");
 const fs = require("node:fs");
 const { execFileSync } = require("node:child_process");
-const { buildSync } = require("../../apps/web/node_modules/esbuild");
+const { buildSync } = require("esbuild");
 async function main() {
   const destination = path.resolve(__dirname, "../admin-runtime/.build");
   fs.mkdirSync(path.join(destination, "ai"), { recursive: true });

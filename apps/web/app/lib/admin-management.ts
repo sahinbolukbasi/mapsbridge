@@ -6,7 +6,10 @@ export type AdminSession = {
   paymentsConfigured: boolean;
   userManagement: boolean;
 };
-export type ManagedRecord = Record<string, unknown>;
+// Admin paneli backend'den gelen heterojen (şema-esnek) kayıtları işler.
+// Index signature + any: dinamik alan erişimine izin verir, runtime davranışı değişmez.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ManagedRecord = Record<string, any>;
 export const managementApi = {
   session: () => apiFetch<{ session: AdminSession }>("/admin/session"),
   list: (section: string) => apiFetch<Record<string, ManagedRecord[]>>(`/admin/${section}`),

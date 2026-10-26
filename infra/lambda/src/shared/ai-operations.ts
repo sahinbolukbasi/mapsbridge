@@ -1,4 +1,5 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { getDynamoClient } from "./dynamo";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 export const AI_CONTROL_KEY = "SYSTEM#AI_CONTROL";
@@ -58,7 +59,7 @@ export async function readEnabledAIAgents(): Promise<Set<string>> {
     return new Set(defaultEnabledAgents);
   }
 }
-const client = () => new DynamoDBClient({ region: process.env.AWS_REGION, maxAttempts: 1 });
+const client = () => getDynamoClient({ maxAttempts: 1 });
 export async function readAIControl(): Promise<AIControl> {
   if (!process.env.DYNAMODB_TABLE) return defaultControl();
   const result = await client().send(

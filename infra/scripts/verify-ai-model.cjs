@@ -1,5 +1,5 @@
 // Live Bedrock smoke test. Uses the AWS credential chain; prints no credentials.
-const { buildSync } = require("../../apps/web/node_modules/esbuild");
+const { buildSync } = require("esbuild");
 const { mkdtempSync, rmSync } = require("node:fs");
 const { tmpdir } = require("node:os");
 const path = require("node:path");
