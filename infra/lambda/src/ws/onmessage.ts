@@ -46,6 +46,9 @@ async function handleEvent(event: WsEvent) {
   if (!connectionId) {
     return { statusCode: 400, body: "Missing connectionId" };
   }
+  if (!domain || !stage) {
+    return { statusCode: 400, body: "Missing domain or stage" };
+  }
 
   let body: Record<string, unknown>;
   try {
@@ -56,10 +59,11 @@ async function handleEvent(event: WsEvent) {
 
   if (!body || typeof body !== "object" || Array.isArray(body))
     return { statusCode: 400, body: "Invalid message" };
-  const { action, threadId, content } = body;
+  const action = typeof body.action === "string" ? body.action : "";
+  const threadId = typeof body.threadId === "string" ? body.threadId : "";
+  const content = typeof body.content === "string" ? body.content : "";
   if (
     !["send_message", "typing", "mark_read"].includes(action) ||
-    typeof threadId !== "string" ||
     !threadId.trim() ||
     threadId.length > 128
   ) {

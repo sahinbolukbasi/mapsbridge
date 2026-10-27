@@ -121,9 +121,9 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
           await import("@aws-sdk/client-cognito-identity-provider");
         const cognito = new CognitoIdentityProviderClient({
           region,
-          requestHandler: { requestTimeout: 4000 } as unknown as ConstructorParameters<
-            typeof CognitoIdentityProviderClient
-          >[0]["requestHandler"],
+          requestHandler: { requestTimeout: 4000 } as unknown as NonNullable<
+            ConstructorParameters<typeof CognitoIdentityProviderClient>[0]
+          >["requestHandler"],
         });
         const result = await cognito.send(
           new ListUsersCommand({

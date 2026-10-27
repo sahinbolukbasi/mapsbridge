@@ -4,10 +4,19 @@ import { ok, badRequest, notFound, serverError, parseBody } from "../shared/http
 import { stripeClient } from "../billing/stripe-client";
 import { read } from "../shared/data";
 import { grantCredits } from "../billing/store";
-import { protectAccount, recordAuditLog, getTableName, scanAllRaw } from "./management";
+import { protectAccount, recordAuditLog, getTableName, scanAllRaw, type Row } from "./management";
 import { getDynamoClient } from "../shared/dynamo";
 
-export async function paymentRecords() {
+export type PaymentRecord = {
+  id: string;
+  status: string;
+  amount?: number;
+  currency?: string;
+  createdAt?: string;
+  paymentIntentId?: string;
+  [key: string]: unknown;
+};
+export async function paymentRecords(): Promise<PaymentRecord[]> {
   const { unmarshall } = await import("@aws-sdk/util-dynamodb");
   const ddb = getDynamoClient();
   const result = await scanAllRaw(ddb, {
@@ -28,7 +37,7 @@ export async function paymentRecords() {
       .filter((r) => r.PK?.toString().startsWith("REFUND#") && r.status === "succeeded")
       .map((r) => r.paymentIntentId),
   );
-  const payments = new Map<string, Record<string, unknown>>();
+  const payments = new Map<string, PaymentRecord>();
   for (const row of records) {
     if (row.PK?.startsWith("REFUND#") || (row.currency && row.currency.toLowerCase() !== "try"))
       continue;
@@ -59,12 +68,12 @@ export async function handleListUsers(event: ApiGatewayEvent) {
     Limit: limit,
   });
 
-  const grouped = new Map<string, Record<string, unknown>>();
+  const grouped = new Map<string, Row>();
   for (const item of result.Items) {
     const row = unmarshall(item);
     const userId = row.PK?.replace(/^USER#/, "");
     if (!userId) continue;
-    const user = grouped.get(userId) || { userId, routesCount: 0 };
+    const user: Row = grouped.get(userId) || { userId, routesCount: 0 };
     if (row.SK === "META" || row.SK === "PROFILE") {
       for (const field of ["email", "name", "role", "suspended", "suspendReason", "createdAt"]) {
         if (row[field] !== undefined) user[field] = row[field];

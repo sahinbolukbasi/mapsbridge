@@ -122,7 +122,7 @@ export async function commit(
   reason: string,
   existing?: Row | null,
   patchOnly = false,
-) {
+): Promise<Row> {
   const condition = existing
     ? existing.version === undefined
       ? "attribute_exists(PK) AND attribute_not_exists(#version)"

@@ -119,7 +119,8 @@ export async function handler(event: ApiGatewayEvent & { Records?: Array<{ messa
             ? p.id === body.targetId && p.mode === body.mode
             : p.priceId === body.priceId),
       );
-      if (!product) return jsonResponse(400, { error: "Satışa açık bir paket seçin." });
+      if (!product || !product.priceId)
+        return jsonResponse(400, { error: "Satışa açık bir paket seçin." });
       if (body.cycle && body.cycle !== "monthly")
         return jsonResponse(400, { error: "Yıllık ödeme henüz kullanıma açık değil." });
       const key = idempotency(event, userId);
@@ -151,7 +152,7 @@ export async function handler(event: ApiGatewayEvent & { Records?: Array<{ messa
           mode: product.mode === "subscription" ? "subscription" : "payment",
           line_items: [{ price: product.priceId, quantity: 1 }],
           client_reference_id: userId,
-          ...(customer?.customerId ? { customer: customer.customerId } : {}),
+          ...(customer?.customerId ? { customer: String(customer.customerId) } : {}),
           success_url: `${origin}/odeme/?success=true&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${origin}/odeme/?canceled=true`,
           metadata: { userId, productId: product.id },
@@ -236,6 +237,7 @@ async function webhook(event: ApiGatewayEvent) {
         );
         if (
           !product ||
+          !lines ||
           lines.length !== 1 ||
           lines[0].quantity !== 1 ||
           session.currency !== "try" ||
@@ -266,7 +268,7 @@ async function webhook(event: ApiGatewayEvent) {
       const invoice = await stripe.invoices.retrieve(object.id);
       if (invoice.status !== "paid" || !invoice.paid || !invoice.subscription) break;
       // Proration invoices do not create a second monthly credit allocation.
-      if (!["subscription_create", "subscription_cycle"].includes(invoice.billing_reason)) break;
+      if (!["subscription_create", "subscription_cycle"].includes(invoice.billing_reason || "")) break;
       const sub = await stripe.subscriptions.retrieve(
         typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription.id,
       );
@@ -315,6 +317,7 @@ async function webhook(event: ApiGatewayEvent) {
         typeof charge.customer === "string" ? charge.customer : charge.customer?.id;
       if (!customerId) throw new Error("Refund customer missing");
       const customer = await stripe.customers.retrieve(customerId);
+      if (customer.deleted) throw new Error("Refund customer deleted");
       const userId = customer.metadata?.userId;
       if (!userId || (await read(`USER#${userId}`, "STRIPE_CUSTOMER"))?.customerId !== customerId)
         throw new Error("Refund owner mismatch");

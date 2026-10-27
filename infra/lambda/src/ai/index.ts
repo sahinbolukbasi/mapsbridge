@@ -204,7 +204,7 @@ async function handleRequest(event: Event) {
       return reply(503, { error: "AI asistanı yönetici tarafından kapatıldı." });
     let normalized;
     try {
-      normalized = normalizeRequest(body);
+      normalized = normalizeRequest(body as unknown as Parameters<typeof normalizeRequest>[0]);
     } catch {
       return reply(400, { error: "Geçersiz konum." });
     }
@@ -522,7 +522,7 @@ async function handleStreamRequest(
       writeSse(meta, "status", { phase: "intake", message: "İstek değerlendiriliyor..." });
       let normalized;
       try {
-        normalized = normalizeRequest(body);
+        normalized = normalizeRequest(body as unknown as Parameters<typeof normalizeRequest>[0]);
       } catch {
         writeSse(meta, "error", { message: "Geçersiz konum.", code: "BAD_REQUEST" });
         return;
@@ -539,7 +539,10 @@ async function handleStreamRequest(
           prompt: normalized.prompt,
           routeMode: normalized.routeMode,
           preferences,
-          conversationHistory: body.conversationHistory || [],
+          conversationHistory: normalized.conversationHistory as {
+            role: "user" | "assistant";
+            content: string;
+          }[],
           conversationState: (storedConversation as ConversationState | null) || undefined,
           tripManifestoMarkdown: normalized.tripManifestoMarkdown || undefined,
           userLocation: normalized.userLocation || undefined,
@@ -562,7 +565,7 @@ async function handleStreamRequest(
       // Reserve credits atomically before generation
       let reservation: Awaited<ReturnType<typeof reserveAI>>;
       try {
-        reservation = await reserveAI(user.sub, body.requestId, body.prompt, 0);
+        reservation = await reserveAI(user.sub, String(body.requestId), String(body.prompt), 0);
       } catch (err) {
         if (err instanceof BillingError) {
           writeSse(meta, "error", { message: err.message, code: err.code });

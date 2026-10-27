@@ -32,7 +32,7 @@ export async function handler(
 ): Promise<{ status: string; uploaded?: number; jobId?: string }> {
   if (event.action === "collect") return collectAndUpload();
   if (event.action === "ingest") return triggerIngestion();
-  throw new Error(`Unknown action: ${(event as Record<string, unknown>).action}`);
+  throw new Error(`Unknown action: ${(event as unknown as Record<string, unknown>).action}`);
 }
 
 async function collectAndUpload(): Promise<{ status: string; uploaded: number }> {
@@ -88,11 +88,13 @@ async function collectAndUpload(): Promise<{ status: string; uploaded: number }>
         `Destination: ${item.destination || "unknown"}`,
         `Query: ${item.prompt}`,
         `Summary: ${item.summary}`,
-        item.themes?.length ? `Themes: ${item.themes.join(", ")}` : "",
+        Array.isArray(item.themes) && item.themes.length
+          ? `Themes: ${item.themes.join(", ")}`
+          : "",
       ]
         .filter(Boolean)
         .join("\n");
-      const key = `published/training/${item.PK.replace("TRAINING#", "")}/${item.requestId || item.SK}.txt`;
+      const key = `published/training/${String(item.PK).replace("TRAINING#", "")}/${item.requestId || item.SK}.txt`;
       await s3.send(
         new PutObjectCommand({
           Bucket: BUCKET,

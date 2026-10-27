@@ -126,14 +126,19 @@ function safeTrainingRecord(item: Row) {
     source: record?.source || "unknown",
     metadata: record?.metadata || {},
     messages: Array.isArray(record?.messages)
-      ? record.messages.map((message) => ({
-          role: message?.role === "assistant" ? "assistant" : "user",
-          content: Array.isArray(message?.content)
-            ? message.content
-                .map((part) => String(part?.text || "").slice(0, 12000))
-                .join("\n")
-            : "",
-        }))
+      ? record.messages.map((message: unknown) => {
+          const m = (message ?? {}) as { role?: unknown; content?: unknown };
+          return {
+            role: m.role === "assistant" ? "assistant" : "user",
+            content: Array.isArray(m.content)
+              ? m.content
+                  .map((part: unknown) =>
+                    String((part as { text?: unknown })?.text || "").slice(0, 12000),
+                  )
+                  .join("\n")
+              : "",
+          };
+        })
       : [],
   };
 }

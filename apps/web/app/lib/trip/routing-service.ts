@@ -92,7 +92,10 @@ export class OsrmRoutingProvider implements IRoutingProvider {
       clearTimeout(timeoutId);
 
       if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as {
+          code?: string;
+          routes?: { geometry: { coordinates: [number, number][] }; distance: number; duration: number }[];
+        };
         if (data.code === "Ok" && data.routes && data.routes.length > 0) {
           const primaryRoute = data.routes[0];
           // GeoJSON coordinates are [lng, lat], convert to [lat, lng] for Leaflet

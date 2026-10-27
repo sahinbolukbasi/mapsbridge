@@ -177,6 +177,10 @@ export class StripeWebhookValidator {
         throw new BillingError(400, "MISSING_PAYLOAD", "Webhook payload is missing");
       }
 
+      if (!signature) {
+        // İmzasız webhook asla doğrulanamaz; kredi/abonelik yazımından önce reddet.
+        throw new BillingError(400, "MISSING_SIGNATURE", "Webhook signature is missing");
+      }
       try {
         const verified = await validator.verify(payload, signature);
 

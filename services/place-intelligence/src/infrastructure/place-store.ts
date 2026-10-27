@@ -29,7 +29,7 @@ function marshall(item: Record<string, unknown>) {
 function unmarshall(item: Record<string, unknown>) {
   const { unmarshall: u } =
     require("@aws-sdk/util-dynamodb") as typeof import("@aws-sdk/util-dynamodb");
-  return u(item);
+  return u(item as Parameters<typeof u>[0]);
 }
 
 const cityKey = (city: string) => city.toLowerCase().replace(/\s+/g, "-");

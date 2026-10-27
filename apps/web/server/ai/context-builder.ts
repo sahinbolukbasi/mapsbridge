@@ -15,12 +15,14 @@ interface RequestBody {
 }
 export function normalizeRequest(body: RequestBody) {
   const location = body.userLocation;
+  const locLat = location?.lat;
+  const locLng = location?.lng;
   if (
     location !== undefined &&
-    (!Number.isFinite(location?.lat) ||
-      Math.abs(location.lat) > 90 ||
-      !Number.isFinite(location?.lng) ||
-      Math.abs(location.lng) > 180)
+    (!Number.isFinite(locLat) ||
+      Math.abs(locLat as number) > 90 ||
+      !Number.isFinite(locLng) ||
+      Math.abs(locLng as number) > 180)
   )
     throw new Error("INVALID_LOCATION");
   return {
@@ -28,15 +30,19 @@ export function normalizeRequest(body: RequestBody) {
     prompt: body.prompt.trim(),
     conversationHistory: body.conversationHistory || [],
     conversationId: body.conversationId || null,
-    routeMode:
-      body.routeMode === "calm" || body.routeMode === "classic" || body.routeMode === "explorer"
-        ? body.routeMode
-        : undefined,
+    routeMode: ((): "calm" | "classic" | "explorer" | undefined => {
+      if (body.routeMode === "calm" || body.routeMode === "classic" || body.routeMode === "explorer")
+        return body.routeMode;
+      return undefined;
+    })(),
     tripManifestoMarkdown:
       typeof body.tripManifestoMarkdown === "string"
         ? body.tripManifestoMarkdown.slice(0, 10000)
         : null,
-    userLocation: location ? { lat: location.lat, lng: location.lng } : null,
+    userLocation:
+      location && Number.isFinite(locLat) && Number.isFinite(locLng)
+        ? { lat: locLat as number, lng: locLng as number }
+        : null,
     conversationFlow:
       body.conversationFlow &&
       typeof body.conversationFlow.activeTopic === "string" &&
