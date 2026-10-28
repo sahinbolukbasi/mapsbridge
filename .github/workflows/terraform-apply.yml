@@ -41,6 +41,11 @@ on:
 permissions:
   contents: read
   id-token: write
+# Aynı anda yalnızca bir Terraform apply — çakışan apply'ların bıraktığı stale
+# state lock sorununu kökten önler.
+concurrency:
+  group: terraform-apply
+  cancel-in-progress: false
 
 env:
   AWS_REGION: eu-central-1
