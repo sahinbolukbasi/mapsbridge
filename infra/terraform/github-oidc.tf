@@ -55,9 +55,9 @@ resource "aws_iam_role_policy" "github_deploy" {
         Resource = "*"
       },
       {
-        Sid    = "SSMRead"
-        Effect = "Allow"
-        Action = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath", "ssm:DescribeParameters", "ssm:PutParameter", "ssm:DeleteParameter"]
+        Sid      = "SSMRead"
+        Effect   = "Allow"
+        Action   = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath", "ssm:DescribeParameters", "ssm:PutParameter", "ssm:DeleteParameter"]
         Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/mapsbridge/*"
       },
       {
@@ -132,6 +132,7 @@ resource "aws_iam_role_policy" "github_deploy" {
           "iam:GetOpenIDConnectProvider", "iam:ListOpenIDConnectProviders",
           "iam:CreateOpenIDConnectProvider", "iam:AddClientIDToOpenIDConnectProvider",
           "bedrock:*",
+          "s3vectors:*",
           "cloudtrail:*",
           "aoss:*",
           "resource-groups:*",

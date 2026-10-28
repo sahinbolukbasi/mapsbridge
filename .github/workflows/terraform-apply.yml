@@ -222,7 +222,14 @@ jobs:
 
       - name: Terraform Apply
         working-directory: infra/terraform
-        run: terraform apply -auto-approve tfplan
+        run: |
+          # İlk deneme kaydedilmiş planı uygular. ENI detach / IAM propagation
+          # kaynaklı geçici hatada güncel değişkenlerle yeniden plan+apply denenir.
+          if ! terraform apply -auto-approve tfplan; then
+            echo "::warning::İlk apply başarısız (ENI detach/IAM propagation olası). 60s sonra yeniden deneniyor..."
+            sleep 60
+            terraform apply -auto-approve
+          fi
 
       - name: Show Outputs
         working-directory: infra/terraform
@@ -591,6 +598,10 @@ jobs:
       (github.event.inputs.stack == 'ai-training' || github.event.inputs.stack == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      TF_VAR_account_id: "865369794421"
+      TF_VAR_prefix: mapsbridge-prod
+      TF_VAR_table_name: mapsbridge-prod-data
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
