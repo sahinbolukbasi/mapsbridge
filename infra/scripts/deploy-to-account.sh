@@ -27,6 +27,7 @@ TFVARS_FILE=""
 AWS_REGION="eu-central-1"
 SKIP_BUILD=false
 PLAN_ONLY=false
+EXPECTED_ACCOUNT=""
 
 # ─── Parse args ───────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -36,6 +37,7 @@ while [[ $# -gt 0 ]]; do
     --region)    AWS_REGION="$2"; shift 2 ;;
     --skip-build) SKIP_BUILD=true; shift ;;
     --plan-only) PLAN_ONLY=true; shift ;;
+    --expected-account) EXPECTED_ACCOUNT="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -57,6 +59,13 @@ echo ""
 echo "=== MapsBridge Deploy to AWS Account ==="
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 echo "Account ID : $ACCOUNT_ID"
+# Güvenlik: yanlış hesaba deploy'u engelle. --expected-account verilirse birebir eşleşmeli.
+if [[ -n "$EXPECTED_ACCOUNT" && "$ACCOUNT_ID" != "$EXPECTED_ACCOUNT" ]]; then
+  echo ""
+  echo "✗ HESAP UYUŞMAZLIĞI: beklenen $EXPECTED_ACCOUNT, bağlı olunan $ACCOUNT_ID"
+  echo "  Yanlış profil. Deploy iptal edildi (hiçbir kaynağa dokunulmadı)."
+  exit 1
+fi
 echo "Profile    : $AWS_PROFILE"
 echo "Region     : $AWS_REGION"
 echo "tfvars     : $TFVARS_FILE"
@@ -76,8 +85,10 @@ if [[ "$SKIP_BUILD" == false ]]; then
 fi
 
 # ─── Step 2: Bootstrap remote state bucket (idempotent) ───────────────────
-STATE_BUCKET="mapsbridge-tfstate-${ACCOUNT_ID}"
-LOCK_TABLE="mapsbridge-tfstate-lock"
+# State isimleri backend.tf ile BİREBİR aynı olmalı; aksi halde terraform init
+# mevcut state yerine ikinci bir bucket oluşturur ve state ikiye bölünür.
+STATE_BUCKET="mapsbridge-terraform-state-${ACCOUNT_ID}"
+LOCK_TABLE="mapsbridge-terraform-locks"
 
 echo ""
 echo "── Step 2: Bootstrapping remote state ──"

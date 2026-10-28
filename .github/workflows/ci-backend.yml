@@ -46,4 +46,3 @@ jobs:
       - run: npm ci
       - run: npm ci --prefix infra/lambda --ignore-scripts
       - run: npx tsc --noEmit --project infra/lambda/tsconfig.json
-        continue-on-error: true

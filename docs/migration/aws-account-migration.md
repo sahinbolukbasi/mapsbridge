@@ -1,52 +1,79 @@
-# AWS Hesap Migrasyonu — Durum
+# AWS Hesap Durumu — Deploy Hedefi
 
-Eski hesap: `996270854731` (KAPANACAK)
-Yeni hesap: `865369794421` (AKTİF — tüm operasyon burada)
+> **Tek doğruluk kaynağı.** Tüm deploy'lar `865369794421` hesabına yapılır.
+> `996270854731` hesabına **hiçbir şey deploy edilmez** (geliştirici CLI'ı bu
+> hesapta olabilir, ama deploy GitHub Actions OIDC rolü ile `865`'e gider).
 
-## Tamamlanan Adımlar
+| Hesap | Durum |
+| --- | --- |
+| `865369794421` | **AKTİF / DEPLOY HEDEFİ** — tüm production altyapısı burada |
+| `996270854731` | Kullanılmıyor — asla deploy edilmez |
 
-- [x] Terraform backend S3: `mapsbridge-terraform-state-865369794421`
-- [x] GitHub OIDC role: `arn:aws:iam::865369794421:role/...`
-- [x] GitHub Secrets: `AWS_DEPLOY_ROLE_ARN` yeni hesabı gösteriyor
-- [x] Tüm infra TF dosyaları `mapsbridge` prefix kullanıyor
-- [x] Frontend localStorage migration: `adreskopru.*` → `mapsbridge.*` (cognito.ts)
-- [x] CI/CD: deploy-web, deploy-api, deploy-ios, deploy-android workflow'ları yeni hesaba deploy ediyor
+## Canlıya Alma — Önerilen Yol (GitHub Actions)
 
-## Eski Hesapta Kapatılması Gerekenler (996270854731)
+Deploy için **local AWS CLI erişimine gerek yoktur**. GitHub Actions, OIDC rolü
+(`AWS_DEPLOY_ROLE_ARN` secret) ile `865` hesabına deploy eder.
 
-> **ÖNEMLİ**: Eski hesaba admin erişimi gerekiyor. Mevcut `bedrock-vscode-continue` kullanıcısının
-> sadece Bedrock izni var. Console'dan giriş yapıp aşağıdakileri siliniz.
+### 1. Altyapı (Terraform)
+`Actions → Terraform Apply` workflow'unu `workflow_dispatch` ile tetikle.
+- `stack` seçimi: ilk kurulumda `all` (bağımlılık sırasını workflow yönetir:
+  `main → admin-runtime → agentcore-gateway → ai-memory → ai-finops → ai-training → travel-rag`).
+- Önce `plan_only: true` ile planı incele, sonra `plan_only: false` ile uygula.
+- `ACCOUNT_ID` workflow'da `865369794421`'e sabitlidir.
 
-### Silinecek Kaynaklar
+### 2. Lambda kodu (API)
+`infra/lambda/**` main'e merge edilince `Deploy API (Lambda)` workflow'u otomatik
+çalışır. Artık deploy öncesi **typecheck + unit test** geçmeden deploy olmaz.
+Manuel tetiklemek için: `Actions → Deploy API (Lambda) → Run workflow`.
 
-1. **Lambda fonksiyonları**: `adreskopru-prod-*` prefix'li tüm fonksiyonlar
-2. **S3 bucket'ları**: `adreskopru-prod-996270854731-web`, `adreskopru-prod-*` bucketlar
-3. **API Gateway**: `adreskopru-prod` HTTP API
-4. **DynamoDB tabloları**: `adreskopru-prod-data` ve ilgili tablolar
-5. **Cognito User Pool**: Eski `adreskopru` pool (kullanıcılar yeni pool'a kaydoldu)
-6. **CloudFront distribution**: Eski web distribution (DNS artık yeni hesabı gösteriyor)
-7. **CloudWatch log grupları**: `/aws/lambda/adreskopru-*`
-8. **IAM rolleri**: `adreskopru-prod-*` rolleri
-9. **RDS/Aurora**: Eski cluster varsa
-10. **Bedrock guardrail**: Eski guardrail (fbj50603sjh9) — yenisi yeni hesapta oluşturulacak
-11. **IAM user**: `bedrock-vscode-continue` — artık gerekli değil
+### 3. Web (Next.js)
+`Deploy Web` workflow'u — static export → S3 + CloudFront invalidation.
 
-### Console'dan Silme Sırası
+## Gerekli GitHub Secrets (865 hesabı)
 
-1. CloudFront → Distribution disable → delete
-2. API Gateway → Delete API
-3. Lambda → Delete all `adreskopru-*` functions
-4. S3 → Empty + Delete buckets
-5. DynamoDB → Delete tables
-6. Cognito → Delete user pool
-7. RDS → Delete cluster (snapshot al önce)
-8. CloudWatch Logs → Delete log groups
-9. IAM → Detach policies, delete roles and users
+Terraform Apply ve Deploy API workflow'ları bu secret'ları kullanır:
 
-## Yeni Hesap Eksikler (865369794421)
+| Secret | Açıklama |
+| --- | --- |
+| `AWS_DEPLOY_ROLE_ARN` | `865` hesabındaki OIDC deploy rolü ARN'si |
+| `API_GATEWAY_ID` | Çekirdek stack çıktısı (HTTP API ID) |
+| `DYNAMODB_TABLE` | `mapsbridge-prod-data` |
+| `COGNITO_USER_POOL_ID` | Çekirdek stack çıktısı |
+| `COGNITO_CLIENT_ID` | Çekirdek stack çıktısı |
+| `ADMIN_SUB` | Birincil admin Cognito sub (rolü panelden değişmez) |
+| `ACM_CERT_ARN` | us-east-1 `*.mapsbridge.com` sertifika ARN'si (CloudFront) |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Stripe (production'da asla değiştirilmez) |
+| `ADMIN_ALLOWED_CIDRS`, `SLACK_ADMIN_USER_IDS` | Opsiyonel erişim/operasyon ayarları |
 
-- [ ] Terraform Apply çalıştır (GitHub Actions → Terraform Apply workflow)
-- [ ] Bedrock model erişimi iste (Claude, Titan Embed, Nova)
-- [ ] Bedrock guardrail oluştur
-- [ ] AWS CLI default profile güncelle: `865369794421`
-- [ ] Grafana Cloud → CloudWatch data source bağla
+> Çekirdek stack ilk kez apply edildiğinde `terraform output` ile `API_GATEWAY_ID`,
+> `COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID` değerlerini al ve GitHub Secrets'a yaz.
+> admin-runtime ve ai-memory stack'leri bu secret'ları `TF_VAR_*` olarak kullanır.
+
+## Manuel Deploy (yedek yol — local CLI gerekir)
+
+`865` hesabına CLI erişimin varsa:
+
+```bash
+# Profili doğrula (865 olmalı):
+aws sts get-caller-identity --profile mapsbridge-865
+
+# Çekirdek stack — hesap guard'ı yanlış hesabı engeller:
+./infra/scripts/deploy-to-account.sh \
+  --profile mapsbridge-865 \
+  --tfvars infra/terraform/terraform.tfvars \
+  --expected-account 865369794421 \
+  --plan-only       # önce plan; onayladıktan sonra --plan-only'siz çalıştır
+```
+
+> Not: `deploy-to-account.sh` yalnızca çekirdek `infra/terraform` stack'ini kurar.
+> admin-runtime ve diğer stack'ler için GitHub Actions `Terraform Apply` workflow'u
+> kullanılır (bağımlılık sırasını yönetir).
+
+## İlk Kurulum Ön Koşulları (865 hesabı)
+
+- [ ] OIDC deploy rolü (`AWS_DEPLOY_ROLE_ARN`) oluştur ve GitHub Secrets'a yaz
+- [ ] Terraform state: `mapsbridge-terraform-state-865369794421` bucket +
+      `mapsbridge-terraform-locks` DynamoDB tablosu (deploy script idempotent oluşturur)
+- [ ] Bedrock model erişimi iste (Claude Haiku, Titan Embed, Nova)
+- [ ] us-east-1'de `*.mapsbridge.com` ACM sertifikası oluştur → `ACM_CERT_ARN`
+- [ ] Çekirdek stack apply → çıktıları GitHub Secrets'a yaz (yukarıdaki tablo)
