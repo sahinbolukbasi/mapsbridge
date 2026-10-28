@@ -89,4 +89,3 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit --project services/${{ matrix.service }}/tsconfig.json
-        continue-on-error: true

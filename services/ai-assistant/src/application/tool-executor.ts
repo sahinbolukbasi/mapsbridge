@@ -6,7 +6,7 @@
  * place collection (OSM, Google Places, Foursquare) and external APIs.
  */
 
-import type { NormalizedPlace } from "../../../place-intelligence/src/domain/types.js";
+import type { NormalizedPlace, PlaceCategory } from "../../../place-intelligence/src/domain/types.js";
 
 export interface ToolExecutionRequest {
   toolName: string;
@@ -83,7 +83,7 @@ export class ToolExecutor {
     params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const city = params.city || params.destination;
+    const city = String(params.city || params.destination || "");
     if (!city) {
       return {
         success: false,
@@ -102,7 +102,7 @@ export class ToolExecutor {
     if (places.length === 0) {
       const { discoverCityByCategory } =
         await import("../../../place-intelligence/src/application/discovery-service.js");
-      const result = await discoverCityByCategory(city, params.country || "", [
+      const result = await discoverCityByCategory(city, String(params.country || ""), [
         "restaurant",
         "cafe",
       ]);
@@ -113,7 +113,7 @@ export class ToolExecutor {
       await storePlaces(result.places).catch(() => {});
     }
 
-    const cuisine = params.cuisine?.toLowerCase();
+    const cuisine = params.cuisine ? String(params.cuisine).toLowerCase() : undefined;
     if (cuisine) {
       const filtered = places.filter(
         (p: NormalizedPlace) =>
@@ -137,8 +137,8 @@ export class ToolExecutor {
     params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const city = params.city || params.destination;
-    const category = params.category;
+    const city = String(params.city || params.destination || "");
+    const category = params.category ? String(params.category) : undefined;
 
     if (!city) {
       return {
@@ -161,7 +161,7 @@ export class ToolExecutor {
       const cats = category
         ? [category]
         : ["attraction", "museum", "park", "monument", "viewpoint"];
-      const result = await discoverCityByCategory(city, params.country as string || "", cats as string[]);
+      const result = await discoverCityByCategory(city, params.country as string || "", cats as PlaceCategory[]);
       places = result.places;
 
       const { storePlaces } =
@@ -182,7 +182,7 @@ export class ToolExecutor {
     params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const city = params.city || "Istanbul";
+    const city = String(params.city || "Istanbul");
     const apiKey = process.env.OPENWEATHERMAP_API_KEY;
 
     if (apiKey) {
@@ -230,7 +230,7 @@ export class ToolExecutor {
     params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const city = params.city || "Istanbul";
+    const city = String(params.city || "Istanbul");
     return {
       success: true,
       toolName: "find_events",
@@ -248,10 +248,10 @@ export class ToolExecutor {
     params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const fromLat = params.fromLat;
-    const fromLng = params.fromLng;
-    const toLat = params.toLat;
-    const toLng = params.toLng;
+    const fromLat = Number(params.fromLat);
+    const fromLng = Number(params.fromLng);
+    const toLat = Number(params.toLat);
+    const toLng = Number(params.toLng);
 
     if (fromLat && fromLng && toLat && toLng) {
       const dist = haversineKm(fromLat, fromLng, toLat, toLng);
@@ -294,7 +294,7 @@ export class ToolExecutor {
     started: number,
   ): Promise<ToolExecutionResponse> {
     const placeId = params.placeId;
-    const city = params.city;
+    const city = String(params.city || "");
 
     if (placeId && city) {
       const { getPlacesForCity } =
@@ -329,7 +329,7 @@ export class ToolExecutor {
     params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const city = params.city;
+    const city = String(params.city || "");
     if (!city) {
       return {
         success: false,
@@ -347,8 +347,8 @@ export class ToolExecutor {
 
     const result = await discover({
       city,
-      country: params.country,
-      categories: params.categories,
+      country: params.country ? String(params.country) : undefined,
+      categories: params.categories as PlaceCategory[] | undefined,
       maxResults: 100,
     });
 
@@ -371,7 +371,8 @@ export class ToolExecutor {
     params: Record<string, unknown>,
     started: number,
   ): Promise<ToolExecutionResponse> {
-    const { placeId, city } = params;
+    const placeId = params.placeId;
+    const city = String(params.city || "");
     if (!placeId || !city) {
       return {
         success: false,
