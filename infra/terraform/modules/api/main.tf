@@ -43,17 +43,17 @@ locals {
     })
 
     stripe = merge(local._base, {
-      STRIPE_SECRET_KEY      = "secret:${var.stripe_secret_ssm}"
-      STRIPE_WEBHOOK_SECRET  = "secret:${var.stripe_webhook_secret_ssm}"
-      STRIPE_QUEUE_URL       = var.stripe_queue_url
+      STRIPE_SECRET_KEY     = "secret:${var.stripe_secret_ssm}"
+      STRIPE_WEBHOOK_SECRET = "secret:${var.stripe_webhook_secret_ssm}"
+      STRIPE_QUEUE_URL      = var.stripe_queue_url
     })
 
     admin = merge(local._base, {
-      STRIPE_SECRET_KEY  = "secret:${var.stripe_secret_ssm}"
+      STRIPE_SECRET_KEY       = "secret:${var.stripe_secret_ssm}"
       BEDROCK_MODEL_ID        = var.bedrock_model_id
       BEDROCK_INTAKE_MODEL_ID = var.bedrock_intake_model_id
-      ANALYTICS_BUCKET   = var.analytics_bucket_id
-      ATHENA_WORKGROUP   = var.athena_workgroup
+      ANALYTICS_BUCKET        = var.analytics_bucket_id
+      ATHENA_WORKGROUP        = var.athena_workgroup
     })
 
     places = merge(local._base, {
@@ -62,11 +62,11 @@ locals {
     })
 
     revenuecat = merge(local._base, {
-      RC_SECRET_API_KEY     = "secret:${var.rc_secret_api_key_ssm}"
-      RC_WEBHOOK_AUTH_SECRET = "secret:${var.rc_webhook_auth_secret_ssm}"
+      RC_SECRET_API_KEY       = "secret:${var.rc_secret_api_key_ssm}"
+      RC_WEBHOOK_AUTH_SECRET  = "secret:${var.rc_webhook_auth_secret_ssm}"
       RC_BILLING_CHECKOUT_URL = var.rc_billing_checkout_url
-      BILLING_ENABLED       = var.billing_enabled
-      APP_ORIGIN            = var.app_origin
+      BILLING_ENABLED         = var.billing_enabled
+      APP_ORIGIN              = var.app_origin
     })
   }
 }
@@ -185,16 +185,10 @@ resource "aws_lambda_function" "domain" {
   # Domain-specific memory optimization (Cost: 256MB default, 512MB for AI/Bedrock)
   memory_size = each.key == "ai" ? 512 : var.lambda_memory
 
-  dynamic "vpc_config" {
-    # stripe/ai/routes call external APIs (Stripe, Bedrock, OSRM) and have no NAT gateway,
-    # so they cannot be VPC-attached. admin only accesses DynamoDB/S3/Secrets (all have
-    # VPC endpoints), so it IS placed in the VPC for network isolation.
-    for_each = length(var.private_subnet_ids) > 0 && contains(["admin"], each.key) ? [1] : []
-    content {
-      subnet_ids         = var.private_subnet_ids
-      security_group_ids = [var.lambda_security_group_id]
-    }
-  }
+  # NOT: Bu stack'teki Lambda'lar (auth/chat/marketplace) VPC'ye BAĞLANMAZ.
+  # VPC-bağlı Lambda, her deploy'da Security Group değişiminde 45dk'ya varan ENI
+  # detach beklemesine yol açar; eriştikleri servisler (DynamoDB/S3) IAM + TLS ile
+  # zaten güvenli. admin/ai/routes/stripe admin-runtime stack'inde yönetilir.
   reserved_concurrent_executions = -1
 
   environment {
@@ -354,8 +348,8 @@ resource "aws_iam_role_policy" "rc_secrets" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect   = "Allow"
-      Action   = ["ssm:GetParameter"]
+      Effect = "Allow"
+      Action = ["ssm:GetParameter"]
       Resource = [
         "arn:aws:ssm:${var.aws_region}:*:parameter${var.rc_secret_api_key_ssm}",
         "arn:aws:ssm:${var.aws_region}:*:parameter${var.rc_webhook_auth_secret_ssm}",
@@ -369,7 +363,7 @@ resource "aws_iam_role_policy" "ai_model" {
   name  = "canonical-ai-model"
   role  = aws_iam_role.lambda["ai"].id
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [{
       Effect = "Allow",
       Action = ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],

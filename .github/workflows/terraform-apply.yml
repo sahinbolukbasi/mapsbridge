@@ -46,6 +46,11 @@ env:
   AWS_REGION: eu-central-1
   ACCOUNT_ID: "865369794421"
   PREFIX: mapsbridge-prod
+  # CI hız/otomasyon: interaktif prompt yok, gereksiz öneri çıktısı yok,
+  # provider indirme paralelliği artırıldı.
+  TF_IN_AUTOMATION: "1"
+  TF_INPUT: "0"
+  TF_CLI_ARGS_init: "-input=false"
 
 jobs:
   # ─── Main Stack ──────────────────────────────────────────────────────────
@@ -102,7 +107,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Force-unlock state (if requested)
         if: github.event.inputs.force_unlock == 'true'
@@ -202,7 +207,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Await IAM propagation and refresh credentials
         run: |
@@ -272,7 +277,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/admin-runtime
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Terraform Plan
         working-directory: infra/admin-runtime
@@ -322,7 +327,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/admin-runtime
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -365,7 +370,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/agentcore-gateway
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Terraform Plan
         working-directory: infra/agentcore-gateway
@@ -408,7 +413,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/agentcore-gateway
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -454,7 +459,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-memory
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Terraform Plan
         working-directory: infra/ai-memory
@@ -500,7 +505,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-memory
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -538,7 +543,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-finops
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Terraform Plan
         working-directory: infra/ai-finops
@@ -576,7 +581,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-finops
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -612,7 +617,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-training
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Terraform Plan
         working-directory: infra/ai-training
@@ -644,7 +649,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/ai-training
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -676,7 +681,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/travel-rag
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Terraform Plan
         working-directory: infra/travel-rag
@@ -708,7 +713,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/travel-rag
-        run: terraform init -upgrade
+        run: terraform init -input=false
 
       - name: Download plan
         uses: actions/download-artifact@v4
