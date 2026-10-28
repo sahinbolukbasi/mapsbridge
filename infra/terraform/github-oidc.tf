@@ -61,35 +61,9 @@ resource "aws_iam_role_policy" "github_deploy" {
         Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/mapsbridge/*"
       },
       {
-        Sid    = "EC2Read"
-        Effect = "Allow"
-        Action = [
-          "ec2:DescribeVpcs",
-          "ec2:DescribeSubnets",
-          "ec2:DescribeSecurityGroups",
-          "ec2:DescribeInternetGateways",
-          "ec2:DescribeRouteTables",
-          "ec2:DescribeAvailabilityZones",
-          "ec2:DescribeNatGateways",
-          "ec2:DescribeVpcEndpoints",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DescribeAddresses",
-          "ec2:DeleteNetworkInterface",
-          "ec2:DetachNetworkInterface",
-          "ec2:CreateNetworkInterface",
-          "ec2:ModifyNetworkInterfaceAttribute",
-          "ec2:DeleteSecurityGroup",
-          "ec2:RevokeSecurityGroupIngress",
-          "ec2:RevokeSecurityGroupEgress",
-          "ec2:CreateSecurityGroup",
-          "ec2:AuthorizeSecurityGroupIngress",
-          "ec2:AuthorizeSecurityGroupEgress",
-          "ec2:CreateVpcEndpoint",
-          "ec2:DeleteVpcEndpoints",
-          "ec2:ModifyVpcEndpoint",
-          "ec2:CreateTags",
-          "ec2:DeleteTags",
-        ]
+        Sid      = "EC2Read"
+        Effect   = "Allow"
+        Action   = ["ec2:*"]
         Resource = "*"
       },
       {

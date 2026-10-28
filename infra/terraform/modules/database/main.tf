@@ -38,7 +38,7 @@ resource "aws_rds_cluster" "aurora" {
   preferred_backup_window         = "03:00-04:00"
   copy_tags_to_snapshot           = true
   deletion_protection             = var.environment == "prod"
-  skip_final_snapshot             = var.environment != "prod"
+  skip_final_snapshot             = true # kullanılmayan Aurora; veri yok, temiz destroy
 
   serverlessv2_scaling_configuration {
     min_capacity = 0.5
@@ -56,7 +56,7 @@ resource "aws_db_parameter_group" "aurora_instance" {
 }
 
 resource "aws_rds_cluster_instance" "aurora" {
-  count                      = 1   # Tek instance yeterli; reader yük gerekirse ekle
+  count                      = 1 # Tek instance yeterli; reader yük gerekirse ekle
   identifier                 = "${local.substack_name}-${count.index}"
   cluster_identifier         = aws_rds_cluster.aurora.id
   instance_class             = var.aurora_instance_class
