@@ -154,17 +154,6 @@ resource "aws_cloudwatch_log_group" "lambda" {
   tags              = local.tags
 }
 
-# ─── VPC Module ───────────────────────────────────────────────────────────
-module "vpc" {
-  source         = "./modules/vpc"
-  name           = local.name
-  project        = var.project
-  environment    = var.environment
-  aws_region     = var.aws_region
-  vpc_cidr       = var.vpc_cidr
-  enable_bedrock = var.enable_bedrock
-}
-
 # ─── Storage Module (S3: media / guides / analytics / athena) ─────────────
 module "storage" {
   source = "./modules/storage"
@@ -174,21 +163,6 @@ module "storage" {
   tags                        = local.tags
   cors_origins                = local.cors_origins
   cloudfront_distribution_arn = aws_cloudfront_distribution.web.arn
-}
-
-# ─── Database Module (Aurora Serverless v2 + ElastiCache Provisioned) ─────
-module "database" {
-  source = "./modules/database"
-
-  name                     = local.name
-  environment              = var.environment
-  tags                     = local.tags
-  private_subnet_ids       = module.vpc.private_subnet_ids
-  aurora_security_group_id = module.vpc.aurora_security_group_id
-  redis_security_group_id  = module.vpc.redis_security_group_id
-  db_username              = var.db_username
-  aurora_instance_class    = var.aurora_instance_class
-  kms_key_arn              = aws_kms_key.main.arn
 }
 
 # ─── Analytics Module (Firehose → S3 → Athena) ────────────────────────────
@@ -221,26 +195,21 @@ module "api" {
   source            = "./modules/api"
   billing_table_arn = aws_dynamodb_table.data.arn
 
-  name                     = local.name
-  environment              = var.environment
-  tags                     = local.tags
-  aws_region               = var.aws_region
-  private_subnet_ids       = module.vpc.private_subnet_ids
-  lambda_security_group_id = module.vpc.lambda_security_group_id
-  lambda_runtime           = "nodejs20.x"
-  lambda_timeout           = var.lambda_timeout
-  lambda_memory            = var.lambda_memory
-  lambda_domains           = local.lambda_packages
-  domain_routes            = local.domain_routes
-  cors_origins             = local.cors_origins
+  name           = local.name
+  environment    = var.environment
+  tags           = local.tags
+  aws_region     = var.aws_region
+  lambda_runtime = "nodejs20.x"
+  lambda_timeout = var.lambda_timeout
+  lambda_memory  = var.lambda_memory
+  lambda_domains = local.lambda_packages
+  domain_routes  = local.domain_routes
+  cors_origins   = local.cors_origins
 
   cognito_user_pool_arn = aws_cognito_user_pool.users.arn
   cognito_user_pool_id  = aws_cognito_user_pool.users.id
   cognito_client_id     = aws_cognito_user_pool_client.web.id
 
-  aurora_cluster_arn = module.database.aurora_cluster_arn
-  aurora_writer_ssm  = "/mapsbridge/${var.environment}/aurora/writer"
-  redis_endpoint_ssm = "/mapsbridge/${var.environment}/redis/endpoint"
 
   guides_bucket_id    = module.storage.guides_bucket_id
   guides_bucket_arn   = module.storage.guides_bucket_arn

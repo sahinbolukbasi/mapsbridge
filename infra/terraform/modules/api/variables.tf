@@ -18,15 +18,7 @@ variable "aws_region" {
   description = "AWS region"
 }
 
-variable "private_subnet_ids" {
-  type        = list(string)
-  description = "Private subnet IDs for Lambda VPC config"
-}
 
-variable "lambda_security_group_id" {
-  type        = string
-  description = "Security group ID for Lambda functions"
-}
 
 variable "lambda_runtime" {
   type        = string
@@ -79,20 +71,8 @@ variable "cognito_client_id" {
   description = "Cognito App Client ID"
 }
 
-variable "aurora_cluster_arn" {
-  type        = string
-  description = "Aurora cluster ARN"
-}
 
-variable "aurora_writer_ssm" {
-  type        = string
-  description = "SSM parameter path for Aurora writer endpoint"
-}
 
-variable "redis_endpoint_ssm" {
-  type        = string
-  description = "SSM parameter path for Redis endpoint"
-}
 
 variable "guides_bucket_id" {
   type        = string

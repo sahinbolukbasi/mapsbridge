@@ -22,15 +22,7 @@ output "lambda_function_names" {
   value = module.api.lambda_function_names
 }
 
-output "aurora_endpoint" {
-  value     = module.database.aurora_endpoint
-  sensitive = true
-}
 
-output "redis_endpoint" {
-  value     = module.database.redis_endpoint
-  sensitive = true
-}
 
 output "firehose_stream_name" {
   value = module.analytics.firehose_stream_name
