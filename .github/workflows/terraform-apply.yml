@@ -330,7 +330,11 @@ jobs:
   # ─── AgentCore Gateway ────────────────────────────────────────────────────
   agentcore-gateway-plan:
     name: "Plan: agentcore-gateway"
-    if: ${{ github.event.inputs.stack == 'agentcore-gateway' || github.event.inputs.stack == 'all' }}
+    needs: [main-apply]
+    if: |
+      always() &&
+      needs.main-apply.result != 'failure' &&
+      (github.event.inputs.stack == 'agentcore-gateway' || github.event.inputs.stack == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -412,7 +416,11 @@ jobs:
   # ─── AI Memory ────────────────────────────────────────────────────────────
   ai-memory-plan:
     name: "Plan: ai-memory"
-    if: ${{ github.event.inputs.stack == 'ai-memory' || github.event.inputs.stack == 'all' }}
+    needs: [main-apply]
+    if: |
+      always() &&
+      needs.main-apply.result != 'failure' &&
+      (github.event.inputs.stack == 'ai-memory' || github.event.inputs.stack == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -500,7 +508,11 @@ jobs:
   # ─── AI FinOps ────────────────────────────────────────────────────────────
   ai-finops-plan:
     name: "Plan: ai-finops"
-    if: ${{ github.event.inputs.stack == 'ai-finops' || github.event.inputs.stack == 'all' }}
+    needs: [main-apply]
+    if: |
+      always() &&
+      needs.main-apply.result != 'failure' &&
+      (github.event.inputs.stack == 'ai-finops' || github.event.inputs.stack == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -572,7 +584,11 @@ jobs:
   # ─── AI Training ──────────────────────────────────────────────────────────
   ai-training-plan:
     name: "Plan: ai-training"
-    if: ${{ github.event.inputs.stack == 'ai-training' || github.event.inputs.stack == 'all' }}
+    needs: [main-apply]
+    if: |
+      always() &&
+      needs.main-apply.result != 'failure' &&
+      (github.event.inputs.stack == 'ai-training' || github.event.inputs.stack == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -632,7 +648,11 @@ jobs:
   # ─── Travel RAG ───────────────────────────────────────────────────────────
   travel-rag-plan:
     name: "Plan: travel-rag"
-    if: ${{ github.event.inputs.stack == 'travel-rag' || github.event.inputs.stack == 'all' }}
+    needs: [main-apply]
+    if: |
+      always() &&
+      needs.main-apply.result != 'failure' &&
+      (github.event.inputs.stack == 'travel-rag' || github.event.inputs.stack == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
