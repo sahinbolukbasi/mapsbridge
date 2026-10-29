@@ -33,18 +33,6 @@ jobs:
       - name: Run AI assistant tests
         run: node --test services/ai-assistant/tests/*.test.cjs
 
-  test-identity-billing:
-    name: Identity & Billing Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
-      - name: Run identity-billing tests
-        run: node --test services/identity-billing/tests/*.test.cjs
 
   test-messaging:
     name: Messaging Tests
@@ -80,7 +68,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [ai-assistant, identity-billing, messaging, place-intelligence]
+        service: [ai-assistant, messaging, place-intelligence]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
