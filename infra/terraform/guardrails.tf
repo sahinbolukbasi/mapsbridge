@@ -28,7 +28,7 @@ resource "aws_bedrock_guardrail" "travel_guardrail" {
     }
     filters_config {
       input_strength  = "HIGH"
-      output_strength = "HIGH"
+      output_strength = "NONE" # PROMPT_ATTACK yalnızca input'a uygulanır; output NONE olmalı (AWS kuralı)
       type            = "PROMPT_ATTACK"
     }
   }

@@ -53,10 +53,36 @@ data "aws_caller_identity" "current" {}
 
 # ─── KMS Key (encryption at rest for Aurora, Redis, S3 SSE-KMS) ───────────
 resource "aws_kms_key" "main" {
-  description             = "MapsBridge master key — Aurora, Redis, S3 SSE-KMS"
+  description             = "MapsBridge master key — S3 SSE-KMS, CloudTrail"
   deletion_window_in_days = 30
   enable_key_rotation     = true
   tags                    = local.tags
+  # Key policy: hesap kök admin erişimi + CloudTrail servisinin şifreleme izni
+  # (InsufficientEncryptionPolicyException'ı giderir).
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "EnableRootAccount"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      },
+      {
+        Sid       = "AllowCloudTrailEncrypt"
+        Effect    = "Allow"
+        Principal = { Service = "cloudtrail.amazonaws.com" }
+        Action    = ["kms:GenerateDataKey*", "kms:DescribeKey"]
+        Resource  = "*"
+        Condition = {
+          StringLike = {
+            "kms:EncryptionContext:aws:cloudtrail:arn" = "arn:aws:cloudtrail:*:${data.aws_caller_identity.current.account_id}:trail/*"
+          }
+        }
+      }
+    ]
+  })
 }
 
 resource "aws_kms_alias" "main" {
