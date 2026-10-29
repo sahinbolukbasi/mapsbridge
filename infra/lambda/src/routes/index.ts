@@ -1,4 +1,5 @@
 import { verifiedUserId } from "../shared/auth";
+import { resolveUserId } from "../shared/with-auth";
 /**
  * MapsBridge Routes Domain — Lambda handler
  * Routes: GET/POST/PUT/DELETE /routes, /routes/{id}
@@ -135,10 +136,7 @@ function getTableName(): string {
 
 // ─── List Routes (user's saved routes) ────────────────────────────────────
 async function handleListRoutes(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const { QueryCommand } = await import("@aws-sdk/client-dynamodb");
@@ -159,10 +157,7 @@ async function handleListRoutes(event: ApiGatewayEvent) {
 
 // ─── Create Route ─────────────────────────────────────────────────────────
 async function handleCreateRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const body = parseBody<{ name?: string; stops?: unknown[]; days?: unknown[]; isPublic?: boolean }>(event);
@@ -223,10 +218,7 @@ async function handleCreateRoute(event: ApiGatewayEvent) {
 
 // ─── Get Route ────────────────────────────────────────────────────────────
 async function handleGetRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -249,10 +241,7 @@ async function handleGetRoute(event: ApiGatewayEvent) {
 
 // ─── Update Route ─────────────────────────────────────────────────────────
 async function handleUpdateRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -308,10 +297,7 @@ async function handleUpdateRoute(event: ApiGatewayEvent) {
 
 // ─── Delete Route ─────────────────────────────────────────────────────────
 async function handleDeleteRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -332,10 +318,7 @@ async function handleDeleteRoute(event: ApiGatewayEvent) {
 
 // ─── Share Route ──────────────────────────────────────────────────────────
 async function handleShareRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
