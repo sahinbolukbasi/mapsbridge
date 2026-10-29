@@ -61,7 +61,7 @@ declare global {
     webkitSpeechRecognition?: new () => SpeechRecognition;
   }
 
-  // eslint-disable-next-line no-var
+   
   var SpeechRecognition: { prototype: SpeechRecognition; new (): SpeechRecognition } | undefined;
 }
 
