@@ -62,7 +62,6 @@ export default {
     },
     plugins: [
       "expo-secure-store",
-      "react-native-purchases",
     ],
     web: {
       favicon: "./assets/favicon.png",
