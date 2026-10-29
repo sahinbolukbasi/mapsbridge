@@ -105,7 +105,17 @@ export function MapScreen({
   const [selectedCategory, _setSelectedCategory] = useState("TÜMÜ");
   const [currentStopIdx, setCurrentStopIdx] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Record<string, unknown>[]>([]);
+  const [searchResults, setSearchResults] = useState<
+    Array<{
+      name: string;
+      formatted_address?: string;
+      geometry?: { location?: { lat: number; lng: number } };
+      types?: string[];
+      rating?: number;
+      category?: string;
+      photoUrl?: string;
+    }>
+  >([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [activeTileLayer, setActiveTileLayer] = useState<"light" | "dark" | "satellite">("light");
 
@@ -172,7 +182,7 @@ export function MapScreen({
 
   const webViewRef = useRef<WebView>(null);
   const stopsTrackScrollRef = useRef<ScrollView>(null);
-  const stopsCarouselRef = useRef<FlatList<unknown>>(null);
+  const stopsCarouselRef = useRef<FlatList<TripStop>>(null);
 
   // Subscribe to tripStore updates
   useEffect(() => {
@@ -570,20 +580,20 @@ export function MapScreen({
 
     const newStop: TripStop = {
       id: `stop-${Date.now()}`,
-      name: place.name,
+      name: place.name || "İsimsiz",
       category: getCategoryFromTypes(place.types),
       time: "15:00",
       duration: "45 dk",
-      address: place.formatted_address || place.name,
+      address: place.formatted_address || place.name || "",
       lat: loc.lat,
       lng: loc.lng,
       rating: place.rating || 4.8,
-      photoUrl: place.photoUrl,
+      photoUrl: (place as { photoUrl?: string }).photoUrl,
       walkTimeFromPrev: "~8 dk yürüyüş",
       distanceFromPrev: "500m",
     };
 
-    Alert.alert(place.name, place.formatted_address || "Rotanıza eklemek ister misiniz?", [
+    Alert.alert(place.name || "Mekan", place.formatted_address || "Rotanıza eklemek ister misiniz?", [
       { text: "Vazgeç", style: "cancel" },
       {
         text: "Rotaya Ekle",
@@ -1656,10 +1666,10 @@ export function MapScreen({
             </View>
 
             {/* Horizontal Swipeable Stop Cards Carousel (Sağa Sola Kaydırmalı) */}
-            <FlatList
+            <FlatList<TripStop>
               ref={stopsCarouselRef}
               data={filteredStops}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item: TripStop) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
               snapToInterval={CARD_WIDTH + CARD_GAP}
@@ -1682,7 +1692,7 @@ export function MapScreen({
                   stopsTrackScrollRef.current?.scrollTo({ x: newIdx * 48, animated: true });
                 }
               }}
-              renderItem={({ item: stop, index: sIdx }) => {
+              renderItem={({ item: stop, index: sIdx }: { item: TripStop; index: number }) => {
                 return (
                   <TouchableOpacity
                     activeOpacity={0.96}
@@ -2155,7 +2165,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#faf8ff",
   },
   fullMap: {
-    ...(StyleSheet.absoluteFill as Record<string, unknown>),
+    ...(StyleSheet.absoluteFill as unknown as Record<string, unknown>),
     backgroundColor: "#eaf1ec",
   },
   liveIndicatorRow: {

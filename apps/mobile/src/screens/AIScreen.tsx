@@ -264,24 +264,24 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
           const activeConvId = latest.latestConversationId || latest.conversationId;
           if (activeConvId) setConversationId(activeConvId);
 
-          const syncedMessages: ChatMessageItem[] = conv.messages.map((m: { role: string; content: string }, idx: number) => ({
+          const syncedMessages: ChatMessageItem[] = (conv.messages ?? []).map((m: { role: string; content: string }, idx: number) => ({
             id: `sync-${idx}`,
             sender: m.role === "user" ? "user" : "bot",
             text: m.content,
             time: "Senkronize",
           }));
 
-          if (conv.route && conv.route.stops?.length > 0) {
+          if (conv.route && (conv.route.stops?.length ?? 0) > 0) {
             const r = conv.route;
-            const botStops: TripStop[] = r.stops.map((s: { id?: string; name: string; category?: string; day?: number; timeSlot?: string; suggestedDuration?: string; duration?: string; address?: string; lat?: number; lng?: number }, idx: number) => ({
+            const botStops: TripStop[] = (r.stops ?? []).map((s: { id?: string; name: string; category?: string; day?: number; timeSlot?: string; suggestedDuration?: string; duration?: string; address?: string; lat?: number; lng?: number }, idx: number) => ({
               id: s.id || `stop-${idx}`,
               name: s.name,
               category: s.category || "TARİHİ YER",
               time: `${s.day || 1}. gün · ${s.timeSlot || "Sıra " + (idx + 1)}`,
               duration: s.suggestedDuration || s.duration || "Süre belirtilmedi",
               address: s.address || "",
-              lat: s.lat,
-              lng: s.lng,
+              lat: s.lat ?? 0,
+              lng: s.lng ?? 0,
             }));
 
             const lastBot = syncedMessages.filter((m) => m.sender === "bot").pop();

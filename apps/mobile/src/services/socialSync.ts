@@ -130,7 +130,7 @@ function sanitizeText(val?: string | null): string {
 
 function mapServerPostToMobile(post: RawServerPost): MobileCommunityPost {
   return {
-    id: post.id,
+    id: post.id || "",
     authorName: post.authorDisplayName || post.authorUsername || "Gezgin",
     authorHandle: post.authorUsername.startsWith("@")
       ? post.authorUsername
@@ -166,9 +166,9 @@ function mapServerPostToMobile(post: RawServerPost): MobileCommunityPost {
     isLiked: !!post.likedByMe,
     isBookmarked: !!post.savedByMe,
     comments: (post.comments || []).map((c) => ({
-      id: c.id,
+      id: c.id || "",
       user: c.username?.startsWith("@") ? c.username : `@${c.username || "gezgin"}`,
-      displayName: c.displayName,
+      displayName: c.displayName || "",
       text: c.text || c.content || "",
       time: c.createdAt || c.time || "Az önce",
     })),
