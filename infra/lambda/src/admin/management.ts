@@ -1,3 +1,19 @@
+// admin/management.ts — Admin context shared kernel + yönetim route'ları
+// -------------------------------------------------------------------
+// DİKKAT (yapı): Bu dosya iki rolü birden taşıyor (R7'de ayrılacak — bkz
+// .agents/tasks/selfdev-build-2026-10-28/R7-DEVIR.md):
+//   1) PERSISTENCE/UTIL helper'ları (get/scan/commit/scanAllRaw/recordAuditLog/
+//      getTableName/Row/AdminError/bodyOf/text/...) — 9 admin dosyası buradan import eder.
+//      HEDEF: admin/repo.ts'e taşınacak (re-export ile geriye-uyumlu).
+//   2) managementRoutes — yönetim iş kuralları + route handler'ları.
+// Yeni helper eklerken: bu dosyayı şişirme; persistence ise repo katmanına (gelecekte repo.ts) koy.
+//
+// DANGER-ZONE komşuluğu (#4 RBAC): managementRoutes auth/izin akışına dokunur.
+// Değişiklikten sonra admin.test.cjs + admin-permission-map.test.cjs koş.
+//
+// TİP BORCU: `Row = Record<string, any>` tip güvenliği yok — backend şeması değişirse
+// sessiz kırılır. HEDEF: packages/contracts tipleriyle değiştir (ayrı iş, kullanıcı onayı).
+
 import { stripeClient } from "../billing/stripe-client";
 import {
   GetItemCommand,
