@@ -25,7 +25,7 @@ inclusion: always
 - **Vanilla CSS** — CSS framework YOK (Tailwind/styled-components yok). Özel tasarım token'ları kullanılır. Not: panel tarafında bazı Tailwind-benzeri utility class'lar (`text-[15px]`) geçmişten kalmış olabilir; yeni kodda vanilla CSS tercih et.
 - **ORM YOK** — doğrudan DynamoDB DocumentClient.
 - **Single-table DynamoDB** — PK/SK pattern'leri. Erişim kalıbı eklemeden önce mevcut pattern'leri incele.
-- **Clean Architecture** — domain / application / infrastructure katmanları. Lambda handler sadece transport.
+- **Clean Architecture** — domain / application / infrastructure katmanları. Lambda handler sadece transport. (Hedef; canlı kodda tam uygulanmıyor — gerçek+hedef için `architecture-truth.md`.)
 - Kullanıcıya dönük stringler **Türkçe**.
 
 ## Next.js Uyarısı
@@ -51,6 +51,8 @@ Kökten çalıştırılır (npm workspaces):
 | `npm run monitor:synthetics` | Canlı endpoint canary kontrolleri |
 | `npm run mobile:start` | Expo dev server |
 | `npm run mobile:ios` / `mobile:android` | Mobil simülatör |
+
+> Not (2026-10-28 doğrulandı): backend/servis testleri altta `node --test .../*.test.cjs` koşar (ör. `infra/lambda/tests/*.test.cjs`). Tek bir danger-zone testini koşmak için: `node --test infra/lambda/tests/billing.test.cjs` gibi. Hangi dosyaya hangi test — bkz `danger-zones.md` "Koruyan test" satırları.
 
 ## Doğrulama Kuralı
 

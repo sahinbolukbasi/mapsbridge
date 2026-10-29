@@ -1,4 +1,5 @@
 import { verifiedUserId } from "../shared/auth";
+import { resolveUserId } from "../shared/with-auth";
 /**
  * MapsBridge Routes Domain — Lambda handler
  * Routes: GET/POST/PUT/DELETE /routes, /routes/{id}
@@ -25,6 +26,13 @@ import {
   parseBody,
 } from "../shared/http";
 import { Router } from "../shared/router";
+import {
+  handleGetFlightPrices,
+  handleGetHotelPrices,
+  handleGetPopularRoutes,
+} from "./prices";
+import { handleOsrmRoute } from "./osrm";
+import { handleTelemetry } from "./telemetry";
 import { read, subscription } from "../shared/data";
 import { handler as slackBotHandler } from "../slack-bot";
 import { getDynamoClient } from "../shared/dynamo";
@@ -33,22 +41,6 @@ import { getDynamoClient } from "../shared/dynamo";
 type EventWithUser = ApiGatewayEvent & { verifiedUser?: { sub: string } | null };
 
 // OSRM leg/step shapes for typed route responses
-type OsrmStep = {
-  distance: number;
-  duration: number;
-  maneuver?: {
-    instruction?: string;
-    bearing_after?: number;
-    type?: string;
-    modifier?: string;
-    location?: unknown;
-  };
-};
-type OsrmLeg = {
-  distance: number;
-  duration: number;
-  steps?: OsrmStep[];
-};
 
 const router = new Router();
 
@@ -135,10 +127,7 @@ function getTableName(): string {
 
 // ─── List Routes (user's saved routes) ────────────────────────────────────
 async function handleListRoutes(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const { QueryCommand } = await import("@aws-sdk/client-dynamodb");
@@ -159,10 +148,7 @@ async function handleListRoutes(event: ApiGatewayEvent) {
 
 // ─── Create Route ─────────────────────────────────────────────────────────
 async function handleCreateRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const body = parseBody<{ name?: string; stops?: unknown[]; days?: unknown[]; isPublic?: boolean }>(event);
@@ -223,10 +209,7 @@ async function handleCreateRoute(event: ApiGatewayEvent) {
 
 // ─── Get Route ────────────────────────────────────────────────────────────
 async function handleGetRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -249,10 +232,7 @@ async function handleGetRoute(event: ApiGatewayEvent) {
 
 // ─── Update Route ─────────────────────────────────────────────────────────
 async function handleUpdateRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -308,10 +288,7 @@ async function handleUpdateRoute(event: ApiGatewayEvent) {
 
 // ─── Delete Route ─────────────────────────────────────────────────────────
 async function handleDeleteRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -332,10 +309,7 @@ async function handleDeleteRoute(event: ApiGatewayEvent) {
 
 // ─── Share Route ──────────────────────────────────────────────────────────
 async function handleShareRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  if (!token) return unauthorized();
-
-  const userId = (event as EventWithUser).verifiedUser?.sub || (await verifiedUserId(token));
+  const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
   const routeId = event.pathParameters?.id;
@@ -373,79 +347,6 @@ async function handleShareRoute(event: ApiGatewayEvent) {
   return created({ shareCode, expiresAt, url: `/s/${shareCode}` });
 }
 
-// ─── OSRM Route (real road routing) ───────────────────────────────────────
-async function handleOsrmRoute(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  const userId = token ? await verifiedUserId(token) : null;
-  if (!userId) return unauthorized();
-
-  const profile = event.pathParameters?.profile || "driving";
-  const validProfiles = ["driving", "walking", "cycling"];
-  if (!validProfiles.includes(profile)) {
-    return badRequest(
-      `Geçersiz rota profili: ${profile}. Şunlardan biri olmalı: ${validProfiles.join(", ")}`,
-    );
-  }
-
-  const coords = event.queryStringParameters?.coords;
-  if (!coords) return badRequest("coords parametresi gerekli (format: lon1,lat1;lon2,lat2;...)");
-
-  const COORDS_RE =
-    /^(-?\d{1,3}(\.\d+)?,-?\d{1,3}(\.\d+)?)(;-?\d{1,3}(\.\d+)?,-?\d{1,3}(\.\d+)?)*$/;
-  if (!COORDS_RE.test(coords))
-    return badRequest("coords formatı geçersiz (beklenen: lon,lat;lon,lat;...)");
-
-  // OSRM_BASE_URL ayarlı değilse public demo sunucuya düşülür. Demo sunucu
-  // rate-limit uygular ve production için uygun değildir — görünür uyarı bırak.
-  const osrmBase = process.env.OSRM_BASE_URL || "https://router.project-osrm.org";
-  if (!process.env.OSRM_BASE_URL) {
-    console.warn(
-      "[routes] OSRM_BASE_URL tanımlı değil — public demo sunucu (router.project-osrm.org) kullanılıyor. Production'da rate-limit riski var; OSRM_BASE_URL ayarlayın.",
-    );
-  }
-  const url = `${osrmBase}/route/v1/${profile}/${coords}?overview=full&geometries=geojson&steps=true&alternatives=false`;
-
-  try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    if (!response.ok) {
-      return badRequest(`OSRM hatası: ${response.status}`);
-    }
-    const data = (await response.json()) as {
-      code?: string;
-      message?: string;
-      routes?: Array<{ distance: number; duration: number; geometry: unknown; legs?: OsrmLeg[] }>;
-    };
-    if (data.code !== "Ok") {
-      return badRequest(`OSRM: ${data.message || "Rota hesaplanamadı."}`);
-    }
-
-    const route = data.routes?.[0];
-    if (!route) return badRequest("Rota bulunamadı.");
-
-    return ok({
-      distance: route.distance, // meters
-      duration: route.duration, // seconds
-      polyline: route.geometry, // GeoJSON LineString
-      legs: route.legs?.map((leg) => ({
-        distance: leg.distance,
-        duration: leg.duration,
-        steps: leg.steps?.map((step) => ({
-          instruction: step.maneuver?.instruction || "",
-          distance: step.distance,
-          duration: step.duration,
-          bearingAfter: step.maneuver?.bearing_after,
-          type: step.maneuver?.type,
-          modifier: step.maneuver?.modifier,
-          location: step.maneuver?.location,
-        })),
-      })),
-      profile,
-    });
-  } catch (err: unknown) {
-    console.error("[OSRM Error]", err);
-    return serverError("Rota hesaplanamadı. Lütfen tekrar deneyin.");
-  }
-}
 
 // ─── AI Route Planner (Bedrock + Token Rate Limit) ────────────────────────
 async function handleAiRoutePlanner(_event: ApiGatewayEvent) {
@@ -493,66 +394,6 @@ async function handlePresignUpload(event: ApiGatewayEvent) {
   });
 }
 
-// ─── Interaction Telemetry Logger (Behavioral Analytics) ───────────────────
-async function handleTelemetry(event: ApiGatewayEvent) {
-  try {
-    // Require authentication — anonymous writes are not accepted
-    const token = extractBearerToken(event);
-    if (!token) return unauthorized();
-    const userId = await verifiedUserId(token);
-    if (!userId) return unauthorized();
-
-    // Payload size guard (raw body must not exceed 32 KB)
-    const rawBody = event.body || "";
-    if (rawBody.length > 32768) return badRequest("Telemetry payload too large.");
-
-    const body = parseBody<{ events?: Array<Record<string, unknown>> }>(event);
-    if (!body?.events || !Array.isArray(body.events) || body.events.length === 0) {
-      return ok({ received: 0 });
-    }
-
-    // Size limit: accept at most 10 events per request
-    if (body.events.length > 10) return badRequest("Too many events; maximum is 10 per request.");
-
-    // Schema validation: each event must have type (string ≤50) and ts (number)
-    for (const ev of body.events) {
-      if (!ev || typeof ev !== "object") return badRequest("Each event must be an object.");
-      if (typeof ev.type !== "string" || ev.type.length === 0 || ev.type.length > 50)
-        return badRequest("Each event must have a valid 'type' string (max 50 chars).");
-      if (typeof ev.ts !== "number" || !Number.isFinite(ev.ts))
-        return badRequest("Each event must have a valid numeric 'ts' timestamp.");
-    }
-
-    const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
-    const { marshall } = await import("@aws-sdk/util-dynamodb");
-    const ddb = getDynamoClient();
-
-    const batch = body.events.slice(0, 10);
-    const now = new Date().toISOString();
-    const batchId = crypto.randomUUID().slice(0, 8);
-
-    await ddb.send(
-      new PutItemCommand({
-        TableName: getTableName(),
-        Item: marshall({
-          PK: `USER#${userId}`,
-          SK: `TELEMETRY#${Date.now()}#${batchId}`,
-          userId,
-          events: batch,
-          count: batch.length,
-          updatedAt: now,
-          // Expire telemetry records after 90 days
-          ttl: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60,
-        }),
-      }),
-    );
-
-    return ok({ received: batch.length, status: "logged" });
-  } catch (err: unknown) {
-    console.error("[Telemetry Error]", err);
-    return ok({ received: 0, status: "fallback" });
-  }
-}
 
 async function handleGetSavedAddresses(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
@@ -723,90 +564,4 @@ async function handlePutAiMemory(event: ApiGatewayEvent) {
   );
 
   return ok({ status: "saved" });
-}
-
-// ─── Travelpayouts Price Endpoints ─────────────────────────────────────────
-
-async function handleGetFlightPrices(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  const userId = await verifiedUserId(token);
-  if (!userId) return unauthorized();
-
-  const q = event.queryStringParameters || {};
-  const origin = (q.origin || "IST").toUpperCase().slice(0, 3);
-  const destination = (q.destination || "").toUpperCase().slice(0, 3);
-  if (!destination) return badRequest("destination parametresi gerekli (IATA kodu, örn: BCN)");
-  if (!/^[A-Z]{3}$/.test(origin) || !/^[A-Z]{3}$/.test(destination))
-    return badRequest("Geçersiz IATA kodu.");
-
-  try {
-    const { getCheapestFlights } = await import("../shared/travelpayouts");
-    const prices = await getCheapestFlights({
-      origin,
-      destination,
-      currency: q.currency || "usd",
-      departDate: q.departDate,
-      returnDate: q.returnDate,
-    });
-    return ok({ origin, destination, prices, currency: q.currency || "usd", source: "travelpayouts_cache" });
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg === "TP_RATE_LIMIT") return jsonResponse(429, { error: "Fiyat servisi meşgul, lütfen tekrar deneyin." });
-    console.error("[TP Flights]", msg);
-    return serverError("Uçuş fiyatları alınamadı.");
-  }
-}
-
-async function handleGetHotelPrices(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  const userId = await verifiedUserId(token);
-  if (!userId) return unauthorized();
-
-  const q = event.queryStringParameters || {};
-  const location = (q.location || q.destination || "").trim();
-  if (!location) return badRequest("location parametresi gerekli (şehir adı)");
-
-  const today = new Date();
-  const nextWeek = new Date(today.getTime() + 7 * 86400000);
-  const checkIn = q.checkIn || today.toISOString().slice(0, 10);
-  const checkOut = q.checkOut || nextWeek.toISOString().slice(0, 10);
-
-  try {
-    const { getHotelPrices } = await import("../shared/travelpayouts");
-    const hotels = await getHotelPrices({
-      location,
-      checkIn,
-      checkOut,
-      adultsCount: q.adults ? parseInt(q.adults, 10) : 2,
-      currency: q.currency || "usd",
-      limit: 10,
-    });
-    return ok({ location, checkIn, checkOut, hotels, currency: q.currency || "usd", source: "hotellook_cache" });
-  } catch (err: unknown) {
-    console.error("[TP Hotels]", err instanceof Error ? err.message : String(err));
-    return serverError("Otel fiyatları alınamadı.");
-  }
-}
-
-async function handleGetPopularRoutes(event: ApiGatewayEvent) {
-  const token = extractBearerToken(event);
-  const userId = await verifiedUserId(token);
-  if (!userId) return unauthorized();
-
-  const q = event.queryStringParameters || {};
-  const origin = (q.origin || "IST").toUpperCase().slice(0, 3);
-  if (!/^[A-Z]{3}$/.test(origin)) return badRequest("Geçersiz IATA kodu.");
-
-  try {
-    const { getPopularDestinations } = await import("../shared/travelpayouts");
-    const destinations = await getPopularDestinations({
-      origin,
-      currency: q.currency || "usd",
-      limit: 10,
-    });
-    return ok({ origin, destinations, currency: q.currency || "usd", source: "travelpayouts_popular" });
-  } catch (err: unknown) {
-    console.error("[TP Popular]", err instanceof Error ? err.message : String(err));
-    return serverError("Popüler rotalar alınamadı.");
-  }
 }

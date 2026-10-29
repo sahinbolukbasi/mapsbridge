@@ -1,0 +1,27 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Kaydetmede backend typecheck",
+      "trigger": "PostFileSave",
+      "description": "infra/lambda/src altındaki bir .ts dosyası kaydedildiğinde backend TypeScript kontrolü (typecheck:backend) çalıştırır.",
+      "matcher": "infra/lambda/src/.*\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && echo 'Backend typecheck…' && npm run typecheck:backend 2>&1 | tail -20",
+        "timeout": 180
+      }
+    },
+    {
+      "name": "Kaydetmede web typecheck",
+      "trigger": "PostFileSave",
+      "description": "apps/web/app altındaki bir .ts/.tsx dosyası kaydedildiğinde web TypeScript kontrolü (typecheck:web) çalıştırır.",
+      "matcher": "apps/web/app/.*\\.(ts|tsx)$",
+      "action": {
+        "type": "command",
+        "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && echo 'Web typecheck…' && npm run typecheck:web 2>&1 | tail -20",
+        "timeout": 180
+      }
+    }
+  ]
+}

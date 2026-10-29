@@ -1,0 +1,60 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Danger-zone: kredi atomikliği testi",
+      "trigger": "PostFileSave",
+      "description": "billing/store.ts kaydedilince kredi atomikliği testini (billing.test.cjs) koşar — danger-zone #1.",
+      "matcher": "infra/lambda/src/billing/store\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && echo '⚠ DANGER-ZONE #1 (kredi atomikliği). billing.test.cjs koşuluyor…' && node --test infra/lambda/tests/billing.test.cjs 2>&1 | tail -15",
+        "timeout": 120
+      }
+    },
+    {
+      "name": "Danger-zone: auth/hesap birleştirme testi",
+      "trigger": "PostFileSave",
+      "description": "shared/auth.ts kaydedilince auth testini (auth.test.cjs) koşar — danger-zone #2.",
+      "matcher": "infra/lambda/src/shared/auth\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && echo '⚠ DANGER-ZONE #2 (auth + hesap birleştirme). E-posta/şifre, Google, Apple uçtan uca test et. auth.test.cjs koşuluyor…' && node --test infra/lambda/tests/auth.test.cjs 2>&1 | tail -15",
+        "timeout": 120
+      }
+    },
+    {
+      "name": "Danger-zone: Stripe webhook testi",
+      "trigger": "PostFileSave",
+      "description": "stripe/index.ts kaydedilince Stripe webhook testini (stripe-webhook.test.cjs) koşar — danger-zone #3.",
+      "matcher": "infra/lambda/src/stripe/index\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && echo '⚠ DANGER-ZONE #3 (Stripe webhook). STRIPE_WEBHOOK_SECRET prod'\\''da değişmez; imza doğrulaması + idempotency koru. stripe-webhook.test.cjs koşuluyor…' && node --test infra/lambda/tests/stripe-webhook.test.cjs 2>&1 | tail -15",
+        "timeout": 120
+      }
+    },
+    {
+      "name": "Danger-zone: auth middleware zinciri testi",
+      "trigger": "PostFileSave",
+      "description": "routes/index.ts kaydedilince middleware zinciri testlerini (routes + admin) koşar — danger-zone #4.",
+      "matcher": "infra/lambda/src/routes/index\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && echo '⚠ DANGER-ZONE #4 (auth→tier→kota middleware sırası). Sırayı değiştirme; yeni kontrol zincirin sonuna. routes + admin testleri koşuluyor…' && node --test infra/lambda/tests/routes.test.cjs infra/lambda/tests/admin.test.cjs 2>&1 | tail -15",
+        "timeout": 150
+      }
+    },
+    {
+      "name": "Danger-zone: chat GSI1 testi",
+      "trigger": "PostFileSave",
+      "description": "chat/index.ts kaydedilince chat testini (chat.test.cjs) koşar — danger-zone #5 (GSI1).",
+      "matcher": "infra/lambda/src/chat/index\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && echo '⚠ DANGER-ZONE #5 (chat GSI1). GSI1 Terraform'\\''da tanımlı ve çalışıyor; GSI şemasını değiştirirsen backfill dikkat. chat.test.cjs koşuluyor…' && node --test infra/lambda/tests/chat.test.cjs 2>&1 | tail -15",
+        "timeout": 120
+      }
+    }
+  ]
+}

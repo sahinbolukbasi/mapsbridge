@@ -1,5 +1,6 @@
 {
   "serviceName": "map-trip",
+  "_note": "Mantıksal YETENEK alanı monitörü — services/map-trip klasörü YOK. İzlenen işlevler canlı backend'de infra/lambda/src/routes (rota kaydet/optimize, OSRM) ve paylaşım kodu (/k/{code}) içinde yaşar. Ad, kod klasörünü değil ürün yeteneğini temsil eder (bkz .kiro/steering/architecture-truth.md).",
   "runtime": "AWS Lambda / DynamoDB",
   "slo": {
     "routeSaveLatencyP95Ms": 250,
