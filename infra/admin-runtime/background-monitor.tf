@@ -8,7 +8,7 @@ resource "aws_cloudwatch_log_group" "monitor" {
 resource "aws_iam_role" "monitor" {
   name = "${var.prefix}-background-monitor"
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [{ Effect = "Allow", Principal = { Service = "lambda.amazonaws.com" }, Action = "sts:AssumeRole" }]
   })
 }
@@ -27,7 +27,7 @@ resource "aws_iam_role_policy" "monitor" {
 resource "aws_lambda_function" "monitor" {
   function_name    = "${var.prefix}-background-monitor"
   role             = aws_iam_role.monitor.arn
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   architectures    = ["arm64"]
   handler          = "index.handler"
   timeout          = 120
@@ -38,13 +38,19 @@ resource "aws_lambda_function" "monitor" {
     variables = { DYNAMODB_TABLE = var.dynamodb_table }
   }
   depends_on = [aws_iam_role_policy.monitor, aws_cloudwatch_log_group.monitor]
-  tags = { Environment = "prod", Project = "mapsbridge", Workload = "core-backend" }
+  tags       = { Environment = "prod", Project = "mapsbridge", Workload = "core-backend" }
+
+  # Kod/runtime/environment ayrı kod pipeline'ında yönetilir; CI placeholder
+  # zip'leri canlı monitor kodunu ezmesin diye yok sayılır (bkz main.tf).
+  lifecycle {
+    ignore_changes = [source_code_hash, filename, runtime, environment]
+  }
 }
 
 resource "aws_iam_role" "monitor_scheduler" {
   name = "${var.prefix}-monitor-scheduler"
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [{ Effect = "Allow", Principal = { Service = "scheduler.amazonaws.com" }, Action = "sts:AssumeRole" }]
   })
 }
@@ -52,7 +58,7 @@ resource "aws_iam_role" "monitor_scheduler" {
 resource "aws_iam_role_policy" "monitor_scheduler" {
   role = aws_iam_role.monitor_scheduler.id
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [{ Effect = "Allow", Action = "lambda:InvokeFunction", Resource = aws_lambda_function.monitor.arn }]
   })
 }

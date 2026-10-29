@@ -4,7 +4,7 @@
 resource "aws_lambda_function" "ai_stream" {
   function_name    = "${var.prefix}-ai-stream"
   role             = aws_iam_role.domain["ai"].arn
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   architectures    = ["arm64"]
   handler          = "index.streamHandler"
   timeout          = 30
@@ -12,6 +12,12 @@ resource "aws_lambda_function" "ai_stream" {
   filename         = "${path.module}/.build/ai.zip"
   source_code_hash = filebase64sha256("${path.module}/.build/ai.zip")
   tags             = { Environment = "prod", Project = "mapsbridge", Workload = "travel-ai" }
+
+  # Kod/runtime/environment ayrı kod pipeline'ında yönetilir; CI placeholder
+  # zip'leri canlı streaming AI kodunu ezmesin diye yok sayılır (bkz main.tf).
+  lifecycle {
+    ignore_changes = [source_code_hash, filename, runtime, environment]
+  }
   environment {
     variables = merge(
       { ENVIRONMENT = "prod", DYNAMODB_TABLE = var.dynamodb_table, COGNITO_USER_POOL_ID = var.cognito_user_pool_id, COGNITO_CLIENT_ID = var.cognito_client_id },

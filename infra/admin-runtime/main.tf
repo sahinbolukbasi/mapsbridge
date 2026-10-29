@@ -108,7 +108,7 @@ resource "aws_lambda_function" "domain" {
   for_each         = local.domains
   function_name    = "${var.prefix}-${each.key}"
   role             = aws_iam_role.domain[each.key].arn
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   architectures    = ["arm64"]
   handler          = "index.handler"
   timeout          = 30
@@ -116,6 +116,16 @@ resource "aws_lambda_function" "domain" {
   filename         = "${path.module}/.build/${each.key}.zip"
   source_code_hash = filebase64sha256("${path.module}/.build/${each.key}.zip")
   tags             = { Workload = each.key == "ai" ? "travel-ai" : "core-backend" }
+
+  # Bu stack API Gateway route/integration/izin sahipliğini yönetir; Lambda
+  # KODU ayrı bir pipeline tarafından dağıtılır (deploy-api / build-admin-runtime).
+  # CI bu stack'i placeholder zip'lerle derlediğinden, source_code_hash/filename
+  # uygulanırsa CANLI çalışan kod stub ile ezilir. runtime ve environment de
+  # canlıda ayrıca güncellendiğinden (nodejs22.x, KB id'leri), bunları da yok say:
+  # böylece "route onarımı" apply'ı asla canlı fonksiyon davranışına dokunmaz.
+  lifecycle {
+    ignore_changes = [source_code_hash, filename, runtime, environment]
+  }
   environment {
     variables = merge({ ENVIRONMENT = "prod", DYNAMODB_TABLE = var.dynamodb_table, COGNITO_USER_POOL_ID = var.cognito_user_pool_id, COGNITO_CLIENT_ID = var.cognito_client_id }, each.key == "admin" ? { ADMIN_GROUP_NAME = local.group, COGNITO_USER_MANAGEMENT = "true", MODERATOR_GROUP_NAME = "mapsbridge-moderator", SUPPORT_GROUP_NAME = "mapsbridge-support", PROTECTED_ADMIN_SUB = var.protected_admin_sub, AI_TRAINING_BUCKET = "${var.prefix}-training-${var.account_id}", BEDROCK_TRAINING_REGION = "us-east-1", BEDROCK_TRAINING_ROLE_ARN = "arn:aws:iam::${var.account_id}:role/${var.prefix}-bedrock-finetune" } : {}, each.key == "routes" ? { SLACK_SIGNING_SECRET = "secret://mapsbridge/slack/signing-secret", SLACK_BOT_TOKEN = "secret://mapsbridge/slack/bot-token", GH_TOKEN = "secret://mapsbridge/github/token", ALLOWED_USERS = "", ALLOWED_CHANNELS = "", SLACK_ADMIN_USER_IDS = var.slack_admin_user_ids, DEPLOY_TARGETS = var.deploy_targets, OSRM_BASE_URL = "https://router.project-osrm.org", MEDIA_BUCKET = "${var.prefix}-storage-media-${var.account_id}" } : {}, each.key == "ai" ? { BEDROCK_MODEL_ID = "eu.anthropic.claude-haiku-4-5-20251001-v1:0", AI_DAILY_REQUEST_LIMIT = "200", TRAVEL_KNOWLEDGE_BASE_ID = var.travel_knowledge_base_id, PLACE_RESEARCH_ENABLED = "true" } : {}, each.key == "ai" ? var.ai_memory_environment : {}, each.key == "ai" ? var.ai_gateway_environment : {}, each.key == "ai" ? { AI_TRAINING_COLLECTION_ENABLED = tostring(var.ai_training_collection_enabled) } : {}, each.key == "ai" ? var.ai_finops_environment : {}, each.key == "stripe" ? merge({ APP_ORIGIN = var.frontend_origin, BILLING_ENABLED = "false" }, var.billing_environment) : {})
   }
