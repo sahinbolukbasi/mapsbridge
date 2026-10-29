@@ -73,12 +73,7 @@ function grepFiles(pattern, searchDir) {
 // ---------------------------------------------------------------------------
 test("drift-guard: services/ klasörleri steering ile birebir eşleşir", () => {
   const actual = listDirs("services");
-  const expected = [
-    "ai-assistant",
-    "identity-billing",
-    "messaging",
-    "place-intelligence",
-  ];
+  const expected = ["ai-assistant", "messaging", "place-intelligence"];
   assert.deepEqual(
     actual,
     expected,
@@ -106,18 +101,19 @@ test("drift-guard: packages/ klasörleri steering ile birebir eşleşir", () => 
 // 3. DEAD/LIVE SERVİS İDDİALARI — architecture-truth.md ile tutarlı
 //    Not: src ağaçlarında ararız (node_modules hariç), bu yüzden hızlı.
 // ---------------------------------------------------------------------------
-test("drift-guard: identity-billing ÖLÜ kalır (canlı import yok)", () => {
+test("drift-guard: identity-billing SİLİNDİ kalır (R2) — klasör + import yok", () => {
+  const folderExists = existsSync(path.join(repoRoot, "services/identity-billing"));
+  assert.equal(
+    folderExists,
+    false,
+    "services/identity-billing geri gelmiş. R2'de silindi (ölü iskelet); gerçek billing infra/lambda/src/billing.",
+  );
   const live = [
     ...grepFiles("identity-billing", "infra/lambda/src"),
     ...grepFiles("identity-billing", "apps/web/app"),
     ...grepFiles("identity-billing", "apps/web/server"),
   ];
-  assert.equal(
-    live.length,
-    0,
-    `identity-billing artık import ediliyor: [${live}]. ` +
-      `architecture-truth.md onu ÖLÜ sayıyor. Canlandıysa truth dosyasını güncelle; yoksa importu kaldır.`,
-  );
+  assert.equal(live.length, 0, `identity-billing import ediliyor: [${live}]. R2'de silindi — importu kaldır.`);
 });
 
 test("drift-guard: messaging ve place-intelligence CANLI kalır", () => {
