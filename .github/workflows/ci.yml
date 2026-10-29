@@ -47,7 +47,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm ci --prefix infra/lambda --ignore-scripts
-
       - name: Auto-fix formatting (on push to develop)
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: |
@@ -59,16 +58,41 @@ jobs:
             git commit -m "chore: auto-fix formatting [skip ci]"
             git push
           fi
-
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
+
+  # ── Merge gate: tek zorunlu kapı ─────────────────────────────────
+  # Per-system workflow'lar (ci-backend/web/services/infra) path-filtreli ve
+  # birbirini `needs` ile bekleyemez. Bu job PR'da HER ZAMAN koşar (path filtresiz),
+  # tüm test paketlerini + typecheck'i + drift-guard'ı tek yerde zorunlu kılar.
+  # Böylece "CI Results ✅" rozeti gerçekten testlerin geçtiğini garanti eder.
+  merge-gate:
+    name: Merge Gate (tests + typecheck + drift-guard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix infra/lambda --ignore-scripts
+      - name: Typecheck (web + backend)
+        run: npm run typecheck:all
+      - name: Backend tests (drift-guard dahil)
+        run: npm run test:backend
+      - name: Web unit tests
+        run: npm run test:web
+      - name: Service tests
+        run: npm run test:services
 
   # ── Summary (PR comment) ─────────────────────────────────────────
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [secrets, lint]
+    needs: [secrets, lint, merge-gate]
     if: always() && github.event_name == 'pull_request'
     timeout-minutes: 5
     steps:
@@ -79,8 +103,9 @@ jobs:
             const jobs = {
               'Secret Scan': '${{ needs.secrets.result }}',
               'Lint & Format': '${{ needs.lint.result }}',
+              'Merge Gate (tests + typecheck + drift-guard)': '${{ needs.merge-gate.result }}',
             };
-            const icon = s => s === 'success' ? '✅' : s === 'skipped' ? '⏭️' : '❌';
+            const icon = s => s === 'success' ? '✅' : s === 'skipped' ? '⏭' : '❌';
             const rows = Object.entries(jobs)
               .map(([name, result]) => `| ${name} | ${icon(result)} ${result} |`)
               .join('\n');
@@ -92,11 +117,11 @@ jobs:
               '|-----|--------|',
               rows,
               '',
-              '_Per-system checks (tests, build, infra validate) run in their own workflows._',
+              '_Per-system checks (build, infra validate, mobile) run in their own path-filtered workflows; the Merge Gate above is the authoritative test+typecheck barrier._',
               '',
               failed
                 ? '> **Action needed:** Fix the failing checks above before merging.'
-                : '> Lint and secret scan passed.',
+                : '> Lint, secret scan, and merge gate (tests + typecheck + drift-guard) passed.',
               '',
               `_Run: [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})_`
             ].join('\n');

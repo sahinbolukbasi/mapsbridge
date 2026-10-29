@@ -39,6 +39,8 @@ monitoring/
 
 ## 3. Servis Seviyesi İzleme (`monitoring/services/`)
 
+> NOT (2026-10-28): Buradaki adlar koddaki `services/*` KLASORLERI degil, mantiksal URUN YETENEK alanlaridir. Canli backend infra/lambda/src icindedir; eslemenin tamami icin her JSON'daki `_note` alanina ve .kiro/steering/architecture-truth.md dosyasina bak. (orn. `map-trip` -> routes/shares; `community` -> marketplace/articles; `identity-billing` -> auth/billing/stripe — services/identity-billing klasoru olu olsa da islevler canli.)
+
 Her mikroservis kendi SLA/SLO taahhütlerine göre izlenir:
 
 1. **`ai-assistant`:** Bedrock Nova Micro / Claude Haiku API gecikmesi, harcanan token maliyeti, RAG vektör arama başarısı, günlük kullanıcı/servis kotası.

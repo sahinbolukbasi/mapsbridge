@@ -1,5 +1,15 @@
 # MapsBridge Monorepo Denetim Raporu
 
+
+
+> **GÜNCELLEME 2026-10-28 (drift düzeltmesi):** Bu rapor 2026-10-15 tarihlidir ve bazı bulguları ARTIK GEÇERSİZDİR. Kodun güncel gerçeği için `.kiro/steering/architecture-truth.md` TEK DOĞRULUK KAYNAĞIDIR. Diske karşı doğrulanan değişiklikler:
+> - "admin/index.ts 1936 satır, parçala" → **ÖDENDİ**: admin/index.ts = 204 satır; domain `management/finance/users/analytics/...`'e bölünmüş.
+> - "18 dosyada `new DynamoDBClient()`" → **ÖDENDİ**: 0; `getDynamoClient()` singleton kullanılıyor.
+> - "Hiç kullanılmayan 6 paket" → bu paketler diskten **silinmiş**; artık yalnızca `packages/contracts` var.
+> - "3 servis klasörü hiç kullanılmıyor" → düzeltme: `services/` = 4 klasör; `messaging` ve `place-intelligence` CANLI, `ai-assistant` kısmen canlı, yalnızca `identity-billing` ölü.
+> - Chat GSI1 "Terraform'da yok, endpoint kırık olabilir" → **YANLIŞ**: GSI1 `infra/terraform/hosting.tf:289-291`'de tanımlı, endpoint çalışıyor.
+> - HÂLÂ GEÇERLİ: `infra/lambda/src` → `apps/web` arası 6 ters-yön `../../../../` import (sınır erozyonu). Hedef: `packages/ai-core` ile 0'a indirmek (bkz architecture-truth.md §4).
+
 > Oluşturulma: 2026-10-15 | Kapsam: tüm repo (node_modules/.next/dist/build hariç)
 
 ---

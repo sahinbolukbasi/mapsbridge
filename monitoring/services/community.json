@@ -1,5 +1,6 @@
 {
   "serviceName": "community",
+  "_note": "Mantıksal YETENEK alanı monitörü — services/community klasörü YOK. İzlenen işlevler canlı backend'de infra/lambda/src/marketplace + community/articles uçları ve CloudFront ile servis edilen herkese açık rehber/yazı sayfalarıdır. Ad, kod klasörünü değil ürün yeteneğini temsil eder (bkz .kiro/steering/architecture-truth.md).",
   "runtime": "AWS Lambda + CloudFront CDN",
   "slo": {
     "publicGuideLoadP95Ms": 180,
