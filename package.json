@@ -43,13 +43,17 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "ui:audit": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/ui-audit/cli.ts",
+    "ui:audit:typecheck": "tsc -p scripts/ui-audit/tsconfig.json"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@eslint/js": "^10.0.1",
     "esbuild": "^0.28.2",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
+    "playwright": "1.63.0",
     "prettier": "^3.9.10",
     "typescript-eslint": "^8.71.2"
   }
