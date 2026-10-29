@@ -1,0 +1,19 @@
+# MapsBridge robots.txt — generate-seo.cjs tarafından üretildi
+User-agent: *
+Allow: /
+Disallow: /ai/
+Disallow: /desk/
+Disallow: /messages/
+Disallow: /profile/
+Disallow: /login/
+Disallow: /register/
+Disallow: /verify/
+Disallow: /reset-password/
+Disallow: /forgot-password/
+Disallow: /sifre-sifirla/
+Disallow: /admin/
+Disallow: /u/admin/
+Disallow: /checkout/
+Disallow: /auth/callback/
+
+Sitemap: https://mapsbridge.com/sitemap.xml
