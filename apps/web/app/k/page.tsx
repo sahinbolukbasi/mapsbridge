@@ -184,15 +184,13 @@ export default function FindByCodePage() {
       {/* Full Screen Map */}
       <div ref={mapContainerRef} className="lookup-map" />
 
-      {/* Floating Top Nav */}
-      <header className="lookup-header">
-        <a className="brand-badge" href="/">
-          <span>●</span> MapsBridge
-        </a>
+      {/* Harita üstü eylem çubuğu (site header'ı SiteChrome'da; marka rozeti C6'da kaldırıldı) */}
+      <div className="lookup-header">
+        <span aria-hidden="true" />
         <button className="open-lookup-btn" onClick={() => setShowLookupModal(true)}>
           🔍 Yeni Kod Gir
         </button>
-      </header>
+      </div>
 
       {/* Lookup Modal / Dialog */}
       {showLookupModal && (

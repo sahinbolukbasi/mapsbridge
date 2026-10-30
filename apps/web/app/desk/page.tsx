@@ -1,6 +1,5 @@
 "use client";
 
-import { HeaderNav } from "../components/header-nav";
 
 import { userStorage } from "../lib/user-storage";
 
@@ -11,6 +10,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { getStoredSession, refreshSession, signOut } from "../lib/cognito";
 import { AuthActionModal, PanelGuestBanner } from "../components/auth-gate";
 import { AuthGuard } from "../components/auth-guard";
+import { SAVED_ADDRESSES_EVENT, type SavedAddressesChangedDetail } from "../lib/chrome-events";
 import { AIPromoLanding } from "../ai/ai-promo-landing";
 import {
   GooglePlannerMap,
@@ -313,6 +313,14 @@ export default function Panel() {
 
   // Saved Addresses & Gezi Rotaları State
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  // Kalıcı header'a (SiteChrome) kayıtlı adres sayısını bildir (eski HeaderNav savedCount prop'u).
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent<SavedAddressesChangedDetail>(SAVED_ADDRESSES_EVENT, {
+        detail: { count: savedAddresses.length },
+      }),
+    );
+  }, [savedAddresses.length]);
 
   const addressesInitialized = useRef(false);
 
@@ -2165,10 +2173,9 @@ export default function Panel() {
       featureName="Seyahat Haritası"
       title="Haritaya Giriş Yapın"
       subtitle="Kişisel gezi rotalarınızı oluşturmak, duraklarınızı coğrafi sıraya dizmek ve AI seyahat asistanınızı kullanmak için giriş yapmalısınız."
-      fallback={<AIPromoLanding />}
+      fallback={<AIPromoLanding titleText="Harita masası" />}
     >
       <main className={`map-page ${googleMapsEnabled ? "google-map-page" : ""}`}>
-        <HeaderNav savedCount={savedAddresses.length} />
 
         {/* Ziyaretçi Tanıtım Banner'ı */}
         {!userEmail && <PanelGuestBanner nextUrl="/maps/" />}

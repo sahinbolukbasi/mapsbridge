@@ -1002,4 +1002,56 @@
       color: var(--brand);
     }
   }
+
+  /* AC-17: dokunmatik genişliklerde header kontrolleri ≥44×44 (design §3 "Dokunma hedefi"). */
+  @media (max-width: 767.98px) {
+    .header-brand-link,
+    .header-locale-btn {
+      min-height: var(--touch-target);
+      min-width: var(--touch-target);
+    }
+  }
+  /* Chrome varyantları (G19): eski sayfa override'larının (messages/community/profile CSS)
+     birebir karşılığı; varyant SiteChrome'dan data-variant ile gelir. */
+  .global-site-header[data-variant] {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+  }
+  .global-site-header[data-variant] .global-site-header-inner {
+    max-width: 100%;
+  }
+  .global-site-header[data-variant="wide-compact"] .global-site-header-inner {
+    padding: 0 1rem;
+  }
+  /* Mobil alt nav'a bağlı gövde kuralları (C6: styles.css legacy'den chrome'a taşındı; sıra korunur).
+     Eski 1279/767 koşulları kümedeki .98 eşleniğiyle yazıldı (D18: <1px fark, yeni değer yok). */
+  @media (max-width: 640px) {
+    body:has(.mobile-primary-nav) :is(.profile-toast, .public-toast-notification) {
+      bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+  }
+  @media (max-width: 1279.98px) {
+    body:has(.mobile-primary-nav) :is(.profile-toast, .public-toast-notification) {
+      bottom: calc(var(--mobile-nav-height) + 16px);
+    }
+  }
+  @media (max-width: 1279.98px) {
+    body:has(.mobile-primary-nav) {
+      --mobile-nav-height: calc(92px + env(safe-area-inset-bottom));
+      padding-bottom: var(--mobile-nav-height);
+    }
+    body:has(.mobile-primary-nav) .operations-support-link {
+      bottom: calc(var(--mobile-nav-height) + 12px);
+    }
+    body:has(.mobile-primary-nav) .operations-banners {
+      bottom: calc(var(--mobile-nav-height) + 68px);
+    }
+  }
+  @media (max-width: 767.98px) {
+    body:has(.mobile-primary-nav) {
+      --mobile-nav-height: calc(72px + env(safe-area-inset-bottom));
+    }
+  }
 }

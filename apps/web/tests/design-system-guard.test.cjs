@@ -58,6 +58,7 @@ const HINT = {
   G1: "token kullanın",
   G2: ":root yalnızca styles/tokens.css'te tanımlanır",
   G3: "koyu tema yok; [data-theme] / dataset.theme kullanmayın",
+  G4m: "<main> yalnızca PageShell'de (components/ui/page-shell.tsx); sayfa PageShell render eder",
   G5: "header/footer yalnızca SiteChrome'dan (components/ui/site-chrome.tsx) render edilir",
   G6: "Tailwind-benzeri sınıf yerine yerleşim sınıfı ya da primitive kullanın",
   G7: "TS/TSX'te renk literal'i yerine token (CSS değişkeni / lib/design-tokens.ts) kullanın",
@@ -472,6 +473,15 @@ const RULES = {
           /\.dataset\.theme$/.test(n.left.getText(sf))
         )
           c.add(rel(abs), lineOfTs(sf, n), n.getText(sf).slice(0, 60));
+    }
+    return c.result;
+  },
+  // G4'ün registry'den bağımsız alt kuralı (design §10): C6'dan itibaren koşar (ratchet → 0).
+  G4m() {
+    const c = collector();
+    for (const abs of TSX_FILES) {
+      if (appRel(abs) === "components/ui/page-shell.tsx") continue;
+      for (const el of jsxElements(abs)) if (el.tag === "main") c.add(rel(abs), el.line, "<main");
     }
     return c.result;
   },

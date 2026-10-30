@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FullPagePromotion } from "../components/auth-gate";
-import { HeaderNav } from "../components/header-nav";
 import { getStoredSession } from "../lib/cognito";
 import { userStorage } from "../lib/user-storage";
 import { billingService } from "../lib/billing/billing-service";
@@ -439,8 +438,6 @@ export default function ProfilePage() {
 
   return (
     <div className="stitch-main-profile-root">
-      {/* Unified Global Header */}
-      <HeaderNav />
 
       {/* Hero Background */}
       <div className="profile-hero-bg" />

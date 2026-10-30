@@ -1,6 +1,5 @@
 import "./styles/tokens.css";
 import "./styles/base.css";
-import { OperationsBanner } from "./components/operations-banner";
 import "./operations.css";
 import { siteOrigin } from "./lib/site-metadata";
 import { DialogFocus } from "./components/dialog-focus";
@@ -11,13 +10,13 @@ import { UpgradeModal } from "./components/upgrade-modal";
 import { AuthProvider } from "./lib/auth-context";
 import { WSProvider } from "./lib/ws-context";
 import { LocaleProvider } from "./lib/locale-context";
+import { SiteChrome } from "./components/ui/site-chrome";
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./styles.css";
 import "./auth.css";
 import "./extras.css";
 import "./tw-utils.css";
-import "./components/header-nav.css";
 // Leaflet'e karşı layer'sız muaf kurallar; legacy global'lerden sonra (design §2.6).
 import "./styles/vendor-overrides.css";
 
@@ -100,9 +99,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <GoogleOneTap />
             <UpgradeModal />
             <LocaleProvider>
-              <MobilePlatformProvider>{children}</MobilePlatformProvider>
+              <MobilePlatformProvider>
+                {/* design §4.1: SkipLink + Header + OperationsBanner + sayfa + Footer + MobileNav + Toaster */}
+                <SiteChrome>{children}</SiteChrome>
+              </MobilePlatformProvider>
             </LocaleProvider>
-            <OperationsBanner />
           </WSProvider>
         </AuthProvider>
       </body>

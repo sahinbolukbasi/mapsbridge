@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { HeaderNav } from "../components/header-nav";
 import { apiFetch } from "../lib/api-client";
 
 type Blog = {
@@ -47,7 +46,6 @@ export default function ArticlesPage() {
         background: "var(--bg, #f8fafc)",
       }}
     >
-      <HeaderNav />
       <main
         className="support-page"
         style={{ maxWidth: "1000px", margin: "2rem auto", padding: "0 1.5rem", width: "100%" }}

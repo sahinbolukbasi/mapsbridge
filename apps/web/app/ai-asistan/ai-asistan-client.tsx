@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { HeaderNav } from "../components/header-nav";
-import { SiteFooter } from "../components/site-footer";
 import { getStoredSession } from "../lib/cognito";
 import "./ai-asistan.css";
 
@@ -152,8 +150,6 @@ export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClient
 
   return (
     <div className="ai-tanitim-container">
-      <HeaderNav />
-
       <main className="ai-tanitim-main">
         {/* HERO SECTION */}
         <section className="ai-hero-wrap">
@@ -1471,8 +1467,6 @@ export function AIAsistanClient({ isEnglish: initialIsEnglish }: AIAsistanClient
           </div>
         </section>
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

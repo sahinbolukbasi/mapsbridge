@@ -7,8 +7,6 @@ import {
   handleGoogleCredentialResponse,
   getStoredSession,
 } from "../lib/cognito";
-import { HeaderNav } from "../components/header-nav";
-import { SiteFooter } from "../components/site-footer";
 import "./login.css";
 
 interface GoogleCredentialResponse { credential: string; }
@@ -249,7 +247,6 @@ export default function LoginPage() {
 
   return (
     <div className="login-viewport bg-surface font-body-md text-body-md text-on-surface antialiased">
-      <HeaderNav />
 
       {/* Main Split Screen */}
       <main className="login-main">
@@ -807,8 +804,6 @@ export default function LoginPage() {
         </div>
       </main>
 
-      {/* Unified Global Site Footer */}
-      <SiteFooter />
     </div>
   );
 }

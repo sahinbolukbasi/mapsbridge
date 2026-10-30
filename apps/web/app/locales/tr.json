@@ -228,6 +228,10 @@
 
   "ui.skipToContent": "İçeriğe geç",
   "ui.systemNotice": "Sistem duyurusu",
+  "ui.mainMenu": "Ana menü",
+  "ui.mobileMenu": "Mobil menü",
+  "ui.footerLinks": "Alt bilgi bağlantıları",
+  "ui.userMenu": "Profil menüsü",
   "ui.loading": "Yükleniyor…",
   "ui.close": "Kapat",
   "ui.cancel": "İptal",

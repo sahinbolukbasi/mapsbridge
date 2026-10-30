@@ -1,19 +1,56 @@
 "use client";
 
 import { userStorage } from "../lib/user-storage";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getStoredSession, signOut } from "../lib/cognito";
 import { billingService } from "../lib/billing/billing-service";
 import { useLocale, getAlternatePath } from "../lib/locale-context";
+import { SAVED_ADDRESSES_EVENT, type SavedAddressesChangedDetail } from "../lib/chrome-events";
+
+/** Chrome varyantı (G19): sayfa CSS'i header'ı override etmez; varyant SiteChrome'dan gelir. */
+export type HeaderVariant = "default" | "wide" | "wide-compact";
 
 interface HeaderNavProps {
-  onOpenSaved?: () => void;
-  savedCount?: number;
+  variant?: HeaderVariant;
 }
 
-export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
+/** Oturum e-postası (HeaderNav ve MobileNav ortak; pathname değişince yeniden okunur). */
+function readSessionEmail(): string | null {
+  const session = getStoredSession();
+  const fallbackEmail =
+    typeof window !== "undefined" ? localStorage.getItem("mapsbridge.userEmail") : null;
+  return session?.email || fallbackEmail || null;
+}
+
+/** Okunmamış doğrudan mesaj sayısı (localStorage; storage olayıyla güncellenir). */
+function useUnreadMessagesCount(): number {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const checkUnread = () => {
+      try {
+        const raw = localStorage.getItem("mapsbridge.directMessages");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            setCount(
+              parsed.filter(
+                (m: { status?: string; read?: boolean }) => m.status === "unread" || !m.read,
+              ).length,
+            );
+          }
+        }
+      } catch {}
+    };
+    checkUnread();
+    window.addEventListener("storage", checkUnread);
+    return () => window.removeEventListener("storage", checkUnread);
+  }, []);
+  return count;
+}
+
+export function HeaderNav({ variant = "default" }: HeaderNavProps) {
   const [storageError, setStorageError] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -24,11 +61,41 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
   const [userHandle, setUserHandle] = useState<string>("traveler");
   const [userAvatar, setUserAvatar] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
-  const [localSavedCount, setLocalSavedCount] = useState(savedCount ?? 0);
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [localSavedCount, setLocalSavedCount] = useState(0);
+  const unreadMessagesCount = useUnreadMessagesCount();
   const [wallet, setWallet] = useState(() => billingService.getWallet());
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
+
+  // Disclosure menü: Esc kapatır ve odağı tetikleyiciye döndürür; dışarı tıklama kapatır.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    };
+    const onPointer = (e: PointerEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
+    };
+  }, [isOpen]);
+
+  // Harita masası kayıtlı adres listesini değiştirince sayıyı yayar (eski savedCount prop'u).
+  useEffect(() => {
+    const onSaved = (e: Event) => {
+      const count = (e as CustomEvent<Partial<SavedAddressesChangedDetail>>).detail?.count;
+      if (typeof count === "number") setLocalSavedCount(count);
+    };
+    window.addEventListener(SAVED_ADDRESSES_EVENT, onSaved);
+    return () => window.removeEventListener(SAVED_ADDRESSES_EVENT, onSaved);
+  }, []);
 
   useEffect(() => {
     const handleWalletUpdated = (e: Event) => {
@@ -41,32 +108,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
   }, []);
 
   useEffect(() => {
-    const checkUnread = () => {
-      try {
-        const raw = localStorage.getItem("mapsbridge.directMessages");
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            setUnreadMessagesCount(
-              parsed.filter((m: { status?: string; read?: boolean }) => m.status === "unread" || !m.read).length,
-            );
-          }
-        }
-      } catch {}
-    };
-    checkUnread();
-    window.addEventListener("storage", checkUnread);
-    return () => window.removeEventListener("storage", checkUnread);
-  }, []);
-
-  useEffect(() => {
-    const session = getStoredSession();
-    const fallbackEmail =
-      typeof window !== "undefined"
-        ? localStorage.getItem("mapsbridge.userEmail") ||
-          localStorage.getItem("mapsbridge.userEmail")
-        : null;
-    const activeEmail = session?.email || fallbackEmail;
+    const activeEmail = readSessionEmail();
 
     if (activeEmail) {
       setUserEmail(activeEmail);
@@ -103,11 +145,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
 
   function handleOpenSavedAddresses() {
     setIsOpen(false);
-    if (onOpenSaved) {
-      onOpenSaved();
-    } else {
-      router.push("/maps/?modal=saved");
-    }
+    router.push("/maps/?modal=saved");
   }
 
   function handleLogout() {
@@ -118,7 +156,10 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
 
   return (
     <>
-      <header className="global-site-header">
+      <header
+        className="global-site-header"
+        data-variant={variant === "default" ? undefined : variant}
+      >
         {storageError && (
           <p role="alert" className="global-storage-error">
             Could not save your change. Check your browser storage and try again.{" "}
@@ -131,7 +172,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
           <div style={{ display: "flex", alignItems: "center", gap: "1.75rem" }}>
             <Link className="header-brand-link" href={mounted && userEmail ? "/maps/" : "/"} prefetch={false}>
               <div className="header-brand-icon">
-                <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
+                <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "22px" }}>
                   explore
                 </span>
               </div>
@@ -140,7 +181,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
               </span>
             </Link>
 
-            <nav className="header-nav-center">
+            <nav className="header-nav-center" aria-label={t("ui.mainMenu")}>
               {!(mounted && userEmail) && (
                 <Link
                   className={`header-nav-pill ${
@@ -216,15 +257,14 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                   onClick={() => setIsOpen(!isOpen)}
                   ref={triggerRef}
                   aria-expanded={isOpen}
-                  aria-haspopup="true"
-                  aria-label="Profil ve Gezgin Menüsü"
+                  aria-controls={menuId}
                 >
                   <div className="header-user-avatar-wrap">
                     <div className="header-user-avatar-circle">
                       {userAvatar ? (
                         <img src={userAvatar} alt={userName} />
                       ) : (
-                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                        <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "18px" }}>
                           person
                         </span>
                       )}
@@ -236,8 +276,11 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                       {userName.length > 12 ? userName.slice(0, 11) + "…" : userName}
                     </span>
                     <span className="header-user-pill-role">PRO KAŞİF</span>
+                    <span className="ui-visually-hidden">{t("ui.userMenu")}</span>
                   </div>
                   <span
+                    aria-hidden="true"
+                    translate="no"
                     className={`material-symbols-outlined header-user-pill-arrow ${isOpen ? "open" : ""}`}
                   >
                     expand_more
@@ -245,7 +288,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                 </button>
 
                 {isOpen && (
-                  <div className="header-stitch-dropdown" role="menu" aria-label="Kullanıcı Menüsü">
+                  <div className="header-stitch-dropdown" id={menuId}>
                     {/* 1. Üst Kullanıcı Kartı */}
                     <div className="header-stitch-user-card">
                       <div
@@ -262,6 +305,8 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                             <img src={userAvatar} alt={userName} />
                           ) : (
                             <span
+                              aria-hidden="true"
+                              translate="no"
                               className="material-symbols-outlined"
                               style={{ fontSize: "24px" }}
                             >
@@ -282,9 +327,10 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         href="/profile/edit/"
                         className="header-stitch-edit-btn"
                         title="Profili Düzenle"
+                        aria-label="Profili Düzenle"
                         onClick={() => setIsOpen(false)}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "16px" }}>
                           edit
                         </span>
                       </a>
@@ -296,6 +342,8 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         <div className="header-stitch-stat-top">
                           <span style={{ display: "flex", alignItems: "center", gap: "3px" }}>
                             <span
+                              aria-hidden="true"
+                              translate="no"
                               className="material-symbols-outlined"
                               style={{ fontSize: "14px", color: "#10b981" }}
                             >
@@ -324,6 +372,8 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         <div className="header-stitch-stat-top">
                           <span style={{ display: "flex", alignItems: "center", gap: "3px" }}>
                             <span
+                              aria-hidden="true"
+                              translate="no"
                               className="material-symbols-outlined"
                               style={{ fontSize: "14px", color: "#10b981" }}
                             >
@@ -389,7 +439,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         }}
                       >
                         <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined" style={{ color: "#10b981" }}>
+                          <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ color: "#10b981" }}>
                             workspace_premium
                           </span>
                           <span>Üyelik &amp; Kredi Masası</span>
@@ -411,10 +461,12 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         onClick={() => setIsOpen(false)}
                       >
                         <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined">account_circle</span>
+                          <span aria-hidden="true" translate="no" className="material-symbols-outlined">account_circle</span>
                           <span>Ana Profilim &amp; Gezgin Paneli</span>
                         </div>
                         <span
+                          aria-hidden="true"
+                          translate="no"
                           className="material-symbols-outlined"
                           style={{ fontSize: "16px", color: "#717974" }}
                         >
@@ -428,7 +480,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         onClick={() => setIsOpen(false)}
                       >
                         <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined">map</span>
+                          <span aria-hidden="true" translate="no" className="material-symbols-outlined">map</span>
                           <span>Rotalarım &amp; Gezilerim</span>
                         </div>
                         <span className="header-stitch-badge-pill">
@@ -444,7 +496,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         onClick={handleOpenSavedAddresses}
                       >
                         <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined">bookmark_added</span>
+                          <span aria-hidden="true" translate="no" className="material-symbols-outlined">bookmark_added</span>
                           <span>Kayıtlı Noktalarım &amp; Havuz</span>
                         </div>
                         <span className="header-stitch-badge-pill">{localSavedCount} Nokta</span>
@@ -456,7 +508,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         onClick={() => setIsOpen(false)}
                       >
                         <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined" style={{ color: "#10b981" }}>
+                          <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ color: "#10b981" }}>
                             forum
                           </span>
                           <span>Gezgin Sohbetleri &amp; Gruplar</span>
@@ -482,10 +534,10 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         onClick={() => setIsOpen(false)}
                       >
                         <div className="header-stitch-item-left">
-                          <span className="material-symbols-outlined">public</span>
+                          <span aria-hidden="true" translate="no" className="material-symbols-outlined">public</span>
                           <span style={{ fontSize: "12px" }}>mapsbridge.com/@{userHandle}</span>
                         </div>
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                        <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "14px" }}>
                           open_in_new
                         </span>
                       </a>
@@ -501,6 +553,8 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                       >
                         <div className="header-stitch-item-left">
                           <span
+                            aria-hidden="true"
+                            translate="no"
                             className="material-symbols-outlined"
                             style={{ fontSize: "18px", color: "#717974" }}
                           >
@@ -516,7 +570,7 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                         onClick={handleLogout}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                          <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "18px" }}>
                             logout
                           </span>
                           <span>Çıkış Yap</span>
@@ -547,22 +601,19 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
                 document.cookie = `locale=${isEnglish ? "tr" : "en"};path=/;max-age=31536000;SameSite=Lax`;
                 window.location.assign(alternate);
               }}
-              aria-label={isEnglish ? "Türkçe'ye geç" : "Switch to English"}
               title={isEnglish ? "Türkçe'ye geç" : "Switch to English"}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+              <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
                 translate
               </span>
               <span>{isEnglish ? "TR" : "EN"}</span>
+              <span className="ui-visually-hidden">
+                {isEnglish ? "Türkçe'ye geç" : "Switch to English"}
+              </span>
             </button>
           </div>
         </div>
       </header>
-      <MobileNav
-        signedIn={mounted && Boolean(userEmail)}
-        unreadCount={unreadMessagesCount}
-        isEnglish={isEnglish}
-      />
     </>
   );
 }
@@ -577,16 +628,15 @@ const mobileIcons = {
   profile: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z",
 } as const;
 
-export function MobileNav({
-  signedIn = true,
-  unreadCount = 0,
-  isEnglish = false,
-}: {
-  signedIn?: boolean;
-  unreadCount?: number;
-  isEnglish?: boolean;
-}) {
+/** Mobil alt navigasyon; SiteChrome'da footer'dan sonra tek kez render edilir. */
+export function MobileNav() {
   const pathname = usePathname();
+  const { t, isEnglish } = useLocale();
+  const unreadCount = useUnreadMessagesCount();
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    setSignedIn(Boolean(readSessionEmail()));
+  }, [pathname]);
   const path = pathname.replace(/\/$/, "") || "/";
   const items = signedIn
     ? ([
@@ -607,7 +657,7 @@ export function MobileNav({
   return (
     <nav
       className="mobile-primary-nav"
-      aria-label={isEnglish ? "Main navigation" : "Mobil ana navigasyon"}
+      aria-label={t("ui.mobileMenu")}
     >
       <div className="mobile-nav-track">
         {items.map((item) => {

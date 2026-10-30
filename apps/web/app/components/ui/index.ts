@@ -1,4 +1,5 @@
-// Tasarım sistemi primitive'leri (design §3). SiteChrome/SkipLink C6'da, LegacyRedirect C7'de eklenir.
+// Tasarım sistemi primitive'leri (design §3). LegacyRedirect C7'de eklenir.
+// SiteChrome bilerek barrel'de YOK: yalnızca root layout import eder (components/ui/site-chrome).
 export { Alert, type AlertTone } from "./alert";
 export { Avatar, initialsOf } from "./avatar";
 export { Badge, type BadgeTone } from "./badge";
@@ -29,6 +30,7 @@ export { Pagination, pageWindow } from "./pagination";
 export { Section, type SectionSurface } from "./section";
 export { Select, type SelectProps } from "./select";
 export { Skeleton } from "./skeleton";
+export { SkipLink } from "./skip-link";
 export { Table, type SortDirection, type TableColumn } from "./table";
 export { Tabs, type TabItem } from "./tabs";
 export { Textarea, type TextareaProps } from "./textarea";

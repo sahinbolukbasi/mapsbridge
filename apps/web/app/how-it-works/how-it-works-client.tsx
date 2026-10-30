@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { HeaderNav } from "../components/header-nav";
-import { SiteFooter } from "../components/site-footer";
 import "./how-it-works.css";
 
 export function HowItWorksClient() {
@@ -24,7 +22,6 @@ export function HowItWorksClient() {
   return (
     <div className="nasil-page">
       <div className="nasil-ambient-glow-1" />
-      <HeaderNav />
 
       <main>
         {/* ── Hero ── */}
@@ -584,8 +581,6 @@ export function HowItWorksClient() {
           </div>
         </section>
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

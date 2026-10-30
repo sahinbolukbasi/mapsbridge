@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, FormEvent } from "react";
 import Link from "next/link";
 import { FullPagePromotion } from "../../components/auth-gate";
-import { HeaderNav } from "../../components/header-nav";
 import { getStoredSession, changePasswordDirect } from "../../lib/cognito";
 import { userStorage } from "../../lib/user-storage";
 import { billingService } from "../../lib/billing/billing-service";
@@ -443,8 +442,6 @@ export default function EditProfilePage() {
 
   return (
     <div className="stitch-profile-root">
-      {/* Unified Global Header */}
-      <HeaderNav />
 
       {/* Hidden File Inputs for Media Upload */}
       <input
@@ -464,8 +461,8 @@ export default function EditProfilePage() {
         aria-hidden="true"
       />
 
-      {/* Sticky Top Header Bar */}
-      <header className="stitch-profile-sticky-bar">
+      {/* Sticky üst eylem çubuğu (site header'ı SiteChrome'da; ikinci banner landmark'ı olmasın) */}
+      <div className="stitch-profile-sticky-bar">
         <div className="stitch-sticky-bar-inner">
           <div className="flex flex-col gap-1">
             <nav aria-label="Breadcrumb" className="stitch-breadcrumb-row">
@@ -504,7 +501,7 @@ export default function EditProfilePage() {
             </button>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Workspace Layout */}
       <main className="stitch-profile-workspace">

@@ -228,6 +228,10 @@
 
   "ui.skipToContent": "Skip to content",
   "ui.systemNotice": "System notice",
+  "ui.mainMenu": "Main menu",
+  "ui.mobileMenu": "Mobile menu",
+  "ui.footerLinks": "Footer links",
+  "ui.userMenu": "Profile menu",
   "ui.loading": "Loading…",
   "ui.close": "Close",
   "ui.cancel": "Cancel",

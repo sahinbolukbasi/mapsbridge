@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { HeaderNav } from "../components/header-nav";
-import { SiteFooter } from "../components/site-footer";
+import { PageHeader, PageShell } from "../components/ui";
 import { AuthActionModal } from "../components/auth-gate";
 import { getStoredSession, isTokenExpired, refreshSession } from "../lib/cognito";
 import "./ai-promo.css";
@@ -107,7 +106,12 @@ const DAY_STOPS = {
   ],
 };
 
-export function AIPromoLanding() {
+/**
+ * Kimliksiz promosyon dalı (design §4.5): chrome SiteChrome'dadır; kendi PageShell'ini (landing)
+ * ve tek h1'ini (PageHeader hero) render eder. `titleText` düz metin başlıktır (C7'de registry).
+ * Hero zemini açık olduğu için yüzey varsayılandır (inverse değil).
+ */
+export function AIPromoLanding({ titleText = "Seyahat asistanı" }: { titleText?: string } = {}) {
   const [selectedDay, setSelectedDay] = useState<1 | 2 | 3>(1);
   const [copiedCode, setCopiedCode] = useState(false);
   const [authModal, setAuthModal] = useState(false);
@@ -171,20 +175,23 @@ export function AIPromoLanding() {
 
   if (checkingSession) {
     return (
-      <main
+      <PageShell
+        layout="landing"
         className="ai-promo-wrapper"
-        style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}
-        aria-live="polite"
+        header={<PageHeader variant="hidden" title={titleText} />}
       >
-        Oturum kontrol ediliyor...
-      </main>
+        <div
+          style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}
+          aria-live="polite"
+        >
+          Oturum kontrol ediliyor...
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="ai-promo-wrapper">
-      <HeaderNav />
-
+    <PageShell layout="landing" className="ai-promo-wrapper">
       {/* ── 1. Top Hero Section ── */}
       <section className="ai-promo-hero">
         <div className="ai-promo-hero-inner">
@@ -193,10 +200,17 @@ export function AIPromoLanding() {
             <span>✨ MAPSBRIDGE AI SEYAHAT BOTU • CANLI ASİSTAN</span>
           </div>
 
-          <h1 className="ai-promo-hero-title">
-            Hayalindeki Seyahati Anlat, <br />
-            <span className="ai-promo-hero-highlight">AI Anında</span> Haritalandırsın.
-          </h1>
+          <PageHeader
+            variant="hero"
+            titleText={titleText}
+            titleClassName="ai-promo-hero-title"
+            title={
+              <>
+                Hayalindeki Seyahati Anlat, <br />
+                <span className="ai-promo-hero-highlight">AI Anında</span> Haritalandırsın.
+              </>
+            }
+          />
 
           <p className="ai-promo-hero-desc">
             Yapay zeka asistanı bütçenize, ilgi alanlarınıza, tempo tercihinize ve seyahat
@@ -1024,9 +1038,6 @@ export function AIPromoLanding() {
         </div>
       </section>
 
-      {/* Unified Global Site Footer */}
-      <SiteFooter />
-
       <AuthActionModal
         isOpen={authModal}
         onClose={() => setAuthModal(false)}
@@ -1035,6 +1046,6 @@ export function AIPromoLanding() {
         featureName="AI Seyahat Asistanı"
         nextUrl={loginUrl(promptText)}
       />
-    </div>
+    </PageShell>
   );
 }

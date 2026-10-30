@@ -1019,8 +1019,9 @@
     }
   }
 
+  /* C6: header SiteChrome'da (kök dışında). */
   .ai-studio-root {
-    min-height: calc(100dvh - var(--mobile-nav-height));
+    min-height: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
   }
 
   /* Secondary workspace tabs live at the top; only the app dock stays at the bottom. */

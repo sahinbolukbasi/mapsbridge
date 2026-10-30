@@ -7,30 +7,6 @@ import "./welcome.css";
 export default function WelcomePage() {
   return (
     <main className="welcome-page-container" aria-label="MapsBridge Giriş ve Kayıt Ekranı">
-      {/* Top Header */}
-      <header className="welcome-header">
-        <Link href="/" className="welcome-brand-mark" aria-label="MapsBridge Ana Sayfa">
-          <div className="welcome-brand-icon">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          </div>
-          <div>
-            <div className="welcome-brand-title">MapsBridge</div>
-          </div>
-        </Link>
-      </header>
-
       {/* Hero / Identity Section */}
       <section className="welcome-main-content">
         <div className="welcome-badge-tag">
@@ -46,7 +22,7 @@ export default function WelcomePage() {
       </section>
 
       {/* Action Buttons: Only Apple, Google, E-posta Giriş, Kayıt Ol */}
-      <footer className="welcome-action-section">
+      <div className="welcome-action-section">
         {/*  Apple Sign-In */}
         <Link
           href="/login/?provider=apple&next=/desk/"
@@ -123,7 +99,7 @@ export default function WelcomePage() {
           </svg>
           <span>Kayıt Ol</span>
         </Link>
-      </footer>
+      </div>
     </main>
   );
 }

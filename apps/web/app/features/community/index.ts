@@ -5,7 +5,6 @@ export * from "./components/RoutesTab";
 export * from "./components/TripsTab";
 export * from "./components/BuddyTab";
 export * from "./components/CommunitySidebar";
-export * from "./components/CommunityFooter";
 export * from "./components/CreatorDashboardModal";
 export * from "./components/NewPostModal";
 export * from "./components/ListRouteModal";

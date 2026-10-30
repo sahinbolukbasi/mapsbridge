@@ -24,7 +24,12 @@ export function SiteFooter() {
           <div className="global-footer-brand-col">
             <Link href="/" className="global-footer-brand-link" prefetch={false}>
               <div className="global-footer-brand-icon">
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                <span
+                  aria-hidden="true"
+                  translate="no"
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "20px" }}
+                >
                   explore
                 </span>
               </div>
@@ -79,7 +84,7 @@ export function SiteFooter() {
           </div>
 
           {/* Nav Links Grid */}
-          <div className="global-footer-links-col">
+          <nav className="global-footer-links-col" aria-label={t("ui.footerLinks")}>
             <div>
               <span className="global-footer-group-title">{t("footer.product")}</span>
               <ul className="global-footer-links">
@@ -162,14 +167,19 @@ export function SiteFooter() {
                 </li>
               </ul>
             </div>
-          </div>
+          </nav>
         </div>
 
         {/* Bottom Metadata & Preferences */}
         <div className="global-footer-bottom">
           <div className="global-footer-bottom-left">
             <span className="global-footer-security-pill">
-              <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+              <span
+                aria-hidden="true"
+                translate="no"
+                className="material-symbols-outlined"
+                style={{ fontSize: "15px" }}
+              >
                 verified_user
               </span>
               <span>{t("footer.secure")}</span>

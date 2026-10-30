@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import trDict from "../locales/tr.json";
 import enDict from "../locales/en.json";
@@ -37,6 +37,10 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     [locale, dict],
   );
 
+  // İstemci navigasyonu (ör. / → /en/) HTML'i yeniden yüklemez; <html lang> burada izlenir (I11).
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 

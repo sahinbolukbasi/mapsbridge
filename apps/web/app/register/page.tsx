@@ -2,8 +2,6 @@
 
 import React, { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import { signUp, handleGoogleCredentialResponse, getStoredSession } from "../lib/cognito";
-import { HeaderNav } from "../components/header-nav";
-import { SiteFooter } from "../components/site-footer";
 import "./register.css";
 
 interface GoogleCredentialResponse { credential: string; }
@@ -272,7 +270,6 @@ export default function SignUpPage() {
 
   return (
     <div className="signup-viewport bg-surface font-body-md text-body-md text-on-surface antialiased">
-      <HeaderNav />
 
       {/* Main Split Content */}
       <main className="signup-main">
@@ -966,8 +963,6 @@ export default function SignUpPage() {
         </div>
       </main>
 
-      {/* Unified Global Site Footer */}
-      <SiteFooter />
     </div>
   );
 }

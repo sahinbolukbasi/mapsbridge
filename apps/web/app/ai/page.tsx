@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { HeaderNav } from "../components/header-nav";
 import { AuthActionModal } from "../components/auth-gate";
 import { getStoredSession, refreshSession, isTokenExpired } from "../lib/cognito";
 import { apiFetch } from "../lib/api-client";
@@ -878,7 +877,6 @@ export default function AIPage() {
           background: "#0a0f1d",
         }}
       >
-        <HeaderNav />
         <main
           className="ai-studio-main"
           style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
@@ -895,7 +893,6 @@ export default function AIPage() {
 
   return (
     <div className="ai-studio-root">
-      <HeaderNav />
       <main className="ai-studio-main">
         <div className={`ai-studio-workspace ${panelWide ? "ai-panel-wide" : ""}`}>
           <aside className="ai-studio-aside-left" aria-label="Sohbetler">

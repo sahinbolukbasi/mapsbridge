@@ -17,9 +17,10 @@
   }
 
   @media (min-width: 1024px) {
+    /* C6: header SiteChrome'da (kök dışında); kök header'ın altındaki alanı doldurur. */
     .stitch-main-profile-root {
-      height: 100vh;
-      max-height: 100vh;
+      height: calc(100vh - var(--app-header-height));
+      max-height: calc(100vh - var(--app-header-height));
       overflow: hidden;
     }
     .stitch-main-profile-root > main,
@@ -27,17 +28,6 @@
       overflow-y: auto;
       overscroll-behavior: contain;
     }
-  }
-
-  .stitch-main-profile-root .global-site-header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    width: 100%;
-  }
-
-  .stitch-main-profile-root .global-site-header-inner {
-    max-width: 100% !important;
   }
 
   /* Top Workspace Navbar */

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { HeaderNav } from "../components/header-nav";
 import { billingService } from "../lib/billing/billing-service";
 import { apiFetch } from "../lib/api-client";
 import { getStoredSession } from "../lib/cognito";
@@ -156,7 +155,6 @@ export default function CheckoutPage() {
 
   return (
     <div className="odeme-page-root">
-      <HeaderNav />
       <main className="billing-home">
         <Link href="/ai/" className="billing-back">
           ← Seyahat asistanına dön

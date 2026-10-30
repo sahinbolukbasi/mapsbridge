@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { HeaderNav } from "../components/header-nav";
 import { AuthActionModal } from "../components/auth-gate";
 import { getStoredSession } from "../lib/cognito";
 import { getFollowedUsers } from "../lib/follow-system";
@@ -10,7 +9,7 @@ import { webSocialSync } from "../lib/social-sync";
 import "./community.css";
 
 import type { CommunityPost } from "../features/community/types";
-import { DiscoverTab, NewPostModal, CommunityFooter } from "../features/community";
+import { DiscoverTab, NewPostModal } from "../features/community";
 
 export type { CommunityPost };
 
@@ -294,7 +293,6 @@ export default function CommunityPage() {
 
   return (
     <div className="community-page-root">
-      <HeaderNav />
 
       {/* ── HERO BANNER ── */}
       <section className="community-hero">
@@ -458,7 +456,6 @@ export default function CommunityPage() {
         </aside>
       </div>
 
-      <CommunityFooter />
 
       {/* ── YENİ PAYLAŞIM MODALI ── */}
       <NewPostModal

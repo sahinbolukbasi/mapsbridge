@@ -6,7 +6,6 @@ import { getStoredSession } from "../lib/cognito";
 import { useAuth } from "../lib/auth-context";
 import { useWS } from "../lib/ws-context";
 import { FullPagePromotion } from "../components/auth-gate";
-import { HeaderNav } from "../components/header-nav";
 import "./messages.css";
 
 import type {
@@ -482,8 +481,6 @@ export default function MessagesPage() {
 
   return (
     <div className="chat-page-root" data-mobile-pane={mobilePane}>
-      {/* Unified Global Header */}
-      <HeaderNav />
 
       {/* Main Workspace Area */}
       <main className="chat-main-workspace">

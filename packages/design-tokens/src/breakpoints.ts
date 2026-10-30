@@ -71,8 +71,8 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
   "register/register.css": [{ query: "(max-width: 500px)", count: 1 }],
   "styles/tokens.css": [{ query: "(max-width: 767px)", count: 1 }],
   "styles.css": [
-    { query: "(max-width: 1279px)", count: 3 },
-    { query: "(max-width: 767px)", count: 4 },
+    { query: "(max-width: 1279px)", count: 1 },
+    { query: "(max-width: 767px)", count: 3 },
   ],
   "u/admin/admin.css": [
     { query: "(max-width: 1100px)", count: 1 },

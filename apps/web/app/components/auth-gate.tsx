@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { HeaderNav } from "./header-nav";
+import { PageHeader, PageShell } from "./ui";
 import { GoogleAuthButton } from "./google-auth-button";
 import "./auth-gate.css";
 
@@ -27,6 +27,8 @@ export interface FullPagePromotionProps {
   nextUrl: string;
   primaryButtonText?: string;
   secondaryButtonText?: string;
+  /** Düz metin başlık (`<title>`/chrome-check); verilmezse heroTitle. C7'de registry'den. */
+  titleText?: string;
 }
 
 /**
@@ -45,73 +47,81 @@ export function FullPagePromotion({
   nextUrl,
   primaryButtonText = "Hemen Ücretsiz Başla",
   secondaryButtonText = "Giriş Yap",
+  titleText,
 }: FullPagePromotionProps) {
   const signupLink = `/register/?next=${encodeURIComponent(nextUrl)}`;
   const loginLink = `/login/?next=${encodeURIComponent(nextUrl)}`;
 
+  // Kimlik kapısı (design §4.5): chrome SiteChrome'dadır; kapı kendi PageShell'ini ve tek h1'ini
+  // (PageHeader) render eder. Zemin açık olduğu için yüzey varsayılandır (inverse değil).
   return (
-    <div className="promotion-page-root">
-      <HeaderNav />
+    <PageShell layout="landing" className="promotion-page-root">
       <div className="promo-ambient-glow-1" aria-hidden="true" />
       <div className="promo-ambient-glow-2" aria-hidden="true" />
+      <div className="promotion-page-flex">
+        <div className="promo-main-content">
+          <div className="promo-badge">
+            <span className="promo-badge-icon">{badgeIcon}</span>
+            <span>{badgeText}</span>
+          </div>
 
-      <main className="promo-main-content">
-        <div className="promo-badge">
-          <span className="promo-badge-icon">{badgeIcon}</span>
-          <span>{badgeText}</span>
-        </div>
+          <PageHeader
+            variant="hero"
+            title={heroTitle}
+            titleText={titleText}
+            titleClassName="promo-hero-title"
+          />
+          <p className="promo-hero-subtitle">{heroSubtitle}</p>
 
-        <h1 className="promo-hero-title">{heroTitle}</h1>
-        <p className="promo-hero-subtitle">{heroSubtitle}</p>
+          <div className="promo-actions-group">
+            <a href={signupLink} className="promo-btn-primary">
+              <span>🚀</span>
+              <span>{primaryButtonText}</span>
+            </a>
+            <a href={loginLink} className="promo-btn-secondary">
+              <span>🔑</span>
+              <span>{secondaryButtonText}</span>
+            </a>
+          </div>
 
-        <div className="promo-actions-group">
-          <a href={signupLink} className="promo-btn-primary">
-            <span>🚀</span>
-            <span>{primaryButtonText}</span>
-          </a>
-          <a href={loginLink} className="promo-btn-secondary">
-            <span>🔑</span>
-            <span>{secondaryButtonText}</span>
-          </a>
-        </div>
+          {/* 4 Feature Value Pillars */}
+          <div className="promo-features-grid">
+            {features.map((f, i) => (
+              <div key={i} className="promo-feature-card">
+                <div className="promo-card-icon-wrap">{f.icon}</div>
+                <h3 className="promo-card-title">{f.title}</h3>
+                <p className="promo-card-desc">{f.description}</p>
+              </div>
+            ))}
+          </div>
 
-        {/* 4 Feature Value Pillars */}
-        <div className="promo-features-grid">
-          {features.map((f, i) => (
-            <div key={i} className="promo-feature-card">
-              <div className="promo-card-icon-wrap">{f.icon}</div>
-              <h3 className="promo-card-title">{f.title}</h3>
-              <p className="promo-card-desc">{f.description}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Samples / Teasers */}
-        {samples && samples.length > 0 && (
-          <div className="promo-teaser-container">
-            <div className="promo-teaser-header">
-              <h3 className="promo-teaser-title">
-                <span>⚡</span>
-                <span>{samplesTitle || "Örnek Deneyimler & Rotalar"}</span>
-              </h3>
-              <div className="promo-teaser-pills">
-                <span className="promo-teaser-pill">Yapay Zeka</span>
-                <span className="promo-teaser-pill">Çoklu Durak</span>
-                <span className="promo-teaser-pill">Süreli Şifreleme</span>
+          {/* Samples / Teasers */}
+          {samples && samples.length > 0 && (
+            <div className="promo-teaser-container">
+              <div className="promo-teaser-header">
+                <h3 className="promo-teaser-title">
+                  <span>⚡</span>
+                  <span>{samplesTitle || "Örnek Deneyimler & Rotalar"}</span>
+                </h3>
+                <div className="promo-teaser-pills">
+                  <span className="promo-teaser-pill">Yapay Zeka</span>
+                  <span className="promo-teaser-pill">Çoklu Durak</span>
+                  <span className="promo-teaser-pill">Süreli Şifreleme</span>
+                </div>
+              </div>
+              <div className="promo-samples-grid">
+                {samples.map((s, idx) => (
+                  <div key={idx} className="promo-sample-card">
+                    <strong>{s.title}</strong>
+                    <p>{s.description}</p>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="promo-samples-grid">
-              {samples.map((s, idx) => (
-                <div key={idx} className="promo-sample-card">
-                  <strong>{s.title}</strong>
-                  <p>{s.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
+          )}
+        </div>
+      </div>
+    </PageShell>
   );
 }
 

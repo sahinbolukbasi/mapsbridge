@@ -23,6 +23,8 @@ export interface ScanOptions {
   routes: string[];
   widths: number[];
   axeWidth: number;
+  /** `--axe-width` virgüllü listesinin geri kalanı: bu genişliklerde de axe koşulur (axeExtra). */
+  extraAxeWidths?: number[];
   screenshotsDir: string | null;
   runAxe: boolean;
   concurrency: number;
@@ -68,14 +70,47 @@ export interface PageResult {
   consoleErrors: number;
   pageErrors: number;
   error: string | null;
-  axe: {
-    width: number;
-    violationsByImpact: ImpactCounts;
-    nodesByImpact: ImpactCounts;
-    violations: ViolationSummary[];
-    passes: number;
-    incomplete: number;
-  } | null;
+  axe: AxeResult | null;
+  /** extraAxeWidths sonuçları (toplamlara katılmaz; birincil genişlik `axe`). */
+  axeExtra?: AxeResult[];
+}
+
+interface AxeResult {
+  width: number;
+  violationsByImpact: ImpactCounts;
+  nodesByImpact: ImpactCounts;
+  violations: ViolationSummary[];
+  passes: number;
+  incomplete: number;
+}
+
+async function runAxe(page: Page, width: number): Promise<AxeResult> {
+  const axe = await new AxeBuilder({ page }).analyze();
+  const violationsByImpact = zero();
+  const nodesByImpact = zero();
+  const violations: ViolationSummary[] = axe.violations.map((v) => {
+    const impact = (v.impact ?? "unknown") as Impact | "unknown";
+    if (impact !== "unknown") {
+      violationsByImpact[impact]++;
+      nodesByImpact[impact] += v.nodes.length;
+    }
+    return {
+      id: v.id,
+      impact,
+      help: v.help,
+      helpUrl: v.helpUrl,
+      nodes: v.nodes.length,
+      targets: v.nodes.slice(0, 5).map((n) => n.target.join(" ")),
+    };
+  });
+  return {
+    width,
+    violationsByImpact,
+    nodesByImpact,
+    violations,
+    passes: axe.passes.length,
+    incomplete: axe.incomplete.length,
+  };
 }
 
 const zero = (): ImpactCounts => ({ critical: 0, serious: 0, moderate: 0, minor: 0 });
@@ -243,9 +278,10 @@ async function scanRoute(
   page.on("pageerror", () => result.pageErrors++);
 
   // axe genişliği en son taranır ki sonuç sayfası o genişlikte kalsın.
-  const widths = [...new Set([...opts.widths, ...(opts.runAxe ? [opts.axeWidth] : [])])].sort(
-    (a, b) => Number(a === opts.axeWidth) - Number(b === opts.axeWidth),
-  );
+  const extra = opts.runAxe ? (opts.extraAxeWidths ?? []).filter((w) => w !== opts.axeWidth) : [];
+  const widths = [
+    ...new Set([...opts.widths, ...extra, ...(opts.runAxe ? [opts.axeWidth] : [])]),
+  ].sort((a, b) => Number(a === opts.axeWidth) - Number(b === opts.axeWidth));
   try {
     for (const width of widths) {
       await page.setViewportSize({ width, height: 900 });
@@ -263,34 +299,8 @@ async function scanRoute(
         await page.screenshot({ path: file, fullPage: true, animations: "disabled" });
         result.screenshots.push(file);
       }
-      if (opts.runAxe && width === opts.axeWidth) {
-        const axe = await new AxeBuilder({ page }).analyze();
-        const violationsByImpact = zero();
-        const nodesByImpact = zero();
-        const violations: ViolationSummary[] = axe.violations.map((v) => {
-          const impact = (v.impact ?? "unknown") as Impact | "unknown";
-          if (impact !== "unknown") {
-            violationsByImpact[impact]++;
-            nodesByImpact[impact] += v.nodes.length;
-          }
-          return {
-            id: v.id,
-            impact,
-            help: v.help,
-            helpUrl: v.helpUrl,
-            nodes: v.nodes.length,
-            targets: v.nodes.slice(0, 5).map((n) => n.target.join(" ")),
-          };
-        });
-        result.axe = {
-          width,
-          violationsByImpact,
-          nodesByImpact,
-          violations,
-          passes: axe.passes.length,
-          incomplete: axe.incomplete.length,
-        };
-      }
+      if (opts.runAxe && width === opts.axeWidth) result.axe = await runAxe(page, width);
+      else if (extra.includes(width)) (result.axeExtra ??= []).push(await runAxe(page, width));
     }
   } catch (err) {
     result.error = err instanceof Error ? err.message.split("\n")[0] : String(err);

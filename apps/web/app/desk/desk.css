@@ -5053,11 +5053,6 @@
       transform: translateY(-8px);
     }
   }
-  @media (max-width: 640px) {
-    body:has(.mobile-primary-nav) .map-page {
-      height: calc(100dvh - 64px - env(safe-area-inset-bottom));
-    }
-  }
 
   .map-page .panel-top-nav {
     background: var(--surface);
@@ -6998,9 +6993,6 @@
   }
 
   @media (max-width: 1279px) {
-    body:has(.mobile-primary-nav) .map-page {
-      height: calc(100dvh - var(--mobile-nav-height));
-    }
     .map-page {
       --nav-height: 76px;
     }
@@ -8212,5 +8204,12 @@
     .panel-screen-body.sidebar-collapsed .google-map-floating-header {
       left: 50%;
     }
+  }
+  /* C6: header SiteChrome'da (main dışında). Harita header'ın altından başlar ve görünür alanı
+     doldurur; iç ofsetler (--nav-height) header yüksekliği kadar azalır (0). Mobil alt nav
+     yüksekliği gövdeden gelir (header-nav.css). */
+  .map-page {
+    --nav-height: 0px;
+    height: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
   }
 }

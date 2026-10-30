@@ -4,7 +4,6 @@ import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { userStorage } from "../lib/user-storage";
 import { AuthActionModal } from "../components/auth-gate";
-import { HeaderNav } from "../components/header-nav";
 import { getStoredSession } from "../lib/cognito";
 import { isFollowingUser, toggleFollowUser } from "../lib/follow-system";
 import "./public-profile.css";
@@ -553,8 +552,6 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
 
   return (
     <div className="public-profile-root">
-      {/* Unified Global Header */}
-      <HeaderNav />
 
       <main style={{ width: "100%", paddingTop: "0.5rem" }}>
         {/* 2. Sticky Preview Mode Notification Banner */}
@@ -1608,59 +1605,6 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
         </section>
       </main>
 
-      {/* 6. Footer matching Stitch */}
-      <footer className="pub-page-footer">
-        <div className="pub-footer-inner">
-          <div className="pub-footer-brand">
-            <div
-              className="pub-brand-icon"
-              style={{ width: "28px", height: "28px", borderRadius: "8px" }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                polyline
-              </span>
-            </div>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--stitch-primary)" }}>
-              MapsBridge
-            </span>
-            <span style={{ fontSize: "13px", color: "var(--stitch-on-surface-variant)" }}>
-              © 2025 Tüm Hakları Saklıdır.
-            </span>
-          </div>
-
-          <div className="pub-footer-links">
-            <Link href="/terms" className="pub-footer-link">
-              Kullanım Koşulları
-            </Link>
-            <Link href="/privacy" className="pub-footer-link">
-              Gizlilik Politikası
-            </Link>
-            <Link href="/guvenlik" className="pub-footer-link">
-              Güvenlik
-            </Link>
-            <Link href="/yardim" className="pub-footer-link">
-              Yardım Merkezi
-            </Link>
-          </div>
-
-          <div>
-            <span
-              style={{
-                fontSize: "13px",
-                color: "var(--stitch-on-surface-variant)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                language
-              </span>
-              TR - Türkçe
-            </span>
-          </div>
-        </div>
-      </footer>
 
       {/* Toast Notification */}
       {toast && (

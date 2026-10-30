@@ -82,6 +82,50 @@ export default tseslint.config(
     },
   },
 
+  // Tasarım sistemi (design §10, guard G5'in editör içi erken uyarısı): header/footer yalnızca
+  // SiteChrome'dan (components/ui/site-chrome.tsx) render edilir; tw-utils.css yeni import edilmez.
+  // root layout.tsx tw-utils.css'i import eden tek legacy global'dir (C18'de dosya silinir), bu
+  // yüzden onun bloğunda yalnızca header/footer yasağı vardır.
+  {
+    files: ["apps/web/app/**/*.tsx"],
+    ignores: ["apps/web/app/components/ui/site-chrome.tsx", "apps/web/app/layout.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/components/header-nav", "**/header-nav", "**/components/site-footer", "**/site-footer"],
+              message:
+                "Header/footer yalnızca SiteChrome'dan render edilir (components/ui/site-chrome.tsx; bkz. .kiro/steering/design-system.md §Chrome).",
+            },
+            {
+              group: ["**/tw-utils.css"],
+              message:
+                "tw-utils.css yeni import edilmez; yerleşim sınıfı ya da primitive kullanın (bkz. .kiro/steering/design-system.md §Primitive'ler).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["apps/web/app/layout.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/components/header-nav", "**/header-nav", "**/components/site-footer", "**/site-footer"],
+              message:
+                "Header/footer yalnızca SiteChrome'dan render edilir (components/ui/site-chrome.tsx; bkz. .kiro/steering/design-system.md §Chrome).",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Architectural boundary: infra/lambda must not import from apps/.
   // Shared types/utilities belong in packages/. Existing violations are warned
   // (not errored) until imports are migrated to packages/ai-runtime or similar.

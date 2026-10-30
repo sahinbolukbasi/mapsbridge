@@ -3,8 +3,6 @@
 import React, { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { forgotPassword, confirmForgotPassword, signIn } from "../lib/cognito";
-import { HeaderNav } from "../components/header-nav";
-import { SiteFooter } from "../components/site-footer";
 import "./reset-password.css";
 
 export default function ForgotPasswordPage() {
@@ -162,7 +160,6 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="reset-viewport">
-      <HeaderNav />
 
       {/* Main Content */}
       <main className="reset-main">
@@ -711,8 +708,6 @@ export default function ForgotPasswordPage() {
         </div>
       </main>
 
-      {/* Unified Global Site Footer */}
-      <SiteFooter />
     </div>
   );
 }

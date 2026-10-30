@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { HeaderNav } from "./header-nav";
-import { SiteFooter } from "./site-footer";
 import "./not-found-view.css";
 
 interface NotFoundViewProps {
@@ -48,9 +46,6 @@ export function NotFoundView({
 
   return (
     <div className="not-found-page-wrapper not-found-topography">
-      {/* Universal Standard Header Nav across all pages */}
-      <HeaderNav />
-
       {/* Main 404 Hero Section */}
       <main className="not-found-main">
         <div className="not-found-content-box">
@@ -301,9 +296,6 @@ export function NotFoundView({
           </div>
         </div>
       </main>
-
-      {/* Universal Standard Footer across all pages */}
-      <SiteFooter />
     </div>
   );
 }

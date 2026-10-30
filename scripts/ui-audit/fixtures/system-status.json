@@ -1,0 +1,8 @@
+{
+  "_note": "ui-audit chrome-check AC-38 (design §4.1 R5-5): page.route(\"**/system/status\") ile servis edilen tek duyurulu durum. Mock API sözleşmesine (yalnızca /admin/*) eklenmez.",
+  "maintenanceMode": false,
+  "maintenanceMessage": "",
+  "announcements": [
+    { "id": "ui-audit", "title": "Test duyurusu", "message": "Chrome-check fixture", "version": 1 }
+  ]
+}

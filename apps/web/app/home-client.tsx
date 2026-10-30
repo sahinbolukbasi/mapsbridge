@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getStoredSession } from "./lib/cognito";
-import { HeaderNav } from "./components/header-nav";
-import { SiteFooter } from "./components/site-footer";
 import "./home.css";
 import { MobileStart } from "./components/mobile-start";
 import { FAQ_ITEMS, FAQ_ITEMS_EN, COMMUNITY_STORIES, COMMUNITY_POSTS } from "./features/landing";
@@ -60,9 +58,6 @@ export default function Home() {
 
   return (
     <div className="home-container">
-      {/* Üst Navigasyon */}
-      <HeaderNav />
-
       <MobileStart />
       <main className="home-desktop-content">
         {/* ========================================================= */}
@@ -1189,9 +1184,6 @@ export default function Home() {
           </form>
         </div>
       </div>
-
-      {/* Unified Global Site Footer */}
-      <SiteFooter />
     </div>
   );
 }

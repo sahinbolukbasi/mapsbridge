@@ -2,8 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { getStoredSession, isTokenExpired, willExpireSoon, refreshSession } from "../lib/cognito";
-import { HeaderNav } from "./header-nav";
-import { SiteFooter } from "./site-footer";
+import { LoadingState, PageHeader, PageShell } from "./ui";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -63,37 +62,13 @@ export function AuthGuard({
     };
   }, []);
 
+  // Kimlik kapısı (design §4.5): chrome SiteChrome'dadır; her dal kendi PageShell'ini ve tek h1'ini
+  // render eder. Yükleniyor dalı prerender HTML'idir (statik main + h1).
   if (checking) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          background: "var(--bg-main, #f8fafc)",
-        }}
-      >
-        <HeaderNav />
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              color: "#64748b",
-              fontWeight: 500,
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ animation: "spin 1s linear infinite" }}
-            >
-              sync
-            </span>
-            Oturum kontrol ediliyor...
-          </div>
-        </div>
-      </div>
+      <PageShell layout="app" header={<PageHeader variant="hidden" title={featureName} />}>
+        <LoadingState label="Oturum kontrol ediliyor..." />
+      </PageShell>
     );
   }
 
@@ -106,16 +81,7 @@ export function AuthGuard({
     const signupUrl = `/register/?next=${encodeURIComponent(currentPath)}`;
 
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          background:
-            "radial-gradient(ellipse at 50% -20%, rgba(30,77,62,0.15), transparent 70%), var(--bg-main, #0f172a)",
-        }}
-      >
-        <HeaderNav />
+      <PageShell layout="form">
         <div
           style={{
             flex: 1,
@@ -152,7 +118,12 @@ export function AuthGuard({
                 color: "#1e4d3e",
               }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>
+              <span
+                aria-hidden="true"
+                translate="no"
+                className="material-symbols-outlined"
+                style={{ fontSize: "32px" }}
+              >
                 lock
               </span>
             </div>
@@ -170,17 +141,7 @@ export function AuthGuard({
               {featureName}
             </div>
 
-            <h1
-              style={{
-                fontSize: "24px",
-                fontWeight: 800,
-                color: "#0f172a",
-                marginBottom: "12px",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {title}
-            </h1>
+            <PageHeader title={title} />
 
             <p
               style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.6, marginBottom: "28px" }}
@@ -207,7 +168,12 @@ export function AuthGuard({
                   transition: "all 0.2s ease",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                <span
+                  aria-hidden="true"
+                  translate="no"
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "20px" }}
+                >
                   login
                 </span>
                 Giriş Yap
@@ -231,7 +197,12 @@ export function AuthGuard({
                   transition: "all 0.2s ease",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                <span
+                  aria-hidden="true"
+                  translate="no"
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "20px" }}
+                >
                   person_add
                 </span>
                 Ücretsiz Hesap Oluştur
@@ -265,8 +236,7 @@ export function AuthGuard({
             </div>
           </div>
         </div>
-        <SiteFooter />
-      </div>
+      </PageShell>
     );
   }
 

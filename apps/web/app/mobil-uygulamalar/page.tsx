@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { HeaderNav } from "../components/header-nav";
-import { SiteFooter } from "../components/site-footer";
 import "./mobil-uygulamalar.css";
 
 export default function MobileAppsComingSoonPage() {
@@ -28,7 +26,6 @@ export default function MobileAppsComingSoonPage() {
 
   return (
     <div className="mobile-apps-container">
-      <HeaderNav />
 
       <main className="mobile-apps-main">
         {/* Hero Section */}
@@ -193,7 +190,6 @@ export default function MobileAppsComingSoonPage() {
         </section>
       </main>
 
-      <SiteFooter />
     </div>
   );
 }

@@ -321,4 +321,11 @@
       justify-content: center;
     }
   }
+  /* AC-17: dokunmatik genişliklerde footer kontrolleri ≥44×44 (design §3 "Dokunma hedefi"). */
+  @media (max-width: 767.98px) {
+    .global-footer-brand-link,
+    .global-footer-app-btn {
+      min-height: var(--touch-target);
+    }
+  }
 }

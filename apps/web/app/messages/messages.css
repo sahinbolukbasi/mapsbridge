@@ -12,23 +12,12 @@
   }
 
   @media (min-width: 1024px) {
+    /* C6: header SiteChrome'da (kök dışında); kök header'ın altındaki alanı doldurur. */
     .chat-page-root {
-      height: 100vh;
-      max-height: 100vh;
+      height: calc(100vh - var(--app-header-height));
+      max-height: calc(100vh - var(--app-header-height));
       overflow: hidden;
     }
-  }
-
-  .chat-page-root .global-site-header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    width: 100%;
-  }
-
-  .chat-page-root .global-site-header-inner {
-    max-width: 100% !important;
-    padding: 0 1rem !important;
   }
 
   .chat-main-workspace {
@@ -1751,8 +1740,9 @@
   .chat-mobile-tabs {
     display: none;
   }
+  /* C6: header SiteChrome'da (kök dışında). */
   .chat-page-root {
-    height: calc(100dvh - var(--mobile-nav-height));
+    height: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
     min-height: 0;
     max-height: none;
     overflow: hidden;

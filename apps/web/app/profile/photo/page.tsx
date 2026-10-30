@@ -4,7 +4,6 @@ import { userStorage } from "../../lib/user-storage";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { HeaderNav } from "../../components/header-nav";
 import { FullPagePromotion } from "../../components/auth-gate";
 import { getStoredSession } from "../../lib/cognito";
 import "./photo.css";
@@ -180,8 +179,6 @@ export default function ProfilePhotoPage() {
 
   return (
     <div className="photo-page-root">
-      <HeaderNav />
-
       <main className="photo-page-container">
         {/* Üst Başlık & Geri Dön */}
         <div className="photo-page-header">

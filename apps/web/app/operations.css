@@ -11,6 +11,11 @@
     font-family: Arial, sans-serif;
     pointer-events: none;
   }
+  /* R5-5: iç "Sistem duyurusu" region'ı; dış kapla aynı aralık (görsel fark yok). */
+  .operations-banners__region {
+    display: grid;
+    gap: 10px;
+  }
   .operations-banner {
     background: #123d30;
     color: white;
