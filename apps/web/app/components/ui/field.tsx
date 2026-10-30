@@ -15,6 +15,7 @@ export type FieldControlProps = {
  * aria-required enjekte eder. Hata <p role="alert"> yalnızca hata metni değişince duyurulur.
  */
 export function Field({
+  id: idProp,
   label,
   hint,
   error,
@@ -31,9 +32,12 @@ export function Field({
   optionalLabel?: string;
   className?: string;
   children: ((ids: FieldControlProps) => ReactNode) | ReactElement<FieldControlProps>;
+  /** Sabit kontrol id'si (hata özeti bağlantıları, odak); verilmezse useId(). */
+  id?: string;
 }) {
   const { t } = useLocale();
-  const id = useId();
+  const autoId = useId();
+  const id = idProp ?? autoId;
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   const control: FieldControlProps = {

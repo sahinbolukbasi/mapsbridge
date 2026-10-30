@@ -1,7 +1,29 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
-  /* Eski <style jsx> keyframes'i base.css'teki ui-spin'e taşındı (design §2.6, G20). */
+  /* /auth/callback/ (design §4.4 satır 20). Eski <style jsx> keyframes'i base.css'teki ui-spin. */
+  .auth-callback {
+    padding-block-end: var(--space-16);
+  }
+  .auth-callback__card {
+    text-align: center;
+  }
   .auth-callback-spinner {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto var(--space-6);
+    border: 3px solid var(--color-accent-sky);
+    border-top-color: transparent;
+    border-radius: var(--radius-full);
     animation: ui-spin 1s linear infinite;
+  }
+  .auth-callback__title {
+    margin: 0 0 var(--space-2);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+  }
+  .auth-callback__status {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
   }
 }

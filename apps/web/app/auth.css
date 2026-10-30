@@ -55,14 +55,6 @@
     letter-spacing: -0.02em;
     margin: 0 0 1.25rem;
   }
-
-  .auth .intro {
-    color: var(--text-muted);
-    font-size: var(--font-body);
-    line-height: var(--line-body);
-    margin: 0 0 1.5rem;
-  }
-
   .auth form {
     display: grid;
     gap: var(--space-4);
@@ -109,19 +101,6 @@
     font-size: 0.8rem;
     font-weight: 400;
   }
-
-  .auth .forgot {
-    color: var(--brand);
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: opacity 0.2s;
-  }
-
-  .auth .forgot:hover {
-    text-decoration: underline;
-  }
-
   .auth button.primary {
     background: var(--brand);
     color: var(--on-brand);
@@ -157,64 +136,6 @@
     font-weight: 600;
     margin: 1rem 0 0;
   }
-
-  .signup-callout {
-    background: var(--surface-alt);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-    margin-top: 1.75rem;
-    text-align: center;
-    display: grid;
-    gap: 0.5rem;
-  }
-
-  .signup-callout strong {
-    color: var(--text);
-    font-size: var(--font-body);
-  }
-
-  .signup-callout small {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-  }
-
-  .signup-callout .primary {
-    display: inline-block;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 0.9rem;
-    font-weight: 700;
-    padding: 0.65rem 1rem;
-    border-radius: var(--radius);
-    text-decoration: none;
-    margin-top: 0.4rem;
-    transition: all 0.2s;
-  }
-
-  .signup-callout .primary:hover {
-    border-color: var(--brand);
-  }
-
-  .password-rules {
-    list-style: none;
-    padding: 0;
-    margin: -0.25rem 0 0.5rem;
-    display: grid;
-    gap: 0.25rem;
-  }
-
-  .password-rules li {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
-
-  .password-rules li.valid {
-    color: var(--success);
-    font-weight: 600;
-  }
-
   .fineprint {
     color: var(--text-muted);
     font-size: 0.8rem;
@@ -249,35 +170,6 @@
     text-align: center;
     margin-bottom: 0.5rem;
   }
-
-  .resend-button {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    padding: 0.75rem;
-    font-size: var(--font-sm);
-    font-weight: 600;
-    width: 100%;
-    margin-top: 1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
-  }
-
-  .resend-button:hover:not(:disabled) {
-    background: var(--surface-alt);
-    border-color: var(--brand);
-  }
-
-  .resend-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
   @media (max-width: 640px) {
     .auth {
       padding: 2rem 1rem 3rem;
@@ -316,9 +208,9 @@
   .google-auth-btn {
     width: 100%;
     min-height: 48px;
-    background: #ffffff;
+    background: var(--color-surface);
     color: #1f2937;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius, 12px);
     font-size: 0.95rem;
     font-weight: 600;
@@ -334,8 +226,8 @@
   }
 
   .google-auth-btn:hover:not(:disabled) {
-    background: #f9fafb;
-    border-color: #9ca3af;
+    background: var(--color-bg);
+    border-color: var(--color-neutral-400);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateY(-1px);
   }
@@ -359,285 +251,10 @@
   .google-btn-text {
     font-weight: 600;
   }
-
-  /* Sosyal Giriş Ayırıcı Çizgi */
-  .auth-divider {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 1.5rem 0;
-    color: var(--text-muted);
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  .auth-divider::before,
-  .auth-divider::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* Google Setup / Test Modal */
-  .google-setup-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(6px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 99999;
-    padding: 1.25rem;
-    animation: fadeIn 0.2s ease-out;
-  }
-
-  .google-setup-card {
-    background: #ffffff;
-    border-radius: 20px;
-    max-width: 460px;
-    width: 100%;
-    padding: 2rem;
-    position: relative;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    border: 1px solid #e2e8f0;
-  }
-
-  .google-modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: #f1f5f9;
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    font-size: 1rem;
-    cursor: pointer;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .google-setup-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-
-  .google-modal-icon {
-    display: inline-flex;
-    padding: 0.75rem;
-    background: #f8fafc;
-    border-radius: 50%;
-    margin-bottom: 0.75rem;
-    border: 1px solid #e2e8f0;
-  }
-
-  .google-modal-title {
-    font-size: 1.35rem;
-    font-weight: 800;
-    margin: 0 0 0.35rem 0;
-    color: #0f172a;
-  }
-
-  .google-modal-desc {
-    font-size: 0.85rem;
-    color: #64748b;
-    margin: 0;
-    line-height: 1.45;
-  }
-
-  .google-quick-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .google-modal-label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #475569;
-  }
-
-  .google-modal-input {
-    padding: 0.65rem 0.85rem;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    outline: none;
-    background: #ffffff;
-    color: #0f172a;
-  }
-
-  .google-modal-input:focus {
-    border-color: #4285f4;
-  }
-
-  .google-quick-presets {
-    background: #f8fafc;
-    padding: 0.75rem;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-  }
-
-  .preset-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #64748b;
-    display: block;
-    margin-bottom: 0.4rem;
-  }
-
-  .preset-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .preset-chip {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    color: #2563eb;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .google-modal-submit-btn {
-    background: #4285f4;
-    color: #ffffff;
-    border: none;
-    padding: 0.85rem;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: background 0.2s;
-  }
-
-  .google-modal-submit-btn:hover {
-    background: #3367d6;
-  }
-
   .google-gis-container {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     min-height: 44px;
-  }
-
-  .google-modal-tabs {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 0.5rem;
-  }
-
-  .google-tab-btn {
-    background: transparent;
-    border: none;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #64748b;
-    padding: 0.4rem 0.65rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .google-tab-btn:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-
-  .google-tab-btn.active {
-    background: #eff6ff;
-    color: #2563eb;
-  }
-
-  .google-active-id-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    margin-top: 0.6rem;
-    font-size: 0.75rem;
-  }
-
-  .badge-active {
-    background: #16a34a;
-    color: #ffffff;
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 0.7rem;
-  }
-
-  .google-clear-btn {
-    margin-left: auto;
-    background: transparent;
-    border: none;
-    color: #dc2626;
-    font-weight: 600;
-    font-size: 0.75rem;
-    cursor: pointer;
-  }
-
-  .google-clear-btn:hover {
-    text-decoration: underline;
-  }
-
-  .google-guide-content {
-    text-align: left;
-    max-height: 280px;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-  }
-
-  .google-guide-content h4 {
-    font-size: 0.92rem;
-    margin: 0 0 0.75rem;
-    color: #0f172a;
-  }
-
-  .google-guide-steps {
-    padding-left: 1.25rem;
-    margin: 0;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: #475569;
-  }
-
-  .google-guide-steps li {
-    margin-bottom: 0.75rem;
-  }
-
-  .google-guide-steps code {
-    background: #f1f5f9;
-    padding: 0.1rem 0.35rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    color: #2563eb;
-  }
-
-  .guide-link {
-    color: #2563eb;
-    font-weight: 600;
-    text-decoration: underline;
-  }
-}
+  }}

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { handleGoogleCredentialResponse } from "../../lib/cognito";
 import "./callback.css";
-import { PageHeader } from "../../components/ui";
+import { Card, PageHeader, PageShell } from "../../components/ui";
 
 export default function AuthCallbackPage() {
   const [status, setStatus] = useState("Oturum doğrulanıyor...");
@@ -55,50 +55,19 @@ export default function AuthCallbackPage() {
   }, []);
 
   return (
-    <main
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: "var(--bg, #f8fafc)",
-        color: "var(--text, #0f172a)",
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-      }}
+    <PageShell
+      className="auth-callback"
+      header={
+        <PageHeader description="Google kimliğiniz doğrulanıyor; birazdan yönlendirileceksiniz." />
+      }
     >
-      {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
-      <PageHeader variant="hidden" />
-      <div
-        style={{
-          background: "var(--surface, #ffffff)",
-          border: "1px solid var(--border, #e2e8f0)",
-          borderRadius: "16px",
-          padding: "2.5rem",
-          maxWidth: "420px",
-          width: "90%",
-          textAlign: "center",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
-        }}
-      >
-        <div
-          className="auth-callback-spinner"
-          style={{
-            width: "48px",
-            height: "48px",
-            border: "3px solid #4285F4",
-            borderTopColor: "transparent",
-            borderRadius: "50%",
-            margin: "0 auto 1.5rem auto",
-          }}
-        />
-        <h2 style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0 0 0.5rem 0" }}>
-          Google Kimliği Doğrulanıyor
-        </h2>
-        <p style={{ fontSize: "0.9rem", color: "var(--text-muted, #64748b)", margin: 0 }}>
+      <Card padding="lg" className="auth-callback__card">
+        <div className="auth-callback-spinner" aria-hidden="true" />
+        <h2 className="auth-callback__title">Google Kimliği Doğrulanıyor</h2>
+        <p className="auth-callback__status" role="status">
           {status}
         </p>
-      </div>
-    </main>
+      </Card>
+    </PageShell>
   );
 }

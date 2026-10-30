@@ -2,15 +2,26 @@
 
 import React, { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { signIn, handleGoogleCredentialResponse, getStoredSession } from "../lib/cognito";
 import {
-  signIn,
-  handleGoogleCredentialResponse,
-  getStoredSession,
-} from "../lib/cognito";
+  Alert,
+  Button,
+  Field,
+  GoogleLogo,
+  IconButton,
+  Modal,
+  PageHeader,
+  PageShell,
+} from "../components/ui";
 import "./login.css";
 
-interface GoogleCredentialResponse { credential: string; }
-interface GoogleTokenResponse { error?: string; access_token?: string; }
+interface GoogleCredentialResponse {
+  credential: string;
+}
+interface GoogleTokenResponse {
+  error?: string;
+  access_token?: string;
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -23,6 +34,10 @@ export default function LoginPage() {
   const [isAppleLoading, setIsAppleLoading] = useState(false);
 
   const [showGoogleFallbackModal, setShowGoogleFallbackModal] = useState(false);
+  // İstemci doğrulaması gönderimde (design §6.2): alan hataları + özet + ilk hatalı alana odak.
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +79,11 @@ export default function LoginPage() {
         }
       } catch (err: unknown) {
         console.error("Google oturum açma hatası:", err);
-        setMessage(err instanceof Error ? err.message : "Google ile giriş başarısız oldu. Lütfen tekrar deneyin.");
+        setMessage(
+          err instanceof Error
+            ? err.message
+            : "Google ile giriş başarısız oldu. Lütfen tekrar deneyin.",
+        );
       } finally {
         setIsGoogleLoading(false);
       }
@@ -144,7 +163,12 @@ export default function LoginPage() {
                 const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
                   headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                 });
-                const profile = await userRes.json() as { email?: string; name?: string; given_name?: string; picture?: string };
+                const profile = (await userRes.json()) as {
+                  email?: string;
+                  name?: string;
+                  given_name?: string;
+                  picture?: string;
+                };
                 if (profile?.email) {
                   handleGoogleCredentialResponse(tokenResponse.access_token, {
                     email: profile.email,
@@ -224,6 +248,16 @@ export default function LoginPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const errors: { email?: string; password?: string } = {};
+    if (!email.trim()) errors.email = "E-posta adresinizi girin.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      errors.email = "Geçerli bir e-posta adresi girin (ör. ornek@alanadi.com).";
+    if (!password) errors.password = "Şifrenizi girin.";
+    setFieldErrors(errors);
+    if (errors.email || errors.password) {
+      (errors.email ? emailRef : passwordRef).current?.focus();
+      return;
+    }
     setIsLoading(true);
     setMessage("");
 
@@ -246,10 +280,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-viewport bg-surface font-body-md text-body-md text-on-surface antialiased">
-
+    <PageShell layout="landing" className="login-viewport">
       {/* Main Split Screen */}
-      <main className="login-main">
+      <div className="login-main">
         <div className="login-container">
           <div className="login-grid">
             {/* Sol Panel: Giriş Formu */}
@@ -264,7 +297,7 @@ export default function LoginPage() {
                   <span>TEKRAR HOŞ GELDİN</span>
                 </div>
 
-                <h1 className="login-title">Giriş yap.</h1>
+                <PageHeader title="Giriş yap." titleText="Giriş yap" />
                 <p className="login-subtitle">
                   Kişisel rotalarına, kayıtlı duraklarına ve seyahat arkadaşlarına kaldığın yerden
                   devam et.
@@ -278,29 +311,13 @@ export default function LoginPage() {
                     onClick={triggerGoogleSignIn}
                     disabled={isGoogleLoading}
                   >
-                    <svg style={{ width: "19px", height: "19px" }} viewBox="0 0 24 24">
-                      <path
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                        fill="#4285F4"
-                      ></path>
-                      <path
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                        fill="#34A853"
-                      ></path>
-                      <path
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                        fill="#FBBC05"
-                      ></path>
-                      <path
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                        fill="#EA4335"
-                      ></path>
-                    </svg>
+                    <GoogleLogo size={19} />
                     <span>{isGoogleLoading ? "Bağlanıyor..." : "Google ile Giriş Yap"}</span>
                   </button>
 
                   <button
                     className="login-apple-btn"
+                    data-surface="inverse"
                     type="button"
                     onClick={triggerAppleSignIn}
                     disabled={isAppleLoading}
@@ -319,121 +336,28 @@ export default function LoginPage() {
 
                 {/* Apple fallback modal kaldırıldı — Apple Sign In henüz web'de entegre değil */}
 
-                {showGoogleFallbackModal && (
-                  <div
-                    style={{
-                      position: "fixed",
-                      inset: 0,
-                      backgroundColor: "rgba(0,0,0,0.6)",
-                      backdropFilter: "blur(4px)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      zIndex: 9999,
-                      padding: "1rem",
-                    }}
-                    onClick={() => setShowGoogleFallbackModal(false)}
-                  >
-                    <div
-                      style={{
-                        backgroundColor: "#ffffff",
-                        borderRadius: "1.25rem",
-                        padding: "1.75rem",
-                        maxWidth: "440px",
-                        width: "100%",
-                        boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
-                        border: "1px solid #e2e8f0",
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          marginBottom: "0.75rem",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                          <svg style={{ width: "22px", height: "22px" }} viewBox="0 0 24 24">
-                            <path
-                              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                              fill="#4285F4"
-                            />
-                            <path
-                              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                              fill="#34A853"
-                            />
-                            <path
-                              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                              fill="#FBBC05"
-                            />
-                            <path
-                              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                              fill="#EA4335"
-                            />
-                          </svg>
-                          <h3
-                            style={{
-                              margin: 0,
-                              fontSize: "17px",
-                              fontWeight: 700,
-                              color: "#131b2e",
-                            }}
-                          >
-                            Google ile Giriş
-                          </h3>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setShowGoogleFallbackModal(false)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            color: "#64748b",
-                            fontSize: "18px",
-                            fontWeight: 700,
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                      <p
-                        style={{
-                          fontSize: "13.5px",
-                          color: "#475569",
-                          marginBottom: "1rem",
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        Google ile giriş şu anda gerçekleştirilemedi. Bu durum genellikle
-                        tarayıcınızın pop-up engelleyicisinden kaynaklanır.
-                      </p>
-                      <ul
-                        style={{
-                          fontSize: "13px",
-                          color: "#475569",
-                          margin: "0 0 1.25rem 0",
-                          paddingLeft: "1.25rem",
-                          lineHeight: 1.7,
-                        }}
-                      >
-                        <li>Tarayıcınızda pop-up engelleyicisini kapatıp tekrar deneyin</li>
-                        <li>Farklı bir tarayıcı kullanın (Chrome önerilir)</li>
-                        <li>Veya aşağıdan e-posta ve şifre ile giriş yapın</li>
-                      </ul>
-                      <button
-                        type="button"
-                        className="login-submit-btn"
-                        style={{ width: "100%", marginTop: 0 }}
-                        onClick={() => setShowGoogleFallbackModal(false)}
-                      >
-                        Anladım, E-posta ile Devam Et
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <Modal
+                  open={showGoogleFallbackModal}
+                  onClose={() => setShowGoogleFallbackModal(false)}
+                  title={
+                    <span className="login-fallback-title">
+                      <GoogleLogo size={22} /> Google ile Giriş
+                    </span>
+                  }
+                  description="Google ile giriş şu anda gerçekleştirilemedi. Bu durum genellikle tarayıcınızın pop-up engelleyicisinden kaynaklanır."
+                  size="sm"
+                  footer={
+                    <Button fullWidth onClick={() => setShowGoogleFallbackModal(false)}>
+                      Anladım, E-posta ile Devam Et
+                    </Button>
+                  }
+                >
+                  <ul className="login-fallback-list">
+                    <li>Tarayıcınızda pop-up engelleyicisini kapatıp tekrar deneyin</li>
+                    <li>Farklı bir tarayıcı kullanın (Chrome önerilir)</li>
+                    <li>Veya aşağıdan e-posta ve şifre ile giriş yapın</li>
+                  </ul>
+                </Modal>
 
                 {/* Ayraç */}
                 <div className="login-divider">
@@ -443,154 +367,150 @@ export default function LoginPage() {
                 </div>
 
                 {/* Form Alanları */}
-                <form onSubmit={handleSubmit}>
-                  <div className="login-form-group">
-                    <label className="login-label" htmlFor="emailInput">
-                      E-posta
-                    </label>
-                    <div className="login-input-wrapper">
-                      <span className="material-symbols-outlined login-input-icon">mail</span>
-                      <input
-                        className="login-input"
-                        id="emailInput"
-                        name="email"
-                        placeholder="ornek@alanadi.com"
-                        required
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="login-form-group">
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: "0.375rem",
-                      }}
-                    >
-                      <label
-                        className="login-label"
-                        htmlFor="passwordInput"
-                        style={{ marginBottom: 0 }}
-                      >
-                        Şifre
-                      </label>
-                      <Link
-                        style={{
-                          fontSize: "12px",
-                          color: "var(--mb-secondary)",
-                          fontWeight: 600,
-                          textDecoration: "none",
-                        }}
-                        href={`/reset-password/${email ? `?email=${encodeURIComponent(email)}` : ""}`}
-                      >
-                        Şifremi unuttum
-                      </Link>
-                    </div>
-                    <div className="login-input-wrapper">
-                      <span className="material-symbols-outlined login-input-icon">lock</span>
-                      <input
-                        className="login-input"
-                        id="passwordInput"
-                        name="password"
-                        placeholder="••••••••"
-                        required
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                      />
-                      <button
-                        className="login-password-toggle"
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        title={showPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
-                      >
-                        <span className="material-symbols-outlined text-[20px]">
-                          {showPassword ? "visibility_off" : "visibility"}
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      marginTop: "0.5rem",
-                    }}
+                <form onSubmit={handleSubmit} noValidate>
+                  {(fieldErrors.email || fieldErrors.password) && (
+                    <Alert tone="danger" live="assertive" title="Lütfen şu alanları düzeltin:">
+                      <ul className="login-error-summary">
+                        {fieldErrors.email && (
+                          <li>
+                            <a
+                              href="#emailInput"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                emailRef.current?.focus();
+                              }}
+                            >
+                              E-posta: {fieldErrors.email}
+                            </a>
+                          </li>
+                        )}
+                        {fieldErrors.password && (
+                          <li>
+                            <a
+                              href="#passwordInput"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                passwordRef.current?.focus();
+                              }}
+                            >
+                              Şifre: {fieldErrors.password}
+                            </a>
+                          </li>
+                        )}
+                      </ul>
+                    </Alert>
+                  )}
+                  <Field
+                    id="emailInput"
+                    label="E-posta"
+                    required
+                    error={fieldErrors.email}
+                    className="login-form-group"
                   >
+                    {(ids) => (
+                      <div className="login-input-wrapper">
+                        <span
+                          className="material-symbols-outlined login-input-icon"
+                          aria-hidden="true"
+                        >
+                          mail
+                        </span>
+                        <input
+                          {...ids}
+                          ref={emailRef}
+                          className="login-input"
+                          name="email"
+                          placeholder="ornek@alanadi.com"
+                          required
+                          type="email"
+                          autoComplete="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </Field>
+
+                  <div className="login-password-head">
+                    <Link
+                      className="login-forgot-link"
+                      href={`/reset-password/${email ? `?email=${encodeURIComponent(email)}` : ""}`}
+                    >
+                      Şifremi unuttum
+                    </Link>
+                  </div>
+                  <Field
+                    id="passwordInput"
+                    label="Şifre"
+                    required
+                    error={fieldErrors.password}
+                    className="login-form-group"
+                  >
+                    {(ids) => (
+                      <div className="login-input-wrapper">
+                        <span
+                          className="material-symbols-outlined login-input-icon"
+                          aria-hidden="true"
+                        >
+                          lock
+                        </span>
+                        <input
+                          {...ids}
+                          ref={passwordRef}
+                          className="login-input"
+                          name="password"
+                          placeholder="••••••••"
+                          required
+                          type={showPassword ? "text" : "password"}
+                          autoComplete="current-password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <IconButton
+                          className="login-password-toggle"
+                          variant="ghost"
+                          size="sm"
+                          icon={showPassword ? "visibility_off" : "visibility"}
+                          label="Şifreyi göster"
+                          pressed={showPassword}
+                          onClick={() => setShowPassword(!showPassword)}
+                        />
+                      </div>
+                    )}
+                  </Field>
+
+                  <div className="login-remember">
                     <input
                       id="rememberMe"
+                      className="login-remember__box"
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        accentColor: "var(--mb-primary-container)",
-                        cursor: "pointer",
-                      }}
                     />
-                    <label
-                      htmlFor="rememberMe"
-                      style={{
-                        fontSize: "13px",
-                        color: "var(--mb-on-surface-variant)",
-                        cursor: "pointer",
-                        userSelect: "none",
-                      }}
-                    >
+                    <label htmlFor="rememberMe" className="login-remember__label">
                       Beni bu cihazda hatırla
                     </label>
                   </div>
 
-                  {/* Hata Mesajı */}
+                  {/* Sunucu hatası (design §6.2: Alert danger assertive) */}
                   {message && (
-                    <div
-                      style={{
-                        marginTop: "0.875rem",
-                        padding: "0.75rem 1rem",
-                        borderRadius: "0.75rem",
-                        backgroundColor: "rgba(255, 218, 214, 0.5)",
-                        border: "1px solid rgba(186, 26, 26, 0.3)",
-                        color: "#ba1a1a",
-                        fontSize: "13px",
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "0.5rem",
-                      }}
-                      role="alert"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">error</span>
-                      <div>
-                        <p style={{ margin: 0, fontWeight: 600 }}>{message}</p>
-                        {message.toLowerCase().includes("hatalı") && (
-                          <p style={{ margin: "0.25rem 0 0", fontSize: "12px" }}>
-                            Şifrenizi hatırlamıyorsanız:{" "}
-                            <Link
-                              href={`/reset-password/?email=${encodeURIComponent(email)}`}
-                              style={{
-                                textDecoration: "underline",
-                                fontWeight: 700,
-                                color: "inherit",
-                              }}
-                            >
-                              Şifremi Sıfırla →
-                            </Link>
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                    <Alert tone="danger" live="assertive" title={message}>
+                      {message.toLowerCase().includes("hatalı") && (
+                        <>
+                          Şifrenizi hatırlamıyorsanız:{" "}
+                          <Link href={`/reset-password/?email=${encodeURIComponent(email)}`}>
+                            Şifremi Sıfırla →
+                          </Link>
+                        </>
+                      )}
+                    </Alert>
                   )}
 
                   <button className="login-submit-btn" type="submit" disabled={isLoading}>
                     <span>{isLoading ? "Giriş yapılıyor…" : "Giriş yap"}</span>
-                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      arrow_forward
+                    </span>
                   </button>
                 </form>
               </div>
@@ -627,7 +547,7 @@ export default function LoginPage() {
                     }
                   >
                     <span>Ücretsiz üye ol</span>
-                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                    <span className="material-symbols-outlined">arrow_forward</span>
                   </Link>
                 </div>
                 <p
@@ -650,7 +570,7 @@ export default function LoginPage() {
                   }}
                 >
                   <span
-                    className="material-symbols-outlined text-[15px]"
+                    className="material-symbols-outlined"
                     style={{ color: "var(--mb-emerald-accent)" }}
                   >
                     verified_user
@@ -670,12 +590,12 @@ export default function LoginPage() {
                 style={{ backgroundImage: "url('/images/kapadokya-balloons.jpg')" }}
               ></div>
               {/* Koyu Degrade Filtresi */}
-              <div className="login-bg-overlay"></div>
+              <div className="login-bg-overlay" data-surface="inverse"></div>
 
               {/* Üst Asılı Hap: Son Ziyaret Edilen Rota */}
               <div className="login-top-pill">
                 <span
-                  className="material-symbols-outlined text-[18px]"
+                  className="material-symbols-outlined"
                   style={{ color: "var(--mb-secondary)" }}
                 >
                   explore
@@ -748,11 +668,11 @@ export default function LoginPage() {
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <span className="material-symbols-outlined text-[16px]">star</span>
-                    <span className="material-symbols-outlined text-[16px]">star</span>
-                    <span className="material-symbols-outlined text-[16px]">star</span>
-                    <span className="material-symbols-outlined text-[16px]">star</span>
-                    <span className="material-symbols-outlined text-[16px]">star</span>
+                    <span className="material-symbols-outlined">star</span>
+                    <span className="material-symbols-outlined">star</span>
+                    <span className="material-symbols-outlined">star</span>
+                    <span className="material-symbols-outlined">star</span>
+                    <span className="material-symbols-outlined">star</span>
                   </div>
                   <blockquote
                     style={{
@@ -789,7 +709,7 @@ export default function LoginPage() {
                       }}
                     >
                       <span
-                        className="material-symbols-outlined text-[14px]"
+                        className="material-symbols-outlined"
                         style={{ color: "var(--mb-secondary)" }}
                       >
                         pin_drop
@@ -802,8 +722,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-      </main>
-
-    </div>
+      </div>
+    </PageShell>
   );
 }

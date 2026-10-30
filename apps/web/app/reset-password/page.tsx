@@ -3,6 +3,7 @@
 import React, { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { forgotPassword, confirmForgotPassword, signIn } from "../lib/cognito";
+import { Alert, Field, IconButton, PageHeader, PageShell } from "../components/ui";
 import "./reset-password.css";
 
 export default function ForgotPasswordPage() {
@@ -17,6 +18,21 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // Alan hatası (design §6.2): mesaj Alert'te özetlenir, alan aria-invalid + odak alır.
+  type ResetField = "email" | "code" | "newPassword" | "confirm";
+  const [fieldError, setFieldError] = useState<Partial<Record<ResetField, string>>>({});
+  const FIELD_IDS: Record<ResetField, string> = {
+    email: "resetEmailInput",
+    code: "verification_code",
+    newPassword: "new_password",
+    confirm: "confirm_password",
+  };
+  function failField(field: ResetField, text: string) {
+    setMessage(text);
+    setFieldError({ [field]: text });
+    setIsLoading(false);
+    document.getElementById(FIELD_IDS[field])?.focus();
+  }
 
   // URL'den email, code veya step parametrelerini al
   useEffect(() => {
@@ -59,10 +75,10 @@ export default function ForgotPasswordPage() {
     setMessage("");
     setStatus("");
 
+    setFieldError({});
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail) {
-      setMessage("Lütfen e-posta adresinizi girin.");
-      setIsLoading(false);
+      failField("email", "Lütfen e-posta adresinizi girin.");
       return;
     }
 
@@ -74,7 +90,8 @@ export default function ForgotPasswordPage() {
       );
     } catch (err: unknown) {
       setMessage(
-        (err instanceof Error ? err.message : null) || "Doğrulama kodu gönderilemedi. Lütfen e-posta adresinizi kontrol edin.",
+        (err instanceof Error ? err.message : null) ||
+          "Doğrulama kodu gönderilemedi. Lütfen e-posta adresinizi kontrol edin.",
       );
     } finally {
       setIsLoading(false);
@@ -90,6 +107,7 @@ export default function ForgotPasswordPage() {
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanCode = code.trim();
+    setFieldError({});
 
     if (!cleanEmail) {
       setMessage("Lütfen geçerli bir e-posta adresi belirtin.");
@@ -98,20 +116,17 @@ export default function ForgotPasswordPage() {
     }
 
     if (!cleanCode || cleanCode.length < 6) {
-      setMessage("Lütfen e-postanıza gönderilen 6 haneli doğrulama kodunu eksiksiz girin.");
-      setIsLoading(false);
+      failField("code", "Lütfen e-postanıza gönderilen 6 haneli doğrulama kodunu eksiksiz girin.");
       return;
     }
 
     if (!isPasswordValid) {
-      setMessage("Yeni şifreniz tüm güvenlik kurallarını sağlamalıdır.");
-      setIsLoading(false);
+      failField("newPassword", "Yeni şifreniz tüm güvenlik kurallarını sağlamalıdır.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setMessage("Girdiğiniz yeni şifreler birbiriyle eşleşmiyor.");
-      setIsLoading(false);
+      failField("confirm", "Girdiğiniz yeni şifreler birbiriyle eşleşmiyor.");
       return;
     }
 
@@ -129,7 +144,10 @@ export default function ForgotPasswordPage() {
         router.push("/maps/");
       }, 1000);
     } catch (err: unknown) {
-      setMessage((err instanceof Error ? err.message : null) || "Şifre güncellenemedi. Lütfen kodu kontrol edip tekrar deneyin.");
+      setMessage(
+        (err instanceof Error ? err.message : null) ||
+          "Şifre güncellenemedi. Lütfen kodu kontrol edip tekrar deneyin.",
+      );
       setIsLoading(false);
     }
   }
@@ -152,17 +170,19 @@ export default function ForgotPasswordPage() {
       await forgotPassword(cleanEmail);
       setStatus(`Yeni 6 haneli doğrulama kodu ${cleanEmail} adresine tekrar gönderildi.`);
     } catch (err: unknown) {
-      setMessage((err instanceof Error ? err.message : null) || "Kod tekrar gönderilemedi. Lütfen biraz bekleyin.");
+      setMessage(
+        (err instanceof Error ? err.message : null) ||
+          "Kod tekrar gönderilemedi. Lütfen biraz bekleyin.",
+      );
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div className="reset-viewport">
-
+    <PageShell layout="landing" className="reset-viewport">
       {/* Main Content */}
-      <main className="reset-main">
+      <div className="reset-main">
         <div className="reset-grid-layout">
           {/* LEFT COLUMN: Form Container */}
           <section className="reset-form-container" data-purpose="password-reset-form-container">
@@ -176,7 +196,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 {/* Section Title & Subtext */}
-                <h1 className="reset-heading">Yeni Şifreni Belirle</h1>
+                <PageHeader title="Yeni Şifreni Belirle" titleText="Şifre sıfırlama" />
                 <p className="reset-desc">
                   E-postanıza gelen 6 haneli doğrulama kodunu ve yeni şifrenizi girerek hesabınızı
                   güncelleyin.
@@ -242,123 +262,75 @@ export default function ForgotPasswordPage() {
 
                 {/* Status / Error Alerts */}
                 {status && (
-                  <div
-                    style={{
-                      marginTop: "1rem",
-                      padding: "0.75rem 1rem",
-                      borderRadius: "0.75rem",
-                      backgroundColor: "#eafaf3",
-                      border: "1px solid #c4f0dd",
-                      color: "#0c6b4b",
-                      fontSize: "13px",
-                    }}
-                  >
+                  <Alert tone="success" live="polite">
                     {status}
-                  </div>
+                  </Alert>
                 )}
                 {message && (
-                  <div
-                    style={{
-                      marginTop: "1rem",
-                      padding: "0.75rem 1rem",
-                      borderRadius: "0.75rem",
-                      backgroundColor: "#fef2f2",
-                      border: "1px solid #fecaca",
-                      color: "#b91c1c",
-                      fontSize: "13px",
-                    }}
-                  >
+                  <Alert tone="danger" live="assertive">
                     {message}
-                  </div>
+                  </Alert>
                 )}
 
                 {/* Confirm Form */}
-                <form className="reset-form" onSubmit={handleConfirmReset}>
+                <form className="reset-form" onSubmit={handleConfirmReset} noValidate>
                   {/* Verification Code Field */}
-                  <div>
-                    <label className="reset-field-label" htmlFor="verification_code">
-                      6 Haneli Doğrulama Kodu
-                    </label>
-                    <div className="reset-input-container">
-                      <input
-                        className="reset-code-input"
-                        id="verification_code"
-                        maxLength={6}
-                        name="verification_code"
-                        placeholder="Örn: 849201"
-                        type="text"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                      />
-                      {code.length === 6 && <span className="reset-code-badge">Hazır</span>}
-                    </div>
-                  </div>
+                  <Field
+                    id="verification_code"
+                    label="6 Haneli Doğrulama Kodu"
+                    required
+                    error={fieldError.code}
+                  >
+                    {(ids) => (
+                      <div className="reset-input-container">
+                        <input
+                          {...ids}
+                          className="reset-code-input"
+                          maxLength={6}
+                          name="verification_code"
+                          placeholder="Örn: 849201"
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          value={code}
+                          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                        />
+                        {code.length === 6 && <span className="reset-code-badge">Hazır</span>}
+                      </div>
+                    )}
+                  </Field>
 
                   {/* New Password Field */}
-                  <div>
-                    <label className="reset-field-label" htmlFor="new_password">
-                      Yeni Şifreniz
-                    </label>
-                    <div className="reset-input-container">
-                      <input
-                        className="reset-standard-input"
-                        id="new_password"
-                        name="new_password"
-                        placeholder="Yeni şifrenizi girin"
-                        style={{ paddingRight: "3rem" }}
-                        type={showPassword ? "text" : "password"}
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                      />
-                      <button
-                        className="reset-eye-btn"
-                        id="togglePassword"
-                        onClick={() => setShowPassword(!showPassword)}
-                        title={showPassword ? "Şifreyi Gizle" : "Şifreyi Göster"}
-                        type="button"
-                      >
-                        {showPassword ? (
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            width="20"
-                            height="20"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            width="20"
-                            height="20"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                  <Field
+                    id="new_password"
+                    label="Yeni Şifreniz"
+                    required
+                    error={fieldError.newPassword}
+                  >
+                    {(ids) => (
+                      <div className="reset-input-container">
+                        <input
+                          {...ids}
+                          className="reset-standard-input reset-standard-input--toggle"
+                          name="new_password"
+                          placeholder="Yeni şifrenizi girin"
+                          type={showPassword ? "text" : "password"}
+                          autoComplete="new-password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <IconButton
+                          className="reset-eye-btn"
+                          variant="ghost"
+                          size="sm"
+                          icon={showPassword ? "visibility_off" : "visibility"}
+                          label="Şifreyi göster"
+                          pressed={showPassword}
+                          onClick={() => setShowPassword(!showPassword)}
+                        />
+                      </div>
+                    )}
+                  </Field>
 
                   {/* Password Strength Rules Box */}
                   <div className="reset-criteria-box" data-purpose="password-criteria-list">
@@ -391,20 +363,25 @@ export default function ForgotPasswordPage() {
                   </div>
 
                   {/* New Password Confirmation Field */}
-                  <div>
-                    <label className="reset-field-label" htmlFor="confirm_password">
-                      Yeni Şifreniz (Tekrar)
-                    </label>
-                    <input
-                      className="reset-standard-input input-confirm"
-                      id="confirm_password"
-                      name="confirm_password"
-                      placeholder="Yeni şifrenizi tekrar girin"
-                      type={showPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                  </div>
+                  <Field
+                    id="confirm_password"
+                    label="Yeni Şifreniz (Tekrar)"
+                    required
+                    error={fieldError.confirm}
+                  >
+                    {(ids) => (
+                      <input
+                        {...ids}
+                        className="reset-standard-input input-confirm"
+                        name="confirm_password"
+                        placeholder="Yeni şifrenizi tekrar girin"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    )}
+                  </Field>
 
                   {/* Submit Action Button */}
                   <button
@@ -454,7 +431,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 {/* Section Title & Subtext */}
-                <h1 className="reset-heading">Şifreni mi unuttun?</h1>
+                <PageHeader title="Şifreni mi unuttun?" titleText="Şifre sıfırlama" />
                 <p className="reset-desc">
                   Endişelenme, kayıtlı e-posta adresini girerek şifreni sıfırlama kodunu hemen
                   alabilirsin.
@@ -462,55 +439,40 @@ export default function ForgotPasswordPage() {
 
                 {/* Status / Error Alerts */}
                 {status && (
-                  <div
-                    style={{
-                      marginTop: "1rem",
-                      padding: "0.75rem 1rem",
-                      borderRadius: "0.75rem",
-                      backgroundColor: "#eafaf3",
-                      border: "1px solid #c4f0dd",
-                      color: "#0c6b4b",
-                      fontSize: "13px",
-                    }}
-                  >
+                  <Alert tone="success" live="polite">
                     {status}
-                  </div>
+                  </Alert>
                 )}
                 {message && (
-                  <div
-                    style={{
-                      marginTop: "1rem",
-                      padding: "0.75rem 1rem",
-                      borderRadius: "0.75rem",
-                      backgroundColor: "#fef2f2",
-                      border: "1px solid #fecaca",
-                      color: "#b91c1c",
-                      fontSize: "13px",
-                    }}
-                  >
+                  <Alert tone="danger" live="assertive">
                     {message}
-                  </div>
+                  </Alert>
                 )}
 
                 {/* Send Form */}
-                <form className="reset-form" onSubmit={handleSendEmailCode}>
-                  <div>
-                    <label className="reset-field-label" htmlFor="resetEmailInput">
-                      Kayıtlı E-posta Adresi
-                    </label>
-                    <div className="reset-input-container">
-                      <input
-                        className="reset-standard-input"
-                        id="resetEmailInput"
-                        name="email"
-                        placeholder="ornek@alanadi.com"
-                        required
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
+                <form className="reset-form" onSubmit={handleSendEmailCode} noValidate>
+                  <Field
+                    id="resetEmailInput"
+                    label="Kayıtlı E-posta Adresi"
+                    required
+                    error={fieldError.email}
+                  >
+                    {(ids) => (
+                      <div className="reset-input-container">
+                        <input
+                          {...ids}
+                          className="reset-standard-input"
+                          name="email"
+                          placeholder="ornek@alanadi.com"
+                          required
+                          type="email"
+                          autoComplete="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </Field>
 
                   {/* 15 Minute Notice Box */}
                   <div
@@ -518,7 +480,7 @@ export default function ForgotPasswordPage() {
                     style={{ margin: 0, padding: "0.75rem 1rem" }}
                   >
                     <span
-                      className="material-symbols-outlined text-[18px]"
+                      className="material-symbols-outlined"
                       style={{ color: "var(--mb-mint-600)", flexShrink: 0 }}
                     >
                       lock_clock
@@ -543,9 +505,9 @@ export default function ForgotPasswordPage() {
                   <button
                     className="reset-submit-button"
                     style={{
-                      backgroundColor: "#f1f5f9",
+                      backgroundColor: "var(--color-surface-sunken)",
                       color: "#374151",
-                      border: "1px solid #e2e8f0",
+                      border: "1px solid var(--color-border)",
                     }}
                     type="button"
                     onClick={() => {
@@ -589,7 +551,10 @@ export default function ForgotPasswordPage() {
                 <div className="reset-active-pill">
                   <span
                     className="reset-pulse-dot"
-                    style={{ backgroundColor: "#34d399", boxShadow: "0 0 6px #34d399" }}
+                    style={{
+                      backgroundColor: "var(--color-accent-strong)",
+                      boxShadow: "0 0 6px var(--color-accent-strong)",
+                    }}
                   ></span>
                   <span>Güvenli Oturum Yenileme • Aktif Koruma</span>
                 </div>
@@ -599,13 +564,14 @@ export default function ForgotPasswordPage() {
               {/* Bottom Card Overlay Content */}
               <div className="reset-showcase-bottom">
                 {/* 256-Bit Uçtan Uca Şifreleme */}
-                <div className="glass-effect">
+                <div className="glass-effect" data-surface="inverse">
                   <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
                     <div
                       style={{
                         padding: "0.5rem",
                         borderRadius: "0.75rem",
-                        backgroundColor: "rgba(30, 77, 62, 0.8)",
+                        backgroundColor:
+                          "color-mix(in srgb, var(--color-brand-hover) 80%, transparent)",
                         color: "#6ee7b7",
                         flexShrink: 0,
                         marginTop: "2px",
@@ -629,7 +595,12 @@ export default function ForgotPasswordPage() {
                     </div>
                     <div>
                       <h3
-                        style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#ffffff" }}
+                        style={{
+                          margin: 0,
+                          fontSize: "14px",
+                          fontWeight: 600,
+                          color: "var(--color-on-primary)",
+                        }}
                       >
                         256-Bit Uçtan Uca Şifreleme
                       </h3>
@@ -637,7 +608,7 @@ export default function ForgotPasswordPage() {
                         style={{
                           margin: "0.25rem 0 0",
                           fontSize: "12px",
-                          color: "rgba(255, 255, 255, 0.8)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 80%, transparent)",
                           lineHeight: "1.4",
                         }}
                       >
@@ -649,7 +620,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 {/* Session Termination Option */}
-                <div className="glass-effect">
+                <div className="glass-effect" data-surface="inverse">
                   <label className="reset-session-label">
                     <input
                       checked={signOutOtherSessions}
@@ -706,8 +677,7 @@ export default function ForgotPasswordPage() {
             </div>
           </aside>
         </div>
-      </main>
-
-    </div>
+      </div>
+    </PageShell>
   );
 }
