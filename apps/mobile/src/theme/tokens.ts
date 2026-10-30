@@ -1,0 +1,245 @@
+// OTOMATİK ÜRETİLDİ — packages/design-tokens. Elle düzenleme. `npm run tokens:build`
+// React Native teması. Renkler çözülmüş hex/rgba; RN CSS karışımlarını ve değişken referanslarını desteklemez.
+
+export const tokens = {
+  color: {
+    bg: "#f8fafc",
+    surface: "#ffffff",
+    surfaceSunken: "#f1f5f9",
+    surfaceTint: "#eef0ff",
+    surfaceBrand: "#ecfdf5",
+    surfaceBrandStrong: "#d1fae5",
+    onSurfaceBrand: "#065f46",
+    surfaceInverse: "#0d281e",
+    surfaceInverseStrong: "#020e0a",
+    text: "#0f172a",
+    textMuted: "#404945",
+    textSubtle: "#64748b",
+    textInverse: "#ffffff",
+    textInverseMuted: "#cbd5e1",
+    textInverseSubtle: "#94a3b8",
+    textBrand: "#013628",
+    brand: "#286954",
+    brandHover: "#1e4d3e",
+    link: "#286954",
+    linkHover: "#013628",
+    linkInverse: "#34d399",
+    linkInverseHover: "#abedd3",
+    primary: "#013628",
+    primaryHover: "#1e4d3e",
+    primaryActive: "#0d281e",
+    onPrimary: "#ffffff",
+    accent: "#10b981",
+    accentStrong: "#34d399",
+    onAccent: "#0d281e",
+    accentSky: "#0284c7",
+    accentSkySoft: "#38bdf8",
+    accentA10: "rgba(16, 185, 129, 0.1)",
+    accentA20: "rgba(16, 185, 129, 0.2)",
+    accentA30: "rgba(16, 185, 129, 0.3)",
+    whiteA08: "rgba(255, 255, 255, 0.08)",
+    whiteA12: "rgba(255, 255, 255, 0.12)",
+    neutral0: "#ffffff",
+    neutral50: "#f8fafc",
+    neutral100: "#f1f5f9",
+    neutral200: "#e2e8f0",
+    neutral300: "#cbd5e1",
+    neutral400: "#94a3b8",
+    neutral500: "#64748b",
+    neutral600: "#404945",
+    neutral700: "#334155",
+    neutral800: "#1e293b",
+    neutral900: "#0f172a",
+    border: "#e2e8f0",
+    borderSubtle: "rgba(226, 232, 240, 0.85)",
+    borderControl: "#64748b",
+    borderStrong: "#cbd5e1",
+    success: "#047857",
+    successStrong: "#059669",
+    successBg: "#ecfdf5",
+    successBorder: "#abedd3",
+    warning: "#92400e",
+    warningBg: "#fffbeb",
+    warningBgStrong: "#fef3c7",
+    warningBorder: "#fde68a",
+    warningIcon: "#f59e0b",
+    danger: "#b91c1c",
+    dangerBg: "#fef2f2",
+    dangerBorder: "#fecaca",
+    dangerSolid: "#b91c1c",
+    dangerIcon: "#ef4444",
+    info: "#1d4ed8",
+    infoBg: "#eff6ff",
+    infoBorder: "#bfdbfe",
+    infoIcon: "#3b82f6",
+    mapRoute: "#2563eb",
+    focusRingColor: "#013628",
+    focusRingColorInverse: "#34d399",
+    scrim: "rgba(0, 0, 0, 0.45)",
+    buttonPrimaryBg: "#013628",
+    buttonPrimaryBgHover: "#1e4d3e",
+    buttonPrimaryFg: "#ffffff",
+    buttonBrandBg: "#286954",
+    buttonBrandBgHover: "#1e4d3e",
+    buttonBrandFg: "#ffffff",
+    buttonSecondaryBg: "#ffffff",
+    buttonSecondaryBgHover: "#f1f5f9",
+    buttonSecondaryFg: "#0f172a",
+    buttonSecondaryBorder: "#64748b",
+    buttonGhostBgHover: "#f1f5f9",
+    buttonGhostFg: "#0f172a",
+    buttonDangerBg: "#b91c1c",
+    buttonDangerFg: "#ffffff",
+    skeletonBg: "#f1f5f9"
+  },
+  dataPalette: {
+    blue: "#2563eb",
+    emerald: "#10b981",
+    violet: "#8b5cf6",
+    orange: "#f97316",
+    pink: "#ec4899",
+    cyan: "#06b6d4",
+    yellow: "#eab308",
+    red: "#ef4444",
+    indigo: "#6366f1",
+    teal: "#14b8a6",
+    "blue-light": "#3b82f6",
+    green: "#16a34a",
+    purple: "#a855f7",
+    "orange-deep": "#ea580c",
+    amber: "#b45309",
+    slate: "#64748b"
+  },
+  thirdParty: {
+    "google-blue": "#4285f4",
+    "google-green": "#34a853",
+    "google-yellow": "#fbbc05",
+    "google-red": "#ea4335",
+    "google-blue-hover": "#3367d6",
+    whatsapp: "#25d366",
+    yandex: "#fc3f1d",
+    stripe: "#635bff"
+  },
+  space: {
+    "0": 0,
+    "1": 4,
+    "2": 8,
+    "3": 12,
+    "4": 16,
+    "5": 20,
+    "6": 24,
+    "8": 32,
+    "10": 40,
+    "12": 48,
+    "16": 64,
+    "20": 80
+  },
+  radius: {
+    xs: 6,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 24,
+    full: 9999
+  },
+  font: {
+    size: {
+      "2xs": 11,
+      xs: 12,
+      sm: 13,
+      md: 14,
+      base: 16,
+      lg: 18,
+      xl: 20,
+      "2xl": 24,
+      "3xl": 30,
+      display: 36
+    },
+    weight: {
+      regular: "400",
+      medium: "500",
+      semibold: "600",
+      bold: "700",
+      extrabold: "800"
+    },
+    lineHeight: {
+      tight: 1.15,
+      heading: 1.2,
+      body: 1.6
+    }
+  },
+  shadow: {
+    xs: {
+      shadowColor: "#0d281e",
+      shadowOpacity: 0.04,
+      shadowRadius: 1,
+      shadowOffset: {
+        width: 0,
+        height: 1
+      },
+      elevation: 1
+    },
+    sm: {
+      shadowColor: "#0d281e",
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      shadowOffset: {
+        width: 0,
+        height: 2
+      },
+      elevation: 2
+    },
+    md: {
+      shadowColor: "#0d281e",
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: {
+        width: 0,
+        height: 8
+      },
+      elevation: 4
+    },
+    lg: {
+      shadowColor: "#0d281e",
+      shadowOpacity: 0.1,
+      shadowRadius: 24,
+      shadowOffset: {
+        width: 0,
+        height: 16
+      },
+      elevation: 8
+    },
+    xl: {
+      shadowColor: "#0d281e",
+      shadowOpacity: 0.16,
+      shadowRadius: 32,
+      shadowOffset: {
+        width: 0,
+        height: 24
+      },
+      elevation: 12
+    }
+  },
+  motion: {
+    duration: {
+      instant: 0,
+      fast: 120,
+      base: 200,
+      slow: 320
+    }
+  },
+  touch: {
+    min: 44
+  },
+  control: {
+    heightSm: 36,
+    height: 44,
+    heightLg: 52
+  },
+  focusRing: {
+    width: 2,
+    offset: 2
+  }
+} as const;
+
+export type Tokens = typeof tokens;

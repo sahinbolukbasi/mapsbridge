@@ -12,7 +12,7 @@ inclusion: always
 
 - Asıl backend: `infra/lambda/src/`. `services/*` DEĞİL.
 - `services/*` durumu: `messaging` ve `place-intelligence` CANLI (lambda import eder); `ai-assistant` kısmen canlı (apps/web üzerinden); `identity-billing` ÖLÜ (grep=0).
-- `packages/`: sadece `contracts` (canlı, tek paylaşım kanalı).
+- `packages/`: `contracts` (canlı, tek runtime paylaşım kanalı) + `design-tokens` (UI token kaynağı; yalnızca üretim zamanı, runtime import yok).
 
 ## 2. GERÇEK — karmaşıklık sıcak noktaları (ölçülü)
 

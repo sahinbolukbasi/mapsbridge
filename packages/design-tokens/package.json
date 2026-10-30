@@ -1,0 +1,12 @@
+{
+  "name": "@mapsbridge/design-tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "description": "MapsBridge tasarım dili için tek token kaynağı. Web CSS, web TS ve React Native temasını üretir.",
+  "scripts": {
+    "build": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/generate.ts",
+    "check": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/generate.ts --check"
+  }
+}

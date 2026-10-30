@@ -1,0 +1,142 @@
+// OTOMATİK ÜRETİLDİ — packages/design-tokens. Elle düzenleme. `npm run tokens:build`
+// CSS değişkeni okuyamayan JS tüketicileri (Leaflet, canvas) için çözülmüş değerler.
+// Diğer her yerde CSS'te var(--…) kullan.
+
+export const color = {
+  bg: "#f8fafc",
+  surface: "#ffffff",
+  surfaceSunken: "#f1f5f9",
+  surfaceTint: "#eef0ff",
+  surfaceBrand: "#ecfdf5",
+  surfaceBrandStrong: "#d1fae5",
+  onSurfaceBrand: "#065f46",
+  surfaceInverse: "#0d281e",
+  surfaceInverseStrong: "#020e0a",
+  text: "#0f172a",
+  textMuted: "#404945",
+  textSubtle: "#64748b",
+  textInverse: "#ffffff",
+  textInverseMuted: "#cbd5e1",
+  textInverseSubtle: "#94a3b8",
+  textBrand: "#013628",
+  brand: "#286954",
+  brandHover: "#1e4d3e",
+  link: "#286954",
+  linkHover: "#013628",
+  linkInverse: "#34d399",
+  linkInverseHover: "#abedd3",
+  primary: "#013628",
+  primaryHover: "#1e4d3e",
+  primaryActive: "#0d281e",
+  onPrimary: "#ffffff",
+  accent: "#10b981",
+  accentStrong: "#34d399",
+  onAccent: "#0d281e",
+  accentSky: "#0284c7",
+  accentSkySoft: "#38bdf8",
+  accentA10: "rgba(16, 185, 129, 0.1)",
+  accentA20: "rgba(16, 185, 129, 0.2)",
+  accentA30: "rgba(16, 185, 129, 0.3)",
+  whiteA08: "rgba(255, 255, 255, 0.08)",
+  whiteA12: "rgba(255, 255, 255, 0.12)",
+  neutral0: "#ffffff",
+  neutral50: "#f8fafc",
+  neutral100: "#f1f5f9",
+  neutral200: "#e2e8f0",
+  neutral300: "#cbd5e1",
+  neutral400: "#94a3b8",
+  neutral500: "#64748b",
+  neutral600: "#404945",
+  neutral700: "#334155",
+  neutral800: "#1e293b",
+  neutral900: "#0f172a",
+  border: "#e2e8f0",
+  borderSubtle: "rgba(226, 232, 240, 0.85)",
+  borderControl: "#64748b",
+  borderStrong: "#cbd5e1",
+  success: "#047857",
+  successStrong: "#059669",
+  successBg: "#ecfdf5",
+  successBorder: "#abedd3",
+  warning: "#92400e",
+  warningBg: "#fffbeb",
+  warningBgStrong: "#fef3c7",
+  warningBorder: "#fde68a",
+  warningIcon: "#f59e0b",
+  danger: "#b91c1c",
+  dangerBg: "#fef2f2",
+  dangerBorder: "#fecaca",
+  dangerSolid: "#b91c1c",
+  dangerIcon: "#ef4444",
+  info: "#1d4ed8",
+  infoBg: "#eff6ff",
+  infoBorder: "#bfdbfe",
+  infoIcon: "#3b82f6",
+  mapRoute: "#2563eb",
+  focusRingColor: "#013628",
+  focusRingColorInverse: "#34d399",
+  scrim: "rgba(0, 0, 0, 0.45)",
+  buttonPrimaryBg: "#013628",
+  buttonPrimaryBgHover: "#1e4d3e",
+  buttonPrimaryFg: "#ffffff",
+  buttonBrandBg: "#286954",
+  buttonBrandBgHover: "#1e4d3e",
+  buttonBrandFg: "#ffffff",
+  buttonSecondaryBg: "#ffffff",
+  buttonSecondaryBgHover: "#f1f5f9",
+  buttonSecondaryFg: "#0f172a",
+  buttonSecondaryBorder: "#64748b",
+  buttonGhostBgHover: "#f1f5f9",
+  buttonGhostFg: "#0f172a",
+  buttonDangerBg: "#b91c1c",
+  buttonDangerFg: "#ffffff",
+  skeletonBg: "#f1f5f9"
+} as const;
+
+export const dataPalette = {
+  blue: "#2563eb",
+  emerald: "#10b981",
+  violet: "#8b5cf6",
+  orange: "#f97316",
+  pink: "#ec4899",
+  cyan: "#06b6d4",
+  yellow: "#eab308",
+  red: "#ef4444",
+  indigo: "#6366f1",
+  teal: "#14b8a6",
+  "blue-light": "#3b82f6",
+  green: "#16a34a",
+  purple: "#a855f7",
+  "orange-deep": "#ea580c",
+  amber: "#b45309",
+  slate: "#64748b"
+} as const;
+
+export const thirdParty = {
+  "google-blue": "#4285f4",
+  "google-green": "#34a853",
+  "google-yellow": "#fbbc05",
+  "google-red": "#ea4335",
+  "google-blue-hover": "#3367d6",
+  whatsapp: "#25d366",
+  yandex: "#fc3f1d",
+  stripe: "#635bff"
+} as const;
+
+export const illustration = {
+  "globe-sky-100": "#bae6fd",
+  "globe-sky-600": "#0284c7",
+  "globe-sky-700": "#0369a1",
+  "globe-navy": "#172554"
+} as const;
+
+export const mapLine = {
+  route: "#2563eb"
+} as const;
+
+export const breakpoints = {
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280
+} as const;
