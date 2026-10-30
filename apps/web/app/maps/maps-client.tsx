@@ -5,7 +5,7 @@ import { userStorage } from "../lib/user-storage";
 
 import { API_ENDPOINT, readShare } from "../lib/api";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { getStoredSession, refreshSession, signOut } from "../lib/cognito";
 import { AuthActionModal, PanelGuestBanner } from "../components/auth-gate";
@@ -30,6 +30,9 @@ import { billingService } from "../lib/billing/billing-service";
 import type { WalletData } from "../lib/billing/billing-types";
 import { interactionTracker } from "../lib/analytics/tracker";
 import { DealTrackerPanel } from "../components/tracker/deal-tracker-panel";
+import { ensureLeafletCss, ensureLeafletScript } from "../lib/leaflet-loader";
+import { PageHeader, PageShell } from "../components/ui";
+import { SavedModalListener } from "./saved-modal-listener";
 import "../components/trip/travel-planner.css";
 import "./maps.css";
 
@@ -223,6 +226,7 @@ export default function Panel() {
   // ── Professional Travel Day Planner State ──
   const planner = useTravelPlanner();
   const [isPlannerOpen, setIsPlannerOpen] = useState(true);
+  const openSavedPlanner = useCallback(() => setIsPlannerOpen(true), []);
   const [isPlannerCollapsed, setIsPlannerCollapsed] = useState(false);
   const [panelToast, setPanelToast] = useState<string | null>(null);
   const showPanelToast = (msg: string) => {
@@ -529,9 +533,7 @@ export default function Panel() {
     // Check URL parameters (modal and route from profile travel guide)
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("modal") === "saved") {
-        setIsPlannerOpen(true);
-      }
+      // ?modal=saved → SavedModalListener (useSearchParams, G21).
       const routeParam = params.get("route");
       if (routeParam) {
         const decodedRoute = routeParam;
@@ -1238,27 +1240,14 @@ export default function Panel() {
       if (isMounted) setMapStatus("error");
     };
     let script = document.getElementById("leaflet-js") as HTMLScriptElement | null;
-    if (!document.getElementById("leaflet-css")) {
-      const link = document.createElement("link");
-      link.id = "leaflet-css";
-      link.rel = "stylesheet";
-      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-      document.head.appendChild(link);
-    }
+    ensureLeafletCss();
     if ((window as unknown as WindowWithLeaflet).L) initialize();
     else {
-      if (mapAttempt > 0 && script) {
-        script.remove();
-        script = null;
-      }
-      const isNew = !script;
-      script ||= document.createElement("script");
-      script.id = "leaflet-js";
-      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.async = true;
-      script.addEventListener("load", initialize);
-      script.addEventListener("error", failed);
-      if (isNew) document.body.appendChild(script);
+      script = ensureLeafletScript({
+        onLoad: initialize,
+        onError: failed,
+        reload: mapAttempt > 0,
+      });
     }
     const timeout = window.setTimeout(() => {
       if (!mapInstanceRef.current) failed();
@@ -2162,7 +2151,12 @@ export default function Panel() {
       subtitle="Kişisel gezi rotalarınızı oluşturmak, duraklarınızı coğrafi sıraya dizmek ve AI seyahat asistanınızı kullanmak için giriş yapmalısınız."
       fallback={<AIPromoLanding />}
     >
-      <main className={`map-page ${googleMapsEnabled ? "google-map-page" : ""}`}>
+      <PageShell layout="app" className={`map-page ${googleMapsEnabled ? "google-map-page" : ""}`}>
+        {/* AC-34: tek h1 "Harita masası" (registry, görsel olarak gizli). */}
+        <PageHeader variant="hidden" />
+        <Suspense fallback={null}>
+          <SavedModalListener onOpen={openSavedPlanner} />
+        </Suspense>
 
         {/* Ziyaretçi Tanıtım Banner'ı */}
         {!userEmail && <PanelGuestBanner nextUrl="/maps/" />}
@@ -2562,6 +2556,7 @@ export default function Panel() {
               <div className="share-expiry-row">
                 <span className="share-expiry-label">Geçerlilik Süresi:</span>
                 <select
+                  aria-label="Geçerlilik süresi"
                   className="share-expiry-select"
                   value={hours}
                   onChange={(e) => {
@@ -2930,7 +2925,7 @@ export default function Panel() {
           featureName={authModalConfig.featureName}
           nextUrl="/maps/"
         />
-      </main>
+      </PageShell>
     </AuthGuard>
   );
 }

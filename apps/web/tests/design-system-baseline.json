@@ -8,13 +8,13 @@
     "app/components/header-nav.css": 133,
     "app/components/mobile-start.css": 2,
     "app/components/site-footer.css": 34,
-    "app/components/trip/travel-planner.css": 1017,
+    "app/components/trip/travel-planner.css": 72,
     "app/components/upgrade-modal.css": 6,
     "app/home.css": 58,
     "app/how-it-works/how-it-works.css": 16,
     "app/k/k.css": 6,
     "app/login/login.css": 14,
-    "app/maps/maps.css": 578,
+    "app/maps/maps.css": 93,
     "app/messages/messages.css": 4,
     "app/mobile-apps/mobile-apps.css": 9,
     "app/operations.css": 9,
@@ -30,15 +30,10 @@
     "app/welcome/welcome.css": 6
   },
   "G4": {
-    "app/articles/page.tsx": 1,
-    "app/maps/maps-client.tsx": 1
+    "app/articles/page.tsx": 1
   },
   "G4m": {
-    "app/articles/page.tsx": 1,
-    "app/maps/maps-client.tsx": 1
-  },
-  "G5": {
-    "app/components/trip/mobile-pin-sheet.tsx": 1
+    "app/articles/page.tsx": 1
   },
   "G6": {
     "app/components/soft-icon.tsx": 8,
@@ -61,7 +56,7 @@
     "app/components/tracker/deal-tracker-panel.tsx": 62,
     "app/components/travel-globe.tsx": 27,
     "app/components/trip/google-planner-map.tsx": 10,
-    "app/components/trip/travel-planner-sidebar.tsx": 29,
+    "app/components/trip/travel-planner-sidebar.tsx": 8,
     "app/components/trip/trip-side-drawer.tsx": 19,
     "app/features/community/components/BuddyTab.tsx": 11,
     "app/features/community/components/DirectMessageModal.tsx": 9,
@@ -103,10 +98,10 @@
     "app/checkout/checkout.css": 1,
     "app/community/community.css": 7,
     "app/components/header-nav.css": 1,
-    "app/components/trip/travel-planner.css": 18,
+    "app/components/trip/travel-planner.css": 8,
     "app/home.css": 2,
     "app/login/login.css": 1,
-    "app/maps/maps.css": 17,
+    "app/maps/maps.css": 8,
     "app/messages/messages.css": 2,
     "app/mobile-apps/mobile-apps.css": 1,
     "app/profile/edit/edit.css": 2,
@@ -123,8 +118,8 @@
   "G15": {
     "app/community/community.css": 1,
     "app/components/header-nav.css": 2,
-    "app/components/trip/travel-planner.css": 75,
-    "app/maps/maps.css": 92,
+    "app/components/trip/travel-planner.css": 62,
+    "app/maps/maps.css": 78,
     "app/travel-assistant/assistant.css": 4
   },
   "G16c": {
@@ -132,7 +127,7 @@
     "app/checkout/checkout.css": 7,
     "app/components/mobile-start.css": 12,
     "app/components/site-footer.css": 4,
-    "app/maps/maps.css": 23,
+    "app/maps/maps.css": 19,
     "app/messages/messages.css": 3,
     "app/operations.css": 8,
     "app/profile/edit/edit.css": 4,
@@ -148,11 +143,10 @@
     "app/components/auth-gate.css": 2,
     "app/components/header-nav.css": 2,
     "app/components/mobile-start.css": 3,
-    "app/components/trip/travel-planner.css": 4,
     "app/components/upgrade-modal.css": 1,
     "app/home.css": 6,
     "app/how-it-works/how-it-works.css": 2,
-    "app/maps/maps.css": 15,
+    "app/maps/maps.css": 10,
     "app/mobile-apps/mobile-apps.css": 7,
     "app/operations.css": 2,
     "app/profile/edit/edit.css": 1,

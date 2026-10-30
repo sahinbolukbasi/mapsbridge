@@ -5,6 +5,7 @@ import { readShare } from "../lib/api";
 import { useEffect, useRef, useState } from "react";
 import "./k.css";
 import { Alert, Button, Field, Input, Modal, PageHeader, PageShell } from "../components/ui";
+import { ensureLeafletCss, ensureLeafletScript } from "../lib/leaflet-loader";
 
 interface LeafletMap {
   remove(): void;
@@ -76,24 +77,14 @@ export default function FindByCodePage() {
     }
 
     if (!(window as Window & { L?: LeafletLib }).L) {
-      if (!document.getElementById("leaflet-css")) {
-        const link = document.createElement("link");
-        link.id = "leaflet-css";
-        link.rel = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        document.head.appendChild(link);
-      }
-
-      const script = document.createElement("script");
-      script.id = "leaflet-js";
-      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.async = true;
-      script.onerror = () =>
-        setError("Harita yüklenemedi. Kodla adres sorgulamasını yine kullanabilirsiniz.");
-      script.onload = () => {
-        if (isMounted) initMap();
-      };
-      document.body.appendChild(script);
+      ensureLeafletCss();
+      ensureLeafletScript({
+        onError: () =>
+          setError("Harita yüklenemedi. Kodla adres sorgulamasını yine kullanabilirsiniz."),
+        onLoad: () => {
+          if (isMounted) initMap();
+        },
+      });
     } else {
       initMap();
     }

@@ -116,7 +116,7 @@ export function MobilePinSheet({
       <div className="mobile-pin-handle" aria-hidden="true" />
 
       {/* Header */}
-      <header>
+      <div className="mobile-pin-header">
         <div>
           <small>{editing ? "Kayıtlı yer" : pin ? "Kayıtlı pin" : "Haritada seçilen yer"}</small>
           <h2 id="mobile-pin-title">{editing ? "Pini düzenle" : placeName}</h2>
@@ -130,7 +130,7 @@ export function MobilePinSheet({
         >
           ×
         </button>
-      </header>
+      </div>
 
       <div className="mobile-pin-body">
         {editing && pin ? (

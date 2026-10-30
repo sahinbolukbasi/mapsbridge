@@ -8,6 +8,7 @@ import { getStoredSession } from "../lib/cognito";
 import { isFollowingUser, toggleFollowUser } from "../lib/follow-system";
 import "./public-profile.css";
 import { PageHeader, PageShell } from "../components/ui";
+import { ensureLeafletCss, ensureLeafletScript } from "../lib/leaflet-loader";
 
 export interface SavedAddressItem {
   id: string;
@@ -496,22 +497,12 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
     }
 
     if (!(window as Window & { L?: LeafletLib }).L) {
-      if (!document.getElementById("leaflet-css")) {
-        const link = document.createElement("link");
-        link.id = "leaflet-css";
-        link.rel = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        document.head.appendChild(link);
-      }
-
-      const script = document.createElement("script");
-      script.id = "leaflet-js";
-      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.async = true;
-      script.onload = () => {
-        if (isMounted) initMap();
-      };
-      document.body.appendChild(script);
+      ensureLeafletCss();
+      ensureLeafletScript({
+        onLoad: () => {
+          if (isMounted) initMap();
+        },
+      });
     } else {
       setTimeout(initMap, 80);
     }

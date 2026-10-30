@@ -909,9 +909,9 @@ export function TravelPlannerSidebar({
                   style={{
                     marginTop: "0.75rem",
                     padding: "0.75rem",
-                    backgroundColor: "rgba(255,255,255,0.03)",
+                    backgroundColor: "color-mix(in srgb, var(--color-surface) 3%, transparent)",
                     borderRadius: "12px",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: "1px solid var(--color-white-a08)",
                   }}
                 >
                   <GooglePlaceInfo
@@ -989,6 +989,7 @@ export function TravelPlannerSidebar({
                   <div className="form-dual-select">
                     <select
                       className="form-select"
+                      aria-label="Gezi"
                       value={editTargetTripId}
                       onChange={(e) => setEditTargetTripId(e.target.value)}
                     >
@@ -1003,6 +1004,7 @@ export function TravelPlannerSidebar({
                     {editTargetTripId !== "general" && (
                       <select
                         className="form-select"
+                        aria-label="Gün"
                         value={editTargetDayIndex}
                         onChange={(e) => setEditTargetDayIndex(Number(e.target.value))}
                       >
@@ -1379,7 +1381,7 @@ export function TravelPlannerSidebar({
                         style={{
                           fontSize: "12px",
                           fontWeight: 800,
-                          color: "#065f46",
+                          color: "var(--color-on-surface-brand)",
                           margin: 0,
                           display: "flex",
                           alignItems: "center",
@@ -1408,7 +1410,7 @@ export function TravelPlannerSidebar({
                     <p
                       style={{
                         fontSize: "11px",
-                        color: "#047857",
+                        color: "var(--color-success)",
                         margin: 0,
                         whiteSpace: "nowrap",
                         overflow: "hidden",
@@ -1458,7 +1460,7 @@ export function TravelPlannerSidebar({
                 >
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "15px", color: "#f59e0b" }}
+                    style={{ fontSize: "15px", color: "var(--color-warning-icon)" }}
                   >
                     auto_fix_high
                   </span>
@@ -1496,7 +1498,7 @@ export function TravelPlannerSidebar({
               style={{
                 display: "flex",
                 width: "100%",
-                borderTop: "1px solid rgba(226,232,240,0.6)",
+                borderTop: "1px solid color-mix(in srgb, var(--color-border) 60%, transparent)",
                 marginTop: "4px",
                 paddingTop: "8px",
                 paddingLeft: "12px",
@@ -1550,12 +1552,12 @@ export function TravelPlannerSidebar({
                         display: "flex",
                         alignItems: "center",
                         gap: "6px",
-                        color: "#0f172a",
+                        color: "var(--color-text)",
                       }}
                     >
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "17px", color: "#047857" }}
+                        style={{ fontSize: "17px", color: "var(--color-success)" }}
                       >
                         navigation
                       </span>
@@ -1569,7 +1571,7 @@ export function TravelPlannerSidebar({
                         {activeTrip?.title || "Aktif Gezi"}
                       </span>
                     </span>
-                    <span style={{ color: "#047857", fontSize: "11px" }}>
+                    <span style={{ color: "var(--color-success)", fontSize: "11px" }}>
                       {pinsWithTime.filter((p) => p.visited).length} / {pinsWithTime.length} Durak (
                       {pinsWithTime.length > 0
                         ? Math.round(
@@ -1586,14 +1588,14 @@ export function TravelPlannerSidebar({
                       width: "100%",
                       height: "6px",
                       borderRadius: "99px",
-                      background: "#e2e8f0",
+                      background: "var(--color-neutral-200)",
                       overflow: "hidden",
                     }}
                   >
                     <div
                       style={{
                         height: "100%",
-                        background: "#10b981",
+                        background: "var(--color-accent)",
                         borderRadius: "99px",
                         transition: "width 0.3s ease",
                         width: `${
@@ -1617,7 +1619,7 @@ export function TravelPlannerSidebar({
                       paddingTop: "4px",
                     }}
                   >
-                    <span style={{ fontSize: "11px", color: "#64748b" }}>
+                    <span style={{ fontSize: "11px", color: "var(--color-text-subtle)" }}>
                       ⏱️ Toplam:{" "}
                       {daySummary?.totalDayDurationMinutes
                         ? (daySummary.totalDayDurationMinutes / 60).toFixed(1)
@@ -1635,7 +1637,7 @@ export function TravelPlannerSidebar({
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "14px", color: "#34d399" }}
+                          style={{ fontSize: "14px", color: "var(--color-accent-strong)" }}
                         >
                           navigation
                         </span>
@@ -1671,7 +1673,7 @@ export function TravelPlannerSidebar({
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "14px", color: "#f59e0b" }}
+                          style={{ fontSize: "14px", color: "var(--color-warning-icon)" }}
                         >
                           smart_toy
                         </span>
@@ -1733,7 +1735,7 @@ export function TravelPlannerSidebar({
                     style={{
                       fontSize: "13px",
                       fontWeight: 800,
-                      color: "#0f172a",
+                      color: "var(--color-text)",
                       margin: 0,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
@@ -1745,7 +1747,7 @@ export function TravelPlannerSidebar({
                   <p
                     style={{
                       fontSize: "11px",
-                      color: "#64748b",
+                      color: "var(--color-text-subtle)",
                       margin: 0,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
@@ -1822,7 +1824,7 @@ export function TravelPlannerSidebar({
                       explore_nearby
                     </span>
                   </div>
-                  <h3 style={{ fontSize: "13.5px", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                  <h3 style={{ fontSize: "13.5px", fontWeight: 800, color: "var(--color-text)", margin: 0 }}>
                     {pinsWithTime.length === 0
                       ? "Rotanızda Henüz Durak Yok"
                       : "Filtreye Uygun Durak Bulunamadı"}
@@ -1830,7 +1832,7 @@ export function TravelPlannerSidebar({
                   <p
                     style={{
                       fontSize: "11.5px",
-                      color: "#64748b",
+                      color: "var(--color-text-subtle)",
                       maxWidth: "260px",
                       lineHeight: "1.4",
                       margin: 0,
@@ -1931,7 +1933,7 @@ export function TravelPlannerSidebar({
                                     <span>•</span>
                                     <span
                                       style={{
-                                        color: "#059669",
+                                        color: "var(--color-success-strong)",
                                         fontWeight: 700,
                                         display: "inline-flex",
                                         alignItems: "center",
@@ -2070,7 +2072,7 @@ export function TravelPlannerSidebar({
                     <div className="pool-summary-title-row">
                       <span
                         className="material-symbols-outlined"
-                        style={{ color: "#047857", fontSize: "18px" }}
+                        style={{ color: "var(--color-success)", fontSize: "18px" }}
                       >
                         inventory_2
                       </span>
@@ -2080,7 +2082,7 @@ export function TravelPlannerSidebar({
                     </div>
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "20px", color: "#64748b" }}
+                      style={{ fontSize: "20px", color: "var(--color-text-subtle)" }}
                     >
                       expand_more
                     </span>
