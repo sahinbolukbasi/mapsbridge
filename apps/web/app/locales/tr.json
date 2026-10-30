@@ -265,5 +265,9 @@
   "ui.notFound.link.community.desc": "Gezginlerin paylaştığı rotalar ve rehberler.",
   "ui.notFound.link.support": "Yardım ve destek",
   "ui.notFound.link.support.desc": "Destek talebi oluşturun, yanıtları takip edin.",
-  "ui.errorPage.title": "Bir şeyler ters gitti"
+  "ui.errorPage.title": "Bir şeyler ters gitti",
+
+  "ai.prepTab": "✈ Hazırlık",
+  "ai.prepAffiliateTitle": "Rezervasyon seçenekleri",
+  "ai.prepLink": "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün"
 }

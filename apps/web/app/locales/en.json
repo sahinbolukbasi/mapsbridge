@@ -265,5 +265,9 @@
   "ui.notFound.link.community.desc": "Routes and guides shared by travellers.",
   "ui.notFound.link.support": "Help and support",
   "ui.notFound.link.support.desc": "Open a support request and follow the replies.",
-  "ui.errorPage.title": "Something went wrong"
+  "ui.errorPage.title": "Something went wrong",
+
+  "ai.prepTab": "✈ Trip prep",
+  "ai.prepAffiliateTitle": "Booking options",
+  "ai.prepLink": "See flight and stay options in the Trip prep tab"
 }

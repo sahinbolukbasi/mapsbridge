@@ -22,14 +22,16 @@ import { tripToMarkdown, saveTripMarkdown } from "../lib/trip/trip-markdown";
 import type { Trip, Pin } from "../lib/trip/models";
 import { interactionTracker } from "../lib/analytics/tracker";
 import { AIPromoLanding } from "./promo-landing";
-import { PageHeader, PageShell } from "../components/ui";
+import { Button, PageHeader, PageShell } from "../components/ui";
+import { useLocale } from "../lib/locale-context";
 import { DealTrackerPanel } from "../components/tracker/deal-tracker-panel";
 import "./assistant.css";
 import { AssistantMessage } from "./assistant-message";
 import { ThinkingSteps, sseStatusToLivePhase } from "./thinking-steps";
 import { SmartActions } from "./smart-actions";
 import { ContextualFollowups } from "./contextual-followups";
-import { TravelAffiliateCards, InlineAffiliateStrip } from "./travel-affiliate-cards";
+import { PrepPanel } from "./prep-panel";
+import { pickPrepContext } from "./prep-context";
 import { extractDestinationFromText } from "../lib/affiliate/travelpayouts";
 import { useUserMemory } from "../lib/ai/user-memory-hook";
 import {
@@ -247,6 +249,23 @@ export default function AIPage() {
   const route = session?.route && isRoutePlan(session.route) ? session.route : null;
   const { memory, learnFromPrompt, buildContextString, clearMemory } = useUserMemory();
   const [conversationFlow, setConversationFlow] = useState<ConversationFlow>(EMPTY_FLOW);
+  const { t } = useLocale();
+  // I8 (§9.1): affiliate yüzeyleri yalnız taslak panelinin Hazırlık bölümünde (prep-panel.tsx).
+  const prepContext = pickPrepContext({
+    route,
+    messages: session?.messages ?? [],
+    surfacePricing: shouldSurfacePricing(conversationFlow),
+    extractDestination: extractDestinationFromText,
+  });
+  const draftHeadingRef = useRef<HTMLElement>(null);
+  const openPrep = () => {
+    setPanelOpen(true);
+    setMobileTab("draft");
+    if (route) setDraftTab("flights");
+    window.setTimeout(() => draftHeadingRef.current?.focus(), 0);
+  };
+  const prepIcon = t("ai.prepTab", "✈ Hazırlık").split(" ")[0];
+  const prepLabel = t("ai.prepTab", "✈ Hazırlık").split(" ").slice(1).join(" ");
 
   // Affiliate click analytics
   useEffect(() => {
@@ -1296,14 +1315,19 @@ export default function AIPage() {
                             Rotayı göster
                           </button>
                         </div>
-                        <TravelAffiliateCards route={m.route} />
+                        <Button variant="link" onClick={openPrep}>
+                          {t("ai.prepLink", "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün")}
+                        </Button>
                       </>
                     )}
 
                     {m.role === "assistant" && !m.route && shouldSurfacePricing(conversationFlow) && (() => {
                       const dest = extractDestinationFromText(m.text);
-                      const tok = getStoredSession()?.token;
-                      return dest ? <InlineAffiliateStrip destination={dest} messageText={m.text} authToken={tok || undefined} /> : null;
+                      return dest ? (
+                        <Button variant="link" onClick={openPrep}>
+                          {t("ai.prepLink", "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün")}
+                        </Button>
+                      ) : null;
                     })()}
 
                     {m.role === "assistant" && m.quickReplies && m.quickReplies.length > 0 && (
@@ -1704,7 +1728,9 @@ export default function AIPage() {
               aria-label="Oluşturulan rota"
             >
               <div className="ai-draft-header">
-                <strong>Oluşturulan rota</strong>
+                <strong ref={draftHeadingRef} tabIndex={-1}>
+                  Oluşturulan rota
+                </strong>
                 <div className="ai-header-actions">
                   <button
                     className="ai-small-btn ai-panel-resize"
@@ -1730,6 +1756,7 @@ export default function AIPage() {
                   <span className="material-symbols-outlined">map</span>
                   <h2>Henüz rota yok</h2>
                   <p>Tercihlerini konuştuktan sonra oluşturduğumuz rota burada görünecek.</p>
+                  {prepContext.kind === "strip" && <PrepPanel context={prepContext} />}
                 </div>
               ) : (
                 <>
@@ -1776,7 +1803,7 @@ export default function AIPage() {
                       className={`ai-day-tab-btn ${draftTab === "flights" ? "active" : ""}`}
                       onClick={() => setDraftTab("flights")}
                     >
-                      ✈️ Uçuşlar
+                      <span aria-hidden="true">{prepIcon}</span> {prepLabel}
                       {session?.flightPrices?.cheapestPrice
                         ? ` · ${session.flightPrices.cheapestCurrency} ${session.flightPrices.cheapestPrice}`
                         : ""}
@@ -2097,7 +2124,10 @@ export default function AIPage() {
                       className="ai-timeline-container ai-custom-scrollbar"
                       style={{ padding: "0.5rem" }}
                     >
-                      {!session?.flightPrices ? (
+                      <PrepPanel
+                        context={prepContext}
+                        flightBlock={
+                      !session?.flightPrices ? (
                         <p className="ai-muted">
                           Uçuş fiyatı bilgisi bu rota için mevcut değil. Rota oluştururken otomatik
                           kontrol edilir.
@@ -2272,7 +2302,9 @@ export default function AIPage() {
                             Travelpayouts üzerinden arama yapılır. Fiyatlar değişkendir.
                           </p>
                         </>
-                      )}
+                      )
+                        }
+                      />
                     </div>
                   )}
 

@@ -152,3 +152,84 @@ test("resolvePageTitle: altı durum (R5-7 / R6-4)", () => {
   assert.ok("error" in r({ title: node, locale: "tr" }, "/x/"));
   assert.match(r({ locale: "tr" }, "/y/").error, /PageHeader: title\/titleText verin .*\(\/y\/\)/);
 });
+
+// AC-37 / I8 (design §9.1): affiliate yüzeylerinin tek bağlama kuralı ve tek render yeri.
+const TA = path.resolve(__dirname, "../app/travel-assistant");
+const { pickPrepContext } = loadTs(path.join(TA, "prep-context.ts"));
+test("pickPrepContext: route / strip / none durumları (AC-37)", () => {
+  const ext = (text) => (/Roma/.test(text) ? "Roma" : /Paris/.test(text) ? "Paris" : null);
+  const route = { title: "R" };
+  const a = (text, extra = {}) => ({ role: "assistant", text, ...extra });
+  const u = (text) => ({ role: "user", text });
+  const pick = (o) => plain(pickPrepContext({ extractDestination: ext, ...o }));
+  // rota var → route (fiyat bayrağından bağımsız)
+  assert.deepEqual(pick({ route, messages: [], surfacePricing: false }), { kind: "route", route });
+  // rota yok + fiyat kapalı → none
+  assert.deepEqual(pick({ route: null, messages: [a("Roma")], surfacePricing: false }), {
+    kind: "none",
+  });
+  // son rotasız asistan mesajında hedef var → strip (doğru metin)
+  assert.deepEqual(
+    pick({
+      route: null,
+      messages: [a("Paris gezisi"), u("x"), a("Roma'ya gidelim")],
+      surfacePricing: true,
+    }),
+    { kind: "strip", destination: "Roma", messageText: "Roma'ya gidelim" },
+  );
+  // son rotasız mesajda hedef yok, bir öncekinde var → önceki mesaj
+  assert.deepEqual(
+    pick({ route: null, messages: [a("Paris gezisi"), a("Tarih?")], surfacePricing: true }),
+    { kind: "strip", destination: "Paris", messageText: "Paris gezisi" },
+  );
+  // hiç hedef yok → none
+  assert.deepEqual(
+    pick({ route: null, messages: [a("Merhaba"), u("Roma")], surfacePricing: true }),
+    {
+      kind: "none",
+    },
+  );
+  // rotalı mesajlar taramada atlanır
+  assert.deepEqual(
+    pick({
+      route: null,
+      messages: [a("Paris gezisi"), a("Roma rotası", { route: { title: "x" } })],
+      surfacePricing: true,
+    }),
+    { kind: "strip", destination: "Paris", messageText: "Paris gezisi" },
+  );
+});
+test("I8: <TravelAffiliateCards / <InlineAffiliateStrip JSX'i yalnız travel-assistant/prep-panel.tsx'te", () => {
+  const APP = path.resolve(__dirname, "../app");
+  const hits = [];
+  const walk = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith(".tsx")) {
+        const src = fs.readFileSync(p, "utf8");
+        if (/<(TravelAffiliateCards|InlineAffiliateStrip)\b/.test(src))
+          hits.push(path.relative(APP, p));
+      }
+    }
+  };
+  walk(APP);
+  assert.deepEqual(hits, [path.join("travel-assistant", "prep-panel.tsx")]);
+  assert.ok(
+    !fs.existsSync(path.join(APP, "ai/prep-context.ts")),
+    "app/ai/ altında prep-context.ts olmamalı",
+  );
+  assert.ok(
+    !fs.existsSync(path.join(APP, "ai/prep-panel.tsx")),
+    "app/ai/ altında prep-panel.tsx olmamalı",
+  );
+  const aiPage = fs.readFileSync(path.join(APP, "ai/page.tsx"), "utf8");
+  assert.doesNotMatch(aiPage, /TravelAffiliateCards|InlineAffiliateStrip/);
+  const tr = require("../app/locales/tr.json");
+  const en = require("../app/locales/en.json");
+  for (const k of ["ai.prepTab", "ai.prepAffiliateTitle", "ai.prepLink"]) {
+    assert.ok(tr[k] && en[k], `${k} TR/EN'de olmalı`);
+  }
+  assert.equal(tr["ai.prepTab"], "✈ Hazırlık");
+  assert.equal(en["ai.prepTab"], "✈ Trip prep");
+});
