@@ -1,0 +1,26 @@
+{
+  "records": [
+    {
+      "id": "tr-1",
+      "status": "pending",
+      "summary": "Kapadokya rota diyaloğu (PII maskelendi)",
+      "createdAt": "2026-10-29T20:00:00.000Z",
+      "expiresAt": "2026-11-28T20:00:00.000Z"
+    },
+    {
+      "id": "tr-2",
+      "status": "approved",
+      "summary": "Ege kıyı turu diyaloğu (PII maskelendi)",
+      "createdAt": "2026-10-28T20:00:00.000Z",
+      "expiresAt": "2026-11-27T20:00:00.000Z"
+    }
+  ],
+  "truncated": false,
+  "policy": {
+    "automaticTraining": false,
+    "requiresHumanReview": true,
+    "retentionDays": 30,
+    "piiMaskedBeforeQueue": true
+  },
+  "observedAt": "2026-10-30T09:00:00.000Z"
+}

@@ -1,0 +1,13 @@
+{
+  "jobs": [
+    {
+      "jobName": "mb-ft-2026-10-01",
+      "jobArn": "arn:aws:bedrock:eu-central-1:000000000000:model-customization-job/mock",
+      "status": "Completed",
+      "baseModelId": "amazon.nova-lite",
+      "createdAt": "2026-10-01T10:00:00.000Z"
+    }
+  ],
+  "region": "eu-central-1",
+  "observedAt": "2026-10-30T09:00:00.000Z"
+}

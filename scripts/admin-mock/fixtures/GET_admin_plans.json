@@ -1,0 +1,41 @@
+{
+  "plans": [
+    {
+      "id": "free",
+      "name": "Gezgin",
+      "tagline": "Başlamak için",
+      "monthlyPriceTry": 0,
+      "yearlyPriceTry": 0,
+      "monthlyCredits": 0,
+      "color": "slate",
+      "enabled": true,
+      "activeSubscribers": 1100
+    },
+    {
+      "id": "explorer",
+      "name": "Kaşif",
+      "tagline": "Düzenli gezginler için",
+      "badge": "Popüler",
+      "monthlyPriceTry": 149,
+      "yearlyPriceTry": 1490,
+      "monthlyCredits": 100,
+      "color": "forest",
+      "highlight": true,
+      "enabled": true,
+      "stripePriceIdMonthly": "price_mock_exp_m",
+      "stripePriceIdYearly": "price_mock_exp_y",
+      "activeSubscribers": 140
+    },
+    {
+      "id": "pro",
+      "name": "Pro Kaşif",
+      "tagline": "Yoğun planlama",
+      "monthlyPriceTry": 399,
+      "yearlyPriceTry": 3990,
+      "monthlyCredits": 500,
+      "color": "indigo",
+      "enabled": true,
+      "activeSubscribers": 40
+    }
+  ]
+}

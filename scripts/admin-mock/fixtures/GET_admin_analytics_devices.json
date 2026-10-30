@@ -1,0 +1,14 @@
+{
+  "devices": {
+    "total": 5400,
+    "mobile": 3510,
+    "web": 1620,
+    "tablet": 270,
+    "mobilePercent": 65,
+    "webPercent": 30,
+    "trend": [
+      { "date": "2026-10-28", "mobile": 120, "web": 54, "tablet": 9 },
+      { "date": "2026-10-29", "mobile": 131, "web": 60, "tablet": 8 }
+    ]
+  }
+}

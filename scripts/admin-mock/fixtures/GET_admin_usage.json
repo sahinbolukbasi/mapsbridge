@@ -1,0 +1,25 @@
+{
+  "usage": [
+    {
+      "id": "use-1",
+      "userId": "u-1001",
+      "status": "completed",
+      "credits": 1,
+      "createdAt": "2026-10-30T08:00:00.000Z"
+    },
+    {
+      "id": "use-2",
+      "userId": "u-1002",
+      "status": "completed",
+      "credits": 5,
+      "createdAt": "2026-10-30T08:20:00.000Z"
+    },
+    {
+      "id": "use-3",
+      "userId": "u-1004",
+      "status": "failed",
+      "credits": 0,
+      "createdAt": "2026-10-30T08:40:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "subscriptions": {
+    "total": 210,
+    "active": 180,
+    "cancelled": 30,
+    "newLast30d": 24,
+    "churnLast30d": 6,
+    "churnRate": 0.033,
+    "mrrTry": 36880,
+    "paidUsers": 180,
+    "conversionRate": 0.14,
+    "planBreakdown": [
+      { "tier": "explorer", "count": 140 },
+      { "tier": "pro", "count": 40 }
+    ]
+  }
+}

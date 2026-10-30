@@ -1,0 +1,21 @@
+{
+  "shares": [
+    {
+      "id": "sh-1",
+      "type": "location",
+      "owner": "u-1001",
+      "address": "Kadıköy, İstanbul",
+      "createdAt": "2026-10-30T06:00:00.000Z",
+      "expiresAt": 1893456000,
+      "status": "active"
+    },
+    {
+      "id": "sh-2",
+      "type": "route",
+      "owner": "u-1002",
+      "createdAt": "2026-10-01T06:00:00.000Z",
+      "expiresAt": 1790000000,
+      "status": "expired"
+    }
+  ]
+}

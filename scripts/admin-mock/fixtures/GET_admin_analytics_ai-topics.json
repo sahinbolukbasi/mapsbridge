@@ -1,0 +1,20 @@
+{
+  "aiAnalytics": {
+    "totalRequests": 4210,
+    "totalCost": 38.4,
+    "avgCostPerRequest": 0.0091,
+    "topTopics": [
+      { "topic": "Hafta sonu kaçamağı", "count": 820 },
+      { "topic": "Gastronomi", "count": 510 }
+    ],
+    "topDestinations": [
+      { "destination": "Kapadokya", "count": 640 },
+      { "destination": "İzmir", "count": 410 }
+    ],
+    "dailyActivity": [
+      { "date": "2026-10-28", "requests": 140 },
+      { "date": "2026-10-29", "requests": 152 }
+    ],
+    "periodDays": 30
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "finance": {
+    "totalRevenueTRY": 18420,
+    "totalTransactions": 212,
+    "failedTransactions": 6,
+    "monthlyRevenue": [
+      { "month": "2026-08", "amount": 5120 },
+      { "month": "2026-09", "amount": 6230 },
+      { "month": "2026-10", "amount": 7070 }
+    ],
+    "currency": "TRY"
+  }
+}

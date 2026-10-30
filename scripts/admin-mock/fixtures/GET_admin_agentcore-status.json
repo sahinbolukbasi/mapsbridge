@@ -1,0 +1,20 @@
+{
+  "observedAt": "2026-10-30T09:00:00.000Z",
+  "region": "eu-central-1",
+  "gateway": {
+    "id": "gw-mock",
+    "name": "mapsbridge-gateway",
+    "status": "READY",
+    "url": "https://gateway.example.com/mcp",
+    "protocol": "MCP"
+  },
+  "memory": { "id": "mem-mock", "status": "ACTIVE" },
+  "worker": {
+    "name": "mapsbridge-ai-worker",
+    "state": "Active",
+    "lastUpdate": "2026-10-29T22:00:00.000Z",
+    "errorsLastHour": 0,
+    "invocationsLastHour": 132,
+    "dlqMessages": 0
+  }
+}

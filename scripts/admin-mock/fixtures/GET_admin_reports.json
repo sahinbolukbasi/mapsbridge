@@ -1,0 +1,35 @@
+{
+  "reports": [
+    {
+      "reportId": "rep-1",
+      "reporterSub": "u-1002",
+      "contentType": "route",
+      "contentId": "r-77",
+      "reason": "Yanıltıcı rota açıklaması",
+      "status": "pending",
+      "createdAt": "2026-10-29T16:00:00.000Z"
+    },
+    {
+      "reportId": "rep-2",
+      "reporterSub": "u-1004",
+      "contentType": "user",
+      "contentId": "u-1003",
+      "reason": "Spam mesajlar",
+      "status": "pending",
+      "createdAt": "2026-10-30T07:30:00.000Z"
+    },
+    {
+      "reportId": "rep-3",
+      "reporterSub": "u-1001",
+      "contentType": "message",
+      "contentId": "m-9",
+      "reason": "Uygunsuz dil",
+      "status": "dismissed",
+      "createdAt": "2026-10-20T10:00:00.000Z",
+      "resolvedAt": "2026-10-21T09:00:00.000Z",
+      "resolutionAction": "dismiss",
+      "resolutionNotes": "Kural ihlali bulunmadı."
+    }
+  ],
+  "count": 3
+}

@@ -1,0 +1,36 @@
+{
+  "user": {
+    "userId": "u-1001",
+    "username": "ornek.kullanici",
+    "email": "ornek.kullanici@example.com",
+    "name": "Örnek Kullanıcı",
+    "phone": "+905550000000",
+    "emailVerified": true,
+    "enabled": true,
+    "status": "CONFIRMED",
+    "createdAt": "2026-03-14T09:12:00.000Z",
+    "groups": [],
+    "notes": "Kurgusal test kullanıcısı.",
+    "version": 3
+  },
+  "wallet": { "credits": 42, "frozen": false },
+  "subscription": { "tier": "explorer", "status": "active" },
+  "routes": [
+    { "PK": "USER#u-1001", "SK": "ROUTE#r-1", "name": "Kapadokya hafta sonu" },
+    { "PK": "USER#u-1001", "SK": "ROUTE#r-2", "name": "Ege kıyı turu" }
+  ],
+  "usage": [
+    {
+      "requestId": "req-a1",
+      "status": "completed",
+      "cost": 1,
+      "createdAt": "2026-10-28T10:00:00.000Z"
+    },
+    {
+      "requestId": "req-a2",
+      "status": "completed",
+      "cost": 5,
+      "createdAt": "2026-10-29T12:30:00.000Z"
+    }
+  ]
+}

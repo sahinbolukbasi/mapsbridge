@@ -1,0 +1,20 @@
+{
+  "subscriptions": [
+    {
+      "PK": "USER#u-1001",
+      "SK": "SUBSCRIPTION",
+      "tier": "explorer",
+      "status": "active",
+      "stripeSubscriptionId": "sub_mock_1",
+      "cancelAtPeriodEnd": false
+    },
+    {
+      "PK": "USER#u-1002",
+      "SK": "SUBSCRIPTION",
+      "tier": "pro",
+      "status": "active",
+      "stripeSubscriptionId": "sub_mock_2",
+      "cancelAtPeriodEnd": true
+    }
+  ]
+}

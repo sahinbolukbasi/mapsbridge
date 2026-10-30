@@ -1,0 +1,31 @@
+{
+  "agents": [
+    {
+      "id": "intent",
+      "name": "Niyet çıkarımı",
+      "description": "Kullanıcı mesajından gezi niyetini çıkarır (S0).",
+      "wired": true,
+      "enabled": true,
+      "capabilities": ["intent"]
+    },
+    {
+      "id": "narration",
+      "name": "Anlatım",
+      "description": "Deterministik rotayı anlatır (S5).",
+      "wired": true,
+      "enabled": true,
+      "capabilities": ["narration"]
+    },
+    {
+      "id": "review-distiller",
+      "name": "Yorum damıtma",
+      "description": "Gece çalışan yapısal çıkarım (faz 6).",
+      "wired": false,
+      "enabled": false,
+      "capabilities": ["batch"]
+    }
+  ],
+  "version": 3,
+  "policy": { "humanApprovalRequired": true },
+  "observedAt": "2026-10-30T09:00:00.000Z"
+}

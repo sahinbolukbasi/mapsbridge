@@ -1,0 +1,10 @@
+{
+  "realtime": {
+    "timestamp": "2026-10-30T09:00:00.000Z",
+    "registeredUsers": 1284,
+    "activeExplorers": null,
+    "activeRoutes": null,
+    "telemetry": { "requestsPerMinute": null, "errorRate": null },
+    "note": "Canlı telemetri henüz bağlanmadı."
+  }
+}

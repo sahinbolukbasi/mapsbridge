@@ -1,0 +1,16 @@
+{
+  "usage": {
+    "period": { "from": "2026-10-01T00:00:00.000Z", "to": "2026-10-30T00:00:00.000Z" },
+    "totalRequests": 4210,
+    "inputTokens": 1820000,
+    "outputTokens": 640000,
+    "totalTokens": 2460000,
+    "estimatedCostUsd": 38.4,
+    "completedPlans": 512,
+    "failures": 23,
+    "successRate": 0.994,
+    "activeModels": ["anthropic.claude-haiku", "amazon.nova-lite"],
+    "source": "cloudwatch",
+    "namespace": "MapsBridge/AI"
+  }
+}

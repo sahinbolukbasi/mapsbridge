@@ -1,0 +1,15 @@
+{
+  "community": {
+    "totalPosts": 860,
+    "postsLast24h": 14,
+    "postsLast7d": 91,
+    "totalLikes": 5400,
+    "totalComments": 1320,
+    "engagementRate": 0.21,
+    "topPosts": [{ "id": "p-1", "title": "Kapadokya'da gün doğumu", "likes": 210 }],
+    "dailyTrend": [
+      { "date": "2026-10-28", "posts": 12 },
+      { "date": "2026-10-29", "posts": 15 }
+    ]
+  }
+}

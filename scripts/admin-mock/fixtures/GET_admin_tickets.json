@@ -1,0 +1,37 @@
+{
+  "tickets": [
+    {
+      "PK": "TICKET#t-1",
+      "SK": "META",
+      "subject": "Kredi yüklenmedi",
+      "status": "open",
+      "priority": "high",
+      "messages": [
+        {
+          "from": "user",
+          "text": "Ödeme yaptım ama kredim görünmüyor.",
+          "at": "2026-10-30T07:00:00.000Z"
+        }
+      ],
+      "assignedTo": null,
+      "internalNote": "",
+      "version": 1,
+      "createdAt": "2026-10-30T07:00:00.000Z",
+      "updatedAt": "2026-10-30T07:00:00.000Z"
+    },
+    {
+      "id": "t-2",
+      "PK": "TICKET#t-2",
+      "SK": "META",
+      "subject": "Rota paylaşım bağlantısı açılmıyor",
+      "status": "in_progress",
+      "priority": "normal",
+      "messages": [],
+      "assignedTo": "u-1004",
+      "internalNote": "Bağlantı süresi dolmuş olabilir.",
+      "version": 2,
+      "createdAt": "2026-10-28T12:00:00.000Z",
+      "updatedAt": "2026-10-29T09:00:00.000Z"
+    }
+  ]
+}

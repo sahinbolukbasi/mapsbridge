@@ -1,0 +1,23 @@
+{
+  "control": {
+    "enabled": true,
+    "defaultModel": "anthropic.claude-haiku",
+    "disabledModels": [],
+    "version": 5
+  },
+  "runtime": {
+    "primaryModel": "anthropic.claude-haiku",
+    "models": ["anthropic.claude-haiku", "amazon.nova-lite", "anthropic.claude-sonnet"],
+    "observedAt": "2026-10-30T08:59:00.000Z"
+  },
+  "events": [
+    {
+      "id": "ev-1",
+      "type": "model_switch",
+      "message": "Varsayılan model güncellendi",
+      "createdAt": "2026-10-20T10:00:00.000Z"
+    }
+  ],
+  "truncated": false,
+  "observedAt": "2026-10-30T09:00:00.000Z"
+}

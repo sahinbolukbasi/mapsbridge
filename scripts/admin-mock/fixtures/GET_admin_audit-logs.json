@@ -1,0 +1,22 @@
+{
+  "logs": [
+    {
+      "auditId": "au-1",
+      "actorSub": "u-admin",
+      "action": "user_suspended",
+      "targetId": "u-1003",
+      "reason": "Tekrarlanan spam içerik",
+      "createdAt": "2026-10-25T11:00:00.000Z"
+    },
+    {
+      "auditId": "au-2",
+      "actorSub": "u-admin",
+      "action": "plan_updated",
+      "targetId": "explorer",
+      "reason": "Kampanya fiyatı",
+      "details": { "monthlyPriceTry": 149 },
+      "createdAt": "2026-10-20T09:30:00.000Z"
+    }
+  ],
+  "count": 2
+}

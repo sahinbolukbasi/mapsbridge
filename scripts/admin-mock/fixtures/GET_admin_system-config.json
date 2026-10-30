@@ -1,0 +1,9 @@
+{
+  "config": {
+    "maintenanceMode": false,
+    "routeCreationEnabled": true,
+    "sharesEnabled": true,
+    "version": 4,
+    "updatedAt": "2026-10-15T10:00:00.000Z"
+  }
+}

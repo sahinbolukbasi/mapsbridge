@@ -1,0 +1,17 @@
+{
+  "health": {
+    "status": "operational",
+    "timestamp": "2026-10-30T09:00:00.000Z",
+    "environment": "mock",
+    "region": "eu-central-1",
+    "services": {
+      "dynamodb": { "status": "operational", "latencyMs": 12, "table": "mock-data" },
+      "cognito": { "status": "operational", "latencyMs": 40 },
+      "bedrock": { "status": "operational", "latencyMs": 210 },
+      "apiGateway": { "status": "operational" },
+      "stripe": { "status": "degraded", "latencyMs": 900 },
+      "osrm": { "status": "operational", "latencyMs": 120 },
+      "geocoding": { "status": "operational", "latencyMs": 80 }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "stats": {
+    "totalCreditsGranted": 25400,
+    "totalCreditsConsumed": 18210,
+    "totalCreditsRemaining": 7190,
+    "activeWallets": 312,
+    "averageBalancePerUser": 23,
+    "byModule": {
+      "ai_chat": 9100,
+      "ai_deep_trip": 5200,
+      "ai_stay_dining": 2410,
+      "route_optimize": 1500
+    },
+    "dailyConsumption": [
+      { "date": "2026-10-28", "consumed": 410, "granted": 600 },
+      { "date": "2026-10-29", "consumed": 455, "granted": 300 }
+    ],
+    "planDistribution": [
+      { "tier": "free", "userCount": 1100, "avgCredits": 3 },
+      { "tier": "explorer", "userCount": 140, "avgCredits": 61 },
+      { "tier": "pro", "userCount": 40, "avgCredits": 288 }
+    ],
+    "topConsumers": [
+      { "userId": "u-1002", "email": "deniz.gezgin@example.com", "consumed": 410, "tier": "pro" }
+    ]
+  }
+}

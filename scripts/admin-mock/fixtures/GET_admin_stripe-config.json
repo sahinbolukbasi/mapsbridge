@@ -1,0 +1,16 @@
+{
+  "stripe": {
+    "connected": true,
+    "mode": "test",
+    "publishableKey": "pk_test_mock",
+    "webhookConfigured": true,
+    "webhookUrl": "https://api.example.com/stripe/webhook",
+    "lastWebhookAt": "2026-10-30T07:55:00.000Z",
+    "supportedCurrencies": ["try"],
+    "defaultCurrency": "try",
+    "taxEnabled": false,
+    "version": 2,
+    "updatedAt": "2026-10-01T10:00:00.000Z",
+    "updatedBy": "u-admin"
+  }
+}

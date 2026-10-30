@@ -1,0 +1,30 @@
+{
+  "packs": [
+    {
+      "id": "pack-25",
+      "title": "Başlangıç paketi",
+      "description": "Kısa bir gezi için 25 kredi",
+      "credits": 25,
+      "bonusCredits": 0,
+      "priceTry": 49,
+      "unitPriceTry": 1.96,
+      "popular": false,
+      "enabled": true,
+      "stripeProductId": "prod_mock_25",
+      "totalPurchases": 61
+    },
+    {
+      "id": "pack-100",
+      "title": "Gezgin paketi",
+      "description": "100 kredi + 10 hediye",
+      "credits": 100,
+      "bonusCredits": 10,
+      "priceTry": 149,
+      "unitPriceTry": 1.35,
+      "popular": true,
+      "enabled": true,
+      "stripeProductId": "prod_mock_100",
+      "totalPurchases": 88
+    }
+  ]
+}

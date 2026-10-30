@@ -1,0 +1,28 @@
+{
+  "content": [
+    {
+      "PK": "BLOG#b-1",
+      "SK": "META",
+      "id": "b-1",
+      "type": "blog",
+      "title": "Kapadokya'da üç gün",
+      "content": "Balon turundan önce bilmeniz gerekenler.",
+      "status": "published",
+      "published": true,
+      "version": 3,
+      "createdAt": "2026-08-01T10:00:00.000Z"
+    },
+    {
+      "PK": "GUIDE#g-1",
+      "SK": "META",
+      "id": "g-1",
+      "type": "guide",
+      "title": "Ege kıyıları rehberi",
+      "description": "Koylar, köyler ve yürüyüş parkurları.",
+      "status": "draft",
+      "published": false,
+      "version": 1,
+      "createdAt": "2026-10-12T10:00:00.000Z"
+    }
+  ]
+}

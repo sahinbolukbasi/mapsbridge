@@ -1,0 +1,45 @@
+{
+  "release": {
+    "version": 4,
+    "active": {
+      "id": "rel_active",
+      "model": "anthropic.claude-haiku",
+      "promptVersion": "p-2026-09",
+      "qualityGate": "passed",
+      "status": "active",
+      "publishedAt": "2026-09-15T10:00:00.000Z"
+    },
+    "candidate": {
+      "id": "rel_candidate",
+      "model": "amazon.nova-lite",
+      "promptVersion": "p-2026-10",
+      "metrics": {
+        "schemaPassRate": 0.995,
+        "routeValidityRate": 0.97,
+        "sourceCoverageRate": 0.96,
+        "decisionSummarySafetyRate": 0.995,
+        "p95LatencyMs": 1800
+      },
+      "qualityGate": "passed",
+      "status": "candidate",
+      "proposedAt": "2026-10-29T10:00:00.000Z"
+    },
+    "previousActive": {
+      "id": "rel_prev",
+      "model": "anthropic.claude-haiku",
+      "promptVersion": "p-2026-08",
+      "qualityGate": "passed",
+      "status": "retired"
+    },
+    "status": "ready_to_publish"
+  },
+  "thresholds": {
+    "schemaPassRate": 0.99,
+    "routeValidityRate": 0.95,
+    "sourceCoverageRate": 0.95,
+    "decisionSummarySafetyRate": 0.99,
+    "p95LatencyMs": 10000
+  },
+  "policy": { "automaticPublish": false, "rollbackSupported": true, "runtimeModelMutation": false },
+  "observedAt": "2026-10-30T09:00:00.000Z"
+}

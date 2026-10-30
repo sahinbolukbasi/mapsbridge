@@ -1,0 +1,46 @@
+{
+  "users": [
+    {
+      "userId": "u-1001",
+      "username": "ornek.kullanici",
+      "email": "ornek.kullanici@example.com",
+      "name": "Örnek Kullanıcı",
+      "role": "user",
+      "suspended": false,
+      "createdAt": "2026-03-14T09:12:00.000Z",
+      "tier": "explorer",
+      "routesCount": 4
+    },
+    {
+      "userId": "u-1002",
+      "email": "deniz.gezgin@example.com",
+      "name": "Deniz Gezgin",
+      "role": "moderator",
+      "suspended": false,
+      "createdAt": "2026-04-02T15:40:00.000Z",
+      "tier": "pro",
+      "routesCount": 11
+    },
+    {
+      "userId": "u-1003",
+      "email": "kaan.yolcu@example.com",
+      "name": "Kaan Yolcu",
+      "suspended": true,
+      "suspendReason": "Tekrarlanan spam içerik",
+      "createdAt": "2026-05-21T08:05:00.000Z",
+      "routesCount": 0
+    },
+    {
+      "userId": "u-1004",
+      "email": "ayse.rota@example.com",
+      "name": "Ayşe Rota",
+      "role": "support",
+      "suspended": false,
+      "createdAt": "2026-06-30T19:22:00.000Z",
+      "tier": "free",
+      "routesCount": 2
+    }
+  ],
+  "count": 4,
+  "nextCursor": null
+}

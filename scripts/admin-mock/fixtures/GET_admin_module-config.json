@@ -1,0 +1,10 @@
+{
+  "moduleConfig": {
+    "mapEnabled": true,
+    "aiEnabled": true,
+    "communityEnabled": true,
+    "messagingEnabled": true,
+    "updatedBy": "u-admin",
+    "version": 2
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "announcements": [
+    {
+      "id": "an-1",
+      "title": "Planlı bakım",
+      "message": "Pazar 03:00–04:00 arası kısa bir bakım yapılacak.",
+      "status": "draft",
+      "startsAt": "2026-11-02T00:00:00.000Z",
+      "endsAt": "2026-11-02T01:00:00.000Z",
+      "version": 1
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "routes": [
+    {
+      "PK": "USER#u-1001",
+      "SK": "ROUTE#r-1",
+      "routeId": "r-1",
+      "name": "Kapadokya hafta sonu",
+      "description": "İki günlük balon ve vadi yürüyüşü rotası",
+      "adminStatus": "approved",
+      "version": 2,
+      "createdAt": "2026-09-10T08:00:00.000Z"
+    },
+    {
+      "PK": "USER#u-1002",
+      "SK": "ROUTE#r-77",
+      "routeId": "r-77",
+      "name": "Ege kıyı turu",
+      "description": "Bodrum'dan Ayvalık'a kıyı boyunca",
+      "adminStatus": "pending",
+      "version": 1,
+      "createdAt": "2026-10-28T12:00:00.000Z"
+    }
+  ],
+  "count": 2
+}

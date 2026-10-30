@@ -1,0 +1,20 @@
+{
+  "profiles": [
+    {
+      "id": "ornek.kullanici",
+      "owner": "u-1001",
+      "name": "Örnek Kullanıcı",
+      "published": true,
+      "status": "active",
+      "version": 1
+    },
+    {
+      "id": "kaan.yolcu",
+      "owner": "u-1003",
+      "name": "Kaan Yolcu",
+      "published": true,
+      "status": "pending",
+      "version": 2
+    }
+  ]
+}
