@@ -11,6 +11,8 @@ import { SoftIcon, SoftBadge } from "../components/soft-icon";
 import { EditPostModalWeb } from "../features/community";
 import type { CommunityPost } from "../features/community/types";
 import "./profile.css";
+import "./profile-layout.css";
+import { PageHeader, PageShell } from "../components/ui";
 
 const _DEFAULT_PANORAMIC_COVER =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDTc8C7y216cNhYVun67c1dQAQCYruzM64RWHw44AeECZKUlMYFy2BsIHfwU6-V0zxgT44lEfPZa3GmGYDUIDxkOrtonBJGDHzrNLvyOpToIF8xPDu9WmExhjeSOTQXnUS2s0eIzJXHqjHQwXt5EsZ97-rmxCzi_0dMOHHTaYcTkchmwC2yDxBpc6AOHWJdhD1P4BgTX8eY62qvHLJGGBC724h5yeydozucbvhXuB51u_TDFd-tC-Lr7g";
@@ -128,7 +130,9 @@ export default function ProfilePage() {
       if (tripsRaw) {
         const parsed = JSON.parse(tripsRaw);
         if (Array.isArray(parsed?.trips)) {
-          const validTrips = parsed.trips.filter((t: { pins?: unknown[] }) => t.pins && t.pins.length > 0);
+          const validTrips = parsed.trips.filter(
+            (t: { pins?: unknown[] }) => t.pins && t.pins.length > 0,
+          );
           setSavedTrips(validTrips);
         }
       }
@@ -437,13 +441,15 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="stitch-main-profile-root">
+    <PageShell layout="landing" className="stitch-main-profile-root">
+      {/* Tek h1 (AC-34): görsel başlık sayfa içinde <p> olarak kalır; kabuk başlığı ekran okuyucuya. */}
+      <PageHeader variant="hidden" title={fullName || "Gezgin"} />
 
       {/* Hero Background */}
-      <div className="profile-hero-bg" />
+      <div className="profile-hero-bg" data-surface="inverse" />
 
       {/* Main Container */}
-      <main className="stitch-profile-container">
+      <div className="stitch-profile-container">
         {/* Compact Profile Header */}
         <div className="stitch-profile-header-card" style={{ marginTop: "0.75rem" }}>
           <div className="stitch-profile-header-top">
@@ -460,7 +466,7 @@ export default function ProfilePage() {
 
               <div className="stitch-identity-info">
                 <div className="stitch-name-status-row">
-                  <h1 className="stitch-user-fullname">{fullName || "Gezgin"}</h1>
+                  <p className="stitch-user-fullname">{fullName || "Gezgin"}</p>
                   <span className="stitch-user-handle-tag">@{username || "gezgin"}</span>
                   {(savedTrips.length > 0 || subscriptionTier !== "free") && (
                     <span className="stitch-route-leader-badge">
@@ -499,7 +505,7 @@ export default function ProfilePage() {
 
             <div className="stitch-profile-actions-bar">
               <Link href="/profile/edit/" className="stitch-action-btn-neutral">
-                <span className="material-symbols-outlined text-[18px]">edit</span>
+                <span className="material-symbols-outlined">edit</span>
                 <span>Profili Düzenle</span>
               </Link>
 
@@ -509,14 +515,12 @@ export default function ProfilePage() {
                 onClick={handleCopyProfileLink}
                 title="Profil bağlantısını kopyala"
               >
-                <span className="material-symbols-outlined text-[18px]">
-                  {copiedLink ? "done" : "share"}
-                </span>
+                <span className="material-symbols-outlined">{copiedLink ? "done" : "share"}</span>
                 <span>{copiedLink ? "Kopyalandı" : "Paylaş"}</span>
               </button>
 
               <Link href="/maps/" className="stitch-action-btn-primary">
-                <span className="material-symbols-outlined text-[18px]">visibility</span>
+                <span className="material-symbols-outlined">visibility</span>
                 <span>Ön İzleme</span>
               </Link>
             </div>
@@ -533,7 +537,7 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "routes" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("routes")}
               >
-                <span className="material-symbols-outlined text-[18px]">map</span>
+                <span className="material-symbols-outlined">map</span>
                 <span>Rotalar ({savedTrips.length})</span>
               </button>
 
@@ -542,7 +546,7 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "posts" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("posts")}
               >
-                <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
+                <span className="material-symbols-outlined">chat_bubble</span>
                 <span>Paylaşımlar ({userPosts.length})</span>
               </button>
 
@@ -551,7 +555,7 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "pool" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("pool")}
               >
-                <span className="material-symbols-outlined text-[18px]">bookmark</span>
+                <span className="material-symbols-outlined">bookmark</span>
                 <span>Kayıtlı Mekanlar ({savedPins.length})</span>
               </button>
 
@@ -560,7 +564,7 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "analytics" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("analytics")}
               >
-                <span className="material-symbols-outlined text-[18px]">bar_chart</span>
+                <span className="material-symbols-outlined">bar_chart</span>
                 <span>İstatistik</span>
               </button>
 
@@ -569,7 +573,7 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "activity" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("activity")}
               >
-                <span className="material-symbols-outlined text-[18px]">notifications</span>
+                <span className="material-symbols-outlined">notifications</span>
                 {unreadNotifCount > 0 && (
                   <span className="stitch-tab-badge">{unreadNotifCount}</span>
                 )}
@@ -611,8 +615,8 @@ export default function ProfilePage() {
                     </button>
                   </div>
                   <div className="stitch-filter-actions">
-                    <Link href="/maps/" className="stitch-btn-add-quick">
-                      <span className="material-symbols-outlined text-[16px]">flight_takeoff</span>
+                    <Link href="/maps/" className="stitch-btn-add-quick" data-surface="inverse">
+                      <span className="material-symbols-outlined">flight_takeoff</span>
                       <span>Hızlı Rota Ekle</span>
                     </Link>
                   </div>
@@ -640,117 +644,120 @@ export default function ProfilePage() {
                         <Link
                           href="/maps/"
                           className="stitch-btn-add-quick"
+                          data-surface="inverse"
                           style={{ padding: "0.55rem 1.1rem" }}
                         >
-                          <span className="material-symbols-outlined text-[16px]">add</span>
+                          <span className="material-symbols-outlined">add</span>
                           <span>Seyahat Masasında Rota Oluştur</span>
                         </Link>
                         <Link
                           href="/travel-assistant/"
                           className="stitch-btn-add-quick"
+                          data-surface="inverse"
                           style={{
                             padding: "0.55rem 1.1rem",
-                            background: "rgba(16, 185, 129, 0.15)",
-                            borderColor: "rgba(16, 185, 129, 0.35)",
-                            color: "#34d399",
+                            background: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
+                            borderColor: "color-mix(in srgb, var(--color-accent) 35%, transparent)",
+                            color: "var(--color-accent-strong)",
                           }}
                         >
-                          <span className="material-symbols-outlined text-[16px]">smart_toy</span>
+                          <span className="material-symbols-outlined">smart_toy</span>
                           <span>AI Asistan ile Planla</span>
                         </Link>
                       </div>
                     </div>
                   ) : (
-                    filteredTrips.map((trip: { id?: string; title?: string; destination?: string; days?: unknown[]; pins?: unknown[] }) => {
-                      const pinCount = trip.pins?.length || 0;
-                      const dayCount = trip.days?.length || 1;
-                      return (
-                        <div key={trip.id} className="stitch-route-card">
-                          <div className="stitch-route-thumb-wrap">
-                            <div
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                minHeight: "130px",
-                                background: "linear-gradient(135deg, #0d9488 0%, #1e293b 100%)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <span
-                                className="material-symbols-outlined text-white"
-                                style={{ fontSize: "36px", opacity: 0.8 }}
+                    filteredTrips.map(
+                      (trip: {
+                        id?: string;
+                        title?: string;
+                        destination?: string;
+                        days?: unknown[];
+                        pins?: unknown[];
+                      }) => {
+                        const pinCount = trip.pins?.length || 0;
+                        const dayCount = trip.days?.length || 1;
+                        return (
+                          <div key={trip.id} className="stitch-route-card">
+                            <div className="stitch-route-thumb-wrap">
+                              <div
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  minHeight: "130px",
+                                  background:
+                                    "linear-gradient(135deg, #0d9488 0%, var(--color-neutral-800) 100%)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
                               >
-                                map
-                              </span>
+                                <span
+                                  className="material-symbols-outlined pf-1"
+                                  style={{ fontSize: "36px", opacity: 0.8 }}
+                                >
+                                  map
+                                </span>
+                              </div>
+                              <div className="stitch-thumb-badge draft">
+                                <span className="material-symbols-outlined">edit_document</span>
+                                <span>TASLAK</span>
+                              </div>
                             </div>
-                            <div className="stitch-thumb-badge draft">
-                              <span className="material-symbols-outlined text-[14px]">
-                                edit_document
-                              </span>
-                              <span>TASLAK</span>
-                            </div>
-                          </div>
 
-                          <div className="stitch-route-info-col">
-                            <div className="flex flex-col gap-1.5">
-                              <div className="stitch-route-meta-top">
-                                <div className="stitch-route-duration-pill">
-                                  <span className="material-symbols-outlined text-[16px]">
-                                    schedule
-                                  </span>
-                                  <span>
-                                    {dayCount} GÜN · {pinCount} DURAK
-                                  </span>
+                            <div className="stitch-route-info-col">
+                              <div className="pf-2">
+                                <div className="stitch-route-meta-top">
+                                  <div className="stitch-route-duration-pill">
+                                    <span className="material-symbols-outlined">schedule</span>
+                                    <span>
+                                      {dayCount} GÜN · {pinCount} DURAK
+                                    </span>
+                                  </div>
                                 </div>
+
+                                <h3 className="stitch-route-title">
+                                  {trip.title || "Adsız Gezi Rotası"}
+                                </h3>
+                                <p className="stitch-route-desc">
+                                  {trip.destination ||
+                                    "Belirlenmiş seyahat planı ve kişisel duraklar."}
+                                </p>
                               </div>
 
-                              <h3 className="stitch-route-title">
-                                {trip.title || "Adsız Gezi Rotası"}
-                              </h3>
-                              <p className="stitch-route-desc">
-                                {trip.destination ||
-                                  "Belirlenmiş seyahat planı ve kişisel duraklar."}
-                              </p>
-                            </div>
-
-                            <div className="stitch-route-actions-bottom">
-                              <div className="stitch-route-btn-group">
-                                <Link
-                                  href={`/maps/?trip=${encodeURIComponent(trip.id || "")}`}
-                                  className="stitch-route-btn primary"
-                                >
-                                  <span className="material-symbols-outlined text-[16px]">
-                                    edit
-                                  </span>
-                                  <span>Düzenle</span>
-                                </Link>
-                                <Link
-                                  href={`/maps/?trip=${encodeURIComponent(trip.id || "")}`}
-                                  className="stitch-route-btn"
-                                >
-                                  <span className="material-symbols-outlined text-[16px]">map</span>
-                                  <span>Haritada Aç</span>
-                                </Link>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteTrip(trip.id || "")}
-                                  className="stitch-route-btn"
-                                  title="Rotayı Sil"
-                                  style={{ color: "#ef4444" }}
-                                >
-                                  <span className="material-symbols-outlined text-[16px]">
-                                    delete
-                                  </span>
-                                </button>
+                              <div className="stitch-route-actions-bottom">
+                                <div className="stitch-route-btn-group">
+                                  <Link
+                                    href={`/maps/?trip=${encodeURIComponent(trip.id || "")}`}
+                                    className="stitch-route-btn primary"
+                                  >
+                                    <span className="material-symbols-outlined">edit</span>
+                                    <span>Düzenle</span>
+                                  </Link>
+                                  <Link
+                                    href={`/maps/?trip=${encodeURIComponent(trip.id || "")}`}
+                                    className="stitch-route-btn"
+                                  >
+                                    <span className="material-symbols-outlined">map</span>
+                                    <span>Haritada Aç</span>
+                                  </Link>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteTrip(trip.id || "")}
+                                    className="stitch-route-btn"
+                                    title="Rotayı Sil"
+                                    style={{ color: "var(--color-danger-icon)" }}
+                                  >
+                                    <span className="material-symbols-outlined">delete</span>
+                                  </button>
+                                </div>
+                                <span className="pf-3 text-muted">Kişisel gezi</span>
                               </div>
-                              <span className="text-xs text-muted">Kişisel gezi</span>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
+                        );
+                      },
+                    )
                   )}
                 </div>
               </>
@@ -817,9 +824,9 @@ export default function ProfilePage() {
                     style={{
                       textAlign: "center",
                       padding: "3.5rem 1rem",
-                      background: "rgba(255,255,255,0.02)",
+                      background: "color-mix(in srgb, var(--color-surface) 2%, transparent)",
                       borderRadius: "1rem",
-                      border: "1px dashed rgba(255,255,255,0.08)",
+                      border: "1px dashed var(--color-white-a08)",
                     }}
                   >
                     <div
@@ -827,7 +834,7 @@ export default function ProfilePage() {
                         display: "inline-flex",
                         padding: "1rem",
                         borderRadius: "999px",
-                        background: "rgba(16, 185, 129, 0.1)",
+                        background: "var(--color-accent-a10)",
                         marginBottom: "0.75rem",
                       }}
                     >
@@ -862,8 +869,9 @@ export default function ProfilePage() {
                       <article
                         key={post.id}
                         style={{
-                          background: "var(--stitch-card-bg, rgba(30, 41, 59, 0.45))",
-                          border: "1px solid rgba(255, 255, 255, 0.08)",
+                          background:
+                            "var(--stitch-card-bg, color-mix(in srgb, var(--color-neutral-800) 45%, transparent))",
+                          border: "1px solid var(--color-white-a08)",
                           borderRadius: "1rem",
                           padding: "1.25rem",
                           backdropFilter: "blur(12px)",
@@ -939,8 +947,10 @@ export default function ProfilePage() {
                                 gap: "0.35rem",
                                 padding: "0.4rem 0.75rem",
                                 borderRadius: "0.5rem",
-                                background: "rgba(255, 255, 255, 0.06)",
-                                border: "1px solid rgba(255, 255, 255, 0.1)",
+                                background:
+                                  "color-mix(in srgb, var(--color-surface) 6%, transparent)",
+                                border:
+                                  "1px solid color-mix(in srgb, var(--color-neutral-0) 10%, transparent)",
                                 color: "#e2e8f0",
                                 fontSize: "0.8rem",
                                 cursor: "pointer",
@@ -960,7 +970,8 @@ export default function ProfilePage() {
                                 gap: "0.35rem",
                                 padding: "0.4rem 0.65rem",
                                 borderRadius: "0.5rem",
-                                background: "rgba(239, 68, 68, 0.1)",
+                                background:
+                                  "color-mix(in srgb, var(--color-danger-icon) 10%, transparent)",
                                 border: "1px solid rgba(239, 68, 68, 0.2)",
                                 color: "#fca5a5",
                                 fontSize: "0.8rem",
@@ -1028,7 +1039,8 @@ export default function ProfilePage() {
                             gap: "1.25rem",
                             marginTop: "0.75rem",
                             paddingTop: "0.75rem",
-                            borderTop: "1px solid rgba(255,255,255,0.06)",
+                            borderTop:
+                              "1px solid color-mix(in srgb, var(--color-neutral-0) 6%, transparent)",
                             fontSize: "0.8rem",
                             color: "#94a3b8",
                           }}
@@ -1094,8 +1106,8 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="stitch-filter-actions">
-                    <Link href="/maps/" className="stitch-btn-add-quick">
-                      <span className="material-symbols-outlined text-[16px]">add_location</span>
+                    <Link href="/maps/" className="stitch-btn-add-quick" data-surface="inverse">
+                      <span className="material-symbols-outlined">add_location</span>
                       <span>Haritada Nokta Ekle</span>
                     </Link>
                   </div>
@@ -1116,9 +1128,10 @@ export default function ProfilePage() {
                       <Link
                         href="/maps/"
                         className="stitch-btn-add-quick"
+                        data-surface="inverse"
                         style={{ padding: "0.55rem 1.1rem" }}
                       >
-                        <span className="material-symbols-outlined text-[16px]">explore</span>
+                        <span className="material-symbols-outlined">explore</span>
                         <span>Harita Masasında Nokta Keşfet</span>
                       </Link>
                     </div>
@@ -1136,7 +1149,7 @@ export default function ProfilePage() {
                         <div key={pin.id} className="stitch-pool-card">
                           <div className="stitch-pool-card-header">
                             <span className="stitch-pool-category-badge">
-                              <span className="material-symbols-outlined text-[14px]">place</span>
+                              <span className="material-symbols-outlined">place</span>
                               <span>{categoryName}</span>
                             </span>
                             <button
@@ -1145,7 +1158,7 @@ export default function ProfilePage() {
                               className="stitch-pool-delete-btn"
                               title="Noktayı Havuzdan Kaldır"
                             >
-                              <span className="material-symbols-outlined text-[16px]">close</span>
+                              <span className="material-symbols-outlined">close</span>
                             </button>
                           </div>
 
@@ -1164,7 +1177,7 @@ export default function ProfilePage() {
                               className="stitch-route-btn primary"
                               style={{ width: "100%", justifyContent: "center" }}
                             >
-                              <span className="material-symbols-outlined text-[16px]">near_me</span>
+                              <span className="material-symbols-outlined">near_me</span>
                               <span>Haritada Göster</span>
                             </Link>
                           </div>
@@ -1180,11 +1193,9 @@ export default function ProfilePage() {
             {activeMainTab === "collections" && (
               <div className="stitch-collections-section">
                 <div className="stitch-filter-bar">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-secondary text-[20px]">
-                      folder_special
-                    </span>
-                    <span className="text-sm font-semibold text-main">
+                  <div className="pf-4">
+                    <span className="material-symbols-outlined text-secondary">folder_special</span>
+                    <span className="pf-5 text-main">
                       Kayıtlı Albümler ve Tematik Listeler ({collections.length})
                     </span>
                   </div>
@@ -1194,10 +1205,9 @@ export default function ProfilePage() {
                       type="button"
                       onClick={handleCreateCollection}
                       className="stitch-btn-add-quick"
+                      data-surface="inverse"
                     >
-                      <span className="material-symbols-outlined text-[16px]">
-                        create_new_folder
-                      </span>
+                      <span className="material-symbols-outlined">create_new_folder</span>
                       <span>Yeni Koleksiyon</span>
                     </button>
                   </div>
@@ -1208,9 +1218,7 @@ export default function ProfilePage() {
                     <div key={col.id} className="stitch-collection-card">
                       <div className="stitch-collection-top">
                         <div className="stitch-collection-icon-wrap">
-                          <span className="material-symbols-outlined text-[26px]">
-                            {col.icon || "folder"}
-                          </span>
+                          <span className="material-symbols-outlined">{col.icon || "folder"}</span>
                         </div>
                         <button
                           type="button"
@@ -1218,7 +1226,7 @@ export default function ProfilePage() {
                           className="stitch-pool-delete-btn"
                           title="Koleksiyonu Sil"
                         >
-                          <span className="material-symbols-outlined text-[16px]">close</span>
+                          <span className="material-symbols-outlined">close</span>
                         </button>
                       </div>
 
@@ -1229,14 +1237,14 @@ export default function ProfilePage() {
 
                       <div className="stitch-collection-footer">
                         <span className="stitch-collection-count-pill">
-                          <span className="material-symbols-outlined text-[14px]">pin_drop</span>
+                          <span className="material-symbols-outlined">pin_drop</span>
                           <span>{col.count} Durak / Rota</span>
                         </span>
                         <Link
                           href={`/maps/?collection=${encodeURIComponent(col.title)}`}
                           className="stitch-route-btn"
                         >
-                          <span className="material-symbols-outlined text-[16px]">folder_open</span>
+                          <span className="material-symbols-outlined">folder_open</span>
                           <span>Aç</span>
                         </Link>
                       </div>
@@ -1298,15 +1306,13 @@ export default function ProfilePage() {
                 <div className="stitch-analytics-visual-grid">
                   <div className="stitch-analytics-card">
                     <div className="stitch-analytics-card-header">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-secondary text-[20px]">
-                          bar_chart
-                        </span>
-                        <h4 className="font-bold text-main text-base">
+                      <div className="pf-4">
+                        <span className="material-symbols-outlined text-secondary">bar_chart</span>
+                        <h4 className="pf-6 text-main text-base">
                           Haftalık Keşif ve Planlama Aktivitesi
                         </h4>
                       </div>
-                      <span className="text-xs text-muted font-medium">Son 7 Gün</span>
+                      <span className="pf-7 text-muted">Son 7 Gün</span>
                     </div>
 
                     <div style={{ textAlign: "center", padding: "2rem 1rem", color: "#94a3b8" }}>
@@ -1330,15 +1336,13 @@ export default function ProfilePage() {
 
                   <div className="stitch-analytics-card">
                     <div className="stitch-analytics-card-header">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-secondary text-[20px]">
+                      <div className="pf-4">
+                        <span className="material-symbols-outlined text-secondary">
                           military_tech
                         </span>
-                        <h4 className="font-bold text-main text-base">Gezgin Rozetleri & Seviye</h4>
+                        <h4 className="pf-6 text-main text-base">Gezgin Rozetleri & Seviye</h4>
                       </div>
-                      <span className="text-xs font-bold text-emerald-accent">
-                        Seviye 1 Keşifçi
-                      </span>
+                      <span className="pf-8 text-emerald-accent">Seviye 1 Keşifçi</span>
                     </div>
 
                     <div className="stitch-badges-list">
@@ -1347,13 +1351,11 @@ export default function ProfilePage() {
                           className={`stitch-badge-icon ${savedTrips.length > 0 ? "gold" : ""}`}
                           style={savedTrips.length === 0 ? { opacity: 0.4 } : {}}
                         >
-                          <span className="material-symbols-outlined text-[18px]">verified</span>
+                          <span className="material-symbols-outlined">verified</span>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-main">
-                            Doğrulanmış Rota Lideri
-                          </span>
-                          <span className="text-xs text-muted">
+                        <div className="pf-9">
+                          <span className="pf-10 text-main">Doğrulanmış Rota Lideri</span>
+                          <span className="pf-3 text-muted">
                             {savedTrips.length > 0
                               ? "Kişisel profili ve gezi kayıtları onaylandı."
                               : "İlk rotanı oluşturarak bu rozeti kazan."}
@@ -1368,11 +1370,11 @@ export default function ProfilePage() {
                           className={`stitch-badge-icon ${savedPins.length + totalTripPinsCount >= 10 ? "mint" : ""}`}
                           style={savedPins.length + totalTripPinsCount < 10 ? { opacity: 0.4 } : {}}
                         >
-                          <span className="material-symbols-outlined text-[18px]">explore</span>
+                          <span className="material-symbols-outlined">explore</span>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-main">Pusula Kaşifi</span>
-                          <span className="text-xs text-muted">
+                        <div className="pf-9">
+                          <span className="pf-10 text-main">Pusula Kaşifi</span>
+                          <span className="pf-3 text-muted">
                             {savedPins.length + totalTripPinsCount >= 10
                               ? "10'dan fazla durak ve seyahat rotası kaydedildi."
                               : `${savedPins.length + totalTripPinsCount}/10 durak kaydedildi. Devam et!`}
@@ -1382,11 +1384,11 @@ export default function ProfilePage() {
 
                       <div className="stitch-badge-item">
                         <div className="stitch-badge-icon" style={{ opacity: 0.4 }}>
-                          <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+                          <span className="material-symbols-outlined">smart_toy</span>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-main">AI Destekli Seyyah</span>
-                          <span className="text-xs text-muted">
+                        <div className="pf-9">
+                          <span className="pf-10 text-main">AI Destekli Seyyah</span>
+                          <span className="pf-3 text-muted">
                             AI Asistanı kullanarak bu rozeti kazanabilirsin.
                           </span>
                         </div>
@@ -1446,7 +1448,9 @@ export default function ProfilePage() {
                 {/* Creator Marketplace Box */}
                 <div
                   className="stitch-empty-state-box"
-                  style={{ background: "rgba(30, 77, 62, 0.08)" }}
+                  style={{
+                    background: "color-mix(in srgb, var(--color-brand-hover) 8%, transparent)",
+                  }}
                 >
                   <span
                     className="material-symbols-outlined stitch-empty-icon"
@@ -1466,22 +1470,24 @@ export default function ProfilePage() {
                     <Link
                       href="/maps/"
                       className="stitch-btn-add-quick"
+                      data-surface="inverse"
                       style={{ padding: "0.55rem 1.1rem" }}
                     >
-                      <span className="material-symbols-outlined text-[16px]">add_business</span>
+                      <span className="material-symbols-outlined">add_business</span>
                       <span>Yeni Rotayı Satışa Ekle</span>
                     </Link>
                     <Link
                       href="/profile/edit/?tab=odeme"
                       className="stitch-btn-add-quick"
+                      data-surface="inverse"
                       style={{
                         padding: "0.55rem 1.1rem",
                         background: "transparent",
-                        borderColor: "rgba(255, 255, 255, 0.2)",
+                        borderColor: "color-mix(in srgb, var(--color-neutral-0) 20%, transparent)",
                         color: "var(--sb-text-main)",
                       }}
                     >
-                      <span className="material-symbols-outlined text-[16px]">account_balance</span>
+                      <span className="material-symbols-outlined">account_balance</span>
                       <span>Ödeme & Banka Bilgileri</span>
                     </Link>
                   </div>
@@ -1493,11 +1499,11 @@ export default function ProfilePage() {
             {activeMainTab === "activity" && (
               <div className="stitch-activity-section">
                 <div className="stitch-filter-bar">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-secondary text-[20px]">
+                  <div className="pf-4">
+                    <span className="material-symbols-outlined text-secondary">
                       notifications_active
                     </span>
-                    <span className="text-sm font-semibold text-main">
+                    <span className="pf-5 text-main">
                       Bildirim ve Etkileşim Akışı ({notifications.length})
                     </span>
                   </div>
@@ -1507,8 +1513,9 @@ export default function ProfilePage() {
                       type="button"
                       onClick={handleMarkAllNotifsRead}
                       className="stitch-btn-add-quick"
+                      data-surface="inverse"
                     >
-                      <span className="material-symbols-outlined text-[16px]">done_all</span>
+                      <span className="material-symbols-outlined">done_all</span>
                       <span>Tümünü Okundu İşaretle</span>
                     </button>
                   )}
@@ -1541,13 +1548,11 @@ export default function ProfilePage() {
                             <div
                               className={`stitch-activity-icon-box ${notif.unread ? "gold" : ""}`}
                             >
-                              <span className="material-symbols-outlined text-[18px]">
-                                {notif.icon}
-                              </span>
+                              <span className="material-symbols-outlined">{notif.icon}</span>
                             </div>
-                            <div className="flex flex-col gap-0.5">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-sm text-main">{notif.title}</span>
+                            <div className="pf-9 gap-0.5">
+                              <div className="pf-4">
+                                <span className="pf-10 text-main">{notif.title}</span>
                                 {notif.unread && <span className="stitch-unread-indicator-dot" />}
                               </div>
                               <p className="stitch-activity-text">{notif.desc}</p>
@@ -1563,7 +1568,7 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Edit Post Modal */}
       {editingPost && (
@@ -1579,10 +1584,10 @@ export default function ProfilePage() {
       {/* Floating Toast Notification */}
       {toastMessage && (
         <div className="stitch-toast-notification">
-          <span className="material-symbols-outlined text-mint-glow text-[20px]">info</span>
+          <span className="material-symbols-outlined text-mint-glow">info</span>
           <span>{toastMessage}</span>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

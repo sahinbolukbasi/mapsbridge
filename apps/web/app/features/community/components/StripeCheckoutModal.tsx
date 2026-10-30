@@ -85,7 +85,7 @@ export function StripeCheckoutModal({ item, onClose, onConfirm }: StripeCheckout
             </label>
           </div>
 
-          <button type="submit" className="btn-confirm-payment">
+          <button type="submit" className="btn-confirm-payment" data-surface="inverse">
             🔒 Güvenli Ödemeyi Tamamla
           </button>
         </form>

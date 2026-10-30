@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { FullPagePromotion } from "../../components/auth-gate";
 import { getStoredSession } from "../../lib/cognito";
 import "./photo.css";
+import { PageHeader, PageShell } from "../../components/ui";
 
 const PRESET_AVATARS = [
   {
@@ -178,15 +179,17 @@ export default function ProfilePhotoPage() {
   }
 
   return (
-    <div className="photo-page-root">
-      <main className="photo-page-container">
+    <PageShell layout="landing" className="photo-page-root">
+      {/* Tek h1 (AC-34): görsel başlık sayfa içinde <p> olarak kalır; kabuk başlığı ekran okuyucuya. */}
+      <PageHeader variant="hidden" title="Profil Fotoğrafı Yükle" />
+      <div className="photo-page-container">
         {/* Üst Başlık & Geri Dön */}
         <div className="photo-page-header">
           <a href="/profile/" className="back-link">
             ← Profile Geri Dön
           </a>
           <span className="photo-eyebrow">HESAP GÖRÜNÜMÜ</span>
-          <h1 className="photo-title">Profil Fotoğrafı Yükle</h1>
+          <p className="photo-title">Profil Fotoğrafı Yükle</p>
           <p className="photo-sub">
             MapsBridge profilinizde, seyahat gruplarınızda ve harita paylaşımlarınızda görünecek
             fotoğrafınızı belirleyin.
@@ -304,7 +307,7 @@ export default function ProfilePhotoPage() {
             {toast}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </PageShell>
   );
 }

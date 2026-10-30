@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { GroupTrip, MarketRoute } from "../types";
 import type { GroupChatMessage } from "../initial-data";
+import "../community-layout.css";
 
 interface GroupTripModalProps {
   trip: GroupTrip | null;
@@ -196,7 +197,7 @@ export function GroupTripModal({
                       {msg.attachedRoute && (
                         <div className="chat-attached-route-card">
                           <div className="attached-route-info">
-                            <span className="material-symbols-outlined text-[#10B981]">map</span>
+                            <span className="material-symbols-outlined">map</span>
                             <div>
                               <strong>{msg.attachedRoute.title}</strong>
                               <p>
@@ -234,7 +235,7 @@ export function GroupTripModal({
 
                 {/* Gezi Rotası Paylaş & Arkadaş Bul Barı */}
                 <div className="chat-route-share-bar">
-                  <span className="material-symbols-outlined text-[17px] text-[#10B981]">
+                  <span className="material-symbols-outlined">
                     route
                   </span>
                   <select

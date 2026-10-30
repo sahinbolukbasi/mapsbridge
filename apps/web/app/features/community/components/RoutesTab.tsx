@@ -67,7 +67,7 @@ export function RoutesTab({
               style={{
                 background: "transparent",
                 border: "none",
-                color: "rgba(255,255,255,0.6)",
+                color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
                 cursor: "pointer",
                 padding: "0 8px",
                 fontSize: "14px",
@@ -132,13 +132,13 @@ export function RoutesTab({
               gridColumn: "1 / -1",
               padding: "3.5rem 1.5rem",
               textAlign: "center",
-              background: "var(--card-bg, #ffffff)",
+              background: "var(--card-bg, var(--color-surface))",
               borderRadius: "16px",
-              border: "1px dashed var(--card-border, rgba(1,54,40,0.2))",
+              border: "1px dashed var(--card-border, color-mix(in srgb, var(--color-primary) 20%, transparent))",
             }}
           >
             <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>🗺️</span>
-            <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, #0d281e)" }}>
+            <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, var(--color-on-accent))" }}>
               Aramanıza uygun rota bulunamadı
             </h3>
             <p

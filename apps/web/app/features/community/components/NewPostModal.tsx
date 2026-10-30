@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { PRESET_TRAVEL_PHOTOS } from "../initial-data";
+import "../community-layout.css";
+import { Modal } from "../../../components/ui";
 
 interface NewPostModalProps {
   isOpen: boolean;
@@ -47,19 +49,17 @@ export function NewPostModal({
   };
 
   return (
-    <div className="community-modal-overlay" onClick={onClose}>
-      <div className="x-tweet-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Tweet Modal Top Bar */}
+    <Modal open onClose={onClose} title="Yeni paylaşım" size="md" className="new-post-dialog">
+      <div className="x-tweet-modal">
+        {/* Gizlilik bilgisi (eski üst çubuk; kapat düğmesi Modal'da) */}
         <div className="x-tweet-header">
-          <button type="button" className="x-tweet-close-btn" onClick={onClose} title="Kapat">
-            ✕
-          </button>
           <div className="x-tweet-privacy-pill">
-            <span className="material-symbols-outlined text-[14px]">public</span>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              public
+            </span>
             <span>Topluluk &amp; Keşfet Akışı</span>
           </div>
         </div>
-
         <form onSubmit={handleSubmit}>
           <div className="x-tweet-body">
             {/* Sol Avatar */}
@@ -97,7 +97,7 @@ export function NewPostModal({
               {/* Bağlı Rota Rozeti */}
               {selectedRoute && (
                 <div className="x-attached-route-tag">
-                  <span className="material-symbols-outlined text-[16px] text-[#10B981]">map</span>
+                  <span className="material-symbols-outlined">map</span>
                   <span>{selectedRoute}</span>
                   <button
                     type="button"
@@ -106,7 +106,7 @@ export function NewPostModal({
                       background: "transparent",
                       border: "none",
                       cursor: "pointer",
-                      color: "#64748b",
+                      color: "var(--color-text-subtle)",
                       marginLeft: "4px",
                     }}
                     title="Rotayı Kaldır"
@@ -147,7 +147,7 @@ export function NewPostModal({
                   padding: "0.25rem 0.5rem",
                   borderRadius: "9999px",
                   background: "transparent",
-                  border: "1px solid #cbd5e1",
+                  border: "1px solid var(--color-border-strong)",
                 }}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -168,7 +168,7 @@ export function NewPostModal({
                   padding: "0.25rem 0.5rem",
                   borderRadius: "9999px",
                   background: "transparent",
-                  border: "1px solid #cbd5e1",
+                  border: "1px solid var(--color-border-strong)",
                   maxWidth: "160px",
                 }}
                 value={selectedRoute}
@@ -204,6 +204,6 @@ export function NewPostModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { TravelBuddy } from "../initial-data";
+import "../community-layout.css";
 
 interface BuddyTabProps {
   travelBuddies: TravelBuddy[];
@@ -48,12 +49,12 @@ export function BuddyTab({
       {/* AI Matching Info Banner */}
       <div
         style={{
-          background: "linear-gradient(135deg, rgba(13,40,30,0.95), rgba(20,83,64,0.9))",
-          border: "1px solid rgba(16,185,129,0.35)",
+          background: "linear-gradient(135deg, color-mix(in srgb, var(--color-surface-inverse) 95%, transparent), color-mix(in srgb, var(--color-brand-hover) 90%, transparent))",
+          border: "1px solid color-mix(in srgb, var(--color-accent) 35%, transparent)",
           borderRadius: "16px",
           padding: "1.25rem 1.5rem",
           marginBottom: "1.5rem",
-          color: "#fff",
+          color: "var(--color-on-primary)",
           boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
           display: "flex",
           alignItems: "center",
@@ -66,7 +67,7 @@ export function BuddyTab({
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
             <span
               className="material-symbols-outlined"
-              style={{ color: "#34d399", fontSize: "22px" }}
+              style={{ color: "var(--color-accent-strong)", fontSize: "22px" }}
             >
               psychology
             </span>
@@ -75,14 +76,14 @@ export function BuddyTab({
                 fontSize: "12px",
                 fontWeight: 800,
                 letterSpacing: "0.06em",
-                color: "#34d399",
+                color: "var(--color-accent-strong)",
                 textTransform: "uppercase",
               }}
             >
               AI Destekli Akıllı Gezgin Eşleşmesi
             </span>
           </div>
-          <h3 style={{ margin: "0 0 6px", fontSize: "17px", fontWeight: 700, color: "#fff" }}>
+          <h3 style={{ margin: "0 0 6px", fontSize: "17px", fontWeight: 700, color: "var(--color-on-primary)" }}>
             Ortak İlgi Alanları ve Rotalara Göre Gezi Arkadaşı Bulun
           </h3>
           <p
@@ -90,7 +91,7 @@ export function BuddyTab({
               margin: 0,
               fontSize: "13px",
               lineHeight: "1.5",
-              color: "rgba(255,255,255,0.8)",
+              color: "color-mix(in srgb, var(--color-on-primary) 80%, transparent)",
             }}
           >
             Yapay zeka motorumuz seyahat etmek istediğiniz destinasyonları, ilgi etiketlerinizi
@@ -104,9 +105,9 @@ export function BuddyTab({
             style={{
               padding: "6px 14px",
               borderRadius: "999px",
-              background: "rgba(16,185,129,0.2)",
-              border: "1px solid rgba(16,185,129,0.4)",
-              color: "#34d399",
+              background: "var(--color-accent-a20)",
+              border: "1px solid color-mix(in srgb, var(--color-accent) 40%, transparent)",
+              color: "var(--color-accent-strong)",
               fontSize: "12px",
               fontWeight: 700,
             }}
@@ -134,7 +135,7 @@ export function BuddyTab({
               style={{
                 background: "transparent",
                 border: "none",
-                color: "rgba(255,255,255,0.6)",
+                color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
                 cursor: "pointer",
                 padding: "0 8px",
                 fontSize: "14px",
@@ -176,13 +177,13 @@ export function BuddyTab({
               gridColumn: "1 / -1",
               padding: "3rem 1.5rem",
               textAlign: "center",
-              background: "var(--card-bg, #ffffff)",
+              background: "var(--card-bg, var(--color-surface))",
               borderRadius: "16px",
-              border: "1px dashed var(--card-border, rgba(1,54,40,0.2))",
+              border: "1px dashed var(--card-border, color-mix(in srgb, var(--color-primary) 20%, transparent))",
             }}
           >
             <span style={{ fontSize: "2rem", display: "block", marginBottom: "0.5rem" }}>🤝</span>
-            <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, #0d281e)" }}>
+            <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, var(--color-on-accent))" }}>
               Aramanıza uygun gezi arkadaşı bulunamadı
             </h3>
             <p style={{ margin: 0, color: "var(--text-muted, #4b5563)", fontSize: "0.9rem" }}>
@@ -197,9 +198,9 @@ export function BuddyTab({
               <div
                 key={buddy.id}
                 style={{
-                  background: "var(--card-bg, #ffffff)",
+                  background: "var(--card-bg, var(--color-surface))",
                   borderRadius: "16px",
-                  border: "1px solid var(--card-border, rgba(1,54,40,0.12))",
+                  border: "1px solid var(--card-border, color-mix(in srgb, var(--color-primary) 12%, transparent))",
                   padding: "1.25rem",
                   display: "flex",
                   flexDirection: "column",
@@ -221,7 +222,7 @@ export function BuddyTab({
                         height: "48px",
                         borderRadius: "50%",
                         objectFit: "cover",
-                        border: "2px solid #10b981",
+                        border: "2px solid var(--color-accent)",
                       }}
                     />
                     <div>
@@ -230,12 +231,12 @@ export function BuddyTab({
                           margin: 0,
                           fontSize: "15px",
                           fontWeight: 700,
-                          color: "var(--text-primary, #0d281e)",
+                          color: "var(--text-primary, var(--color-on-accent))",
                         }}
                       >
                         {buddy.name}
                       </h4>
-                      <span style={{ fontSize: "12px", color: "var(--text-muted, #64748b)" }}>
+                      <span style={{ fontSize: "12px", color: "var(--text-muted, var(--color-text-subtle))" }}>
                         @{buddy.username} · {buddy.travelStyle}
                       </span>
                     </div>
@@ -243,8 +244,8 @@ export function BuddyTab({
 
                   <div
                     style={{
-                      background: "rgba(16,185,129,0.12)",
-                      border: "1px solid rgba(16,185,129,0.3)",
+                      background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                      border: "1px solid var(--color-accent-a30)",
                       borderRadius: "10px",
                       padding: "4px 8px",
                       textAlign: "center",
@@ -254,13 +255,13 @@ export function BuddyTab({
                       style={{
                         fontSize: "10px",
                         fontWeight: 700,
-                        color: "#059669",
+                        color: "var(--color-success-strong)",
                         display: "block",
                       }}
                     >
                       UYUM
                     </span>
-                    <strong style={{ fontSize: "14px", color: "#047857" }}>
+                    <strong style={{ fontSize: "14px", color: "var(--color-success)" }}>
                       %{buddy.matchScore}
                     </strong>
                   </div>
@@ -273,7 +274,7 @@ export function BuddyTab({
                     borderRadius: "10px",
                     padding: "8px 12px",
                     fontSize: "12px",
-                    color: "var(--text-secondary, #1e293b)",
+                    color: "var(--text-secondary, var(--color-neutral-800))",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -291,7 +292,7 @@ export function BuddyTab({
                   <div
                     style={{
                       fontSize: "11px",
-                      color: "#059669",
+                      color: "var(--color-success-strong)",
                       marginTop: "4px",
                       fontStyle: "italic",
                     }}
@@ -306,7 +307,7 @@ export function BuddyTab({
                     margin: 0,
                     fontSize: "12.5px",
                     lineHeight: "1.45",
-                    color: "var(--text-body, #334155)",
+                    color: "var(--text-body, var(--color-neutral-700))",
                   }}
                 >
                   &quot;{buddy.bio}&quot;
@@ -340,7 +341,7 @@ export function BuddyTab({
                       flex: 1,
                       padding: "9px 12px",
                       borderRadius: "10px",
-                      background: "#10b981",
+                      background: "var(--color-accent)",
                       color: "#031c13",
                       fontWeight: 700,
                       fontSize: "12.5px",
@@ -352,7 +353,7 @@ export function BuddyTab({
                       gap: "6px",
                     }}
                   >
-                    <span className="material-symbols-outlined text-[16px]">chat</span>
+                    <span className="material-symbols-outlined">chat</span>
                     <span>Bire Bir Mesaj</span>
                   </button>
 

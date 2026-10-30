@@ -10,6 +10,7 @@ import "./community.css";
 
 import type { CommunityPost } from "../features/community/types";
 import { DiscoverTab, NewPostModal } from "../features/community";
+import { PageHeader, PageShell } from "../components/ui";
 
 export type { CommunityPost };
 
@@ -100,7 +101,18 @@ export default function CommunityPage() {
   }, []);
 
   // ── Central Action: Add to My Trip (Clone Route from Feed) ────
-  const handleAddToMyTrip = (route: { title: string; destination?: string; stops?: Array<{ label?: string; name?: string; address?: string; lat?: number; lng?: number; category?: string }> }) => {
+  const handleAddToMyTrip = (route: {
+    title: string;
+    destination?: string;
+    stops?: Array<{
+      label?: string;
+      name?: string;
+      address?: string;
+      lat?: number;
+      lng?: number;
+      category?: string;
+    }>;
+  }) => {
     if (!requireAuth("Seyahate Ekle", "Bu rotayı seyahat planınıza kopyalamak için")) return;
 
     try {
@@ -122,20 +134,32 @@ export default function CommunityPage() {
               },
             ];
 
-      const clonedPins = stopsData.map((s: { label?: string; name?: string; address?: string; lat?: number; lng?: number; category?: string }, idx: number) => ({
-        id: "pin-" + Date.now() + "-" + idx,
-        tripId: newTripId,
-        label: s.label || s.name || `Durak ${idx + 1}`,
-        address: s.address || s.label || route.destination || "Keşif Noktası",
-        lat: s.lat || 41.0,
-        lng: s.lng || 29.0,
-        category: s.category || "tarih",
-        dayIndex: 1,
-        order: idx + 1,
-        group: route.title,
-        visited: false,
-        durationMinutes: 60,
-      }));
+      const clonedPins = stopsData.map(
+        (
+          s: {
+            label?: string;
+            name?: string;
+            address?: string;
+            lat?: number;
+            lng?: number;
+            category?: string;
+          },
+          idx: number,
+        ) => ({
+          id: "pin-" + Date.now() + "-" + idx,
+          tripId: newTripId,
+          label: s.label || s.name || `Durak ${idx + 1}`,
+          address: s.address || s.label || route.destination || "Keşif Noktası",
+          lat: s.lat || 41.0,
+          lng: s.lng || 29.0,
+          category: s.category || "tarih",
+          dayIndex: 1,
+          order: idx + 1,
+          group: route.title,
+          visited: false,
+          durationMinutes: 60,
+        }),
+      );
 
       const newTrip = {
         id: newTripId,
@@ -292,7 +316,9 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="community-page-root">
+    <PageShell layout="landing" className="community-page-root">
+      {/* Tek h1 (AC-34): görsel başlık sayfa içinde <p> olarak kalır; kabuk başlığı ekran okuyucuya. */}
+      <PageHeader variant="hidden" title="Keşfet, Rota Paylaş & Gezi Arkadaşı Bul" />
 
       {/* ── HERO BANNER ── */}
       <section className="community-hero">
@@ -313,7 +339,7 @@ export default function CommunityPage() {
           {/* Headline + CTA */}
           <div className="hero-headline-row">
             <div className="hero-headline-text">
-              <h1 className="hero-title">Keşfet, Rota Paylaş &amp; Gezi Arkadaşı Bul</h1>
+              <p className="hero-title">Keşfet, Rota Paylaş &amp; Gezi Arkadaşı Bul</p>
               <p className="hero-subtitle">
                 Gezgin deneyimlerini keşfedin, onaylı seyahat rotalarını paylaşın, grup seyahatleri
                 organize edin ve seyahat arkadaşı bulun.
@@ -343,11 +369,17 @@ export default function CommunityPage() {
                 key={tab.key}
                 type="button"
                 className={`hero-tab${activeTab === tab.key ? " active" : ""}`}
+                aria-pressed={activeTab === tab.key}
                 onClick={() => setActiveTab(tab.key)}
               >
                 {tab.label}
                 {tab.badge && (
-                  <span className={`hero-tab-badge${tab.live ? " live" : ""}`}>{tab.badge}</span>
+                  <span
+                    className={`hero-tab-badge${tab.live ? " live" : ""}`}
+                    data-surface={activeTab === tab.key ? "inverse" : undefined}
+                  >
+                    {tab.badge}
+                  </span>
                 )}
               </button>
             ))}
@@ -357,7 +389,7 @@ export default function CommunityPage() {
 
       <div className="community-layout">
         {/* ── MAIN FEED ── */}
-        <main className="community-feed-col">
+        <div className="community-feed-col">
           <DiscoverTab
             posts={posts}
             filter="all"
@@ -367,7 +399,13 @@ export default function CommunityPage() {
             onToggleLike={handleToggleLike}
             onToggleBookmark={handleToggleBookmark}
             onRetweet={handleRetweet}
-            onAddToMyTrip={handleAddToMyTrip as (route: { title: string; destination?: string; stops?: unknown[] }) => void}
+            onAddToMyTrip={
+              handleAddToMyTrip as (route: {
+                title: string;
+                destination?: string;
+                stops?: unknown[];
+              }) => void
+            }
             onOpenNewPost={() => {
               requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
                 setShowNewPostModal(true);
@@ -380,7 +418,7 @@ export default function CommunityPage() {
             onDeletePost={handleDeletePost}
             showToast={showToast}
           />
-        </main>
+        </div>
 
         {/* ── SIDEBAR ── */}
         <aside className="community-sidebar-col">
@@ -456,7 +494,6 @@ export default function CommunityPage() {
         </aside>
       </div>
 
-
       {/* ── YENİ PAYLAŞIM MODALI ── */}
       <NewPostModal
         isOpen={showNewPostModal}
@@ -475,9 +512,9 @@ export default function CommunityPage() {
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 50,
-            background: "rgba(15,23,42,0.92)",
+            background: "color-mix(in srgb, var(--color-neutral-900) 92%, transparent)",
             backdropFilter: "blur(8px)",
-            color: "#fff",
+            color: "var(--color-on-primary)",
             padding: "0.6rem 1.25rem",
             borderRadius: "9999px",
             fontSize: "0.75rem",
@@ -503,6 +540,6 @@ export default function CommunityPage() {
           onClose={() => setShowAuthModal(false)}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

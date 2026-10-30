@@ -5,6 +5,7 @@ import type { CommunityPost } from "../types";
 import { PRESET_TRAVEL_PHOTOS } from "../initial-data";
 import { SoftIcon } from "../../../components/soft-icon";
 import { EditPostModalWeb } from "./EditPostModalWeb";
+import "../community-layout.css";
 
 export interface PublicProfileModalUser {
   name: string;
@@ -233,9 +234,9 @@ export function DiscoverTab({
           position: "sticky",
           top: 0,
           zIndex: 20,
-          background: "var(--c-sticky-bg, rgba(255,255,255,0.92))",
+          background: "var(--c-sticky-bg, color-mix(in srgb, var(--color-surface) 92%, transparent))",
           backdropFilter: "blur(12px)",
-          borderBottom: "1px solid var(--c-border, #e2e8f0)",
+          borderBottom: "1px solid var(--c-border, var(--color-border))",
           marginBottom: "0.75rem",
         }}
       >
@@ -271,8 +272,8 @@ export function DiscoverTab({
                       <span
                         style={{
                           padding: "1px 6px",
-                          background: "rgba(16,185,129,0.15)",
-                          color: "#059669",
+                          background: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
+                          color: "var(--color-success-strong)",
                           fontSize: 11,
                           fontWeight: 700,
                           borderRadius: 9999,
@@ -372,8 +373,8 @@ export function DiscoverTab({
               width: 40,
               height: 40,
               borderRadius: "50%",
-              background: "rgba(16,185,129,0.15)",
-              color: "#059669",
+              background: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
+              color: "var(--color-success-strong)",
               fontWeight: 700,
               display: "flex",
               alignItems: "center",
@@ -410,12 +411,12 @@ export function DiscoverTab({
 
             {/* Fotoğraf Önizleme */}
             {composerPhoto && (
-              <div className="relative rounded-xl overflow-hidden max-h-48 border border-slate-200">
-                <img src={composerPhoto} alt="Önizleme" className="w-full h-full object-cover" />
+              <div className="cm-1">
+                <img src={composerPhoto} alt="Önizleme" className="cm-2" />
                 <button
                   type="button"
                   onClick={() => setComposerPhoto(null)}
-                  className="absolute top-2 right-2 bg-slate-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-slate-900 text-xs"
+                  className="cm-3"
                 >
                   ✕
                 </button>
@@ -424,13 +425,13 @@ export function DiscoverTab({
 
             {/* Seçili Rota Rozeti */}
             {composerRoute && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-semibold rounded-lg border border-emerald-200">
+              <div className="cm-4">
                 <SoftIcon name="map" size={13} color="#059669" />
                 <span>Ekli Rota: {composerRoute}</span>
                 <button
                   type="button"
                   onClick={() => setComposerRoute("")}
-                  className="ml-1 text-slate-400 hover:text-slate-700"
+                  className="cm-5 text-slate-400"
                 >
                   ✕
                 </button>
@@ -439,14 +440,14 @@ export function DiscoverTab({
 
             {/* Konum Etiketi Açık İse */}
             {showLocationInput && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="cm-6">
                 <SoftIcon name="map-pin" size={14} color="#059669" />
                 <input
                   type="text"
                   value={composerLocation}
                   onChange={(e) => setComposerLocation(e.target.value)}
                   placeholder="Konum etiketi (örn: Roma, İtalya veya Kapadokya)..."
-                  className="w-full bg-transparent text-xs text-slate-800 focus:outline-none"
+                  className="cm-7"
                 />
                 {composerLocation && (
                   <button
@@ -455,7 +456,7 @@ export function DiscoverTab({
                       setComposerLocation("");
                       setShowLocationInput(false);
                     }}
-                    className="text-xs text-slate-400 hover:text-slate-700"
+                    className="cm-8 text-slate-400"
                   >
                     ✕
                   </button>
@@ -465,18 +466,18 @@ export function DiscoverTab({
 
             {/* Fotoğraf Seçici Paneli */}
             {showPhotoPicker && (
-              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-2">
-                <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
+              <div className="cm-9">
+                <div className="cm-10 text-slate-600">
                   <span>📸 Hızlı Seyahat Görseli Seç</span>
                   <button
                     type="button"
                     onClick={() => setShowPhotoPicker(false)}
-                    className="text-slate-400 hover:text-slate-700"
+                    className="cm-11 text-slate-400"
                   >
                     Kapat
                   </button>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="cm-12">
                   {PRESET_TRAVEL_PHOTOS.map((p, idx) => (
                     <button
                       key={idx}
@@ -485,16 +486,16 @@ export function DiscoverTab({
                         setComposerPhoto(p.url);
                         setShowPhotoPicker(false);
                       }}
-                      className={`group relative rounded-lg overflow-hidden h-16 border text-left transition-all ${
+                      className={`cm-group cm-13 h-16 ${
                         composerPhoto === p.url ? "ring-2 ring-emerald-500" : "border-slate-200"
                       }`}
                     >
                       <img
                         src={p.url}
                         alt={p.label}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        className="cm-14"
                       />
-                      <span className="absolute inset-x-0 bottom-0 bg-black/60 text-[10px] text-white px-1.5 py-0.5 truncate font-medium">
+                      <span className="cm-15 bg-black/60">
                         {p.label}
                       </span>
                     </button>
@@ -505,13 +506,13 @@ export function DiscoverTab({
 
             {/* Rota Seçici Paneli */}
             {showRoutePicker && (
-              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-2">
-                <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
+              <div className="cm-9">
+                <div className="cm-10 text-slate-600">
                   <span>🗺️ Seyahat Rotası İliştir</span>
                   <button
                     type="button"
                     onClick={() => setShowRoutePicker(false)}
-                    className="text-slate-400 hover:text-slate-700"
+                    className="cm-11 text-slate-400"
                   >
                     Kapat
                   </button>
@@ -522,7 +523,7 @@ export function DiscoverTab({
                     setComposerRoute(e.target.value);
                     if (e.target.value) setShowRoutePicker(false);
                   }}
-                  className="w-full text-xs p-2 rounded-lg border border-slate-200 bg-white text-slate-800 focus:outline-none"
+                  className="cm-16"
                 >
                   <option value="">Bir rota seçin...</option>
                   {userSavedRoutes.map((r, i) => (
@@ -544,36 +545,36 @@ export function DiscoverTab({
             )}
 
             {/* Alt Butonlar */}
-            <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center gap-1 sm:gap-2 text-slate-500">
+            <div className="cm-17">
+              <div className="cm-18">
                 <button
                   type="button"
                   onClick={() => setShowPhotoPicker(!showPhotoPicker)}
-                  className={`p-2 rounded-xl hover:bg-slate-100 hover:text-emerald-600 transition-colors inline-flex items-center gap-1 text-xs font-semibold ${
+                  className={`cm-19 hover:text-emerald-600 ${
                     composerPhoto ? "text-emerald-600 bg-emerald-50" : ""
                   }`}
                   title="Fotoğraf Ekle"
                 >
                   <SoftIcon name="photo" size={17} color={composerPhoto ? "#059669" : "#64748b"} />
-                  <span className="hidden sm:inline">Fotoğraf</span>
+                  <span className="cm-20">Fotoğraf</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setShowRoutePicker(!showRoutePicker)}
-                  className={`p-2 rounded-xl hover:bg-slate-100 hover:text-emerald-600 transition-colors inline-flex items-center gap-1 text-xs font-semibold ${
+                  className={`cm-19 hover:text-emerald-600 ${
                     composerRoute ? "text-emerald-600 bg-emerald-50" : ""
                   }`}
                   title="Rota İliştir"
                 >
                   <SoftIcon name="map" size={17} color={composerRoute ? "#059669" : "#64748b"} />
-                  <span className="hidden sm:inline">Rota</span>
+                  <span className="cm-20">Rota</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setShowLocationInput(!showLocationInput)}
-                  className={`p-2 rounded-xl hover:bg-slate-100 hover:text-emerald-600 transition-colors inline-flex items-center gap-1 text-xs font-semibold ${
+                  className={`cm-19 hover:text-emerald-600 ${
                     composerLocation ? "text-emerald-600 bg-emerald-50" : ""
                   }`}
                   title="Konum Ekle"
@@ -583,14 +584,14 @@ export function DiscoverTab({
                     size={17}
                     color={composerLocation ? "#059669" : "#64748b"}
                   />
-                  <span className="hidden sm:inline">Konum</span>
+                  <span className="cm-20">Konum</span>
                 </button>
               </div>
 
               <button
                 type="submit"
                 disabled={!composerText.trim()}
-                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-sm transition-all inline-flex items-center gap-1.5"
+                className="cm-21 shadow-sm"
               >
                 <SoftIcon name="send" size={13} color="#ffffff" />
                 <span>Paylaş</span>
@@ -601,7 +602,7 @@ export function DiscoverTab({
       </div>
 
       {/* ── AKIŞ AKORT LİSTESİ (STREAM FEED) ── */}
-      <div className="space-y-4">
+      <div className="cm-22">
         {displayedPosts.length === 0 ? (
           <div
             style={{
@@ -617,7 +618,7 @@ export function DiscoverTab({
                 width: 56,
                 height: 56,
                 borderRadius: "50%",
-                background: "rgba(16,185,129,0.1)",
+                background: "var(--color-accent-a10)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -653,8 +654,8 @@ export function DiscoverTab({
               onClick={onOpenNewPost}
               style={{
                 padding: "0.45rem 0.85rem",
-                background: "#059669",
-                color: "#fff",
+                background: "var(--color-success-strong)",
+                color: "var(--color-on-primary)",
                 borderRadius: "0.65rem",
                 fontSize: "0.8rem",
                 fontWeight: 700,
@@ -697,23 +698,23 @@ export function DiscoverTab({
               >
                 <div style={{ padding: "1rem 1.15rem" }}>
                   {/* Üst Yazar Bilgisi ve 3 Nokta Menüsü */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
+                  <div className="cm-23">
+                    <div className="cm-24">
                       {/* Avatar */}
                       <button
                         type="button"
                         onClick={() => handleOpenUserProfile(post)}
-                        className="relative flex-shrink-0 group"
+                        className="cm-25 cm-group"
                         title={`${post.authorDisplayName} profilini incele`}
                       >
                         {post.authorAvatar ? (
                           <img
                             src={post.authorAvatar}
                             alt={post.authorDisplayName}
-                            className="w-11 h-11 rounded-full object-cover border border-slate-200 group-hover:ring-2 group-hover:ring-emerald-500 transition-all"
+                            className="cm-26"
                           />
                         ) : (
-                          <div className="w-11 h-11 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-sm border border-emerald-200 group-hover:ring-2 group-hover:ring-emerald-500 transition-all">
+                          <div className="cm-27">
                             {post.authorDisplayName.charAt(0)}
                           </div>
                         )}
@@ -721,34 +722,34 @@ export function DiscoverTab({
 
                       {/* İsim / Handle / Rozet / Zaman */}
                       <div>
-                        <div className="flex items-center gap-1.5 flex-wrap">
+                        <div className="cm-28">
                           <button
                             type="button"
                             onClick={() => handleOpenUserProfile(post)}
-                            className="text-sm font-bold text-slate-900 hover:text-emerald-700 transition-colors text-left"
+                            className="cm-29"
                           >
                             {post.authorDisplayName}
                           </button>
                           {(post.verified ?? true) && (
                             <span
-                              className="text-emerald-600 text-xs font-bold"
+                              className="cm-30"
                               title="Onaylı Gezgin"
                             >
                               ✓
                             </span>
                           )}
-                          <span className="text-xs text-slate-400">
+                          <span className="cm-31 text-slate-400">
                             {post.authorUsername.startsWith("@")
                               ? post.authorUsername
                               : `@${post.authorUsername}`}
                           </span>
                           <span className="text-slate-300">·</span>
-                          <span className="text-xs text-slate-400">{post.createdAt}</span>
+                          <span className="cm-31 text-slate-400">{post.createdAt}</span>
                         </div>
 
                         {/* Konum Etiketi */}
                         {post.locationTag && (
-                          <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-medium mt-0.5">
+                          <div className="cm-33">
                             <SoftIcon name="map-pin" size={11} color="#059669" />
                             <span>{post.locationTag}</span>
                           </div>
@@ -757,11 +758,11 @@ export function DiscoverTab({
                     </div>
 
                     {/* Sağ Taraf: 3 Nokta Seçenekler Menüsü */}
-                    <div className="relative">
+                    <div className="cm-34">
                       <button
                         type="button"
                         onClick={() => setActiveMenuPostId(isMenuOpen ? null : post.id)}
-                        className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center"
+                        className="cm-35 text-slate-400"
                         title="Seçenekler"
                       >
                         <svg
@@ -784,10 +785,10 @@ export function DiscoverTab({
                       {isMenuOpen && (
                         <>
                           <div
-                            className="fixed inset-0 z-30"
+                            className="cm-36"
                             onClick={() => setActiveMenuPostId(null)}
                           />
-                          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-40 animate-fade-in text-xs font-semibold text-slate-700">
+                          <div className="cm-37 shadow-xl">
                             {isMyPost ? (
                               <>
                                 <button
@@ -796,7 +797,7 @@ export function DiscoverTab({
                                     setActiveMenuPostId(null);
                                     setEditingPost(post);
                                   }}
-                                  className="w-full px-3.5 py-2 text-left hover:bg-slate-50 flex items-center gap-2"
+                                  className="cm-38"
                                 >
                                   <SoftIcon name="edit" size={14} color="#475569" />
                                   <span>Gönderiyi Düzenle</span>
@@ -813,7 +814,7 @@ export function DiscoverTab({
                                       if (onDeletePost) onDeletePost(post.id);
                                     }
                                   }}
-                                  className="w-full px-3.5 py-2 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
+                                  className="cm-39 text-red-600"
                                 >
                                   <SoftIcon name="trash" size={14} color="#dc2626" />
                                   <span>Paylaşımı Sil</span>
@@ -827,7 +828,7 @@ export function DiscoverTab({
                                     setActiveMenuPostId(null);
                                     onToggleFollow(post.authorUsername);
                                   }}
-                                  className="w-full px-3.5 py-2 text-left hover:bg-slate-50 flex items-center gap-2"
+                                  className="cm-38"
                                 >
                                   <SoftIcon name="user" size={14} color="#059669" />
                                   <span>{isFollowing ? "Takipten Çıkar" : "Gezgini Takip Et"}</span>
@@ -839,7 +840,7 @@ export function DiscoverTab({
                                     if (showToast)
                                       showToast("✓ Paylaşım moderasyon ekibine bildirildi.");
                                   }}
-                                  className="w-full px-3.5 py-2 text-left hover:bg-slate-50 text-slate-600 flex items-center gap-2"
+                                  className="cm-40 text-slate-600"
                                 >
                                   <SoftIcon name="shield" size={14} color="#eab308" />
                                   <span>Paylaşımı Bildir</span>
@@ -853,13 +854,13 @@ export function DiscoverTab({
                   </div>
 
                   {/* Paylaşım Metni */}
-                  <p className="text-sm text-slate-800 leading-relaxed mb-3 whitespace-pre-line">
+                  <p className="cm-41">
                     {post.content}
                   </p>
 
                   {/* Hashtag Listesi */}
                   {post.hashtags && post.hashtags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3">
+                    <div className="cm-42">
                       {post.hashtags.map((h, i) => (
                         <span
                           key={i}
@@ -867,7 +868,7 @@ export function DiscoverTab({
                             const tagWord = h.replace("#", "");
                             setSelectedCategory(tagWord);
                           }}
-                          className="text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 cursor-pointer px-2 py-0.5 rounded-md font-semibold transition-colors"
+                          className="cm-43"
                         >
                           {h}
                         </span>
@@ -877,11 +878,11 @@ export function DiscoverTab({
 
                   {/* Medya Görseli */}
                   {post.image && (
-                    <div className="rounded-xl overflow-hidden border border-slate-200 mb-3 max-h-96">
+                    <div className="cm-44">
                       <img
                         src={post.image}
                         alt="Seyahat Görseli"
-                        className="w-full h-full object-cover hover:scale-[1.01] transition-transform duration-300"
+                        className="cm-45"
                         loading="lazy"
                       />
                     </div>
@@ -889,22 +890,22 @@ export function DiscoverTab({
 
                   {/* ── İLİŞTİRİLMİŞ ROTA KARTI (MOBİLDEKİ CLONE ROUTE ÖZELLİĞİ) ── */}
                   {post.linkedRoute && (
-                    <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 sm:p-4 mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm text-sm">
+                    <div className="cm-46">
+                      <div className="cm-47">
+                        <div className="cm-48 shadow-sm">
                           🗺️
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-slate-900">
+                          <h4 className="cm-49">
                             {post.linkedRoute.title}
                           </h4>
-                          <p className="text-xs text-emerald-800 font-medium">
+                          <p className="cm-50">
                             {post.linkedRoute.destination} • {post.linkedRoute.stopCount} Durak
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="cm-51">
                         <button
                           type="button"
                           onClick={() => {
@@ -914,7 +915,7 @@ export function DiscoverTab({
                               stops: post.linkedRoute!.stops,
                             });
                           }}
-                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all inline-flex items-center gap-1.5 flex-shrink-0"
+                          className="cm-52 shadow-sm"
                         >
                           <SoftIcon name="plus" size={13} color="#ffffff" />
                           <span>Haritama Ekle</span>
@@ -924,12 +925,12 @@ export function DiscoverTab({
                   )}
 
                   {/* ── AKSİYON BUTONLARI (REACTIONS BAR - LIKE, COMMENT, RETWEET, BOOKMARK, SHARE) ── */}
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-slate-500 text-xs font-semibold">
+                  <div className="cm-53">
                     {/* Yorum Yap */}
                     <button
                       type="button"
                       onClick={() => toggleComments(post.id)}
-                      className={`flex items-center gap-1.5 p-1.5 sm:px-2.5 rounded-lg hover:bg-slate-100 hover:text-emerald-700 transition-colors ${
+                      className={`cm-54 ${
                         isCommentsOpen ? "text-emerald-700 bg-emerald-50" : ""
                       }`}
                       title="Yorumlar"
@@ -950,7 +951,7 @@ export function DiscoverTab({
                         if (showToast)
                           showToast(`🔁 "${post.authorDisplayName}" paylaşımı yeniden yayınlandı!`);
                       }}
-                      className={`flex items-center gap-1.5 p-1.5 sm:px-2.5 rounded-lg hover:bg-emerald-50 hover:text-emerald-700 transition-colors ${
+                      className={`cm-55 hover:bg-emerald-50 ${
                         post.repostedByMe ? "text-emerald-600 font-bold" : ""
                       }`}
                       title="Yeniden Paylaş"
@@ -967,7 +968,7 @@ export function DiscoverTab({
                     <button
                       type="button"
                       onClick={() => onToggleLike(post.id)}
-                      className={`flex items-center gap-1.5 p-1.5 sm:px-2.5 rounded-lg hover:bg-rose-50 hover:text-rose-600 transition-colors ${
+                      className={`cm-56 hover:bg-rose-50 hover:text-rose-600 ${
                         post.likedByMe ? "text-rose-600 font-bold" : ""
                       }`}
                       title="Beğen"
@@ -993,7 +994,7 @@ export function DiscoverTab({
                           );
                         }
                       }}
-                      className={`flex items-center gap-1.5 p-1.5 sm:px-2.5 rounded-lg hover:bg-emerald-50 hover:text-emerald-700 transition-colors ${
+                      className={`cm-55 hover:bg-emerald-50 ${
                         post.savedByMe ? "text-emerald-600 font-bold" : ""
                       }`}
                       title="Yer İmlerine Kaydet"
@@ -1010,7 +1011,7 @@ export function DiscoverTab({
                     <button
                       type="button"
                       onClick={() => handleSharePost(post)}
-                      className="flex items-center gap-1.5 p-1.5 sm:px-2.5 rounded-lg hover:bg-slate-100 hover:text-slate-800 transition-colors"
+                      className="cm-57"
                       title="Paylaş"
                     >
                       <SoftIcon name="send" size={15} color="#64748b" />
@@ -1019,11 +1020,11 @@ export function DiscoverTab({
 
                   {/* ── YORUMLAR PANELİ (AÇILIP KAPANAN) ── */}
                   {isCommentsOpen && (
-                    <div className="mt-3 pt-3 border-t border-slate-100 space-y-3">
+                    <div className="cm-58">
                       {/* Yorum Ekleme Formu */}
                       <form
                         onSubmit={(e) => handleSendCommentSubmit(post.id, e)}
-                        className="flex items-center gap-2"
+                        className="cm-51"
                       >
                         <input
                           type="text"
@@ -1032,42 +1033,42 @@ export function DiscoverTab({
                             setCommentInputs({ ...commentInputs, [post.id]: e.target.value })
                           }
                           placeholder={`@${post.authorUsername} kullanıcısına yanıt ver...`}
-                          className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 bg-slate-50"
+                          className="cm-59"
                         />
                         <button
                           type="submit"
                           disabled={!commentInputs[post.id]?.trim()}
-                          className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all"
+                          className="cm-60"
                         >
                           Yanıtla
                         </button>
                       </form>
 
                       {/* Yorumlar Listesi */}
-                      <div className="space-y-2 pt-1">
+                      <div className="cm-61">
                         {!post.comments || post.comments.length === 0 ? (
-                          <p className="text-xs text-slate-400 py-1">
+                          <p className="cm-62 text-slate-400">
                             Henüz yorum yok. İlk yorumu siz yapın!
                           </p>
                         ) : (
                           post.comments.map((c) => (
                             <div
                               key={c.id}
-                              className="flex items-start gap-2.5 bg-slate-50/70 p-2.5 rounded-xl border border-slate-100"
+                              className="cm-63"
                             >
-                              <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                              <div className="cm-64">
                                 {c.displayName ? c.displayName.charAt(0) : c.username.charAt(0)}
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-xs font-bold text-slate-800">
+                              <div className="cm-65">
+                                <div className="cm-66">
+                                  <span className="cm-67">
                                     {c.displayName || c.username}
                                   </span>
-                                  <span className="text-[11px] text-slate-400">@{c.username}</span>
+                                  <span className="cm-68 text-slate-400">@{c.username}</span>
                                   <span className="text-slate-300">·</span>
-                                  <span className="text-[11px] text-slate-400">{c.createdAt}</span>
+                                  <span className="cm-68 text-slate-400">{c.createdAt}</span>
                                 </div>
-                                <p className="text-xs text-slate-700 mt-0.5 leading-relaxed">
+                                <p className="cm-69">
                                   {c.text}
                                 </p>
                               </div>
@@ -1130,7 +1131,7 @@ export function DiscoverTab({
             <div
               style={{
                 height: 100,
-                background: "linear-gradient(135deg, #059669 0%, #0d9488 100%)",
+                background: "linear-gradient(135deg, var(--color-success-strong) 0%, #0d9488 100%)",
                 position: "relative",
               }}
             >
@@ -1145,7 +1146,7 @@ export function DiscoverTab({
                   height: 32,
                   borderRadius: "50%",
                   background: "rgba(0,0,0,0.4)",
-                  color: "#fff",
+                  color: "var(--color-on-primary)",
                   border: "none",
                   cursor: "pointer",
                   display: "flex",
@@ -1213,7 +1214,7 @@ export function DiscoverTab({
                   {selectedProfileUser.name}
                 </h3>
                 {selectedProfileUser.verified && (
-                  <span style={{ color: "#059669", fontWeight: 700 }}>✓</span>
+                  <span style={{ color: "var(--color-success-strong)", fontWeight: 700 }}>✓</span>
                 )}
               </div>
               <p style={{ fontSize: "0.75rem", color: "var(--c-text-muted)", margin: "2px 0 0" }}>

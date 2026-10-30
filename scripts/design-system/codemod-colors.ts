@@ -32,6 +32,13 @@ import { hexToRgb, resolveColor } from "../../packages/design-tokens/src/resolve
 import { color, inverseOverrides } from "../../packages/design-tokens/src/tokens.ts";
 import { legacyAliases } from "../../packages/design-tokens/src/legacy-aliases.ts";
 import { luminance } from "../../packages/design-tokens/src/contrast.ts";
+import {
+  emitTwCss,
+  ensureImport,
+  loadTwTable,
+  transformTwTsx,
+  type TwReport,
+} from "./codemod-tw.ts";
 
 const root = resolve(import.meta.dirname, "../..");
 const webApp = join(root, "apps/web/app");
@@ -317,8 +324,21 @@ export function decide(
   const { hex, alpha } = parsed;
   if (role === "shadow" && hex === "#000000")
     return { action: "note", reason: "gölge: siyah alfa → --shadow-* token'ı (elle)" };
-  if (role === "text" && dark === null)
-    return { action: "ambiguous", reason: "zemin belirsiz (karışık seçici listesi)" };
+  if (role === "text" && dark === null) {
+    // Karışık seçici listesi: yalnızca değeri her iki kapsamda birebir koruyan (inverse'te
+    // değişmeyen) token kabul edilir; yoksa belirsiz.
+    const exact = PALETTE_BY_HEX.get(hex);
+    const stableToken = exact && alpha === 1 ? tokenFor(hex, "text", false, true) : null;
+    if (!stableToken)
+      return { action: "ambiguous", reason: "zemin belirsiz (karışık seçici listesi)" };
+    return {
+      action: "replace",
+      after: `var(--${stableToken})`,
+      kind: "exact",
+      preserved: true,
+      targetHex: hex,
+    };
+  }
   const isDark = dark === true;
   let target = PALETTE_BY_HEX.get(hex);
   let kind: Change["kind"] = alpha === 1 ? "exact" : "alpha";
@@ -639,7 +659,7 @@ export function transformCss(
           fr.skipped++;
           continue;
         }
-        if (res.action === "unmapped") {
+        if (res.action !== "replace") {
           report.unmapped.push({ ...base, reason: res.reason });
           fr.skipped++;
           continue;
@@ -807,7 +827,84 @@ function collect(target: string, mode: "css" | "tsx" | undefined, out: string[])
   if (!appRel.startsWith("..") && EXCLUDED.some((re) => re.test(appRel))) return;
   out.push(target);
 }
+/** --mode tw: tw sınıfları → üretilmiş yerleşim sınıfları (+ renkler kodmoddan geçer). */
+function mainTw(argv: string[]) {
+  let out: string | undefined;
+  let prefix: string | undefined;
+  let dryRun = false;
+  let reportPath: string | undefined;
+  const files: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--mode") i++;
+    else if (a === "--css") out = resolve(argv[++i]);
+    else if (a === "--prefix") prefix = argv[++i];
+    else if (a === "--dry-run") dryRun = true;
+    else if (a === "--report") reportPath = argv[++i];
+    else if (a.startsWith("--")) throw new Error(`Bilinmeyen seçenek: ${a}`);
+    else files.push(resolve(a));
+  }
+  if (!out || !prefix || !files.length)
+    throw new Error("--mode tw: --css <çıktı.css> --prefix <ön-ek> <tsx…> gerekli");
+  if (!/^[a-z][a-z0-9-]*$/.test(prefix)) throw new Error(`Geçersiz ön ek: ${prefix}`);
+  const table = loadTwTable(root);
+  // Rengi manuel-kontrast / belirsiz / gölge notu düşen utility'ler çevrilmez (G1 yeni dosyada artmasın).
+  for (const r of table.rules) {
+    const probe = emptyReport("css", true);
+    transformCss(
+      `${LAYER_ORDER}\n@layer legacy {\n  .probe {\n    ${r.body}\n  }\n}\n`,
+      "probe.css",
+      new Set(),
+      probe,
+    );
+    if (
+      probe.manualContrast.length ||
+      probe.ambiguous.length ||
+      probe.notes.length ||
+      probe.unmapped.length
+    )
+      for (const p of r.parts) table.keep.add(p.util);
+  }
+  const gen = new Map<string, string>();
+  const tw: TwReport = { files: [], classes: {}, notes: [] };
+  const writes: Array<[string, string]> = [];
+  for (const abs of files) {
+    const rel = relative(root, abs).split("\\").join("/");
+    const src = readFileSync(abs, "utf8");
+    let next = transformTwTsx(src, table, prefix, gen, tw, rel);
+    if (next !== src) next = ensureImport(next, abs, out);
+    if (next !== src) writes.push([abs, next]);
+  }
+  const relOut = relative(root, out).split("\\").join("/");
+  let css = emitTwCss(
+    table,
+    prefix,
+    gen,
+    `Üretildi: scripts/design-system/codemod-colors.ts --mode tw (design §2.7 8b). Elle düzenlemeyin; değerler tw-utils.css'ten birebir.`,
+  );
+  const colors = emptyReport("css", dryRun);
+  css = transformCss(css, relOut, new Set(), colors);
+  if (!dryRun) {
+    for (const [abs, next] of writes) writeFileSync(abs, next);
+    if (gen.size) writeFileSync(out, css);
+  }
+  if (reportPath)
+    writeFileSync(
+      reportPath,
+      JSON.stringify(
+        { tw, colors, generated: Object.fromEntries([...gen].map(([k, v]) => [v, k])) },
+        null,
+        2,
+      ) + "\n",
+    );
+  console.log(
+    `codemod-colors (tw${dryRun ? ", dry-run" : ""}): ${files.length} dosya · ${gen.size} üretilmiş sınıf · ${tw.files.reduce((s, f) => s + f.replaced, 0)} utility çevrildi · ${tw.files.reduce((s, f) => s + f.deleted, 0)} silindi · renk ${colors.applied.length} uygulandı / ${colors.manualContrast.length} manuel`,
+  );
+  return colors.unmapped.length ? 1 : 0;
+}
+
 function main(argv: string[]) {
+  if (argv[argv.indexOf("--mode") + 1] === "tw" && argv.includes("--mode")) return mainTw(argv);
   let mode: "css" | "tsx" | undefined;
   let dryRun = false;
   let reportPath: string | undefined;

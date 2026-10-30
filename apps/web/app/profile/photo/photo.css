@@ -118,14 +118,14 @@
     width: 160px;
     height: 160px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2563eb, #0284c7);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--color-map-route), var(--color-accent-sky));
+    color: var(--color-text-inverse);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 4rem;
     font-weight: 800;
-    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 10px 25px color-mix(in srgb, var(--color-map-route) 25%, transparent);
     z-index: 2;
   }
 
@@ -164,14 +164,14 @@
     width: 100%;
     padding: 0.85rem;
     background: var(--brand);
-    color: #ffffff;
+    color: var(--color-text-inverse);
     border: 0;
     border-radius: 14px;
     font-size: 0.92rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent-sky-soft) 30%, transparent);
   }
 
   .save-photo-btn:hover:not(:disabled) {
@@ -189,7 +189,7 @@
     width: 100%;
     padding: 0.65rem;
     background: transparent;
-    color: #ef4444;
+    color: var(--color-danger-icon);
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 14px;
     font-size: 0.84rem;
@@ -199,7 +199,7 @@
   }
 
   .remove-photo-btn:hover {
-    background: rgba(239, 68, 68, 0.08);
+    background: color-mix(in srgb, var(--color-danger-icon) 8%, transparent);
   }
 
   /* Sürükle Bırak Alanı */
@@ -328,8 +328,8 @@
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    background: #0f172a;
-    color: #ffffff;
+    background: var(--color-neutral-900);
+    color: var(--color-text-inverse);
     padding: 0.85rem 1.35rem;
     border-radius: 14px;
     font-size: 0.88rem;

@@ -7,6 +7,7 @@ import { AuthActionModal } from "../components/auth-gate";
 import { getStoredSession } from "../lib/cognito";
 import { isFollowingUser, toggleFollowUser } from "../lib/follow-system";
 import "./public-profile.css";
+import { PageHeader, PageShell } from "../components/ui";
 
 export interface SavedAddressItem {
   id: string;
@@ -97,8 +98,14 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
     map(el: HTMLElement, opts?: Record<string, unknown>): LeafletMap;
     tileLayer(url: string, opts?: Record<string, unknown>): { addTo(map: LeafletMap): void };
     divIcon(opts: Record<string, unknown>): unknown;
-    marker(latlng: [number, number], opts?: Record<string, unknown>): { addTo(map: LeafletMap): { bindPopup(html: string): unknown } };
-    polyline(latlngs: [number, number][], opts?: Record<string, unknown>): { addTo(map: LeafletMap): void };
+    marker(
+      latlng: [number, number],
+      opts?: Record<string, unknown>,
+    ): { addTo(map: LeafletMap): { bindPopup(html: string): unknown } };
+    polyline(
+      latlngs: [number, number][],
+      opts?: Record<string, unknown>,
+    ): { addTo(map: LeafletMap): void };
     latLngBounds(latlngs: [number, number][]): unknown;
   }
 
@@ -551,9 +558,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
   }
 
   return (
-    <div className="public-profile-root">
+    <PageShell layout="landing" className="public-profile-root">
+      {/* Tek h1 (AC-34): görsel başlık sayfa içinde <p> olarak kalır; kabuk başlığı ekran okuyucuya. */}
+      <PageHeader variant="hidden" title={displayName} />
 
-      <main style={{ width: "100%", paddingTop: "0.5rem" }}>
+      <div className="pub-profile-main">
         {/* 2. Sticky Preview Mode Notification Banner */}
         <aside className="pub-preview-banner">
           <div className="pub-preview-banner-inner">
@@ -585,8 +594,8 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
         <section className="pub-hero-section">
           <div className="pub-panoramic-cover">
             <div className="pub-cover-image" style={{ backgroundImage: `url('${coverUrl}')` }} />
-            <div className="pub-cover-overlay" />
-            <div className="pub-floating-location-chip">
+            <div className="pub-cover-overlay" data-surface="inverse" />
+            <div className="pub-floating-location-chip" data-surface="inverse">
               <span
                 className="material-symbols-outlined"
                 style={{ fontSize: "16px", color: "var(--stitch-mint-glow)" }}
@@ -619,7 +628,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
 
                   <div className="pub-user-details">
                     <div className="pub-name-row">
-                      <h1 className="pub-user-name">{displayName}</h1>
+                      <p className="pub-user-name">{displayName}</p>
                       <span className="pub-badge-pill pro">
                         <span
                           className="material-symbols-outlined fill"
@@ -766,7 +775,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     4.9
                     <span
                       className="material-symbols-outlined fill"
-                      style={{ fontSize: "18px", color: "#f59e0b" }}
+                      style={{ fontSize: "18px", color: "var(--color-warning-icon)" }}
                     >
                       star
                     </span>
@@ -914,7 +923,8 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                 style={{
                                   padding: "0.3rem 0.75rem",
                                   borderRadius: "9999px",
-                                  background: "rgba(13, 40, 30, 0.8)",
+                                  background:
+                                    "color-mix(in srgb, var(--color-surface-inverse) 80%, transparent)",
                                   backdropFilter: "blur(8px)",
                                   color: "var(--stitch-mint-glow)",
                                   fontSize: "10px",
@@ -939,7 +949,8 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                 style={{
                                   padding: "0.3rem 0.75rem",
                                   borderRadius: "9999px",
-                                  background: "rgba(236, 253, 245, 0.95)",
+                                  background:
+                                    "color-mix(in srgb, var(--color-surface-brand) 95%, transparent)",
                                   backdropFilter: "blur(8px)",
                                   color: "var(--stitch-secondary)",
                                   fontSize: "10px",
@@ -955,7 +966,8 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                 style={{
                                   padding: "0.3rem 0.75rem",
                                   borderRadius: "9999px",
-                                  background: "rgba(13, 40, 30, 0.8)",
+                                  background:
+                                    "color-mix(in srgb, var(--color-surface-inverse) 80%, transparent)",
                                   backdropFilter: "blur(8px)",
                                   color: "var(--stitch-mint-glow)",
                                   fontSize: "10px",
@@ -980,7 +992,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                           <div className="pub-route-rating-right">
                             <span
                               className="material-symbols-outlined fill"
-                              style={{ fontSize: "15px", color: "#f59e0b" }}
+                              style={{ fontSize: "15px", color: "var(--color-warning-icon)" }}
                             >
                               star
                             </span>
@@ -1313,7 +1325,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                           insetInline: 0,
                           padding: "0.5rem 0.75rem",
                           background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
-                          color: "#fff",
+                          color: "var(--color-on-primary)",
                           fontSize: "11px",
                           fontWeight: 600,
                         }}
@@ -1381,7 +1393,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                             </div>
                           </div>
                         </div>
-                        <div style={{ display: "flex", color: "#f59e0b" }}>
+                        <div style={{ display: "flex", color: "var(--color-warning-icon)" }}>
                           {[...Array(rev.stars)].map((_, s) => (
                             <span
                               key={s}
@@ -1563,7 +1575,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   >
                     SON GEZGİN İNCELEMESİ
                   </span>
-                  <div style={{ display: "flex", color: "#f59e0b" }}>
+                  <div style={{ display: "flex", color: "var(--color-warning-icon)" }}>
                     {[...Array(5)].map((_, i) => (
                       <span
                         key={i}
@@ -1603,8 +1615,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
             </div>
           </div>
         </section>
-      </main>
-
+      </div>
 
       {/* Toast Notification */}
       {toast && (
@@ -1668,7 +1679,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         height: "24px",
                         borderRadius: "50%",
                         background: "var(--stitch-primary)",
-                        color: "#fff",
+                        color: "var(--color-on-primary)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -2012,6 +2023,6 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
           onClose={() => setShowAuthModal(false)}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

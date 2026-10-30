@@ -17,6 +17,8 @@ import {
   DEFAULT_AVATAR_IMAGE,
   AVAILABLE_INTERESTS,
 } from "../../features/profile/constants";
+import "./edit-layout.css";
+import { PageHeader, PageShell } from "../../components/ui";
 
 export default function EditProfilePage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -169,7 +171,6 @@ export default function EditProfilePage() {
     ) {
       setActiveTab(tabParam);
     }
-
   }, []);
 
   function showToast(msg: string) {
@@ -441,7 +442,9 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="stitch-profile-root">
+    <PageShell layout="landing" className="stitch-profile-root">
+      {/* Tek h1 (AC-34): görsel başlık sayfa içinde <p> olarak kalır; kabuk başlığı ekran okuyucuya. */}
+      <PageHeader variant="hidden" title="Profilini ve Tercihlerini Düzenle" />
 
       {/* Hidden File Inputs for Media Upload */}
       <input
@@ -450,6 +453,7 @@ export default function EditProfilePage() {
         onChange={handleCoverFile}
         accept="image/png,image/jpeg,image/webp"
         className="sr-only"
+        tabIndex={-1}
         aria-hidden="true"
       />
       <input
@@ -458,26 +462,27 @@ export default function EditProfilePage() {
         onChange={handleAvatarFile}
         accept="image/png,image/jpeg,image/webp"
         className="sr-only"
+        tabIndex={-1}
         aria-hidden="true"
       />
 
       {/* Sticky üst eylem çubuğu (site header'ı SiteChrome'da; ikinci banner landmark'ı olmasın) */}
       <div className="stitch-profile-sticky-bar">
         <div className="stitch-sticky-bar-inner">
-          <div className="flex flex-col gap-1">
+          <div className="pe-1">
             <nav aria-label="Breadcrumb" className="stitch-breadcrumb-row">
               <Link href="/profile/" className="stitch-breadcrumb-link">
                 Hesabım
               </Link>
-              <span className="material-symbols-outlined text-[12px]">chevron_right</span>
+              <span className="material-symbols-outlined">chevron_right</span>
               <Link href="/profile/edit/" className="stitch-breadcrumb-link">
                 Profil Ayarları
               </Link>
-              <span className="material-symbols-outlined text-[12px]">chevron_right</span>
+              <span className="material-symbols-outlined">chevron_right</span>
               <span className="stitch-breadcrumb-current">Profili Düzenle</span>
             </nav>
             <div className="stitch-sticky-title-row">
-              <h1 className="stitch-sticky-title">Profilini ve Tercihlerini Düzenle</h1>
+              <p className="stitch-sticky-title">Profilini ve Tercihlerini Düzenle</p>
               <span className="stitch-draft-badge">TASLAK AKTİF</span>
             </div>
             <p className="stitch-sticky-subtitle">
@@ -494,7 +499,7 @@ export default function EditProfilePage() {
               className={`stitch-btn-save ${isSavedAnimation ? "saved" : ""}`}
               onClick={() => handleSaveAll()}
             >
-              <span className="material-symbols-outlined text-[18px]">
+              <span className="material-symbols-outlined">
                 {isSavedAnimation ? "done_all" : "check"}
               </span>
               <span>{isSavedAnimation ? "Kaydedildi!" : "Değişiklikleri Kaydet"}</span>
@@ -504,7 +509,7 @@ export default function EditProfilePage() {
       </div>
 
       {/* Main Workspace Layout */}
-      <main className="stitch-profile-workspace">
+      <div className="stitch-profile-workspace">
         <div className="stitch-workspace-grid">
           {/* Left Sub-Navigation Sidebar (4 cols) */}
           <aside className="stitch-profile-sidebar">
@@ -548,7 +553,7 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined stitch-nav-item-icon">person</span>
                   <span>Genel Profil Bilgileri</span>
                 </div>
-                <span className="material-symbols-outlined text-[18px]">
+                <span className="material-symbols-outlined">
                   {activeTab === "genel" ? "arrow_right" : "chevron_right"}
                 </span>
               </button>
@@ -562,9 +567,7 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined stitch-nav-item-icon">lock</span>
                   <span>Hesap Güvenliği & Şifre</span>
                 </div>
-                <span className="material-symbols-outlined text-[16px] text-outline">
-                  chevron_right
-                </span>
+                <span className="material-symbols-outlined text-outline">chevron_right</span>
               </button>
 
               <button
@@ -590,9 +593,7 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined stitch-nav-item-icon">hub</span>
                   <span>Sosyal Hesaplar & Entegrasyonlar</span>
                 </div>
-                <span className="material-symbols-outlined text-[16px] text-outline">
-                  chevron_right
-                </span>
+                <span className="material-symbols-outlined text-outline">chevron_right</span>
               </button>
 
               <button
@@ -604,9 +605,7 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined stitch-nav-item-icon">payments</span>
                   <span>Ödeme & Rota Satış Ayarları</span>
                 </div>
-                <span className="material-symbols-outlined text-[16px] text-outline">
-                  chevron_right
-                </span>
+                <span className="material-symbols-outlined text-outline">chevron_right</span>
               </button>
 
               <div className="stitch-nav-divider" />
@@ -620,7 +619,7 @@ export default function EditProfilePage() {
                   <span className="material-symbols-outlined stitch-nav-item-icon">warning</span>
                   <span>Hesabı Dondur / Sil</span>
                 </div>
-                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </nav>
 
@@ -673,7 +672,7 @@ export default function EditProfilePage() {
                           className="stitch-cover-action-btn primary"
                           onClick={() => coverInputRef.current?.click()}
                         >
-                          <span className="material-symbols-outlined text-[18px]">wallpaper</span>
+                          <span className="material-symbols-outlined">wallpaper</span>
                           <span>Kapağı Değiştir</span>
                         </button>
                         <button
@@ -681,13 +680,13 @@ export default function EditProfilePage() {
                           className="stitch-cover-action-btn danger"
                           onClick={handleRemoveCover}
                         >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                          <span className="material-symbols-outlined">delete</span>
                           <span>Kaldır</span>
                         </button>
                       </div>
                     </div>
                     <p className="stitch-helper-text">
-                      <span className="material-symbols-outlined text-[14px]">info</span>
+                      <span className="material-symbols-outlined">info</span>
                       En iyi sonuç için yatay, yüksek çözünürlüklü manzara fotoğrafları (PNG veya
                       JPG, maks. 5MB) tercih edin.
                     </p>
@@ -700,7 +699,7 @@ export default function EditProfilePage() {
                         <img src={userAvatar} alt={fullName} />
                       </div>
                       <div className="stitch-avatar-badge-icon" title="Profil Fotoğrafı">
-                        <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+                        <span className="material-symbols-outlined">photo_camera</span>
                       </div>
                     </div>
 
@@ -716,7 +715,7 @@ export default function EditProfilePage() {
                           className="stitch-avatar-btn primary"
                           onClick={() => avatarInputRef.current?.click()}
                         >
-                          <span className="material-symbols-outlined text-[16px]">upload</span>
+                          <span className="material-symbols-outlined">upload</span>
                           <span>Yeni Fotoğraf Yükle</span>
                         </button>
                         <button
@@ -724,7 +723,7 @@ export default function EditProfilePage() {
                           className="stitch-avatar-btn secondary"
                           onClick={openWebcam}
                         >
-                          <span className="material-symbols-outlined text-[16px]">videocam</span>
+                          <span className="material-symbols-outlined">videocam</span>
                           <span>Webcam ile Çek</span>
                         </button>
                         <button
@@ -769,14 +768,12 @@ export default function EditProfilePage() {
 
                     {/* Username & Availability */}
                     <div className="stitch-input-group">
-                      <div className="flex items-center justify-between">
+                      <div className="pe-2">
                         <label className="stitch-field-label" htmlFor="username">
                           Kullanıcı Adı
                         </label>
                         <span className="stitch-username-status">
-                          <span className="material-symbols-outlined text-[14px]">
-                            check_circle
-                          </span>
+                          <span className="material-symbols-outlined">check_circle</span>
                           MÜSAİT
                         </span>
                       </div>
@@ -797,7 +794,7 @@ export default function EditProfilePage() {
                       </div>
                       <p className="stitch-input-preview-note">
                         Önizleme:{" "}
-                        <span className="font-semibold text-secondary">
+                        <span className="pe-3 text-secondary">
                           mapsbridge.com/@{username || "gezgin"}
                         </span>
                       </p>
@@ -823,7 +820,7 @@ export default function EditProfilePage() {
 
                     {/* Bio Textarea with Live Counter */}
                     <div className="stitch-input-group full-width">
-                      <div className="flex items-center justify-between">
+                      <div className="pe-2">
                         <label className="stitch-field-label" htmlFor="bio">
                           Biyografi & Seyahat Felsefesi
                         </label>
@@ -877,13 +874,13 @@ export default function EditProfilePage() {
                           </span>
                         ))}
                         {showAddLanguage ? (
-                          <div className="inline-flex items-center gap-1">
+                          <div className="pe-4">
                             <input
                               type="text"
                               value={newLanguageInput}
                               onChange={(e) => setNewLanguageInput(e.target.value)}
                               placeholder="Dil ekle..."
-                              className="px-2 py-0.5 text-xs rounded-lg border border-subtle bg-surface"
+                              className="pe-5 border-subtle bg-surface"
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
@@ -895,7 +892,7 @@ export default function EditProfilePage() {
                             <button
                               type="button"
                               onClick={addLanguage}
-                              className="text-xs font-bold text-secondary"
+                              className="pe-6 text-secondary"
                             >
                               ✓
                             </button>
@@ -906,7 +903,7 @@ export default function EditProfilePage() {
                             className="stitch-chip-add-btn"
                             onClick={() => setShowAddLanguage(true)}
                           >
-                            <span className="material-symbols-outlined text-[16px]">add</span>
+                            <span className="material-symbols-outlined">add</span>
                             <span>Ekle</span>
                           </button>
                         )}
@@ -929,7 +926,7 @@ export default function EditProfilePage() {
                     </span>
                   </div>
 
-                  <div className="flex flex-col gap-2">
+                  <div className="pe-7">
                     <label className="stitch-field-label">
                       İlgi Alanı Kategorileri (Topluluk aramalarında eşleşmek için seçin)
                     </label>
@@ -943,9 +940,7 @@ export default function EditProfilePage() {
                             className={`stitch-interest-pill ${isSelected ? "active" : "inactive"}`}
                             onClick={() => toggleInterest(item.label)}
                           >
-                            <span className="material-symbols-outlined text-[18px]">
-                              {item.icon}
-                            </span>
+                            <span className="material-symbols-outlined">{item.icon}</span>
                             <span>{item.label}</span>
                           </button>
                         );
@@ -958,13 +953,13 @@ export default function EditProfilePage() {
                     <div className="stitch-toggle-card-left">
                       <div className="stitch-badge-icon-box">
                         <span
-                          className="material-symbols-outlined text-[20px]"
+                          className="material-symbols-outlined"
                           style={{ fontVariationSettings: "'FILL' 1" }}
                         >
                           military_tech
                         </span>
                       </div>
-                      <div className="flex flex-col">
+                      <div className="pe-8">
                         <span className="stitch-toggle-title">
                           PRO Kaşif Rozetini Profilde Göster
                         </span>
@@ -978,6 +973,8 @@ export default function EditProfilePage() {
                     <label className="stitch-switch">
                       <input
                         type="checkbox"
+                        role="switch"
+                        aria-label="PRO Kaşif Rozetini Profilde Göster"
                         checked={showProBadge}
                         onChange={(e) => setShowProBadge(e.target.checked)}
                       />
@@ -1038,7 +1035,7 @@ export default function EditProfilePage() {
                   </div>
 
                   {/* Email Privacy Selection */}
-                  <div className="flex flex-col gap-2 pt-2">
+                  <div className="pe-9">
                     <label className="stitch-field-label">E-posta Adresi Görünürlük Tercihi</label>
                     <div className="stitch-radio-grid">
                       <label
@@ -1051,7 +1048,7 @@ export default function EditProfilePage() {
                           checked={emailPrivacy === "public"}
                           onChange={() => setEmailPrivacy("public")}
                         />
-                        <div className="flex flex-col">
+                        <div className="pe-8">
                           <span className="stitch-radio-title">Herkese Açık</span>
                           <span className="stitch-radio-desc">
                             Tüm MapsBridge gezginleri e-posta adresinizi görebilir.
@@ -1069,7 +1066,7 @@ export default function EditProfilePage() {
                           checked={emailPrivacy === "friends"}
                           onChange={() => setEmailPrivacy("friends")}
                         />
-                        <div className="flex flex-col">
+                        <div className="pe-8">
                           <span className="stitch-radio-title">
                             Yalnızca Seyahat Arkadaşlarıma Açık
                           </span>
@@ -1089,7 +1086,7 @@ export default function EditProfilePage() {
                     className="stitch-public-preview-link"
                     target="_blank"
                   >
-                    <span className="material-symbols-outlined text-[18px]">visibility</span>
+                    <span className="material-symbols-outlined">visibility</span>
                     <span>Kamu Ön İzlemesini Gör (mapsbridge.com/@{username || "gezgin"})</span>
                   </Link>
 
@@ -1102,7 +1099,7 @@ export default function EditProfilePage() {
                       className={`stitch-btn-save ${isSavedAnimation ? "saved" : ""}`}
                       onClick={() => handleSaveAll()}
                     >
-                      <span className="material-symbols-outlined text-[18px]">
+                      <span className="material-symbols-outlined">
                         {isSavedAnimation ? "done_all" : "save"}
                       </span>
                       <span>{isSavedAnimation ? "Kaydedildi!" : "Değişiklikleri Kaydet"}</span>
@@ -1122,16 +1119,16 @@ export default function EditProfilePage() {
                   </div>
                 </div>
 
-                <form onSubmit={handleChangePassword} className="flex flex-col gap-4 max-w-xl">
+                <form onSubmit={handleChangePassword} className="pe-8 gap-4 max-w-xl">
                   {passwordError && (
-                    <div className="p-3 rounded-xl bg-error-container text-error text-sm font-semibold flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px]">error</span>
+                    <div className="pe-10 bg-error-container text-error">
+                      <span className="material-symbols-outlined">error</span>
                       <span>{passwordError}</span>
                     </div>
                   )}
                   {passwordStatus && (
-                    <div className="p-3 rounded-xl bg-mint-subtle text-secondary text-sm font-bold flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                    <div className="pe-11 bg-mint-subtle text-secondary">
+                      <span className="material-symbols-outlined">check_circle</span>
                       <span>{passwordStatus}</span>
                     </div>
                   )}
@@ -1152,10 +1149,10 @@ export default function EditProfilePage() {
                       />
                       <button
                         type="button"
-                        className="absolute right-3 text-muted"
+                        className="pe-12 right-3 text-muted"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        <span className="material-symbols-outlined text-[18px]">
+                        <span className="material-symbols-outlined">
                           {showPassword ? "visibility_off" : "visibility"}
                         </span>
                       </button>
@@ -1182,20 +1179,18 @@ export default function EditProfilePage() {
                   </div>
 
                   {/* Password Rules List */}
-                  <div className="p-3.5 rounded-xl bg-canvas-base border border-subtle flex flex-col gap-1.5">
-                    <span className="text-xs font-bold text-main">Şifre Güvenlik Kriterleri:</span>
+                  <div className="p-3.5 pe-13 bg-canvas-base border-subtle">
+                    <span className="pe-6 text-main">Şifre Güvenlik Kriterleri:</span>
                     {passwordRules.map(([isValid, desc], idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-xs">
+                      <div key={idx} className="pe-14">
                         <span
-                          className={`material-symbols-outlined text-[16px] ${
+                          className={`material-symbols-outlined ${
                             isValid ? "text-emerald-accent" : "text-outline"
                           }`}
                         >
                           {isValid ? "check_circle" : "radio_button_unchecked"}
                         </span>
-                        <span className={isValid ? "text-main font-medium" : "text-muted"}>
-                          {desc}
-                        </span>
+                        <span className={isValid ? "text-main pe-15" : "text-muted"}>{desc}</span>
                       </div>
                     ))}
                   </div>
@@ -1203,7 +1198,7 @@ export default function EditProfilePage() {
                   <button
                     type="submit"
                     disabled={isUpdatingPassword || !isPasswordValid}
-                    className="stitch-btn-save mt-2 justify-center"
+                    className="stitch-btn-save mt-2 pe-16"
                   >
                     {isUpdatingPassword ? "Güncelleniyor..." : "Şifremi Güncelle"}
                   </button>
@@ -1221,15 +1216,13 @@ export default function EditProfilePage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="pe-8 gap-4">
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
                       <div className="stitch-badge-icon-box">
-                        <span className="material-symbols-outlined text-[20px]">
-                          calendar_month
-                        </span>
+                        <span className="material-symbols-outlined">calendar_month</span>
                       </div>
-                      <div className="flex flex-col">
+                      <div className="pe-8">
                         <span className="stitch-toggle-title">
                           Seyahat ve Durak Hatırlatıcıları
                         </span>
@@ -1241,6 +1234,8 @@ export default function EditProfilePage() {
                     <label className="stitch-switch">
                       <input
                         type="checkbox"
+                        role="switch"
+                        aria-label="Seyahat ve Durak Hatırlatıcıları"
                         checked={notifTravelReminders}
                         onChange={(e) => setNotifTravelReminders(e.target.checked)}
                       />
@@ -1251,9 +1246,9 @@ export default function EditProfilePage() {
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
                       <div className="stitch-badge-icon-box">
-                        <span className="material-symbols-outlined text-[20px]">mail</span>
+                        <span className="material-symbols-outlined">mail</span>
                       </div>
-                      <div className="flex flex-col">
+                      <div className="pe-8">
                         <span className="stitch-toggle-title">Haftalık Rota ve İlham Bülteni</span>
                         <p className="stitch-toggle-desc">
                           Haftanın en popüler rotaları ve gezgin topluluğunun yeni keşifleri
@@ -1264,6 +1259,8 @@ export default function EditProfilePage() {
                     <label className="stitch-switch">
                       <input
                         type="checkbox"
+                        role="switch"
+                        aria-label="Haftalık Rota ve İlham Bülteni"
                         checked={notifEmailSummaries}
                         onChange={(e) => setNotifEmailSummaries(e.target.checked)}
                       />
@@ -1274,11 +1271,9 @@ export default function EditProfilePage() {
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
                       <div className="stitch-badge-icon-box">
-                        <span className="material-symbols-outlined text-[20px]">
-                          tips_and_updates
-                        </span>
+                        <span className="material-symbols-outlined">tips_and_updates</span>
                       </div>
-                      <div className="flex flex-col">
+                      <div className="pe-8">
                         <span className="stitch-toggle-title">
                           Topluluk Yorumları & Bahsetmeler
                         </span>
@@ -1290,6 +1285,8 @@ export default function EditProfilePage() {
                     <label className="stitch-switch">
                       <input
                         type="checkbox"
+                        role="switch"
+                        aria-label="Topluluk Yorumları & Bahsetmeler"
                         checked={notifCommunityTips}
                         onChange={(e) => setNotifCommunityTips(e.target.checked)}
                       />
@@ -1297,7 +1294,7 @@ export default function EditProfilePage() {
                     </label>
                   </div>
 
-                  <div className="stitch-sticky-actions pt-2">
+                  <div className="stitch-sticky-actions pe-17">
                     <button
                       type="button"
                       className="stitch-btn-save"
@@ -1320,15 +1317,15 @@ export default function EditProfilePage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <div className="p-4 rounded-xl bg-canvas-base border border-subtle flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-surface-card flex items-center justify-center shadow-sm">
+                <div className="pe-18">
+                  <div className="p-4 pe-19 bg-canvas-base border-subtle">
+                    <div className="pe-20">
+                      <div className="w-10 h-10 pe-21 shadow-sm bg-surface-card">
                         <span className="text-xl">🌐</span>
                       </div>
                       <div>
-                        <span className="font-bold text-main block text-sm">Google Hesabı</span>
-                        <span className="text-xs text-muted">
+                        <span className="pe-22 text-main block">Google Hesabı</span>
+                        <span className="pe-23 text-muted">
                           Hızlı oturum açma ve Maps senkronizasyonu aktif
                         </span>
                       </div>
@@ -1336,16 +1333,14 @@ export default function EditProfilePage() {
                     <span className="stitch-draft-badge">BAĞLI</span>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-canvas-base border border-subtle flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-surface-card flex items-center justify-center shadow-sm">
+                  <div className="p-4 pe-19 bg-canvas-base border-subtle">
+                    <div className="pe-20">
+                      <div className="w-10 h-10 pe-21 shadow-sm bg-surface-card">
                         <span className="text-xl">🗺️</span>
                       </div>
                       <div>
-                        <span className="font-bold text-main block text-sm">
-                          Strava & GPX Aktarımı
-                        </span>
-                        <span className="text-xs text-muted">
+                        <span className="pe-22 text-main block">Strava & GPX Aktarımı</span>
+                        <span className="pe-23 text-muted">
                           Doğa yürüyüşü ve bisiklet rotalarını doğrudan aktar
                         </span>
                       </div>
@@ -1378,7 +1373,7 @@ export default function EditProfilePage() {
                     style={{
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "var(--color-primary, #10b981)",
+                      color: "var(--color-primary, var(--color-accent))",
                       textDecoration: "none",
                       display: "flex",
                       alignItems: "center",
@@ -1397,8 +1392,8 @@ export default function EditProfilePage() {
                   style={{
                     padding: "20px",
                     borderRadius: "14px",
-                    background: "rgba(16, 185, 129, 0.08)",
-                    border: "1px solid rgba(16, 185, 129, 0.25)",
+                    background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
                     display: "flex",
                     flexDirection: "column",
                     gap: "14px",
@@ -1419,7 +1414,7 @@ export default function EditProfilePage() {
                           width: "42px",
                           height: "42px",
                           borderRadius: "10px",
-                          background: "#10b981",
+                          background: "var(--color-accent)",
                           color: "#031c13",
                           display: "flex",
                           alignItems: "center",
@@ -1433,7 +1428,13 @@ export default function EditProfilePage() {
                       </div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span style={{ fontSize: "16px", fontWeight: 800, color: "#fff" }}>
+                          <span
+                            style={{
+                              fontSize: "16px",
+                              fontWeight: 800,
+                              color: "var(--color-on-primary)",
+                            }}
+                          >
                             {wallet.subscriptionTier === "pro"
                               ? "PRO KAŞİF (Pro Traveler)"
                               : wallet.subscriptionTier === "agency"
@@ -1446,17 +1447,23 @@ export default function EditProfilePage() {
                             style={{
                               fontSize: "10px",
                               fontWeight: 800,
-                              color: "#10b981",
-                              background: "rgba(16, 185, 129, 0.15)",
+                              color: "var(--color-accent)",
+                              background:
+                                "color-mix(in srgb, var(--color-accent) 15%, transparent)",
                               padding: "2px 8px",
                               borderRadius: "999px",
-                              border: "1px solid rgba(16, 185, 129, 0.3)",
+                              border: "1px solid var(--color-accent-a30)",
                             }}
                           >
                             AKTİF PLAN
                           </span>
                         </div>
-                        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
+                          }}
+                        >
                           Dönem:{" "}
                           {wallet.subscriptionCycle === "yearly"
                             ? "Yıllık Taahhüt (%20 İndirimli)"
@@ -1472,7 +1479,7 @@ export default function EditProfilePage() {
                         style={{
                           padding: "8px 14px",
                           borderRadius: "8px",
-                          background: "#10b981",
+                          background: "var(--color-accent)",
                           color: "#031c13",
                           fontWeight: 700,
                           fontSize: "12px",
@@ -1486,9 +1493,10 @@ export default function EditProfilePage() {
                         style={{
                           padding: "8px 14px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.06)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 6%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontWeight: 600,
                           fontSize: "12px",
                           textDecoration: "none",
@@ -1505,30 +1513,60 @@ export default function EditProfilePage() {
                       gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
                       gap: "12px",
                       paddingTop: "10px",
-                      borderTop: "1px solid rgba(16, 185, 129, 0.15)",
+                      borderTop:
+                        "1px solid color-mix(in srgb, var(--color-accent) 15%, transparent)",
                     }}
                   >
                     <div>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
+                        }}
+                      >
                         Kalan AI Kredisi:
                       </span>
-                      <div style={{ fontSize: "15px", fontWeight: 800, color: "#10b981" }}>
+                      <div
+                        style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-accent)" }}
+                      >
                         ⚡ {wallet.credits} Kredi
                       </div>
                     </div>
                     <div>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
+                        }}
+                      >
                         Pazar Yeri Komisyonu:
                       </span>
-                      <div style={{ fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                      <div
+                        style={{
+                          fontSize: "15px",
+                          fontWeight: 700,
+                          color: "var(--color-on-primary)",
+                        }}
+                      >
                         %10 (Kazancınız %90 Net)
                       </div>
                     </div>
                     <div>
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
+                        }}
+                      >
                         Öncelikli AI &amp; OSRM:
                       </span>
-                      <div style={{ fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                      <div
+                        style={{
+                          fontSize: "15px",
+                          fontWeight: 700,
+                          color: "var(--color-on-primary)",
+                        }}
+                      >
                         Açık / Aktif
                       </div>
                     </div>
@@ -1540,8 +1578,8 @@ export default function EditProfilePage() {
                   style={{
                     padding: "20px",
                     borderRadius: "14px",
-                    background: "rgba(255,255,255,0.02)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "color-mix(in srgb, var(--color-surface) 2%, transparent)",
+                    border: "1px solid var(--color-white-a08)",
                   }}
                 >
                   <div
@@ -1554,11 +1592,18 @@ export default function EditProfilePage() {
                   >
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "20px", color: "#10b981" }}
+                      style={{ fontSize: "20px", color: "var(--color-accent)" }}
                     >
                       receipt_long
                     </span>
-                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: "var(--color-on-primary)",
+                      }}
+                    >
                       Fatura &amp; Yasal Bilgiler
                     </h3>
                   </div>
@@ -1571,7 +1616,7 @@ export default function EditProfilePage() {
                         gap: "6px",
                         fontSize: "13px",
                         cursor: "pointer",
-                        color: "#fff",
+                        color: "var(--color-on-primary)",
                       }}
                     >
                       <input
@@ -1591,7 +1636,7 @@ export default function EditProfilePage() {
                         gap: "6px",
                         fontSize: "13px",
                         cursor: "pointer",
-                        color: "#fff",
+                        color: "var(--color-on-primary)",
                       }}
                     >
                       <input
@@ -1620,7 +1665,7 @@ export default function EditProfilePage() {
                           display: "block",
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "rgba(255,255,255,0.7)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 70%, transparent)",
                           marginBottom: "4px",
                         }}
                       >
@@ -1642,9 +1687,10 @@ export default function EditProfilePage() {
                           width: "100%",
                           padding: "9px 12px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontSize: "13px",
                         }}
                       />
@@ -1656,7 +1702,7 @@ export default function EditProfilePage() {
                           display: "block",
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "rgba(255,255,255,0.7)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 70%, transparent)",
                           marginBottom: "4px",
                         }}
                       >
@@ -1675,9 +1721,10 @@ export default function EditProfilePage() {
                           width: "100%",
                           padding: "9px 12px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontSize: "13px",
                         }}
                       />
@@ -1691,7 +1738,7 @@ export default function EditProfilePage() {
                           display: "block",
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "rgba(255,255,255,0.7)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 70%, transparent)",
                           marginBottom: "4px",
                         }}
                       >
@@ -1708,9 +1755,10 @@ export default function EditProfilePage() {
                           width: "100%",
                           padding: "9px 12px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontSize: "13px",
                         }}
                       />
@@ -1731,7 +1779,7 @@ export default function EditProfilePage() {
                           display: "block",
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "rgba(255,255,255,0.7)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 70%, transparent)",
                           marginBottom: "4px",
                         }}
                       >
@@ -1748,9 +1796,10 @@ export default function EditProfilePage() {
                           width: "100%",
                           padding: "9px 12px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontSize: "13px",
                         }}
                       />
@@ -1762,7 +1811,7 @@ export default function EditProfilePage() {
                           display: "block",
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "rgba(255,255,255,0.7)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 70%, transparent)",
                           marginBottom: "4px",
                         }}
                       >
@@ -1779,9 +1828,10 @@ export default function EditProfilePage() {
                           width: "100%",
                           padding: "9px 12px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontSize: "13px",
                         }}
                       />
@@ -1797,7 +1847,7 @@ export default function EditProfilePage() {
                     style={{
                       padding: "9px 18px",
                       borderRadius: "8px",
-                      background: "#10b981",
+                      background: "var(--color-accent)",
                       color: "#031c13",
                       fontWeight: 700,
                       fontSize: "12.5px",
@@ -1814,8 +1864,8 @@ export default function EditProfilePage() {
                   style={{
                     padding: "20px",
                     borderRadius: "14px",
-                    background: "rgba(255,255,255,0.02)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "color-mix(in srgb, var(--color-surface) 2%, transparent)",
+                    border: "1px solid var(--color-white-a08)",
                   }}
                 >
                   <div
@@ -1828,11 +1878,18 @@ export default function EditProfilePage() {
                   >
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "20px", color: "#10b981" }}
+                      style={{ fontSize: "20px", color: "var(--color-accent)" }}
                     >
                       account_balance_wallet
                     </span>
-                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: "var(--color-on-primary)",
+                      }}
+                    >
                       Gezgin Cüzdanı &amp; Gelir Çekme
                     </h3>
                   </div>
@@ -1847,46 +1904,78 @@ export default function EditProfilePage() {
                   >
                     <div
                       style={{
-                        background: "rgba(16, 185, 129, 0.08)",
-                        border: "1px solid rgba(16, 185, 129, 0.25)",
+                        background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
                         padding: "14px",
                         borderRadius: "10px",
                       }}
                     >
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
+                        }}
+                      >
                         Çekilebilir Bakiye
                       </span>
-                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#10b981" }}>
+                      <div
+                        style={{ fontSize: "18px", fontWeight: 800, color: "var(--color-accent)" }}
+                      >
                         ₺{wallet.creatorEarningsTry.toLocaleString("tr-TR")}
                       </div>
                     </div>
                     <div
                       style={{
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--color-neutral-0) 10%, transparent)",
                         padding: "14px",
                         borderRadius: "10px",
                       }}
                     >
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
+                        }}
+                      >
                         Bekleyen Transfer
                       </span>
-                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#fff" }}>
+                      <div
+                        style={{
+                          fontSize: "18px",
+                          fontWeight: 800,
+                          color: "var(--color-on-primary)",
+                        }}
+                      >
                         ₺{wallet.creatorPendingPayoutTry.toLocaleString("tr-TR")}
                       </div>
                     </div>
                     <div
                       style={{
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--color-neutral-0) 10%, transparent)",
                         padding: "14px",
                         borderRadius: "10px",
                       }}
                     >
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
+                        }}
+                      >
                         Toplam Çekilen
                       </span>
-                      <div style={{ fontSize: "18px", fontWeight: 800, color: "#fff" }}>
+                      <div
+                        style={{
+                          fontSize: "18px",
+                          fontWeight: 800,
+                          color: "var(--color-on-primary)",
+                        }}
+                      >
                         ₺{wallet.totalWithdrawnTry.toLocaleString("tr-TR")}
                       </div>
                     </div>
@@ -1906,7 +1995,7 @@ export default function EditProfilePage() {
                           display: "block",
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "rgba(255,255,255,0.7)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 70%, transparent)",
                           marginBottom: "4px",
                         }}
                       >
@@ -1921,9 +2010,10 @@ export default function EditProfilePage() {
                           width: "100%",
                           padding: "9px 12px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontSize: "13px",
                         }}
                       />
@@ -1934,7 +2024,7 @@ export default function EditProfilePage() {
                           display: "block",
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "rgba(255,255,255,0.7)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 70%, transparent)",
                           marginBottom: "4px",
                         }}
                       >
@@ -1949,9 +2039,10 @@ export default function EditProfilePage() {
                           width: "100%",
                           padding: "9px 12px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontSize: "13px",
                         }}
                       />
@@ -1962,7 +2053,7 @@ export default function EditProfilePage() {
                           display: "block",
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "rgba(255,255,255,0.7)",
+                          color: "color-mix(in srgb, var(--color-on-primary) 70%, transparent)",
                           marginBottom: "4px",
                         }}
                       >
@@ -1978,9 +2069,10 @@ export default function EditProfilePage() {
                           width: "100%",
                           padding: "9px 12px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
+                          background: "color-mix(in srgb, var(--color-surface) 4%, transparent)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--color-neutral-0) 15%, transparent)",
+                          color: "var(--color-on-primary)",
                           fontSize: "13px",
                         }}
                       />
@@ -2010,9 +2102,9 @@ export default function EditProfilePage() {
                     style={{
                       padding: "9px 18px",
                       borderRadius: "8px",
-                      background: "rgba(16, 185, 129, 0.2)",
-                      border: "1px solid #10b981",
-                      color: "#10b981",
+                      background: "var(--color-accent-a20)",
+                      border: "1px solid var(--color-accent)",
+                      color: "var(--color-accent)",
                       fontWeight: 700,
                       fontSize: "12.5px",
                       cursor: "pointer",
@@ -2027,8 +2119,8 @@ export default function EditProfilePage() {
                   style={{
                     padding: "20px",
                     borderRadius: "14px",
-                    background: "rgba(255,255,255,0.02)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "color-mix(in srgb, var(--color-surface) 2%, transparent)",
+                    border: "1px solid var(--color-white-a08)",
                   }}
                 >
                   <div
@@ -2042,15 +2134,27 @@ export default function EditProfilePage() {
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "20px", color: "#10b981" }}
+                        style={{ fontSize: "20px", color: "var(--color-accent)" }}
                       >
                         history
                       </span>
-                      <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "15px",
+                          fontWeight: 700,
+                          color: "var(--color-on-primary)",
+                        }}
+                      >
                         Satın Alma &amp; Fatura Geçmişi
                       </h3>
                     </div>
-                    <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
+                      }}
+                    >
                       {transactions.length} Kayıt
                     </span>
                   </div>
@@ -2061,20 +2165,21 @@ export default function EditProfilePage() {
                         width: "100%",
                         borderCollapse: "collapse",
                         fontSize: "12.5px",
-                        color: "#fff",
+                        color: "var(--color-on-primary)",
                       }}
                     >
                       <thead>
                         <tr
                           style={{
-                            borderBottom: "1px solid rgba(255,255,255,0.1)",
+                            borderBottom:
+                              "1px solid color-mix(in srgb, var(--color-neutral-0) 10%, transparent)",
                             textAlign: "left",
                           }}
                         >
                           <th
                             style={{
                               padding: "10px 8px",
-                              color: "rgba(255,255,255,0.5)",
+                              color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
                               fontWeight: 600,
                             }}
                           >
@@ -2083,7 +2188,7 @@ export default function EditProfilePage() {
                           <th
                             style={{
                               padding: "10px 8px",
-                              color: "rgba(255,255,255,0.5)",
+                              color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
                               fontWeight: 600,
                             }}
                           >
@@ -2092,7 +2197,7 @@ export default function EditProfilePage() {
                           <th
                             style={{
                               padding: "10px 8px",
-                              color: "rgba(255,255,255,0.5)",
+                              color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
                               fontWeight: 600,
                             }}
                           >
@@ -2101,7 +2206,7 @@ export default function EditProfilePage() {
                           <th
                             style={{
                               padding: "10px 8px",
-                              color: "rgba(255,255,255,0.5)",
+                              color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
                               fontWeight: 600,
                             }}
                           >
@@ -2110,7 +2215,7 @@ export default function EditProfilePage() {
                           <th
                             style={{
                               padding: "10px 8px",
-                              color: "rgba(255,255,255,0.5)",
+                              color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
                               fontWeight: 600,
                             }}
                           >
@@ -2119,7 +2224,7 @@ export default function EditProfilePage() {
                           <th
                             style={{
                               padding: "10px 8px",
-                              color: "rgba(255,255,255,0.5)",
+                              color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
                               fontWeight: 600,
                               textAlign: "right",
                             }}
@@ -2132,9 +2237,18 @@ export default function EditProfilePage() {
                         {transactions.map((tx) => (
                           <tr
                             key={tx.id}
-                            style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                            style={{
+                              borderBottom:
+                                "1px solid color-mix(in srgb, var(--color-neutral-0) 5%, transparent)",
+                            }}
                           >
-                            <td style={{ padding: "10px 8px", color: "rgba(255,255,255,0.6)" }}>
+                            <td
+                              style={{
+                                padding: "10px 8px",
+                                color:
+                                  "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
+                              }}
+                            >
                               {new Date(tx.date).toLocaleDateString("tr-TR")}
                             </td>
                             <td style={{ padding: "10px 8px", fontWeight: 600 }}>
@@ -2182,7 +2296,7 @@ export default function EditProfilePage() {
                                 style={{
                                   background: "transparent",
                                   border: "none",
-                                  color: "#10b981",
+                                  color: "var(--color-accent)",
                                   cursor: "pointer",
                                   fontSize: "12px",
                                   fontWeight: 600,
@@ -2208,20 +2322,18 @@ export default function EditProfilePage() {
               <div className="stitch-form-section">
                 <div className="stitch-section-header">
                   <div className="stitch-section-title-wrap">
-                    <span className="w-2.5 h-2.5 rounded-full bg-error" />
+                    <span className="w-2.5 h-2.5 pe-24 bg-error" />
                     <h2 className="stitch-section-title text-error">Tehlike Bölgesi</h2>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-error-container/30 border border-error/20 flex flex-col gap-3">
-                  <span className="font-bold text-error text-sm">
-                    Hesabı Dondur veya Kalıcı Olarak Sil
-                  </span>
-                  <p className="text-xs text-muted">
+                <div className="p-4 pe-25 bg-error-container/30 border-error/20">
+                  <span className="pe-22 text-error">Hesabı Dondur veya Kalıcı Olarak Sil</span>
+                  <p className="pe-23 text-muted">
                     Hesabınızı sildiğinizde yayınladığınız tüm rotalar, favori duraklarınız ve
                     harita masası verileriniz geri döndürülemez biçimde silinir.
                   </p>
-                  <div className="pt-2 flex gap-3">
+                  <div className="pe-26">
                     <button
                       type="button"
                       className="stitch-avatar-btn secondary"
@@ -2246,25 +2358,25 @@ export default function EditProfilePage() {
             )}
           </section>
         </div>
-      </main>
+      </div>
 
       {/* Webcam Modal */}
       {isWebcamOpen && (
         <div className="stitch-modal-overlay">
           <div className="stitch-modal-card">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-main text-base">Webcam ile Fotoğraf Çek</h3>
+            <div className="pe-2">
+              <h3 className="pe-27 text-main text-base">Webcam ile Fotoğraf Çek</h3>
               <button type="button" onClick={closeWebcam} className="text-muted hover:text-main">
-                <span className="material-symbols-outlined text-[20px]">close</span>
+                <span className="material-symbols-outlined">close</span>
               </button>
             </div>
             <video ref={videoRef} className="stitch-webcam-preview" autoPlay playsInline />
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="pe-28 justify-end">
               <button type="button" className="stitch-btn-cancel" onClick={closeWebcam}>
                 İptal
               </button>
               <button type="button" className="stitch-btn-save" onClick={captureWebcamPhoto}>
-                <span className="material-symbols-outlined text-[18px]">camera</span>
+                <span className="material-symbols-outlined">camera</span>
                 <span>Fotoğrafı Çek</span>
               </button>
             </div>
@@ -2276,15 +2388,15 @@ export default function EditProfilePage() {
       {showDangerModal && (
         <div className="stitch-modal-overlay">
           <div className="stitch-modal-card">
-            <div className="flex items-center gap-2 text-error">
-              <span className="material-symbols-outlined text-[24px]">warning</span>
-              <h3 className="font-bold text-base">Hesabı Silmek İstediğinizden Emin misiniz?</h3>
+            <div className="pe-29 text-error">
+              <span className="material-symbols-outlined">warning</span>
+              <h3 className="pe-27 text-base">Hesabı Silmek İstediğinizden Emin misiniz?</h3>
             </div>
-            <p className="text-xs text-muted leading-relaxed">
+            <p className="pe-30 text-muted">
               Bu işlem geri alınamaz. Profiliniz, rotalarınız ve seyahat verileriniz kalıcı olarak
               silinecektir. Devam etmek istiyor musunuz?
             </p>
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="pe-28 justify-end">
               <button
                 type="button"
                 className="stitch-btn-cancel"
@@ -2321,9 +2433,9 @@ export default function EditProfilePage() {
               maxWidth: "480px",
               width: "100%",
               padding: "24px",
-              color: "#fff",
-              background: "#0d281e",
-              border: "1px solid rgba(16, 185, 129, 0.4)",
+              color: "var(--color-on-primary)",
+              background: "var(--color-surface-inverse)",
+              border: "1px solid color-mix(in srgb, var(--color-accent) 40%, transparent)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -2333,14 +2445,15 @@ export default function EditProfilePage() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 marginBottom: "16px",
-                borderBottom: "1px solid rgba(255,255,255,0.1)",
+                borderBottom:
+                  "1px solid color-mix(in srgb, var(--color-neutral-0) 10%, transparent)",
                 paddingBottom: "12px",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span
                   className="material-symbols-outlined"
-                  style={{ fontSize: "24px", color: "#10b981" }}
+                  style={{ fontSize: "24px", color: "var(--color-accent)" }}
                 >
                   receipt
                 </span>
@@ -2348,7 +2461,12 @@ export default function EditProfilePage() {
                   Resmi Ödeme Makbuzu
                 </h3>
               </div>
-              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+              <span
+                style={{
+                  fontSize: "11px",
+                  color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
+                }}
+              >
                 #{selectedReceiptTx.id}
               </span>
             </div>
@@ -2363,16 +2481,28 @@ export default function EditProfilePage() {
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "rgba(255,255,255,0.6)" }}>Hizmet:</span>
+                <span
+                  style={{ color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)" }}
+                >
+                  Hizmet:
+                </span>
                 <span style={{ fontWeight: 600 }}>{selectedReceiptTx.description}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "rgba(255,255,255,0.6)" }}>Tarih:</span>
+                <span
+                  style={{ color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)" }}
+                >
+                  Tarih:
+                </span>
                 <span>{new Date(selectedReceiptTx.date).toLocaleString("tr-TR")}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "rgba(255,255,255,0.6)" }}>Tutar:</span>
-                <span style={{ fontSize: "15px", fontWeight: 800, color: "#10b981" }}>
+                <span
+                  style={{ color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)" }}
+                >
+                  Tutar:
+                </span>
+                <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-accent)" }}>
                   {selectedReceiptTx.amountTry !== undefined
                     ? `₺${Math.abs(selectedReceiptTx.amountTry).toLocaleString("tr-TR")}`
                     : "0 ₺"}
@@ -2381,7 +2511,13 @@ export default function EditProfilePage() {
               {selectedReceiptTx.creditsDelta !== undefined &&
                 selectedReceiptTx.creditsDelta !== 0 && (
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: "rgba(255,255,255,0.6)" }}>Kredi Hareketi:</span>
+                    <span
+                      style={{
+                        color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
+                      }}
+                    >
+                      Kredi Hareketi:
+                    </span>
                     <span
                       style={{
                         fontWeight: 700,
@@ -2397,23 +2533,37 @@ export default function EditProfilePage() {
                 )}
               <div
                 style={{
-                  borderTop: "1px solid rgba(255,255,255,0.08)",
+                  borderTop: "1px solid var(--color-white-a08)",
                   paddingTop: "10px",
                   marginTop: "4px",
                 }}
               >
                 <div
-                  style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", marginBottom: "4px" }}
+                  style={{
+                    fontSize: "11px",
+                    color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
+                    marginBottom: "4px",
+                  }}
                 >
                   Fatura Sahibi:
                 </div>
                 <div style={{ fontWeight: 600 }}>{billingDetails.fullNameOrCompany}</div>
-                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",
+                  }}
+                >
                   {billingDetails.invoiceType === "corporate"
                     ? `Vergi No: ${billingDetails.taxOrIdNumber}`
                     : `TCKN: ${billingDetails.taxOrIdNumber}`}
                 </div>
-                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "color-mix(in srgb, var(--color-on-primary) 50%, transparent)",
+                  }}
+                >
                   {billingDetails.address}, {billingDetails.city}
                 </div>
               </div>
@@ -2427,7 +2577,7 @@ export default function EditProfilePage() {
                   flex: 1,
                   padding: "10px",
                   borderRadius: "8px",
-                  background: "#10b981",
+                  background: "var(--color-accent)",
                   color: "#031c13",
                   fontWeight: 700,
                   fontSize: "13px",
@@ -2450,8 +2600,8 @@ export default function EditProfilePage() {
                 style={{
                   padding: "10px 16px",
                   borderRadius: "8px",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#fff",
+                  background: "var(--color-white-a08)",
+                  color: "var(--color-on-primary)",
                   fontSize: "13px",
                   border: "none",
                   cursor: "pointer",
@@ -2467,10 +2617,10 @@ export default function EditProfilePage() {
       {/* Floating Toast Notification */}
       {toastMessage && (
         <div className="stitch-toast-notification">
-          <span className="material-symbols-outlined text-mint-glow text-[20px]">info</span>
+          <span className="material-symbols-outlined text-mint-glow">info</span>
           <span>{toastMessage}</span>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

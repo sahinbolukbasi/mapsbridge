@@ -52,7 +52,7 @@ export function DirectMessageModal({
             />
             <div>
               <h3 style={{ margin: 0, fontSize: "15px" }}>{target.name}</h3>
-              <span style={{ fontSize: "11px", color: "#10b981" }}>
+              <span style={{ fontSize: "11px", color: "var(--color-accent)" }}>
                 @{target.username} · {target.targetDestination || "Gezgin"}
               </span>
             </div>
@@ -144,7 +144,7 @@ export function DirectMessageModal({
             style={{
               padding: "0 18px",
               borderRadius: "8px",
-              background: "#10b981",
+              background: "var(--color-accent)",
               color: "#031c13",
               fontWeight: 700,
               fontSize: "13px",

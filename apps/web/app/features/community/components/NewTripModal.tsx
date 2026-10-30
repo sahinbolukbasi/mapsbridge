@@ -166,7 +166,7 @@ export function NewTripModal({ isOpen, onClose, onSubmit }: NewTripModalProps) {
             />
           </label>
 
-          <button type="submit" className="btn-modal-submit">
+          <button type="submit" className="btn-modal-submit" data-surface="inverse">
             Grup Gezisini Başlat ➔
           </button>
         </form>

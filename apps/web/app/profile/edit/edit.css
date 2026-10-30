@@ -1,283 +1,5 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
-  /* Top Workspace Navbar */
-  .panel-top-nav {
-    position: sticky;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 72px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--sb-border-subtle);
-    z-index: 50;
-    display: flex;
-    align-items: center;
-  }
-
-  .panel-nav-inner {
-    width: 100%;
-    max-width: 78rem;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.25rem;
-  }
-
-  .panel-nav-left {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .panel-brand-stitch {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  .brand-icon-circle-stitch {
-    width: 40px;
-    height: 40px;
-    border-radius: 9999px;
-    background: var(--sb-primary-container);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--sb-mint-glow);
-    box-shadow: 0 4px 16px rgba(30, 77, 62, 0.18);
-    transition: all 0.2s ease;
-  }
-
-  .brand-icon-circle-stitch:hover {
-    background: var(--sb-secondary);
-  }
-
-  .brand-text-col-stitch {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .brand-name-stitch {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--sb-primary);
-    letter-spacing: -0.02em;
-    line-height: 1.15;
-  }
-
-  .brand-subtitle-stitch {
-    font-family: "Inter", sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--sb-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    line-height: 1;
-    margin-top: 2px;
-  }
-
-  .panel-nav-pills-stitch {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: var(--sb-canvas-subtle);
-    padding: 0.25rem;
-    border-radius: 9999px;
-  }
-
-  .nav-pill-stitch {
-    padding: 0.35rem 1rem;
-    border-radius: 9999px;
-    font-family: "Inter", sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--sb-text-muted);
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .nav-pill-stitch:hover {
-    color: var(--sb-text-main);
-    background: rgba(0, 0, 0, 0.05);
-  }
-
-  .nav-pill-stitch.active {
-    background: var(--sb-primary-container);
-    color: #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .panel-nav-center-stitch {
-    flex: 1;
-    max-width: 440px;
-  }
-
-  .panel-search-form-stitch {
-    position: relative;
-    display: flex;
-    align-items: center;
-    background: var(--sb-canvas-subtle);
-    border-radius: 9999px;
-    padding: 0.35rem 0.6rem 0.35rem 1rem;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-  }
-
-  .panel-search-form-stitch:focus-within {
-    border-color: var(--sb-secondary);
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(40, 105, 84, 0.12);
-  }
-
-  .search-icon-stitch {
-    color: var(--sb-text-outline);
-    font-size: 20px !important;
-    margin-right: 0.5rem;
-    flex-shrink: 0;
-  }
-
-  .search-input-stitch {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 13px;
-    color: var(--sb-text-main);
-  }
-
-  .search-input-stitch::placeholder {
-    color: var(--sb-text-outline);
-  }
-
-  .panel-nav-right-stitch {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .nav-ai-btn-stitch {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 0.95rem;
-    border-radius: 9999px;
-    background: var(--sb-mint-subtle);
-    color: var(--sb-primary);
-    text-decoration: none;
-    font-family: "Inter", sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    transition: all 0.2s ease;
-  }
-
-  .nav-ai-btn-stitch:hover {
-    background: var(--sb-secondary-container);
-  }
-
-  .nav-credits-badge-stitch {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 9999px;
-    background: var(--sb-canvas-subtle);
-    color: var(--sb-primary);
-    font-family: "Inter", sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .nav-notification-btn-stitch {
-    position: relative;
-    width: 36px;
-    height: 36px;
-    border-radius: 9999px;
-    background: var(--sb-canvas-subtle);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--sb-text-muted);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .nav-notification-btn-stitch:hover {
-    background: #e2e8f0;
-    color: var(--sb-text-main);
-  }
-
-  .notification-dot-stitch {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 8px;
-    height: 8px;
-    border-radius: 9999px;
-    background: var(--sb-emerald-accent);
-  }
-
-  .nav-profile-pill-stitch {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: transparent;
-    border: none;
-    text-decoration: none;
-    cursor: pointer;
-    padding: 0.2rem 0.4rem;
-    border-radius: 9999px;
-    transition: all 0.2s ease;
-  }
-
-  .nav-profile-pill-stitch:hover {
-    background: var(--sb-canvas-subtle);
-  }
-
-  .profile-circle-stitch {
-    width: 34px;
-    height: 34px;
-    border-radius: 9999px;
-    background: var(--sb-primary);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(1, 54, 40, 0.2);
-  }
-
-  .profile-info-col-stitch {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-  }
-
-  .profile-name-stitch {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--sb-text-main);
-    line-height: 1.15;
-  }
-
-  .profile-role-stitch {
-    font-family: "Inter", sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--sb-secondary);
-    line-height: 1.1;
-  }
-
   /* Base Wrapper */
   .stitch-profile-root {
     min-height: 100vh;
@@ -299,11 +21,11 @@
     position: sticky;
     top: 72px;
     z-index: 40;
-    background: rgba(250, 248, 255, 0.92);
+    background: color-mix(in srgb, var(--color-bg) 92%, transparent);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--sb-border-subtle);
-    box-shadow: 0 2px 10px rgba(1, 54, 40, 0.03);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-primary) 3%, transparent);
   }
 
   .stitch-sticky-bar-inner {
@@ -377,7 +99,7 @@
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.06em;
-    border: 1px solid rgba(52, 211, 153, 0.3);
+    border: 1px solid color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
   }
 
   .stitch-sticky-subtitle {
@@ -409,7 +131,7 @@
   }
 
   .stitch-btn-cancel:hover {
-    background-color: #e2e8f0;
+    background-color: var(--color-neutral-200);
   }
 
   .stitch-btn-save {
@@ -419,18 +141,18 @@
     padding: 0.6rem 1.4rem;
     border-radius: 9999px;
     background-color: var(--sb-primary-container);
-    color: #ffffff;
+    color: var(--color-text-inverse);
     font-size: 0.84rem;
     font-weight: 700;
     border: none;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(1, 54, 40, 0.15);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .stitch-btn-save:hover {
     background-color: var(--sb-secondary);
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 25%, transparent);
     transform: translateY(-1px);
   }
 
@@ -476,7 +198,7 @@
     border-radius: 1.25rem;
     padding: 1.15rem;
     border: 1px solid var(--sb-border-subtle);
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -497,7 +219,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--color-text-inverse);
     font-weight: 800;
     font-size: 1.2rem;
   }
@@ -569,7 +291,7 @@
     border-radius: 1.25rem;
     padding: 0.5rem;
     border: 1px solid var(--sb-border-subtle);
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -600,8 +322,8 @@
 
   .stitch-nav-item.active {
     background-color: var(--sb-primary-container);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(1, 54, 40, 0.15);
+    color: var(--color-text-inverse);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
 
   .stitch-nav-item-left {
@@ -645,7 +367,7 @@
     border-radius: 1.25rem;
     padding: 1.15rem;
     border: 1px solid var(--sb-border-subtle);
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
@@ -704,7 +426,7 @@
     border-radius: 1.25rem;
     padding: 1.5rem;
     border: 1px solid var(--sb-border-subtle);
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -789,6 +511,7 @@
   .stitch-cover-overlay {
     position: absolute;
     inset: 0;
+    /* Yarı saydam scrim; içinde açık kart var → inverse kap değil, kodmod uygulanmadı (G18). */
     background: rgba(13, 40, 30, 0.35);
     backdrop-filter: blur(2px);
     display: flex;
@@ -874,7 +597,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: var(--color-text-inverse);
     font-size: 2rem;
     font-weight: 800;
   }
@@ -893,7 +616,7 @@
     height: 2rem;
     border-radius: 9999px;
     background-color: var(--sb-primary-container);
-    color: #ffffff;
+    color: var(--color-text-inverse);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -950,7 +673,7 @@
   }
 
   .stitch-avatar-btn.secondary:hover {
-    background-color: #e2e8f0;
+    background-color: var(--color-neutral-200);
   }
 
   .stitch-avatar-btn.text-danger {
@@ -1019,14 +742,14 @@
     outline: none;
     background-color: var(--sb-surface-card);
     border-color: var(--sb-secondary);
-    box-shadow: 0 0 0 3px rgba(40, 105, 84, 0.15);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 15%, transparent);
   }
 
   .stitch-text-input.mint-highlight {
     background-color: var(--sb-mint-subtle);
     color: var(--sb-primary);
     font-weight: 700;
-    border-color: rgba(52, 211, 153, 0.35);
+    border-color: color-mix(in srgb, var(--color-accent-strong) 35%, transparent);
   }
 
   .stitch-username-status {
@@ -1065,7 +788,7 @@
     outline: none;
     background-color: var(--sb-surface-card);
     border-color: var(--sb-secondary);
-    box-shadow: 0 0 0 3px rgba(40, 105, 84, 0.15);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 15%, transparent);
   }
 
   .stitch-char-counter {
@@ -1160,14 +883,14 @@
   }
 
   .stitch-interest-pill.inactive:hover {
-    background-color: #e2e8f0;
+    background-color: var(--color-neutral-200);
     color: var(--sb-text-main);
   }
 
   .stitch-interest-pill.active {
     background-color: var(--sb-primary-container);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(1, 54, 40, 0.18);
+    color: var(--color-text-inverse);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 18%, transparent);
   }
 
   /* PRO Badge Toggle Card */
@@ -1175,7 +898,7 @@
     padding: 1rem 1.25rem;
     border-radius: 0.85rem;
     background-color: var(--sb-mint-subtle);
-    border: 1px solid rgba(52, 211, 153, 0.3);
+    border: 1px solid color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1193,7 +916,7 @@
     height: 2.6rem;
     border-radius: 0.75rem;
     background-color: var(--sb-primary);
-    color: #ffffff;
+    color: var(--color-text-inverse);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1245,7 +968,7 @@
     width: 20px;
     left: 2px;
     bottom: 2px;
-    background-color: #ffffff;
+    background-color: var(--color-surface);
     transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     border-radius: 50%;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
@@ -1286,7 +1009,7 @@
 
   .stitch-radio-card.active {
     background-color: var(--sb-mint-subtle);
-    border-color: rgba(52, 211, 153, 0.4);
+    border-color: color-mix(in srgb, var(--color-accent-strong) 40%, transparent);
   }
 
   .stitch-radio-card input[type="radio"] {
@@ -1316,7 +1039,7 @@
     border-radius: 1.25rem;
     padding: 1rem 1.25rem;
     border: 1px solid var(--sb-border-subtle);
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -1353,7 +1076,7 @@
     z-index: 1000;
     padding: 0.75rem 1.25rem;
     background-color: var(--sb-deep-forest);
-    color: #ffffff;
+    color: var(--color-text-inverse);
     border-radius: 9999px;
     font-size: 0.85rem;
     font-weight: 600;
@@ -1361,7 +1084,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    border: 1px solid rgba(52, 211, 153, 0.3);
+    border: 1px solid color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
     animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -1380,6 +1103,7 @@
   .stitch-modal-overlay {
     position: fixed;
     inset: 0;
+    /* Yarı saydam scrim; içinde açık kart var → inverse kap değil, kodmod uygulanmadı (G18). */
     background: rgba(13, 40, 30, 0.6);
     backdrop-filter: blur(4px);
     z-index: 100;

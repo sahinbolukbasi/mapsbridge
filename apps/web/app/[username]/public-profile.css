@@ -1,6 +1,11 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
   /* Base Root Layout */
+  /* C11: eski <main style> → kabuk içi kap */
+  .pub-profile-main {
+    width: 100%;
+    padding-top: 0.5rem;
+  }
   .public-profile-root {
     min-height: 100vh;
     background-color: var(--stitch-background);
@@ -27,168 +32,6 @@
   .public-profile-root .material-symbols-outlined.fill {
     font-variation-settings: "FILL" 1;
   }
-
-  /* Unified Top Header Navigation */
-  .pub-top-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    background: rgba(250, 248, 255, 0.9);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--stitch-border-subtle);
-    z-index: 50;
-    display: flex;
-    align-items: center;
-  }
-
-  .pub-top-header-inner {
-    width: 100%;
-    max-width: 78rem;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-  }
-
-  .pub-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .pub-brand-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: var(--stitch-primary-container);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(13, 40, 30, 0.12);
-    transition: transform 0.2s ease;
-  }
-
-  .pub-brand:hover .pub-brand-icon {
-    transform: scale(1.05);
-  }
-
-  .pub-brand-text {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .pub-brand-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--stitch-primary);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
-
-  .pub-brand-subtitle {
-    font-family: var(--stitch-font-label);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--stitch-on-surface-variant);
-    margin-top: 2px;
-  }
-
-  .pub-nav-links {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem;
-  }
-
-  .pub-nav-link {
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    font-family: var(--stitch-font-label);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--stitch-on-surface-variant);
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .pub-nav-link:hover {
-    background: var(--stitch-surface-container);
-    color: var(--stitch-on-surface);
-  }
-
-  .pub-nav-link.active {
-    background: var(--stitch-primary-container);
-    color: #ffffff;
-  }
-
-  .pub-header-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .pub-search-box {
-    position: relative;
-    display: none;
-    align-items: center;
-  }
-
-  @media (min-width: 900px) {
-    .pub-search-box {
-      display: flex;
-    }
-  }
-
-  .pub-search-box .search-icon {
-    position: absolute;
-    left: 0.85rem;
-    color: var(--stitch-outline);
-    font-size: 19px;
-    pointer-events: none;
-  }
-
-  .pub-search-input {
-    padding: 0.5rem 1rem 0.5rem 2.6rem;
-    width: 220px;
-    border-radius: 9999px;
-    border: 1px solid transparent;
-    background: var(--stitch-surface-container-lowest);
-    font-size: 13px;
-    color: var(--stitch-on-surface);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-    outline: none;
-    transition: all 0.2s ease;
-  }
-
-  .pub-search-input:focus {
-    border-color: rgba(40, 105, 84, 0.4);
-    box-shadow: 0 0 0 3px rgba(40, 105, 84, 0.1);
-    width: 260px;
-  }
-
-  .pub-credit-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.85rem;
-    border-radius: 9999px;
-    background: var(--stitch-secondary-container);
-    color: var(--stitch-on-secondary-container);
-    font-family: var(--stitch-font-label);
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-
   .pub-icon-btn {
     width: 40px;
     height: 40px;
@@ -208,73 +51,6 @@
     background: var(--stitch-surface-container);
     color: var(--stitch-on-surface);
   }
-
-  .pub-icon-btn .badge-dot {
-    position: absolute;
-    top: 9px;
-    right: 9px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--stitch-emerald-accent);
-  }
-
-  .pub-header-user {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-left: 0.25rem;
-    text-decoration: none;
-  }
-
-  .pub-header-user-info {
-    display: none;
-    flex-direction: column;
-    text-align: right;
-  }
-
-  @media (min-width: 1024px) {
-    .pub-header-user-info {
-      display: flex;
-    }
-  }
-
-  .pub-header-user-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--stitch-on-surface);
-    line-height: 1.2;
-  }
-
-  .pub-header-user-sub {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 4px;
-    font-size: 10px;
-    font-family: var(--stitch-font-label);
-  }
-
-  .pub-header-user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 9999px;
-    background: var(--stitch-primary);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 13px;
-    overflow: hidden;
-  }
-
-  .pub-header-user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
   /* Sticky Preview Mode Notification Banner */
   .pub-preview-banner {
     position: sticky;
@@ -283,7 +59,7 @@
     width: 100%;
     background: var(--stitch-primary);
     color: var(--stitch-on-primary);
-    box-shadow: 0 4px 12px rgba(1, 54, 40, 0.15);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
 
   .pub-preview-banner-inner {
@@ -338,8 +114,8 @@
     gap: 0.35rem;
     padding: 0.35rem 0.9rem;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.14);
-    color: #ffffff;
+    background: color-mix(in srgb, var(--color-surface) 14%, transparent);
+    color: var(--color-on-primary);
     font-family: var(--stitch-font-label);
     font-size: 12px;
     font-weight: 600;
@@ -350,7 +126,7 @@
   }
 
   .pub-banner-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: color-mix(in srgb, var(--color-surface) 25%, transparent);
     transform: translateY(-1px);
   }
 
@@ -387,8 +163,8 @@
     inset: 0;
     background: linear-gradient(
       to top,
-      rgba(13, 40, 30, 0.85) 0%,
-      rgba(1, 54, 40, 0.3) 50%,
+      color-mix(in srgb, var(--color-surface-inverse) 85%, transparent) 0%,
+      color-mix(in srgb, var(--color-primary) 30%, transparent) 50%,
       transparent 100%
     );
   }
@@ -402,10 +178,10 @@
     gap: 0.5rem;
     padding: 0.4rem 1rem;
     border-radius: 9999px;
-    background: rgba(13, 40, 30, 0.7);
+    background: color-mix(in srgb, var(--color-surface-inverse) 70%, transparent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    color: #ffffff;
+    color: var(--color-text-inverse);
     font-size: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
@@ -430,11 +206,11 @@
     background: var(--stitch-surface-container-lowest);
     border-radius: 28px;
     padding: 2rem;
-    box-shadow: 0 20px 48px -12px rgba(13, 40, 30, 0.12);
+    box-shadow: 0 20px 48px -12px color-mix(in srgb, var(--color-surface-inverse) 12%, transparent);
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
   }
 
   @media (min-width: 1024px) {
@@ -495,7 +271,7 @@
     height: 100%;
     border-radius: 9999px;
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(13, 40, 30, 0.15);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-surface-inverse) 15%, transparent);
     border: 4px solid var(--stitch-surface-container-lowest);
     background: var(--stitch-surface-container);
   }
@@ -518,7 +294,7 @@
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, var(--stitch-primary), var(--stitch-secondary));
-    color: #ffffff;
+    color: var(--color-text-inverse);
     font-size: 2.5rem;
     font-weight: 800;
   }
@@ -531,7 +307,7 @@
     height: 26px;
     border-radius: 50%;
     background: var(--stitch-emerald-accent);
-    color: #ffffff;
+    color: var(--color-on-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -710,21 +486,21 @@
     font-weight: 600;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(1, 54, 40, 0.2);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 20%, transparent);
     transition: all 0.2s ease;
   }
 
   .pub-btn-primary:hover {
     background: var(--stitch-primary-container);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(1, 54, 40, 0.28);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 28%, transparent);
   }
 
   .pub-btn-primary.following {
     background: var(--stitch-mint-subtle);
     color: var(--stitch-secondary);
     box-shadow: none;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    border: 1px solid var(--color-accent-a30);
   }
 
   /* Bio Paragraph */
@@ -744,7 +520,7 @@
     padding: 1.25rem 1.5rem;
     background: var(--stitch-canvas-base);
     border-radius: 18px;
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
   }
 
   @media (min-width: 768px) {
@@ -829,7 +605,7 @@
     cursor: pointer;
     background: var(--stitch-surface-container-lowest);
     color: var(--stitch-on-surface-variant);
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--color-neutral-900) 4%, transparent);
     transition: all 0.2s ease;
   }
 
@@ -840,8 +616,8 @@
 
   .pub-tab-pill.active {
     background: var(--stitch-primary);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(1, 54, 40, 0.18);
+    color: var(--color-text-inverse);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 18%, transparent);
   }
 
   /* Filter Sub-bar */
@@ -854,8 +630,8 @@
     background: var(--stitch-surface-container-lowest);
     padding: 0.85rem 1.25rem;
     border-radius: 20px;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
   }
 
   .pub-filter-left {
@@ -932,8 +708,8 @@
     background: var(--stitch-surface-container-lowest);
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--color-neutral-900) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease;
@@ -942,8 +718,8 @@
 
   .pub-route-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 14px 32px rgba(13, 40, 30, 0.1);
-    border-color: rgba(40, 105, 84, 0.3);
+    box-shadow: 0 14px 32px color-mix(in srgb, var(--color-surface-inverse) 10%, transparent);
+    border-color: color-mix(in srgb, var(--color-brand) 30%, transparent);
   }
 
   .pub-route-media {
@@ -979,7 +755,7 @@
     z-index: 2;
     padding: 0.25rem 0.65rem;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.92);
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     color: var(--stitch-on-surface);
@@ -1073,8 +849,8 @@
 
   .pub-route-cta-btn.primary {
     background: var(--stitch-primary);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(1, 54, 40, 0.15);
+    color: var(--color-text-inverse);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
 
   .pub-route-cta-btn.primary:hover {
@@ -1129,8 +905,8 @@
     background: var(--stitch-surface-container-lowest);
     border-radius: 24px;
     padding: 1.5rem;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--color-neutral-900) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -1167,7 +943,7 @@
     align-items: center;
     text-align: center;
     gap: 0.35rem;
-    border: 1px solid rgba(226, 232, 240, 0.5);
+    border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
   }
 
   .pub-badge-icon-box {
@@ -1221,10 +997,10 @@
       var(--stitch-primary) 0%,
       var(--stitch-primary-container) 100%
     );
-    color: #ffffff;
+    color: var(--color-text-inverse);
     border-radius: 24px;
     padding: 1.75rem;
-    box-shadow: 0 10px 28px rgba(1, 54, 40, 0.2);
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--color-primary) 20%, transparent);
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -1240,7 +1016,7 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: rgba(16, 185, 129, 0.12);
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
     pointer-events: none;
   }
 
@@ -1255,7 +1031,7 @@
   .pub-collab-title {
     font-size: 1.2rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--color-on-primary);
     margin: 0;
   }
 
@@ -1300,8 +1076,8 @@
     width: 100%;
     padding: 0.65rem;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
+    background: var(--color-white-a12);
+    color: var(--color-on-primary);
     font-family: var(--stitch-font-label);
     font-size: 12px;
     font-weight: 600;
@@ -1315,7 +1091,7 @@
   }
 
   .pub-collab-btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: color-mix(in srgb, var(--color-surface) 22%, transparent);
   }
 
   /* Testimonial Box */
@@ -1351,6 +1127,7 @@
   .pub-modal-backdrop {
     position: fixed;
     inset: 0;
+    /* Yarı saydam scrim; içinde açık kart var → inverse kap değil, kodmod uygulanmadı (G18). */
     background: rgba(13, 40, 30, 0.65);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -1432,7 +1209,7 @@
     left: 50%;
     transform: translateX(-50%);
     background: var(--stitch-deep-forest);
-    color: #ffffff;
+    color: var(--color-text-inverse);
     padding: 0.75rem 1.5rem;
     border-radius: 9999px;
     font-size: 14px;

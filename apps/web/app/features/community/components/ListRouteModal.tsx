@@ -158,7 +158,7 @@ export function ListRouteModal({
             />
           </label>
 
-          <button type="submit" className="btn-modal-submit">
+          <button type="submit" className="btn-modal-submit" data-surface="inverse">
             ✓ Rotayı Toplulukta Paylaş
           </button>
         </form>

@@ -17,7 +17,6 @@ export const BREAKPOINT_VALUES: ReadonlyArray<number> = Object.values(BREAKPOINT
 export type LegacyBreakpoint = { query: string; count: number };
 
 export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> = {
-  "[username]/public-profile.css": [{ query: "(min-width: 900px)", count: 1 }],
   "travel-assistant/assistant.css": [
     { query: "(max-width: 600px)", count: 1 },
     { query: "(max-width: 767px)", count: 1 },
@@ -32,8 +31,6 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
   "community/community.css": [
     { query: "(max-width: 1023px)", count: 1 },
     { query: "(max-width: 767px)", count: 3 },
-    { query: "(min-width: 1400px)", count: 1 },
-    { query: "(min-width: 1540px)", count: 1 },
   ],
   "components/header-nav.css": [
     { query: "(max-width: 1279px)", count: 1 },
