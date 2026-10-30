@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
@@ -20,6 +19,7 @@ import {
   isProSync,
 } from "../services/revenuecat";
 
+import { ModalFrame } from "../ui";
 import { tokens, withAlpha } from "../theme";
 interface PaywallModalProps {
   visible: boolean;
@@ -143,8 +143,13 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
     ];
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={styles.container}>
+    <ModalFrame
+      visible={visible}
+      variant="sheet"
+      animation="slide"
+      onRequestClose={onClose}
+      style={styles.container}
+    >
         {/* Close */}
         <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
           <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.closeBtnText}>✕</Text>
@@ -256,8 +261,7 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
             </Text>
           </Text>
         </ScrollView>
-      </View>
-    </Modal>
+      </ModalFrame>
   );
 }
 

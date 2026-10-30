@@ -10,7 +10,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Modal,
   Animated,
   Easing,
 } from "react-native";
@@ -42,7 +41,7 @@ import {
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import * as ImagePicker from "expo-image-picker";
 
-import { Screen, motion } from "../ui";
+import { ModalFrame, motion, Screen } from "../ui";
 import { tokens, withAlpha } from "../theme";
 interface AIScreenProps {
   onOpenMap: () => void;
@@ -1136,13 +1135,13 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
       </KeyboardAvoidingView>
 
       {/* Route Loader Modal */}
-      <Modal
+      <ModalFrame
         visible={showRouteLoaderModal}
-        transparent
-        animationType="slide"
+        variant="bottomSheet"
+        animation="slide"
         onRequestClose={() => setShowRouteLoaderModal(false)}
+        style={styles.routeLoaderBackdrop}
       >
-        <View style={styles.routeLoaderBackdrop}>
           <View style={styles.routeLoaderCard}>
             <View style={styles.routeLoaderHeader}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -1278,17 +1277,16 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               </ScrollView>
             )}
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* Agents Modal */}
-      <Modal
+      <ModalFrame
         visible={showAgentsModal}
-        transparent
-        animationType="slide"
+        variant="bottomSheet"
+        animation="slide"
         onRequestClose={() => setShowAgentsModal(false)}
+        style={styles.agentsBackdrop}
       >
-        <View style={styles.agentsBackdrop}>
           <View style={styles.agentsCard}>
             <View style={styles.agentsHeader}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -1412,17 +1410,16 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               </TouchableOpacity>
             </ScrollView>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* Past Conversations History Modal (Burger Menü) */}
-      <Modal
+      <ModalFrame
         visible={showHistoryModal}
-        transparent
-        animationType="slide"
+        variant="bottomSheet"
+        animation="slide"
         onRequestClose={() => setShowHistoryModal(false)}
+        style={styles.historyModalBackdrop}
       >
-        <View style={styles.historyModalBackdrop}>
           <View style={styles.historyModalCard}>
             <View style={styles.historyModalHeader}>
               <View>
@@ -1481,8 +1478,7 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               )}
             </ScrollView>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       <ScreenTourModal screen="ai" />
     </Screen>

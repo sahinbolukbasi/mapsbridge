@@ -5,8 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Modal,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import { CloseIcon, CheckIcon, MapPinIcon, CameraIcon, TrashIcon } from "./Icons";
 import { socialSyncService, MobileUserProfile } from "../services/socialSync";
 
+import { ModalFrame } from "../ui";
 import { tokens, withAlpha } from "../theme";
 export const AVATAR_PRESETS = [
   {
@@ -146,8 +145,13 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
-      <SafeAreaView style={styles.safeArea}>
+    <ModalFrame
+      visible={visible}
+      variant="fullscreen"
+      animation="slide"
+      onRequestClose={onClose}
+      style={styles.safeArea}
+    >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={{ flex: 1 }}
@@ -332,8 +336,7 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
-    </Modal>
+      </ModalFrame>
   );
 }
 

@@ -31,3 +31,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run mobile:typecheck
+      - name: Mobile design-system rules
+        run: node --test apps/web/tests/mobile-design-system.test.cjs apps/web/tests/design-tokens.test.cjs

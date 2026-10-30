@@ -6,11 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   Image,
   Alert,
   Share,
-  Modal,
 } from "react-native";
 import { tripStore, TripStop } from "../services/tripStore";
 import { PublicProfileView, PublicProfileUser } from "./PublicProfileView";
@@ -31,7 +29,7 @@ import {
 } from "../components/Icons";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 
-import { Screen } from "../ui";
+import { ModalFrame, Screen } from "../ui";
 import { tokens, withAlpha } from "../theme";
 interface CommunityScreenProps {
   onOpenMap: () => void;
@@ -672,8 +670,13 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
       </View>
 
       {/* New Post Creation Modal */}
-      <Modal visible={showNewPostModal} animationType="slide" presentationStyle="pageSheet">
-        <SafeAreaView style={styles.modalContainer}>
+      <ModalFrame
+        visible={showNewPostModal}
+        variant="sheet"
+        animation="slide"
+        onRequestClose={() => setShowNewPostModal(false)}
+        style={styles.modalContainer}
+      >
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowNewPostModal(false)}>
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Vazgeç</Text>
@@ -738,12 +741,16 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
               </View>
             )}
           </ScrollView>
-        </SafeAreaView>
-      </Modal>
+        </ModalFrame>
 
       {/* Comments Modal */}
-      <Modal visible={!!activeCommentPost} animationType="slide" presentationStyle="pageSheet">
-        <SafeAreaView style={styles.modalContainer}>
+      <ModalFrame
+        visible={!!activeCommentPost}
+        variant="sheet"
+        animation="slide"
+        onRequestClose={() => setActiveCommentPost(null)}
+        style={styles.modalContainer}
+      >
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setActiveCommentPost(null)}>
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Kapat</Text>
@@ -784,8 +791,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontWeight: "800" }}>Gönder</Text>
             </TouchableOpacity>
           </View>
-        </SafeAreaView>
-      </Modal>
+        </ModalFrame>
 
       {/* Edit Post Modal */}
       {editingPost && (

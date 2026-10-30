@@ -11,7 +11,6 @@ import {
   Share,
   Linking,
   Platform,
-  Modal,
   Dimensions,
   ActivityIndicator,
   FlatList,
@@ -46,7 +45,7 @@ import {
 } from "../components/Icons";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 
-import { AccessibleStopList, SafeArea, mapLabel, motion } from "../ui";
+import { AccessibleStopList, mapLabel, ModalFrame, motion, SafeArea } from "../ui";
 import { tokens, withAlpha } from "../theme";
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -1861,8 +1860,13 @@ export function MapScreen({
       </View>
 
       {/* Route Switcher Modal */}
-      <Modal visible={showRouteModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+      <ModalFrame
+        visible={showRouteModal}
+        variant="dialog"
+        animation="fade"
+        onRequestClose={() => setShowRouteModal(false)}
+        style={styles.modalOverlay}
+      >
           <View style={styles.modalContent}>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rotayı Değiştir</Text>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Haritada incelemek istediğiniz rotayı seçin</Text>
@@ -1905,17 +1909,16 @@ export function MapScreen({
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseBtnText}>Kapat</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* Comprehensive Share Modal (QR Kod + Toplu Taşıma + Canlı Yol Tarifi) */}
-      <Modal
+      <ModalFrame
         visible={!!shareTarget}
-        transparent
-        animationType="slide"
+        variant="bottomSheet"
+        animation="slide"
         onRequestClose={() => setShareTarget(null)}
+        style={styles.shareModalBackdrop}
       >
-        <View style={styles.shareModalBackdrop}>
           <View style={styles.shareModalCard}>
             <View style={styles.shareModalHeader}>
               <View style={{ flex: 1 }}>
@@ -2024,17 +2027,16 @@ export function MapScreen({
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* Map Settings Modal */}
-      <Modal
+      <ModalFrame
         visible={showMapSettingsModal}
-        transparent
-        animationType="fade"
+        variant="dialog"
+        animation="fade"
         onRequestClose={() => setShowMapSettingsModal(false)}
+        style={styles.mapSettingsBackdrop}
       >
-        <View style={styles.mapSettingsBackdrop}>
           <View style={styles.mapSettingsCard}>
             <View style={styles.mapSettingsHeader}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -2149,8 +2151,7 @@ export function MapScreen({
               </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
       <ScreenTourModal screen="map" />
     </View>
   );

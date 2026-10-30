@@ -8,7 +8,6 @@ import {
   Image,
   Alert,
   Linking,
-  Modal,
   TextInput,
   Share,
 } from "react-native";
@@ -36,7 +35,7 @@ import { ScreenTourModal } from "../components/ScreenTourModal";
 import { PaywallModal } from "../components/PaywallModal";
 import { getOfferings, isProSync } from "../services/revenuecat";
 
-import { AccessibleStopList, Screen, ScreenHeader, mapLabel } from "../ui";
+import { AccessibleStopList, mapLabel, ModalFrame, Screen, ScreenHeader } from "../ui";
 import { tokens, withAlpha } from "../theme";
 interface PlanScreenProps {
   onOpenMap: (stopId?: string) => void;
@@ -1059,8 +1058,13 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
       </ScrollView>
 
       {/* Route Picker Modal - with Close Button and Search */}
-      <Modal visible={showRoutePickerModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+      <ModalFrame
+        visible={showRoutePickerModal}
+        variant="dialog"
+        animation="fade"
+        onRequestClose={() => setShowRoutePickerModal(false)}
+        style={styles.modalOverlay}
+      >
           <View style={styles.modalContent}>
             {/* Header with Close Button */}
             <View style={styles.modalHeaderWithClose}>
@@ -1178,12 +1182,16 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               })}
             </ScrollView>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* Rename Route Modal */}
-      <Modal visible={renamingRoute !== null} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+      <ModalFrame
+        visible={renamingRoute !== null}
+        variant="dialog"
+        animation="fade"
+        onRequestClose={() => setRenamingRoute(null)}
+        style={styles.modalOverlay}
+      >
           <View style={styles.modalContent}>
             <View style={styles.modalHeaderWithClose}>
               <View>
@@ -1255,12 +1263,16 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* Edit Stop Modal */}
-      <Modal visible={editingStop !== null} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
+      <ModalFrame
+        visible={editingStop !== null}
+        variant="bottomSheet"
+        animation="slide"
+        onRequestClose={() => setEditingStop(null)}
+        style={styles.modalOverlay}
+      >
           <View style={styles.modalContent}>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Durağı Düzenle</Text>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Durak adı, zamanlama ve notları özelleştirin</Text>
@@ -1383,12 +1395,16 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* Add New Stop Modal */}
-      <Modal visible={showAddStopModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
+      <ModalFrame
+        visible={showAddStopModal}
+        variant="bottomSheet"
+        animation="slide"
+        onRequestClose={() => setShowAddStopModal(false)}
+        style={styles.modalOverlay}
+      >
           <View style={styles.modalContent}>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rotaya Durak Ekle</Text>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
@@ -1472,12 +1488,16 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* New Trip Modal */}
-      <Modal visible={showNewTripModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
+      <ModalFrame
+        visible={showNewTripModal}
+        variant="bottomSheet"
+        animation="slide"
+        onRequestClose={() => setShowNewTripModal(false)}
+        style={styles.modalOverlay}
+      >
           <View style={styles.modalContent}>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Yeni Gezi Planı Oluştur</Text>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Şehir veya seyahat başlığı belirleyin</Text>
@@ -1502,8 +1522,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
       <ScreenTourModal screen="plan" />
 
       {/* Paywall Modal — opened by template gate and other Pro features */}

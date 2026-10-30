@@ -8,7 +8,6 @@ import {
   Image,
   Share,
   Alert,
-  Modal,
   TextInput,
 } from "react-native";
 import {
@@ -36,7 +35,7 @@ import { ScreenTourModal } from "../components/ScreenTourModal";
 import { PaywallModal } from "../components/PaywallModal";
 import { getCustomerInfo, getActiveTier, type PlanTier } from "../services/revenuecat";
 
-import { Screen } from "../ui";
+import { ModalFrame, Screen } from "../ui";
 import { tokens, withAlpha } from "../theme";
 interface ProfileScreenProps {
   onShowWelcome: () => void;
@@ -705,8 +704,13 @@ export function ProfileScreen({
       />
 
       {/* Rename Route Modal */}
-      <Modal visible={renamingRoute !== null} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+      <ModalFrame
+        visible={renamingRoute !== null}
+        variant="dialog"
+        animation="fade"
+        onRequestClose={() => setRenamingRoute(null)}
+        style={styles.modalOverlay}
+      >
           <View style={styles.modalCard}>
             <View style={styles.modalHeaderRow}>
               <View>
@@ -750,8 +754,7 @@ export function ProfileScreen({
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
+        </ModalFrame>
 
       {/* Edit Profile Modal */}
       <EditProfileModal

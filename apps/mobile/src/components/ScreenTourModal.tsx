@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Modal,
   Dimensions,
   ScrollView,
 } from "react-native";
@@ -22,6 +21,7 @@ import {
   LightbulbIcon,
 } from "./Icons";
 
+import { ModalFrame } from "../ui";
 import { tokens, withAlpha } from "../theme";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -204,13 +204,13 @@ export function ScreenTourModal({
   if (!content) return null;
 
   return (
-    <Modal
+    <ModalFrame
       visible={internalVisible}
-      transparent
-      animationType="fade"
+      variant="dialog"
+      animation="fade"
       onRequestClose={handleDismiss}
+      style={styles.backdrop}
     >
-      <View style={styles.backdrop}>
         <View style={styles.container}>
           {/* Close button top right */}
           <TouchableOpacity
@@ -273,8 +273,7 @@ export function ScreenTourModal({
             </TouchableOpacity>
           </ScrollView>
         </View>
-      </View>
-    </Modal>
+      </ModalFrame>
   );
 }
 

@@ -5,8 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Modal,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +13,7 @@ import {
 import { CloseIcon, CheckIcon, TrashIcon, TagIcon, MapPinIcon } from "./Icons";
 import { socialSyncService, MobileCommunityPost } from "../services/socialSync";
 
+import { ModalFrame } from "../ui";
 import { tokens } from "../theme";
 interface EditPostModalProps {
   visible: boolean;
@@ -83,8 +82,13 @@ export function EditPostModal({ visible, post, onClose, onSaved, onDeleted }: Ed
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
-      <SafeAreaView style={styles.safeArea}>
+    <ModalFrame
+      visible={visible}
+      variant="fullscreen"
+      animation="slide"
+      onRequestClose={onClose}
+      style={styles.safeArea}
+    >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={{ flex: 1 }}
@@ -159,8 +163,7 @@ export function EditPostModal({ visible, post, onClose, onSaved, onDeleted }: Ed
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
-    </Modal>
+      </ModalFrame>
   );
 }
 

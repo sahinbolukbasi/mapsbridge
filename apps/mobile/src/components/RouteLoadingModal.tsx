@@ -3,13 +3,12 @@ import {
   StyleSheet,
   Text,
   View,
-  Modal,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
 } from "react-native";
 import Svg, { Path, Circle, Text as SvgText, G } from "react-native-svg";
 
+import { ModalFrame } from "../ui";
 import { tokens, withAlpha } from "../theme";
 interface RouteLoadingModalProps {
   visible: boolean;
@@ -29,8 +28,13 @@ export function RouteLoadingModal({
   if (!visible) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={false}>
-      <SafeAreaView style={styles.safeContainer}>
+    <ModalFrame
+      visible={visible}
+      variant="fullscreen"
+      animation="slide"
+      dismissible={false}
+      style={styles.safeContainer}
+    >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -233,8 +237,7 @@ export function RouteLoadingModal({
           </TouchableOpacity>
           <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.footnote}>ROTA HAZIRLANDIĞINDA TİTREŞİMLİ BİLDİRİM GÖNDERİLİR</Text>
         </ScrollView>
-      </SafeAreaView>
-    </Modal>
+      </ModalFrame>
   );
 }
 

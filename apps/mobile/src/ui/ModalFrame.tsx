@@ -31,7 +31,10 @@ export interface ModalFrameProps {
   variant: ModalVariant;
   dismissible?: boolean;
   animation?: "slide" | "fade";
-  /** İçerik kökünün ek stili (bugünkü kök/örtü stilleri birebir korunur). */
+  /**
+   * İçerik kökünün stili. dialog/bottomSheet'te verilirse varsayılan scrim/hizalama yerine
+   * yalnız bu stil uygulanır (bugünkü örtü stilleri birebir korunur).
+   */
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
 }
@@ -96,7 +99,11 @@ export function ModalFrame({
         <View
           accessibilityViewIsModal={true}
           accessibilityLabel={title}
-          style={[styles.overlay, variant === "dialog" ? styles.center : styles.bottom, style]}
+          style={
+            style
+              ? [styles.fill, style]
+              : [styles.overlay, variant === "dialog" ? styles.center : styles.bottom]
+          }
         >
           {children}
         </View>
@@ -111,6 +118,7 @@ export function ModalFrame({
 }
 
 const styles = StyleSheet.create({
+  fill: { flex: 1 },
   overlay: { flex: 1, backgroundColor: tokens.color.scrim },
   center: { justifyContent: "center", alignItems: "center", padding: tokens.space["5"] },
   bottom: { justifyContent: "flex-end" },
