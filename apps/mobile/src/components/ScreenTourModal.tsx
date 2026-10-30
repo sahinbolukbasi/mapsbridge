@@ -22,6 +22,7 @@ import {
   LightbulbIcon,
 } from "./Icons";
 
+import { tokens, withAlpha } from "../theme";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export type TourScreenType = "map" | "plan" | "ai" | "community" | "profile";
@@ -218,7 +219,7 @@ export function ScreenTourModal({
             activeOpacity={0.7}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <Text style={styles.closeBtnText}>✕</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.closeBtnText}>✕</Text>
           </TouchableOpacity>
 
           <ScrollView
@@ -228,21 +229,21 @@ export function ScreenTourModal({
             {/* Header Badge */}
             <View style={styles.badgeRow}>
               <View style={styles.pulsingDot} />
-              <Text style={styles.badgeText}>{content.badge}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badgeText}>{content.badge}</Text>
             </View>
 
             {/* Title & Subtitle */}
-            <Text style={styles.title}>{content.title}</Text>
-            <Text style={styles.subtitle}>{content.subtitle}</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.title}>{content.title}</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.subtitle}>{content.subtitle}</Text>
 
             {/* Feature Steps */}
             <View style={styles.stepsContainer}>
               {content.steps.map((step, idx) => (
                 <View key={idx} style={styles.stepCard}>
-                  <View style={styles.stepIconWrap}>{step.icon("#10B981")}</View>
+                  <View style={styles.stepIconWrap}>{step.icon(tokens.color.accent)}</View>
                   <View style={styles.stepTextContainer}>
-                    <Text style={styles.stepTitle}>{step.title}</Text>
-                    <Text style={styles.stepDesc}>{step.desc}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>{step.title}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>{step.desc}</Text>
                   </View>
                 </View>
               ))}
@@ -251,9 +252,9 @@ export function ScreenTourModal({
             {/* Helpful Tip Box */}
             <View style={styles.tipBox}>
               <View style={styles.tipIconWrap}>
-                <LightbulbIcon size={16} color="#d97706" />
+                <LightbulbIcon size={16} color={tokens.color.warningStrong} />
               </View>
-              <Text style={styles.tipText}>{content.tip}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipText}>{content.tip}</Text>
             </View>
 
             {/* CTA Button */}
@@ -262,13 +263,13 @@ export function ScreenTourModal({
               onPress={handleDismiss}
               activeOpacity={0.85}
             >
-              <Text style={styles.primaryBtnText}>Anladım, Keşfe Başla</Text>
-              <Text style={styles.primaryBtnArrow}>➔</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryBtnText}>Anladım, Keşfe Başla</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryBtnArrow}>➔</Text>
             </TouchableOpacity>
 
             {/* Dismiss without seeing again */}
             <TouchableOpacity style={styles.skipBtn} onPress={handleDismiss} activeOpacity={0.7}>
-              <Text style={styles.skipBtnText}>Tanıtımı Kapat</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.skipBtnText}>Tanıtımı Kapat</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -280,7 +281,7 @@ export function ScreenTourModal({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(2, 14, 10, 0.78)",
+    backgroundColor: withAlpha(tokens.color.surfaceInverseStrong, 0.78),
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
@@ -289,12 +290,12 @@ const styles = StyleSheet.create({
   container: {
     width: Math.min(SCREEN_WIDTH - 36, 420),
     maxHeight: "88%",
-    backgroundColor: "#0a1f18",
+    backgroundColor: tokens.color.surfaceInverse,
     borderRadius: 24,
     borderWidth: 1.5,
-    borderColor: "#1e4d3e",
+    borderColor: tokens.color.brandHover,
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.5,
     shadowRadius: 28,
@@ -309,12 +310,12 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: tokens.color.whiteA08,
     justifyContent: "center",
     alignItems: "center",
   },
   closeBtnText: {
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     fontSize: 16,
     fontWeight: "700",
     lineHeight: 18,
@@ -332,19 +333,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 9999,
-    backgroundColor: "rgba(16, 185, 129, 0.12)",
+    backgroundColor: withAlpha(tokens.color.accent, 0.12),
     borderWidth: 1,
-    borderColor: "rgba(16, 185, 129, 0.3)",
+    borderColor: tokens.color.accentA30,
     marginBottom: 12,
   },
   pulsingDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
   },
   badgeText: {
-    color: "#34D399",
+    color: tokens.color.accentStrong,
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 0.8,
@@ -352,14 +353,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     letterSpacing: -0.4,
     marginBottom: 6,
     paddingRight: 24,
   },
   subtitle: {
     fontSize: 13.5,
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     lineHeight: 20,
     marginBottom: 20,
   },
@@ -373,17 +374,17 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 12,
     borderRadius: 14,
-    backgroundColor: "rgba(255, 255, 255, 0.035)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.035),
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    borderColor: withAlpha(tokens.color.neutral0, 0.06),
   },
   stepIconWrap: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "rgba(16, 185, 129, 0.12)",
+    backgroundColor: withAlpha(tokens.color.accent, 0.12),
     borderWidth: 1,
-    borderColor: "rgba(16, 185, 129, 0.25)",
+    borderColor: withAlpha(tokens.color.accent, 0.25),
     justifyContent: "center",
     alignItems: "center",
     marginTop: 2,
@@ -394,12 +395,12 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#e2e8f0",
+    color: tokens.color.neutral200,
     marginBottom: 2,
   },
   stepDesc: {
     fontSize: 12.5,
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     lineHeight: 18,
   },
   tipBox: {
@@ -408,9 +409,9 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "rgba(217, 119, 6, 0.1)",
+    backgroundColor: withAlpha(tokens.color.warningStrong, 0.1),
     borderWidth: 1,
-    borderColor: "rgba(217, 119, 6, 0.25)",
+    borderColor: withAlpha(tokens.color.warningStrong, 0.25),
     marginBottom: 22,
   },
   tipIconWrap: {
@@ -419,7 +420,7 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 12,
-    color: "#fde68a",
+    color: tokens.color.warningBorder,
     lineHeight: 17,
     fontWeight: "500",
   },
@@ -430,8 +431,8 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: "#10B981",
-    shadowColor: "#10B981",
+    backgroundColor: tokens.color.accent,
+    shadowColor: tokens.color.accent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,
@@ -439,13 +440,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   primaryBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 15,
     fontWeight: "800",
     letterSpacing: 0.2,
   },
   primaryBtnArrow: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 14,
     fontWeight: "900",
   },
@@ -454,7 +455,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipBtnText: {
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     fontSize: 12.5,
     fontWeight: "600",
   },

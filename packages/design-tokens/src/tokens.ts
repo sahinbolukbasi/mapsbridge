@@ -197,6 +197,12 @@ export const motion = {
 export const control = { "height-sm": 36, height: 44, "height-lg": 52, touch: 44 } as const;
 
 export const focusRing = { width: 2, offset: 2 } as const;
+// Yalnız mobil (design §7.5): metin ölçekleme tavanı. compact = sabit alanlı metin (sekme
+// etiketi, rozet, header başlığı), body = gövde metni.
+export const fontMaxScale = { compact: 1.4, body: 2 } as const;
+// Yalnız mobil: RN'de color-mix olmadığından gölge (shadowColor) ve siyah tabanlı örtüler
+// için opak taban renkleri (`withAlpha` ile saydamlaştırılır). Web karşılığı yok.
+export const nativeOnlyColors = { black: "black" } as const satisfies Record<string, PaletteName>;
 
 export const layout = {
   "container-max": "1200px",

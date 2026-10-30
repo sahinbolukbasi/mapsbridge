@@ -22,6 +22,7 @@ import { storage } from "./src/services/storage";
 import { tripStore } from "./src/services/tripStore";
 import { initRevenueCat } from "./src/services/revenuecat";
 
+import { tokens } from "./src/theme";
 const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
 // Session persistence constants
@@ -385,7 +386,7 @@ export function App() {
   if (loadingSession || showSplash) {
     return (
       <View style={styles.appShell}>
-        <StatusBar barStyle="dark-content" backgroundColor="#faf8ff" />
+        <StatusBar barStyle="dark-content" backgroundColor={tokens.color.bg} />
         <SplashScreen minDurationMs={1200} onFinish={() => setShowSplash(false)} />
       </View>
     );
@@ -426,7 +427,7 @@ export function App() {
 
   return (
     <View style={styles.appShell}>
-      <StatusBar barStyle="light-content" backgroundColor="#020e0a" />
+      <StatusBar barStyle="light-content" backgroundColor={tokens.color.surfaceInverseStrong} />
 
       {/* Screen Routing */}
       <View style={styles.screenContainer}>
@@ -457,7 +458,7 @@ export function App() {
         )}
       </View>
 
-      {/* 5 Core Tabs: Harita, Planım, AI Asistan, Keşfet, Profil */}
+      {/* 5 Core Tabs: Harita, Rotalarım, AI Asistan, Topluluk, Profil */}
       <BottomTabBar activeTab={activeTab} onSelectTab={setActiveTab} />
     </View>
   );
@@ -476,16 +477,16 @@ export default AppWithErrorBoundary;
 const styles = StyleSheet.create({
   appShell: {
     flex: 1,
-    backgroundColor: "#020e0a",
+    backgroundColor: tokens.color.surfaceInverseStrong,
   },
   screenContainer: {
     flex: 1,
     overflow: "hidden",
   },
   googleModalHeader: {
-    backgroundColor: "#0d281e",
+    backgroundColor: tokens.color.surfaceInverse,
     borderBottomWidth: 1,
-    borderBottomColor: "#1e4d3e",
+    borderBottomColor: tokens.color.brandHover,
   },
   googleNavRow: {
     flexDirection: "row",
@@ -498,10 +499,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: tokens.color.whiteA08,
   },
   googleCloseText: {
-    color: "#e2e8f0",
+    color: tokens.color.neutral200,
     fontSize: 14,
     fontWeight: "600",
   },
@@ -514,7 +515,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   googleHostname: {
-    color: "#34d399",
+    color: tokens.color.accentStrong,
     fontSize: 13,
     fontWeight: "700",
     letterSpacing: 0.2,
@@ -525,6 +526,6 @@ const styles = StyleSheet.create({
   },
   googleWebViewContainer: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
   },
 });

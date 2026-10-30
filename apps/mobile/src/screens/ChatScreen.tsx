@@ -6,12 +6,10 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   Platform,
   Image,
   KeyboardAvoidingView,
   Alert,
-  StatusBar,
 } from "react-native";
 import { tripStore, TripStop } from "../services/tripStore";
 import { authService } from "../services/api";
@@ -24,6 +22,8 @@ import {
   MountainIcon,
 } from "../components/Icons";
 
+import { Screen } from "../ui";
+import { tokens, withAlpha } from "../theme";
 interface ChatScreenProps {
   onGoBack?: () => void;
   onOpenMap?: () => void;
@@ -153,10 +153,10 @@ export function ChatScreen({
         <View
           style={[
             styles.avatarFallbackBase,
-            { width: size, height: size, borderRadius: size / 2, backgroundColor: "#059669" },
+            { width: size, height: size, borderRadius: size / 2, backgroundColor: tokens.color.successStrong },
           ]}
         >
-          <BalloonIcon size={size * 0.48} color="#ffffff" />
+          <BalloonIcon size={size * 0.48} color={tokens.color.onPrimary} />
         </View>
       );
     }
@@ -166,10 +166,10 @@ export function ChatScreen({
         <View
           style={[
             styles.avatarFallbackBase,
-            { width: size, height: size, borderRadius: size / 2, backgroundColor: "#0f766e" },
+            { width: size, height: size, borderRadius: size / 2, backgroundColor: tokens.color.brand },
           ]}
         >
-          <MountainIcon size={size * 0.48} color="#ffffff" />
+          <MountainIcon size={size * 0.48} color={tokens.color.onPrimary} />
         </View>
       );
     }
@@ -178,10 +178,10 @@ export function ChatScreen({
       <View
         style={[
           styles.avatarFallbackBase,
-          { width: size, height: size, borderRadius: size / 2, backgroundColor: "#047857" },
+          { width: size, height: size, borderRadius: size / 2, backgroundColor: tokens.color.success },
         ]}
       >
-        <Text style={[styles.avatarFallbackLetter, { fontSize: size * 0.38 }]}>
+        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.avatarFallbackLetter, { fontSize: size * 0.38 }]}>
           {contact.avatarText || contact.name.slice(0, 2).toUpperCase()}
         </Text>
       </View>
@@ -210,28 +210,26 @@ export function ChatScreen({
   // ==========================================
   if (viewMode === "list") {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="#faf8ff" />
-
+      <Screen style={styles.container}>
         {/* Top Header */}
         <View style={styles.inboxHeader}>
           <View style={styles.inboxHeaderLeft}>
             {onGoBack && (
               <TouchableOpacity style={styles.inboxBackBtn} onPress={onGoBack} activeOpacity={0.7}>
-                <Text style={styles.inboxBackBtnIcon}>‹</Text>
-                <Text style={styles.inboxBackBtnLabel}>Geri</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inboxBackBtnIcon}>‹</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inboxBackBtnLabel}>Geri</Text>
               </TouchableOpacity>
             )}
 
             <View style={{ marginLeft: onGoBack ? 4 : 0 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Text style={styles.inboxHeaderTitle}>Gezgin Sohbetleri</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.inboxHeaderTitle}>Gezgin Sohbetleri</Text>
                 <View style={styles.liveNetworkPill}>
                   <View style={styles.livePulseDot} />
-                  <Text style={styles.liveNetworkText}>CANLI</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.liveNetworkText}>CANLI</Text>
                 </View>
               </View>
-              <Text style={styles.inboxHeaderSub}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inboxHeaderSub}>
                 {contacts.length > 0
                   ? `${contacts.length} Aktif Bağlantı`
                   : "Gezgin mesajlaşma ağı"}
@@ -244,19 +242,19 @@ export function ChatScreen({
         <View style={styles.searchSection}>
           <View style={styles.searchBox}>
             <View style={{ marginRight: 6 }}>
-              <SearchIcon size={16} color="#64748b" />
+              <SearchIcon size={16} color={tokens.color.textSubtle} />
             </View>
             <TextInput
               style={styles.searchInput}
               placeholder="Gezgin veya sohbet ara..."
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={tokens.color.neutral400}
               value={searchQuery}
               onChangeText={setSearchQuery}
               clearButtonMode="while-editing"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <Text style={{ fontSize: 14, color: "#94a3b8", paddingHorizontal: 4 }}>✕</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 14, color: tokens.color.neutral400, paddingHorizontal: 4 }}>✕</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -269,7 +267,7 @@ export function ChatScreen({
             onPress={() => setActiveFilterTab("all")}
             activeOpacity={0.8}
           >
-            <Text
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
               style={[
                 styles.filterPillText,
                 activeFilterTab === "all" && styles.filterPillTextActive,
@@ -284,7 +282,7 @@ export function ChatScreen({
             onPress={() => setActiveFilterTab("direct")}
             activeOpacity={0.8}
           >
-            <Text
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
               style={[
                 styles.filterPillText,
                 activeFilterTab === "direct" && styles.filterPillTextActive,
@@ -299,7 +297,7 @@ export function ChatScreen({
             onPress={() => setActiveFilterTab("groups")}
             activeOpacity={0.8}
           >
-            <Text
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
               style={[
                 styles.filterPillText,
                 activeFilterTab === "groups" && styles.filterPillTextActive,
@@ -319,16 +317,16 @@ export function ChatScreen({
           {filteredContacts.length === 0 ? (
             <View style={styles.emptyInboxContainer}>
               <View style={styles.emptyIconCircle}>
-                <ChatIcon size={28} color="#059669" />
+                <ChatIcon size={28} color={tokens.color.successStrong} />
               </View>
-              <Text style={styles.emptyInboxTitle}>Henüz mesajınız yok</Text>
-              <Text style={styles.emptyInboxSub}>
-                Keşfet akışındaki gezginlerin veya rehberlerin profiline girip "Mesaj Gönder"
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyInboxTitle}>Henüz mesajınız yok</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyInboxSub}>
+                Topluluk akışındaki gezginlerin veya rehberlerin profiline girip "Mesaj Gönder"
                 butonuna basarak anında sohbet başlatabilirsiniz!
               </Text>
               {onGoBack && (
                 <TouchableOpacity style={styles.exploreLinkBtn} onPress={onGoBack}>
-                  <Text style={styles.exploreLinkBtnText}>← Keşfet'e Göz At</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.exploreLinkBtnText}>← Topluluğa Göz At</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -349,17 +347,17 @@ export function ChatScreen({
 
                   <View style={styles.cardCenterCol}>
                     <View style={styles.cardTopRow}>
-                      <Text style={styles.cardName} numberOfLines={1}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardName} numberOfLines={1}>
                         {contact.name}
                       </Text>
-                      <Text style={styles.cardTime}>{contact.lastMessageTime}</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardTime}>{contact.lastMessageTime}</Text>
                     </View>
 
-                    <Text style={styles.cardRole} numberOfLines={1}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardRole} numberOfLines={1}>
                       {contact.role}
                     </Text>
 
-                    <Text
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                       style={[styles.cardSnippet, hasUnread && styles.cardSnippetUnread]}
                       numberOfLines={1}
                     >
@@ -370,7 +368,7 @@ export function ChatScreen({
                   {hasUnread && (
                     <View style={styles.cardBadgeWrap}>
                       <View style={styles.cardBadge}>
-                        <Text style={styles.cardBadgeText}>{contact.unreadCount}</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.cardBadgeText}>{contact.unreadCount}</Text>
                       </View>
                     </View>
                   )}
@@ -379,7 +377,7 @@ export function ChatScreen({
             })
           )}
         </ScrollView>
-      </SafeAreaView>
+      </Screen>
     );
   }
 
@@ -387,9 +385,7 @@ export function ChatScreen({
   // VIEW 2: BİRE BİR / GRUP SOHBET DETAYI
   // ==========================================
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-
+    <Screen style={styles.container} background="surface">
       {/* Detail Header Bar */}
       <View style={styles.detailHeader}>
         <TouchableOpacity
@@ -405,7 +401,7 @@ export function ChatScreen({
           }}
           activeOpacity={0.7}
         >
-          <Text style={styles.detailBackIcon}>‹</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detailBackIcon}>‹</Text>
         </TouchableOpacity>
 
         {activeContact && (
@@ -413,12 +409,12 @@ export function ChatScreen({
             {renderContactAvatar(activeContact, 38)}
             <View style={{ marginLeft: 10, flex: 1 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <Text style={styles.detailUserName} numberOfLines={1}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detailUserName} numberOfLines={1}>
                   {activeContact.name}
                 </Text>
                 {activeContact.online && <View style={styles.onlinePillDot} />}
               </View>
-              <Text style={styles.detailUserSub} numberOfLines={1}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detailUserSub} numberOfLines={1}>
                 {activeContact.role}
               </Text>
             </View>
@@ -440,8 +436,8 @@ export function ChatScreen({
         >
           {messages.length === 0 ? (
             <View style={styles.emptyMessagesWrap}>
-              <Text style={styles.emptyMessagesTitle}>Sohbet Başladı 👋</Text>
-              <Text style={styles.emptyMessagesSub}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyMessagesTitle}>Sohbet Başladı 👋</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyMessagesSub}>
                 {activeContact?.name} kullanıcısına ilk mesajınızı gönderin ve seyahat rotalarınızı
                 paylaşın!
               </Text>
@@ -472,13 +468,13 @@ export function ChatScreen({
                       <View style={styles.embedRouteCard}>
                         <View style={styles.embedRouteTopRow}>
                           <View style={styles.embedRouteIconBadge}>
-                            <MapIcon size={14} color="#059669" />
+                            <MapIcon size={14} color={tokens.color.successStrong} />
                           </View>
                           <View style={{ flex: 1 }}>
-                            <Text style={styles.embedRouteTitle} numberOfLines={1}>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.embedRouteTitle} numberOfLines={1}>
                               {item.routeEmbed.title}
                             </Text>
-                            <Text style={styles.embedRouteSub}>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.embedRouteSub}>
                               {item.routeEmbed.days} • {item.routeEmbed.stopsCount} Durak
                             </Text>
                           </View>
@@ -489,14 +485,14 @@ export function ChatScreen({
                             style={styles.embedActionBtn}
                             onPress={() => handleCloneRouteToDesk(item.routeEmbed!)}
                           >
-                            <Text style={styles.embedActionBtnText}>Masama Klonla</Text>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.embedActionBtnText}>Masama Klonla</Text>
                           </TouchableOpacity>
 
                           <TouchableOpacity
                             style={[styles.embedActionBtn, styles.embedActionBtnSecondary]}
                             onPress={() => handleInspectRouteOnMap(item.routeEmbed!)}
                           >
-                            <Text style={styles.embedActionBtnTextSecondary}>Haritada Gör →</Text>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.embedActionBtnTextSecondary}>Haritada Gör →</Text>
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -504,7 +500,7 @@ export function ChatScreen({
 
                     {/* Text Message */}
                     {item.text ? (
-                      <Text
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={[
                           styles.bubbleText,
                           isMe ? styles.bubbleTextMe : styles.bubbleTextThem,
@@ -516,7 +512,7 @@ export function ChatScreen({
 
                     {/* Message Meta (Time & Read status) */}
                     <View style={styles.bubbleMetaRow}>
-                      <Text
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={[
                           styles.bubbleTime,
                           isMe ? styles.bubbleTimeMe : styles.bubbleTimeThem,
@@ -524,7 +520,7 @@ export function ChatScreen({
                       >
                         {item.time}
                       </Text>
-                      {isMe && <Text style={styles.readCheck}>✓✓</Text>}
+                      {isMe && <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.readCheck}>✓✓</Text>}
                     </View>
                   </View>
                 </View>
@@ -538,7 +534,7 @@ export function ChatScreen({
           <TextInput
             style={styles.inputField}
             placeholder="Mesajınızı yazın..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor={tokens.color.neutral400}
             value={inputText}
             onChangeText={setInputText}
             multiline
@@ -551,18 +547,18 @@ export function ChatScreen({
             disabled={!inputText.trim()}
             activeOpacity={0.8}
           >
-            <Text style={styles.sendBtnText}>Gönder</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sendBtnText}>Gönder</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8faf9",
+    backgroundColor: tokens.color.bg,
   },
   inboxHeader: {
     flexDirection: "row",
@@ -570,9 +566,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: tokens.color.border,
   },
   inboxHeaderLeft: {
     flexDirection: "row",
@@ -587,46 +583,46 @@ const styles = StyleSheet.create({
   },
   inboxBackBtnIcon: {
     fontSize: 26,
-    color: "#0f172a",
+    color: tokens.color.text,
     lineHeight: 28,
   },
   inboxBackBtnLabel: {
     fontSize: 14,
-    color: "#0f172a",
+    color: tokens.color.text,
     fontWeight: "600",
     marginLeft: 2,
   },
   inboxHeaderTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#0f172a",
+    color: tokens.color.text,
     letterSpacing: -0.3,
   },
   liveNetworkPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   livePulseDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#10b981",
+    backgroundColor: tokens.color.accent,
   },
   liveNetworkText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#047857",
+    color: tokens.color.success,
   },
   inboxHeaderSub: {
     fontSize: 12,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   searchSection: {
@@ -637,17 +633,17 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
     paddingHorizontal: 12,
     height: 40,
   },
   searchInput: {
     flex: 1,
     fontSize: 13,
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   filterPillsRow: {
     flexDirection: "row",
@@ -659,21 +655,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   filterPillActive: {
-    backgroundColor: "#059669",
-    borderColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
+    borderColor: tokens.color.successStrong,
   },
   filterPillText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#64748b",
+    color: tokens.color.textSubtle,
   },
   filterPillTextActive: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontWeight: "700",
   },
   inboxList: {
@@ -686,21 +682,21 @@ const styles = StyleSheet.create({
   conversationCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 16,
     padding: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    shadowColor: "#000",
+    borderColor: tokens.color.border,
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
     shadowRadius: 3,
     elevation: 1,
   },
   conversationCardUnread: {
-    backgroundColor: "#f0fdf4",
-    borderColor: "#bbf7d0",
+    backgroundColor: tokens.color.surfaceBrand,
+    borderColor: tokens.color.successBorder,
   },
   cardAvatarCol: {
     position: "relative",
@@ -713,9 +709,9 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#10b981",
+    backgroundColor: tokens.color.accent,
     borderWidth: 2,
-    borderColor: "#ffffff",
+    borderColor: tokens.color.neutral0,
   },
   cardCenterCol: {
     flex: 1,
@@ -729,31 +725,31 @@ const styles = StyleSheet.create({
   cardName: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   cardTime: {
     fontSize: 11,
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
   },
   cardRole: {
     fontSize: 11,
-    color: "#059669",
+    color: tokens.color.successStrong,
     fontWeight: "600",
     marginBottom: 2,
   },
   cardSnippet: {
     fontSize: 12,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
   },
   cardSnippetUnread: {
-    color: "#0f172a",
+    color: tokens.color.text,
     fontWeight: "700",
   },
   cardBadgeWrap: {
     marginLeft: 8,
   },
   cardBadge: {
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -761,7 +757,7 @@ const styles = StyleSheet.create({
   cardBadgeText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   emptyInboxContainer: {
     alignItems: "center",
@@ -773,22 +769,22 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   emptyInboxTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0f172a",
+    color: tokens.color.text,
     marginBottom: 6,
   },
   emptyInboxSub: {
     fontSize: 13,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     textAlign: "center",
     lineHeight: 18,
     marginBottom: 20,
@@ -796,13 +792,13 @@ const styles = StyleSheet.create({
   exploreLinkBtn: {
     paddingHorizontal: 18,
     paddingVertical: 8,
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     borderRadius: 12,
   },
   exploreLinkBtnText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
 
   // ── Detail View Styles ──
@@ -811,9 +807,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: tokens.color.border,
   },
   detailBackBtn: {
     paddingHorizontal: 8,
@@ -821,7 +817,7 @@ const styles = StyleSheet.create({
   },
   detailBackIcon: {
     fontSize: 28,
-    color: "#0f172a",
+    color: tokens.color.text,
     lineHeight: 30,
   },
   detailUserWrap: {
@@ -833,17 +829,17 @@ const styles = StyleSheet.create({
   detailUserName: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   onlinePillDot: {
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: "#10b981",
+    backgroundColor: tokens.color.accent,
   },
   detailUserSub: {
     fontSize: 11,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
   },
   messagesScroll: {
     flex: 1,
@@ -860,12 +856,12 @@ const styles = StyleSheet.create({
   emptyMessagesTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0f172a",
+    color: tokens.color.text,
     marginBottom: 6,
   },
   emptyMessagesSub: {
     fontSize: 13,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     textAlign: "center",
     lineHeight: 18,
   },
@@ -891,14 +887,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   bubbleBoxMe: {
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     borderBottomRightRadius: 4,
   },
   bubbleBoxThem: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   bubbleBoxWithRoute: {
     paddingHorizontal: 10,
@@ -909,10 +905,10 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   bubbleTextMe: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   bubbleTextThem: {
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   bubbleMetaRow: {
     flexDirection: "row",
@@ -925,23 +921,23 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   bubbleTimeMe: {
-    color: "rgba(255,255,255,0.7)",
+    color: withAlpha(tokens.color.onPrimary, 0.7),
   },
   bubbleTimeThem: {
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
   },
   readCheck: {
     fontSize: 9,
-    color: "rgba(255,255,255,0.8)",
+    color: withAlpha(tokens.color.onPrimary, 0.8),
     fontWeight: "800",
   },
   embedRouteCard: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderRadius: 12,
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   embedRouteTopRow: {
     flexDirection: "row",
@@ -953,20 +949,20 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   embedRouteTitle: {
     fontSize: 12.5,
     fontWeight: "700",
-    color: "#065f46",
+    color: tokens.color.onSurfaceBrand,
   },
   embedRouteSub: {
     fontSize: 11,
-    color: "#047857",
+    color: tokens.color.success,
   },
   embedRouteActions: {
     flexDirection: "row",
@@ -974,7 +970,7 @@ const styles = StyleSheet.create({
   },
   embedActionBtn: {
     flex: 1,
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     borderRadius: 8,
     paddingVertical: 5,
     alignItems: "center",
@@ -982,40 +978,40 @@ const styles = StyleSheet.create({
   embedActionBtnText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   embedActionBtnSecondary: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   embedActionBtnTextSecondary: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#059669",
+    color: tokens.color.successStrong,
   },
   inputBar: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: tokens.color.border,
     gap: 8,
   },
   inputField: {
     flex: 1,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 8,
     fontSize: 13,
-    color: "#0f172a",
+    color: tokens.color.text,
     maxHeight: 90,
   },
   sendBtn: {
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 9,
@@ -1028,14 +1024,14 @@ const styles = StyleSheet.create({
   sendBtnText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   avatarFallbackBase: {
     alignItems: "center",
     justifyContent: "center",
   },
   avatarFallbackLetter: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontWeight: "800",
   },
 });

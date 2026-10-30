@@ -4,7 +4,6 @@ import {
   Text,
   View,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
   Image,
   Alert,
@@ -36,6 +35,8 @@ export interface PublicProfileUser {
 import { ChatScreen } from "./ChatScreen";
 import { chatStore, ChatContact } from "../services/chatStore";
 
+import { SafeArea } from "../ui";
+import { tokens, withAlpha } from "../theme";
 interface PublicProfileViewProps {
   user: PublicProfileUser;
   onBack: () => void;
@@ -182,16 +183,16 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
           <View style={styles.coverGradientOverlay} />
 
           {/* Top Floating Actions: Back Button & Badges */}
-          <SafeAreaView style={styles.coverTopBar}>
+          <SafeArea style={styles.coverTopBar}>
             <TouchableOpacity style={styles.topBackBtn} onPress={onBack} activeOpacity={0.8}>
-              <Text style={styles.topBackArrow}>←</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.topBackArrow}>←</Text>
             </TouchableOpacity>
 
             <View style={styles.coverBadge}>
-              <Text style={{ fontSize: 11, marginRight: 4 }}>🏔️</Text>
-              <Text style={styles.coverBadgeText}>Vadi Kaşifi</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, marginRight: 4 }}>🏔️</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.coverBadgeText}>Vadi Kaşifi</Text>
             </View>
-          </SafeAreaView>
+          </SafeArea>
         </View>
 
         {/* Profile Info Header Bar */}
@@ -202,7 +203,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             <View style={styles.avatarWrap}>
               <Image source={{ uri: user.avatar }} style={styles.avatar} />
               <View style={styles.verifiedBadge}>
-                <Text style={styles.verifiedCheckText}>✓</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.verifiedCheckText}>✓</Text>
               </View>
             </View>
 
@@ -213,7 +214,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 onPress={handleStartChat}
                 activeOpacity={0.8}
               >
-                <Text style={{ fontSize: 16 }}>✉️</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>✉️</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -221,7 +222,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 onPress={handleShareProfile}
                 activeOpacity={0.8}
               >
-                <Text style={{ fontSize: 16 }}>🔗</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>🔗</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -229,7 +230,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 onPress={handleToggleFollow}
                 activeOpacity={0.85}
               >
-                <Text style={[styles.followBtnText, isFollowing && styles.followingBtnText]}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.followBtnText, isFollowing && styles.followingBtnText]}>
                   {isFollowing ? "✓ Takip Ediliyor" : "+ Takip Et"}
                 </Text>
               </TouchableOpacity>
@@ -238,57 +239,57 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
 
           {/* Name & Handle */}
           <View style={styles.nameRow}>
-            <Text style={styles.userNameText}>{user.name}</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userNameText}>{user.name}</Text>
             <View style={styles.masterBadge}>
-              <Text style={{ fontSize: 11, marginRight: 2 }}>⭐</Text>
-              <Text style={styles.masterBadgeText}>Master Gezgin</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, marginRight: 2 }}>⭐</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.masterBadgeText}>Master Gezgin</Text>
             </View>
           </View>
-          <Text style={styles.userHandleText}>{user.handle}</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userHandleText}>{user.handle}</Text>
 
           {/* Bio Text */}
-          <Text style={styles.bioText}>{bioText}</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.bioText}>{bioText}</Text>
 
           {/* Location & Metadata Row */}
           <View style={styles.metaInfoRow}>
             <View style={styles.metaItem}>
-              <Text style={styles.metaIcon}>📍</Text>
-              <Text style={styles.metaText}>{user.location || "Nevşehir, Türkiye"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaIcon}>📍</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaText}>{user.location || "Nevşehir, Türkiye"}</Text>
             </View>
             <View style={styles.metaItem}>
-              <Text style={styles.metaIcon}>📅</Text>
-              <Text style={styles.metaText}>{user.joinDate || "Mart 2024'te katıldı"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaIcon}>📅</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaText}>{user.joinDate || "Mart 2024'te katıldı"}</Text>
             </View>
             <TouchableOpacity onPress={handleShareProfile}>
-              <Text style={styles.metaLinkText}>🔗 {user.website || "mapsbridge.com/canberk"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaLinkText}>🔗 {user.website || "mapsbridge.com/canberk"}</Text>
             </TouchableOpacity>
           </View>
 
           {/* Stats Summary Bar */}
           <View style={styles.statsBar}>
             <View style={styles.statBox}>
-              <Text style={styles.statNumber}>{user.postsCount || 14}</Text>
-              <Text style={styles.statLabel}>PAYLAŞIM</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>{user.postsCount || 14}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>PAYLAŞIM</Text>
             </View>
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <Text style={[styles.statNumber, { color: "#013628" }]}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.statNumber, { color: tokens.color.textBrand }]}>
                 🛣️ {user.routesCount || 8}
               </Text>
-              <Text style={styles.statLabel}>AÇIK ROTA</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>AÇIK ROTA</Text>
             </View>
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <Text style={styles.statNumber}>{user.followersCount || "1.4k"}</Text>
-              <Text style={styles.statLabel}>TAKİPÇİ</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>{user.followersCount || "1.4k"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>TAKİPÇİ</Text>
             </View>
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <Text style={styles.statNumber}>{user.followingCount || "324"}</Text>
-              <Text style={styles.statLabel}>TAKİP</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>{user.followingCount || "324"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>TAKİP</Text>
             </View>
           </View>
         </View>
@@ -300,7 +301,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             onPress={() => setActiveTab("feed")}
             activeOpacity={0.8}
           >
-            <Text style={[styles.tabBtnText, activeTab === "feed" && styles.tabBtnTextActive]}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.tabBtnText, activeTab === "feed" && styles.tabBtnTextActive]}>
               Yazılar & Akış
             </Text>
             {activeTab === "feed" && <View style={styles.tabIndicator} />}
@@ -312,11 +313,11 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             activeOpacity={0.8}
           >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-              <Text style={[styles.tabBtnText, activeTab === "routes" && styles.tabBtnTextActive]}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.tabBtnText, activeTab === "routes" && styles.tabBtnTextActive]}>
                 Rotalar
               </Text>
               <View style={styles.routesCountPill}>
-                <Text style={styles.routesCountPillText}>8</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routesCountPillText}>8</Text>
               </View>
             </View>
             {activeTab === "routes" && <View style={styles.tabIndicator} />}
@@ -327,7 +328,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             onPress={() => setActiveTab("media")}
             activeOpacity={0.8}
           >
-            <Text style={[styles.tabBtnText, activeTab === "media" && styles.tabBtnTextActive]}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.tabBtnText, activeTab === "media" && styles.tabBtnTextActive]}>
               Medyalar
             </Text>
             {activeTab === "media" && <View style={styles.tabIndicator} />}
@@ -338,7 +339,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             onPress={() => setActiveTab("likes")}
             activeOpacity={0.8}
           >
-            <Text style={[styles.tabBtnText, activeTab === "likes" && styles.tabBtnTextActive]}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.tabBtnText, activeTab === "likes" && styles.tabBtnTextActive]}>
               Beğeniler
             </Text>
             {activeTab === "likes" && <View style={styles.tabIndicator} />}
@@ -351,26 +352,26 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             {/* Pinned Experience Article */}
             <View style={styles.postCard}>
               <View style={styles.pinnedBadge}>
-                <Text style={{ fontSize: 11, marginRight: 4 }}>📌</Text>
-                <Text style={styles.pinnedBadgeText}>Sabitlenmiş Gezgin Deneyimi</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, marginRight: 4 }}>📌</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.pinnedBadgeText}>Sabitlenmiş Gezgin Deneyimi</Text>
               </View>
 
               <View style={styles.postAuthorRow}>
                 <Image source={{ uri: user.avatar }} style={styles.miniAvatar} />
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Text style={styles.miniAuthorName}>{user.name}</Text>
-                    <Text style={{ color: "#10B981", fontWeight: "900", fontSize: 13 }}>✓</Text>
-                    <Text style={styles.miniAuthorHandle}>{user.handle} · 3g</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.miniAuthorName}>{user.name}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}>✓</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.miniAuthorHandle}>{user.handle} · 3g</Text>
                   </View>
                 </View>
               </View>
 
-              <Text style={styles.postText}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.postText}>
                 Sabah 05:30'da Aşk Vadisi'nde balonların yükselişini izlemek paha biçilemezdi 🎈🌅
                 Vadi içindeki gizli patikaları tek tek kaydettim, rotayı klonlayabilirsiniz!
               </Text>
-              <Text style={styles.postHashtags}>#Kapadokya #Doğa #Doğadakiİz</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.postHashtags}>#Kapadokya #Doğa #Doğadakiİz</Text>
 
               {/* Route Attachment Card */}
               <View style={styles.routeCardContainer}>
@@ -383,33 +384,33 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                     resizeMode="cover"
                   />
                   <View style={styles.gpsRoutePill}>
-                    <Text style={styles.gpsRoutePillText}>🧭 Canlı GPS Rotası</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.gpsRoutePillText}>🧭 Canlı GPS Rotası</Text>
                   </View>
                   <View style={styles.elevationPill}>
-                    <Text style={styles.elevationPillText}>📈 +140m İrtifa</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.elevationPillText}>📈 +140m İrtifa</Text>
                   </View>
                 </View>
 
                 <View style={styles.routeCardInfoBox}>
                   <View style={styles.routeCardTitleRow}>
-                    <Text style={styles.routeCardTitle} numberOfLines={1}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeCardTitle} numberOfLines={1}>
                       Kapadokya: Gün Doğumu Vadi Yürüyüşü
                     </Text>
                     <View style={styles.routeLevelPill}>
-                      <Text style={styles.routeLevelPillText}>Kolay</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeLevelPillText}>Kolay</Text>
                     </View>
                   </View>
 
-                  <Text style={styles.routeStatsRow}>📍 8 Durak • 📏 5.1 km • ⏱️ 2s 15dk</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeStatsRow}>📍 8 Durak • 📏 5.1 km • ⏱️ 2s 15dk</Text>
 
                   <View style={styles.clonersAndActionRow}>
-                    <Text style={styles.clonersText}>👥 42 gezgin klonladı</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.clonersText}>👥 42 gezgin klonladı</Text>
                     <TouchableOpacity
                       style={styles.importRouteBtn}
                       onPress={() => handleImportRoute("Kapadokya: Gün Doğumu Vadi Yürüyüşü")}
                       activeOpacity={0.85}
                     >
-                      <Text style={styles.importRouteBtnText}>Haritama Al 📥</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.importRouteBtnText}>Haritama Al 📥</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -421,26 +422,26 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                   style={styles.interactionItem}
                   onPress={() => Alert.alert("Yorumlar", "58 Gezgin Yorumu")}
                 >
-                  <Text style={styles.interactionIcon}>💬</Text>
-                  <Text style={styles.interactionCount}>58</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>💬</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>58</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.interactionItem}
                   onPress={() => Alert.alert("Paylaşım", "93 kişi rotayı paylaştı")}
                 >
-                  <Text style={styles.interactionIcon}>🔁</Text>
-                  <Text style={styles.interactionCount}>93</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>🔁</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>93</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem} onPress={handleLikePost1}>
-                  <Text style={[styles.interactionIcon, isPost1Liked && { color: "#ba1a1a" }]}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.interactionIcon, isPost1Liked && { color: tokens.color.danger }]}>
                     {isPost1Liked ? "❤️" : "🤍"}
                   </Text>
-                  <Text
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
                     style={[
                       styles.interactionCount,
-                      isPost1Liked && { color: "#ba1a1a", fontWeight: "800" },
+                      isPost1Liked && { color: tokens.color.danger, fontWeight: "800" },
                     ]}
                   >
                     {post1Likes}
@@ -451,12 +452,12 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                   style={styles.interactionItem}
                   onPress={() => setIsBookmarked(!isBookmarked)}
                 >
-                  <Text style={styles.interactionIcon}>{isBookmarked ? "🔖" : "📑"}</Text>
-                  <Text style={styles.interactionCount}>140</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>{isBookmarked ? "🔖" : "📑"}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>140</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem} onPress={handleShareProfile}>
-                  <Text style={styles.interactionIcon}>↗️</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>↗️</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -467,14 +468,14 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 <Image source={{ uri: user.avatar }} style={styles.miniAvatar} />
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Text style={styles.miniAuthorName}>{user.name}</Text>
-                    <Text style={{ color: "#10B981", fontWeight: "900", fontSize: 13 }}>✓</Text>
-                    <Text style={styles.miniAuthorHandle}>{user.handle} · 1hf</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.miniAuthorName}>{user.name}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}>✓</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.miniAuthorHandle}>{user.handle} · 1hf</Text>
                   </View>
                 </View>
               </View>
 
-              <Text style={styles.postText}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.postText}>
                 Ihlara Vadisi'nin derinliklerinde akan Melendiz Çayı boyunca 14 km yürüdük. Suyun
                 sesi ve kayalara oyulmuş kiliseler büyüleyiciydi 🥾🌿
               </Text>
@@ -500,23 +501,23 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
               {/* Interaction Bar */}
               <View style={styles.interactionRow}>
                 <TouchableOpacity style={styles.interactionItem}>
-                  <Text style={styles.interactionIcon}>💬</Text>
-                  <Text style={styles.interactionCount}>24</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>💬</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>24</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem}>
-                  <Text style={styles.interactionIcon}>🔁</Text>
-                  <Text style={styles.interactionCount}>31</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>🔁</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>31</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem} onPress={handleLikePost2}>
-                  <Text style={[styles.interactionIcon, isPost2Liked && { color: "#ba1a1a" }]}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.interactionIcon, isPost2Liked && { color: tokens.color.danger }]}>
                     {isPost2Liked ? "❤️" : "🤍"}
                   </Text>
-                  <Text
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
                     style={[
                       styles.interactionCount,
-                      isPost2Liked && { color: "#ba1a1a", fontWeight: "800" },
+                      isPost2Liked && { color: tokens.color.danger, fontWeight: "800" },
                     ]}
                   >
                     {post2Likes}
@@ -524,12 +525,12 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem}>
-                  <Text style={styles.interactionIcon}>📑</Text>
-                  <Text style={styles.interactionCount}>64</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>📑</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>64</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem} onPress={handleShareProfile}>
-                  <Text style={styles.interactionIcon}>↗️</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>↗️</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -567,8 +568,8 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             ].map((route) => (
               <View key={route.id} style={styles.routeItemCard}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.routeItemTitle}>{route.name}</Text>
-                  <Text style={styles.routeItemSub}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeItemTitle}>{route.name}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeItemSub}>
                     {route.stopsCount} Durak • {route.km} • {route.time} • {route.level}
                   </Text>
                 </View>
@@ -576,7 +577,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                   style={styles.importRouteBtn}
                   onPress={() => handleImportRoute(route.name)}
                 >
-                  <Text style={styles.importRouteBtnText}>Haritama Al 📥</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.importRouteBtnText}>Haritama Al 📥</Text>
                 </TouchableOpacity>
               </View>
             ))}
@@ -602,9 +603,9 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
         {/* Tab Content: Likes */}
         {activeTab === "likes" && (
           <View style={styles.likesEmptyContent}>
-            <Text style={{ fontSize: 32, marginBottom: 8 }}>❤️</Text>
-            <Text style={styles.likesEmptyTitle}>Beğenilen Gönderiler</Text>
-            <Text style={styles.likesEmptySub}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 32, marginBottom: 8 }}>❤️</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.likesEmptyTitle}>Beğenilen Gönderiler</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.likesEmptySub}>
               {user.name} tarafından beğenilen 342 rota ve fotoğraf burada toplanıyor.
             </Text>
           </View>
@@ -617,7 +618,7 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   scrollContent: {
     paddingBottom: 90,
@@ -626,7 +627,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 180,
     position: "relative",
-    backgroundColor: "#0D281E",
+    backgroundColor: tokens.color.surfaceInverse,
   },
   coverImage: {
     width: "100%",
@@ -634,7 +635,7 @@ const styles = StyleSheet.create({
   },
   coverGradientOverlay: {
     ...(StyleSheet.absoluteFill as object),
-    backgroundColor: "rgba(13, 40, 30, 0.35)",
+    backgroundColor: withAlpha(tokens.color.surfaceInverse, 0.35),
   },
   coverTopBar: {
     position: "absolute",
@@ -650,10 +651,10 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "rgba(255, 255, 255, 0.92)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.92),
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
@@ -662,12 +663,12 @@ const styles = StyleSheet.create({
   topBackArrow: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   coverBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(13, 40, 30, 0.75)",
+    backgroundColor: withAlpha(tokens.color.surfaceInverse, 0.75),
     paddingVertical: 5,
     paddingHorizontal: 12,
     borderRadius: 999,
@@ -675,11 +676,11 @@ const styles = StyleSheet.create({
   coverBadgeText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   profileHeaderBox: {
     paddingHorizontal: 16,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   avatarActionsRow: {
     flexDirection: "row",
@@ -693,9 +694,9 @@ const styles = StyleSheet.create({
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     padding: 3,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
@@ -713,14 +714,14 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#ffffff",
+    borderColor: tokens.color.neutral0,
   },
   verifiedCheckText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 11,
     fontWeight: "900",
   },
@@ -734,31 +735,31 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#eaedff",
+    backgroundColor: tokens.color.surfaceTint,
     alignItems: "center",
     justifyContent: "center",
   },
   followBtn: {
-    backgroundColor: "#1e4d3e",
+    backgroundColor: tokens.color.brandHover,
     paddingVertical: 9,
     paddingHorizontal: 18,
     borderRadius: 999,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
   },
   followingBtn: {
-    backgroundColor: "#e2e7ff",
+    backgroundColor: tokens.color.surfaceTint,
   },
   followBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 13,
     fontWeight: "800",
   },
   followingBtnText: {
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   nameRow: {
     flexDirection: "row",
@@ -768,13 +769,13 @@ const styles = StyleSheet.create({
   userNameText: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
     letterSpacing: -0.2,
   },
   masterBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
@@ -782,16 +783,16 @@ const styles = StyleSheet.create({
   masterBadgeText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   userHandleText: {
     fontSize: 13,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   bioText: {
     fontSize: 13,
-    color: "#131b2e",
+    color: tokens.color.text,
     lineHeight: 20,
     marginTop: 8,
   },
@@ -812,26 +813,26 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontWeight: "500",
   },
   metaLinkText: {
     fontSize: 11,
-    color: "#10B981",
+    color: tokens.color.accent,
     fontWeight: "700",
   },
   statsBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 18,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "#eaedff",
+    borderColor: tokens.color.surfaceTint,
     marginTop: 14,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -844,24 +845,24 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   statLabel: {
     fontSize: 9,
     fontWeight: "700",
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   statDivider: {
     width: 1,
     height: 22,
-    backgroundColor: "#eaedff",
+    backgroundColor: tokens.color.surfaceTint,
   },
   tabsStickyRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#eaedff",
-    backgroundColor: "#faf8ff",
+    borderBottomColor: tokens.color.surfaceTint,
+    backgroundColor: tokens.color.bg,
     paddingHorizontal: 16,
     marginTop: 12,
   },
@@ -875,10 +876,10 @@ const styles = StyleSheet.create({
   tabBtnText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   tabBtnTextActive: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontWeight: "800",
   },
   tabIndicator: {
@@ -888,10 +889,10 @@ const styles = StyleSheet.create({
     right: 12,
     height: 3,
     borderRadius: 1.5,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
   },
   routesCountPill: {
-    backgroundColor: "#abedd3",
+    backgroundColor: tokens.color.surfaceBrandSoft,
     paddingVertical: 1,
     paddingHorizontal: 6,
     borderRadius: 999,
@@ -899,7 +900,7 @@ const styles = StyleSheet.create({
   routesCountPillText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   feedContent: {
     paddingHorizontal: 16,
@@ -907,12 +908,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   postCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#eaedff",
-    shadowColor: "#000",
+    borderColor: tokens.color.surfaceTint,
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -921,7 +922,7 @@ const styles = StyleSheet.create({
   pinnedBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingVertical: 3,
     paddingHorizontal: 10,
     borderRadius: 999,
@@ -931,7 +932,7 @@ const styles = StyleSheet.create({
   pinnedBadgeText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   postAuthorRow: {
     flexDirection: "row",
@@ -947,30 +948,30 @@ const styles = StyleSheet.create({
   miniAuthorName: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   miniAuthorHandle: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   postText: {
     fontSize: 13,
-    color: "#131b2e",
+    color: tokens.color.text,
     lineHeight: 20,
   },
   postHashtags: {
     fontSize: 12,
-    color: "#286954",
+    color: tokens.color.link,
     fontWeight: "700",
     marginTop: 4,
   },
   routeCardContainer: {
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     borderRadius: 16,
     overflow: "hidden",
     marginTop: 10,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   routeCardBannerWrap: {
     height: 120,
@@ -984,7 +985,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 8,
     left: 8,
-    backgroundColor: "rgba(13, 40, 30, 0.8)",
+    backgroundColor: withAlpha(tokens.color.surfaceInverse, 0.8),
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 999,
@@ -992,13 +993,13 @@ const styles = StyleSheet.create({
   gpsRoutePillText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   elevationPill: {
     position: "absolute",
     bottom: 8,
     right: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.92)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.92),
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
@@ -1006,7 +1007,7 @@ const styles = StyleSheet.create({
   elevationPillText: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   routeCardInfoBox: {
     padding: 12,
@@ -1019,11 +1020,11 @@ const styles = StyleSheet.create({
   routeCardTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
     flexShrink: 1,
   },
   routeLevelPill: {
-    backgroundColor: "#abedd3",
+    backgroundColor: tokens.color.surfaceBrandSoft,
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 6,
@@ -1031,11 +1032,11 @@ const styles = StyleSheet.create({
   routeLevelPillText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   routeStatsRow: {
     fontSize: 11,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginTop: 4,
   },
   clonersAndActionRow: {
@@ -1045,15 +1046,15 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: tokens.color.border,
   },
   clonersText: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontWeight: "600",
   },
   importRouteBtn: {
-    backgroundColor: "#1e4d3e",
+    backgroundColor: tokens.color.brandHover,
     paddingVertical: 7,
     paddingHorizontal: 12,
     borderRadius: 999,
@@ -1061,7 +1062,7 @@ const styles = StyleSheet.create({
   importRouteBtnText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   photoGridRow: {
     flexDirection: "row",
@@ -1082,7 +1083,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: "#f2f3ff",
+    borderTopColor: tokens.color.surfaceTint,
     paddingHorizontal: 4,
   },
   interactionItem: {
@@ -1096,7 +1097,7 @@ const styles = StyleSheet.create({
   interactionCount: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   routesListContent: {
     paddingHorizontal: 16,
@@ -1107,12 +1108,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#eaedff",
-    shadowColor: "#000",
+    borderColor: tokens.color.surfaceTint,
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -1121,11 +1122,11 @@ const styles = StyleSheet.create({
   routeItemTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   routeItemSub: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginTop: 3,
   },
   mediaGridContent: {
@@ -1149,11 +1150,11 @@ const styles = StyleSheet.create({
   likesEmptyTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   likesEmptySub: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     textAlign: "center",
     marginTop: 4,
     lineHeight: 18,

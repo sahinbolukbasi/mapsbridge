@@ -4,14 +4,14 @@ import {
   Text,
   View,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
   ScrollView,
   Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AppleLogo, GoogleLogo, ArrowRightIcon, ExploreIcon } from "../components/Icons";
 
+import { Screen } from "../ui";
+import { tokens, withAlpha } from "../theme";
 interface WelcomeScreenProps {
   onSelectAuth: (mode: "login" | "register" | "apple" | "google") => void;
 }
@@ -23,8 +23,7 @@ const HERO_BG_IMAGE =
 
 export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D281E" />
+    <Screen style={styles.safeArea} background="surfaceInverse">
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -36,12 +35,12 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
 
           {/* Atmospheric gradient overlays */}
           <LinearGradient
-            colors={["rgba(13, 40, 30, 0.75)", "transparent", "#faf8ff"]}
+            colors={[withAlpha(tokens.color.surfaceInverse, 0.75), "transparent", tokens.color.bg]}
             locations={[0, 0.45, 1]}
             style={StyleSheet.absoluteFill}
           />
           <LinearGradient
-            colors={["transparent", "rgba(250, 248, 255, 0.85)", "#faf8ff"]}
+            colors={["transparent", withAlpha(tokens.color.bg, 0.85), tokens.color.bg]}
             locations={[0.5, 0.82, 1]}
             style={styles.bottomBlendMask}
           />
@@ -50,9 +49,9 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
           <View style={styles.headerBar}>
             <View style={styles.brandPill}>
               <View style={styles.brandIconCircle}>
-                <ExploreIcon size={14} color="#0D281E" />
+                <ExploreIcon size={14} color={tokens.color.onAccent} />
               </View>
-              <Text style={styles.brandText}>MapsBridge</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.brandText}>MapsBridge</Text>
               <View style={styles.pulseDot} />
             </View>
           </View>
@@ -66,15 +65,15 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
                   <View style={styles.cardPulseDot} />
                   <View>
                     <View style={styles.cardStatusRow}>
-                      <Text style={styles.cardStatusAi}>AI CANLI ROTA</Text>
-                      <Text style={styles.cardStatusDot}>•</Text>
-                      <Text style={styles.cardStatusGps}>GPS Aktif</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardStatusAi}>AI CANLI ROTA</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardStatusDot}>•</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardStatusGps}>GPS Aktif</Text>
                     </View>
-                    <Text style={styles.cardTitle}>Kapadokya Balon Vadisi</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardTitle}>Kapadokya Balon Vadisi</Text>
                   </View>
                 </View>
                 <View style={styles.savingsPill}>
-                  <Text style={styles.savingsPillText}>⚡ 30 sn • %40 Tasarruf</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.savingsPillText}>⚡ 30 sn • %40 Tasarruf</Text>
                 </View>
               </View>
 
@@ -86,48 +85,48 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
                 {/* Stop 1 */}
                 <View style={styles.waypointRow}>
                   <View style={styles.badge1}>
-                    <Text style={styles.badge1Text}>1</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge1Text}>1</Text>
                   </View>
                   <View style={styles.waypointInfo}>
-                    <Text style={styles.waypointName} numberOfLines={1}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointName} numberOfLines={1}>
                       Aşk Vadisi (Seyir Terası)
                     </Text>
-                    <Text style={styles.waypointTime}>05:45 • Gün Doğumu & Balonlar</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointTime}>05:45 • Gün Doğumu & Balonlar</Text>
                   </View>
                   <View style={styles.distPill}>
-                    <Text style={styles.distPillText}>1.8 km • ~12 dk</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.distPillText}>1.8 km • ~12 dk</Text>
                   </View>
                 </View>
 
                 {/* Stop 2 */}
                 <View style={styles.waypointRow}>
                   <View style={styles.badge2}>
-                    <Text style={styles.badge2Text}>2</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge2Text}>2</Text>
                   </View>
                   <View style={styles.waypointInfo}>
-                    <Text style={styles.waypointName} numberOfLines={1}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointName} numberOfLines={1}>
                       Göreme Açık Hava Müzesi
                     </Text>
-                    <Text style={styles.waypointTimeDim}>07:15 • 4 Tarihi Durak</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointTimeDim}>07:15 • 4 Tarihi Durak</Text>
                   </View>
                   <View style={styles.distPillDim}>
-                    <Text style={styles.distPillDimText}>2.4 km</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.distPillDimText}>2.4 km</Text>
                   </View>
                 </View>
 
                 {/* Stop 3 */}
                 <View style={styles.waypointRow}>
                   <View style={styles.badge3}>
-                    <Text style={styles.badge3Text}>🏁</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge3Text}>🏁</Text>
                   </View>
                   <View style={styles.waypointInfo}>
-                    <Text style={styles.waypointName} numberOfLines={1}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointName} numberOfLines={1}>
                       Uçhisar Kalesi
                     </Text>
-                    <Text style={styles.waypointTimeDim}>09:30 • Panoramik Gün Sonu</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointTimeDim}>09:30 • Panoramik Gün Sonu</Text>
                   </View>
                   <View style={styles.distPillAccent}>
-                    <Text style={styles.distPillAccentText}>Varış</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.distPillAccentText}>Varış</Text>
                   </View>
                 </View>
               </View>
@@ -135,10 +134,10 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
               {/* Card Footer Bar */}
               <View style={styles.cardFooterBar}>
                 <View style={styles.cardFooterStats}>
-                  <Text style={styles.cardFooterStatPill}>📍 8 Durak</Text>
-                  <Text style={styles.cardFooterStatPill}>🧭 5.1 km Toplam</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.cardFooterStatPill}>📍 8 Durak</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.cardFooterStatPill}>🧭 5.1 km Toplam</Text>
                 </View>
-                <Text style={styles.cardFooterAction}>✨ AKILLI SIRALAMA</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardFooterAction}>✨ AKILLI SIRALAMA</Text>
               </View>
             </View>
           </View>
@@ -153,12 +152,12 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
             <View style={styles.progressDot} />
           </View>
 
-          <Text style={styles.headline}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headline}>
             Daha az planla,{"\n"}
-            <Text style={styles.headlineAccent}>daha çok keşfet.</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headlineAccent}>daha çok keşfet.</Text>
           </Text>
 
-          <Text style={styles.subtitle}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.subtitle}>
             Yapay zeka asistanı ve gezgin topluluğuyla rotanı anında oluştur, haritada tek dokunuşla
             canlı keşfe başla.
           </Text>
@@ -173,11 +172,11 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
             activeOpacity={0.88}
           >
             <View style={styles.primaryEmailLeft}>
-              <Text style={{ fontSize: 18 }}>✉️</Text>
-              <Text style={styles.primaryEmailText}>E-posta ile Ücretsiz Başla</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 18 }}>✉️</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryEmailText}>E-posta ile Ücretsiz Başla</Text>
             </View>
             <View style={styles.arrowCircle}>
-              <ArrowRightIcon size={14} color="#34D399" />
+              <ArrowRightIcon size={14} color={tokens.color.accentStrong} />
             </View>
           </TouchableOpacity>
 
@@ -190,7 +189,7 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
               activeOpacity={0.85}
             >
               <GoogleLogo size={18} />
-              <Text style={styles.socialBtnText}>Google</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.socialBtnText}>Google</Text>
             </TouchableOpacity>
 
             {/* Apple */}
@@ -199,36 +198,36 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
               onPress={() => onSelectAuth("apple")}
               activeOpacity={0.85}
             >
-              <AppleLogo size={18} color="#131b2e" />
-              <Text style={styles.socialBtnText}>Apple</Text>
+              <AppleLogo size={18} color={tokens.color.text} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.socialBtnText}>Apple</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Sign In Navigation Link */}
         <View style={styles.loginLinkRow}>
-          <Text style={styles.loginLinkMuted}>Zaten hesabın var mı? </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.loginLinkMuted}>Zaten hesabın var mı? </Text>
           <TouchableOpacity onPress={() => onSelectAuth("login")}>
-            <Text style={styles.loginLinkActive}>Giriş Yap ➔</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.loginLinkActive}>Giriş Yap ➔</Text>
           </TouchableOpacity>
         </View>
 
         {/* Legal Footer */}
         <View style={styles.legalSection}>
-          <Text style={styles.legalText}>
-            Devam ederek <Text style={styles.legalLink}>Kullanım Şartları</Text> ve{" "}
-            <Text style={styles.legalLink}>Gizlilik Politikası</Text>'nı onaylamış olursunuz.
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legalText}>
+            Devam ederek <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legalLink}>Kullanım Şartları</Text> ve{" "}
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legalLink}>Gizlilik Politikası</Text>'nı onaylamış olursunuz.
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   scrollContent: {
     paddingBottom: 28,
@@ -266,32 +265,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "rgba(13, 40, 30, 0.72)",
+    backgroundColor: withAlpha(tokens.color.surfaceInverse, 0.72),
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "rgba(52, 211, 153, 0.25)",
+    borderColor: withAlpha(tokens.color.accentStrong, 0.25),
   },
   brandIconCircle: {
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#34D399",
+    backgroundColor: tokens.color.accentStrong,
     alignItems: "center",
     justifyContent: "center",
   },
   brandText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#ECFDF5",
+    color: tokens.color.surfaceBrand,
     letterSpacing: -0.2,
   },
   pulseDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#34D399",
+    backgroundColor: tokens.color.accentStrong,
     marginLeft: 2,
   },
   glassCardWrapper: {
@@ -300,11 +299,11 @@ const styles = StyleSheet.create({
   },
   glassCard: {
     borderRadius: 20,
-    backgroundColor: "rgba(15, 41, 33, 0.88)",
+    backgroundColor: withAlpha(tokens.color.surfaceInverse, 0.88),
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.16)",
+    borderColor: withAlpha(tokens.color.neutral0, 0.16),
     padding: 15,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.35,
     shadowRadius: 20,
@@ -326,8 +325,8 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#34D399",
-    shadowColor: "#34D399",
+    backgroundColor: tokens.color.accentStrong,
+    shadowColor: tokens.color.accentStrong,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 6,
@@ -339,37 +338,37 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   cardStatusAi: {
-    color: "#34D399",
+    color: tokens.color.accentStrong,
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 0.5,
   },
   cardStatusDot: {
-    color: "rgba(255, 255, 255, 0.4)",
+    color: withAlpha(tokens.color.onPrimary, 0.4),
     fontSize: 10,
   },
   cardStatusGps: {
-    color: "rgba(255, 255, 255, 0.7)",
+    color: withAlpha(tokens.color.onPrimary, 0.7),
     fontSize: 10,
     fontWeight: "600",
   },
   cardTitle: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 14,
     fontWeight: "800",
     marginTop: 2,
     letterSpacing: -0.2,
   },
   savingsPill: {
-    backgroundColor: "rgba(52, 211, 153, 0.15)",
+    backgroundColor: withAlpha(tokens.color.accentStrong, 0.15),
     borderWidth: 1,
-    borderColor: "rgba(52, 211, 153, 0.35)",
+    borderColor: withAlpha(tokens.color.accentStrong, 0.35),
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
   },
   savingsPillText: {
-    color: "#34D399",
+    color: tokens.color.accentStrong,
     fontSize: 10,
     fontWeight: "700",
   },
@@ -384,7 +383,7 @@ const styles = StyleSheet.create({
     top: 14,
     bottom: 14,
     width: 2,
-    backgroundColor: "rgba(52, 211, 153, 0.35)",
+    backgroundColor: withAlpha(tokens.color.accentStrong, 0.35),
   },
   waypointRow: {
     flexDirection: "row",
@@ -395,13 +394,13 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#34D399",
+    backgroundColor: tokens.color.accentStrong,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
   },
   badge1Text: {
-    color: "#0D281E",
+    color: tokens.color.onAccent,
     fontSize: 11,
     fontWeight: "800",
   },
@@ -409,15 +408,15 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.18),
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.35)",
+    borderColor: withAlpha(tokens.color.neutral0, 0.35),
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
   },
   badge2Text: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 11,
     fontWeight: "700",
   },
@@ -425,9 +424,9 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "rgba(16, 185, 129, 0.25)",
+    backgroundColor: withAlpha(tokens.color.accent, 0.25),
     borderWidth: 1,
-    borderColor: "rgba(52, 211, 153, 0.5)",
+    borderColor: withAlpha(tokens.color.accentStrong, 0.5),
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
@@ -439,55 +438,55 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   waypointName: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: -0.1,
   },
   waypointTime: {
-    color: "rgba(52, 211, 153, 0.95)",
+    color: withAlpha(tokens.color.accentStrong, 0.95),
     fontSize: 10,
     fontWeight: "500",
     marginTop: 1,
   },
   waypointTimeDim: {
-    color: "rgba(255, 255, 255, 0.65)",
+    color: withAlpha(tokens.color.onPrimary, 0.65),
     fontSize: 10,
     fontWeight: "500",
     marginTop: 1,
   },
   distPill: {
-    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: tokens.color.whiteA12,
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
   },
   distPillText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 10,
     fontWeight: "600",
   },
   distPillDim: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: tokens.color.whiteA08,
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
   },
   distPillDimText: {
-    color: "rgba(255, 255, 255, 0.75)",
+    color: withAlpha(tokens.color.onPrimary, 0.75),
     fontSize: 10,
     fontWeight: "600",
   },
   distPillAccent: {
-    backgroundColor: "rgba(52, 211, 153, 0.18)",
+    backgroundColor: withAlpha(tokens.color.accentStrong, 0.18),
     borderWidth: 1,
-    borderColor: "rgba(52, 211, 153, 0.35)",
+    borderColor: withAlpha(tokens.color.accentStrong, 0.35),
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 6,
   },
   distPillAccentText: {
-    color: "#34D399",
+    color: tokens.color.accentStrong,
     fontSize: 10,
     fontWeight: "700",
   },
@@ -498,7 +497,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     marginTop: 8,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.12)",
+    borderTopColor: tokens.color.whiteA12,
   },
   cardFooterStats: {
     flexDirection: "row",
@@ -506,16 +505,16 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardFooterStatPill: {
-    color: "rgba(255, 255, 255, 0.85)",
+    color: withAlpha(tokens.color.onPrimary, 0.85),
     fontSize: 10,
     fontWeight: "600",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: tokens.color.whiteA08,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 5,
   },
   cardFooterAction: {
-    color: "#34D399",
+    color: tokens.color.accentStrong,
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 0.4,
@@ -535,29 +534,29 @@ const styles = StyleSheet.create({
     width: 24,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
   },
   progressDot: {
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: "#cbd5e1",
+    backgroundColor: tokens.color.neutral300,
   },
   headline: {
     fontSize: 30,
     lineHeight: 36,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     letterSpacing: -0.6,
     marginBottom: 8,
   },
   headlineAccent: {
-    color: "#286954",
+    color: tokens.color.link,
   },
   subtitle: {
     fontSize: 13.5,
     lineHeight: 20,
-    color: "#404945",
+    color: tokens.color.textMuted,
     fontWeight: "400",
   },
   actionsSection: {
@@ -569,11 +568,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 16,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.22,
     shadowRadius: 10,
@@ -585,7 +584,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   primaryEmailText: {
-    color: "#ECFDF5",
+    color: tokens.color.surfaceBrand,
     fontSize: 14.5,
     fontWeight: "700",
     letterSpacing: -0.2,
@@ -594,7 +593,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: tokens.color.whiteA12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -608,19 +607,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1,
-    borderColor: "rgba(226, 232, 240, 0.9)",
+    borderColor: withAlpha(tokens.color.border, 0.9),
     paddingVertical: 13,
     borderRadius: 16,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
     elevation: 1,
   },
   socialBtnText: {
-    color: "#131b2e",
+    color: tokens.color.text,
     fontSize: 13.5,
     fontWeight: "600",
   },
@@ -631,12 +630,12 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   loginLinkMuted: {
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontSize: 13,
     fontWeight: "500",
   },
   loginLinkActive: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontSize: 13,
     fontWeight: "700",
     textDecorationLine: "underline",
@@ -646,13 +645,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   legalText: {
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontSize: 10.5,
     lineHeight: 15,
     textAlign: "center",
   },
   legalLink: {
     textDecorationLine: "underline",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
 });

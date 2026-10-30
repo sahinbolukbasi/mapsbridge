@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  StatusBar,
   Image,
   Alert,
   Share,
@@ -32,6 +31,8 @@ import {
 } from "../components/Icons";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 
+import { Screen } from "../ui";
+import { tokens, withAlpha } from "../theme";
 interface CommunityScreenProps {
   onOpenMap: () => void;
   onOpenProfile?: () => void;
@@ -319,16 +320,14 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#faf8ff" />
-
+    <Screen style={styles.safeArea}>
       {/* Top Header Bar with Messages Quick Access */}
       <View style={styles.topHeaderBar}>
         <View style={styles.headerTitleRow}>
           <View style={styles.headerLogoBadge}>
-            <ExploreIcon size={18} color="#059669" />
+            <ExploreIcon size={18} color={tokens.color.successStrong} />
           </View>
-          <Text style={styles.headerTitle}>Keşfet</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.headerTitle} accessibilityRole="header">Topluluk</Text>
         </View>
 
         <TouchableOpacity
@@ -339,7 +338,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
           }}
           activeOpacity={0.8}
         >
-          <ChatIcon size={18} color="#065f46" />
+          <ChatIcon size={18} color={tokens.color.onSurfaceBrand} />
         </TouchableOpacity>
       </View>
 
@@ -350,7 +349,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
           onPress={() => setActiveTab("foryou")}
           activeOpacity={0.8}
         >
-          <Text
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
             style={[styles.timelineTabText, activeTab === "foryou" && styles.timelineTabTextActive]}
           >
             Sana Özel
@@ -363,7 +362,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
           onPress={() => setActiveTab("following")}
           activeOpacity={0.8}
         >
-          <Text
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
             style={[
               styles.timelineTabText,
               activeTab === "following" && styles.timelineTabTextActive,
@@ -388,8 +387,8 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
               style={[styles.filterChip, selectedCat === cat.id && styles.filterChipActive]}
               onPress={() => setSelectedCat(cat.id)}
             >
-              {cat.icon ? <Text style={{ fontSize: 13, marginRight: 4 }}>{cat.icon}</Text> : null}
-              <Text
+              {cat.icon ? <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 13, marginRight: 4 }}>{cat.icon}</Text> : null}
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
                 style={[
                   styles.filterChipText,
                   selectedCat === cat.id && styles.filterChipTextActive,
@@ -421,21 +420,21 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                 width: 60,
                 height: 60,
                 borderRadius: 30,
-                backgroundColor: "#e1f7ec",
+                backgroundColor: tokens.color.surfaceBrand,
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: 16,
               }}
             >
-              <ExploreIcon size={28} color="#059669" />
+              <ExploreIcon size={28} color={tokens.color.successStrong} />
             </View>
-            <Text style={{ fontSize: 16, fontWeight: "700", color: "#1e293b", marginBottom: 6 }}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, fontWeight: "700", color: tokens.color.neutral800, marginBottom: 6 }}>
               Henüz paylaşım bulunmuyor
             </Text>
-            <Text
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
               style={{
                 fontSize: 13,
-                color: "#64748b",
+                color: tokens.color.textSubtle,
                 textAlign: "center",
                 lineHeight: 18,
                 marginBottom: 20,
@@ -447,14 +446,14 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
             </Text>
             <TouchableOpacity
               style={{
-                backgroundColor: "#059669",
+                backgroundColor: tokens.color.successStrong,
                 paddingHorizontal: 20,
                 paddingVertical: 10,
                 borderRadius: 20,
               }}
               onPress={() => setShowNewPostModal(true)}
             >
-              <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 13 }}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontWeight: "bold", fontSize: 13 }}>
                 ✍️ İlk Paylaşımı Yap
               </Text>
             </TouchableOpacity>
@@ -509,34 +508,34 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                           });
                         }}
                       >
-                        <Text style={styles.authorName} numberOfLines={1}>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.authorName} numberOfLines={1}>
                           {post.authorName}
                         </Text>
                       </TouchableOpacity>
-                      {post.verified && <Text style={styles.verifiedCheck}>✓</Text>}
-                      <Text style={styles.authorHandle} numberOfLines={1}>
+                      {post.verified && <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.verifiedCheck}>✓</Text>}
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.authorHandle} numberOfLines={1}>
                         {post.authorHandle}
                       </Text>
-                      <Text style={styles.dotSeparator}>·</Text>
-                      <Text style={styles.timeAgo}>{post.timeAgo}</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.dotSeparator}>·</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.timeAgo}>{post.timeAgo}</Text>
                     </View>
                     <TouchableOpacity
                       onPress={() => handlePostOptions(post)}
                       activeOpacity={0.7}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      <Text style={styles.moreIcon}>•••</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.moreIcon}>•••</Text>
                     </TouchableOpacity>
                   </View>
 
                   {/* Tweet Content */}
-                  <Text style={styles.tweetText}>{post.content}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tweetText}>{post.content}</Text>
 
                   {/* Hashtags */}
                   {post.hashtags && post.hashtags.length > 0 && (
                     <View style={styles.hashtagsRow}>
                       {post.hashtags.map((h: string, i: number) => (
-                        <Text key={i} style={styles.hashtagText}>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} key={i} style={styles.hashtagText}>
                           {h}{" "}
                         </Text>
                       ))}
@@ -553,8 +552,8 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                       />
                       {post.locationTag && (
                         <View style={styles.locationPill}>
-                          <MapPinIcon size={12} color="#10B981" />
-                          <Text style={styles.locationText}>{post.locationTag}</Text>
+                          <MapPinIcon size={12} color={tokens.color.accent} />
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.locationText}>{post.locationTag}</Text>
                         </View>
                       )}
                     </View>
@@ -565,13 +564,13 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                     <View style={styles.routeCardAttachment}>
                       <View style={styles.routeAttachLeft}>
                         <View style={styles.routeAttachIconBox}>
-                          <MapIcon size={16} color="#05513d" />
+                          <MapIcon size={16} color={tokens.color.onSurfaceBrand} />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.routeAttachTitle} numberOfLines={1}>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeAttachTitle} numberOfLines={1}>
                             {post.routeAttachment.title}
                           </Text>
-                          <Text style={styles.routeAttachStats} numberOfLines={1}>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeAttachStats} numberOfLines={1}>
                             {post.routeAttachment.stats}
                           </Text>
                         </View>
@@ -582,7 +581,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                         onPress={() => handleCloneRoute(post)}
                         activeOpacity={0.85}
                       >
-                        <Text style={styles.cloneRouteBtnText}>Haritama Al</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cloneRouteBtnText}>Haritama Al</Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -594,8 +593,8 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                       style={styles.interactionBtn}
                       onPress={() => setActiveCommentPost(post)}
                     >
-                      <ChatIcon size={15} color="#717974" />
-                      <Text style={styles.interactionCount}>{post.commentsCount}</Text>
+                      <ChatIcon size={15} color={tokens.color.textSubtle} />
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>{post.commentsCount}</Text>
                     </TouchableOpacity>
 
                     {/* Retweet / Rota Paylaş */}
@@ -603,8 +602,8 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                       style={styles.interactionBtn}
                       onPress={() => handleRetweet(post)}
                     >
-                      <ExploreIcon size={15} color="#717974" />
-                      <Text style={styles.interactionCount}>{post.retweetsCount}</Text>
+                      <ExploreIcon size={15} color={tokens.color.textSubtle} />
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>{post.retweetsCount}</Text>
                     </TouchableOpacity>
 
                     {/* Like */}
@@ -614,13 +613,13 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                     >
                       <HeartIcon
                         size={15}
-                        color="#ef4444"
-                        fill={post.isLiked ? "#ef4444" : "none"}
+                        color={tokens.color.dangerIcon}
+                        fill={post.isLiked ? tokens.color.dangerIcon : "none"}
                       />
-                      <Text
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
                         style={[
                           styles.interactionCount,
-                          post.isLiked && { color: "#e11d48", fontWeight: "700" },
+                          post.isLiked && { color: tokens.color.dangerIcon, fontWeight: "700" },
                         ]}
                       >
                         {post.likesCount}
@@ -632,11 +631,11 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                       style={styles.interactionBtn}
                       onPress={() => handleToggleBookmark(post.id)}
                     >
-                      <BookmarkIcon size={15} color={post.isBookmarked ? "#013628" : "#717974"} />
-                      <Text
+                      <BookmarkIcon size={15} color={post.isBookmarked ? tokens.color.textBrand : tokens.color.textSubtle} />
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
                         style={[
                           styles.interactionCount,
-                          post.isBookmarked && { color: "#013628", fontWeight: "700" },
+                          post.isBookmarked && { color: tokens.color.textBrand, fontWeight: "700" },
                         ]}
                       >
                         {post.bookmarksCount}
@@ -648,7 +647,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
                       style={styles.interactionBtn}
                       onPress={() => handleShare(post)}
                     >
-                      <SendIcon size={14} color="#717974" />
+                      <SendIcon size={14} color={tokens.color.textSubtle} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -666,9 +665,9 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
           activeOpacity={0.88}
         >
           <View style={styles.fabIconCircle}>
-            <EditIcon size={14} color="#ffffff" />
+            <EditIcon size={14} color={tokens.color.onPrimary} />
           </View>
-          <Text style={styles.fabText}>Sen de Paylaş</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fabText}>Sen de Paylaş</Text>
         </TouchableOpacity>
       </View>
 
@@ -677,11 +676,11 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowNewPostModal(false)}>
-              <Text style={styles.modalCancelText}>Vazgeç</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Vazgeç</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Yeni Gönderi</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Yeni Gönderi</Text>
             <TouchableOpacity style={styles.modalPublishBtn} onPress={handleCreatePost}>
-              <Text style={styles.modalPublishBtnText}>Paylaş</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalPublishBtnText}>Paylaş</Text>
             </TouchableOpacity>
           </View>
 
@@ -689,7 +688,7 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
             <TextInput
               style={styles.modalTextInput}
               placeholder="Gezgin topluluğuna ne paylaşmak istersin? Rota ipuçları, fotoğraflar..."
-              placeholderTextColor="#717974"
+              placeholderTextColor={tokens.color.textSubtle}
               value={newPostContent}
               onChangeText={setNewPostContent}
               multiline
@@ -698,13 +697,13 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
 
             <View style={styles.modalFieldRow}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <MapPinIcon size={14} color="#10B981" />
-                <Text style={styles.modalFieldLabel}>Konum / Şehir:</Text>
+                <MapPinIcon size={14} color={tokens.color.accent} />
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalFieldLabel}>Konum / Şehir:</Text>
               </View>
               <TextInput
                 style={styles.modalFieldInput}
                 placeholder="Örn: Roma, İtalya veya Kapadokya"
-                placeholderTextColor="#717974"
+                placeholderTextColor={tokens.color.textSubtle}
                 value={newPostLocation}
                 onChangeText={setNewPostLocation}
               />
@@ -712,13 +711,13 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
 
             <View style={styles.modalFieldRow}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <TagIcon size={14} color="#10B981" />
-                <Text style={styles.modalFieldLabel}>Etiketler:</Text>
+                <TagIcon size={14} color={tokens.color.accent} />
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalFieldLabel}>Etiketler:</Text>
               </View>
               <TextInput
                 style={styles.modalFieldInput}
                 placeholder="#Roma #Gastronomi #SırtÇantası"
-                placeholderTextColor="#717974"
+                placeholderTextColor={tokens.color.textSubtle}
                 value={newPostHashtags}
                 onChangeText={setNewPostHashtags}
               />
@@ -726,12 +725,12 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
 
             {tripStore.getActiveRoute().stops.length > 0 && (
               <View style={styles.modalAttachedRouteBox}>
-                <MapIcon size={18} color="#05513d" />
+                <MapIcon size={18} color={tokens.color.onSurfaceBrand} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.modalAttachedRouteTitle}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalAttachedRouteTitle}>
                     {tripStore.getActiveRoute().name}
                   </Text>
-                  <Text style={styles.modalAttachedRouteSub}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalAttachedRouteSub}>
                     {tripStore.getActiveRoute().stops.length} Duraklı aktif rotan bu gönderiye
                     iliştirilecek.
                   </Text>
@@ -747,9 +746,9 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setActiveCommentPost(null)}>
-              <Text style={styles.modalCancelText}>Kapat</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Kapat</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>
               Yorumlar ({activeCommentPost?.commentsCount || 0})
             </Text>
             <View style={{ width: 50 }} />
@@ -759,14 +758,14 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
             {activeCommentPost?.comments && activeCommentPost.comments.length > 0 ? (
               activeCommentPost.comments.map((c: MobileCommunityComment) => (
                 <View key={c.id} style={styles.commentItem}>
-                  <Text style={styles.commentUser}>{c.user}</Text>
-                  <Text style={styles.commentText}>{c.text}</Text>
-                  <Text style={styles.commentTime}>{c.time}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.commentUser}>{c.user}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.commentText}>{c.text}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.commentTime}>{c.time}</Text>
                 </View>
               ))
             ) : (
               <View style={{ paddingVertical: 40, alignItems: "center" }}>
-                <Text style={{ color: "#717974", fontSize: 14 }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.textSubtle, fontSize: 14 }}>
                   Henüz yorum yapılmamış. İlk yorumu sen yaz!
                 </Text>
               </View>
@@ -777,12 +776,12 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
             <TextInput
               style={styles.commentInput}
               placeholder="Yorumunuzu yazın..."
-              placeholderTextColor="#717974"
+              placeholderTextColor={tokens.color.textSubtle}
               value={newCommentText}
               onChangeText={setNewCommentText}
             />
             <TouchableOpacity style={styles.sendCommentBtn} onPress={handleAddComment}>
-              <Text style={{ color: "#fff", fontWeight: "800" }}>Gönder</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontWeight: "800" }}>Gönder</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -805,14 +804,14 @@ export function CommunityScreen({ onOpenMap }: CommunityScreenProps) {
         />
       )}
       <ScreenTourModal screen="community" />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   topHeaderBar: {
     flexDirection: "row",
@@ -821,8 +820,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-    backgroundColor: "#ffffff",
+    borderBottomColor: tokens.color.neutral100,
+    backgroundColor: tokens.color.surface,
   },
   headerTitleRow: {
     flexDirection: "row",
@@ -833,33 +832,33 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#065f46",
+    color: tokens.color.onSurfaceBrand,
     letterSpacing: -0.3,
   },
   chatHeaderBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   timelineTabsBar: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#eaedff",
-    backgroundColor: "#faf8ff",
+    borderBottomColor: tokens.color.surfaceTint,
+    backgroundColor: tokens.color.bg,
   },
   timelineTab: {
     flex: 1,
@@ -870,10 +869,10 @@ const styles = StyleSheet.create({
   timelineTabText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   timelineTabTextActive: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontWeight: "800",
   },
   activeTabIndicator: {
@@ -881,13 +880,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: 48,
     height: 3,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     borderRadius: 999,
   },
   filterPillsRow: {
     borderBottomWidth: 1,
-    borderBottomColor: "#eaedff",
-    backgroundColor: "#faf8ff",
+    borderBottomColor: tokens.color.surfaceTint,
+    backgroundColor: tokens.color.bg,
     paddingVertical: 8,
   },
   filterPillsScroll: {
@@ -900,21 +899,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1,
-    borderColor: "#eaedff",
+    borderColor: tokens.color.surfaceTint,
   },
   filterChipActive: {
-    backgroundColor: "#013628",
-    borderColor: "#013628",
+    backgroundColor: tokens.color.primary,
+    borderColor: tokens.color.primary,
   },
   filterChipText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#404945",
+    color: tokens.color.textMuted,
   },
   filterChipTextActive: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontWeight: "700",
   },
   feedScrollContent: {
@@ -924,8 +923,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#eaedff",
-    backgroundColor: "#faf8ff",
+    borderBottomColor: tokens.color.surfaceTint,
+    backgroundColor: tokens.color.bg,
   },
   tweetRow: {
     flexDirection: "row",
@@ -936,7 +935,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
   },
   tweetBody: {
     flex: 1,
@@ -957,34 +956,34 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   verifiedCheck: {
     fontSize: 12,
-    color: "#10B981",
+    color: tokens.color.accent,
     fontWeight: "900",
   },
   authorHandle: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   dotSeparator: {
     fontSize: 12,
-    color: "#c0c8c3",
+    color: tokens.color.neutral300,
   },
   timeAgo: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   moreIcon: {
     fontSize: 14,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     paddingHorizontal: 4,
   },
   tweetText: {
     fontSize: 14,
     lineHeight: 21,
-    color: "#131b2e",
+    color: tokens.color.text,
     marginBottom: 6,
   },
   hashtagsRow: {
@@ -994,7 +993,7 @@ const styles = StyleSheet.create({
   },
   hashtagText: {
     fontSize: 13,
-    color: "#286954",
+    color: tokens.color.link,
     fontWeight: "600",
   },
   mediaContainer: {
@@ -1003,7 +1002,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginTop: 6,
     marginBottom: 8,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -1019,13 +1018,13 @@ const styles = StyleSheet.create({
     left: 8,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.65)",
+    backgroundColor: withAlpha(tokens.color.black, 0.65),
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
   },
   locationText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 11,
     fontWeight: "700",
   },
@@ -1033,11 +1032,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderRadius: 14,
     padding: 10,
     borderWidth: 1,
-    borderColor: "#abedd3",
+    borderColor: tokens.color.successBorder,
     marginVertical: 8,
     gap: 8,
   },
@@ -1051,28 +1050,28 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     alignItems: "center",
     justifyContent: "center",
   },
   routeAttachTitle: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   routeAttachStats: {
     fontSize: 11,
-    color: "#286954",
+    color: tokens.color.link,
     marginTop: 1,
   },
   cloneRouteBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
   },
   cloneRouteBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 11,
     fontWeight: "800",
   },
@@ -1090,7 +1089,7 @@ const styles = StyleSheet.create({
   },
   interactionCount: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontWeight: "500",
   },
   fabContainer: {
@@ -1103,11 +1102,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 999,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -1117,19 +1116,19 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: "#34D399",
+    backgroundColor: tokens.color.accentStrong,
     alignItems: "center",
     justifyContent: "center",
   },
   fabText: {
-    color: "#bbedd8",
+    color: tokens.color.surfaceBrandStrong,
     fontSize: 13,
     fontWeight: "800",
     letterSpacing: 0.3,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   modalHeader: {
     flexDirection: "row",
@@ -1138,26 +1137,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#eaedff",
+    borderBottomColor: tokens.color.surfaceTint,
   },
   modalCancelText: {
     fontSize: 14,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontWeight: "600",
   },
   modalTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   modalPublishBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 999,
   },
   modalPublishBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 13,
     fontWeight: "800",
   },
@@ -1167,7 +1166,7 @@ const styles = StyleSheet.create({
   },
   modalTextInput: {
     fontSize: 15,
-    color: "#131b2e",
+    color: tokens.color.text,
     lineHeight: 22,
     minHeight: 120,
     textAlignVertical: "top",
@@ -1178,56 +1177,56 @@ const styles = StyleSheet.create({
   modalFieldLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
     marginBottom: 4,
   },
   modalFieldInput: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: tokens.color.surfaceSunken,
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 42,
     fontSize: 13,
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   modalAttachedRouteBox: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     padding: 12,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#abedd3",
+    borderColor: tokens.color.successBorder,
     marginTop: 16,
   },
   modalAttachedRouteTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   modalAttachedRouteSub: {
     fontSize: 11,
-    color: "#286954",
+    color: tokens.color.link,
     marginTop: 2,
   },
   commentItem: {
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#eaedff",
+    borderBottomColor: tokens.color.surfaceTint,
   },
   commentUser: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   commentText: {
     fontSize: 13,
-    color: "#131b2e",
+    color: tokens.color.text,
     marginTop: 2,
   },
   commentTime: {
     fontSize: 10,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   commentInputRow: {
@@ -1236,20 +1235,20 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     borderTopWidth: 1,
-    borderTopColor: "#eaedff",
-    backgroundColor: "#ffffff",
+    borderTopColor: tokens.color.surfaceTint,
+    backgroundColor: tokens.color.surface,
   },
   commentInput: {
     flex: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: tokens.color.surfaceSunken,
     borderRadius: 20,
     paddingHorizontal: 14,
     height: 40,
     fontSize: 13,
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   sendCommentBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 20,

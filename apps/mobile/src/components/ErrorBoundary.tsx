@@ -1,6 +1,8 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 
+import { SafeArea } from "../ui";
+import { tokens, withAlpha } from "../theme";
 interface Props {
   children: ReactNode;
 }
@@ -31,25 +33,25 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <SafeAreaView style={styles.container}>
+        <SafeArea style={styles.container}>
           <View style={styles.card}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>SİSTEM KURTARMA</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badgeText}>SİSTEM KURTARMA</Text>
             </View>
-            <Text style={styles.title}>Uygulama Güvenle Kurtarıldı</Text>
-            <Text style={styles.message}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.title}>Uygulama Güvenle Kurtarıldı</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.message}>
               Beklenmedik bir ekran yükleme sorunu oluştu. Verileriniz koruma altında tutulmaktadır.
             </Text>
             {this.state.error?.message && (
-              <Text style={styles.detail} numberOfLines={3}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detail} numberOfLines={3}>
                 {this.state.error.message}
               </Text>
             )}
             <TouchableOpacity style={styles.button} onPress={this.handleReset} activeOpacity={0.85}>
-              <Text style={styles.buttonText}>Yeniden Başlat</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.buttonText}>Yeniden Başlat</Text>
             </TouchableOpacity>
           </View>
-        </SafeAreaView>
+        </SafeArea>
       );
     }
 
@@ -60,32 +62,32 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#020e0a",
+    backgroundColor: tokens.color.surfaceInverseStrong,
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
   },
   card: {
-    backgroundColor: "#0d281e",
+    backgroundColor: tokens.color.surfaceInverse,
     borderRadius: 20,
     padding: 24,
     width: "100%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: "#1e4d3e",
+    borderColor: tokens.color.brandHover,
     alignItems: "center",
   },
   badge: {
-    backgroundColor: "rgba(52, 211, 153, 0.15)",
+    backgroundColor: withAlpha(tokens.color.accentStrong, 0.15),
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#34d399",
+    borderColor: tokens.color.accentStrong,
     marginBottom: 16,
   },
   badgeText: {
-    color: "#34d399",
+    color: tokens.color.accentStrong,
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 0.8,
@@ -93,13 +95,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     textAlign: "center",
     marginBottom: 10,
   },
   message: {
     fontSize: 13,
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     textAlign: "center",
     lineHeight: 20,
     marginBottom: 16,
@@ -107,15 +109,15 @@ const styles = StyleSheet.create({
   detail: {
     fontSize: 11,
     fontFamily: "monospace",
-    color: "#f87171",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    color: tokens.color.dangerIcon,
+    backgroundColor: withAlpha(tokens.color.black, 0.3),
     padding: 10,
     borderRadius: 8,
     width: "100%",
     marginBottom: 20,
   },
   button: {
-    backgroundColor: "#10b981",
+    backgroundColor: tokens.color.accent,
     paddingVertical: 13,
     paddingHorizontal: 28,
     borderRadius: 999,
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 14,
     fontWeight: "800",
   },

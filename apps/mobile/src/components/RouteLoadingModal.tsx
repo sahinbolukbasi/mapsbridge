@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Svg, { Path, Circle, Text as SvgText, G } from "react-native-svg";
 
+import { tokens, withAlpha } from "../theme";
 interface RouteLoadingModalProps {
   visible: boolean;
   onCancel?: () => void;
@@ -38,17 +39,17 @@ export function RouteLoadingModal({
           <View style={styles.headerBar}>
             <View style={styles.headerLeft}>
               <View style={styles.headerIconCircle}>
-                <Text style={{ fontSize: 16 }}>🧭</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>🧭</Text>
               </View>
               <View>
-                <Text style={styles.headerTitle}>MapsBridge</Text>
-                <Text style={styles.headerSub}>ROTA MOTORU 4.2</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.headerTitle}>MapsBridge</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headerSub}>ROTA MOTORU 4.2</Text>
               </View>
             </View>
 
             <TouchableOpacity style={styles.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
-              <Text style={styles.cancelBtnText}>Vazgeç</Text>
-              <Text style={styles.cancelBtnCross}>✕</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cancelBtnText}>Vazgeç</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cancelBtnCross}>✕</Text>
             </TouchableOpacity>
           </View>
 
@@ -62,33 +63,33 @@ export function RouteLoadingModal({
                 {/* Trail Path */}
                 <Path
                   d="M 30,110 C 70,120 100,40 160,50 C 220,60 240,110 290,30"
-                  stroke="#10B981"
+                  stroke={tokens.color.accent}
                   strokeDasharray="6 6"
                   strokeLinecap="round"
                   strokeWidth={3}
                   fill="none"
                 />
                 {/* Waypoint 1 (Completed) */}
-                <Circle cx={30} cy={110} r={7} fill="#013628" />
-                <Circle cx={30} cy={110} r={3} fill="#ffffff" />
-                <SvgText x={16} y={130} fill="#286954" fontSize="10" fontWeight="bold">
+                <Circle cx={30} cy={110} r={7} fill={tokens.color.textBrand} />
+                <Circle cx={30} cy={110} r={3} fill={tokens.color.onPrimary} />
+                <SvgText x={16} y={130} fill={tokens.color.link} fontSize="10" fontWeight="bold">
                   Karaköy
                 </SvgText>
 
                 {/* Waypoint 2 (Active Scan Node) */}
                 <G>
-                  <Circle cx={160} cy={50} r={14} fill="rgba(16, 185, 129, 0.25)" />
-                  <Circle cx={160} cy={50} r={8} fill="#10B981" />
-                  <Circle cx={160} cy={50} r={3.5} fill="#ffffff" />
-                  <SvgText x={126} y={30} fill="#0D281E" fontSize="10" fontWeight="bold">
+                  <Circle cx={160} cy={50} r={14} fill={withAlpha(tokens.color.accent, 0.25)} />
+                  <Circle cx={160} cy={50} r={8} fill={tokens.color.accent} />
+                  <Circle cx={160} cy={50} r={3.5} fill={tokens.color.onPrimary} />
+                  <SvgText x={126} y={30} fill={tokens.color.onAccent} fontSize="10" fontWeight="bold">
                     Galata Kulesi
                   </SvgText>
                 </G>
 
                 {/* Waypoint 3 (Pending Node) */}
-                <Circle cx={290} cy={30} r={6} fill="#c0c8c3" />
-                <Circle cx={290} cy={30} r={2.5} fill="#ffffff" />
-                <SvgText x={245} y={18} fill="#717974" fontSize="10" fontWeight="bold">
+                <Circle cx={290} cy={30} r={6} fill={tokens.color.neutral300} />
+                <Circle cx={290} cy={30} r={2.5} fill={tokens.color.onPrimary} />
+                <SvgText x={245} y={18} fill={tokens.color.textSubtle} fontSize="10" fontWeight="bold">
                   İstiklal Cad.
                 </SvgText>
               </Svg>
@@ -96,23 +97,23 @@ export function RouteLoadingModal({
               {/* Live Radar Ping Indicator */}
               <View style={styles.liveOptimizationBadge}>
                 <View style={styles.livePulseDot} />
-                <Text style={styles.liveOptimizationText}>Canlı Optimizasyon</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.liveOptimizationText}>Canlı Optimizasyon</Text>
               </View>
 
               {/* Percentage Float */}
               <View style={styles.percentBadge}>
-                <Text style={styles.percentNum}>{progressPercent}%</Text>
-                <Text style={styles.percentLabel}>HESAPLANDI</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.percentNum}>{progressPercent}%</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.percentLabel}>HESAPLANDI</Text>
               </View>
             </View>
 
             {/* Title & Context */}
             <View style={styles.cardTextBox}>
               <View style={styles.titleRow}>
-                <Text style={styles.cardTitle}>{routeTitle}</Text>
-                <Text style={styles.syncSpin}>🔄</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardTitle}>{routeTitle}</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.syncSpin}>🔄</Text>
               </View>
-              <Text style={styles.cardDesc}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardDesc}>
                 Yapay zeka durak sıralamasını, eğim analizini ve çevrimdışı yürüyüş verilerini
                 optimize ediyor.
               </Text>
@@ -124,18 +125,18 @@ export function RouteLoadingModal({
               <View style={styles.milestoneItem}>
                 <View style={styles.stepIndicatorCol}>
                   <View style={[styles.stepCircle, styles.stepCircleCompleted]}>
-                    <Text style={styles.stepCheck}>✓</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepCheck}>✓</Text>
                   </View>
-                  <View style={[styles.stepConnector, { backgroundColor: "#10B981" }]} />
+                  <View style={[styles.stepConnector, { backgroundColor: tokens.color.accent }]} />
                 </View>
                 <View style={styles.stepInfo}>
                   <View style={styles.stepHeaderRow}>
-                    <Text style={styles.stepTitle}>GPS Koordinatları & Duraklar</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>GPS Koordinatları & Duraklar</Text>
                     <View style={styles.completedTag}>
-                      <Text style={styles.completedTagText}>Tamamlandı</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.completedTagText}>Tamamlandı</Text>
                     </View>
                   </View>
-                  <Text style={styles.stepDesc}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
                     İlgi noktaları ve ara mola noktaları doğrulandı.
                   </Text>
                 </View>
@@ -145,20 +146,20 @@ export function RouteLoadingModal({
               <View style={styles.milestoneItem}>
                 <View style={styles.stepIndicatorCol}>
                   <View style={[styles.stepCircle, styles.stepCircleActive]}>
-                    <Text style={{ fontSize: 11, color: "#fff" }}>⚡</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, color: tokens.color.onPrimary }}>⚡</Text>
                   </View>
                   <View style={styles.stepConnector} />
                 </View>
                 <View style={styles.stepInfo}>
                   <View style={styles.stepHeaderRow}>
-                    <Text style={[styles.stepTitle, { fontWeight: "800" }]}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.stepTitle, { fontWeight: "800" }]}>
                       En Hızlı Yürüyüş Yolu Analizi
                     </Text>
                     <View style={styles.activeTag}>
-                      <Text style={styles.activeTagText}>İşleniyor</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.activeTagText}>İşleniyor</Text>
                     </View>
                   </View>
-                  <Text style={styles.stepDesc}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
                     Trafik, yaya kalabalığı ve güncel yol çalışmaları taranıyor.
                   </Text>
                 </View>
@@ -168,18 +169,18 @@ export function RouteLoadingModal({
               <View style={[styles.milestoneItem, { opacity: 0.65 }]}>
                 <View style={styles.stepIndicatorCol}>
                   <View style={styles.stepCircle}>
-                    <Text style={{ fontSize: 10, color: "#717974" }}>⏳</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>⏳</Text>
                   </View>
                   <View style={styles.stepConnector} />
                 </View>
                 <View style={styles.stepInfo}>
                   <View style={styles.stepHeaderRow}>
-                    <Text style={styles.stepTitle}>Kaşif Notları & Yerel İpuçları</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>Kaşif Notları & Yerel İpuçları</Text>
                     <View style={styles.pendingTag}>
-                      <Text style={styles.pendingTagText}>Sırada</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.pendingTagText}>Sırada</Text>
                     </View>
                   </View>
-                  <Text style={styles.stepDesc}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
                     Gizli sokak lezzetleri ve manzara seyir noktaları eklenecek.
                   </Text>
                 </View>
@@ -189,17 +190,17 @@ export function RouteLoadingModal({
               <View style={[styles.milestoneItem, { opacity: 0.45 }]}>
                 <View style={styles.stepIndicatorCol}>
                   <View style={styles.stepCircle}>
-                    <Text style={{ fontSize: 10, color: "#717974" }}>☁️</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>☁️</Text>
                   </View>
                 </View>
                 <View style={styles.stepInfo}>
                   <View style={styles.stepHeaderRow}>
-                    <Text style={styles.stepTitle}>Çevrimdışı Harita Hazırlığı</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>Çevrimdışı Harita Hazırlığı</Text>
                     <View style={styles.pendingTag}>
-                      <Text style={styles.pendingTagText}>Bekliyor</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.pendingTagText}>Bekliyor</Text>
                     </View>
                   </View>
-                  <Text style={styles.stepDesc}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
                     Sinyalsiz dağ ve ara sokak moduna uygun paketleniyor.
                   </Text>
                 </View>
@@ -210,11 +211,11 @@ export function RouteLoadingModal({
           {/* Travel Tip Banner */}
           <View style={styles.tipBanner}>
             <View style={styles.tipIconWrap}>
-              <Text style={{ fontSize: 16 }}>💡</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>💡</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.tipHeading}>Gezgin İpucu</Text>
-              <Text style={styles.tipBody}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipHeading}>Gezgin İpucu</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipBody}>
                 MapsBridge ile oluşturulan rotaları internet bağlantınız kesildiğinde de GPS
                 üzerinden rota sapması uyarısıyla kullanabilirsiniz.
               </Text>
@@ -227,10 +228,10 @@ export function RouteLoadingModal({
             onPress={onRunInBackground || onCancel}
             activeOpacity={0.8}
           >
-            <Text style={{ fontSize: 16 }}>🔔</Text>
-            <Text style={styles.backgroundCtaText}>Arka Planda Yükle ve Bildir</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>🔔</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.backgroundCtaText}>Arka Planda Yükle ve Bildir</Text>
           </TouchableOpacity>
-          <Text style={styles.footnote}>ROTA HAZIRLANDIĞINDA TİTREŞİMLİ BİLDİRİM GÖNDERİLİR</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.footnote}>ROTA HAZIRLANDIĞINDA TİTREŞİMLİ BİLDİRİM GÖNDERİLİR</Text>
         </ScrollView>
       </SafeAreaView>
     </Modal>
@@ -240,7 +241,7 @@ export function RouteLoadingModal({
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -262,26 +263,26 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#1e4d3e",
+    backgroundColor: tokens.color.brandHover,
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   headerSub: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#286954",
+    color: tokens.color.link,
     letterSpacing: 0.8,
   },
   cancelBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#eaedff",
+    backgroundColor: tokens.color.surfaceTint,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
@@ -289,17 +290,17 @@ const styles = StyleSheet.create({
   cancelBtnText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#404945",
+    color: tokens.color.textMuted,
   },
   cancelBtnCross: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   radarCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 22,
     padding: 18,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
@@ -313,10 +314,10 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: "rgba(52, 211, 153, 0.12)",
+    backgroundColor: withAlpha(tokens.color.accentStrong, 0.12),
   },
   radarGraphicBox: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: tokens.color.bg,
     borderRadius: 16,
     overflow: "hidden",
     position: "relative",
@@ -328,12 +329,12 @@ const styles = StyleSheet.create({
     right: 10,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.95),
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 999,
     gap: 5,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -342,18 +343,18 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
   },
   liveOptimizationText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#286954",
+    color: tokens.color.link,
   },
   percentBadge: {
     position: "absolute",
     bottom: 10,
     left: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.95),
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 10,
@@ -364,12 +365,12 @@ const styles = StyleSheet.create({
   percentNum: {
     fontSize: 16,
     fontWeight: "900",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   percentLabel: {
     fontSize: 8,
     fontWeight: "800",
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   cardTextBox: {
     marginBottom: 16,
@@ -383,14 +384,14 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   syncSpin: {
     fontSize: 16,
   },
   cardDesc: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     lineHeight: 18,
   },
   milestonesList: {
@@ -408,26 +409,26 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#eaedff",
+    backgroundColor: tokens.color.surfaceTint,
     alignItems: "center",
     justifyContent: "center",
   },
   stepCircleCompleted: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
   },
   stepCircleActive: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
   },
   stepCheck: {
     fontSize: 12,
     fontWeight: "900",
-    color: "#10B981",
+    color: tokens.color.accent,
   },
   stepConnector: {
     width: 2,
     flex: 1,
     minHeight: 20,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: tokens.color.neutral200,
     marginVertical: 2,
   },
   stepInfo: {
@@ -442,10 +443,10 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   completedTag: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
@@ -453,10 +454,10 @@ const styles = StyleSheet.create({
   completedTagText: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#286954",
+    color: tokens.color.link,
   },
   activeTag: {
-    backgroundColor: "#abedd3",
+    backgroundColor: tokens.color.surfaceBrandSoft,
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
@@ -464,10 +465,10 @@ const styles = StyleSheet.create({
   activeTagText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#005236",
+    color: tokens.color.onSurfaceBrand,
   },
   pendingTag: {
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: 999,
@@ -475,14 +476,14 @@ const styles = StyleSheet.create({
   pendingTagText: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   stepDesc: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   tipBanner: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderRadius: 16,
     padding: 14,
     flexDirection: "row",
@@ -492,19 +493,19 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     alignItems: "center",
     justifyContent: "center",
   },
   tipHeading: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     marginBottom: 2,
   },
   tipBody: {
     fontSize: 11,
-    color: "#286954",
+    color: tokens.color.link,
     lineHeight: 16,
   },
   backgroundCtaBtn: {
@@ -512,10 +513,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     paddingVertical: 14,
     borderRadius: 999,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -524,13 +525,13 @@ const styles = StyleSheet.create({
   backgroundCtaText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   footnote: {
     textAlign: "center",
     fontSize: 9,
     fontWeight: "800",
-    color: "#717974",
+    color: tokens.color.textSubtle,
     letterSpacing: 0.6,
   },
 });

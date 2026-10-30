@@ -156,7 +156,8 @@ export const tokens = {
     modalScrim: "rgba(0, 0, 0, 0.45)",
     avatarBg: "#d1fae5",
     avatarFg: "#065f46",
-    skeletonBg: "#f1f5f9"
+    skeletonBg: "#f1f5f9",
+    black: "#000000"
   },
   dataPalette: {
     blue: "#2563eb",
@@ -232,6 +233,10 @@ export const tokens = {
       tight: 1.15,
       heading: 1.2,
       body: 1.6
+    },
+    maxScale: {
+      compact: 1.4,
+      body: 2
     }
   },
   shadow: {

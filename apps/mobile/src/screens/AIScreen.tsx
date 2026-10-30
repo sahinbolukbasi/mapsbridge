@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   Image,
   Alert,
   KeyboardAvoidingView,
@@ -43,6 +42,8 @@ import {
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import * as ImagePicker from "expo-image-picker";
 
+import { Screen, motion } from "../ui";
+import { tokens, withAlpha } from "../theme";
 interface AIScreenProps {
   onOpenMap: () => void;
   onOpenProfile?: () => void;
@@ -88,22 +89,20 @@ function ThinkingBubble({ status }: { status: string }) {
 
   useEffect(() => {
     const pulse = (dot: Animated.Value, delay: number) =>
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(dot, {
-            toValue: 1,
+      motion.loop(
+        motion.sequence([
+          motion.delay(delay),
+          motion.animate(dot, 1, {
             duration: 300,
             easing: Easing.ease,
             useNativeDriver: true,
           }),
-          Animated.timing(dot, {
-            toValue: 0,
+          motion.animate(dot, 0, {
             duration: 300,
             easing: Easing.ease,
             useNativeDriver: true,
           }),
-          Animated.delay(600 - delay),
+          motion.delay(600 - delay),
         ]),
       );
     const a1 = pulse(dot1, 0);
@@ -123,7 +122,7 @@ function ThinkingBubble({ status }: { status: string }) {
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
     marginHorizontal: 2,
     opacity: dot.interpolate({ inputRange: [0, 1], outputRange: [0.25, 1] }),
     transform: [{ translateY: dot.interpolate({ inputRange: [0, 1], outputRange: [0, -4] }) }],
@@ -136,8 +135,8 @@ function ThinkingBubble({ status }: { status: string }) {
         <Animated.View style={dotStyle(dot2)} />
         <Animated.View style={dotStyle(dot3)} />
       </View>
-      <Text
-        style={{ color: "#64748B", fontSize: 12, fontStyle: "italic", flex: 1 }}
+      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+        style={{ color: tokens.color.textSubtle, fontSize: 12, fontStyle: "italic", flex: 1 }}
         numberOfLines={1}
       >
         {status}
@@ -742,7 +741,7 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen style={styles.container}>
       {/* Single Unified Redesigned Header */}
       <View style={styles.aiSimpleHeader}>
         <View style={styles.aiIdentityRow}>
@@ -752,15 +751,15 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
             onPress={() => setShowHistoryModal(true)}
             activeOpacity={0.7}
           >
-            <Text style={styles.historyDrawerIcon}>☰</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyDrawerIcon}>☰</Text>
           </TouchableOpacity>
 
           <View style={styles.aiAvatarWrap}>
-            <RobotIcon size={20} color="#059669" />
+            <RobotIcon size={20} color={tokens.color.successStrong} />
           </View>
           <View>
-            <Text style={styles.aiName}>MapsBridge AI</Text>
-            <Text style={styles.aiMinimalSub}>Seyahat Asistanı</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.aiName}>MapsBridge AI</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.aiMinimalSub}>Seyahat Asistanı</Text>
           </View>
         </View>
 
@@ -770,7 +769,7 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
           onPress={handleNewChat}
           activeOpacity={0.7}
         >
-          <Text style={styles.newChatHeaderBtnText}>+ Yeni Sohbet</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.newChatHeaderBtnText}>+ Yeni Sohbet</Text>
         </TouchableOpacity>
       </View>
 
@@ -792,11 +791,11 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               return (
                 <View key={msg.id} style={styles.userMsgWrapper}>
                   <View style={styles.userBubble}>
-                    <Text style={styles.userText}>{msg.text}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userText}>{msg.text}</Text>
                   </View>
                   <View style={styles.metaTimeRow}>
-                    <Text style={styles.metaTimeText}>{msg.time}</Text>
-                    <Text style={{ fontSize: 11, color: "#10B981" }}>✓✓</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaTimeText}>{msg.time}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, color: tokens.color.accent }}>✓✓</Text>
                   </View>
                 </View>
               );
@@ -807,22 +806,22 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                 {/* Bot Label */}
                 <View style={styles.botHeaderRow}>
                   <View style={styles.sparkleWrap}>
-                    <SparkIcon size={12} color="#10B981" />
+                    <SparkIcon size={12} color={tokens.color.accent} />
                   </View>
-                  <Text style={styles.botLabel}>MAPSBRIDGE ATELIER BOT</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botLabel}>MAPSBRIDGE ATELIER BOT</Text>
                 </View>
 
                 {/* Bot Content Box */}
                 <View style={styles.botCard}>
-                  <Text style={styles.botIntroText}>{msg.text}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botIntroText}>{msg.text}</Text>
 
                   {/* Route Plan Structured Details */}
                   {msg.routePlan && (
                     <View style={styles.routeStructureBox}>
                       <View style={styles.routeStructureHead}>
-                        <Text style={styles.routeStructureTitle}>{msg.routePlan.dayTitle}</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeStructureTitle}>{msg.routePlan.dayTitle}</Text>
                         <View style={styles.zigzagBadge}>
-                          <Text style={styles.zigzagBadgeText}>ZİKZAKSIZ</Text>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.zigzagBadgeText}>ZİKZAKSIZ</Text>
                         </View>
                       </View>
 
@@ -833,17 +832,17 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                             <View style={styles.seqItemRow}>
                               <View style={styles.seqBullet} />
                               <View style={{ flex: 1 }}>
-                                <Text style={styles.seqTimeTitle}>
+                                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.seqTimeTitle}>
                                   {st.time} • {st.name}
                                 </Text>
-                                <Text style={styles.seqDesc}>{st.desc}</Text>
+                                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.seqDesc}>{st.desc}</Text>
                               </View>
                             </View>
 
                             {st.walk ? (
                               <View style={styles.seqWalkRow}>
-                                <WalkIcon size={12} color="#059669" />
-                                <Text style={styles.seqWalkText}>{st.walk}</Text>
+                                <WalkIcon size={12} color={tokens.color.successStrong} />
+                                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.seqWalkText}>{st.walk}</Text>
                               </View>
                             ) : null}
                           </View>
@@ -852,8 +851,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
 
                       {/* Distance & Time summary ribbon */}
                       <View style={styles.statsRibbon}>
-                        <Text style={styles.ribbonItem}>Mesafe: {msg.routePlan.totalKm}</Text>
-                        <Text style={styles.ribbonItem}>Yürüme: {msg.routePlan.totalWalkTime}</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.ribbonItem}>Mesafe: {msg.routePlan.totalKm}</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.ribbonItem}>Yürüme: {msg.routePlan.totalWalkTime}</Text>
                       </View>
                     </View>
                   )}
@@ -868,11 +867,11 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                           resizeMode="cover"
                         />
                         <View style={styles.previewBadge}>
-                          <Text style={styles.previewBadgeText}>CANLI ROTA ÖNİZLEMESİ</Text>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.previewBadgeText}>CANLI ROTA ÖNİZLEMESİ</Text>
                         </View>
                         <View style={styles.previewOverlayText}>
-                          <Text style={styles.previewTitle}>{msg.routePlan.title}</Text>
-                          <Text style={styles.previewSub}>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.previewTitle}>{msg.routePlan.title}</Text>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.previewSub}>
                             {msg.routePlan.stops.length} optimize durak • 0 zikzak
                           </Text>
                         </View>
@@ -883,9 +882,9 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         {msg.routePlan.stopPills.map((pill, pIdx) => (
                           <View key={pIdx} style={styles.previewPill}>
                             <View style={styles.pNumCircle}>
-                              <Text style={styles.pNumText}>{pIdx + 1}</Text>
+                              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pNumText}>{pIdx + 1}</Text>
                             </View>
-                            <Text style={styles.pText} numberOfLines={1}>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pText} numberOfLines={1}>
                               {pill}
                             </Text>
                           </View>
@@ -907,8 +906,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                               gap: 6,
                             }}
                           >
-                            <DirectionsIcon size={14} color="#013628" />
-                            <Text style={styles.openMapText}>Haritada Aç & Düzenle</Text>
+                            <DirectionsIcon size={14} color={tokens.color.textBrand} />
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.openMapText}>Haritada Aç & Düzenle</Text>
                           </View>
                         </TouchableOpacity>
 
@@ -925,8 +924,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                               gap: 6,
                             }}
                           >
-                            <BookmarkIcon size={14} color="#059669" />
-                            <Text style={styles.savePlanText}>Seyahat Masama Kaydet</Text>
+                            <BookmarkIcon size={14} color={tokens.color.successStrong} />
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.savePlanText}>Seyahat Masama Kaydet</Text>
                           </View>
                         </TouchableOpacity>
                       </View>
@@ -940,9 +939,9 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         <View
                           key={cIdx}
                           style={{
-                            backgroundColor: "#131A17",
+                            backgroundColor: tokens.color.surfaceInverseStrong,
                             borderWidth: 1,
-                            borderColor: "#22382E",
+                            borderColor: tokens.color.onAccent,
                             borderRadius: 12,
                             padding: 12,
                           }}
@@ -955,16 +954,16 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                               marginBottom: 6,
                             }}
                           >
-                            <SparkIcon size={14} color="#10B981" />
-                            <Text style={{ color: "#E2E8F0", fontWeight: "700", fontSize: 13 }}>
+                            <SparkIcon size={14} color={tokens.color.accent} />
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.neutral200, fontWeight: "700", fontSize: 13 }}>
                               {card.title}
                             </Text>
                           </View>
                           {card.bullets.map((b, bIdx) => (
-                            <Text
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                               key={bIdx}
                               style={{
-                                color: "#94A3B8",
+                                color: tokens.color.neutral400,
                                 fontSize: 12,
                                 lineHeight: 18,
                                 marginTop: 2,
@@ -983,16 +982,16 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                     <View
                       style={{
                         marginTop: 10,
-                        backgroundColor: "rgba(245, 158, 11, 0.1)",
+                        backgroundColor: withAlpha(tokens.color.warningIcon, 0.1),
                         borderLeftWidth: 3,
-                        borderLeftColor: "#F59E0B",
+                        borderLeftColor: tokens.color.warningIcon,
                         borderRadius: 8,
                         padding: 10,
                       }}
                     >
-                      <Text
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={{
-                          color: "#F59E0B",
+                          color: tokens.color.warningIcon,
                           fontSize: 12,
                           fontWeight: "700",
                           marginBottom: 4,
@@ -1001,9 +1000,9 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         ⚠ Plan Uyarıları
                       </Text>
                       {msg.feasibilityWarnings.map((w, wIdx) => (
-                        <Text
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                           key={wIdx}
-                          style={{ color: "#FCD34D", fontSize: 11, lineHeight: 16, marginTop: 2 }}
+                          style={{ color: tokens.color.warningBorder, fontSize: 11, lineHeight: 16, marginTop: 2 }}
                         >
                           • {w}
                         </Text>
@@ -1016,16 +1015,16 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                     <View
                       style={{
                         marginTop: 8,
-                        backgroundColor: "rgba(99, 102, 241, 0.08)",
+                        backgroundColor: withAlpha(tokens.dataPalette.indigo, 0.08),
                         borderLeftWidth: 3,
-                        borderLeftColor: "#6366F1",
+                        borderLeftColor: tokens.dataPalette.indigo,
                         borderRadius: 8,
                         padding: 10,
                       }}
                     >
-                      <Text
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={{
-                          color: "#818CF8",
+                          color: tokens.dataPalette.indigo,
                           fontSize: 11,
                           fontWeight: "700",
                           marginBottom: 3,
@@ -1034,9 +1033,9 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         ℹ Varsayımlar
                       </Text>
                       {msg.assumptions.map((a, aIdx) => (
-                        <Text
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                           key={aIdx}
-                          style={{ color: "#A5B4FC", fontSize: 11, lineHeight: 16, marginTop: 2 }}
+                          style={{ color: tokens.color.infoBorder, fontSize: 11, lineHeight: 16, marginTop: 2 }}
                         >
                           • {a}
                         </Text>
@@ -1051,9 +1050,9 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         <TouchableOpacity
                           key={oIdx}
                           style={{
-                            backgroundColor: "rgba(16, 185, 129, 0.12)",
+                            backgroundColor: withAlpha(tokens.color.accent, 0.12),
                             borderWidth: 1,
-                            borderColor: "#10B981",
+                            borderColor: tokens.color.accent,
                             paddingHorizontal: 12,
                             paddingVertical: 6,
                             borderRadius: 16,
@@ -1061,7 +1060,7 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                           onPress={() => handleSendPrompt(opt.prompt)}
                           activeOpacity={0.7}
                         >
-                          <Text style={{ color: "#10B981", fontSize: 12, fontWeight: "600" }}>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontSize: 12, fontWeight: "600" }}>
                             {opt.label}
                           </Text>
                         </TouchableOpacity>
@@ -1071,7 +1070,7 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
 
                   {/* Feedback / Meta */}
                   <View style={styles.botFooterRow}>
-                    <Text style={styles.engineVersion}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.engineVersion}>
                       AWS Bedrock & Agent Core • MapsBridge Engine v2.4
                     </Text>
                   </View>
@@ -1084,9 +1083,9 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
             <View style={styles.botMsgWrapper}>
               <View style={styles.botHeaderRow}>
                 <View style={styles.sparkleWrap}>
-                  <SparkIcon size={12} color="#10B981" />
+                  <SparkIcon size={12} color={tokens.color.accent} />
                 </View>
-                <Text style={styles.botLabel}>MAPSBRIDGE ATELIER BOT</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botLabel}>MAPSBRIDGE ATELIER BOT</Text>
               </View>
               <View style={[styles.botCard, { paddingVertical: 14 }]}>
                 <ThinkingBubble status={THINKING_STEPS[thinkingStepIndex]} />
@@ -1103,7 +1102,7 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               onPress={handleAttachPhoto}
               accessibilityLabel="Fotoğraf Ekle"
             >
-              <CameraIcon size={18} color="#059669" />
+              <CameraIcon size={18} color={tokens.color.successStrong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1111,12 +1110,12 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               onPress={handleToggleVoice}
               accessibilityLabel="Sesle Konuş"
             >
-              <MicIcon size={18} color="#059669" />
+              <MicIcon size={18} color={tokens.color.successStrong} />
             </TouchableOpacity>
 
             <TextInput
               placeholder="Seyahat hayalini yaz (örn: Kyoto 4 gün)..."
-              placeholderTextColor="#717974"
+              placeholderTextColor={tokens.color.textSubtle}
               style={styles.textInput}
               value={inputText}
               onChangeText={setInputText}
@@ -1130,7 +1129,7 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               onPress={() => handleSendPrompt(inputText)}
               activeOpacity={0.8}
             >
-              <Text style={styles.sendBtnText}>➔</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sendBtnText}>➔</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1147,18 +1146,18 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
           <View style={styles.routeLoaderCard}>
             <View style={styles.routeLoaderHeader}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <DirectionsIcon size={16} color="#013628" />
-                <Text style={styles.routeLoaderTitle}>Rotamı Düzenle</Text>
+                <DirectionsIcon size={16} color={tokens.color.textBrand} />
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeLoaderTitle}>Rotamı Düzenle</Text>
               </View>
               <TouchableOpacity onPress={() => setShowRouteLoaderModal(false)} activeOpacity={0.7}>
-                <Text style={styles.routeLoaderClose}>✕</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeLoaderClose}>✕</Text>
               </TouchableOpacity>
             </View>
 
             {loadedRouteDetails && (
               <ScrollView style={styles.routeLoaderContent}>
-                <Text style={styles.routeLoaderRouteTitle}>{loadedRouteDetails.title}</Text>
-                <Text style={styles.routeLoaderStopCount}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeLoaderRouteTitle}>{loadedRouteDetails.title}</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeLoaderStopCount}>
                   {loadedRouteDetails.stops.length} durak
                 </Text>
 
@@ -1168,29 +1167,29 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                     style={styles.routeDetailBtn}
                     onPress={() => handleAddRouteDetail("flight")}
                   >
-                    <DirectionsIcon size={18} color="#059669" />
-                    <Text style={styles.routeDetailBtnText}>Uçak</Text>
+                    <DirectionsIcon size={18} color={tokens.color.successStrong} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeDetailBtnText}>Uçak</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.routeDetailBtn}
                     onPress={() => handleAddRouteDetail("transport")}
                   >
-                    <CarIcon size={18} color="#059669" />
-                    <Text style={styles.routeDetailBtnText}>Ulaşım</Text>
+                    <CarIcon size={18} color={tokens.color.successStrong} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeDetailBtnText}>Ulaşım</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.routeDetailBtn}
                     onPress={() => handleAddRouteDetail("hotel")}
                   >
-                    <HotelIcon size={18} color="#059669" />
-                    <Text style={styles.routeDetailBtnText}>Otel</Text>
+                    <HotelIcon size={18} color={tokens.color.successStrong} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeDetailBtnText}>Otel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.routeDetailBtn}
                     onPress={() => handleAddRouteDetail("meals")}
                   >
-                    <FoodIcon size={18} color="#059669" />
-                    <Text style={styles.routeDetailBtnText}>Yemek</Text>
+                    <FoodIcon size={18} color={tokens.color.successStrong} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeDetailBtnText}>Yemek</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -1198,38 +1197,38 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                 {loadedRouteDetails.flight && (
                   <View style={styles.addedDetailItem}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <DirectionsIcon size={12} color="#059669" />
-                      <Text style={styles.addedDetailLabel}>Uçak</Text>
+                      <DirectionsIcon size={12} color={tokens.color.successStrong} />
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailLabel}>Uçak</Text>
                     </View>
-                    <Text style={styles.addedDetailValue}>{loadedRouteDetails.flight}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailValue}>{loadedRouteDetails.flight}</Text>
                   </View>
                 )}
                 {loadedRouteDetails.transport && (
                   <View style={styles.addedDetailItem}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <CarIcon size={12} color="#059669" />
-                      <Text style={styles.addedDetailLabel}>Ulaşım</Text>
+                      <CarIcon size={12} color={tokens.color.successStrong} />
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailLabel}>Ulaşım</Text>
                     </View>
-                    <Text style={styles.addedDetailValue}>{loadedRouteDetails.transport}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailValue}>{loadedRouteDetails.transport}</Text>
                   </View>
                 )}
                 {loadedRouteDetails.hotel && (
                   <View style={styles.addedDetailItem}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <HotelIcon size={12} color="#059669" />
-                      <Text style={styles.addedDetailLabel}>Otel</Text>
+                      <HotelIcon size={12} color={tokens.color.successStrong} />
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailLabel}>Otel</Text>
                     </View>
-                    <Text style={styles.addedDetailValue}>{loadedRouteDetails.hotel}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailValue}>{loadedRouteDetails.hotel}</Text>
                   </View>
                 )}
                 {loadedRouteDetails.meals && loadedRouteDetails.meals.length > 0 && (
                   <View style={styles.addedDetailItem}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <FoodIcon size={12} color="#059669" />
-                      <Text style={styles.addedDetailLabel}>Yemekler</Text>
+                      <FoodIcon size={12} color={tokens.color.successStrong} />
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailLabel}>Yemekler</Text>
                     </View>
                     {loadedRouteDetails.meals.map((meal, idx) => (
-                      <Text key={idx} style={styles.addedDetailValue}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} key={idx} style={styles.addedDetailValue}>
                         • {meal}
                       </Text>
                     ))}
@@ -1250,8 +1249,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                       gap: 6,
                     }}
                   >
-                    <SparkIcon size={16} color="#ffffff" />
-                    <Text style={styles.optimizeRouteBtnText}>Rotayı Optimize Et</Text>
+                    <SparkIcon size={16} color={tokens.color.onPrimary} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.optimizeRouteBtnText}>Rotayı Optimize Et</Text>
                   </View>
                 </TouchableOpacity>
 
@@ -1272,8 +1271,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                       gap: 6,
                     }}
                   >
-                    <MapIcon size={16} color="#013628" />
-                    <Text style={styles.openMapText}>Haritada Gör</Text>
+                    <MapIcon size={16} color={tokens.color.textBrand} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.openMapText}>Haritada Gör</Text>
                   </View>
                 </TouchableOpacity>
               </ScrollView>
@@ -1293,17 +1292,17 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
           <View style={styles.agentsCard}>
             <View style={styles.agentsHeader}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <RobotIcon size={16} color="#013628" />
-                <Text style={styles.agentsTitle}>Seyahat Agentleri</Text>
+                <RobotIcon size={16} color={tokens.color.textBrand} />
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsTitle}>Seyahat Agentleri</Text>
               </View>
               <TouchableOpacity onPress={() => setShowAgentsModal(false)} activeOpacity={0.7}>
-                <Text style={styles.agentsClose}>✕</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsClose}>✕</Text>
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.agentsContent}>
               {/* Active Agents */}
-              <Text style={styles.agentsSectionTitle}>Aktif Agentler</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsSectionTitle}>Aktif Agentler</Text>
               {agents
                 .filter((a) => a.isActive)
                 .map((agent) => (
@@ -1332,18 +1331,18 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         width: 36,
                         height: 36,
                         borderRadius: 18,
-                        backgroundColor: "rgba(5, 150, 105, 0.1)",
+                        backgroundColor: withAlpha(tokens.color.successStrong, 0.1),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <RobotIcon size={20} color="#059669" />
+                      <RobotIcon size={20} color={tokens.color.successStrong} />
                     </View>
                     <View style={{ flex: 1, marginLeft: 12 }}>
-                      <Text style={styles.agentName}>{agent.title}</Text>
-                      <Text style={styles.agentDesc}>{agent.description}</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentName}>{agent.title}</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentDesc}>{agent.description}</Text>
                       {agent.reminders.length > 0 && (
-                        <Text style={styles.agentReminders}>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentReminders}>
                           {agent.reminders.filter((r) => !r.completed).length} hatırlatma
                         </Text>
                       )}
@@ -1356,8 +1355,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 6, marginVertical: 10 }}
               >
-                <TranslateIcon size={16} color="#013628" />
-                <Text style={styles.agentsSectionTitle}>İngilizce Konuşma Yardımcısı</Text>
+                <TranslateIcon size={16} color={tokens.color.textBrand} />
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsSectionTitle}>İngilizce Konuşma Yardımcısı</Text>
               </View>
               <View style={styles.phrasesContainer}>
                 {["emergency", "transport", "accommodation", "restaurant", "general"].map(
@@ -1379,13 +1378,13 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                       }}
                     >
                       <View style={{ marginBottom: 4 }}>
-                        {category === "emergency" && <AlertCircleIcon size={18} color="#dc2626" />}
-                        {category === "transport" && <CarIcon size={18} color="#059669" />}
-                        {category === "accommodation" && <HotelIcon size={18} color="#0284c7" />}
-                        {category === "restaurant" && <FoodIcon size={18} color="#d97706" />}
-                        {category === "general" && <TranslateIcon size={18} color="#059669" />}
+                        {category === "emergency" && <AlertCircleIcon size={18} color={tokens.color.danger} />}
+                        {category === "transport" && <CarIcon size={18} color={tokens.color.successStrong} />}
+                        {category === "accommodation" && <HotelIcon size={18} color={tokens.color.accentSky} />}
+                        {category === "restaurant" && <FoodIcon size={18} color={tokens.color.warningStrong} />}
+                        {category === "general" && <TranslateIcon size={18} color={tokens.color.successStrong} />}
                       </View>
-                      <Text style={styles.phraseCategoryText}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.phraseCategoryText}>
                         {category === "emergency" && "Acil Durum"}
                         {category === "transport" && "Ulaşım"}
                         {category === "accommodation" && "Konaklama"}
@@ -1408,8 +1407,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                   );
                 }}
               >
-                <AlertCircleIcon size={18} color="#dc2626" />
-                <Text style={styles.emergencyQuickText}>Acil Durum Numaraları</Text>
+                <AlertCircleIcon size={18} color={tokens.color.danger} />
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emergencyQuickText}>Acil Durum Numaraları</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -1427,14 +1426,14 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
           <View style={styles.historyModalCard}>
             <View style={styles.historyModalHeader}>
               <View>
-                <Text style={styles.historyModalTitle}>Sohbet Geçmişi</Text>
-                <Text style={styles.historyModalSub}>Önceki seyahat sohbetlerinize geri dönün</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyModalTitle}>Sohbet Geçmişi</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyModalSub}>Önceki seyahat sohbetlerinize geri dönün</Text>
               </View>
               <TouchableOpacity
                 style={styles.modalCloseCircle}
                 onPress={() => setShowHistoryModal(false)}
               >
-                <Text style={styles.modalCloseCircleText}>✕</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseCircleText}>✕</Text>
               </TouchableOpacity>
             </View>
 
@@ -1446,13 +1445,13 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               }}
               activeOpacity={0.8}
             >
-              <Text style={styles.historyNewChatBtnText}>+ Sıfırdan Yeni Sohbet Başlat</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyNewChatBtnText}>+ Sıfırdan Yeni Sohbet Başlat</Text>
             </TouchableOpacity>
 
             <ScrollView style={{ maxHeight: 360, marginTop: 12 }}>
               {pastConversations.length === 0 ? (
                 <View style={styles.emptyHistoryBox}>
-                  <Text style={styles.emptyHistoryText}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyHistoryText}>
                     Henüz kaydedilmiş önceki sohbet bulunmuyor.
                   </Text>
                 </View>
@@ -1469,14 +1468,14 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                     activeOpacity={0.7}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.historyItemTitle} numberOfLines={1}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyItemTitle} numberOfLines={1}>
                         {item.title}
                       </Text>
-                      <Text style={styles.historyItemDate}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyItemDate}>
                         {item.date} • {item.messages.length} mesaj
                       </Text>
                     </View>
-                    <Text style={{ fontSize: 16, color: "#059669", fontWeight: "800" }}>›</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.color.successStrong, fontWeight: "800" }}>›</Text>
                   </TouchableOpacity>
                 ))
               )}
@@ -1486,14 +1485,14 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
       </Modal>
 
       <ScreenTourModal screen="ai" />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   aiSubHeader: {
     paddingHorizontal: 16,
@@ -1502,8 +1501,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#eaedff",
-    backgroundColor: "rgba(250, 248, 255, 0.95)",
+    borderBottomColor: tokens.color.surfaceTint,
+    backgroundColor: withAlpha(tokens.color.bg, 0.95),
   },
   aiIdentityRow: {
     flexDirection: "row",
@@ -1514,7 +1513,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
@@ -1523,49 +1522,49 @@ const styles = StyleSheet.create({
     width: 9,
     height: 9,
     borderRadius: 4.5,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
     position: "absolute",
     bottom: 0,
     right: 0,
     borderWidth: 1.5,
-    borderColor: "#ffffff",
+    borderColor: tokens.color.neutral0,
   },
   aiName: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   aiSubStatus: {
     fontSize: 11,
-    color: "#286954",
+    color: tokens.color.link,
   },
   newChatBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
   },
   newChatBtnText: {
     fontSize: 11.5,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   newChatHeaderBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     marginRight: 4,
   },
   newChatHeaderBtnText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   suggestionTrackWrapper: {
     paddingVertical: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#eaedff",
+    borderBottomColor: tokens.color.surfaceTint,
   },
   suggestionTrack: {
     paddingHorizontal: 16,
@@ -1576,8 +1575,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: "#ffffff",
-    shadowColor: "#000",
+    backgroundColor: tokens.color.surface,
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -1586,7 +1585,7 @@ const styles = StyleSheet.create({
   sugPillText: {
     fontSize: 11.5,
     fontWeight: "600",
-    color: "#404945",
+    color: tokens.color.textMuted,
   },
   chatScroll: {
     flex: 1,
@@ -1607,8 +1606,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 20,
     borderTopRightRadius: 4,
-    backgroundColor: "#1e4d3e",
-    shadowColor: "#013628",
+    backgroundColor: tokens.color.brandHover,
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -1616,7 +1615,7 @@ const styles = StyleSheet.create({
   },
   userText: {
     fontSize: 14,
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     lineHeight: 20,
   },
   metaTimeRow: {
@@ -1628,7 +1627,7 @@ const styles = StyleSheet.create({
   },
   metaTimeText: {
     fontSize: 10,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   botMsgWrapper: {
     alignSelf: "flex-start",
@@ -1645,22 +1644,22 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
   },
   botLabel: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#286954",
+    color: tokens.color.link,
     letterSpacing: 0.8,
   },
   botCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 20,
     borderTopLeftRadius: 4,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -1669,11 +1668,11 @@ const styles = StyleSheet.create({
   },
   botIntroText: {
     fontSize: 14,
-    color: "#131b2e",
+    color: tokens.color.text,
     lineHeight: 21,
   },
   routeStructureBox: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderRadius: 14,
     padding: 12,
     gap: 8,
@@ -1686,18 +1685,18 @@ const styles = StyleSheet.create({
   routeStructureTitle: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   zigzagBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
-    backgroundColor: "rgba(16, 185, 129, 0.2)",
+    backgroundColor: tokens.color.accentA20,
   },
   zigzagBadgeText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#0D281E",
+    color: tokens.color.onAccent,
   },
   routeStopsSequence: {
     gap: 8,
@@ -1716,17 +1715,17 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     marginTop: 5,
   },
   seqTimeTitle: {
     fontSize: 12.5,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   seqDesc: {
     fontSize: 11,
-    color: "#404945",
+    color: tokens.color.textMuted,
   },
   seqWalkRow: {
     flexDirection: "row",
@@ -1737,12 +1736,12 @@ const styles = StyleSheet.create({
   },
   seqWalkText: {
     fontSize: 10.5,
-    color: "#286954",
+    color: tokens.color.link,
   },
   statsRibbon: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -1751,10 +1750,10 @@ const styles = StyleSheet.create({
   ribbonItem: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   previewCard: {
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     borderRadius: 16,
     overflow: "hidden",
     gap: 10,
@@ -1776,12 +1775,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 999,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.9),
   },
   previewBadgeText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   previewOverlayText: {
     position: "absolute",
@@ -1792,15 +1791,15 @@ const styles = StyleSheet.create({
   previewTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#ffffff",
-    textShadowColor: "rgba(0,0,0,0.6)",
+    color: tokens.color.onPrimary,
+    textShadowColor: withAlpha(tokens.color.black, 0.6),
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
   previewSub: {
     fontSize: 10.5,
-    color: "#bbedd8",
-    textShadowColor: "rgba(0,0,0,0.6)",
+    color: tokens.color.surfaceBrandStrong,
+    textShadowColor: withAlpha(tokens.color.black, 0.6),
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
@@ -1814,7 +1813,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 10,
     padding: 6,
   },
@@ -1822,19 +1821,19 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     alignItems: "center",
     justifyContent: "center",
   },
   pNumText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   pText: {
     fontSize: 10.5,
     fontWeight: "600",
-    color: "#131b2e",
+    color: tokens.color.text,
     flex: 1,
   },
   previewCtaStack: {
@@ -1844,26 +1843,26 @@ const styles = StyleSheet.create({
   openMapBtn: {
     height: 42,
     borderRadius: 21,
-    backgroundColor: "#1e4d3e",
+    backgroundColor: tokens.color.brandHover,
     alignItems: "center",
     justifyContent: "center",
   },
   openMapText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   savePlanBtn: {
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
   },
   savePlanText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   botFooterRow: {
     flexDirection: "row",
@@ -1876,24 +1875,24 @@ const styles = StyleSheet.create({
   },
   engineVersion: {
     fontSize: 9.5,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   inputAreaWrapper: {
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 16,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#eaedff",
+    borderTopColor: tokens.color.surfaceTint,
   },
   inputPillBox: {
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -1909,25 +1908,25 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     fontSize: 13,
-    color: "#131b2e",
+    color: tokens.color.text,
     paddingHorizontal: 8,
   },
   sendBtn: {
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#1e4d3e",
+    backgroundColor: tokens.color.brandHover,
     alignItems: "center",
     justifyContent: "center",
   },
   sendBtnText: {
     fontSize: 14,
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontWeight: "800",
   },
   ecoFooterText: {
     fontSize: 10,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     textAlign: "center",
     marginTop: 6,
   },
@@ -1939,8 +1938,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#eaedff",
-    backgroundColor: "#faf8ff",
+    borderBottomColor: tokens.color.surfaceTint,
+    backgroundColor: tokens.color.bg,
   },
   aiHeaderActions: {
     flexDirection: "row",
@@ -1949,7 +1948,7 @@ const styles = StyleSheet.create({
   headerActionBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderRadius: 16,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -1958,16 +1957,16 @@ const styles = StyleSheet.create({
   headerActionBtnText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   // Route Loader Modal styles
   routeLoaderBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(tokens.color.black, 0.5),
     justifyContent: "flex-end",
   },
   routeLoaderCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
@@ -1984,11 +1983,11 @@ const styles = StyleSheet.create({
   routeLoaderTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   routeLoaderClose: {
     fontSize: 20,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     padding: 4,
   },
   routeLoaderContent: {
@@ -1997,12 +1996,12 @@ const styles = StyleSheet.create({
   routeLoaderRouteTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#1e293b",
+    color: tokens.color.neutral800,
     marginBottom: 4,
   },
   routeLoaderStopCount: {
     fontSize: 13,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginBottom: 16,
   },
   routeDetailButtons: {
@@ -2013,20 +2012,20 @@ const styles = StyleSheet.create({
   routeDetailBtn: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     borderRadius: 12,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   routeDetailBtnText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginTop: 4,
   },
   addedDetailItem: {
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -2034,15 +2033,15 @@ const styles = StyleSheet.create({
   addedDetailLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginBottom: 4,
   },
   addedDetailValue: {
     fontSize: 13,
-    color: "#1e293b",
+    color: tokens.color.neutral800,
   },
   optimizeRouteBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: "center",
@@ -2052,16 +2051,16 @@ const styles = StyleSheet.create({
   optimizeRouteBtnText: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   // Agents Modal styles
   agentsBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(tokens.color.black, 0.5),
     justifyContent: "flex-end",
   },
   agentsCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
@@ -2078,11 +2077,11 @@ const styles = StyleSheet.create({
   agentsTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   agentsClose: {
     fontSize: 20,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     padding: 4,
   },
   agentsContent: {
@@ -2091,40 +2090,40 @@ const styles = StyleSheet.create({
   agentsSectionTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginTop: 16,
     marginBottom: 12,
   },
   agentCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     borderRadius: 16,
     padding: 14,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   agentName: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#1e293b",
+    color: tokens.color.neutral800,
   },
   agentDesc: {
     fontSize: 12,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   agentReminders: {
     fontSize: 11,
-    color: "#10B981",
+    color: tokens.color.accent,
     marginTop: 4,
   },
   agentStatusActive: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
   },
   // Language Phrases styles
   phrasesContainer: {
@@ -2135,7 +2134,7 @@ const styles = StyleSheet.create({
   phraseCategoryBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -2147,51 +2146,51 @@ const styles = StyleSheet.create({
   phraseCategoryText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   // Emergency Quick Button
   emergencyQuickBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fef2f2",
+    backgroundColor: tokens.color.dangerBg,
     borderRadius: 14,
     padding: 16,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: "#fecaca",
+    borderColor: tokens.color.dangerBorder,
     gap: 12,
   },
   emergencyQuickText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#dc2626",
+    color: tokens.color.danger,
   },
   // Redesigned AI Header & History Drawer
   historyDrawerBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
   },
   historyDrawerIcon: {
     fontSize: 18,
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontWeight: "700",
   },
   aiMinimalSub: {
     fontSize: 11,
-    color: "#059669",
+    color: tokens.color.successStrong,
     fontWeight: "600",
   },
   // Voice Recording Banner
   voiceRecordingBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fef2f2",
+    backgroundColor: tokens.color.dangerBg,
     borderWidth: 1,
-    borderColor: "#fca5a5",
+    borderColor: tokens.color.dangerBorder,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -2202,36 +2201,36 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#dc2626",
+    backgroundColor: tokens.color.dangerSolid,
   },
   voiceRecordingText: {
     flex: 1,
     fontSize: 11.5,
-    color: "#991b1b",
+    color: tokens.color.danger,
     fontWeight: "600",
   },
   voiceStopBtn: {
-    backgroundColor: "#dc2626",
+    backgroundColor: tokens.color.dangerSolid,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
   voiceStopBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 11,
     fontWeight: "700",
   },
   inputActionIconActive: {
-    backgroundColor: "#fee2e2",
+    backgroundColor: tokens.color.dangerBg,
   },
   // Past Conversations History Modal
   historyModalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(tokens.color.black, 0.5),
     justifyContent: "flex-end",
   },
   historyModalCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
@@ -2248,28 +2247,28 @@ const styles = StyleSheet.create({
   historyModalTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   historyModalSub: {
     fontSize: 12,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   modalCloseCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
   },
   modalCloseCircleText: {
     fontSize: 14,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     fontWeight: "700",
   },
   historyNewChatBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     borderRadius: 14,
     paddingVertical: 12,
     alignItems: "center",
@@ -2279,7 +2278,7 @@ const styles = StyleSheet.create({
   historyNewChatBtnText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   emptyHistoryBox: {
     paddingVertical: 32,
@@ -2288,27 +2287,27 @@ const styles = StyleSheet.create({
   },
   emptyHistoryText: {
     fontSize: 13,
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     textAlign: "center",
   },
   historyItemRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     borderRadius: 14,
     padding: 14,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   historyItemTitle: {
     fontSize: 13.5,
     fontWeight: "700",
-    color: "#1e293b",
+    color: tokens.color.neutral800,
     marginBottom: 2,
   },
   historyItemDate: {
     fontSize: 11,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
   },
 });

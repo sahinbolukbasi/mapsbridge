@@ -20,6 +20,7 @@ import {
   isProSync,
 } from "../services/revenuecat";
 
+import { tokens, withAlpha } from "../theme";
 interface PaywallModalProps {
   visible: boolean;
   onClose: () => void;
@@ -146,15 +147,15 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
       <View style={styles.container}>
         {/* Close */}
         <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Text style={styles.closeBtnText}>✕</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.closeBtnText}>✕</Text>
         </TouchableOpacity>
 
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.badge}>MapsBridge PRO</Text>
-            <Text style={styles.headline}>Seyahatin tüm gücü{"\n"}elinin altında</Text>
-            <Text style={styles.subheadline}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge}>MapsBridge PRO</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headline}>Seyahatin tüm gücü{"\n"}elinin altında</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.subheadline}>
               Sınırsız rota, AI asistan ve premium özelliklerle{"\n"}seyahat planlamanı bir üst seviyeye taşı.
             </Text>
           </View>
@@ -163,17 +164,17 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
           <View style={styles.featureList}>
             {PRO_FEATURES.map((f, i) => (
               <View key={i} style={styles.featureRow}>
-                <Text style={styles.featureIcon}>{f.icon}</Text>
-                <Text style={styles.featureText}>{f.text}</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.featureIcon}>{f.icon}</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.featureText}>{f.text}</Text>
               </View>
             ))}
           </View>
 
           {/* Plan Cards */}
-          <Text style={styles.sectionLabel}>Plan Seç</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionLabel}>Plan Seç</Text>
 
           {loading ? (
-            <ActivityIndicator size="large" color="#34d399" style={{ marginVertical: 24 }} />
+            <ActivityIndicator size="large" color={tokens.color.accentStrong} style={{ marginVertical: 24 }} />
           ) : (
             <View style={styles.planCards}>
               {(packages as PurchasesPackage[]).map((pkg) => {
@@ -189,21 +190,21 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
                   >
                     {badge && (
                       <View style={styles.planBadge}>
-                        <Text style={styles.planBadgeText}>{badge}</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.planBadgeText}>{badge}</Text>
                       </View>
                     )}
-                    <Text style={styles.planIcon}>{PLAN_ICONS[id] ?? "📦"}</Text>
-                    <Text style={[styles.planLabel, isSelected && styles.planLabelSelected]}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planIcon}>{PLAN_ICONS[id] ?? "📦"}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.planLabel, isSelected && styles.planLabelSelected]}>
                       {PLAN_LABELS[id] ?? id}
                     </Text>
-                    <Text style={[styles.planPrice, isSelected && styles.planPriceSelected]}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.planPrice, isSelected && styles.planPriceSelected]}>
                       {priceOf(id)}
                     </Text>
                     {id === "$rc_annual" && (
-                      <Text style={styles.planSave}>Aylığa göre %50 tasarruf</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planSave}>Aylığa göre %50 tasarruf</Text>
                     )}
                     {id === "$rc_lifetime" && (
-                      <Text style={styles.planSave}>Tek seferlik ödeme</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planSave}>Tek seferlik ödeme</Text>
                     )}
                   </TouchableOpacity>
                 );
@@ -219,9 +220,9 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
             activeOpacity={0.85}
           >
             {purchasing ? (
-              <ActivityIndicator color="#020e0a" />
+              <ActivityIndicator color={tokens.color.surfaceInverseStrong} />
             ) : (
-              <Text style={styles.ctaBtnText}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.ctaBtnText}>
                 {selectedPkg === "$rc_lifetime" ? "Pro'ya Geç — Ömür Boyu" : "Pro'ya Geç"}
               </Text>
             )}
@@ -230,24 +231,24 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
           {/* Restore */}
           <TouchableOpacity style={styles.restoreBtn} onPress={handleRestore} disabled={restoring}>
             {restoring ? (
-              <ActivityIndicator size="small" color="#94a3b8" />
+              <ActivityIndicator size="small" color={tokens.color.neutral400} />
             ) : (
-              <Text style={styles.restoreBtnText}>Önceki Satın Alımı Geri Yükle</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.restoreBtnText}>Önceki Satın Alımı Geri Yükle</Text>
             )}
           </TouchableOpacity>
 
           {/* Legal */}
-          <Text style={styles.legal}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legal}>
             Abonelik {Platform.OS === "ios" ? "App Store" : "Google Play"} üzerinden yönetilir.
             Abonelikler, iptal tarihinden 24 saat önce otomatik olarak yenilenir.{" "}
-            <Text
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
               style={styles.legalLink}
               onPress={() => Linking.openURL("https://mapsbridge.com/privacy")}
             >
               Gizlilik Politikası
             </Text>
             {" · "}
-            <Text
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
               style={styles.legalLink}
               onPress={() => Linking.openURL("https://mapsbridge.com/terms")}
             >
@@ -263,7 +264,7 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#020e0a",
+    backgroundColor: tokens.color.surfaceInverseStrong,
   },
   closeBtn: {
     position: "absolute",
@@ -273,12 +274,12 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.1),
     alignItems: "center",
     justifyContent: "center",
   },
   closeBtnText: {
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     fontSize: 14,
     fontWeight: "700",
   },
@@ -295,10 +296,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 2,
-    color: "#34d399",
+    color: tokens.color.accentStrong,
     textTransform: "uppercase",
     marginBottom: 12,
-    backgroundColor: "rgba(52,211,153,0.12)",
+    backgroundColor: withAlpha(tokens.color.accentStrong, 0.12),
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
@@ -307,19 +308,19 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#f1f5f9",
+    color: tokens.color.surfaceSunken,
     textAlign: "center",
     lineHeight: 36,
     marginBottom: 10,
   },
   subheadline: {
     fontSize: 14,
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     textAlign: "center",
     lineHeight: 20,
   },
   featureList: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.04),
     borderRadius: 16,
     padding: 16,
     marginBottom: 28,
@@ -337,14 +338,14 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
-    color: "#cbd5e1",
+    color: tokens.color.neutral300,
     flex: 1,
   },
   sectionLabel: {
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 1,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     textTransform: "uppercase",
     marginBottom: 12,
   },
@@ -355,22 +356,22 @@ const styles = StyleSheet.create({
   },
   planCard: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: withAlpha(tokens.color.surface, 0.05),
     borderRadius: 16,
     padding: 14,
     alignItems: "center",
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: tokens.color.whiteA08,
     position: "relative",
   },
   planCardSelected: {
-    borderColor: "#34d399",
-    backgroundColor: "rgba(52,211,153,0.08)",
+    borderColor: tokens.color.accentStrong,
+    backgroundColor: withAlpha(tokens.color.accentStrong, 0.08),
   },
   planBadge: {
     position: "absolute",
     top: -10,
-    backgroundColor: "#34d399",
+    backgroundColor: tokens.color.accentStrong,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
   planBadgeText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#020e0a",
+    color: tokens.color.surfaceInverseStrong,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -390,30 +391,30 @@ const styles = StyleSheet.create({
   planLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     marginBottom: 4,
   },
   planLabelSelected: {
-    color: "#34d399",
+    color: tokens.color.accentStrong,
   },
   planPrice: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#e2e8f0",
+    color: tokens.color.neutral200,
     textAlign: "center",
   },
   planPriceSelected: {
-    color: "#f1f5f9",
+    color: tokens.color.surfaceSunken,
   },
   planSave: {
     fontSize: 9,
-    color: "#34d399",
+    color: tokens.color.accentStrong,
     marginTop: 4,
     textAlign: "center",
     fontWeight: "600",
   },
   ctaBtn: {
-    backgroundColor: "#34d399",
+    backgroundColor: tokens.color.accentStrong,
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
@@ -425,7 +426,7 @@ const styles = StyleSheet.create({
   ctaBtnText: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#020e0a",
+    color: tokens.color.surfaceInverseStrong,
     letterSpacing: 0.3,
   },
   restoreBtn: {
@@ -435,17 +436,17 @@ const styles = StyleSheet.create({
   },
   restoreBtnText: {
     fontSize: 13,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     textDecorationLine: "underline",
   },
   legal: {
     fontSize: 11,
-    color: "#475569",
+    color: tokens.color.textMuted,
     textAlign: "center",
     lineHeight: 16,
   },
   legalLink: {
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     textDecorationLine: "underline",
   },
 });

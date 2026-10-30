@@ -5,8 +5,6 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
   Image,
   Share,
   Alert,
@@ -38,6 +36,8 @@ import { ScreenTourModal } from "../components/ScreenTourModal";
 import { PaywallModal } from "../components/PaywallModal";
 import { getCustomerInfo, getActiveTier, type PlanTier } from "../services/revenuecat";
 
+import { Screen } from "../ui";
+import { tokens, withAlpha } from "../theme";
 interface ProfileScreenProps {
   onShowWelcome: () => void;
   onOpenMap: () => void;
@@ -170,16 +170,14 @@ export function ProfileScreen({
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#faf8ff" />
-
+    <Screen style={styles.container}>
       {/* Top Header Bar */}
       <View style={styles.topHeader}>
         <View style={styles.headerTitleRow}>
           <View style={styles.headerLogoBadge}>
-            <ExploreIcon size={18} color="#34D399" />
+            <ExploreIcon size={18} color={tokens.color.accentStrong} />
           </View>
-          <Text style={styles.headerTitle}>Profil</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.headerTitle}>Profil</Text>
         </View>
 
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -188,9 +186,9 @@ export function ProfileScreen({
             onPress={() => setShowChatScreen(true)}
             activeOpacity={0.8}
           >
-            <ChatIcon size={18} color="#013628" />
+            <ChatIcon size={18} color={tokens.color.textBrand} />
             <View style={styles.chatHeaderBadge}>
-              <Text style={styles.chatHeaderBadgeText}>1</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.chatHeaderBadgeText}>1</Text>
             </View>
           </TouchableOpacity>
 
@@ -201,7 +199,7 @@ export function ProfileScreen({
             }
             activeOpacity={0.8}
           >
-            <BellIcon size={18} color="#013628" />
+            <BellIcon size={18} color={tokens.color.textBrand} />
           </TouchableOpacity>
         </View>
       </View>
@@ -220,30 +218,30 @@ export function ProfileScreen({
                 <Image source={{ uri: profile.avatarUrl }} style={styles.avatarRealImage} />
               ) : (
                 <View style={styles.avatarImagePlaceholder}>
-                  <Text style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
                 </View>
               )}
               <View style={styles.avatarEditPenBadge}>
-                <EditIcon size={10} color="#ffffff" />
+                <EditIcon size={10} color={tokens.color.onPrimary} />
               </View>
             </TouchableOpacity>
 
             {/* User Info */}
             <View style={styles.profileInfo}>
               <View style={styles.nameRow}>
-                <Text style={styles.userName} numberOfLines={1}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userName} numberOfLines={1}>
                   {displayName}
                 </Text>
-                <Text style={styles.verifiedIcon}>✓</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.verifiedIcon}>✓</Text>
               </View>
-              <Text style={styles.userHandle} numberOfLines={1}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userHandle} numberOfLines={1}>
                 {userHandle}
               </Text>
 
               {/* Location Badge */}
               <View style={styles.userLocationBadge}>
-                <MapPinIcon size={11} color="#059669" />
-                <Text style={styles.userLocationText} numberOfLines={1}>
+                <MapPinIcon size={11} color={tokens.color.successStrong} />
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userLocationText} numberOfLines={1}>
                   {profile?.location || "İstanbul, Türkiye"}
                 </Text>
               </View>
@@ -260,12 +258,12 @@ export function ProfileScreen({
               }
               activeOpacity={0.8}
             >
-              <SettingsIcon size={18} color="#013628" />
+              <SettingsIcon size={18} color={tokens.color.textBrand} />
             </TouchableOpacity>
           </View>
 
           {/* User Bio */}
-          <Text style={styles.userBioText}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userBioText}>
             {profile?.bio ||
               "Doğa yürüyüşleri, gizli kanyonlar ve vadiler keşfetmeyi seviyorum 🌄 | MapsBridge Rota Kaşifi"}
           </Text>
@@ -273,20 +271,20 @@ export function ProfileScreen({
           {/* Minimal Stats Row */}
           <View style={styles.statsRow}>
             <View style={styles.statCol}>
-              <Text style={styles.statNum}>{allRoutes.length}</Text>
-              <Text style={styles.statLabel}>Rotalar</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNum}>{allRoutes.length}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>Rotalar</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statCol}>
-              <Text style={styles.statNum}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNum}>
                 {allRoutes.reduce((acc, r) => acc + (r.stops?.length || 0), 0) + savedPool.length}
               </Text>
-              <Text style={styles.statLabel}>Duraklar</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>Duraklar</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statCol}>
-              <Text style={styles.statNum}>{myPosts.length}</Text>
-              <Text style={styles.statLabel}>Paylaşım</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNum}>{myPosts.length}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>Paylaşım</Text>
             </View>
           </View>
 
@@ -297,8 +295,8 @@ export function ProfileScreen({
               onPress={() => setShowChatScreen(true)}
               activeOpacity={0.85}
             >
-              <ChatIcon size={15} color="#ffffff" />
-              <Text style={styles.chatActionBtnText}>Mesajlaş</Text>
+              <ChatIcon size={15} color={tokens.color.onPrimary} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.chatActionBtnText}>Mesajlaş</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -306,8 +304,8 @@ export function ProfileScreen({
               onPress={() => setShowEditModal(true)}
               activeOpacity={0.85}
             >
-              <EditIcon size={15} color="#013628" />
-              <Text style={styles.editProfileBtnText}>Düzenle</Text>
+              <EditIcon size={15} color={tokens.color.textBrand} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.editProfileBtnText}>Düzenle</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -315,8 +313,8 @@ export function ProfileScreen({
               onPress={handleShareProfile}
               activeOpacity={0.85}
             >
-              <ExploreIcon size={15} color="#013628" />
-              <Text style={styles.shareProfileBtnText}>Paylaş</Text>
+              <ExploreIcon size={15} color={tokens.color.textBrand} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareProfileBtnText}>Paylaş</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -324,22 +322,22 @@ export function ProfileScreen({
         {/* My Community Posts (Paylaşımlarım) Section */}
         <View style={styles.sectionHeaderRow}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text style={styles.sectionHeading}>Paylaşımlarım</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeading}>Paylaşımlarım</Text>
             <View style={styles.postCountBadge}>
-              <Text style={styles.postCountBadgeText}>{myPosts.length}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.postCountBadgeText}>{myPosts.length}</Text>
             </View>
           </View>
           <TouchableOpacity onPress={() => setShowChatScreen(false)}>
-            <Text style={styles.sectionHeadingLink}>Topluluk Akışı →</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeadingLink}>Topluluk Akışı →</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.myPostsGroup}>
           {myPosts.length === 0 ? (
             <View style={styles.emptyPostsCard}>
-              <ChatIcon size={24} color="#717974" />
-              <Text style={styles.emptyPostsTitle}>Henüz paylaşımınız yok</Text>
-              <Text style={styles.emptyPostsSub}>
+              <ChatIcon size={24} color={tokens.color.textSubtle} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyPostsTitle}>Henüz paylaşımınız yok</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyPostsSub}>
                 Keşif sekmesinden ilk seyahat hikayenizi veya rotanızı paylaşabilirsiniz.
               </Text>
             </View>
@@ -348,11 +346,11 @@ export function ProfileScreen({
               <View key={post.id} style={styles.myPostCard}>
                 <View style={styles.myPostHeader}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.myPostTime}>{post.timeAgo}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostTime}>{post.timeAgo}</Text>
                     {post.locationTag && (
                       <View style={styles.myPostLocationRow}>
-                        <MapPinIcon size={12} color="#10B981" />
-                        <Text style={styles.myPostLocationText}>{post.locationTag}</Text>
+                        <MapPinIcon size={12} color={tokens.color.accent} />
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostLocationText}>{post.locationTag}</Text>
                       </View>
                     )}
                   </View>
@@ -362,8 +360,8 @@ export function ProfileScreen({
                       onPress={() => setEditingPost(post)}
                       activeOpacity={0.7}
                     >
-                      <EditIcon size={13} color="#013628" />
-                      <Text style={styles.postEditSmallText}>Düzenle</Text>
+                      <EditIcon size={13} color={tokens.color.textBrand} />
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.postEditSmallText}>Düzenle</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.postDeleteSmallBtn}
@@ -382,17 +380,17 @@ export function ProfileScreen({
                       }}
                       activeOpacity={0.7}
                     >
-                      <TrashIcon size={13} color="#ba1a1a" />
+                      <TrashIcon size={13} color={tokens.color.danger} />
                     </TouchableOpacity>
                   </View>
                 </View>
 
-                <Text style={styles.myPostContent}>{post.content}</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostContent}>{post.content}</Text>
 
                 {post.hashtags && post.hashtags.length > 0 && (
                   <View style={styles.myPostHashtags}>
                     {post.hashtags.map((h, i) => (
-                      <Text key={i} style={styles.myPostTag}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} key={i} style={styles.myPostTag}>
                         {h}
                       </Text>
                     ))}
@@ -401,12 +399,12 @@ export function ProfileScreen({
 
                 <View style={styles.myPostStatsRow}>
                   <View style={styles.myPostStatItem}>
-                    <HeartIcon size={13} color="#ef4444" fill={post.isLiked ? "#ef4444" : "none"} />
-                    <Text style={styles.myPostStatText}>{post.likesCount} Beğeni</Text>
+                    <HeartIcon size={13} color={tokens.color.dangerIcon} fill={post.isLiked ? tokens.color.dangerIcon : "none"} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostStatText}>{post.likesCount} Beğeni</Text>
                   </View>
                   <View style={styles.myPostStatItem}>
-                    <ChatIcon size={13} color="#10B981" />
-                    <Text style={styles.myPostStatText}>{post.commentsCount || 0} Yorum</Text>
+                    <ChatIcon size={13} color={tokens.color.accent} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostStatText}>{post.commentsCount || 0} Yorum</Text>
                   </View>
                 </View>
               </View>
@@ -417,22 +415,22 @@ export function ProfileScreen({
         {/* Saved Routes Section: Gerçek Kayıtlı Plan Rotaları */}
         <View style={styles.sectionHeaderRow}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text style={styles.sectionHeading}>Kayıtlı Rotalarım</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeading}>Kayıtlı Rotalarım</Text>
             <View style={styles.postCountBadge}>
-              <Text style={styles.postCountBadgeText}>{allRoutes.length}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.postCountBadgeText}>{allRoutes.length}</Text>
             </View>
           </View>
           <TouchableOpacity onPress={() => (onOpenPlan ? onOpenPlan() : onOpenMap())}>
-            <Text style={styles.sectionHeadingLink}>Plan Masasında Gör →</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeadingLink}>Plan Masasında Gör →</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.routesGroup}>
           {allRoutes.length === 0 ? (
             <View style={styles.emptyRoutesCard}>
-              <BookmarkIcon size={24} color="#717974" />
-              <Text style={styles.emptyRoutesTitle}>Henüz kayıtlı bir rotanız yok</Text>
-              <Text style={styles.emptyRoutesSub}>
+              <BookmarkIcon size={24} color={tokens.color.textSubtle} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyRoutesTitle}>Henüz kayıtlı bir rotanız yok</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyRoutesSub}>
                 Planım sekmesinden dilediğiniz gibi durak seçip gezi rotanızı oluşturabilirsiniz.
               </Text>
               <TouchableOpacity
@@ -444,13 +442,13 @@ export function ProfileScreen({
                 }}
                 activeOpacity={0.8}
               >
-                <Text style={styles.createRouteBtnText}>+ Yeni Rota Oluştur</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.createRouteBtnText}>+ Yeni Rota Oluştur</Text>
               </TouchableOpacity>
             </View>
           ) : (
             allRoutes.map((r, index) => {
               const isActive = r.id === activeRoute.id;
-              const bgColors = ["#1e4d3e", "#05513d", "#013628", "#0d9488"];
+              const bgColors = [tokens.color.brandHover, tokens.color.onSurfaceBrand, tokens.color.primary, tokens.dataPalette.teal];
               const bgColor = bgColors[index % bgColors.length];
 
               return (
@@ -466,11 +464,11 @@ export function ProfileScreen({
                   >
                     <View style={[styles.routeThumb, { backgroundColor: bgColor }]}>
                       {index % 3 === 0 ? (
-                        <BalloonIcon size={22} color="#ffffff" />
+                        <BalloonIcon size={22} color={tokens.color.onPrimary} />
                       ) : index % 3 === 1 ? (
-                        <MountainIcon size={22} color="#ffffff" />
+                        <MountainIcon size={22} color={tokens.color.onPrimary} />
                       ) : (
-                        <MonumentIcon size={22} color="#ffffff" />
+                        <MonumentIcon size={22} color={tokens.color.onPrimary} />
                       )}
                     </View>
                     <View style={styles.routeDetails}>
@@ -485,15 +483,15 @@ export function ProfileScreen({
                             }}
                           >
                             <View style={styles.statusLiveDot} />
-                            <Text style={styles.routeBadgeText}>AKTİF PLANDA</Text>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeBadgeText}>AKTİF PLANDA</Text>
                           </View>
                         )}
-                        <Text style={styles.routeSub}>{r.stops.length} Durak</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeSub}>{r.stops.length} Durak</Text>
                       </View>
-                      <Text style={styles.routeTitle} numberOfLines={1}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeTitle} numberOfLines={1}>
                         {r.name}
                       </Text>
-                      <Text style={styles.routeSub} numberOfLines={1}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeSub} numberOfLines={1}>
                         {r.stops.length > 0
                           ? r.stops
                               .map((s) => s.name)
@@ -515,7 +513,7 @@ export function ProfileScreen({
                       activeOpacity={0.7}
                       accessibilityLabel="Rotanın İsmini Düzenle"
                     >
-                      <EditIcon size={14} color="#059669" />
+                      <EditIcon size={14} color={tokens.color.successStrong} />
                     </TouchableOpacity>
 
                     {allRoutes.length > 1 && (
@@ -540,7 +538,7 @@ export function ProfileScreen({
                         activeOpacity={0.7}
                         accessibilityLabel="Rotayı Sil"
                       >
-                        <TrashIcon size={14} color="#ba1a1a" />
+                        <TrashIcon size={14} color={tokens.color.danger} />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -552,7 +550,7 @@ export function ProfileScreen({
 
         {/* Hesap & Araçlar Section (Gereksiz mock alertler kaldırıldı, hepsi çalışan işlevler) */}
         <View style={styles.toolsCard}>
-          <Text style={styles.toolsCardHeading}>Hesap & Araçlar</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolsCardHeading}>Hesap & Araçlar</Text>
 
           {/* Seyahat Masam & Rota Planım */}
           <TouchableOpacity
@@ -561,21 +559,21 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: "#dcfce7" }]}>
-                <BookmarkIcon size={16} color="#05513d" />
+              <View style={[styles.toolIconWrap, { backgroundColor: tokens.color.surfaceBrandStrong }]}>
+                <BookmarkIcon size={16} color={tokens.color.onSurfaceBrand} />
               </View>
               <View>
-                <Text style={styles.toolLabel}>Seyahat Masam & Rota Planım</Text>
-                <Text style={{ fontSize: 10, color: "#717974" }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>Seyahat Masam & Rota Planım</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>
                   {allRoutes.length} kayıtlı rota • {activeRoute.stops.length} aktif durak
                 </Text>
               </View>
             </View>
             <View style={styles.toolRight}>
-              <View style={[styles.newBadge, { backgroundColor: "#10B981" }]}>
-                <Text style={[styles.newBadgeText, { color: "#ffffff" }]}>AÇ</Text>
+              <View style={[styles.newBadge, { backgroundColor: tokens.color.accent }]}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={[styles.newBadgeText, { color: tokens.color.onPrimary }]}>AÇ</Text>
               </View>
-              <Text style={styles.toolChevron}>›</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
             </View>
           </TouchableOpacity>
 
@@ -586,18 +584,18 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: "#abedd3" }]}>
-                <MapPinIcon size={16} color="#05513d" />
+              <View style={[styles.toolIconWrap, { backgroundColor: tokens.color.surfaceBrandSoft }]}>
+                <MapPinIcon size={16} color={tokens.color.onSurfaceBrand} />
               </View>
               <View>
-                <Text style={styles.toolLabel}>Kayıtlı Durak Havuzum</Text>
-                <Text style={{ fontSize: 10, color: "#717974" }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>Kayıtlı Durak Havuzum</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>
                   {savedPool.length} adet durak kaydedildi
                 </Text>
               </View>
             </View>
             <View style={styles.toolRight}>
-              <Text style={styles.toolChevron}>›</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
             </View>
           </TouchableOpacity>
 
@@ -608,25 +606,25 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: planTier === "pro" ? "rgba(52,211,153,0.15)" : "#fef3c7" }]}>
-                <Text style={{ fontSize: 16 }}>{planTier === "pro" ? "⭐" : "🔓"}</Text>
+              <View style={[styles.toolIconWrap, { backgroundColor: planTier === "pro" ? withAlpha(tokens.color.accentStrong, 0.15) : tokens.color.warningBgStrong }]}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>{planTier === "pro" ? "⭐" : "🔓"}</Text>
               </View>
               <View>
-                <Text style={styles.toolLabel}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>
                   {planTier === "pro" ? "MapsBridge Pro ✓" : "Ücretsiz Plan"}
                 </Text>
-                <Text style={{ fontSize: 10, color: planTier === "pro" ? "#34d399" : "#717974" }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: planTier === "pro" ? tokens.color.accentStrong : tokens.color.textSubtle }}>
                   {planTier === "pro" ? "Tüm özellikler aktif" : "Pro'ya geçerek tüm özellikleri aç"}
                 </Text>
               </View>
             </View>
             <View style={styles.toolRight}>
               {planTier !== "pro" && (
-                <View style={{ backgroundColor: "#34d399", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}>
-                  <Text style={{ fontSize: 10, fontWeight: "800", color: "#020e0a" }}>UPGRADE</Text>
+                <View style={{ backgroundColor: tokens.color.accentStrong, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, fontWeight: "800", color: tokens.color.surfaceInverseStrong }}>UPGRADE</Text>
                 </View>
               )}
-              <Text style={styles.toolChevron}>›</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
             </View>
           </TouchableOpacity>
 
@@ -637,18 +635,18 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: "#e0f2fe" }]}>
-                <ChatIcon size={16} color="#0284c7" />
+              <View style={[styles.toolIconWrap, { backgroundColor: tokens.color.infoBg }]}>
+                <ChatIcon size={16} color={tokens.color.accentSky} />
               </View>
               <View>
-                <Text style={styles.toolLabel}>Gezgin Sohbet & Mesajlaşma</Text>
-                <Text style={{ fontSize: 10, color: "#717974" }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>Gezgin Sohbet & Mesajlaşma</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>
                   Birebir sohbet & rota paylaşımı
                 </Text>
               </View>
             </View>
             <View style={styles.toolRight}>
-              <Text style={styles.toolChevron}>›</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
             </View>
           </TouchableOpacity>
 
@@ -659,17 +657,17 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: "#f3e8ff" }]}>
-                <ExploreIcon size={16} color="#7c3aed" />
+              <View style={[styles.toolIconWrap, { backgroundColor: tokens.color.surfaceTint }]}>
+                <ExploreIcon size={16} color={tokens.dataPalette.violet} />
               </View>
               <View>
-                <Text style={styles.toolLabel}>Profilimi Paylaş</Text>
-                <Text style={{ fontSize: 10, color: "#717974" }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>Profilimi Paylaş</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>
                   Seyahat profilini arkadaşlarınla paylaş
                 </Text>
               </View>
             </View>
-            <Text style={styles.toolChevron}>›</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
           </TouchableOpacity>
 
           {/* Çıkış Yap */}
@@ -679,20 +677,20 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: "#ffdad6" }]}>
-                <LogoutIcon size={16} color="#ba1a1a" />
+              <View style={[styles.toolIconWrap, { backgroundColor: tokens.color.dangerBorder }]}>
+                <LogoutIcon size={16} color={tokens.color.danger} />
               </View>
-              <Text style={[styles.toolLabel, { color: "#ba1a1a", fontWeight: "700" }]}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.toolLabel, { color: tokens.color.danger, fontWeight: "700" }]}>
                 Çıkış Yap
               </Text>
             </View>
-            <Text style={[styles.toolChevron, { color: "#ba1a1a" }]}>›</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.toolChevron, { color: tokens.color.danger }]}>›</Text>
           </TouchableOpacity>
         </View>
 
         {/* Subtle Footer Note */}
         <View style={styles.botanicalFooter}>
-          <Text style={styles.botanicalFooterText}>MAPSBRIDGE BOTANICAL • v3.4.1</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botanicalFooterText}>MAPSBRIDGE BOTANICAL • v3.4.1</Text>
         </View>
       </ScrollView>
 
@@ -712,14 +710,14 @@ export function ProfileScreen({
           <View style={styles.modalCard}>
             <View style={styles.modalHeaderRow}>
               <View>
-                <Text style={styles.modalHeading}>Rotanın İsmini Düzenle</Text>
-                <Text style={styles.modalSubheading}>Rotanız için yeni bir isim belirleyin</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalHeading}>Rotanın İsmini Düzenle</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSubheading}>Rotanız için yeni bir isim belirleyin</Text>
               </View>
               <TouchableOpacity
                 style={styles.modalCloseCircle}
                 onPress={() => setRenamingRoute(null)}
               >
-                <Text style={styles.modalCloseCircleText}>✕</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseCircleText}>✕</Text>
               </TouchableOpacity>
             </View>
 
@@ -728,7 +726,7 @@ export function ProfileScreen({
               value={renameRouteText}
               onChangeText={setRenameRouteText}
               placeholder="Örn: Hafta Sonu Ege Rotası"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={tokens.color.neutral400}
               autoFocus
             />
 
@@ -737,7 +735,7 @@ export function ProfileScreen({
                 style={styles.renameCancelBtn}
                 onPress={() => setRenamingRoute(null)}
               >
-                <Text style={styles.renameCancelText}>Vazgeç</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.renameCancelText}>Vazgeç</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.renameConfirmBtn}
@@ -748,7 +746,7 @@ export function ProfileScreen({
                   }
                 }}
               >
-                <Text style={styles.renameConfirmText}>İsmi Kaydet</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.renameConfirmText}>İsmi Kaydet</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -778,14 +776,14 @@ export function ProfileScreen({
         />
       )}
       <ScreenTourModal screen="profile" />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   topHeader: {
     flexDirection: "row",
@@ -794,7 +792,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(234, 237, 255, 0.7)",
+    borderBottomColor: withAlpha(tokens.color.surfaceTint, 0.7),
   },
   headerTitleRow: {
     flexDirection: "row",
@@ -805,21 +803,21 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#1e4d3e",
+    backgroundColor: tokens.color.brandHover,
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     letterSpacing: -0.3,
   },
   notificationBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -827,28 +825,28 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
     borderWidth: 1,
-    borderColor: "#bbedd8",
+    borderColor: tokens.color.surfaceBrandStrong,
   },
   chatHeaderBadge: {
     position: "absolute",
     top: -2,
     right: -2,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
     width: 16,
     height: 16,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1.5,
-    borderColor: "#ffffff",
+    borderColor: tokens.color.neutral0,
   },
   chatHeaderBadgeText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 9,
     fontWeight: "900",
   },
@@ -858,14 +856,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingVertical: 11,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#bbedd8",
+    borderColor: tokens.color.surfaceBrandStrong,
   },
   chatActionBtnText: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontSize: 13,
     fontWeight: "800",
   },
@@ -875,10 +873,10 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
   },
   profileCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 20,
     padding: 18,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
@@ -898,22 +896,22 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     borderWidth: 2,
-    borderColor: "#34D399",
+    borderColor: tokens.color.accentStrong,
   },
   avatarImagePlaceholder: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderWidth: 2,
-    borderColor: "#34D399",
+    borderColor: tokens.color.accentStrong,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   avatarEditPenBadge: {
     position: "absolute",
@@ -922,11 +920,11 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#ffffff",
+    borderColor: tokens.color.neutral0,
   },
   avatarCheckBadge: {
     position: "absolute",
@@ -935,11 +933,11 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#ffffff",
+    borderColor: tokens.color.neutral0,
   },
   profileInfo: {
     flex: 1,
@@ -952,17 +950,17 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     letterSpacing: -0.3,
   },
   verifiedIcon: {
     fontSize: 13,
-    color: "#10B981",
+    color: tokens.color.accent,
     fontWeight: "900",
   },
   userHandle: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   userLocationBadge: {
@@ -973,12 +971,12 @@ const styles = StyleSheet.create({
   },
   userLocationText: {
     fontSize: 11,
-    color: "#059669",
+    color: tokens.color.successStrong,
     fontWeight: "700",
   },
   userBioText: {
     fontSize: 13,
-    color: "#334155",
+    color: tokens.color.neutral700,
     lineHeight: 18,
     marginTop: 12,
   },
@@ -986,7 +984,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -998,7 +996,7 @@ const styles = StyleSheet.create({
     marginVertical: 14,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#eaedff",
+    borderColor: tokens.color.surfaceTint,
   },
   statCol: {
     alignItems: "center",
@@ -1006,18 +1004,18 @@ const styles = StyleSheet.create({
   statNum: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   statLabel: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontWeight: "600",
     marginTop: 2,
   },
   statDivider: {
     width: 1,
     height: 24,
-    backgroundColor: "#eaedff",
+    backgroundColor: tokens.color.surfaceTint,
   },
   actionButtonsRow: {
     flexDirection: "row",
@@ -1029,12 +1027,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     paddingVertical: 11,
     borderRadius: 999,
   },
   editProfileBtnText: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontSize: 13,
     fontWeight: "700",
   },
@@ -1044,17 +1042,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 11,
     borderRadius: 999,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 3,
   },
   shareProfileBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 13,
     fontWeight: "700",
   },
@@ -1068,12 +1066,12 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   sectionHeadingLink: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#286954",
+    color: tokens.color.link,
   },
   routesGroup: {
     gap: 10,
@@ -1083,10 +1081,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 16,
     padding: 12,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 6,
@@ -1112,41 +1110,41 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
   },
   routeBadgeText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#286954",
+    color: tokens.color.link,
     letterSpacing: 0.4,
   },
   routeBadgeTextAlt: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#717974",
+    color: tokens.color.textSubtle,
     letterSpacing: 0.4,
     marginBottom: 2,
   },
   routeTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   routeSub: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   chevronIcon: {
     fontSize: 22,
-    color: "#c0c8c3",
+    color: tokens.color.neutral300,
     paddingRight: 4,
   },
   toolsCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 20,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 6,
@@ -1156,7 +1154,7 @@ const styles = StyleSheet.create({
   toolsCardHeading: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     marginBottom: 8,
     paddingHorizontal: 2,
   },
@@ -1166,7 +1164,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f2f3ff",
+    borderBottomColor: tokens.color.surfaceTint,
   },
   toolLeft: {
     flexDirection: "row",
@@ -1183,7 +1181,7 @@ const styles = StyleSheet.create({
   toolLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   toolRight: {
     flexDirection: "row",
@@ -1191,20 +1189,20 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   newBadge: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 999,
   },
   newBadgeText: {
-    color: "#005035",
+    color: tokens.color.onSurfaceBrand,
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 0.3,
   },
   toolChevron: {
     fontSize: 20,
-    color: "#c0c8c3",
+    color: tokens.color.neutral300,
   },
   botanicalFooter: {
     alignItems: "center",
@@ -1215,28 +1213,28 @@ const styles = StyleSheet.create({
   botanicalFooterText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     letterSpacing: 0.8,
   },
   postCountBadge: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   postCountBadgeText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#065f46",
+    color: tokens.color.onSurfaceBrand,
   },
   myPostsGroup: {
     gap: 12,
     marginBottom: 22,
   },
   emptyPostsCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 16,
     padding: 24,
     alignItems: "center",
@@ -1246,20 +1244,20 @@ const styles = StyleSheet.create({
   emptyPostsTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     marginTop: 6,
   },
   emptyPostsSub: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     textAlign: "center",
     lineHeight: 18,
   },
   myPostCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 16,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 6,
@@ -1273,7 +1271,7 @@ const styles = StyleSheet.create({
   },
   myPostTime: {
     fontSize: 11,
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     fontWeight: "600",
   },
   myPostLocationRow: {
@@ -1285,7 +1283,7 @@ const styles = StyleSheet.create({
   myPostLocationText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#059669",
+    color: tokens.color.successStrong,
   },
   myPostActionBtns: {
     flexDirection: "row",
@@ -1296,7 +1294,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 999,
@@ -1304,10 +1302,10 @@ const styles = StyleSheet.create({
   postEditSmallText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   postDeleteSmallBtn: {
-    backgroundColor: "#fee2e2",
+    backgroundColor: tokens.color.dangerBg,
     width: 26,
     height: 26,
     borderRadius: 13,
@@ -1316,7 +1314,7 @@ const styles = StyleSheet.create({
   },
   myPostContent: {
     fontSize: 13,
-    color: "#1e293b",
+    color: tokens.color.neutral800,
     lineHeight: 20,
     marginBottom: 8,
   },
@@ -1329,8 +1327,8 @@ const styles = StyleSheet.create({
   myPostTag: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#10b981",
-    backgroundColor: "#ecfdf5",
+    color: tokens.color.accent,
+    backgroundColor: tokens.color.surfaceBrand,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
@@ -1341,7 +1339,7 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderTopColor: tokens.color.neutral100,
   },
   myPostStatItem: {
     flexDirection: "row",
@@ -1351,40 +1349,40 @@ const styles = StyleSheet.create({
   myPostStatText: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#64748b",
+    color: tokens.color.textSubtle,
   },
   // Empty Routes Card
   emptyRoutesCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 16,
     padding: 24,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#e2e7ff",
+    borderColor: tokens.color.surfaceTint,
     marginVertical: 4,
   },
   emptyRoutesTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#1e293b",
+    color: tokens.color.neutral800,
     marginTop: 10,
   },
   emptyRoutesSub: {
     fontSize: 12,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     textAlign: "center",
     marginTop: 4,
     marginBottom: 16,
     lineHeight: 18,
   },
   createRouteBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 20,
   },
   createRouteBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 12.5,
     fontWeight: "700",
   },
@@ -1399,37 +1397,37 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#bbedd8",
+    borderColor: tokens.color.surfaceBrandStrong,
   },
   routeDeleteBtn: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#fee2e2",
+    backgroundColor: tokens.color.dangerBg,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#fecaca",
+    borderColor: tokens.color.dangerBorder,
   },
   // Rename Route Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(tokens.color.black, 0.5),
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
   modalCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 20,
     padding: 20,
     width: "100%",
     maxWidth: 400,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
@@ -1444,60 +1442,60 @@ const styles = StyleSheet.create({
   modalHeading: {
     fontSize: 17,
     fontWeight: "800",
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   modalSubheading: {
     fontSize: 12,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   modalCloseCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
   },
   modalCloseCircleText: {
     fontSize: 14,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     fontWeight: "700",
   },
   modalRenameInput: {
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: tokens.color.borderStrong,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   renameCancelBtn: {
     flex: 1,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
   },
   renameCancelText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#64748b",
+    color: tokens.color.textSubtle,
   },
   renameConfirmBtn: {
     flex: 1.5,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     alignItems: "center",
     justifyContent: "center",
   },
   renameConfirmText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
 });

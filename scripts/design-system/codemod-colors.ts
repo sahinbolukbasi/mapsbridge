@@ -3,7 +3,7 @@
 //
 // Kullanım:
 //   node --experimental-strip-types scripts/design-system/codemod-colors.ts [seçenekler] <dosya|dizin>...
-//     --mode css|tsx         (varsayılan: uzantıdan)
+//     --mode css|tsx|rn      (varsayılan: uzantıdan; rn = React Native, apps/mobile)
 //     --dry-run              dosyaya yazmaz, yalnızca rapor
 //     --report <json>        codemod-report.json yolu
 //     --apply-manual <id,…>  manuel-kontrast listesinden onaylanan satırlar (tekrarlanabilir kayıt)
@@ -24,7 +24,7 @@
 //   8. Layer sarma layer-css.ts'in işidir; sarılmamış CSS dosyası ölümcül hatadır.
 // Ayrıştırılamayan dosya ölümcüldür (işlem durur, hiçbir dosya yazılmaz).
 import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deltaE, fold, normalizeHex } from "../../packages/design-tokens/src/color-math.ts";
 import { dataPalette, palette, thirdParty } from "../../packages/design-tokens/src/palette.ts";
@@ -81,7 +81,7 @@ export type Note = {
 };
 export type FileReport = { file: string; applied: number; manual: number; skipped: number };
 export type Report = {
-  mode: "css" | "tsx";
+  mode: "css" | "tsx" | "rn";
   dryRun: boolean;
   files: FileReport[];
   applied: Change[];
@@ -798,9 +798,383 @@ function inStyleProp(src: string, pos: number): boolean {
 }
 
 // ---------------------------------------------------------------------------------------------
+// RN modu (design §7.1): apps/mobile kaynağındaki TÜM hex/rgb(a) literal'leri `tokens.*`
+// ifadesine çevrilir (StyleSheet, JSX öznitelikleri, JS sabitleri, WebView HTML şablonları).
+// Hedef: exact palette → rol token'ı (değer korunur); değilse fold() (ΔE ≤ 6 ya da §2.4b karar
+// satırı); hiçbiri yoksa `unmapped` → exit 1. Alfa: hazır alfa token'ı (değer birebir) ya da
+// `withAlpha(token, a)` (RN'de color-mix karşılığı). thirdParty/dataPalette katlanmaz, kendi
+// gruplarından okunur. Siyah (gölge/örtü tabanı) → tokens.color.black (yalnız mobil).
+type NativeColors = Record<string, string>;
+const RN_LITERAL =
+  /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![\w-])|\brgba?\([^()]*\)/g;
+type Segment = {
+  start: number;
+  end: number;
+  kind: "str" | "tpl";
+  quoteStart: number;
+  quoteEnd: number;
+};
+/** TS/TSX kaynağını yorum/string/şablon farkındalıklı tarar; metin bölümlerini döner. */
+export function scanSegments(src: string): {
+  segments: Segment[];
+  comments: Array<[number, number]>;
+} {
+  const segments: Segment[] = [];
+  const comments: Array<[number, number]> = [];
+  const stack: number[] = []; // şablon içindeki ${ derinlikleri
+  let i = 0;
+  let depth = 0;
+  const readTemplate = (from: number) => {
+    // from: ` sonrası ya da } sonrası (şablona dönüş)
+    let j = from;
+    const begin = from;
+    while (j < src.length) {
+      const ch = src[j];
+      if (ch === "\\") {
+        j += 2;
+        continue;
+      }
+      if (ch === "`") {
+        segments.push({
+          start: begin,
+          end: j,
+          kind: "tpl",
+          quoteStart: begin - 1,
+          quoteEnd: j + 1,
+        });
+        return { next: j + 1, open: false };
+      }
+      if (ch === "$" && src[j + 1] === "{") {
+        segments.push({ start: begin, end: j, kind: "tpl", quoteStart: begin - 1, quoteEnd: j });
+        return { next: j + 2, open: true };
+      }
+      j++;
+    }
+    throw new Error("kapanmamış şablon literal'i");
+  };
+  // Regex literal'lerini kaba tespit: önceki anlamlı karakter operatörse '/' regex başlatır.
+  const regexAllowed = (pos: number) => {
+    let k = pos - 1;
+    while (k >= 0 && /\s/.test(src[k])) k--;
+    if (k < 0) return true;
+    return (
+      /[(,=:[!&|?{};+\-*%<>~^]/.test(src[k]) ||
+      /\b(return|typeof|case|in|of)$/.test(src.slice(Math.max(0, k - 6), k + 1))
+    );
+  };
+  while (i < src.length) {
+    const ch = src[i];
+    if (ch === "/" && src[i + 1] === "/") {
+      const e = src.indexOf("\n", i);
+      const end = e < 0 ? src.length : e;
+      comments.push([i, end]);
+      i = end;
+      continue;
+    }
+    if (ch === "/" && src[i + 1] === "*") {
+      const e = src.indexOf("*/", i + 2);
+      if (e < 0) throw new Error("kapanmamış yorum");
+      comments.push([i, e + 2]);
+      i = e + 2;
+      continue;
+    }
+    if (ch === "/" && regexAllowed(i)) {
+      // regex literal'i atla
+      let j = i + 1;
+      let cls = false;
+      while (j < src.length && src[j] !== "\n") {
+        if (src[j] === "\\") {
+          j += 2;
+          continue;
+        }
+        if (src[j] === "[") cls = true;
+        else if (src[j] === "]") cls = false;
+        else if (src[j] === "/" && !cls) break;
+        j++;
+      }
+      if (src[j] === "/") {
+        i = j + 1;
+        continue;
+      }
+    }
+    if (ch === '"' || ch === "'") {
+      let j = i + 1;
+      while (j < src.length && src[j] !== ch) {
+        if (src[j] === "\\") j++;
+        else if (src[j] === "\n") break;
+        j++;
+      }
+      segments.push({ start: i + 1, end: j, kind: "str", quoteStart: i, quoteEnd: j + 1 });
+      i = j + 1;
+      continue;
+    }
+    if (ch === "`") {
+      const r = readTemplate(i + 1);
+      i = r.next;
+      if (r.open) {
+        stack.push(depth);
+        depth = 0;
+      }
+      continue;
+    }
+    if (ch === "{") {
+      depth++;
+      i++;
+      continue;
+    }
+    if (ch === "}") {
+      if (depth === 0 && stack.length) {
+        depth = stack.pop()!;
+        const r = readTemplate(i + 1);
+        i = r.next;
+        if (r.open) {
+          stack.push(depth);
+          depth = 0;
+        }
+        continue;
+      }
+      depth--;
+      i++;
+      continue;
+    }
+    i++;
+  }
+  return { segments, comments };
+}
+function rnRole(key: string): Exclude<Role, "ambiguous"> {
+  const k = key.toLowerCase();
+  if (/shadow/.test(k)) return "shadow";
+  if (/^(background|bg)|backgroundcolor|fillcolor|^colors$|bgcolors$|^fill$/.test(k))
+    return k === "fill" ? "text" : "background";
+  if (/border|outline/.test(k)) return "border";
+  return "text";
+}
+/** RN için token ifadesi; bulunamazsa null + sebep. */
+export function decideRn(
+  literal: string,
+  key: string,
+  native: NativeColors,
+):
+  | { expr: string; kind: Change["kind"]; dE?: number; preserved: boolean }
+  | { reason: string; unmapped: boolean } {
+  const parsed = parseColor(literal);
+  if (!parsed) return { reason: "çözümlenemeyen renk", unmapped: true };
+  const { hex, alpha } = parsed;
+  const withA = (expr: string) =>
+    alpha === 1 ? expr : `withAlpha(${expr}, ${Math.round(alpha * 1000) / 1000})`;
+  if (!PALETTE_BY_HEX.has(hex) && THIRD_PARTY.has(hex))
+    return {
+      expr: withA(`tokens.thirdParty[${JSON.stringify(THIRD_PARTY.get(hex))}]`),
+      kind: "exact",
+      preserved: true,
+    };
+  if (!PALETTE_BY_HEX.has(hex) && DATA.has(hex)) {
+    const n = DATA.get(hex)!;
+    const acc = /^[a-z]+$/.test(n) ? `.${n}` : `[${JSON.stringify(n)}]`;
+    return { expr: withA(`tokens.dataPalette${acc}`), kind: "exact", preserved: true };
+  }
+  if (hex === "#000000")
+    return {
+      expr: withA("tokens.color.black"),
+      kind: alpha === 1 ? "exact" : "alpha",
+      preserved: true,
+    };
+  let target = PALETTE_BY_HEX.get(hex);
+  let kind: Change["kind"] = alpha === 1 ? "exact" : "alpha";
+  let dE: number | undefined;
+  if (!target) {
+    const f = fold(hex);
+    if (!f) return { reason: "ΔE > 6 ve §2.4b karar tablosunda satır yok", unmapped: true };
+    kind = f.decided ? "decided" : "fold";
+    dE =
+      Math.round(
+        (f.decided ? f.dE : deltaE(hex, (palette as Record<string, string>)[f.name] ?? hex)) * 10,
+      ) / 10;
+    if (f.group === "data") {
+      const n = f.name.slice("data-".length);
+      const acc = /^[a-z]+$/.test(n) ? `.${n}` : `[${JSON.stringify(n)}]`;
+      return { expr: withA(`tokens.dataPalette${acc}`), kind, dE, preserved: false };
+    }
+    if (f.group !== "ui") return { reason: `karar hedefi UI dışı (${f.name})`, unmapped: true };
+    target = f.name;
+  }
+  const targetHex = palette[target as keyof typeof palette].toLowerCase();
+  const preserved = targetHex === hex;
+  if (targetHex === "#000000") return { expr: withA("tokens.color.black"), kind, dE, preserved };
+  const role = rnRole(key);
+  if (alpha < 1 && preserved) {
+    const rgb = hexToRgb(targetHex);
+    const want = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+    const ready = Object.entries(native).find(([, v]) => v === want)?.[0];
+    if (ready) return { expr: `tokens.color.${ready}`, kind, dE, preserved };
+  }
+  const web =
+    tokenFor(targetHex, role, false) ??
+    tokenFor(targetHex, role === "text" ? "background" : "text", false);
+  let name = web
+    ? web.replace(/^color-/, "").replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase())
+    : null;
+  if (!name || native[name]?.toLowerCase() !== targetHex)
+    name = Object.entries(native).find(([, v]) => v.toLowerCase() === targetHex)?.[0] ?? null;
+  if (!name) return { reason: `${target} (${targetHex}) için mobil token yok`, unmapped: true };
+  return { expr: withA(`tokens.color.${name}`), kind, dE, preserved };
+}
+/** RN modu dönüşümü: string literal'i ifadeye, şablon metnindeki literal'i ${ifade}'ye çevirir. */
+export function transformRn(
+  src: string,
+  file: string,
+  native: NativeColors,
+  themeImport: string,
+  report: Report,
+): string {
+  const edits: Edit[] = [];
+  const fr: FileReport = { file, applied: 0, manual: 0, skipped: 0 };
+  const lineAt = lineIndex(src);
+  const { segments, comments } = scanSegments(src);
+  let usesTokens = false;
+  let usesAlpha = false;
+  for (const [a, b] of comments)
+    for (const m of src.slice(a, b).matchAll(RN_LITERAL))
+      report.notes.push({
+        file,
+        line: lineAt(a + m.index!),
+        property: "yorum",
+        value: m[0],
+        reason: "yorumdaki renk literal'i (elle)",
+      });
+  for (const seg of segments) {
+    const body = src.slice(seg.start, seg.end);
+    const lits = [...body.matchAll(RN_LITERAL)];
+    if (!lits.length) continue;
+    const whole = seg.kind === "str" && lits.length === 1 && lits[0][0] === body;
+    for (const lit of lits) {
+      const pos = seg.start + lit.index!;
+      const line = lineAt(pos);
+      let key: string;
+      if (whole) {
+        const before = src.slice(Math.max(0, seg.quoteStart - 80), seg.quoteStart);
+        key =
+          before.match(/([A-Za-z]+)\s*[:=]\s*\{?\s*\[?\s*(?:["'][^"']*["']\s*,\s*)*$/)?.[1] ?? "?";
+      } else {
+        const before = src.slice(Math.max(0, pos - 120), pos);
+        key = before.match(/([A-Za-z-]+)\s*:[^;:{}]*$/)?.[1] ?? "?";
+        key = key.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
+      }
+      const d = decideRn(lit[0], key, native);
+      if ("reason" in d) {
+        (d.unmapped ? report.unmapped : report.ambiguous).push({
+          file,
+          line,
+          property: key,
+          value: lit[0],
+          reason: d.reason,
+        });
+        fr.skipped++;
+        continue;
+      }
+      if (seg.kind === "str" && !whole) {
+        report.unmapped.push({
+          file,
+          line,
+          property: key,
+          value: lit[0],
+          reason: "string içinde gömülü renk (şablona çevir, elle)",
+        });
+        fr.skipped++;
+        continue;
+      }
+      usesTokens = true;
+      if (d.expr.startsWith("withAlpha(")) usesAlpha = true;
+      if (whole) edits.push({ start: seg.quoteStart, end: seg.quoteEnd, text: d.expr });
+      else edits.push({ start: pos, end: pos + lit[0].length, text: `\${${d.expr}}` });
+      report.applied.push({
+        id: idFor(file, line, lit[0], 0),
+        file,
+        line,
+        selector: seg.kind,
+        property: key,
+        before: lit[0],
+        after: d.expr,
+        kind: d.kind,
+        dE: d.dE,
+        preserved: d.preserved,
+        background: "unknown",
+      });
+      fr.applied++;
+    }
+  }
+  report.files.push(fr);
+  // JSX özniteliği: color="#fff" → color={tokens.x}
+  let out = applyEdits(src, edits);
+  out = out.replace(
+    /([A-Za-z]+)=(tokens\.[A-Za-z0-9_.[\]"-]+|withAlpha\([^()]*\))(?=[\s/>])/g,
+    "$1={$2}",
+  );
+  if (usesTokens) out = ensureThemeImport(out, themeImport, usesAlpha);
+  return out;
+}
+function ensureThemeImport(src: string, from: string, alpha: boolean): string {
+  const names = alpha ? ["tokens", "withAlpha"] : ["tokens"];
+  const re = new RegExp(
+    `import \\{([^}]*)\\} from "${from.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}";`,
+  );
+  const m = src.match(re);
+  if (m) {
+    const have = m[1]
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean);
+    const all = [...new Set([...have, ...names])];
+    return src.replace(re, `import { ${all.join(", ")} } from "${from}";`);
+  }
+  // son import bildiriminden sonra
+  const importRe = /^import[\s\S]*?from\s+["'][^"']+["'];?\s*$/gm;
+  let last = -1;
+  for (const im of src.matchAll(importRe)) last = im.index! + im[0].length;
+  const line = `import { ${names.join(", ")} } from "${from}";`;
+  if (last < 0) return `${line}\n${src}`;
+  return src.slice(0, last) + `\n${line}` + src.slice(last);
+}
+async function mainRn(argv: string[]): Promise<number> {
+  const dryRun = argv.includes("--dry-run");
+  const ri = argv.indexOf("--report");
+  const reportPath = ri >= 0 ? argv[ri + 1] : undefined;
+  const targets = argv
+    .filter((a, i) => !a.startsWith("--") && argv[i - 1] !== "--mode" && argv[i - 1] !== "--report")
+    .map((a) => resolve(a));
+  if (!targets.length) throw new Error("Dosya ya da dizin verin");
+  const mobile = join(root, "apps/mobile");
+  const nativePath = join(mobile, "src/theme/tokens.ts");
+  const { tokens } = (await import(nativePath)) as { tokens: { color: NativeColors } };
+  const files: string[] = [];
+  for (const t of targets) collect(t, "tsx", files);
+  const report = emptyReport("rn", dryRun);
+  const outputs: Array<[string, string, string]> = [];
+  for (const abs of files) {
+    const rel = relative(root, abs).split("\\").join("/");
+    if (rel.startsWith("apps/mobile/src/theme/")) continue;
+    let themeImport = relative(dirname(abs), join(mobile, "src/theme")).split("\\").join("/");
+    if (!themeImport.startsWith(".")) themeImport = `./${themeImport}`;
+    const src = readFileSync(abs, "utf8");
+    outputs.push([abs, src, transformRn(src, rel, tokens.color, themeImport, report)]);
+  }
+  if (!dryRun) for (const [abs, src, next] of outputs) if (next !== src) writeFileSync(abs, next);
+  if (reportPath) writeFileSync(reportPath, JSON.stringify(report, null, 2) + "\n");
+  const t = (k: keyof Report) => (report[k] as unknown[]).length;
+  console.log(
+    `codemod-colors (rn${dryRun ? ", dry-run" : ""}): ${files.length} dosya · uygulanan ${t("applied")} · belirsiz ${t("ambiguous")} · not ${t("notes")} · eşlenmemiş ${t("unmapped")}`,
+  );
+  for (const f of report.files)
+    if (f.applied || f.skipped)
+      console.log(`  ${f.file}: ${f.applied} uygulandı, ${f.skipped} atlandı`);
+  for (const u of [...report.unmapped, ...report.ambiguous])
+    console.error(`  eşlenmemiş: ${u.file}:${u.line} ${u.property}: ${u.value} — ${u.reason}`);
+  return report.unmapped.length || report.ambiguous.length ? 1 : 0;
+}
+// ---------------------------------------------------------------------------------------------
 // CLI
 
-export function emptyReport(mode: "css" | "tsx", dryRun: boolean): Report {
+export function emptyReport(mode: "css" | "tsx" | "rn", dryRun: boolean): Report {
   return {
     mode,
     dryRun,
@@ -903,8 +1277,9 @@ function mainTw(argv: string[]) {
   return colors.unmapped.length ? 1 : 0;
 }
 
-function main(argv: string[]) {
+function main(argv: string[]): number | Promise<number> {
   if (argv[argv.indexOf("--mode") + 1] === "tw" && argv.includes("--mode")) return mainTw(argv);
+  if (argv[argv.indexOf("--mode") + 1] === "rn" && argv.includes("--mode")) return mainRn(argv);
   let mode: "css" | "tsx" | undefined;
   let dryRun = false;
   let reportPath: string | undefined;
@@ -948,10 +1323,13 @@ function main(argv: string[]) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try {
-    process.exitCode = main(process.argv.slice(2));
-  } catch (err) {
-    console.error(`codemod-colors: ${(err as Error).message}`);
-    process.exitCode = 2;
-  }
+  Promise.resolve()
+    .then(() => main(process.argv.slice(2)))
+    .then((code) => {
+      process.exitCode = code;
+    })
+    .catch((err) => {
+      console.error(`codemod-colors: ${(err as Error).message}`);
+      process.exitCode = 2;
+    });
 }

@@ -5,8 +5,6 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
   ScrollView,
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -15,6 +13,8 @@ import {
 import { authService, UserSession } from "../services/api";
 import { AppleLogo, GoogleLogo, ArrowRightIcon, ExploreIcon } from "../components/Icons";
 
+import { Screen } from "../ui";
+import { tokens } from "../theme";
 type AuthMode = "login" | "register" | "confirm_signup" | "forgot_password" | "reset_password";
 
 interface AuthScreenProps {
@@ -177,8 +177,7 @@ export function AuthScreen({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#faf8ff" />
+    <Screen style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
@@ -190,14 +189,14 @@ export function AuthScreen({
           {/* Top Navigation & Brand Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onCancel} style={styles.backBtn} activeOpacity={0.8}>
-              <Text style={{ fontSize: 16, color: "#013628" }}>←</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.color.textBrand }}>←</Text>
             </TouchableOpacity>
 
             <View style={styles.headerCenter}>
               <View style={styles.headerLogoBadge}>
-                <ExploreIcon size={16} color="#ffffff" />
+                <ExploreIcon size={16} color={tokens.color.onPrimary} />
               </View>
-              <Text style={styles.headerBrandText}>MapsBridge</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headerBrandText}>MapsBridge</Text>
             </View>
 
             <View style={{ width: 40 }} />
@@ -205,14 +204,14 @@ export function AuthScreen({
 
           {/* Heading & Subtitle */}
           <View style={styles.titleSection}>
-            <Text style={styles.screenHeading}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.screenHeading}>
               {mode === "login" && "Tekrar Hoş Geldiniz"}
               {mode === "register" && "Hesap Oluştur"}
               {mode === "confirm_signup" && "Kodu Doğrula"}
               {mode === "forgot_password" && "Şifremi Unuttum"}
               {mode === "reset_password" && "Yeni Şifre Belirle"}
             </Text>
-            <Text style={styles.screenSubheading}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.screenSubheading}>
               {mode === "login" && "MapsBridge hesabınıza giriş yaparak rotalarınıza devam edin."}
               {mode === "register" &&
                 "Kendi rotalarını çiz, gizli patikaları keşfet ve dünya ile paylaş."}
@@ -225,13 +224,13 @@ export function AuthScreen({
           {/* Info & Error Alerts */}
           {errorMessage ? (
             <View style={styles.errorAlert}>
-              <Text style={styles.errorAlertText}>⚠️ {errorMessage}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.errorAlertText}>⚠️ {errorMessage}</Text>
             </View>
           ) : null}
 
           {infoMessage ? (
             <View style={styles.infoAlert}>
-              <Text style={styles.infoAlertText}>ℹ️ {infoMessage}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.infoAlertText}>ℹ️ {infoMessage}</Text>
             </View>
           ) : null}
 
@@ -248,7 +247,7 @@ export function AuthScreen({
                   }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.segmentText, mode === "login" && styles.segmentTextActive]}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.segmentText, mode === "login" && styles.segmentTextActive]}>
                     Giriş Yap
                   </Text>
                 </TouchableOpacity>
@@ -261,7 +260,7 @@ export function AuthScreen({
                   }}
                   activeOpacity={0.8}
                 >
-                  <Text
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                     style={[styles.segmentText, mode === "register" && styles.segmentTextActive]}
                   >
                     Kayıt Ol
@@ -291,8 +290,8 @@ export function AuthScreen({
                     }}
                     activeOpacity={0.85}
                   >
-                    <AppleLogo size={18} color="#ffffff" />
-                    <Text style={styles.appleBtnText}>
+                    <AppleLogo size={18} color={tokens.color.onPrimary} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.appleBtnText}>
                       {mode === "register" ? "Apple ile Kayıt Ol" : "Apple ile Giriş Yap"}
                     </Text>
                   </TouchableOpacity>
@@ -304,7 +303,7 @@ export function AuthScreen({
                     activeOpacity={0.85}
                   >
                     <GoogleLogo size={18} />
-                    <Text style={styles.googleBtnText}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.googleBtnText}>
                       {mode === "register" ? "Google ile Kayıt Ol" : "Google ile Giriş Yap"}
                     </Text>
                   </TouchableOpacity>
@@ -313,7 +312,7 @@ export function AuthScreen({
                 {/* Minimal Separator */}
                 <View style={styles.separatorContainer}>
                   <View style={styles.separatorLine} />
-                  <Text style={styles.separatorText}>veya e-posta ile</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.separatorText}>veya e-posta ile</Text>
                 </View>
               </>
             )}
@@ -322,13 +321,13 @@ export function AuthScreen({
             {mode === "register" && (
               <>
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Adınız</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Adınız</Text>
                   <View style={styles.inputWrap}>
-                    <Text style={styles.inputIcon}>👤</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>👤</Text>
                     <TextInput
                       style={styles.input}
                       placeholder="Doğan"
-                      placeholderTextColor="#717974"
+                      placeholderTextColor={tokens.color.textSubtle}
                       value={firstName}
                       onChangeText={setFirstName}
                       autoCapitalize="words"
@@ -337,13 +336,13 @@ export function AuthScreen({
                 </View>
 
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Soyadınız</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Soyadınız</Text>
                   <View style={styles.inputWrap}>
-                    <Text style={styles.inputIcon}>👤</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>👤</Text>
                     <TextInput
                       style={styles.input}
                       placeholder="Demir"
-                      placeholderTextColor="#717974"
+                      placeholderTextColor={tokens.color.textSubtle}
                       value={lastName}
                       onChangeText={setLastName}
                       autoCapitalize="words"
@@ -352,13 +351,13 @@ export function AuthScreen({
                 </View>
 
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Telefon Numarası</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Telefon Numarası</Text>
                   <View style={styles.inputWrap}>
-                    <Text style={styles.inputIcon}>📱</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>📱</Text>
                     <TextInput
                       style={styles.input}
                       placeholder="+905550000000"
-                      placeholderTextColor="#717974"
+                      placeholderTextColor={tokens.color.textSubtle}
                       value={phone}
                       onChangeText={setPhone}
                       keyboardType="phone-pad"
@@ -371,13 +370,13 @@ export function AuthScreen({
 
             {(mode === "login" || mode === "register" || mode === "forgot_password") && (
               <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>E-posta Adresi</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>E-posta Adresi</Text>
                 <View style={styles.inputWrap}>
-                  <Text style={styles.inputIcon}>✉️</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>✉️</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="adiniz@ornek.com"
-                    placeholderTextColor="#717974"
+                    placeholderTextColor={tokens.color.textSubtle}
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -389,13 +388,13 @@ export function AuthScreen({
 
             {(mode === "login" || mode === "register") && (
               <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Şifre</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Şifre</Text>
                 <View style={styles.inputWrap}>
-                  <Text style={styles.inputIcon}>🔒</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>🔒</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="••••••••••••"
-                    placeholderTextColor="#717974"
+                    placeholderTextColor={tokens.color.textSubtle}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
@@ -404,7 +403,7 @@ export function AuthScreen({
                     style={styles.eyeBtn}
                     onPress={() => setShowPassword(!showPassword)}
                   >
-                    <Text style={{ fontSize: 16 }}>{showPassword ? "👁️" : "🙈"}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>{showPassword ? "👁️" : "🙈"}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -415,13 +414,13 @@ export function AuthScreen({
               <View style={styles.rulesContainer}>
                 {rules.map((r) => (
                   <View key={r.id} style={styles.ruleRow}>
-                    <Text style={{ fontSize: 11, color: r.valid ? "#10B981" : "#94a3b8" }}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, color: r.valid ? tokens.color.accent : tokens.color.neutral400 }}>
                       {r.valid ? "✓" : "○"}
                     </Text>
-                    <Text
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                       style={[
                         styles.ruleText,
-                        r.valid ? { color: "#10B981" } : { color: "#717974" },
+                        r.valid ? { color: tokens.color.accent } : { color: tokens.color.textSubtle },
                       ]}
                     >
                       {r.label}
@@ -440,9 +439,9 @@ export function AuthScreen({
                   activeOpacity={0.8}
                 >
                   <View style={[styles.checkbox, rememberMe && styles.checkboxActive]}>
-                    {rememberMe && <Text style={{ color: "#fff", fontSize: 10 }}>✓</Text>}
+                    {rememberMe && <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontSize: 10 }}>✓</Text>}
                   </View>
-                  <Text style={styles.rememberText}>Beni hatırla</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.rememberText}>Beni hatırla</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -451,7 +450,7 @@ export function AuthScreen({
                     clearMessages();
                   }}
                 >
-                  <Text style={styles.forgotPassText}>Şifremi Unuttum?</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.forgotPassText}>Şifremi Unuttum?</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -459,13 +458,13 @@ export function AuthScreen({
             {/* Verification Code Fields */}
             {(mode === "confirm_signup" || mode === "reset_password") && (
               <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Doğrulama Kodu</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Doğrulama Kodu</Text>
                 <View style={styles.inputWrap}>
-                  <Text style={styles.inputIcon}>🔢</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>🔢</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="123456"
-                    placeholderTextColor="#717974"
+                    placeholderTextColor={tokens.color.textSubtle}
                     value={code}
                     onChangeText={setCode}
                     keyboardType="number-pad"
@@ -476,13 +475,13 @@ export function AuthScreen({
 
             {mode === "reset_password" && (
               <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Yeni Şifre</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Yeni Şifre</Text>
                 <View style={styles.inputWrap}>
-                  <Text style={styles.inputIcon}>🔒</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>🔒</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="••••••••••••"
-                    placeholderTextColor="#717974"
+                    placeholderTextColor={tokens.color.textSubtle}
                     value={newPassword}
                     onChangeText={setNewPassword}
                     secureTextEntry
@@ -505,17 +504,17 @@ export function AuthScreen({
               activeOpacity={0.88}
             >
               {loading ? (
-                <ActivityIndicator color="#ffffff" />
+                <ActivityIndicator color={tokens.color.onPrimary} />
               ) : (
                 <View style={styles.primaryBtnInner}>
-                  <Text style={styles.primaryAuthBtnText}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryAuthBtnText}>
                     {mode === "login" && "Giriş Yap"}
                     {mode === "register" && "Hesap Oluştur"}
                     {mode === "confirm_signup" && "Kodu Doğrula"}
                     {mode === "forgot_password" && "Kod Gönder"}
                     {mode === "reset_password" && "Şifreyi Değiştir"}
                   </Text>
-                  <ArrowRightIcon size={16} color="#ffffff" />
+                  <ArrowRightIcon size={16} color={tokens.color.onPrimary} />
                 </View>
               )}
             </TouchableOpacity>
@@ -530,8 +529,8 @@ export function AuthScreen({
                   }}
                   style={styles.switchTouch}
                 >
-                  <Text style={styles.switchMuted}>Hesabın yok mu? </Text>
-                  <Text style={styles.switchActive}>Hemen Kaydol ➔</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.switchMuted}>Hesabın yok mu? </Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.switchActive}>Hemen Kaydol ➔</Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
@@ -541,8 +540,8 @@ export function AuthScreen({
                   }}
                   style={styles.switchTouch}
                 >
-                  <Text style={styles.switchMuted}>Zaten üye misin? </Text>
-                  <Text style={styles.switchActive}>Giriş Yap ➔</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.switchMuted}>Zaten üye misin? </Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.switchActive}>Giriş Yap ➔</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -550,19 +549,19 @@ export function AuthScreen({
 
           {/* Trust Badges Footer */}
           <View style={styles.trustFooter}>
-            <Text style={{ fontSize: 13, marginRight: 5 }}>🔒</Text>
-            <Text style={styles.trustFooterText}>256-Bit SSL uçtan uca güvenli şifreleme</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 13, marginRight: 5 }}>🔒</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.trustFooterText}>256-Bit SSL uçtan uca güvenli şifreleme</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -579,7 +578,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -592,14 +591,14 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     alignItems: "center",
     justifyContent: "center",
   },
   headerBrandText: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     letterSpacing: -0.2,
   },
   titleSection: {
@@ -608,42 +607,42 @@ const styles = StyleSheet.create({
   screenHeading: {
     fontSize: 26,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
     letterSpacing: -0.5,
     marginBottom: 4,
   },
   screenSubheading: {
     fontSize: 13,
-    color: "#404945",
+    color: tokens.color.textMuted,
     lineHeight: 19,
   },
   errorAlert: {
-    backgroundColor: "#ffdad6",
+    backgroundColor: tokens.color.dangerBorder,
     padding: 12,
     borderRadius: 12,
     marginBottom: 12,
   },
   errorAlertText: {
-    color: "#ba1a1a",
+    color: tokens.color.danger,
     fontSize: 12,
     fontWeight: "600",
   },
   infoAlert: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     padding: 12,
     borderRadius: 12,
     marginBottom: 12,
   },
   infoAlertText: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontSize: 12,
     fontWeight: "600",
   },
   mainCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 20,
     padding: 18,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -651,7 +650,7 @@ const styles = StyleSheet.create({
   },
   segmentContainer: {
     flexDirection: "row",
-    backgroundColor: "#F1F5F9",
+    backgroundColor: tokens.color.surfaceSunken,
     borderRadius: 12,
     padding: 3,
     marginBottom: 16,
@@ -664,8 +663,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   segmentBtnActive: {
-    backgroundColor: "#ffffff",
-    shadowColor: "#000",
+    backgroundColor: tokens.color.surface,
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -674,10 +673,10 @@ const styles = StyleSheet.create({
   segmentText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   segmentTextActive: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontWeight: "800",
   },
   socialButtonsGroup: {
@@ -689,17 +688,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    backgroundColor: "#000000",
+    backgroundColor: tokens.color.black,
     paddingVertical: 13,
     borderRadius: 14,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   appleBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 14,
     fontWeight: "600",
   },
@@ -708,14 +707,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
     paddingVertical: 13,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#e2e7ff",
+    borderColor: tokens.color.surfaceTint,
   },
   googleBtnText: {
-    color: "#131b2e",
+    color: tokens.color.text,
     fontSize: 14,
     fontWeight: "600",
   },
@@ -728,14 +727,14 @@ const styles = StyleSheet.create({
   separatorLine: {
     width: "100%",
     height: 1,
-    backgroundColor: "#e2e7ff",
+    backgroundColor: tokens.color.surfaceTint,
   },
   separatorText: {
     position: "absolute",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     paddingHorizontal: 10,
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontWeight: "500",
   },
   fieldGroup: {
@@ -744,14 +743,14 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#131b2e",
+    color: tokens.color.text,
     marginBottom: 6,
   },
   inputWrap: {
     position: "relative",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F1F5F9",
+    backgroundColor: tokens.color.surfaceSunken,
     borderRadius: 12,
     paddingHorizontal: 12,
   },
@@ -763,7 +762,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 46,
     fontSize: 14,
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   eyeBtn: {
     padding: 6,
@@ -798,33 +797,33 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: "#c0c8c3",
+    borderColor: tokens.color.borderStrong,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
   },
   checkboxActive: {
-    backgroundColor: "#013628",
-    borderColor: "#013628",
+    backgroundColor: tokens.color.primary,
+    borderColor: tokens.color.primary,
   },
   rememberText: {
     fontSize: 12,
-    color: "#404945",
+    color: tokens.color.textMuted,
     fontWeight: "500",
   },
   forgotPassText: {
     fontSize: 12,
-    color: "#286954",
+    color: tokens.color.link,
     fontWeight: "700",
   },
   primaryAuthBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -836,7 +835,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   primaryAuthBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 14,
     fontWeight: "800",
     letterSpacing: 0.1,
@@ -852,12 +851,12 @@ const styles = StyleSheet.create({
   },
   switchMuted: {
     fontSize: 13,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   switchActive: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#286954",
+    color: tokens.color.link,
   },
   trustFooter: {
     flexDirection: "row",
@@ -867,7 +866,7 @@ const styles = StyleSheet.create({
   },
   trustFooterText: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontWeight: "500",
   },
 });

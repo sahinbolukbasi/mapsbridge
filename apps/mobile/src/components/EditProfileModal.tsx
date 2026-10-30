@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { CloseIcon, CheckIcon, MapPinIcon, CameraIcon, TrashIcon } from "./Icons";
 import { socialSyncService, MobileUserProfile } from "../services/socialSync";
 
+import { tokens, withAlpha } from "../theme";
 export const AVATAR_PRESETS = [
   {
     id: "preset_1",
@@ -154,17 +155,17 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
           {/* Header Bar */}
           <View style={styles.header}>
             <TouchableOpacity style={styles.iconBtn} onPress={onClose} activeOpacity={0.7}>
-              <CloseIcon size={20} color="#0f172a" />
+              <CloseIcon size={20} color={tokens.color.text} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Profili Düzenle</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.headerTitle}>Profili Düzenle</Text>
             <TouchableOpacity
               style={[styles.saveBtn, saving && { opacity: 0.6 }]}
               onPress={handleSave}
               disabled={saving}
               activeOpacity={0.85}
             >
-              <CheckIcon size={16} color="#ffffff" />
-              <Text style={styles.saveBtnText}>{saving ? "Kaydediliyor..." : "Kaydet"}</Text>
+              <CheckIcon size={16} color={tokens.color.onPrimary} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.saveBtnText}>{saving ? "Kaydediliyor..." : "Kaydet"}</Text>
             </TouchableOpacity>
           </View>
 
@@ -180,17 +181,17 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
                   <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
                 ) : (
                   <View style={styles.avatarCircle}>
-                    <Text style={styles.avatarInitial}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.avatarInitial}>
                       {fullName ? fullName.charAt(0).toUpperCase() : "G"}
                     </Text>
                   </View>
                 )}
                 <View style={styles.avatarBadge}>
-                  <CameraIcon size={13} color="#ffffff" />
+                  <CameraIcon size={13} color={tokens.color.onPrimary} />
                 </View>
               </TouchableOpacity>
 
-              <Text style={styles.avatarSectionTitle}>Profil Fotoğrafı</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.avatarSectionTitle}>Profil Fotoğrafı</Text>
 
               {/* Upload from Gallery CTA */}
               <View style={styles.photoActionsRow}>
@@ -199,8 +200,8 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
                   onPress={handlePickPhoto}
                   activeOpacity={0.8}
                 >
-                  <CameraIcon size={16} color="#ffffff" />
-                  <Text style={styles.pickPhotoBtnText}>Galeriden Fotoğraf Seç</Text>
+                  <CameraIcon size={16} color={tokens.color.onPrimary} />
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pickPhotoBtnText}>Galeriden Fotoğraf Seç</Text>
                 </TouchableOpacity>
 
                 {avatarUrl ? (
@@ -209,13 +210,13 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
                     onPress={handleRemovePhoto}
                     activeOpacity={0.8}
                   >
-                    <TrashIcon size={14} color="#ba1a1a" />
-                    <Text style={styles.removePhotoBtnText}>Kaldır</Text>
+                    <TrashIcon size={14} color={tokens.color.danger} />
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.removePhotoBtnText}>Kaldır</Text>
                   </TouchableOpacity>
                 ) : null}
               </View>
 
-              <Text style={styles.avatarTip}>veya hazır gezgin avatarlarından birini seçin:</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.avatarTip}>veya hazır gezgin avatarlarından birini seçin:</Text>
 
               {/* Avatar Presets Horizontal Scroll */}
               <ScrollView
@@ -235,7 +236,7 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
                       <Image source={{ uri: preset.url }} style={styles.presetImg} />
                       {isSelected && (
                         <View style={styles.presetCheckOverlay}>
-                          <Text style={{ color: "#fff", fontSize: 11, fontWeight: "bold" }}>✓</Text>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontSize: 11, fontWeight: "bold" }}>✓</Text>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -246,39 +247,39 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
 
             {/* Inputs Form */}
             <View style={styles.formGroup}>
-              <Text style={styles.label}>AD SOYAD</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.label}>AD SOYAD</Text>
               <TextInput
                 style={styles.input}
                 value={fullName}
                 onChangeText={setFullName}
                 placeholder="Örn: Canberk Yılmaz"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={tokens.color.neutral400}
               />
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>KULLANICI ADI</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.label}>KULLANICI ADI</Text>
               <View style={styles.inputWithPrefix}>
-                <Text style={styles.inputPrefix}>@</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputPrefix}>@</Text>
                 <TextInput
                   style={[styles.input, styles.inputNoBorder]}
                   value={username}
                   onChangeText={setUsername}
                   placeholder="canberk"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor={tokens.color.neutral400}
                   autoCapitalize="none"
                 />
               </View>
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>SEYAHAT UNVANI</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.label}>SEYAHAT UNVANI</Text>
               <TextInput
                 style={styles.input}
                 value={travelTitle}
                 onChangeText={setTravelTitle}
                 placeholder="Örn: Doğa & Kültür Kaşifi"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={tokens.color.neutral400}
               />
               <ScrollView
                 horizontal
@@ -291,7 +292,7 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
                     style={[styles.sugChip, travelTitle === sug && styles.sugChipActive]}
                     onPress={() => setTravelTitle(sug)}
                   >
-                    <Text
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
                       style={[styles.sugChipText, travelTitle === sug && styles.sugChipTextActive]}
                     >
                       {sug}
@@ -302,32 +303,32 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>KONUM</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.label}>KONUM</Text>
               <View style={styles.inputWithPrefix}>
-                <MapPinIcon size={16} color="#059669" />
+                <MapPinIcon size={16} color={tokens.color.successStrong} />
                 <TextInput
                   style={[styles.input, styles.inputNoBorder]}
                   value={location}
                   onChangeText={setLocation}
                   placeholder="Örn: İstanbul, Türkiye"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor={tokens.color.neutral400}
                 />
               </View>
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>BİYOGRAFİ</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.label}>BİYOGRAFİ</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={bio}
                 onChangeText={setBio}
                 placeholder="Seyahat tutkunuzdan ve keşif rotalarınızdan kısaca bahsedin..."
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor={tokens.color.neutral400}
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
               />
-              <Text style={styles.charCount}>{bio.length}/240</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.charCount}>{bio.length}/240</Text>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -339,7 +340,7 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   header: {
     flexDirection: "row",
@@ -349,33 +350,33 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? 14 : 10,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-    backgroundColor: "#ffffff",
+    borderBottomColor: tokens.color.neutral100,
+    backgroundColor: tokens.color.surface,
   },
   iconBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontSize: 17,
     fontWeight: "800",
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   saveBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 999,
   },
   saveBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 13,
     fontWeight: "700",
   },
@@ -386,11 +387,11 @@ const styles = StyleSheet.create({
   avatarSection: {
     alignItems: "center",
     marginBottom: 24,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     padding: 18,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#f1f5f9",
+    borderColor: tokens.color.neutral100,
   },
   avatarWrap: {
     position: "relative",
@@ -401,22 +402,22 @@ const styles = StyleSheet.create({
     height: 86,
     borderRadius: 43,
     borderWidth: 3,
-    borderColor: "#059669",
+    borderColor: tokens.color.successStrong,
   },
   avatarCircle: {
     width: 86,
     height: 86,
     borderRadius: 43,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderWidth: 3,
-    borderColor: "#059669",
+    borderColor: tokens.color.successStrong,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarInitial: {
     fontSize: 34,
     fontWeight: "900",
-    color: "#065f46",
+    color: tokens.color.onSurfaceBrand,
   },
   avatarBadge: {
     position: "absolute",
@@ -425,16 +426,16 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#ffffff",
+    borderColor: tokens.color.neutral0,
   },
   avatarSectionTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#0f172a",
+    color: tokens.color.text,
     marginTop: 2,
   },
   photoActionsRow: {
@@ -448,18 +449,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
-    shadowColor: "#059669",
+    shadowColor: tokens.color.successStrong,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
   },
   pickPhotoBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 12,
     fontWeight: "700",
   },
@@ -467,19 +468,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#fee2e2",
+    backgroundColor: tokens.color.dangerBg,
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 20,
   },
   removePhotoBtnText: {
-    color: "#ba1a1a",
+    color: tokens.color.danger,
     fontSize: 12,
     fontWeight: "700",
   },
   avatarTip: {
     fontSize: 11.5,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     textAlign: "center",
     marginTop: 4,
     marginBottom: 8,
@@ -499,7 +500,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   presetItemSelected: {
-    borderColor: "#059669",
+    borderColor: tokens.color.successStrong,
     transform: [{ scale: 1.06 }],
   },
   presetImg: {
@@ -508,7 +509,7 @@ const styles = StyleSheet.create({
   },
   presetCheckOverlay: {
     ...(StyleSheet.absoluteFill as object),
-    backgroundColor: "rgba(5, 150, 105, 0.65)",
+    backgroundColor: withAlpha(tokens.color.successStrong, 0.65),
     alignItems: "center",
     justifyContent: "center",
   },
@@ -518,33 +519,33 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#065f46",
+    color: tokens.color.onSurfaceBrand,
     letterSpacing: 0.6,
     marginBottom: 7,
   },
   input: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 14,
-    color: "#0f172a",
+    color: tokens.color.text,
   },
   inputWithPrefix: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
     borderRadius: 14,
     paddingHorizontal: 12,
   },
   inputPrefix: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#059669",
+    color: tokens.color.successStrong,
     marginRight: 4,
   },
   inputNoBorder: {
@@ -557,7 +558,7 @@ const styles = StyleSheet.create({
   },
   charCount: {
     fontSize: 11,
-    color: "#94a3b8",
+    color: tokens.color.neutral400,
     textAlign: "right",
     marginTop: 4,
   },
@@ -570,21 +571,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   sugChipActive: {
-    backgroundColor: "#ecfdf5",
-    borderColor: "#059669",
+    backgroundColor: tokens.color.surfaceBrand,
+    borderColor: tokens.color.successStrong,
   },
   sugChipText: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#475569",
+    color: tokens.color.textMuted,
   },
   sugChipTextActive: {
-    color: "#059669",
+    color: tokens.color.successStrong,
     fontWeight: "700",
   },
 });

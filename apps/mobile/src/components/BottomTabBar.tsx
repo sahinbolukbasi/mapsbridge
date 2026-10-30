@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Platform } from "react-native
 import { MobileTab } from "../types";
 import { MapIcon, CalendarIcon, SparkIcon, ExploreIcon, ProfileIcon } from "./Icons";
 
+import { tokens } from "../theme";
 interface BottomTabBarProps {
   activeTab: MobileTab;
   onSelectTab: (tab: MobileTab) => void;
@@ -29,7 +30,7 @@ export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
     },
     {
       id: "community",
-      label: "Keşfet",
+      label: "Topluluk",
       icon: (color) => <ExploreIcon size={22} color={color} />,
     },
     {
@@ -40,12 +41,15 @@ export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
   ];
 
   return (
-    <View style={[styles.container, isIOS ? styles.iosContainer : styles.androidContainer]}>
+    <View
+      style={[styles.container, isIOS ? styles.iosContainer : styles.androidContainer]}
+      accessibilityRole="tabbar"
+    >
       <View style={styles.barTrack}>
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
-          const activeColor = "#013628";
-          const inactiveColor = "#717974";
+          const activeColor = tokens.color.textBrand;
+          const inactiveColor = tokens.color.textSubtle;
 
           return (
             <TouchableOpacity
@@ -53,12 +57,18 @@ export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
               style={styles.tabItem}
               onPress={() => onSelectTab(tab.id)}
               activeOpacity={0.7}
+              accessibilityRole="tab"
+              accessibilityLabel={tab.label}
+              accessibilityState={{ selected: isActive }}
             >
               <View style={[styles.iconWrap, isActive && styles.activeIconWrap]}>
                 {tab.icon(isActive ? activeColor : inactiveColor)}
               </View>
 
-              <Text style={[styles.tabLabel, isActive ? styles.activeLabel : styles.inactiveLabel]}>
+              <Text
+                style={[styles.tabLabel, isActive ? styles.activeLabel : styles.inactiveLabel]}
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+              >
                 {tab.label}
               </Text>
             </TouchableOpacity>
@@ -71,10 +81,10 @@ export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-    shadowColor: "#000000",
+    borderTopColor: tokens.color.border,
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: -1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -98,6 +108,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   tabItem: {
+    minHeight: tokens.touch.min,
     alignItems: "center",
     justifyContent: "center",
     flex: 1,
@@ -109,7 +120,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   activeIconWrap: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderRadius: 14,
   },
   tabLabel: {
@@ -118,11 +129,11 @@ const styles = StyleSheet.create({
     letterSpacing: -0.1,
   },
   activeLabel: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontWeight: "700",
   },
   inactiveLabel: {
-    color: "#717974",
+    color: tokens.color.textSubtle,
     fontWeight: "500",
   },
 });

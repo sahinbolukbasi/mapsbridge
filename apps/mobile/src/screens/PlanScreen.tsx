@@ -4,7 +4,6 @@ import {
   Text,
   View,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
   Image,
   Alert,
@@ -16,7 +15,6 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { WebView } from "react-native-webview";
 import { tripStore, TripStop, ActiveRoute } from "../services/tripStore";
-import { AppHeader } from "../components/AppHeader";
 import {
   MapIcon,
   MapPinIcon,
@@ -38,6 +36,8 @@ import { ScreenTourModal } from "../components/ScreenTourModal";
 import { PaywallModal } from "../components/PaywallModal";
 import { getOfferings, isProSync } from "../services/revenuecat";
 
+import { AccessibleStopList, Screen, ScreenHeader, mapLabel } from "../ui";
+import { tokens, withAlpha } from "../theme";
 interface PlanScreenProps {
   onOpenMap: (stopId?: string) => void;
   onOpenProfile?: () => void;
@@ -428,19 +428,19 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          html, body, #map { width: 100%; height: 100%; background: #eaf1ec; }
+          html, body, #map { width: 100%; height: 100%; background: ${tokens.color.surfaceBrand}; }
           .leaflet-control-attribution, .leaflet-control-zoom { display: none !important; }
           .plan-pin {
             width: 28px; height: 28px; border-radius: 14px;
-            background: #013628; border: 2px solid #34D399;
-            color: #ffffff; font-family: -apple-system, sans-serif;
+            background: ${tokens.color.primary}; border: 2px solid ${tokens.color.accentStrong};
+            color: ${tokens.color.onPrimary}; font-family: -apple-system, sans-serif;
             font-size: 11px; font-weight: 800;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 8px rgba(1, 54, 40, 0.3);
+            box-shadow: 0 2px 8px ${withAlpha(tokens.color.primary, 0.3)};
             cursor: pointer;
           }
           .visited-pin {
-            background: #10B981; border-color: #ffffff;
+            background: ${tokens.color.accent}; border-color: ${tokens.color.neutral0};
           }
         </style>
       </head>
@@ -477,7 +477,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               if (polylineLayer) map.removeLayer(polylineLayer);
               if (latlngs.length > 1) {
                 polylineLayer = L.polyline(latlngs, {
-                  color: '#10B981', weight: 3.5, dashArray: '6, 6', opacity: 0.9
+                  color: '${tokens.color.accent}', weight: 3.5, dashArray: '6, 6', opacity: 0.9
                 }).addTo(map);
               }
               if (latlngs.length > 0) {
@@ -504,8 +504,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
   `;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <AppHeader hideActions={true} />
+    <Screen style={styles.container}>
+      <ScreenHeader variant="brand" />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Active Trip Header Selector & New Trip Button */}
@@ -516,11 +516,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             activeOpacity={0.8}
           >
             <View style={styles.pulsingEmeraldDot} />
-            <Text style={styles.tripDropdownTitle} numberOfLines={1}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tripDropdownTitle} numberOfLines={1}>
               {activeRoute.name}
             </Text>
-            <Text style={styles.tripDropdownCount}>({activeRoute.stops.length} Durak)</Text>
-            <Text style={{ fontSize: 13, color: "#286954" }}>▼</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.tripDropdownCount}>({activeRoute.stops.length} Durak)</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 13, color: tokens.color.link }}>▼</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -532,7 +532,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             activeOpacity={0.8}
             accessibilityLabel="Rotanın İsmini Düzenle"
           >
-            <EditIcon size={14} color="#013628" />
+            <EditIcon size={14} color={tokens.color.textBrand} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -540,7 +540,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             onPress={() => setShowNewTripModal(true)}
             activeOpacity={0.8}
           >
-            <Text style={styles.newTripBtnText}>+ Yeni</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.newTripBtnText}>+ Yeni</Text>
           </TouchableOpacity>
         </View>
 
@@ -548,34 +548,34 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         <View style={styles.metricCard}>
           <View style={styles.metricItem}>
             <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{activeRoute.stops.length}</Text>
-              <Text style={styles.metricUnit}>Durak</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricValue}>{activeRoute.stops.length}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricUnit}>Durak</Text>
             </View>
-            <Text style={styles.metricLabel}>{activeDay}. GÜN PLANI</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>{activeDay}. GÜN PLANI</Text>
           </View>
 
           <View style={styles.metricDivider} />
 
           <View style={styles.metricItem}>
             <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricValue}>
                 {(Math.max(1, activeRoute.stops.length) * 0.9).toFixed(1)}
               </Text>
-              <Text style={styles.metricUnit}>km</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricUnit}>km</Text>
             </View>
-            <Text style={styles.metricLabel}>YÜRÜYÜŞ MESAFESİ</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>YÜRÜYÜŞ MESAFESİ</Text>
           </View>
 
           <View style={styles.metricDivider} />
 
           <View style={styles.metricItem}>
             <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricValue}>
                 {Math.max(1, Math.floor(activeRoute.stops.length * 1.1))}s{" "}
                 {(activeRoute.stops.length * 15) % 60}d
               </Text>
             </View>
-            <Text style={styles.metricLabel}>TOPLAM SÜRE</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>TOPLAM SÜRE</Text>
           </View>
         </View>
 
@@ -584,9 +584,9 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
           <View style={styles.mapPreviewHeader}>
             <View style={styles.mapPreviewHeaderLeft}>
               <View style={{ marginRight: 6 }}>
-                <MapIcon size={16} color="#059669" />
+                <MapIcon size={16} color={tokens.color.successStrong} />
               </View>
-              <Text style={styles.mapPreviewTitle}>Canlı Rota Önizlemesi</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapPreviewTitle}>Canlı Rota Önizlemesi</Text>
             </View>
 
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -608,8 +608,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 }}
                 activeOpacity={0.8}
               >
-                <Share2Icon size={13} color="#013628" />
-                <Text style={styles.shareStopsHeaderText}>Pinleri Paylaş</Text>
+                <Share2Icon size={13} color={tokens.color.textBrand} />
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareStopsHeaderText}>Pinleri Paylaş</Text>
               </TouchableOpacity>
 
               {/* Haritada Gör Button */}
@@ -618,7 +618,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 onPress={() => onOpenMap()}
                 activeOpacity={0.8}
               >
-                <Text style={styles.openFullMapText}>Haritada Gör ➔</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.openFullMapText}>Haritada Gör ➔</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -629,6 +629,9 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               originWhitelist={["*"]}
               source={{ html: planMapHtml }}
               style={styles.mapWebview}
+              accessible={true}
+              accessibilityLabel={mapLabel(activeRoute.stops.length)}
+              importantForAccessibility="no-hide-descendants"
               scrollEnabled={false}
               javaScriptEnabled={true}
               domStorageEnabled={true}
@@ -640,6 +643,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                   }
                 } catch {}
               }}
+            />
+            <AccessibleStopList
+              day={activeRoute.day}
+              stops={activeRoute.stops}
+              onSelectStop={(id) => onOpenMap(id)}
             />
           </View>
         </View>
@@ -659,8 +667,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 gap: 6,
               }}
             >
-              <SparkIcon size={16} color="#ffffff" />
-              <Text style={styles.optimizeBtnText}>Rotayı Optimize Et</Text>
+              <SparkIcon size={16} color={tokens.color.onPrimary} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.optimizeBtnText}>Rotayı Optimize Et</Text>
             </View>
           </TouchableOpacity>
 
@@ -681,8 +689,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 gap: 6,
               }}
             >
-              <PlusIcon size={16} color="#059669" />
-              <Text style={styles.addStopActionText}>Durak Ekle</Text>
+              <PlusIcon size={16} color={tokens.color.successStrong} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addStopActionText}>Durak Ekle</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -692,11 +700,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
           <View style={styles.emptyGuideCard}>
             {/* Showcase Header */}
             <View style={styles.emptyGuideBadge}>
-              <SparkIcon size={12} color="#059669" />
-              <Text style={styles.emptyGuideBadgeText}>ROTA OLUŞTURUCU</Text>
+              <SparkIcon size={12} color={tokens.color.successStrong} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.emptyGuideBadgeText}>ROTA OLUŞTURUCU</Text>
             </View>
-            <Text style={styles.emptyGuideTitle}>İlk Seyahat Rotanı Başlat</Text>
-            <Text style={styles.emptyGuideSubtitle}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyGuideTitle}>İlk Seyahat Rotanı Başlat</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyGuideSubtitle}>
               Haritadan dilediğin mekanları seçerek adım adım kendi seyahatini oluştur veya tek
               tıkla popüler rota şablonunu yükle.
             </Text>
@@ -710,43 +718,43 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               }}
               activeOpacity={0.85}
             >
-              <MapIcon size={18} color="#ffffff" />
-              <Text style={styles.emptyGuideMainBtnText}>Haritayı Aç ve Durak Seç</Text>
-              <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800" }}>➔</Text>
+              <MapIcon size={18} color={tokens.color.onPrimary} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyGuideMainBtnText}>Haritayı Aç ve Durak Seç</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontSize: 16, fontWeight: "800" }}>➔</Text>
             </TouchableOpacity>
 
             {/* 3 Step Guide */}
             <View style={styles.guideStepsBox}>
-              <Text style={styles.guideStepsTitle}>Nasıl Çalışır?</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepsTitle}>Nasıl Çalışır?</Text>
               <View style={styles.guideStepRow}>
                 <View style={styles.guideStepNumCircle}>
-                  <Text style={styles.guideStepNumText}>1</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepNumText}>1</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.guideStepHeading}>Haritadan Mekan Seçimi</Text>
-                  <Text style={styles.guideStepDesc}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepHeading}>Haritadan Mekan Seçimi</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepDesc}>
                     Mekanlara dokunarak veya arama yaparak duraklarını ekle.
                   </Text>
                 </View>
               </View>
               <View style={styles.guideStepRow}>
                 <View style={styles.guideStepNumCircle}>
-                  <Text style={styles.guideStepNumText}>2</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepNumText}>2</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.guideStepHeading}>Akıllı Rota Optimizasyonu</Text>
-                  <Text style={styles.guideStepDesc}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepHeading}>Akıllı Rota Optimizasyonu</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepDesc}>
                     Yapay zeka ile en verimli yürüme sırasını tek tıkla oluştur.
                   </Text>
                 </View>
               </View>
               <View style={styles.guideStepRow}>
                 <View style={styles.guideStepNumCircle}>
-                  <Text style={styles.guideStepNumText}>3</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepNumText}>3</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.guideStepHeading}>Canlı GPS Navigasyon</Text>
-                  <Text style={styles.guideStepDesc}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepHeading}>Canlı GPS Navigasyon</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepDesc}>
                     Adım adım yürüyüş süreleri ve rotanla şehri güvenle gez.
                   </Text>
                 </View>
@@ -755,13 +763,13 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
 
             {/* Popular Starter Templates */}
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-              <Text style={[styles.starterTemplatesTitle, { marginBottom: 0, flex: 1 }]}>Hızlı Başlangıç Şablonları</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.starterTemplatesTitle, { marginBottom: 0, flex: 1 }]}>Hızlı Başlangıç Şablonları</Text>
               {!isProSync() && (
                 <TouchableOpacity
                   onPress={() => setShowPaywall(true)}
-                  style={{ backgroundColor: "#34d399", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}
+                  style={{ backgroundColor: tokens.color.accentStrong, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}
                 >
-                  <Text style={{ fontSize: 10, fontWeight: "800", color: "#020e0a" }}>PRO</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, fontWeight: "800", color: tokens.color.surfaceInverseStrong }}>PRO</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -769,9 +777,9 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               {SAMPLE_TEMPLATES.map((tmpl) => (
                 <View key={tmpl.id} style={[styles.templateCard, !isProSync() && { opacity: 0.75 }]}>
                   <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text style={styles.templateCity}>{tmpl.city}</Text>
-                    <Text style={styles.templateName}>{tmpl.name}</Text>
-                    <Text style={styles.templateStopsCount}>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.templateCity}>{tmpl.city}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.templateName}>{tmpl.name}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.templateStopsCount}>
                       {tmpl.stops.length} Durak • Hazır Rota
                     </Text>
                   </View>
@@ -780,7 +788,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                     onPress={() => handleApplyTemplate(tmpl)}
                     activeOpacity={0.8}
                   >
-                    <Text style={styles.templateApplyBtnText}>{isProSync() ? "Kullan" : "🔒 Kullan"}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.templateApplyBtnText}>{isProSync() ? "Kullan" : "🔒 Kullan"}</Text>
                   </TouchableOpacity>
                 </View>
               ))}
@@ -804,7 +812,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       onPress={() => tripStore.toggleVisited(stop.id)}
                       activeOpacity={0.7}
                     >
-                      <Text style={[styles.stopPinText, isCompleted && { color: "#ffffff" }]}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.stopPinText, isCompleted && { color: tokens.color.onPrimary }]}>
                         {isCompleted ? "✓" : idx + 1}
                       </Text>
                     </TouchableOpacity>
@@ -813,7 +821,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                     <View style={styles.stopDetailCard}>
                       <View style={styles.stopCardHeader}>
                         <View style={{ flex: 1 }}>
-                          <Text
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                             style={[styles.stopCardTitle, isCompleted && styles.completedTitle]}
                             numberOfLines={1}
                           >
@@ -827,8 +835,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                               marginTop: 2,
                             }}
                           >
-                            <MapPinIcon size={12} color="#059669" />
-                            <Text style={styles.stopCardAddress} numberOfLines={1}>
+                            <MapPinIcon size={12} color={tokens.color.successStrong} />
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopCardAddress} numberOfLines={1}>
                               {stop.address}
                             </Text>
                           </View>
@@ -841,8 +849,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                           activeOpacity={0.7}
                         >
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                            <EditIcon size={12} color="#0f766e" />
-                            <Text style={styles.editBtnText}>Düzenle</Text>
+                            <EditIcon size={12} color={tokens.color.link} />
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.editBtnText}>Düzenle</Text>
                           </View>
                         </TouchableOpacity>
                       </View>
@@ -850,21 +858,21 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       {/* Metadata Badges: Time, Duration, Category, Budget */}
                       <View style={styles.stopMetaRow}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-                          <ClockIcon size={12} color="#64748b" />
-                          <Text style={styles.stopMetaItem}>{stop.time}</Text>
+                          <ClockIcon size={12} color={tokens.color.textSubtle} />
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopMetaItem}>{stop.time}</Text>
                         </View>
-                        <Text style={styles.metaDot}>•</Text>
-                        <Text style={styles.stopMetaItem}>{stop.duration}</Text>
-                        <Text style={styles.metaDot}>•</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaDot}>•</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopMetaItem}>{stop.duration}</Text>
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaDot}>•</Text>
                         <View style={styles.metaCatBadge}>
-                          <Text style={styles.metaCatText}>{stop.category}</Text>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaCatText}>{stop.category}</Text>
                         </View>
                         {stop.budget && (
                           <>
-                            <Text style={styles.metaDot}>•</Text>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaDot}>•</Text>
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-                              <TicketIcon size={12} color="#64748b" />
-                              <Text style={styles.budgetBadgeText}>{stop.budget}</Text>
+                              <TicketIcon size={12} color={tokens.color.textSubtle} />
+                              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.budgetBadgeText}>{stop.budget}</Text>
                             </View>
                           </>
                         )}
@@ -885,9 +893,9 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       {stop.notes && (
                         <View style={styles.stopNotesBox}>
                           <View style={{ marginRight: 6, marginTop: 2 }}>
-                            <LightbulbIcon size={13} color="#d97706" />
+                            <LightbulbIcon size={13} color={tokens.color.warningStrong} />
                           </View>
-                          <Text style={styles.stopNotesText}>{stop.notes}</Text>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopNotesText}>{stop.notes}</Text>
                         </View>
                       )}
 
@@ -899,7 +907,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                             style={[styles.reorderBtn, isFirst && styles.reorderBtnDisabled]}
                             onPress={() => tripStore.reorderStops(idx, idx - 1)}
                           >
-                            <Text style={styles.reorderArrowText}>▲</Text>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.reorderArrowText}>▲</Text>
                           </TouchableOpacity>
 
                           <TouchableOpacity
@@ -907,7 +915,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                             style={[styles.reorderBtn, isLast && styles.reorderBtnDisabled]}
                             onPress={() => tripStore.reorderStops(idx, idx + 1)}
                           >
-                            <Text style={styles.reorderArrowText}>▼</Text>
+                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.reorderArrowText}>▼</Text>
                           </TouchableOpacity>
                         </View>
 
@@ -918,8 +926,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                             activeOpacity={0.8}
                           >
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                              <DirectionsIcon size={12} color="#0f766e" />
-                              <Text style={styles.cardOpenMapText}>Haritada Gör</Text>
+                              <DirectionsIcon size={12} color={tokens.color.link} />
+                              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardOpenMapText}>Haritada Gör</Text>
                             </View>
                           </TouchableOpacity>
 
@@ -936,7 +944,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                               ]);
                             }}
                           >
-                            <TrashIcon size={14} color="#dc2626" />
+                            <TrashIcon size={14} color={tokens.color.danger} />
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -947,8 +955,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                   {!isLast && (
                     <View style={styles.walkingIndicatorRow}>
                       <View style={styles.walkingBadge}>
-                        <WalkIcon size={13} color="#059669" />
-                        <Text style={styles.walkingText}>
+                        <WalkIcon size={13} color={tokens.color.successStrong} />
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.walkingText}>
                           {stop.walkTimeFromPrev || "~6 dk yürüyüş"} (
                           {stop.distanceFromPrev || "450m"})
                         </Text>
@@ -970,11 +978,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
           >
             <View style={styles.poolHeaderLeft}>
               <View style={styles.poolIconWrap}>
-                <PinIcon size={16} color="#059669" />
+                <PinIcon size={16} color={tokens.color.successStrong} />
               </View>
               <View>
-                <Text style={styles.poolTitle}>Kayıtlı Durak Havuzu</Text>
-                <Text style={styles.poolSub}>Güne atanmamış {savedPool.length} mekan var</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolTitle}>Kayıtlı Durak Havuzu</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolSub}>Güne atanmamış {savedPool.length} mekan var</Text>
               </View>
             </View>
 
@@ -998,10 +1006,10 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.clearPoolBtnText}>Temizle</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.clearPoolBtnText}>Temizle</Text>
                 </TouchableOpacity>
               )}
-              <Text style={{ fontSize: 16, color: "#286954" }}>{showPool ? "▲" : "▼"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.color.link }}>{showPool ? "▲" : "▼"}</Text>
             </View>
           </TouchableOpacity>
 
@@ -1009,7 +1017,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             <View style={styles.poolList}>
               {savedPool.length === 0 ? (
                 <View style={styles.emptyPoolBox}>
-                  <Text style={styles.emptyPoolText}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyPoolText}>
                     Kayıtlı durak havuzunuz temiz. Güne atanmamış duraklar burada listelenir.
                   </Text>
                 </View>
@@ -1017,8 +1025,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 savedPool.map((poolItem) => (
                   <View key={poolItem.id} style={styles.poolItemRow}>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.poolItemTitle}>{poolItem.name}</Text>
-                      <Text style={styles.poolItemSub}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolItemTitle}>{poolItem.name}</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolItemSub}>
                         {poolItem.category} • {poolItem.duration}
                       </Text>
                     </View>
@@ -1026,7 +1034,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       style={styles.addToDayBtn}
                       onPress={() => tripStore.addFromPool(poolItem.id)}
                     >
-                      <Text style={styles.addToDayBtnText}>+ Rotaya Al</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addToDayBtnText}>+ Rotaya Al</Text>
                     </TouchableOpacity>
                   </View>
                 ))
@@ -1044,8 +1052,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
           <View
             style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
           >
-            <MapIcon size={18} color="#ffffff" />
-            <Text style={styles.exportMapsFullText}>Google Haritalar'a Aktar</Text>
+            <MapIcon size={18} color={tokens.color.onPrimary} />
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.exportMapsFullText}>Google Haritalar'a Aktar</Text>
           </View>
         </TouchableOpacity>
       </ScrollView>
@@ -1057,8 +1065,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             {/* Header with Close Button */}
             <View style={styles.modalHeaderWithClose}>
               <View>
-                <Text style={styles.modalTitle}>Rotanızı Seçin</Text>
-                <Text style={styles.modalSub}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rotanızı Seçin</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
                   Kayıtlı ve önerilen rotalar arasında geçiş yapın
                 </Text>
               </View>
@@ -1067,19 +1075,19 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 onPress={() => setShowRoutePickerModal(false)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.modalCloseBtnText}>✕</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseBtnText}>✕</Text>
               </TouchableOpacity>
             </View>
 
             {/* Search Input */}
             <View style={styles.modalSearchContainer}>
               <View style={{ marginRight: 8 }}>
-                <SearchIcon size={14} color="#717974" />
+                <SearchIcon size={14} color={tokens.color.textSubtle} />
               </View>
               <TextInput
                 style={styles.modalSearchInput}
                 placeholder="Rota ara..."
-                placeholderTextColor="#717974"
+                placeholderTextColor={tokens.color.textSubtle}
                 value={""}
                 onChangeText={(text) => {
                   // Filter routes based on search text - can be implemented
@@ -1105,21 +1113,21 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       activeOpacity={0.7}
                     >
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                        <Text
+                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
                           style={[
                             styles.routeSelectName,
-                            isActive && { color: "#013628", fontWeight: "800" },
+                            isActive && { color: tokens.color.textBrand, fontWeight: "800" },
                           ]}
                         >
                           {r.name}
                         </Text>
                         {isActive && (
-                          <Text style={{ color: "#10b981", fontWeight: "900", fontSize: 13 }}>
+                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}>
                             ✓ AKTİF
                           </Text>
                         )}
                       </View>
-                      <Text style={styles.routeSelectSub}>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeSelectSub}>
                         {r.stops.length} Durak • Kayıtlı Plan
                       </Text>
                     </TouchableOpacity>
@@ -1137,7 +1145,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                         activeOpacity={0.7}
                         accessibilityLabel="Rotanın İsmini Düzenle"
                       >
-                        <EditIcon size={14} color="#059669" />
+                        <EditIcon size={14} color={tokens.color.successStrong} />
                       </TouchableOpacity>
 
                       {allRoutes.length > 1 && (
@@ -1161,7 +1169,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                           }}
                           activeOpacity={0.7}
                         >
-                          <TrashIcon size={14} color="#ba1a1a" />
+                          <TrashIcon size={14} color={tokens.color.danger} />
                         </TouchableOpacity>
                       )}
                     </View>
@@ -1179,11 +1187,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
           <View style={styles.modalContent}>
             <View style={styles.modalHeaderWithClose}>
               <View>
-                <Text style={styles.modalTitle}>Rota İsmini Düzenle</Text>
-                <Text style={styles.modalSub}>Rotanız için yeni bir isim belirleyin</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rota İsmini Düzenle</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Rotanız için yeni bir isim belirleyin</Text>
               </View>
               <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setRenamingRoute(null)}>
-                <Text style={styles.modalCloseBtnText}>✕</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseBtnText}>✕</Text>
               </TouchableOpacity>
             </View>
 
@@ -1192,9 +1200,9 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 styles.modalSearchInput,
                 {
                   marginVertical: 16,
-                  backgroundColor: "#f8fafc",
+                  backgroundColor: tokens.color.bg,
                   borderWidth: 1,
-                  borderColor: "#cbd5e1",
+                  borderColor: tokens.color.borderStrong,
                   borderRadius: 12,
                   paddingHorizontal: 12,
                   paddingVertical: 10,
@@ -1204,7 +1212,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               value={renameRouteText}
               onChangeText={setRenameRouteText}
               placeholder="Örn: Hafta Sonu Boğaz Turu"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={tokens.color.neutral400}
               autoFocus
             />
 
@@ -1216,21 +1224,21 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                     flex: 1,
                     height: 44,
                     borderRadius: 12,
-                    backgroundColor: "#f1f5f9",
+                    backgroundColor: tokens.color.surfaceSunken,
                     alignItems: "center",
                     justifyContent: "center",
                   },
                 ]}
                 onPress={() => setRenamingRoute(null)}
               >
-                <Text style={{ color: "#64748b", fontWeight: "700", fontSize: 13 }}>Vazgeç</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.textSubtle, fontWeight: "700", fontSize: 13 }}>Vazgeç</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
                   flex: 1.5,
                   height: 44,
                   borderRadius: 12,
-                  backgroundColor: "#013628",
+                  backgroundColor: tokens.color.primary,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -1241,7 +1249,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                   }
                 }}
               >
-                <Text style={{ color: "#ffffff", fontWeight: "800", fontSize: 13 }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontWeight: "800", fontSize: 13 }}>
                   İsmi Kaydet
                 </Text>
               </TouchableOpacity>
@@ -1254,11 +1262,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
       <Modal visible={editingStop !== null} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Durağı Düzenle</Text>
-            <Text style={styles.modalSub}>Durak adı, zamanlama ve notları özelleştirin</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Durağı Düzenle</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Durak adı, zamanlama ve notları özelleştirin</Text>
 
             <ScrollView style={{ maxHeight: 320, marginVertical: 8 }}>
-              <Text style={styles.fieldLabel}>Durak Adı</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Durak Adı</Text>
               <TextInput
                 style={styles.modalInput}
                 value={editName}
@@ -1266,7 +1274,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 placeholder="Durak Adı"
               />
 
-              <Text style={styles.fieldLabel}>Kategori</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Kategori</Text>
               <View style={styles.catChipsRow}>
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
@@ -1274,7 +1282,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                     style={[styles.catChip, editCategory === cat && styles.catChipActive]}
                     onPress={() => setEditCategory(cat)}
                   >
-                    <Text
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
                       style={[styles.catChipText, editCategory === cat && styles.catChipTextActive]}
                     >
                       {cat}
@@ -1286,7 +1294,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               {/* DİĞER seçilince özel tag / yeni kategori oluşturma */}
               {editCategory === "DİĞER" && (
                 <View style={{ marginTop: 8, marginBottom: 4 }}>
-                  <Text style={styles.fieldLabel}>Yeni Özel Kategori / Tag Adı</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Yeni Özel Kategori / Tag Adı</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={editCustomCategory}
@@ -1297,7 +1305,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               )}
 
               {/* Fotoğraf Ekleme & Önizleme */}
-              <Text style={styles.fieldLabel}>Durak Fotoğrafı</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Durak Fotoğrafı</Text>
               <View style={styles.photoPickerContainer}>
                 {editPhotoUrl ? (
                   <View style={styles.photoPreviewCard}>
@@ -1310,7 +1318,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       style={styles.removePhotoBadge}
                       onPress={() => setEditPhotoUrl("")}
                     >
-                      <Text style={styles.removePhotoBadgeText}>✕</Text>
+                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.removePhotoBadgeText}>✕</Text>
                     </TouchableOpacity>
                   </View>
                 ) : null}
@@ -1320,8 +1328,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                   onPress={handlePickPhoto}
                   activeOpacity={0.8}
                 >
-                  <CameraIcon size={16} color="#059669" />
-                  <Text style={styles.pickPhotoActionText}>
+                  <CameraIcon size={16} color={tokens.color.successStrong} />
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pickPhotoActionText}>
                     {editPhotoUrl ? "Fotoğrafı Değiştir" : "+ Fotoğraf Seç / Ekle"}
                   </Text>
                 </TouchableOpacity>
@@ -1329,7 +1337,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
 
               <View style={{ flexDirection: "row", gap: 10 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.fieldLabel}>Ziyaret Saati</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Ziyaret Saati</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={editTime}
@@ -1338,7 +1346,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                   />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.fieldLabel}>Süre</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Süre</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={editDuration}
@@ -1348,7 +1356,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 </View>
               </View>
 
-              <Text style={styles.fieldLabel}>Bütçe / Giriş Ücreti</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Bütçe / Giriş Ücreti</Text>
               <TextInput
                 style={styles.modalInput}
                 value={editBudget}
@@ -1356,7 +1364,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 placeholder="Örn: 350 ₺ veya Ücretsiz"
               />
 
-              <Text style={styles.fieldLabel}>Gezgin Notu & İpucu</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Gezgin Notu & İpucu</Text>
               <TextInput
                 style={[styles.modalInput, { height: 60, textAlignVertical: "top" }]}
                 value={editNotes}
@@ -1368,10 +1376,10 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
 
             <View style={styles.modalActionsRow}>
               <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setEditingStop(null)}>
-                <Text style={styles.modalCancelText}>Vazgeç</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Vazgeç</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleSaveStopEdit}>
-                <Text style={styles.modalConfirmText}>Kaydet</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalConfirmText}>Kaydet</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1382,13 +1390,13 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
       <Modal visible={showAddStopModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Rotaya Durak Ekle</Text>
-            <Text style={styles.modalSub}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rotaya Durak Ekle</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
               Yeni bir mekan, restoran veya tarihi nokta belirleyin
             </Text>
 
             <ScrollView style={{ maxHeight: 320, marginVertical: 8 }}>
-              <Text style={styles.fieldLabel}>Durak / Mekan Adı</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Durak / Mekan Adı</Text>
               <TextInput
                 style={styles.modalInput}
                 value={addName}
@@ -1396,7 +1404,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 placeholder="Örn: Pierre Loti Tepesi"
               />
 
-              <Text style={styles.fieldLabel}>Kategori</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Kategori</Text>
               <View style={styles.catChipsRow}>
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
@@ -1404,7 +1412,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                     style={[styles.catChip, addCategory === cat && styles.catChipActive]}
                     onPress={() => setAddCategory(cat)}
                   >
-                    <Text
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
                       style={[styles.catChipText, addCategory === cat && styles.catChipTextActive]}
                     >
                       {cat}
@@ -1413,7 +1421,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 ))}
               </View>
 
-              <Text style={styles.fieldLabel}>Adres / Bölge</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Adres / Bölge</Text>
               <TextInput
                 style={styles.modalInput}
                 value={addAddress}
@@ -1423,7 +1431,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
 
               <View style={{ flexDirection: "row", gap: 10 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.fieldLabel}>Tahmini Süre</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Tahmini Süre</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={addDuration}
@@ -1432,7 +1440,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                   />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.fieldLabel}>Giriş / Bütçe</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Giriş / Bütçe</Text>
                   <TextInput
                     style={styles.modalInput}
                     value={addBudget}
@@ -1442,7 +1450,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 </View>
               </View>
 
-              <Text style={styles.fieldLabel}>Gezgin Notu</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Gezgin Notu</Text>
               <TextInput
                 style={[styles.modalInput, { height: 50, textAlignVertical: "top" }]}
                 value={addNotes}
@@ -1457,10 +1465,10 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 style={styles.modalCancelBtn}
                 onPress={() => setShowAddStopModal(false)}
               >
-                <Text style={styles.modalCancelText}>Vazgeç</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Vazgeç</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleSaveNewStop}>
-                <Text style={styles.modalConfirmText}>Ekle</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalConfirmText}>Ekle</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1471,12 +1479,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
       <Modal visible={showNewTripModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Yeni Gezi Planı Oluştur</Text>
-            <Text style={styles.modalSub}>Şehir veya seyahat başlığı belirleyin</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Yeni Gezi Planı Oluştur</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Şehir veya seyahat başlığı belirleyin</Text>
 
             <TextInput
               placeholder="Örn: Roma Rönesans Keşfi"
-              placeholderTextColor="#717974"
+              placeholderTextColor={tokens.color.textSubtle}
               style={styles.modalInput}
               value={newTripTitle}
               onChangeText={setNewTripTitle}
@@ -1487,10 +1495,10 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 style={styles.modalCancelBtn}
                 onPress={() => setShowNewTripModal(false)}
               >
-                <Text style={styles.modalCancelText}>Vazgeç</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Vazgeç</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleCreateNewTrip}>
-                <Text style={styles.modalConfirmText}>Oluştur</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalConfirmText}>Oluştur</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1503,14 +1511,14 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         visible={showPaywall}
         onClose={() => setShowPaywall(false)}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#faf8ff",
+    backgroundColor: tokens.color.bg,
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -1527,15 +1535,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#e2e7ff",
+    borderColor: tokens.color.surfaceTint,
     flex: 1,
     marginRight: 10,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -1545,25 +1553,25 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#10B981",
+    backgroundColor: tokens.color.accent,
   },
   tripDropdownTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     flexShrink: 1,
   },
   tripDropdownCount: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#286954",
+    color: tokens.color.link,
   },
   newTripBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 9,
     paddingHorizontal: 14,
     borderRadius: 999,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
@@ -1573,13 +1581,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1,
-    borderColor: "#e2e7ff",
+    borderColor: tokens.color.surfaceTint,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 8,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -1589,12 +1597,12 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
   },
   newTripBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 12,
     fontWeight: "700",
   },
@@ -1602,14 +1610,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 18,
     paddingVertical: 14,
     paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: "#eaedff",
+    borderColor: tokens.color.surfaceTint,
     marginBottom: 14,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -1627,26 +1635,26 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   metricUnit: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#286954",
+    color: tokens.color.link,
   },
   metricLabel: {
     fontSize: 9,
     fontWeight: "700",
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   metricDivider: {
     width: 1,
     height: 24,
-    backgroundColor: "#eaedff",
+    backgroundColor: tokens.color.surfaceTint,
   },
   aiBadge: {
-    backgroundColor: "#bbedd8",
+    backgroundColor: tokens.color.surfaceBrandStrong,
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 6,
@@ -1654,22 +1662,22 @@ const styles = StyleSheet.create({
   aiBadgeText: {
     fontSize: 8,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   activeCheckText: {
     fontSize: 9,
     fontWeight: "700",
-    color: "#10B981",
+    color: tokens.color.accent,
     marginTop: 2,
   },
   mapPreviewCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 18,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#eaedff",
+    borderColor: tokens.color.surfaceTint,
     marginBottom: 14,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -1689,10 +1697,10 @@ const styles = StyleSheet.create({
   mapPreviewTitle: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   openFullMapBtn: {
-    backgroundColor: "#bbedd8",
+    backgroundColor: tokens.color.surfaceBrandStrong,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 999,
@@ -1700,13 +1708,13 @@ const styles = StyleSheet.create({
   openFullMapText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   mapCanvasContainer: {
     height: 170,
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#eaf1ec",
+    backgroundColor: tokens.color.surfaceBrand,
   },
   mapWebview: {
     flex: 1,
@@ -1718,34 +1726,34 @@ const styles = StyleSheet.create({
   },
   optimizeBtn: {
     flex: 1,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 3,
   },
   optimizeBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 13,
     fontWeight: "700",
   },
   addStopActionBtn: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1.5,
-    borderColor: "#bbedd8",
+    borderColor: tokens.color.surfaceBrandStrong,
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
   addStopActionText: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontSize: 13,
     fontWeight: "800",
   },
@@ -1759,7 +1767,7 @@ const styles = StyleSheet.create({
     top: 20,
     bottom: 20,
     width: 2,
-    backgroundColor: "#bbedd8",
+    backgroundColor: tokens.color.surfaceBrandStrong,
     zIndex: 1,
   },
   stopTimelineBlock: {
@@ -1775,34 +1783,34 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 2.5,
-    borderColor: "#013628",
+    borderColor: tokens.color.primary,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
   },
   stopPinCompleted: {
-    backgroundColor: "#10B981",
-    borderColor: "#059669",
+    backgroundColor: tokens.color.accent,
+    borderColor: tokens.color.successStrong,
   },
   stopPinText: {
     fontSize: 13,
     fontWeight: "900",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   stopDetailCard: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 18,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#eaedff",
-    shadowColor: "#000",
+    borderColor: tokens.color.surfaceTint,
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 6,
@@ -1817,19 +1825,19 @@ const styles = StyleSheet.create({
   stopCardTitle: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   completedTitle: {
     textDecorationLine: "line-through",
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   stopCardAddress: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   editBtn: {
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 8,
@@ -1837,7 +1845,7 @@ const styles = StyleSheet.create({
   editBtnText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   stopMetaRow: {
     flexDirection: "row",
@@ -1849,14 +1857,14 @@ const styles = StyleSheet.create({
   stopMetaItem: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#404945",
+    color: tokens.color.textMuted,
   },
   metaDot: {
     fontSize: 10,
-    color: "#c0c8c3",
+    color: tokens.color.neutral300,
   },
   metaCatBadge: {
-    backgroundColor: "#bbedd8",
+    backgroundColor: tokens.color.surfaceBrandStrong,
     paddingVertical: 1,
     paddingHorizontal: 6,
     borderRadius: 4,
@@ -1864,12 +1872,12 @@ const styles = StyleSheet.create({
   metaCatText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   budgetBadgeText: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#286954",
+    color: tokens.color.link,
   },
   stopImageBannerWrap: {
     height: 90,
@@ -1884,14 +1892,14 @@ const styles = StyleSheet.create({
   stopNotesBox: {
     flexDirection: "row",
     gap: 6,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     padding: 8,
     borderRadius: 10,
     marginBottom: 8,
   },
   stopNotesText: {
     fontSize: 11,
-    color: "#013628",
+    color: tokens.color.textBrand,
     flex: 1,
     lineHeight: 16,
   },
@@ -1901,7 +1909,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: "#f2f3ff",
+    borderTopColor: tokens.color.surfaceTint,
   },
   reorderGroup: {
     flexDirection: "row",
@@ -1911,7 +1919,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 6,
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1921,7 +1929,7 @@ const styles = StyleSheet.create({
   reorderArrowText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   rightCardActions: {
     flexDirection: "row",
@@ -1929,7 +1937,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardOpenMapBtn: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
@@ -1937,7 +1945,7 @@ const styles = StyleSheet.create({
   cardOpenMapText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#10B981",
+    color: tokens.color.accent,
   },
   deleteStopBtn: {
     padding: 4,
@@ -1950,7 +1958,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#f2f3ff",
+    backgroundColor: tokens.color.surfaceTint,
     paddingVertical: 3,
     paddingHorizontal: 10,
     borderRadius: 999,
@@ -1962,16 +1970,16 @@ const styles = StyleSheet.create({
   walkingText: {
     fontSize: 10,
     fontWeight: "600",
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   poolCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 18,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#eaedff",
+    borderColor: tokens.color.surfaceTint,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -1991,23 +1999,23 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#bbedd8",
+    backgroundColor: tokens.color.surfaceBrandStrong,
     alignItems: "center",
     justifyContent: "center",
   },
   poolTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   poolSub: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   poolList: {
     marginTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#f2f3ff",
+    borderTopColor: tokens.color.surfaceTint,
     paddingTop: 8,
   },
   poolItemRow: {
@@ -2016,19 +2024,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#f2f3ff",
+    borderBottomColor: tokens.color.surfaceTint,
   },
   poolItemTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#131b2e",
+    color: tokens.color.text,
   },
   poolItemSub: {
     fontSize: 11,
-    color: "#717974",
+    color: tokens.color.textSubtle,
   },
   addToDayBtn: {
-    backgroundColor: "#bbedd8",
+    backgroundColor: tokens.color.surfaceBrandStrong,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
@@ -2036,38 +2044,38 @@ const styles = StyleSheet.create({
   addToDayBtnText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   exportMapsFullBtn: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderWidth: 1.5,
-    borderColor: "#013628",
+    borderColor: tokens.color.primary,
     paddingVertical: 14,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
   exportMapsFullText: {
-    color: "#013628",
+    color: tokens.color.textBrand,
     fontSize: 14,
     fontWeight: "800",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: withAlpha(tokens.color.black, 0.5),
     justifyContent: "center",
     paddingHorizontal: 20,
   },
   modalContent: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 24,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
     shadowRadius: 20,
@@ -2076,12 +2084,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     marginBottom: 4,
   },
   modalSub: {
     fontSize: 12,
-    color: "#717974",
+    color: tokens.color.textSubtle,
     marginBottom: 12,
   },
   routeSelectItem: {
@@ -2091,41 +2099,41 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   routeSelectItemActive: {
-    backgroundColor: "#ecfdf5",
-    borderColor: "#10b981",
+    backgroundColor: tokens.color.surfaceBrand,
+    borderColor: tokens.color.accent,
   },
   routeSelectName: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#334155",
+    color: tokens.color.neutral700,
   },
   routeSelectSub: {
     fontSize: 11,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     marginTop: 2,
   },
   fieldLabel: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#404945",
+    color: tokens.color.textMuted,
     marginTop: 8,
     marginBottom: 4,
   },
   modalInput: {
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 9,
     fontSize: 14,
-    color: "#1e293b",
+    color: tokens.color.neutral800,
   },
   catChipsRow: {
     flexDirection: "row",
@@ -2138,16 +2146,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   catChipActive: {
-    backgroundColor: "#013628",
-    borderColor: "#013628",
+    backgroundColor: tokens.color.primary,
+    borderColor: tokens.color.primary,
   },
   catChipText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#404945",
+    color: tokens.color.textMuted,
   },
   catChipTextActive: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
   },
   // Modal header with close button styles
   modalHeaderWithClose: {
@@ -2160,21 +2168,21 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
   },
   modalCloseBtnText: {
     fontSize: 16,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     fontWeight: "700",
   },
   modalSearchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8fafc",
+    backgroundColor: tokens.color.bg,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -2183,10 +2191,10 @@ const styles = StyleSheet.create({
   modalSearchInput: {
     flex: 1,
     fontSize: 14,
-    color: "#1e293b",
+    color: tokens.color.neutral800,
   },
   modalConfirmBtn: {
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -2195,12 +2203,12 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   modalConfirmText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 14,
     fontWeight: "800",
   },
   modalCancelBtn: {
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -2209,7 +2217,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   modalCancelText: {
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     fontSize: 14,
     fontWeight: "700",
   },
@@ -2220,23 +2228,23 @@ const styles = StyleSheet.create({
   },
   // Empty guide showcase styles
   emptyGuideCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
-    shadowColor: "#000",
+    shadowColor: tokens.color.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: "#e6f4ea",
+    borderColor: tokens.color.surfaceBrand,
   },
   emptyGuideBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 999,
@@ -2246,18 +2254,18 @@ const styles = StyleSheet.create({
   emptyGuideBadgeText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#059669",
+    color: tokens.color.successStrong,
     letterSpacing: 0.8,
   },
   emptyGuideTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     marginBottom: 6,
   },
   emptyGuideSubtitle: {
     fontSize: 13,
-    color: "#52605b",
+    color: tokens.color.textMuted,
     lineHeight: 19,
     marginBottom: 18,
   },
@@ -2266,10 +2274,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    backgroundColor: "#013628",
+    backgroundColor: tokens.color.primary,
     paddingVertical: 14,
     borderRadius: 14,
-    shadowColor: "#013628",
+    shadowColor: tokens.color.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
@@ -2277,23 +2285,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   emptyGuideMainBtnText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 14,
     fontWeight: "800",
     letterSpacing: 0.3,
   },
   guideStepsBox: {
-    backgroundColor: "#f8faf9",
+    backgroundColor: tokens.color.bg,
     borderRadius: 14,
     padding: 14,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#edf4ee",
+    borderColor: tokens.color.surfaceBrand,
   },
   guideStepsTitle: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 12,
@@ -2308,31 +2316,31 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#059669",
+    backgroundColor: tokens.color.successStrong,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 1,
   },
   guideStepNumText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 11,
     fontWeight: "800",
   },
   guideStepHeading: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#131b2e",
+    color: tokens.color.text,
     marginBottom: 1,
   },
   guideStepDesc: {
     fontSize: 12,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     lineHeight: 16,
   },
   starterTemplatesTitle: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -2344,50 +2352,50 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#ffffff",
+    backgroundColor: tokens.color.surface,
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: tokens.color.border,
   },
   templateCity: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#059669",
+    color: tokens.color.successStrong,
     textTransform: "uppercase",
     letterSpacing: 0.4,
   },
   templateName: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#131b2e",
+    color: tokens.color.text,
     marginTop: 2,
     marginBottom: 2,
   },
   templateStopsCount: {
     fontSize: 11,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
   },
   templateApplyBtn: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
   },
   templateApplyBtnText: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#059669",
+    color: tokens.color.successStrong,
   },
   shareStopsHeaderBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
@@ -2395,10 +2403,10 @@ const styles = StyleSheet.create({
   shareStopsHeaderText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#013628",
+    color: tokens.color.textBrand,
   },
   clearPoolBtn: {
-    backgroundColor: "#fee2e2",
+    backgroundColor: tokens.color.dangerBg,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -2406,7 +2414,7 @@ const styles = StyleSheet.create({
   clearPoolBtnText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#dc2626",
+    color: tokens.color.danger,
   },
   emptyPoolBox: {
     paddingVertical: 14,
@@ -2415,7 +2423,7 @@ const styles = StyleSheet.create({
   },
   emptyPoolText: {
     fontSize: 12,
-    color: "#64748b",
+    color: tokens.color.textSubtle,
     textAlign: "center",
     lineHeight: 18,
   },
@@ -2432,7 +2440,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: tokens.color.borderStrong,
   },
   photoPreviewImg: {
     width: "100%",
@@ -2445,12 +2453,12 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "rgba(0,0,0,0.65)",
+    backgroundColor: withAlpha(tokens.color.black, 0.65),
     alignItems: "center",
     justifyContent: "center",
   },
   removePhotoBadgeText: {
-    color: "#ffffff",
+    color: tokens.color.onPrimary,
     fontSize: 10,
     fontWeight: "800",
   },
@@ -2458,9 +2466,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#ecfdf5",
+    backgroundColor: tokens.color.surfaceBrand,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: tokens.color.successBorder,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 10,
@@ -2468,10 +2476,10 @@ const styles = StyleSheet.create({
   pickPhotoActionText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#059669",
+    color: tokens.color.successStrong,
   },
   reorderShiftBtn: {
-    backgroundColor: "#f1f5f9",
+    backgroundColor: tokens.color.surfaceSunken,
     paddingHorizontal: 6,
     paddingVertical: 4,
     borderRadius: 6,
@@ -2480,6 +2488,6 @@ const styles = StyleSheet.create({
   reorderShiftText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#0f766e",
+    color: tokens.color.link,
   },
 });

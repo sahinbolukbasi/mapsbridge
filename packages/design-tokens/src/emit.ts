@@ -9,6 +9,7 @@ import {
   control,
   focusRing,
   fontFamily,
+  fontMaxScale,
   fontSize,
   fontSizeDisplay,
   fontWeight,
@@ -16,6 +17,7 @@ import {
   layout,
   lineHeight,
   motion,
+  nativeOnlyColors,
   radius,
   responsive,
   shadow,
@@ -186,13 +188,15 @@ export function toNative(): string {
       elevation: s.elevation,
     };
   }
+  const nativeColors: Record<string, string> = {};
+  for (const [k, ref] of Object.entries(nativeOnlyColors)) nativeColors[k] = palette[ref];
   const tokens = {
-    color: resolvedColors(),
+    color: { ...resolvedColors(), ...nativeColors },
     dataPalette,
     thirdParty,
     space: spacePx,
     radius,
-    font: { size: sizePx, weight: weights, lineHeight },
+    font: { size: sizePx, weight: weights, lineHeight, maxScale: fontMaxScale },
     shadow: shadows,
     motion: { duration: motion.duration },
     touch: { min: control.touch },

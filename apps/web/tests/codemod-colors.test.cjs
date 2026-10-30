@@ -246,3 +246,35 @@ test("tw modu: tanımsız arbitrary silinir, tanımlı utility üretilmiş sın�
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("RN modu: string → tokens ifadesi, şablon → ${…}, alfa → hazır token / withAlpha, siyah → black, import eklenir", () => {
+  const src = [
+    'import { View } from "react-native";',
+    'const s = { a: { color: "#0f172a", backgroundColor: "#ffffff", shadowColor: "#000" } };',
+    'const b = { borderColor: "rgba(16, 185, 129, 0.2)", backgroundColor: "rgba(255,255,255,0.5)" };',
+    'const h = `body { background: #013628; }`;',
+    'export const X = () => <Icon color="#ffffff" />;',
+  ].join("\n");
+  const script = `
+    import { transformRn, emptyReport } from ${JSON.stringify(SCRIPT)};
+    import { tokens } from ${JSON.stringify(path.join(root, "apps/mobile/src/theme/tokens.ts"))};
+    const report = emptyReport("rn", true);
+    const out = transformRn(${JSON.stringify(src)}, "apps/mobile/src/x.tsx", tokens.color, "../theme", report);
+    console.log(JSON.stringify({ out, report }));
+  `;
+  const r = spawnSync(NODE[0], [...NODE.slice(1), "--input-type=module", "-e", script], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  assert.equal(r.status, 0, r.stderr);
+  const { out, report } = JSON.parse(r.stdout);
+  assert.match(out, /import \{ tokens, withAlpha \} from "\.\.\/theme";/);
+  assert.match(out, /color: tokens\.color\.text, backgroundColor: tokens\.color\.surface/);
+  assert.match(out, /shadowColor: tokens\.color\.black/);
+  assert.match(out, /borderColor: tokens\.color\.accentA20/);
+  assert.match(out, /withAlpha\(tokens\.color\.surface, 0\.5\)/);
+  assert.match(out, /background: \$\{tokens\.color\.primary\}/);
+  assert.match(out, /<Icon color=\{tokens\.color\.onPrimary\} \/>/);
+  assert.doesNotMatch(out, /#[0-9a-fA-F]{3,8}\b|rgba?\(/);
+  assert.equal(report.unmapped.length, 0);
+});
