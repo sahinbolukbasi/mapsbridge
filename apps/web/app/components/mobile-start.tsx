@@ -58,7 +58,7 @@ export function MobileStart() {
           <h2 id="mobile-plan-title">Birlikte planlayalım</h2>
         </div>
         <p>Şehri ve aklındaki geziyi yaz. Gerisini birlikte netleştirelim.</p>
-        <form action="/ai/" method="get">
+        <form action="/travel-assistant/" method="get">
           <label htmlFor="mobile-trip-query">Nereye gitmek istiyorsun?</label>
           <input
             id="mobile-trip-query"

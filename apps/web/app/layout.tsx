@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
-      lang="en"
+      lang="tr"
       suppressHydrationWarning
       className={`${inter.variable} ${plusJakartaSans.variable}`}
     >
@@ -72,7 +72,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var p=location.pathname;if(p!='/en'&&!p.startsWith('/en/'))document.documentElement.lang='tr';}catch(e){}})();`,
+            __html: `(function(){try{var p=location.pathname;if(p==='/en'||p.startsWith('/en/'))document.documentElement.lang='en';}catch(e){}})();`,
           }}
         />
         <link

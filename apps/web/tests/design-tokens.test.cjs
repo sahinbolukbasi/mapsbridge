@@ -65,9 +65,9 @@ test("root layout tokens.css'i ilk CSS olarak yükler", () => {
   assert.equal(firstCss[1], "./styles/tokens.css");
 });
 
-test("donmuş rota baseline'ı 42 path içerir ve sıralıdır (AC-12, R5-1)", () => {
+test("donmuş rota baseline'ı ≥42 path içerir ve sıralıdır (AC-12, R5-1; 42 çekirdek path route-registry.test.cjs BASELINE_42)", () => {
   const { routes } = JSON.parse(read("apps/web/tests/fixtures/baseline-routes.json"));
-  assert.equal(routes.length, 42);
+  assert.ok(routes.length >= 42, `fixture yalnızca büyür: ${routes.length} < 42`);
   assert.deepEqual([...routes].sort(), routes);
   for (const r of routes) assert.match(r, /^\/(.*\/)?$/, `${r} sonda / ile bitmeli`);
 });

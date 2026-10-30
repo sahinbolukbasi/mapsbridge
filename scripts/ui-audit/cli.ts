@@ -306,7 +306,7 @@ async function main(): Promise<void> {
   }
 }
 
-/** Chrome-check rotaları: kanonik rotalar (C7'de route-registry'den; C6'da keşif − legacy). */
+/** Chrome-check rotaları: keşfedilen sayfalar − LEGACY (apps/web/app/lib/route-registry.ts LEGACY_REDIRECTS ile aynı liste). */
 const LEGACY_PATHS = new Set([
   "/ai/",
   "/ai-asistan/",

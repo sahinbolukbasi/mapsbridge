@@ -1,3 +1,2 @@
 "use client";
-
-export { default } from "../desk/page";
+export { default } from "./maps-client";

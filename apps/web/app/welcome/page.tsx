@@ -25,7 +25,7 @@ export default function WelcomePage() {
       <div className="welcome-action-section">
         {/*  Apple Sign-In */}
         <Link
-          href="/login/?provider=apple&next=/desk/"
+          href="/login/?provider=apple&next=/maps/"
           className="native-mobile-btn btn-apple-signin"
         >
           <svg width="18" height="18" viewBox="0 0 170 170" fill="currentColor" aria-hidden="true">
@@ -36,7 +36,7 @@ export default function WelcomePage() {
 
         {/* G Google Sign-In */}
         <Link
-          href="/login/?provider=google&next=/desk/"
+          href="/login/?provider=google&next=/maps/"
           className="native-mobile-btn btn-google-signin"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -61,7 +61,7 @@ export default function WelcomePage() {
         </Link>
 
         {/* E-posta ile Giriş Yap */}
-        <Link href="/login/?next=/desk/" className="native-mobile-btn btn-email-signin">
+        <Link href="/login/?next=/maps/" className="native-mobile-btn btn-email-signin">
           <svg
             width="18"
             height="18"
@@ -80,7 +80,7 @@ export default function WelcomePage() {
         </Link>
 
         {/* Kayıt Ol */}
-        <Link href="/register/?next=/desk/" className="native-mobile-btn btn-register-action">
+        <Link href="/register/?next=/maps/" className="native-mobile-btn btn-register-action">
           <svg
             width="18"
             height="18"

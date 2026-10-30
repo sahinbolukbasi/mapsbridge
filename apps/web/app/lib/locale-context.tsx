@@ -6,7 +6,7 @@ import trDict from "../locales/tr.json";
 import enDict from "../locales/en.json";
 
 export type { AppLocale } from "./locale-utils";
-export { getLocaleFromPath, getAlternatePath } from "./locale-utils";
+export { getLocaleFromPath, getAlternatePath, localeRootPath } from "./locale-utils";
 import type { AppLocale } from "./locale-utils";
 
 const dictionaries: Record<AppLocale, Record<string, string>> = { tr: trDict, en: enDict };

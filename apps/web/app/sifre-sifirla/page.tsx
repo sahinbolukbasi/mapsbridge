@@ -1,7 +1,5 @@
-"use client";
-
-import ForgotPasswordPage from "../reset-password/page";
-
-export default function SifreSifirlaPage() {
-  return <ForgotPasswordPage />;
+import { LegacyRedirect, legacyMetadata } from "../components/ui/legacy-redirect";
+export const metadata = legacyMetadata("/sifre-sifirla/");
+export default function Page() {
+  return <LegacyRedirect from="/sifre-sifirla/" />;
 }

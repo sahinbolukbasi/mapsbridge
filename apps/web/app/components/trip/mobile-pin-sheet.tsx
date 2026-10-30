@@ -102,7 +102,7 @@ export function MobilePinSheet({
     if (onAskAi) {
       onAskAi(prompt);
     } else {
-      window.location.href = `/ai/?q=${encodeURIComponent(prompt)}`;
+      window.location.href = `/travel-assistant/?q=${encodeURIComponent(prompt)}`;
     }
   }
 

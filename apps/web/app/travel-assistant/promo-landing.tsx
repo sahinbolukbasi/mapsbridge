@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageHeader, PageShell } from "../components/ui";
 import { AuthActionModal } from "../components/auth-gate";
 import { getStoredSession, isTokenExpired, refreshSession } from "../lib/cognito";
-import "./ai-promo.css";
+import "./promo-landing.css";
 
 const DAY_STOPS = {
   1: [
@@ -108,10 +108,10 @@ const DAY_STOPS = {
 
 /**
  * Kimliksiz promosyon dalı (design §4.5): chrome SiteChrome'dadır; kendi PageShell'ini (landing)
- * ve tek h1'ini (PageHeader hero) render eder. `titleText` düz metin başlıktır (C7'de registry).
- * Hero zemini açık olduğu için yüzey varsayılandır (inverse değil).
+ * ve tek h1'ini (PageHeader hero) render eder. Düz metin başlık route-registry'den (/maps/ → "Harita
+ * masası", /travel-assistant/ → "Seyahat asistanı"). Hero zemini açık: yüzey varsayılan.
  */
-export function AIPromoLanding({ titleText = "Seyahat asistanı" }: { titleText?: string } = {}) {
+export function AIPromoLanding() {
   const [selectedDay, setSelectedDay] = useState<1 | 2 | 3>(1);
   const [copiedCode, setCopiedCode] = useState(false);
   const [authModal, setAuthModal] = useState(false);
@@ -127,7 +127,7 @@ export function AIPromoLanding({ titleText = "Seyahat asistanı" }: { titleText?
         return;
       }
       if (!isTokenExpired(stored.token) || (await refreshSession())?.token) {
-        window.location.replace("/ai/");
+        window.location.replace("/travel-assistant/");
         return;
       }
       if (active) setCheckingSession(false);
@@ -138,9 +138,10 @@ export function AIPromoLanding({ titleText = "Seyahat asistanı" }: { titleText?
     };
   }, []);
 
-  const loginUrl = (q?: string) => `/login/?redirect=/ai/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
+  const loginUrl = (q?: string) =>
+    `/login/?redirect=/travel-assistant/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
   const signupUrl = (q?: string) =>
-    `/register/?redirect=/ai/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
+    `/register/?redirect=/travel-assistant/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
 
   function handleCopyCode() {
     try {
@@ -155,7 +156,7 @@ export function AIPromoLanding({ titleText = "Seyahat asistanı" }: { titleText?
   function handleStarterClick(text: string) {
     const session = getStoredSession();
     if (session?.token) {
-      window.location.assign(`/ai/?q=${encodeURIComponent(text)}`);
+      window.location.assign(`/travel-assistant/?q=${encodeURIComponent(text)}`);
       return;
     }
     setPromptText(text);
@@ -167,7 +168,7 @@ export function AIPromoLanding({ titleText = "Seyahat asistanı" }: { titleText?
     const text = promptText.trim();
     const session = getStoredSession();
     if (session?.token) {
-      window.location.assign(`/ai/${text ? `?q=${encodeURIComponent(text)}` : ""}`);
+      window.location.assign(`/travel-assistant/${text ? `?q=${encodeURIComponent(text)}` : ""}`);
       return;
     }
     setAuthModal(true);
@@ -178,7 +179,7 @@ export function AIPromoLanding({ titleText = "Seyahat asistanı" }: { titleText?
       <PageShell
         layout="landing"
         className="ai-promo-wrapper"
-        header={<PageHeader variant="hidden" title={titleText} />}
+        header={<PageHeader variant="hidden" />}
       >
         <div
           style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}
@@ -202,7 +203,6 @@ export function AIPromoLanding({ titleText = "Seyahat asistanı" }: { titleText?
 
           <PageHeader
             variant="hero"
-            titleText={titleText}
             titleClassName="ai-promo-hero-title"
             title={
               <>

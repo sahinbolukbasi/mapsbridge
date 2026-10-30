@@ -78,7 +78,7 @@ test("map bottom sheet expands on demand and leaves the map visible", async ({
   page,
 }, testInfo) => {
   await prepare(page, { signedIn: true });
-  await page.goto("/desk/");
+  await page.goto("/maps/");
   const panel = page.getByRole("complementary", { name: "Seyahat Masası" });
   await expect(panel).toBeVisible();
   const collapsed = await panel.boundingBox();

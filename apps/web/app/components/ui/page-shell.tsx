@@ -1,13 +1,18 @@
 "use client";
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { findRoute } from "../../lib/route-registry";
 import { cx } from "./cx";
 import "./ui.css";
 
 export type PageLayout = "content" | "reading" | "form" | "landing" | "app" | "sidebar";
 
-/** Sayfanın tek <main>'i (G4). layout max-width/gutter seçer; yerleşim sayfaya kalır. */
+/**
+ * Sayfanın tek <main>'i (G4). layout max-width/gutter seçer; yerleşim sayfaya kalır. `layout`
+ * verilmezse route-registry kaydının layout'u (yoksa "content"); verilirse registry'yi ezer (§4.2).
+ */
 export function PageShell({
-  layout = "content",
+  layout: layoutProp,
   header,
   sidebar,
   className,
@@ -19,6 +24,8 @@ export function PageShell({
   className?: string;
   children: ReactNode;
 }) {
+  const pathname = usePathname() ?? "/";
+  const layout: PageLayout = layoutProp ?? findRoute(pathname)?.layout ?? "content";
   return (
     <main
       id="main-content"

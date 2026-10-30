@@ -4,6 +4,7 @@ import { readShare } from "../lib/api";
 
 import { useEffect, useRef, useState } from "react";
 import "./k.css";
+import { PageHeader } from "../components/ui";
 
 interface LeafletMap {
   remove(): void;
@@ -181,6 +182,8 @@ export default function FindByCodePage() {
 
   return (
     <main className="lookup-page">
+      {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
+      <PageHeader variant="hidden" />
       {/* Full Screen Map */}
       <div ref={mapContainerRef} className="lookup-map" />
 

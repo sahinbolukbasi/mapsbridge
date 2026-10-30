@@ -165,7 +165,7 @@ export function NotFoundView({
               </Link>
             )}
 
-            <Link href="/ai/" className="not-found-btn-secondary" prefetch={false}>
+            <Link href="/travel-assistant/" className="not-found-btn-secondary" prefetch={false}>
               <span
                 className="material-symbols-outlined"
                 style={{ color: "#10b981", fontVariationSettings: "'FILL' 1" }}
@@ -217,7 +217,7 @@ export function NotFoundView({
               </Link>
 
               {/* Card 2: AI Seyahat Asistanı */}
-              <Link href="/ai/" className="not-found-card" prefetch={false}>
+              <Link href="/travel-assistant/" className="not-found-card" prefetch={false}>
                 <div>
                   <div className="not-found-card-icon">
                     <span

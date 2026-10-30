@@ -486,7 +486,7 @@ export default function LoginPage() {
                           fontWeight: 600,
                           textDecoration: "none",
                         }}
-                        href={`/sifre-sifirla/${email ? `?email=${encodeURIComponent(email)}` : ""}`}
+                        href={`/reset-password/${email ? `?email=${encodeURIComponent(email)}` : ""}`}
                       >
                         Şifremi unuttum
                       </Link>
@@ -573,7 +573,7 @@ export default function LoginPage() {
                           <p style={{ margin: "0.25rem 0 0", fontSize: "12px" }}>
                             Şifrenizi hatırlamıyorsanız:{" "}
                             <Link
-                              href={`/sifre-sifirla/?email=${encodeURIComponent(email)}`}
+                              href={`/reset-password/?email=${encodeURIComponent(email)}`}
                               style={{
                                 textDecoration: "underline",
                                 fontWeight: 700,

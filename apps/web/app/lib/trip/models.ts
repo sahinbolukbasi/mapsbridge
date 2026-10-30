@@ -1,3 +1,4 @@
+import type { PlaceCategory } from "../../features/trip-planner/map-styles";
 export type TransportMode = "walking" | "driving" | "cycling";
 
 export type DrawerView =
@@ -212,3 +213,21 @@ export const DAY_COLORS = [
   "#eab308", // Day 7 - Amber
   "#6366f1", // Day 8 - İndigo
 ];
+
+/** Harita masasında kayıtlı adres (C7: maps/maps-client.tsx'ten taşındı; storage biçimi aynı). */
+export interface SavedAddress {
+  day?: number;
+  suggestedDuration?: string;
+  id: string;
+  label: string;
+  address: string;
+  lat: number;
+  lng: number;
+  group?: string; // Gezi Rotası veya Grup adı
+  category?: PlaceCategory; // Kategori
+  visited?: boolean; // Gidildi mi?
+  order?: number;
+  note?: string; // Detaylı not & ipucu
+  date?: string; // Planlanan veya ziyaret tarihi
+  photo?: string; // Durak / Mekan Fotoğrafı (URL veya Base64)
+}

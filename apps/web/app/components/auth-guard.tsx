@@ -66,7 +66,8 @@ export function AuthGuard({
   // render eder. Yükleniyor dalı prerender HTML'idir (statik main + h1).
   if (checking) {
     return (
-      <PageShell layout="app" header={<PageHeader variant="hidden" title={featureName} />}>
+      // Başlık route-registry'den (ör. /maps/ → "Harita masası"); layout prop'u registry'yi ezer.
+      <PageShell layout="app" header={<PageHeader variant="hidden" />}>
         <LoadingState label="Oturum kontrol ediliyor..." />
       </PageShell>
     );
@@ -76,7 +77,7 @@ export function AuthGuard({
     if (fallback) {
       return <>{fallback}</>;
     }
-    const currentPath = typeof window !== "undefined" ? window.location.pathname : "/desk";
+    const currentPath = typeof window !== "undefined" ? window.location.pathname : "/maps/";
     const loginUrl = `/login/?next=${encodeURIComponent(currentPath)}`;
     const signupUrl = `/register/?next=${encodeURIComponent(currentPath)}`;
 

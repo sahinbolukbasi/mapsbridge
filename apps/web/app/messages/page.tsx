@@ -15,6 +15,7 @@ import type {
   GroupTopicRoute,
 } from "../features/messaging/types";
 import { DEFAULT_TRAVELER_CONTACTS, PRESET_GROUP_ROUTES } from "../features/messaging/mock-data";
+import { PageHeader } from "../components/ui";
 
 export default function MessagesPage() {
   const { user, isAuthenticated: authOk, isLoading: authLoading } = useAuth();
@@ -484,6 +485,8 @@ export default function MessagesPage() {
 
       {/* Main Workspace Area */}
       <main className="chat-main-workspace">
+        {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
+        <PageHeader variant="hidden" />
         <div className="chat-main-container">
           {/* 3. 3-Column Messenger Architecture */}
           <nav className="chat-mobile-tabs" aria-label="Mesajlaşma bölümleri">
@@ -918,7 +921,7 @@ export default function MessagesPage() {
 
                     <div className="chat-middle-header-actions">
                       <Link
-                        href={`/desk/?route=${encodeURIComponent(activeChat.title)}`}
+                        href={`/maps/?route=${encodeURIComponent(activeChat.title)}`}
                         className="chat-btn-live-map"
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>

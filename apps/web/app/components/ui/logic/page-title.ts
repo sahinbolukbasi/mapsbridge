@@ -1,6 +1,6 @@
 // PageHeader başlık çözümü (saf, design §3 PageHeader, R5-7 / R6-4).
 //   text = titleText ?? (string title) ?? entry?.title[locale];  heading = title ?? text
-// Tek hata koşulu text === undefined. Registry araması C7'de eklenir; C5–C6'da title verilir.
+// Tek hata koşulu text === undefined. entry = route-registry kaydı (PageHeader usePathname ile arar).
 
 export type PageTitleLocale = "tr" | "en";
 export type PageTitleEntry = { title: Record<PageTitleLocale, string> };

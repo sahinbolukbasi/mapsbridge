@@ -1,3 +1,4 @@
-import MobileAppsComingSoonPage from "../mobil-uygulamalar/page";
-
-export default MobileAppsComingSoonPage;
+import MobileAppsClient from "./mobile-apps-client";
+export default function MobileAppsPage() {
+  return <MobileAppsClient />;
+}

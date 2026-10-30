@@ -21,6 +21,14 @@ const APP = path.join(WEB, "app");
 const BASELINE_PATH = path.join(__dirname, "design-system-baseline.json");
 const STEERING_PATH = path.join(ROOT, ".kiro/steering/design-system.md");
 const REGISTRY_PATH = path.join(APP, "lib/route-registry.ts");
+let registryCache = null;
+const registry = () => (registryCache ??= loadTs(REGISTRY_PATH));
+// Kimlik kapıları da kendi PageShell'ini çizer (design §4.3, §4.5).
+const SHELL_RENDERING_GATES = [
+  "components/auth-guard.tsx",
+  "components/auth-gate.tsx",
+  "travel-assistant/promo-landing.tsx",
+];
 const PKG_SRC = path.join(ROOT, "packages/design-tokens/src");
 const ORDER = "@layer tokens, base, legacy, chrome, pages, primitives;";
 
@@ -58,10 +66,12 @@ const HINT = {
   G1: "token kullanın",
   G2: ":root yalnızca styles/tokens.css'te tanımlanır",
   G3: "koyu tema yok; [data-theme] / dataset.theme kullanmayın",
+  G4: "her kanonik sayfa (ya da tek *-client.tsx kökü) PageShell render eder; LEGACY sayfası yalnızca LegacyRedirect; her page.tsx registry'de",
   G4m: "<main> yalnızca PageShell'de (components/ui/page-shell.tsx); sayfa PageShell render eder",
   G5: "header/footer yalnızca SiteChrome'dan (components/ui/site-chrome.tsx) render edilir",
   G6: "Tailwind-benzeri sınıf yerine yerleşim sınıfı ya da primitive kullanın",
   G7: "TS/TSX'te renk literal'i yerine token (CSS değişkeni / lib/design-tokens.ts) kullanın",
+  G9: "eş-anlamlı (LEGACY) URL yerine kanonik URL'e bağlantı verin (lib/route-registry.ts LEGACY_REDIRECTS)",
   G8: ".ui-* seçicisi yalnızca components/ui/ui.css'te yazılır",
   G10: "<h1> yalnızca PageHeader'da (components/ui/page-header.tsx)",
   G11: "outline: none yazmayın; odak halkası base.css'teki :focus-visible kuralından gelir",
@@ -126,13 +136,12 @@ const LAMBDA_BUNDLED = [/^lib\/ai\//, /^lib\/trip\/routing-service\.ts$/, /^lib\
 LAMBDA_BUNDLED.push(/^lib\/visa\//, /^lib\/affiliate\//, /^lib\/tracker\//);
 const GENERATED_TS = "lib/design-tokens.ts";
 
-// G23: veri renklerinin serbest olduğu dosyalar. desk/ C7'de maps/'e taşınır.
+// G23: veri renklerinin serbest olduğu dosyalar (desk/ C7'de maps/'e taşındı).
 const DATA_COLOR_ALLOWED = [
   /^components\/trip\//,
   /^features\/trip-planner\//,
   /^lib\/trip\//,
   /^maps\//,
-  /^desk\//,
   /^k\//,
   /^\[username\]\//,
   /^components\/travel-globe\.tsx$/,
@@ -473,6 +482,145 @@ const RULES = {
           /\.dataset\.theme$/.test(n.left.getText(sf))
         )
           c.add(rel(abs), lineOfTs(sf, n), n.getText(sf).slice(0, 60));
+    }
+    return c.result;
+  },
+  // G4 (design §10, §4.3, §5.3): registry'ye bağlı shell kuralları. C7'de etkinleşti.
+  G4() {
+    const c = collector();
+    const { CANONICAL_ROUTES, LEGACY_REDIRECTS } = registry();
+    const abs = (r) => path.join(WEB, r);
+    const hasJsx = (file, tag) => [...jsxElements(file)].some((el) => el.tag === tag);
+    // Relative import + `export ... from` zinciri (yalnızca relative yollar).
+    const resolveRel = (from, spec) => {
+      if (!spec.startsWith(".")) return null;
+      const base = path.resolve(path.dirname(from), spec);
+      return [base, `${base}.tsx`, `${base}.ts`, path.join(base, "index.tsx")].find(
+        (p) => fs.existsSync(p) && fs.statSync(p).isFile(),
+      );
+    };
+    const relTargets = (file) => {
+      const sf = source(file);
+      const out = [];
+      for (const st of sf.statements) {
+        const spec =
+          (ts.isImportDeclaration(st) || ts.isExportDeclaration(st)) &&
+          st.moduleSpecifier &&
+          ts.isStringLiteral(st.moduleSpecifier)
+            ? st.moduleSpecifier.text
+            : null;
+        const target = spec && resolveRel(file, spec);
+        if (target) out.push(target);
+      }
+      return out;
+    };
+    const canonicalFiles = new Set();
+    for (const route of CANONICAL_ROUTES) {
+      const page = abs(route.file);
+      canonicalFiles.add(page);
+      if (!fs.existsSync(page)) {
+        c.add(route.file, 0, `${route.path}: dosya yok`);
+        continue;
+      }
+      if (hasJsx(page, "PageShell")) continue;
+      const clients = relTargets(page).filter((p) => p.endsWith("-client.tsx"));
+      if (clients.length > 1) {
+        c.add(route.file, 0, `${route.path}: tek istemci kökü olmalı (${clients.length} *-client.tsx)`);
+        continue;
+      }
+      // re-export zincirinin sonundaki *-client.tsx
+      let target = clients[0];
+      for (let hop = 0; !target && hop < 3; hop++) {
+        const next = relTargets(page);
+        if (next.length !== 1) break;
+        target = next[0].endsWith("-client.tsx") ? next[0] : undefined;
+      }
+      const owner = target ?? page;
+      if (!hasJsx(owner, "PageShell")) c.add(rel(owner), 0, `${route.path}: <PageShell yok`);
+    }
+    // Kapılar da PageShell çizer; chrome/main çizmez (design §4.3 SHELL_RENDERING_GATES).
+    for (const gate of SHELL_RENDERING_GATES) {
+      const file = path.join(APP, gate);
+      if (!hasJsx(file, "PageShell")) c.add(rel(file), 0, "kapı <PageShell çizmeli");
+      for (const tag of ["main", "HeaderNav", "SiteFooter"])
+        if (hasJsx(file, tag)) c.add(rel(file), 0, `kapı <${tag} çizmez`);
+    }
+    // LEGACY sayfaları yalnızca LegacyRedirect; tablo ↔ sayfa tutarlılığı; zincir yok.
+    const legacyFiles = new Set();
+    for (const [from, to] of Object.entries(LEGACY_REDIRECTS)) {
+      const page = path.join(APP, from.replace(/^\/|\/$/g, ""), "page.tsx");
+      legacyFiles.add(page);
+      if (LEGACY_REDIRECTS[to]) c.add("app/lib/route-registry.ts", 0, `${from} → ${to} zincir`);
+      if (!fs.existsSync(page)) {
+        c.add(rel(page), 0, `${from}: LegacyRedirect sayfası yok`);
+        continue;
+      }
+      const tags = new Set([...jsxElements(page)].map((el) => el.tag));
+      if ([...tags].some((t) => t !== "LegacyRedirect") || !tags.has("LegacyRedirect"))
+        c.add(rel(page), 0, `${from}: yalnızca <LegacyRedirect> içermeli`);
+    }
+    for (const file of TSX_FILES)
+      for (const el of jsxElements(file)) {
+        if (el.tag !== "LegacyRedirect") continue;
+        const fromAttr = el.attrs.find((a) => attrName(a) === "from");
+        const value = fromAttr ? attrStrings(fromAttr)[0] : undefined;
+        const expected = `/${path.relative(APP, path.dirname(file)).split(path.sep).join("/")}/`;
+        if (!value || !LEGACY_REDIRECTS[value] || value !== expected)
+          c.add(rel(file), el.line, `LegacyRedirect from="${value}" tabloda/konumda değil`);
+      }
+    // Her app/**/page.tsx registry'de (kanonik dosya ya da LEGACY sayfası).
+    for (const page of TSX_FILES.filter((f) => path.basename(f) === "page.tsx"))
+      if (!canonicalFiles.has(page) && !legacyFiles.has(page))
+        c.add(rel(page), 0, "page.tsx route-registry.ts'te kayıtlı değil");
+    return c.result;
+  },
+  // G9 (design §5.4): sabit path'i LEGACY anahtarına TAM eşit bağlantı (önek eşleme yok).
+  G9() {
+    const c = collector();
+    const { LEGACY_REDIRECTS } = registry();
+    const legacyPages = new Set(
+      Object.keys(LEGACY_REDIRECTS).map((k) =>
+        path.join(APP, k.replace(/^\/|\/$/g, ""), "page.tsx"),
+      ),
+    );
+    const pathOf = (text) => {
+      const bare = text.split(/[?#]/)[0];
+      if (!bare.startsWith("/")) return null;
+      return bare.endsWith("/") ? bare : `${bare}/`;
+    };
+    const literals = (node) => {
+      const out = [];
+      const visit = (n) => {
+        if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) out.push(n.text);
+        else if (ts.isTemplateExpression(n)) out.push(n.head.text);
+        else ts.forEachChild(n, visit);
+      };
+      visit(node);
+      return out;
+    };
+    for (const file of TSX_FILES) {
+      if (appRel(file) === "lib/route-registry.ts" || legacyPages.has(file)) continue;
+      const sf = source(file);
+      const check = (node, at) => {
+        for (const text of literals(node)) {
+          const p = pathOf(text);
+          if (p && LEGACY_REDIRECTS[p]) c.add(rel(file), lineOfTs(sf, at), `${text} → ${LEGACY_REDIRECTS[p]}`);
+        }
+      };
+      for (const n of tsNodes(sf)) {
+        if (ts.isJsxAttribute(n) && ["href", "action"].includes(n.name.getText(sf)) && n.initializer)
+          check(n.initializer, n);
+        else if (ts.isCallExpression(n) && n.arguments.length) {
+          const callee = n.expression.getText(sf);
+          if (/(^|\.)(push|replace|assign)$/.test(callee) && !/(^|\.)(apiFetch|fetch|adminRequest)$/.test(callee))
+            check(n.arguments[0], n);
+        } else if (
+          ts.isBinaryExpression(n) &&
+          n.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+          /(^|\.)location\.href$/.test(n.left.getText(sf))
+        )
+          check(n.right, n);
+      }
     }
     return c.result;
   },
@@ -938,14 +1086,8 @@ if (require.main === module && process.argv.includes("--write-baseline")) {
     assert.deepEqual(problems, [], problems.join("\n"));
   });
 
-  test("G4 shell ve G9 legacy link: route registry'ye bağlı", (t) => {
-    if (!fs.existsSync(REGISTRY_PATH)) {
-      t.skip("route-registry.ts henüz yok (C7'de etkinleşir)");
-      return;
-    }
-    assert.fail(
-      "lib/route-registry.ts var: G4/G9 skip dalını kaldırın ve kuralları etkinleştirin (C7)",
-    );
+  test("G4/G9 route registry'ye bağlı: lib/route-registry.ts var (C7'den sonra skip yok)", () => {
+    assert.ok(fs.existsSync(REGISTRY_PATH), "lib/route-registry.ts yok: G4/G9 koşamaz");
   });
 
   test("baseline biçimi: bilinen kurallar, pozitif tam sayılar", () => {

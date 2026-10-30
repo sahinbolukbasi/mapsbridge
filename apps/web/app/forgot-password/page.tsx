@@ -1,14 +1,5 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-
-export default function ForgotPasswordPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/reset-password/");
-  }, [router]);
-
-  return null;
+import { LegacyRedirect, legacyMetadata } from "../components/ui/legacy-redirect";
+export const metadata = legacyMetadata("/forgot-password/");
+export default function Page() {
+  return <LegacyRedirect from="/forgot-password/" />;
 }

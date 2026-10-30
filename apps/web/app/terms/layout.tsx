@@ -1,10 +1,5 @@
-import { publicMetadata } from "../lib/site-metadata";
-export const metadata = publicMetadata(
-  "Kullanım koşulları",
-  "MapsBridge hizmetlerinin kullanım koşulları.",
-  "/terms/",
-  "tr",
-);
+import { routeMetadata } from "../lib/site-metadata";
+export const metadata = routeMetadata("/terms/");
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;
 }

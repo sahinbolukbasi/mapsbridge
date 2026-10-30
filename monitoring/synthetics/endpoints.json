@@ -6,7 +6,7 @@
     {
       "name": "Live Web Desk Page",
       "target": "web",
-      "path": "/desk/",
+      "path": "/maps/",
       "method": "GET",
       "expectedStatus": 200,
       "maxLatencyMs": 1500
@@ -14,7 +14,7 @@
     {
       "name": "Live Web AI Planner Page",
       "target": "web",
-      "path": "/ai/",
+      "path": "/travel-assistant/",
       "method": "GET",
       "expectedStatus": 200,
       "maxLatencyMs": 1500

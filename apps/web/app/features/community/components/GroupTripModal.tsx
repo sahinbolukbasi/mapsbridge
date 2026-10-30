@@ -206,7 +206,7 @@ export function GroupTripModal({
                             </div>
                           </div>
                           <a
-                            href={`/desk/?route=${encodeURIComponent(msg.attachedRoute.title)}`}
+                            href={`/maps/?route=${encodeURIComponent(msg.attachedRoute.title)}`}
                             className="btn-inspect-attached-route"
                             target="_blank"
                             rel="noreferrer"

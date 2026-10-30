@@ -415,7 +415,7 @@ export default function CommunityPage() {
               Hızlı Bağlantılar
             </h3>
             <nav className="community-sidebar-links">
-              <a href="/ai/" className="community-sidebar-link">
+              <a href="/travel-assistant/" className="community-sidebar-link">
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
                   smart_toy
                 </span>

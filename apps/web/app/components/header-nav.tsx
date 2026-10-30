@@ -6,11 +6,12 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getStoredSession, signOut } from "../lib/cognito";
 import { billingService } from "../lib/billing/billing-service";
-import { useLocale, getAlternatePath } from "../lib/locale-context";
+import { useLocale, getAlternatePath, localeRootPath } from "../lib/locale-context";
 import { SAVED_ADDRESSES_EVENT, type SavedAddressesChangedDetail } from "../lib/chrome-events";
+import type { ChromeVariant } from "../lib/route-registry";
 
-/** Chrome varyantı (G19): sayfa CSS'i header'ı override etmez; varyant SiteChrome'dan gelir. */
-export type HeaderVariant = "default" | "wide" | "wide-compact";
+/** Chrome varyantı (G19): sayfa CSS'i header'ı override etmez; varyant route-registry'den gelir. */
+export type HeaderVariant = ChromeVariant;
 
 interface HeaderNavProps {
   variant?: HeaderVariant;
@@ -597,18 +598,21 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
               type="button"
               className="header-locale-btn"
               onClick={() => {
+                // D13: gerçek dil varyantı varsa ona, yoksa dil köküne (404 üreten /en/<path>/ yok).
+                const target = isEnglish ? "tr" : "en";
                 const alternate = getAlternatePath(pathname);
-                document.cookie = `locale=${isEnglish ? "tr" : "en"};path=/;max-age=31536000;SameSite=Lax`;
-                window.location.assign(alternate);
+                const here = pathname.endsWith("/") ? pathname : `${pathname}/`;
+                document.cookie = `locale=${target};path=/;max-age=31536000;SameSite=Lax`;
+                window.location.assign(alternate !== here ? alternate : localeRootPath(target));
               }}
-              title={isEnglish ? "Türkçe'ye geç" : "Switch to English"}
+              title={isEnglish ? "Türkçe ana sayfaya geç" : "İngilizce ana sayfaya geç"}
             >
               <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
                 translate
               </span>
               <span>{isEnglish ? "TR" : "EN"}</span>
               <span className="ui-visually-hidden">
-                {isEnglish ? "Türkçe'ye geç" : "Switch to English"}
+                {isEnglish ? "Türkçe ana sayfaya geç" : "İngilizce ana sayfaya geç"}
               </span>
             </button>
           </div>
@@ -642,14 +646,14 @@ export function MobileNav() {
     ? ([
         { href: "/maps/", label: "Harita", english: "Map", icon: "map" },
         { href: "/community/", label: "Topluluk", english: "Community", icon: "people" },
-        { href: "/ai/", label: "AI Asistan", english: "AI Guide", icon: "ai" },
+        { href: "/travel-assistant/", label: "AI Asistan", english: "AI Guide", icon: "ai" },
         { href: "/messages/", label: "Mesajlar", english: "Messages", icon: "message" },
         { href: "/profile/", label: "Profil", english: "Profile", icon: "profile" },
       ] as const)
     : ([
         { href: isEnglish ? "/en/" : "/", label: "Keşfet", english: "Explore", icon: "explore" },
         { href: "/maps/", label: "Harita", english: "Map", icon: "map" },
-        { href: "/ai/", label: "AI Asistan", english: "AI Guide", icon: "ai" },
+        { href: "/travel-assistant/", label: "AI Asistan", english: "AI Guide", icon: "ai" },
         { href: "/community/", label: "Topluluk", english: "Community", icon: "people" },
         { href: "/login/", label: "Giriş", english: "Sign in", icon: "profile" },
       ] as const);

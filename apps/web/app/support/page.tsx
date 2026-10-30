@@ -86,7 +86,7 @@ export default function SupportPage() {
   };
   return (
     <main className="support-page">
-      <a href="/u/">← Uygulamaya dön</a>
+      <a href="/">← Ana sayfa</a>
       <h1>Yardım ve destek</h1>
       <p>Hesap, rota veya ödeme konularında destek ekibimizle iletişime geçin.</p>
       {error && (

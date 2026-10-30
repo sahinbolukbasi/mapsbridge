@@ -646,7 +646,7 @@ export default function ProfilePage() {
                           <span>Seyahat Masasında Rota Oluştur</span>
                         </Link>
                         <Link
-                          href="/ai/"
+                          href="/travel-assistant/"
                           className="stitch-btn-add-quick"
                           style={{
                             padding: "0.55rem 1.1rem",
@@ -718,7 +718,7 @@ export default function ProfilePage() {
                             <div className="stitch-route-actions-bottom">
                               <div className="stitch-route-btn-group">
                                 <Link
-                                  href={`/desk/?trip=${encodeURIComponent(trip.id || "")}`}
+                                  href={`/maps/?trip=${encodeURIComponent(trip.id || "")}`}
                                   className="stitch-route-btn primary"
                                 >
                                   <span className="material-symbols-outlined text-[16px]">
@@ -727,7 +727,7 @@ export default function ProfilePage() {
                                   <span>Düzenle</span>
                                 </Link>
                                 <Link
-                                  href={`/desk/?trip=${encodeURIComponent(trip.id || "")}`}
+                                  href={`/maps/?trip=${encodeURIComponent(trip.id || "")}`}
                                   className="stitch-route-btn"
                                 >
                                   <span className="material-symbols-outlined text-[16px]">map</span>
@@ -1129,8 +1129,8 @@ export default function ProfilePage() {
                       const categoryName = pin.category || pin.group || "Genel Durak";
                       const mapLink =
                         pin.lat && pin.lng
-                          ? `/desk/?lat=${pin.lat}&lng=${pin.lng}&zoom=16`
-                          : `/desk/`;
+                          ? `/maps/?lat=${pin.lat}&lng=${pin.lng}&zoom=16`
+                          : `/maps/`;
 
                       return (
                         <div key={pin.id} className="stitch-pool-card">
@@ -1233,7 +1233,7 @@ export default function ProfilePage() {
                           <span>{col.count} Durak / Rota</span>
                         </span>
                         <Link
-                          href={`/desk/?collection=${encodeURIComponent(col.title)}`}
+                          href={`/maps/?collection=${encodeURIComponent(col.title)}`}
                           className="stitch-route-btn"
                         >
                           <span className="material-symbols-outlined text-[16px]">folder_open</span>

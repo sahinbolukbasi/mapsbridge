@@ -1,4 +1,4 @@
-// Tasarım sistemi primitive'leri (design §3). LegacyRedirect C7'de eklenir.
+// Tasarım sistemi primitive'leri (design §3).
 // SiteChrome bilerek barrel'de YOK: yalnızca root layout import eder (components/ui/site-chrome).
 export { Alert, type AlertTone } from "./alert";
 export { Avatar, initialsOf } from "./avatar";

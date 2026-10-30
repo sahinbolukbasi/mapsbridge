@@ -18,7 +18,7 @@ export type LegacyBreakpoint = { query: string; count: number };
 
 export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> = {
   "[username]/public-profile.css": [{ query: "(min-width: 900px)", count: 1 }],
-  "ai/ai.css": [
+  "travel-assistant/assistant.css": [
     { query: "(max-width: 600px)", count: 1 },
     { query: "(max-width: 767px)", count: 1 },
     { query: "(min-width: 1025px)", count: 1 },
@@ -51,7 +51,7 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
     { query: "(max-width: 820px)", count: 2 },
     { query: "(min-width: 769px) and (max-width: 1024px)", count: 1 },
   ],
-  "desk/desk.css": [
+  "maps/maps.css": [
     { query: "(max-width: 1279px)", count: 1 },
     { query: "(max-width: 767px)", count: 3 },
     { query: "(max-width: 820px)", count: 7 },

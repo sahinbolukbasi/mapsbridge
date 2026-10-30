@@ -31,9 +31,9 @@ export default function Home() {
     e.preventDefault();
     const query = destinationQuery.trim();
     if (query) {
-      router.push(`/ai/?q=${encodeURIComponent(query)}`);
+      router.push(`/travel-assistant/?q=${encodeURIComponent(query)}`);
     } else {
-      router.push("/ai/");
+      router.push("/travel-assistant/");
     }
   }
 
@@ -240,7 +240,7 @@ export default function Home() {
 
                     <div className="mockup-actions">
                       <a
-                        href="/ai/?q=Floransa%27da%203%20g%C3%BCn%20sanat%20ve%20kahve"
+                        href="/travel-assistant/?q=Floransa%27da%203%20g%C3%BCn%20sanat%20ve%20kahve"
                         className="mockup-action-btn primary"
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
@@ -1047,7 +1047,10 @@ export default function Home() {
                 </div>
               </div>
               <div className="community-engagement-actions">
-                <a href={isLoggedIn ? "/ai/" : "/register/"} className="community-share-btn">
+                <a
+                  href={isLoggedIn ? "/travel-assistant/" : "/register/"}
+                  className="community-share-btn"
+                >
                   <span className="material-symbols-outlined">add_circle</span>
                   <span>{t("home.community.shareRoute")}</span>
                 </a>
@@ -1103,7 +1106,10 @@ export default function Home() {
                 <p className="cta-desc">{t("home.cta.desc")}</p>
               </div>
               <div className="cta-actions">
-                <a href={isLoggedIn ? "/ai/" : "/register/"} className="cta-btn-primary">
+                <a
+                  href={isLoggedIn ? "/travel-assistant/" : "/register/"}
+                  className="cta-btn-primary"
+                >
                   <span>{isLoggedIn ? t("home.cta.planWithAi") : t("home.cta.startRoute")}</span>
                   <span className="material-symbols-outlined" style={{ fontSize: "1.25rem" }}>
                     arrow_forward

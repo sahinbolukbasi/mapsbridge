@@ -156,7 +156,7 @@ export default function CheckoutPage() {
   return (
     <div className="odeme-page-root">
       <main className="billing-home">
-        <Link href="/ai/" className="billing-back">
+        <Link href="/travel-assistant/" className="billing-back">
           ← Seyahat asistanına dön
         </Link>
 
@@ -182,7 +182,7 @@ export default function CheckoutPage() {
                     ? "Kaşif Planı"
                     : "Gezgin (Ücretsiz Plan)"}
             </span>
-            <Link href={signedIn ? "/ai/" : "/login/"}>
+            <Link href={signedIn ? "/travel-assistant/" : "/login/"}>
               {signedIn ? "Rotamı Planla" : "Giriş Yap"}
             </Link>
           </div>

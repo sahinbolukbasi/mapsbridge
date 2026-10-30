@@ -154,7 +154,7 @@ async function setup(page, { failed = false, saved = false } = {}) {
     },
     { failed, saved },
   );
-  await page.goto("/desk/");
+  await page.goto("/maps/");
   await expect(page.getByLabel("Google seyahat haritası")).toBeVisible();
 }
 test("Google POI shows attributed photos/reviews and saves only user data plus place ID", async ({

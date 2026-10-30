@@ -4,7 +4,8 @@ import { usePathname } from "next/navigation";
 import { useLocale } from "../../lib/locale-context";
 import { Breadcrumb, type BreadcrumbItem } from "./breadcrumb";
 import { cx } from "./cx";
-import { resolvePageTitle, type PageTitleEntry } from "./logic/page-title";
+import { findRoute } from "../../lib/route-registry";
+import { resolvePageTitle } from "./logic/page-title";
 import "./ui.css";
 
 export type PageHeaderProps = {
@@ -21,9 +22,6 @@ export type PageHeaderProps = {
   /** Hero görseli vb. */
   children?: ReactNode;
 };
-
-/** Registry araması C7'de eklenir (route-registry.ts); C5–C6'da title/titleText verilir. */
-const lookupEntry = (_pathname: string): PageTitleEntry | null => null;
 
 /** Sayfanın tek <h1>'i (G10). Kök <div>; <header> değil (G5). */
 export function PageHeader({
@@ -42,7 +40,7 @@ export function PageHeader({
   const pathname = usePathname() ?? "";
   const { locale } = useLocale();
   const resolved = resolvePageTitle(
-    { title, titleText, entry: lookupEntry(pathname), locale },
+    { title, titleText, entry: findRoute(pathname) ?? null, locale },
     pathname,
   );
   if ("error" in resolved) {

@@ -88,7 +88,11 @@ test("layer'lı her chunk sıra ifadesiyle başlar ve layer sırası korunur (AC
   assert.ok(chunks.length > 0, "out/_next/static altında @layer içeren CSS chunk'ı yok");
   const problems = [];
   for (const { file, css } of chunks) {
+    // next/font çıktısı (repo CSS'i değil, layer'sız muaf) chunk'ın başına düşebilir; atlanır.
+    const isNextFont = (r) =>
+      r.startsWith("@font-face") || NEXT_FONT.test(r.slice(0, r.indexOf("{")).trim());
     const rules = topLevel(css);
+    while (rules.length && isNextFont(rules[0])) rules.shift();
     if (!rules[0] || !rules[0].startsWith("@layer")) {
       problems.push(`${file}: ilk kural @layer değil: ${String(rules[0]).slice(0, 60)}`);
       continue;

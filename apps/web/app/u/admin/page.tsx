@@ -842,7 +842,7 @@ export default function AdminDashboard() {
                 : "Destek ekibi"}{" "}
             · Veriler 60 saniyede yenilenir.
           </small>
-          <a href="/u/">Uygulamaya dön ↗</a>
+          <a href="/maps/">Uygulamaya dön ↗</a>
         </div>
       </aside>
 

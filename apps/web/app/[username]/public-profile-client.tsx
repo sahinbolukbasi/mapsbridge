@@ -1708,7 +1708,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 Kapat
               </button>
               <Link
-                href={`/desk/?route=${encodeURIComponent(previewRoute.name)}`}
+                href={`/maps/?route=${encodeURIComponent(previewRoute.name)}`}
                 className="pub-btn-primary"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>

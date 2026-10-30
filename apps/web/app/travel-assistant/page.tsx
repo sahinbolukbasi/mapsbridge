@@ -1,3 +1,2 @@
 "use client";
-
-export { default } from "../ai/page";
+export { default } from "./travel-assistant-client";

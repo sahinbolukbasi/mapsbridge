@@ -65,7 +65,7 @@ async function setup(page, { saved = false, slow = false } = {}) {
       json: { name: "Yeni mekan", address: { road: "Yeni Sokak", city: "İstanbul" } },
     });
   });
-  await page.goto("/desk/");
+  await page.goto("/maps/");
   await expect(page.locator(".leaflet-container")).toBeVisible();
   await expect(page.locator(".map-load-status")).toHaveCount(0);
 }

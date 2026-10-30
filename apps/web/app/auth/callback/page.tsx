@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { handleGoogleCredentialResponse } from "../../lib/cognito";
 import "./callback.css";
+import { PageHeader } from "../../components/ui";
 
 export default function AuthCallbackPage() {
   const [status, setStatus] = useState("Oturum doğrulanıyor...");
@@ -66,6 +67,8 @@ export default function AuthCallbackPage() {
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
+      {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
+      <PageHeader variant="hidden" />
       <div
         style={{
           background: "var(--surface, #ffffff)",

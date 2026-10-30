@@ -1,10 +1,5 @@
-import { publicMetadata } from "../lib/site-metadata";
-export const metadata = publicMetadata(
-  "Gizlilik politikası",
-  "MapsBridge gizlilik politikası ve kişisel verilerin kullanımı.",
-  "/privacy/",
-  "tr",
-);
+import { routeMetadata } from "../lib/site-metadata";
+export const metadata = routeMetadata("/privacy/");
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;
 }

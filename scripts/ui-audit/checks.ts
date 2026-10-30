@@ -69,7 +69,7 @@ export const LEAFLET_SCENARIOS = {
       activePopup: ".stitch-pin-active-popup",
     },
     markerTargets: [
-      // desk/page.tsx renderGroupOnMap planlayıcı açıkken erken döner ve isPlannerOpen bugün
+      // maps/maps-client.tsx renderGroupOnMap planlayıcı açıkken erken döner ve isPlannerOpen bugün
       // hiç false olmaz; bu yüzden rota durağı pin'i bugün /maps/'te render edilmez.
       {
         name: "custom-route-pin",

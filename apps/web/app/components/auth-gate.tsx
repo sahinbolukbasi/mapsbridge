@@ -27,7 +27,7 @@ export interface FullPagePromotionProps {
   nextUrl: string;
   primaryButtonText?: string;
   secondaryButtonText?: string;
-  /** Düz metin başlık (`<title>`/chrome-check); verilmezse heroTitle. C7'de registry'den. */
+  /** Düz metin başlık (`<title>`/chrome-check); verilmezse heroTitle. */
   titleText?: string;
 }
 

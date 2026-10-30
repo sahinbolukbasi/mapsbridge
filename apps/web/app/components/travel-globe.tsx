@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SavedAddress } from "../desk/page";
+import type { SavedAddress } from "../lib/trip/models";
 
 interface TravelGlobeProps {
   addresses: SavedAddress[];
