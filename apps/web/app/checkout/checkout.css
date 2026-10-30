@@ -7,8 +7,8 @@
 
   .odeme-page-root {
     min-height: 100vh;
-    background: #f8fafc;
-    color: #0f172a;
+    background: var(--color-bg);
+    color: var(--color-text);
     font-family:
       "Inter",
       -apple-system,
@@ -16,691 +16,11 @@
     display: flex;
     flex-direction: column;
   }
-
-  /* ── Top Header Navigation Bar ── */
-  .odeme-header-bar {
-    background: #ffffff;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.85);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .odeme-header-container {
-    max-width: min(100%, 1840px);
-    margin: 0 auto;
-    padding: 0.85rem clamp(1rem, 3vw, 3.5rem);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .odeme-brand-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .odeme-brand-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #0d281e 0%, #286954 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #10b981;
-    box-shadow: 0 4px 12px rgba(13, 40, 30, 0.25);
-  }
-
-  .odeme-brand-text {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .odeme-brand-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: #0d281e;
-    letter-spacing: -0.02em;
-  }
-
-  .odeme-brand-sub {
-    font-size: 11px;
-    font-weight: 600;
-    color: #10b981;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .odeme-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .odeme-wallet-pill {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.35rem 0.85rem;
-    border-radius: 9999px;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    font-size: 12px;
-    font-weight: 700;
-    color: #0f172a;
-  }
-
-  .odeme-wallet-credits {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: #10b981;
-  }
-
-  .odeme-wallet-earnings {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: #286954;
-  }
-
-  .btn-odeme-back {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 1rem;
-    border-radius: 9999px;
-    background: #0d281e;
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 12.5px;
-    font-weight: 700;
-    transition: all 0.2s ease;
-  }
-
-  .btn-odeme-back:hover {
-    background: #286954;
-    transform: translateY(-1px);
-  }
-
-  /* ── Hero & Headings ── */
-  .odeme-hero {
-    text-align: center;
-    padding: 3rem 1.5rem 1.5rem;
-    max-width: 860px;
-    margin: 0 auto;
-  }
-
-  .odeme-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.3rem 0.85rem;
-    border-radius: 9999px;
-    background: rgba(16, 185, 129, 0.12);
-    color: #047857;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 1rem;
-  }
-
-  .odeme-hero-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 2.5rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
-    color: #0d281e;
-    margin-bottom: 1rem;
-  }
-
-  .odeme-hero-title span {
-    background: linear-gradient(135deg, #10b981 0%, #286954 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .odeme-hero-sub {
-    font-size: 1.05rem;
-    color: #475569;
-    line-height: 1.5;
-    max-width: 680px;
-    margin: 0 auto;
-  }
-
-  /* ── Main Tab Switcher ── */
-  .odeme-tab-nav {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin: 2rem 0;
-  }
-
-  .odeme-tab-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.65rem 1.35rem;
-    border-radius: 9999px;
-    border: 1.5px solid rgba(203, 213, 225, 0.8);
-    background: #ffffff;
-    color: #475569;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-  }
-
-  .odeme-tab-btn:hover {
-    border-color: #10b981;
-    color: #0d281e;
-  }
-
-  .odeme-tab-btn.active {
-    background: #0d281e;
-    border-color: #0d281e;
-    color: #ffffff;
-    box-shadow: 0 8px 20px -4px rgba(13, 40, 30, 0.4);
-  }
-
-  /* ── Content Body Container ── */
-  .odeme-content-container {
-    max-width: min(100%, 1840px);
-    margin: 0 auto;
-    padding: 0 clamp(1rem, 3vw, 3.5rem) 4rem;
-    width: 100%;
-  }
-
-  /* ── Tab 1: Credit Packages Grid ── */
-  .credit-packs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
-  }
-
-  .credit-pack-card {
-    background: #ffffff;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 1.75rem;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
-  }
-
-  .credit-pack-card:hover {
-    transform: translateY(-4px);
-    border-color: #10b981;
-    box-shadow: 0 18px 36px -8px rgba(16, 185, 129, 0.18);
-  }
-
-  .credit-pack-card.popular {
-    border-color: #10b981;
-    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
-    box-shadow: 0 18px 36px -8px rgba(16, 185, 129, 0.22);
-  }
-
-  .credit-pack-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #10b981;
-    color: #0d281e;
-    padding: 0.3rem 0.85rem;
-    border-radius: 9999px;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
-    white-space: nowrap;
-  }
-
-  .credit-pack-header {
-    margin-bottom: 1.25rem;
-  }
-
-  .credit-pack-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #0d281e;
-    margin-bottom: 0.25rem;
-  }
-
-  .credit-pack-desc {
-    font-size: 12.5px;
-    color: #64748b;
-    line-height: 1.4;
-  }
-
-  .credit-pack-amount-box {
-    background: rgba(16, 185, 129, 0.08);
-    border-radius: 14px;
-    padding: 1rem;
-    text-align: center;
-    margin-bottom: 1.25rem;
-  }
-
-  .credit-pack-total {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #0d281e;
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 0.25rem;
-  }
-
-  .credit-pack-unit {
-    font-size: 11.5px;
-    font-weight: 600;
-    color: #286954;
-    margin-top: 0.25rem;
-  }
-
-  .credit-pack-price-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-top: auto;
-    padding: 1rem 0 1.25rem;
-    border-top: 1px solid rgba(226, 232, 240, 0.8);
-  }
-
-  .credit-pack-price-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
-  }
-
-  .credit-pack-price-val {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #0d281e;
-  }
-
-  .btn-buy-pack {
-    width: 100%;
-    padding: 0.85rem;
-    border: none;
-    border-radius: 14px;
-    background: #0d281e;
-    color: #ffffff;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(13, 40, 30, 0.2);
-  }
-
-  .btn-buy-pack:hover {
-    background: #286954;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(13, 40, 30, 0.3);
-  }
-
-  .credit-pack-card.popular .btn-buy-pack {
-    background: #10b981;
-    color: #0d281e;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-  }
-
-  .credit-pack-card.popular .btn-buy-pack:hover {
-    background: #059669;
-    color: #ffffff;
-  }
-
-  /* ── Tab 2: Subscription Plans ── */
-  .billing-cycle-toggle-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .cycle-toggle-btn {
-    padding: 0.5rem 1.25rem;
-    border-radius: 9999px;
-    border: 1px solid #cbd5e1;
-    background: #ffffff;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: #475569;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-  }
-
-  .cycle-toggle-btn.active {
-    background: #0d281e;
-    border-color: #0d281e;
-    color: #ffffff;
-  }
-
-  .savings-tag {
-    background: #10b981;
-    color: #0d281e;
-    padding: 0.15rem 0.5rem;
-    border-radius: 9999px;
-    font-size: 10.5px;
-    font-weight: 800;
-  }
-
-  .subscription-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
-    gap: 1.5rem;
-  }
-
-  .plan-card {
-    background: #ffffff;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 2rem 1.75rem;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .plan-card.highlight {
-    border-color: #10b981;
-    background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%);
-    box-shadow: 0 20px 45px -10px rgba(16, 185, 129, 0.25);
-    transform: scale(1.02);
-    z-index: 2;
-  }
-
-  .plan-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #10b981;
-    color: #0d281e;
-    padding: 0.3rem 0.85rem;
-    border-radius: 9999px;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-  }
-
-  .plan-name {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: #0d281e;
-    margin-bottom: 0.35rem;
-  }
-
-  .plan-tagline {
-    font-size: 12.5px;
-    color: #64748b;
-    min-height: 36px;
-    line-height: 1.4;
-    margin-bottom: 1.25rem;
-  }
-
-  .plan-price-block {
-    margin-bottom: 1.5rem;
-  }
-
-  .plan-price {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 2.4rem;
-    font-weight: 800;
-    color: #0d281e;
-    line-height: 1;
-  }
-
-  .plan-period {
-    font-size: 13px;
-    color: #64748b;
-    font-weight: 500;
-  }
-
-  .plan-monthly-note {
-    font-size: 11.5px;
-    color: #10b981;
-    font-weight: 700;
-    margin-top: 0.35rem;
-  }
-
-  .plan-credits-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.3rem 0.75rem;
-    border-radius: 8px;
-    background: rgba(16, 185, 129, 0.12);
-    color: #047857;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-  }
-
-  .plan-features-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2rem 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-  }
-
-  .plan-feature-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    font-size: 12.5px;
-    color: #334155;
-    line-height: 1.4;
-  }
-
-  .plan-feature-item.highlight {
-    font-weight: 700;
-    color: #0d281e;
-  }
-
-  .plan-feature-item.disabled {
-    color: #94a3b8;
-    opacity: 0.6;
-  }
-
-  .plan-feature-icon {
-    width: 18px;
-    height: 18px;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 800;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .plan-feature-icon.check {
-    background: #ecfdf5;
-    color: #10b981;
-  }
-
-  .plan-feature-icon.cross {
-    background: #f1f5f9;
-    color: #94a3b8;
-  }
-
-  .btn-select-plan {
-    margin-top: auto;
-    width: 100%;
-    padding: 0.85rem;
-    border-radius: 14px;
-    border: none;
-    background: #0d281e;
-    color: #ffffff;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-select-plan:hover {
-    background: #286954;
-    transform: translateY(-2px);
-  }
-
-  .plan-card.highlight .btn-select-plan {
-    background: #10b981;
-    color: #0d281e;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
-  }
-
-  .plan-card.highlight .btn-select-plan:hover {
-    background: #059669;
-    color: #ffffff;
-  }
-
-  /* ── Tab 3: Creator Wallet & Marketplace ── */
-  .creator-hub-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-
-  @media (max-width: 900px) {
-    .creator-hub-layout {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .wallet-overview-card {
-    background: linear-gradient(135deg, #0d281e 0%, #1e4d3e 100%);
-    border-radius: 24px;
-    padding: 2.25rem;
-    color: #ffffff;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 20px 40px -10px rgba(13, 40, 30, 0.5);
-  }
-
-  .wallet-card-watermark {
-    position: absolute;
-    right: -20px;
-    bottom: -20px;
-    font-size: 160px;
-    color: rgba(255, 255, 255, 0.04);
-    pointer-events: none;
-  }
-
-  .wallet-balance-row {
-    margin: 1.5rem 0 2rem;
-  }
-
-  .wallet-balance-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #a7f3d0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .wallet-balance-amount {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 3rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin-top: 0.25rem;
-  }
-
-  .wallet-meta-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .wallet-meta-box {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(8px);
-    padding: 1rem;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .wallet-meta-box-label {
-    font-size: 11px;
-    color: #cbd5e1;
-  }
-
-  .wallet-meta-box-val {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-top: 0.25rem;
-  }
-
-  .creator-payout-form {
-    background: #ffffff;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 24px;
-    padding: 2.25rem;
-  }
-
-  .payout-form-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: #0d281e;
-    margin-bottom: 0.35rem;
-  }
-
-  .payout-form-sub {
-    font-size: 13px;
-    color: #64748b;
-    margin-bottom: 1.5rem;
-  }
-
-  .form-field {
-    margin-bottom: 1.25rem;
-  }
-
   .form-label {
     display: block;
     font-size: 12.5px;
     font-weight: 700;
-    color: #334155;
+    color: var(--color-neutral-700);
     margin-bottom: 0.35rem;
   }
 
@@ -708,9 +28,9 @@
     width: 100%;
     padding: 0.75rem 1rem;
     border-radius: 12px;
-    border: 1.5px solid #cbd5e1;
-    background: #ffffff;
-    color: #0f172a;
+    border: 1.5px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text);
     font-family: inherit;
     font-size: 13.5px;
     outline: none;
@@ -718,59 +38,9 @@
   }
 
   .form-input:focus {
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-a20);
   }
-
-  .btn-submit-payout {
-    width: 100%;
-    padding: 0.85rem;
-    border-radius: 12px;
-    border: none;
-    background: #10b981;
-    color: #0d281e;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 13.5px;
-    font-weight: 800;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-    transition: all 0.2s ease;
-  }
-
-  .btn-submit-payout:hover {
-    background: #059669;
-    color: #ffffff;
-    transform: translateY(-2px);
-  }
-
-  /* ── Interactive Checkout Modal / Drawer ── */
-  .checkout-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(13, 40, 30, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-  }
-
-  .checkout-modal-card {
-    background: #ffffff;
-    border-radius: 24px;
-    width: 100%;
-    max-width: 520px;
-    overflow: hidden;
-    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4);
-    animation: checkout-scale-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
   @keyframes checkout-scale-up {
     from {
       transform: scale(0.95);
@@ -781,244 +51,20 @@
       opacity: 1;
     }
   }
-
-  .checkout-modal-head {
-    padding: 1.5rem 1.75rem;
-    background: #0d281e;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .checkout-modal-title-group {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .checkout-modal-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.25rem;
-    font-weight: 800;
-  }
-
-  .btn-checkout-close {
-    background: transparent;
-    border: none;
-    color: #cbd5e1;
-    font-size: 20px;
-    cursor: pointer;
-    line-height: 1;
-  }
-
-  .checkout-modal-body {
-    padding: 1.75rem;
-  }
-
-  .checkout-order-summary {
-    background: #f8fafc;
-    border-radius: 14px;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid #e2e8f0;
-  }
-
-  .checkout-summary-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 13px;
-    color: #475569;
-    margin-bottom: 0.5rem;
-  }
-
-  .checkout-summary-row.total {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px dashed #cbd5e1;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: #0d281e;
-  }
-
-  .checkout-row-2col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
-  .btn-pay-confirm {
-    width: 100%;
-    padding: 0.95rem;
-    border-radius: 14px;
-    border: none;
-    background: #10b981;
-    color: #0d281e;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
-    transition: all 0.2s ease;
-    margin-top: 1.25rem;
-  }
-
-  .btn-pay-confirm:hover:not(:disabled) {
-    background: #059669;
-    color: #ffffff;
-    transform: translateY(-2px);
-  }
-
-  .btn-pay-confirm:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .checkout-security-notes {
-    margin-top: 1rem;
-    text-align: center;
-    font-size: 11.5px;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-  }
-
-  /* ── Trust Banner Footprint ── */
-  .odeme-trust-banner {
-    margin-top: 3rem;
-    padding: 1.5rem;
-    border-radius: 18px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-
-  .trust-item {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 13px;
-    font-weight: 700;
-    color: #334155;
-  }
-
-  .trust-icon-box {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: #ecfdf5;
-    color: #10b981;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* ── Gezgin Rota Pazarı Nasıl Çalışır Banner ── */
-  .odeme-nasil-calisir-card {
-    margin-top: 2.5rem;
-    padding: 2rem;
-    background: #ffffff;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
-    transition: all 0.25s ease;
-  }
-
-  .odeme-nasil-calisir-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #0d281e;
-    margin-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .odeme-nasil-calisir-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-    gap: 1.5rem;
-  }
-
-  .odeme-nasil-calisir-step {
-    padding: 1.25rem;
-    background: #f8fafc;
-    border-radius: 14px;
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    transition: all 0.2s ease;
-  }
-
-  .odeme-nasil-calisir-step:hover {
-    transform: translateY(-2px);
-    border-color: rgba(16, 185, 129, 0.3);
-  }
-
-  .odeme-nasil-calisir-step h4 {
-    font-weight: 800;
-    margin: 0.5rem 0 0.25rem;
-    color: #0d281e;
-    font-size: 0.9375rem;
-  }
-
-  .odeme-nasil-calisir-step p {
-    font-size: 0.8125rem;
-    color: #64748b;
-    margin: 0;
-    line-height: 1.45;
-  }
-
-  .odeme-nasil-link {
-    font-size: 0.8125rem;
-    font-weight: 700;
-    color: #10b981;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .odeme-nasil-link:hover {
-    text-decoration: underline;
-  }
-
-  @media (max-width: 480px) {
-    .wallet-meta-grid,
-    .checkout-row-2col {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .wallet-balance-amount {
-      font-size: clamp(1.75rem, 9vw, 3rem);
-      overflow-wrap: anywhere;
-    }
-  }
-
   .billing-home {
     max-width: 1000px;
     margin: auto;
     padding: 28px 20px 120px;
     color: #12382b;
   }
-  .billing-home h1 {
+  .billing-home .billing-title {
+    font-weight: 700;
+    text-wrap: balance;
     font-size: clamp(25px, 5vw, 36px);
     line-height: 1.18;
     margin: 22px 0 12px;
   }
-  .billing-home p {
+  .billing-home p:not(.billing-title) {
     line-height: 1.6;
   }
   .billing-back {
@@ -1031,8 +77,8 @@
     justify-content: space-between;
     gap: 16px;
     padding: 24px;
-    background: #12382b;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
     border-radius: 22px;
     margin: 24px 0 16px;
   }
@@ -1045,7 +91,7 @@
     font-size: 40px;
   }
   .billing-balance a {
-    background: #d6f5df;
+    background: var(--color-surface-brand-strong);
     color: #12382b;
     border-radius: 12px;
     padding: 13px 17px;
@@ -1055,7 +101,7 @@
     padding: 18px;
     border: 1px solid #bde6ce;
     border-radius: 16px;
-    background: #f0fbf3;
+    background: var(--color-surface-brand);
   }
   .billing-gift p {
     font-size: 14px;
@@ -1069,7 +115,7 @@
   }
   .billing-costs span {
     font-size: 13px;
-    background: white;
+    background: var(--color-surface);
     padding: 14px;
     border: 1px solid #e1e9e3;
     border-radius: 14px;
@@ -1085,7 +131,7 @@
   }
   .billing-message {
     padding: 16px;
-    background: #fff6d8;
+    background: var(--color-warning-bg-strong);
     border-radius: 14px;
     color: #604716;
   }
@@ -1097,15 +143,15 @@
   .billing-tabs button {
     flex: 1;
     padding: 14px;
-    border: 1px solid #ccdcd2;
+    border: 1px solid var(--color-border);
     border-radius: 12px;
-    background: white;
+    background: var(--color-surface);
     color: #12382b;
     font-weight: 700;
   }
   .billing-tabs button[aria-pressed="true"] {
-    background: #12382b;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
   }
   .billing-products {
     display: grid;
@@ -1113,7 +159,7 @@
     gap: 16px;
   }
   .billing-product {
-    background: white;
+    background: var(--color-surface);
     border: 1px solid #d8e6dd;
     border-radius: 20px;
     padding: 22px;
@@ -1144,7 +190,7 @@
   .billing-manage {
     min-height: 48px;
     background: #176548;
-    color: white;
+    color: var(--color-text-inverse);
     border: 0;
     border-radius: 12px;
     padding: 12px;
@@ -1152,16 +198,12 @@
     margin-top: auto;
   }
   .billing-product button:disabled {
-    background: #e5ebe7;
+    background: var(--color-surface-sunken);
     color: #58685e;
     cursor: not-allowed;
-  }
-  .billing-manage {
-    margin-top: 20px;
-  }
-  .billing-home button:focus-visible,
+  }  .billing-home button:focus-visible,
   .billing-home a:focus-visible {
-    outline: 3px solid #cf9c21;
+    outline: 3px solid var(--color-warning-icon);
     outline-offset: 3px;
   }
   @media (max-width: 600px) {

@@ -12,6 +12,7 @@ import {
   CREDIT_PACKAGE_DEFS,
   ACTION_CREDIT_COSTS,
 } from "@mapsbridge/contracts";
+import { PageHeader, PageShell } from "../components/ui";
 import "./checkout.css";
 
 type Product = {
@@ -154,26 +155,28 @@ export default function CheckoutPage() {
   });
 
   return (
-    <div className="odeme-page-root">
-      <main className="billing-home">
+    <PageShell layout="landing" className="odeme-page-root">
+      <div className="billing-home">
+        {/* AC-34: tek h1 (registry başlığı "Plan ve kredi"); görünür başlık tipografisiyle kalır. */}
+        <PageHeader variant="hidden" />
         <Link href="/travel-assistant/" className="billing-back">
           ← Seyahat asistanına dön
         </Link>
 
-        <h1>Kredi &amp; Üyelik Masası</h1>
+        <p className="billing-title">Kredi &amp; Üyelik Masası</p>
         <p>
           Yapay zeka asistanı ve harita masası için ihtiyacın olan planı seç. İstediğin zaman iptal
           et veya paketini yükselt, RevenueCat ile güvenli ve anında aktif.
         </p>
 
         {/* ── Kredi Takibi & Cüzdan Özeti ── */}
-        <section className="billing-balance" aria-label="Kredi hesabı">
+        <section className="billing-balance" data-surface="inverse" aria-label="Kredi hesabı">
           <div>
             <span>Kullanılabilir AI Kredin</span>
             <strong>{signedIn ? wallet.credits.toLocaleString("tr-TR") : "—"}</strong>
           </div>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <span style={{ fontSize: "13px", fontWeight: 700, color: "#10b981" }}>
+            <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-accent)" }}>
               {wallet.subscriptionTier === "agency"
                 ? "Tur Lideri Planı"
                 : wallet.subscriptionTier === "pro"
@@ -281,7 +284,7 @@ export default function CheckoutPage() {
                   width: "20px",
                   height: "20px",
                   borderRadius: "9999px",
-                  background: "#ffffff",
+                  background: "var(--color-surface)",
                   boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                   transform: cycle === "yearly" ? "translateX(22px)" : "translateX(0)",
                   transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -344,8 +347,8 @@ export default function CheckoutPage() {
                         top: "-12px",
                         left: "50%",
                         transform: "translateX(-50%)",
-                        background: "#10b981",
-                        color: "#fff",
+                        background: "var(--color-accent)",
+                        color: "var(--color-on-primary)",
                         padding: "4px 12px",
                         borderRadius: "9999px",
                         fontSize: "11px",
@@ -363,7 +366,7 @@ export default function CheckoutPage() {
                     {tab === "subscription" && <small> / ay</small>}
                   </div>
                   {tab === "subscription" && cycle === "yearly" && (
-                    <p style={{ fontSize: "12px", color: "#10b981", fontWeight: 700 }}>
+                    <p style={{ fontSize: "12px", color: "var(--color-accent)", fontWeight: 700 }}>
                       Yıllık faturalandırılır (Yıllık {(priceTRY * 12).toLocaleString("tr-TR")} ₺)
                     </p>
                   )}
@@ -398,8 +401,8 @@ export default function CheckoutPage() {
           Ödemeler RevenueCat üzerinden güvenli biçimde gerçekleşir. Krediler yalnızca ödeme
           sunucuda doğrulandıktan sonra anında hesabınıza yüklenir.
         </p>
-      </main>
-    </div>
+      </div>
+    </PageShell>
   );
 }
 

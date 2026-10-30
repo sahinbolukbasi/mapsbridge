@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { billingService } from "../lib/billing/billing-service";
 import { getStoredSession } from "../lib/cognito";
 import { BillingCycle, SubscriptionTierId } from "../lib/billing/billing-types";
+import { Modal } from "./ui";
 import "./upgrade-modal.css";
 
 interface PlanItem {
@@ -169,40 +170,16 @@ export function UpgradeModal() {
   };
 
   return (
-    <div
-      className="mb-upgrade-modal-backdrop"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !busyItem) setIsOpen(false);
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="upgrade-modal-title"
+    <Modal
+      open={isOpen}
+      onClose={() => !busyItem && setIsOpen(false)}
+      dismissible={!busyItem}
+      size="lg"
+      className="mb-upgrade-modal"
+      title="Kredi & Üyelik Masası"
+      description="Stripe ile 256-bit SSL güvenli ödeme · Taahhüt yok · Anında hesaba tanımlanır"
     >
-      <div className="mb-upgrade-modal-dialog">
-        {/* Header */}
-        <div className="mb-upgrade-modal-header">
-          <div className="mb-upgrade-modal-title-wrap">
-            <div className="mb-upgrade-modal-icon">
-              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
-                bolt
-              </span>
-            </div>
-            <div>
-              <h2 id="upgrade-modal-title">Kredi &amp; Üyelik Masası</h2>
-              <p>Stripe ile 256-bit SSL güvenli ödeme · Taahhüt yok · Anında hesaba tanımlanır</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="mb-upgrade-modal-close-btn"
-            onClick={() => !busyItem && setIsOpen(false)}
-            aria-label="Kapat"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Body */}
+      {isOpen && (
         <div className="mb-upgrade-modal-body">
           {/* Current Status Card */}
           <div className="mb-upgrade-status-card">
@@ -228,6 +205,7 @@ export function UpgradeModal() {
             <button
               type="button"
               className={`mb-upgrade-cat-tab-btn ${activeTab === "subscriptions" ? "active" : ""}`}
+              aria-pressed={activeTab === "subscriptions"}
               onClick={() => setActiveTab("subscriptions")}
             >
               ⭐ 3 Abonelik Paketi (Yükselt)
@@ -235,6 +213,7 @@ export function UpgradeModal() {
             <button
               type="button"
               className={`mb-upgrade-cat-tab-btn ${activeTab === "packs" ? "active" : ""}`}
+              aria-pressed={activeTab === "packs"}
               onClick={() => setActiveTab("packs")}
             >
               ⚡ Ek Kredi Paketleri (Anında Yükle)
@@ -255,7 +234,9 @@ export function UpgradeModal() {
                   type="button"
                   className={`mb-upgrade-cycle-toggle ${cycle === "yearly" ? "yearly" : ""}`}
                   onClick={() => setCycle(cycle === "monthly" ? "yearly" : "monthly")}
-                  aria-label="Aylık ve Yıllık Ödeme Değiştir"
+                  role="switch"
+                  aria-checked={cycle === "yearly"}
+                  aria-label="Yıllık ödeme"
                 >
                   <span className="mb-upgrade-cycle-knob" />
                 </button>
@@ -357,8 +338,8 @@ export function UpgradeModal() {
             Kart bilgileriniz sunucularımızda saklanmaz.
           </p>
         </div>
-      </div>
-    </div>
+      )}
+    </Modal>
   );
 }
 

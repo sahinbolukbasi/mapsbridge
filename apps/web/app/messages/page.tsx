@@ -15,7 +15,7 @@ import type {
   GroupTopicRoute,
 } from "../features/messaging/types";
 import { DEFAULT_TRAVELER_CONTACTS, PRESET_GROUP_ROUTES } from "../features/messaging/mock-data";
-import { PageHeader } from "../components/ui";
+import { PageHeader, PageShell } from "../components/ui";
 
 export default function MessagesPage() {
   const { user, isAuthenticated: authOk, isLoading: authLoading } = useAuth();
@@ -480,11 +480,11 @@ export default function MessagesPage() {
     );
   }
 
-  return (
+    return (
+    <PageShell layout="app" className="chat-page-shell">
     <div className="chat-page-root" data-mobile-pane={mobilePane}>
-
       {/* Main Workspace Area */}
-      <main className="chat-main-workspace">
+      <div className="chat-main-workspace">
         {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
         <PageHeader variant="hidden" />
         <div className="chat-main-container">
@@ -691,7 +691,7 @@ export default function MessagesPage() {
                           padding: "6px 14px",
                           borderRadius: "8px",
                           background: "var(--chat-primary)",
-                          color: "#fff",
+                          color: "var(--color-on-primary)",
                           fontSize: "11.5px",
                           fontWeight: 700,
                           border: "none",
@@ -774,7 +774,10 @@ export default function MessagesPage() {
                             </span>
                           )}
                           {conv.unreadCount && (
-                            <span className="chat-unread-badge">{conv.unreadCount}</span>
+                            <span className="chat-unread-badge">
+                              {conv.unreadCount}
+                              <span className="ui-visually-hidden"> okunmamış mesaj</span>
+                            </span>
                           )}
                         </div>
                       </div>
@@ -999,7 +1002,13 @@ export default function MessagesPage() {
                   )}
 
                   {/* Chat Stream Scrollable Area */}
-                  <div ref={chatStreamRef} className="chat-stream-scroll">
+                  <div
+                    ref={chatStreamRef}
+                    className="chat-stream-scroll"
+                    role="log"
+                    aria-live="polite"
+                    aria-label="Mesajlar"
+                  >
                     <div className="chat-date-separator">
                       <span className="chat-date-pill">
                         Bugün,{" "}
@@ -1084,7 +1093,7 @@ export default function MessagesPage() {
                                       padding: "0.15rem 0.5rem",
                                       borderRadius: "9999px",
                                       background: "var(--chat-primary)",
-                                      color: "#fff",
+                                      color: "var(--color-on-primary)",
                                       fontSize: "10px",
                                       fontWeight: 700,
                                     }}
@@ -1104,7 +1113,7 @@ export default function MessagesPage() {
                                         bottom: "4px",
                                         left: "6px",
                                         fontSize: "10px",
-                                        color: "#fff",
+                                        color: "var(--color-on-primary)",
                                         fontWeight: 700,
                                         display: "flex",
                                         alignItems: "center",
@@ -1175,7 +1184,7 @@ export default function MessagesPage() {
                                       padding: "0.5rem 0.75rem",
                                       borderRadius: "9999px",
                                       background: "var(--chat-primary-container)",
-                                      color: "#ffffff",
+                                      color: "var(--color-on-primary)",
                                       fontSize: "12px",
                                       fontWeight: 600,
                                       textAlign: "center",
@@ -1237,8 +1246,8 @@ export default function MessagesPage() {
                                       left: "6px",
                                       padding: "0.15rem 0.45rem",
                                       borderRadius: "9999px",
-                                      background: "rgba(13, 40, 30, 0.85)",
-                                      color: "#fff",
+                                      background: "color-mix(in srgb, var(--color-surface-inverse) 85%, transparent)",
+                                      color: "var(--color-on-primary)",
                                       fontSize: "9px",
                                       fontWeight: 700,
                                     }}
@@ -1320,7 +1329,7 @@ export default function MessagesPage() {
                   </div>
 
                   {/* Chat Input Bar */}
-                  <footer className="chat-input-footer">
+                  <div className="chat-input-footer">
                     <div className="chat-quick-attachment-pills">
                       <button
                         type="button"
@@ -1420,7 +1429,7 @@ export default function MessagesPage() {
                         </span>
                       </button>
                     </form>
-                  </footer>
+                  </div>
                 </>
               )}
             </section>
@@ -1482,9 +1491,9 @@ export default function MessagesPage() {
                               <span
                                 className="chat-friend-badge"
                                 style={{
-                                  background: "rgba(40,105,84,0.1)",
+                                  background: "color-mix(in srgb, var(--color-brand) 10%, transparent)",
                                   color: "var(--chat-secondary)",
-                                  borderColor: "rgba(40,105,84,0.3)",
+                                  borderColor: "color-mix(in srgb, var(--color-brand) 30%, transparent)",
                                 }}
                               >
                                 <span
@@ -1624,7 +1633,7 @@ export default function MessagesPage() {
                             className="chat-right-hero-card"
                             style={{ backgroundImage: `url('${coverImg}')` }}
                           >
-                            <div className="chat-right-hero-overlay" />
+                            <div className="chat-right-hero-overlay" data-surface="inverse" />
                             <div style={{ position: "relative", zIndex: 2 }}>
                               <span
                                 style={{
@@ -1644,7 +1653,7 @@ export default function MessagesPage() {
                                   margin: "4px 0 2px",
                                   fontSize: "15px",
                                   fontWeight: 700,
-                                  color: "#fff",
+                                  color: "var(--color-on-primary)",
                                 }}
                               >
                                 {activeChat.title}
@@ -1972,8 +1981,7 @@ export default function MessagesPage() {
             )}
           </div>
         </div>
-      </main>
-
+      </div>
       {/* Toast Notification */}
       {toast && (
         <div className="chat-toast" role="status">
@@ -2143,7 +2151,7 @@ export default function MessagesPage() {
                   style={{
                     background: "transparent",
                     border: "none",
-                    color: "#10b981",
+                    color: "var(--color-accent)",
                     fontSize: "11px",
                     fontWeight: 700,
                     cursor: "pointer",
@@ -2243,8 +2251,8 @@ export default function MessagesPage() {
                                 fontWeight: 700,
                                 padding: "1px 5px",
                                 borderRadius: "9999px",
-                                background: "rgba(16,185,129,0.15)",
-                                color: "#065f46",
+                                background: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
+                                color: "var(--color-on-surface-brand)",
                               }}
                             >
                               Arkadaş
@@ -2489,5 +2497,6 @@ export default function MessagesPage() {
         </div>
       )}
     </div>
+    </PageShell>
   );
 }

@@ -6,6 +6,7 @@
 // 26 farklı küme dışı değer, 20 dosya. Anahtar apps/web/app'e göre yol, query boşlukları
 // tek boşluğa indirilmiş ve küçük harfli @media metnidir. C4: u/u.css silindi (63 koşul, 19 dosya).
 // C16: u/admin/admin.css yeniden yazıldı, ai-dashboard.css silindi (6 koşul ve 2 dosya düştü).
+// C12: checkout.css ölü kurallar silindi (480px ve 900px düştü).
 
 export const BREAKPOINTS = { sm: 640, md: 768, lg: 1024, xl: 1280 } as const;
 
@@ -24,11 +25,7 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
     { query: "(min-width: 1025px)", count: 1 },
     { query: "(min-width: 641px) and (max-width: 1024px)", count: 1 },
   ],
-  "checkout/checkout.css": [
-    { query: "(max-width: 480px)", count: 1 },
-    { query: "(max-width: 600px)", count: 1 },
-    { query: "(max-width: 900px)", count: 1 },
-  ],
+  "checkout/checkout.css": [{ query: "(max-width: 600px)", count: 1 }],
   "community/community.css": [
     { query: "(max-width: 1023px)", count: 1 },
     { query: "(max-width: 767px)", count: 3 },
