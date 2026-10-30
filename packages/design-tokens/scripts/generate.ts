@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { checkInverseScope, checkPairs } from "../src/contrast.ts";
+import { checkInverseScope, checkPairs, checkPrimitiveSurfaces } from "../src/contrast.ts";
 import { toCss, toNative, toWebTs } from "../src/emit.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -17,6 +17,15 @@ if (failures.length > 0) {
   for (const f of failures) {
     console.error(
       `Kontrast yetersiz: ${f.fg} / ${f.bg} = ${f.ratio.toFixed(2)} (eşik ${f.min}; ${f.note})`,
+    );
+  }
+  process.exit(1);
+}
+const surfaceFailures = checkPrimitiveSurfaces();
+if (surfaceFailures.length > 0) {
+  for (const f of surfaceFailures) {
+    console.error(
+      `Primitive kontrastı yetersiz: ${f.primitive}/${f.variant} (${f.scope} kap ${f.container}) ${f.kind} ${f.fg} / ${f.bg} = ${f.ratio.toFixed(2)} (eşik ${f.min})`,
     );
   }
   process.exit(1);

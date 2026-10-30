@@ -112,8 +112,10 @@ export function toCss(): string {
   lines.push('  [data-surface="inverse"] {');
   for (const [name, target] of Object.entries(inverseOverrides)) decl(name, `var(--${target})`);
   lines.push("  }");
+  // Odak halkası kabın zemininde çizildiği için kabı izler; default kapsamında sıfırlanmaz (AC-4f).
   lines.push('  [data-surface="default"] {');
   for (const name of Object.keys(inverseOverrides)) {
+    if (name === "focus-ring-color") continue;
     const value = color[name] ?? component[name];
     decl(name, cssColor(value));
   }

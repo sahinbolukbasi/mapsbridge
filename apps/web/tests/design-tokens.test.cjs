@@ -71,3 +71,51 @@ test("donmuş rota baseline'ı 42 path içerir ve sıralıdır (AC-12, R5-1)", (
   assert.deepEqual([...routes].sort(), routes);
   for (const r of routes) assert.match(r, /^\/(.*\/)?$/, `${r} sonda / ile bitmeli`);
 });
+
+test("AC-4f: primitive varyantları × açık/inverse kap × üç zemin (metin ≥4.5, kenarlık/gösterge ≥3, odak ≥3)", () => {
+  const script = `
+    import { checkPrimitiveSurfaces } from "./src/contrast.ts";
+    import { PRIMITIVE_SURFACES } from "./src/components.ts";
+    console.log(JSON.stringify({ rows: PRIMITIVE_SURFACES, failures: checkPrimitiveSurfaces() }));
+  `;
+  const r = runTs(["--input-type=module", "-e", script]);
+  assert.equal(r.status, 0, r.stderr);
+  const { rows, failures } = JSON.parse(r.stdout);
+  assert.ok(rows.length >= 30, `beklenen ≥30 satır, bulunan ${rows.length}`);
+  assert.deepEqual(failures, []);
+  // Kendi zeminini çizen primitive kökünde data-surface="default" taşır (ownSurface).
+  const uiDir = path.join(root, "apps/web/app/components/ui");
+  for (const file of new Set(
+    rows.filter((row) => row.ownSurface !== false).map((row) => row.file),
+  )) {
+    const src = fs.readFileSync(path.join(uiDir, file), "utf8");
+    assert.match(
+      src,
+      /data-surface"?\s*[=:]\s*[^\n]*"default"/,
+      `${file}: ownSurface primitive kökünde data-surface="default" yok`,
+    );
+  }
+  // Tablodaki her bileşen token'ı tokens.css'te tanımlı.
+  const css = read("apps/web/app/styles/tokens.css");
+  for (const row of rows)
+    for (const name of [row.bg, row.bgHover, ...row.text, ...(row.ui ?? [])].filter(
+      (n) => n && n !== "container",
+    ))
+      assert.match(
+        css,
+        new RegExp(`--${name}:`),
+        `${row.primitive}/${row.variant}: --${name} tanımsız`,
+      );
+});
+
+test("NFR-7: tokens.css + base.css + ui.css ≤ 40 KB (geçici legacy alias bölümü hariç)", () => {
+  const tokens = read("apps/web/app/styles/tokens.css");
+  // Legacy alias bölümü geçicidir (design §13.1 tokens.css satırı "alias bölümü hariç"); C18'de boşalır.
+  const alias = tokens.match(/ {4}\/\* Geçici legacy alias[^\n]*\n(?: {4}--[^\n]*\n)*/);
+  const tokensBytes = Buffer.byteLength(tokens) - (alias ? Buffer.byteLength(alias[0]) : 0);
+  const total =
+    tokensBytes +
+    Buffer.byteLength(read("apps/web/app/styles/base.css")) +
+    Buffer.byteLength(read("apps/web/app/components/ui/ui.css"));
+  assert.ok(total <= 40960, `üç CSS toplamı ${total} bayt (> 40960)`);
+});

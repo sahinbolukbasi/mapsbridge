@@ -1,4 +1,5 @@
 // WCAG 2.x kontrast hesabı ve zorunlu çiftler (design §2.4).
+import { CONTAINER_BACKGROUNDS, PRIMITIVE_SURFACES } from "./components.ts";
 import { composite, resolveColor, type Rgba } from "./resolve.ts";
 import { inverseOverrides } from "./tokens.ts";
 
@@ -120,4 +121,93 @@ export function checkInverseScope(): Failure[] {
     scope: "inverse" as const,
   }));
   return checkPairs(pairs);
+}
+
+/** Bir token'ın kapsamdaki değeri: inverse kapta inverseOverrides hedefi, aksi halde :root değeri. */
+export function resolveInScope(name: string, scope: "light" | "inverse"): Rgba {
+  return resolveColor(
+    scope === "inverse" && inverseOverrides[name] ? inverseOverrides[name] : name,
+  );
+}
+
+export type SurfaceFailure = {
+  primitive: string;
+  variant: string;
+  scope: "light" | "inverse";
+  container: string;
+  fg: string;
+  bg: string;
+  kind: "metin" | "kenarlık/gösterge" | "odak";
+  ratio: number;
+  min: number;
+};
+
+/**
+ * AC-4f: her primitive varyantının metin/zemin (≥4.5), kenarlık/gösterge (≥3.0) ve odak
+ * (≥3.0) çiftleri açık ve inverse kapta, üçer kap zemininde. ownSurface primitive kendi
+ * kökünde data-surface="default" taşıdığı için kendi token'ları açık kapsamda çözülür; odak
+ * halkası kabın zemininde çizilir ve kabı izler (default kapsamı onu sıfırlamaz).
+ */
+export function checkPrimitiveSurfaces(): SurfaceFailure[] {
+  const failures: SurfaceFailure[] = [];
+  for (const row of PRIMITIVE_SURFACES) {
+    if (row.inverse === "n/a" && row.ownSurface === false) continue;
+    const scopes = row.inverse === "n/a" ? (["light"] as const) : (["light", "inverse"] as const);
+    for (const scope of scopes) {
+      const own = row.ownSurface !== false ? "light" : scope;
+      for (const container of CONTAINER_BACKGROUNDS[scope]) {
+        const kap = resolveColor(container);
+        const fill = (name: string): Rgba => {
+          const c = resolveInScope(name, own);
+          return c.a < 1 ? composite(c, kap) : c;
+        };
+        const bgs = row.bg === "container" ? [kap] : [fill(row.bg)];
+        const bgNames = [row.bg === "container" ? container : row.bg];
+        if (row.bgHover) {
+          bgs.push(fill(row.bgHover));
+          bgNames.push(row.bgHover);
+        }
+        const push = (
+          fg: string,
+          bg: string,
+          kind: SurfaceFailure["kind"],
+          ratio: number,
+          min: number,
+        ) => {
+          if (ratio < min)
+            failures.push({
+              primitive: row.primitive,
+              variant: row.variant,
+              scope,
+              container,
+              fg,
+              bg,
+              kind,
+              ratio,
+              min,
+            });
+        };
+        bgs.forEach((bg, k) => {
+          for (const fg of row.text)
+            push(fg, bgNames[k], "metin", contrastRatio(resolveInScope(fg, own), bg), TEXT);
+          for (const fg of row.ui ?? [])
+            push(
+              fg,
+              bgNames[k],
+              "kenarlık/gösterge",
+              contrastRatio(resolveInScope(fg, own), bg),
+              UI,
+            );
+        });
+        push(
+          "focus-ring-color",
+          container,
+          "odak",
+          contrastRatio(resolveInScope("focus-ring-color", scope), kap),
+          UI,
+        );
+      }
+    }
+  }
+  return failures;
 }

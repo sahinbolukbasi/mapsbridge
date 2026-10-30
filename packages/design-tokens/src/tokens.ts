@@ -1,6 +1,7 @@
 // Semantik token'lar ve ölçekler (design §2.2, §2.3).
 // Renk değerleri yalnızca palette referansıdır: { ref: "forest-900" } veya bir alfa karışımı.
 import type { PaletteName } from "./palette.ts";
+import { componentInverseOverrides, componentTokens } from "./components.ts";
 
 export type ColorValue =
   | { ref: PaletteName }
@@ -9,7 +10,6 @@ export type ColorValue =
 
 const r = (ref: PaletteName): ColorValue => ({ ref });
 const mix = (name: PaletteName, percent: number): ColorValue => ({ mix: name, percent });
-const tok = (token: string): ColorValue => ({ token });
 
 // CSS adı → değer. Sıra üretilen dosyada korunur.
 export const color: Record<string, ColorValue> = {
@@ -102,24 +102,9 @@ export const color: Record<string, ColorValue> = {
   "color-scrim": mix("black", 45),
 };
 
-// Bileşen token'ları (design §3.1). Primitive'ler doğrudan semantik renk değil bunları kullanır.
-export const component: Record<string, ColorValue> = {
-  "button-primary-bg": tok("color-primary"),
-  "button-primary-bg-hover": tok("color-primary-hover"),
-  "button-primary-fg": tok("color-on-primary"),
-  "button-brand-bg": tok("color-brand"),
-  "button-brand-bg-hover": tok("color-brand-hover"),
-  "button-brand-fg": tok("color-on-primary"),
-  "button-secondary-bg": tok("color-surface"),
-  "button-secondary-bg-hover": tok("color-surface-sunken"),
-  "button-secondary-fg": tok("color-text"),
-  "button-secondary-border": tok("color-border-control"),
-  "button-ghost-bg-hover": tok("color-surface-sunken"),
-  "button-ghost-fg": tok("color-text"),
-  "button-danger-bg": tok("color-danger-solid"),
-  "button-danger-fg": tok("color-on-primary"),
-  "skeleton-bg": tok("color-surface-sunken"),
-};
+// Bileşen token'ları (design §3.1): kaynak components.ts. Primitive'ler doğrudan semantik renk
+// değil bunları kullanır.
+export const component: Record<string, ColorValue> = componentTokens;
 
 // [data-surface="inverse"] kapsamında yeniden tanımlanan token'lar (design §2.2 Inverse kapsamı).
 export const inverseOverrides: Record<string, string> = {
@@ -132,12 +117,7 @@ export const inverseOverrides: Record<string, string> = {
   "color-border-control": "color-text-inverse-subtle",
   "color-text-brand": "color-text-inverse",
   "focus-ring-color": "focus-ring-color-inverse",
-  "button-primary-bg": "color-accent-strong",
-  "button-primary-bg-hover": "color-link-inverse-hover",
-  "button-primary-fg": "color-on-accent",
-  "button-ghost-bg-hover": "color-white-a08",
-  "button-ghost-fg": "color-text-inverse",
-  "skeleton-bg": "color-white-a08",
+  ...componentInverseOverrides,
 };
 
 export const space = {

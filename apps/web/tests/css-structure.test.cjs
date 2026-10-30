@@ -89,11 +89,13 @@ test("dosyalar doğru layer'dadır (legacy / chrome / pages)", () => {
     const expected =
       rel === "styles/base.css"
         ? "base"
-        : LEGACY.includes(rel)
-          ? "legacy"
-          : CHROME.includes(rel)
-            ? "chrome"
-            : "pages";
+        : rel === "components/ui/ui.css"
+          ? "primitives"
+          : LEGACY.includes(rel)
+            ? "legacy"
+            : CHROME.includes(rel)
+              ? "chrome"
+              : "pages";
     if (!first.startsWith(`@layer ${expected} {`))
       problems.push(`${rel}: beklenen @layer ${expected}, bulunan "${first}"`);
   }
