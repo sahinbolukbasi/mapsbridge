@@ -17,8 +17,8 @@
     gap: 10px;
   }
   .operations-banner {
-    background: #123d30;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
     padding: 18px;
     border-radius: 12px;
     box-shadow: 0 10px 40px #0003;
@@ -55,8 +55,8 @@
     bottom: 20px;
     z-index: 90;
     padding: 11px 16px;
-    background: #123d30;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
     border-radius: 24px;
     font:
       13px Arial,
@@ -72,7 +72,7 @@
     font-family: Arial, sans-serif;
   }
   .support-page > a {
-    color: #286954;
+    color: var(--color-link);
   }
   .support-page h1 {
     font-size: 32px;
@@ -84,8 +84,8 @@
   }
   .support-card {
     padding: 24px;
-    background: white;
-    border: 1px solid #dfe7e2;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 15px;
     margin: 20px 0;
   }
@@ -101,10 +101,10 @@
     width: 100%;
     padding: 12px;
     margin-top: 6px;
-    border: 1px solid #cbd9d0;
+    border: 1px solid var(--color-border-strong);
     border-radius: 8px;
     color: #173b32;
-    background: #fff;
+    background: var(--color-surface);
     font: inherit;
   }
   .support-page textarea {
@@ -113,8 +113,8 @@
   }
   .support-page button {
     padding: 10px 16px;
-    border: 1px solid #cbd9d0;
-    background: #f1f7f2;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-bg);
     color: #173b32;
     border-radius: 8px;
     cursor: pointer;
@@ -142,11 +142,11 @@
   .support-message {
     padding: 16px;
     border-radius: 10px;
-    background: #f3f5f3;
+    background: var(--color-bg);
     margin: 12px 0;
   }
   .support-message.staff {
-    background: #e3f2e8;
+    background: var(--color-surface-brand);
   }
   .support-message p,
   .public-post {

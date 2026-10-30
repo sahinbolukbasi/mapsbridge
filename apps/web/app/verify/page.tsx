@@ -1,10 +1,14 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { confirmSignUp, resendConfirmationCode } from "../lib/cognito";
+import { Alert, Button, Card, Field, Input, PageHeader, PageShell } from "../components/ui";
+import "./verify.css";
 
 export default function VerifyPage() {
   const [message, setMessage] = useState("");
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const codeRef = useRef<HTMLInputElement>(null);
   const [resendMessage, setResendMessage] = useState("");
   const [seconds, setSeconds] = useState(120);
   const email =
@@ -21,6 +25,13 @@ export default function VerifyPage() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const code = String(new FormData(event.currentTarget).get("code")).trim();
+    // İstemci doğrulaması gönderimde (design §6.2): hata alanın altında, odak alana.
+    if (!/^\d{6}$/.test(code)) {
+      setCodeError("6 haneli doğrulama kodunu girin.");
+      codeRef.current?.focus();
+      return;
+    }
+    setCodeError(null);
     try {
       await confirmSignUp(email, code);
       const params =
@@ -45,32 +56,26 @@ export default function VerifyPage() {
   }
 
   return (
-    <main className="auth verify">
-      <a className="brand" href="/">
-        <span>●</span> MapsBridge
-      </a>
-      <section>
-        <p className="eyebrow">HESAP DOĞRULAMA</p>
+    <PageShell
+      className="verify-page"
+      header={<PageHeader eyebrow="HESAP DOĞRULAMA" description="Doğrulama kodunu gir." />}
+    >
+      <Card padding="lg" className="verify-card">
         <div className="sms-icon" aria-hidden="true">
           ✉
         </div>
-        <h1>Doğrulama kodunu gir.</h1>
         {!email && !phone ? (
-          <div className="phone-card" style={{ borderColor: "#ba1a1a" }}>
-            <span style={{ color: "#ba1a1a", fontWeight: 600 }}>E-posta adresi bulunamadı.</span>
-            <small>Lütfen kayıt ekranına dönerek tekrar deneyin.</small>
-            <a
-              href="/register/"
-              style={{
-                display: "inline-block",
-                marginTop: "0.5rem",
-                fontWeight: 700,
-                color: "var(--primary, #10b981)",
-              }}
-            >
-              Kayıt ekranına dön
-            </a>
-          </div>
+          <Alert
+            tone="danger"
+            title="E-posta adresi bulunamadı."
+            action={
+              <Button href="/register/" variant="link">
+                Kayıt ekranına dön
+              </Button>
+            }
+          >
+            Lütfen kayıt ekranına dönerek tekrar deneyin.
+          </Alert>
         ) : (
           <div className="phone-card">
             <span>Doğrulama kodu şu adrese gönderildi:</span>
@@ -78,41 +83,46 @@ export default function VerifyPage() {
             <small>Adres yanlışsa kayıt ekranına dön.</small>
           </div>
         )}
-        <form onSubmit={submit}>
-          <label>
-            Doğrulama kodu
-            <input
-              name="code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              required
-              minLength={6}
-              maxLength={6}
-              placeholder="123456"
-            />
-          </label>
-          <button className="primary full">Doğrula ve giriş yap</button>
+        <form className="verify-form" onSubmit={submit} noValidate>
+          <Field label="Doğrulama kodu" required error={codeError}>
+            {(ids) => (
+              <Input
+                {...ids}
+                ref={codeRef}
+                name="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                required
+                minLength={6}
+                maxLength={6}
+                placeholder="123456"
+              />
+            )}
+          </Field>
+          <Button type="submit" fullWidth>
+            Doğrula ve giriş yap
+          </Button>
         </form>
         {message && (
-          <p className="error" role="alert">
+          <Alert tone="danger" live="assertive">
             {message}
-          </p>
+          </Alert>
         )}
-        <button className="resend-button" type="button" onClick={resend} disabled={seconds > 0}>
-          <span aria-hidden="true">↻</span>
+        <Button variant="secondary" fullWidth onClick={resend} disabled={seconds > 0}>
+          <span aria-hidden="true">↻</span>{" "}
           {seconds > 0
             ? `Yeni kod için ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")} bekle`
             : "Doğrulama kodunu yeniden gönder"}
-        </button>
+        </Button>
         {resendMessage && (
-          <p role="status" style={{ color: "var(--success)", fontWeight: 600 }}>
+          <Alert tone="info" live="polite">
             {resendMessage}
-          </p>
+          </Alert>
         )}
         <p className="fineprint">
           Kod gelmediyse e-postanın gereksiz (spam/junk) kutusunu kontrol etmeyi unutma.
         </p>
-      </section>
-    </main>
+      </Card>
+    </PageShell>
   );
 }

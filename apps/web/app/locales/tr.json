@@ -251,5 +251,19 @@
   "ui.alert.info": "Bilgi:",
   "ui.alert.success": "Başarılı:",
   "ui.alert.warning": "Uyarı:",
-  "ui.alert.danger": "Hata:"
+  "ui.alert.danger": "Hata:",
+  "ui.notFound.title": "Sayfa bulunamadı",
+  "ui.notFound.heading": "Aradığınız durak haritada bulunamadı",
+  "ui.notFound.description": "Sayfa taşınmış ya da kaldırılmış olabilir. Aşağıdaki bağlantılardan devam edebilirsiniz.",
+  "ui.notFound.home": "Ana sayfaya dön",
+  "ui.notFound.popular": "Popüler sayfalar",
+  "ui.notFound.link.maps": "Harita masası",
+  "ui.notFound.link.maps.desc": "Canlı harita ve durak planlama çalışma alanı.",
+  "ui.notFound.link.assistant": "Seyahat asistanı",
+  "ui.notFound.link.assistant.desc": "Kişiselleştirilmiş durak önerileri ve rota oluşturucu.",
+  "ui.notFound.link.community": "Topluluk",
+  "ui.notFound.link.community.desc": "Gezginlerin paylaştığı rotalar ve rehberler.",
+  "ui.notFound.link.support": "Yardım ve destek",
+  "ui.notFound.link.support.desc": "Destek talebi oluşturun, yanıtları takip edin.",
+  "ui.errorPage.title": "Bir şeyler ters gitti"
 }

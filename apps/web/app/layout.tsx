@@ -15,7 +15,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./styles.css";
 import "./auth.css";
-import "./extras.css";
 import "./tw-utils.css";
 // Leaflet'e karşı layer'sız muaf kurallar; legacy global'lerden sonra (design §2.6).
 import "./styles/vendor-overrides.css";

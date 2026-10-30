@@ -2,6 +2,21 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../lib/api-client";
 import { getStoredSession } from "../lib/cognito";
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  Input,
+  LoadingState,
+  PageHeader,
+  PageShell,
+  Section,
+  Select,
+  Textarea,
+} from "../components/ui";
+import "./support.css";
 type Ticket = {
   id: string;
   subject: string;
@@ -85,134 +100,183 @@ export default function SupportPage() {
     }
   };
   return (
-    <main className="support-page">
-      <a href="/">← Ana sayfa</a>
-      <h1>Yardım ve destek</h1>
-      <p>Hesap, rota veya ödeme konularında destek ekibimizle iletişime geçin.</p>
+    <PageShell
+      className="support-page-shell"
+      header={
+        <PageHeader
+          description="Hesap, rota veya ödeme konularında destek ekibimizle iletişime geçin."
+          breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Yardım ve destek" }]}
+        />
+      }
+    >
       {error && (
-        <p role="alert" className="error">
+        <Alert tone="danger" live="assertive">
           {error}
-        </p>
+        </Alert>
       )}
       {notice && (
-        <p role="status" className="success">
+        <Alert tone="success" live="polite">
           {notice}
-        </p>
+        </Alert>
       )}
       {loggedIn === null ? (
-        <p>Oturum kontrol ediliyor…</p>
+        <LoadingState label="Oturum kontrol ediliyor…" />
       ) : !loggedIn ? (
-        <section className="support-card">
+        <Card className="support-panel">
           <p>Destek talebi oluşturmak ve yanıtları görmek için giriş yapın.</p>
-          <a href="/login/">Giriş yap</a>
-        </section>
+          <Button href="/login/" variant="primary">
+            Giriş yap
+          </Button>
+        </Card>
       ) : (
-        <div className="support-grid">
-          <section className="support-card">
-            <h2>Yeni talep</h2>
-            <form onSubmit={(event) => void send(event)}>
-              <label>
-                Kategori
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  disabled={busy}
+        <div className="support-layout">
+          <Card className="support-panel">
+            <Section title="Yeni talep">
+              <form className="support-form" onSubmit={(event) => void send(event)}>
+                <Field label="Kategori">
+                  {(ids) => (
+                    <Select
+                      {...ids}
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      disabled={busy}
+                    >
+                      <option value="account">Hesap ve erişim</option>
+                      <option value="payment">Ödeme ve abonelik</option>
+                      <option value="route">Rota ve paylaşım</option>
+                      <option value="other">Diğer</option>
+                    </Select>
+                  )}
+                </Field>
+                <Field label="Konu" required>
+                  {(ids) => (
+                    <Input
+                      {...ids}
+                      required
+                      maxLength={160}
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      disabled={busy}
+                    />
+                  )}
+                </Field>
+                <Field label="Mesaj" required hint="Parola veya kart bilgisi paylaşmayın.">
+                  {(ids) => (
+                    <Textarea
+                      {...ids}
+                      required
+                      maxLength={4000}
+                      rows={6}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      disabled={busy}
+                    />
+                  )}
+                </Field>
+                <div>
+                  <Button
+                    type="submit"
+                    loading={busy}
+                    disabled={!subject.trim() || !message.trim()}
+                  >
+                    {busy ? "Gönderiliyor…" : "Talep oluştur"}
+                  </Button>
+                </div>
+              </form>
+            </Section>
+          </Card>
+          <Card className="support-panel">
+            <Section
+              title="Taleplerim"
+              actions={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={loading || busy}
+                  onClick={() => void load()}
                 >
-                  <option value="account">Hesap ve erişim</option>
-                  <option value="payment">Ödeme ve abonelik</option>
-                  <option value="route">Rota ve paylaşım</option>
-                  <option value="other">Diğer</option>
-                </select>
-              </label>
-              <label>
-                Konu
-                <input
-                  required
-                  maxLength={160}
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  disabled={busy}
-                />
-              </label>
-              <label>
-                Mesaj
-                <textarea
-                  required
-                  maxLength={4000}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  disabled={busy}
-                />
-              </label>
-              <small>Parola veya kart bilgisi paylaşmayın.</small>
-              <p>
-                <button disabled={busy || !subject.trim() || !message.trim()}>
-                  {busy ? "Gönderiliyor…" : "Talep oluştur"}
-                </button>
-              </p>
-            </form>
-          </section>
-          <section className="support-card">
-            <h2>Taleplerim</h2>
-            <button disabled={loading || busy} onClick={() => void load()}>
-              Yenile
-            </button>
-            {loading ? (
-              <p>Yükleniyor…</p>
-            ) : !tickets.length ? (
-              <p>Henüz destek talebiniz yok.</p>
-            ) : (
-              tickets.map((item) => (
-                <button
-                  className="support-ticket-button"
-                  key={item.id}
-                  onClick={() => {
-                    setTicket(item);
-                    setReply("");
-                  }}
-                >
-                  {item.subject}
-                  <small>
-                    {statuses[item.status]} · {new Date(item.createdAt).toLocaleDateString("tr-TR")}
-                  </small>
-                </button>
-              ))
-            )}
-          </section>
+                  Yenile
+                </Button>
+              }
+            >
+              {loading ? (
+                <LoadingState />
+              ) : !tickets.length ? (
+                <EmptyState title="Henüz destek talebiniz yok." level={3} />
+              ) : (
+                <ul className="support-tickets">
+                  {tickets.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        className="support-ticket"
+                        onClick={() => {
+                          setTicket(item);
+                          setReply("");
+                        }}
+                      >
+                        <span className="support-ticket__subject">{item.subject}</span>
+                        <small className="support-ticket__meta">
+                          {statuses[item.status]} ·{" "}
+                          {new Date(item.createdAt).toLocaleDateString("tr-TR")}
+                        </small>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
+          </Card>
         </div>
       )}
       {ticket && (
-        <section className="support-card">
-          <button onClick={() => setTicket(null)}>Kapat</button>
-          <h2>{ticket.subject}</h2>
-          <p>{statuses[ticket.status]}</p>
-          {ticket.messages.map((item, index) => (
-            <article
-              className={`support-message ${item.author === "support" ? "staff" : ""}`}
-              key={index}
-            >
-              <strong>{item.author === "support" ? "Destek ekibi" : "Siz"}</strong>
-              <small>{new Date(item.createdAt).toLocaleString("tr-TR")}</small>
-              <p>{item.body}</p>
-            </article>
-          ))}
-          {ticket.status !== "closed" && (
-            <form onSubmit={(event) => void send(event, true)}>
-              <label>
-                Yanıtınız
-                <textarea
-                  required
-                  maxLength={4000}
-                  value={reply}
-                  onChange={(e) => setReply(e.target.value)}
-                  disabled={busy}
-                />
-              </label>
-              <button disabled={busy || !reply.trim()}>Yanıt gönder</button>
-            </form>
-          )}
-        </section>
+        <Card className="support-panel">
+          <Section
+            title={ticket.subject}
+            description={statuses[ticket.status]}
+            actions={
+              <Button variant="ghost" size="sm" onClick={() => setTicket(null)}>
+                Kapat
+              </Button>
+            }
+          >
+            {ticket.messages.map((item, index) => (
+              <article
+                className={`support-thread__message${item.author === "support" ? " support-thread__message--staff" : ""}`}
+                key={index}
+              >
+                <strong>{item.author === "support" ? "Destek ekibi" : "Siz"}</strong>
+                <small className="support-thread__time">
+                  {new Date(item.createdAt).toLocaleString("tr-TR")}
+                </small>
+                <p className="support-thread__body">{item.body}</p>
+              </article>
+            ))}
+            {ticket.status !== "closed" && (
+              <form className="support-form" onSubmit={(event) => void send(event, true)}>
+                <Field label="Yanıtınız" required>
+                  {(ids) => (
+                    <Textarea
+                      {...ids}
+                      required
+                      maxLength={4000}
+                      rows={5}
+                      value={reply}
+                      onChange={(e) => setReply(e.target.value)}
+                      disabled={busy}
+                    />
+                  )}
+                </Field>
+                <div>
+                  <Button type="submit" loading={busy} disabled={!reply.trim()}>
+                    Yanıt gönder
+                  </Button>
+                </div>
+              </form>
+            )}
+          </Section>
+        </Card>
       )}
-    </main>
+    </PageShell>
   );
 }

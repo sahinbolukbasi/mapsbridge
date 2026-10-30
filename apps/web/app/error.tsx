@@ -1,8 +1,6 @@
 "use client";
-
 import { useEffect } from "react";
 import { NotFoundView } from "./components/not-found-view";
-
 export default function PageError({
   error,
   reset,
@@ -14,11 +12,9 @@ export default function PageError({
     // Log error to monitoring if needed
     console.error("MapsBridge Render Error:", error);
   }, [error]);
-
   return (
     <NotFoundView
       isError={true}
-      errorCode="500"
       errorMessage={error?.message || "Beklenmedik bir hata oluştu. Lütfen tekrar deneyin."}
       onRetry={reset}
     />

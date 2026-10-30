@@ -251,5 +251,19 @@
   "ui.alert.info": "Info:",
   "ui.alert.success": "Success:",
   "ui.alert.warning": "Warning:",
-  "ui.alert.danger": "Error:"
+  "ui.alert.danger": "Error:",
+  "ui.notFound.title": "Page not found",
+  "ui.notFound.heading": "We couldn't find this stop on the map",
+  "ui.notFound.description": "The page may have moved or been removed. You can continue with the links below.",
+  "ui.notFound.home": "Back to home",
+  "ui.notFound.popular": "Popular pages",
+  "ui.notFound.link.maps": "Map desk",
+  "ui.notFound.link.maps.desc": "Live map and stop planning workspace.",
+  "ui.notFound.link.assistant": "Travel assistant",
+  "ui.notFound.link.assistant.desc": "Personalised stop suggestions and route builder.",
+  "ui.notFound.link.community": "Community",
+  "ui.notFound.link.community.desc": "Routes and guides shared by travellers.",
+  "ui.notFound.link.support": "Help and support",
+  "ui.notFound.link.support.desc": "Open a support request and follow the replies.",
+  "ui.errorPage.title": "Something went wrong"
 }

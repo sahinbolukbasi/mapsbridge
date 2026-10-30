@@ -116,7 +116,6 @@ const LEGACY = [
   "components/upgrade-modal.css",
   "styles.css",
   "auth.css",
-  "extras.css",
   "tw-utils.css",
 ];
 const CHROME = ["components/header-nav.css", "components/site-footer.css"];

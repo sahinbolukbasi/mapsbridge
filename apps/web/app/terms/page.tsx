@@ -1,32 +1,40 @@
+import { PageHeader, PageShell, Section } from "../components/ui";
+import "../styles/legal.css";
 export default function Terms() {
   return (
-    <main className="legal">
-      <a className="brand" href="/">
-        <span>●</span> MapsBridge
-      </a>
-      <h1>Kullanım Koşulları</h1>
+    <PageShell
+      className="legal"
+      header={
+        <PageHeader
+          title="Kullanım Koşulları"
+          breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Kullanım Koşulları" }]}
+        />
+      }
+    >
       <p>
         MapsBridge yalnızca kendi adresini veya paylaşmaya yetkili olduğun bir adresi açık rızayla
         paylaşmak içindir.
       </p>
-      <h2>Google Maps hizmetleri</h2>
-      <p>
-        Google Maps kullanılan özelliklerde{" "}
-        <a
-          href="https://maps.google.com/help/terms_maps/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Google Maps/Google Earth Ek Hizmet Şartları
-        </a>{" "}
-        geçerlidir. Mekan fotoğrafları, değerlendirmeler ve yorumlar belirtilen kaynaklara aittir;
-        açılış saatleri ve işletme bilgileri değişebilir.
-      </p>
-      <h2>Yasak kullanımlar</h2>
-      <p>
-        Gizli takip, izinsiz konum paylaşımı, taciz veya hukuka aykırı herhangi bir kullanım
-        kesinlikle yasaktır.
-      </p>
-    </main>
+      <Section title="Google Maps hizmetleri">
+        <p>
+          Google Maps kullanılan özelliklerde{" "}
+          <a
+            href="https://maps.google.com/help/terms_maps/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Google Maps/Google Earth Ek Hizmet Şartları
+          </a>{" "}
+          geçerlidir. Mekan fotoğrafları, değerlendirmeler ve yorumlar belirtilen kaynaklara aittir;
+          açılış saatleri ve işletme bilgileri değişebilir.
+        </p>
+      </Section>
+      <Section title="Yasak kullanımlar">
+        <p>
+          Gizli takip, izinsiz konum paylaşımı, taciz veya hukuka aykırı herhangi bir kullanım
+          kesinlikle yasaktır.
+        </p>
+      </Section>
+    </PageShell>
   );
 }

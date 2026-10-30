@@ -1,0 +1,15 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* Yasal ve bilgi sayfaları (about, contact, cookies, privacy, terms). Başlık PageHeader'da,
+     bölüm başlıkları Section'da; burada yalnızca okuma düzeni (design §4.4 satır 3-7). */
+  .legal {
+    padding-block-end: var(--space-16);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-base);
+    line-height: 1.65;
+  }
+  .legal-form {
+    display: grid;
+    gap: var(--space-4);
+  }
+}

@@ -4,7 +4,7 @@ import { readShare } from "../lib/api";
 
 import { useEffect, useRef, useState } from "react";
 import "./k.css";
-import { PageHeader } from "../components/ui";
+import { Alert, Button, Field, Input, Modal, PageHeader, PageShell } from "../components/ui";
 
 interface LeafletMap {
   remove(): void;
@@ -33,6 +33,7 @@ interface ShareData {
 
 export default function FindByCodePage() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const codeInputRef = useRef<HTMLInputElement>(null);
   const mapInstanceRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<LeafletMarker | null>(null);
   const latestShare = useRef<ShareData | null>(null);
@@ -129,7 +130,8 @@ export default function FindByCodePage() {
 
       renderShare(data);
     } catch (err: unknown) {
-      if (sequence === requestSequence.current) setError((err instanceof Error ? err.message : null) || "Konum sorgulanamadı.");
+      if (sequence === requestSequence.current)
+        setError((err instanceof Error ? err.message : null) || "Konum sorgulanamadı.");
     } finally {
       if (sequence === requestSequence.current) setLoading(false);
     }
@@ -181,11 +183,11 @@ export default function FindByCodePage() {
   }
 
   return (
-    <main className="lookup-page">
+    <PageShell layout="app" className="lookup-page">
       {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
       <PageHeader variant="hidden" />
       {/* Full Screen Map */}
-      <div ref={mapContainerRef} className="lookup-map" />
+      <div ref={mapContainerRef} className="lookup-map" role="region" aria-label="Harita" />
 
       {/* Harita üstü eylem çubuğu (site header'ı SiteChrome'da; marka rozeti C6'da kaldırıldı) */}
       <div className="lookup-header">
@@ -195,58 +197,48 @@ export default function FindByCodePage() {
         </button>
       </div>
 
-      {/* Lookup Modal / Dialog */}
-      {showLookupModal && (
-        <div className="modal-backdrop" onClick={() => setShowLookupModal(false)}>
-          <div className="lookup-card" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-btn"
-              type="button"
-              onClick={() => setShowLookupModal(false)}
-              aria-label="Kapat ve Haritaya Dön"
-              title="Haritaya Dön"
-            >
-              ✕
-            </button>
-            <div className="icon-wrap">🔑</div>
-            <h2>Kodla Konum Bul</h2>
-            <p>
-              Sizinle paylaşılan 6 haneli konum doğrulama kodunu girerek adresi ve haritadaki yerini
-              anında görüntüleyin.
-            </p>
-
-            <form onSubmit={handleSubmit} className="code-form">
-              <input
+      {/* Kod sorgulama penceresi (design §3 Modal; yerel <dialog>, odak kod alanında) */}
+      <Modal
+        open={showLookupModal}
+        onClose={() => setShowLookupModal(false)}
+        title="Kodla Konum Bul"
+        description="Sizinle paylaşılan 6 haneli konum doğrulama kodunu girerek adresi ve haritadaki yerini anında görüntüleyin."
+        size="sm"
+        initialFocus={codeInputRef}
+        className="lookup-dialog"
+      >
+        <div className="icon-wrap" aria-hidden="true">
+          🔑
+        </div>
+        <form onSubmit={handleSubmit} className="code-form">
+          <Field label="Paylaşım kodu">
+            {(ids) => (
+              <Input
+                {...ids}
+                ref={codeInputRef}
                 type="text"
                 placeholder="Örn: 849201"
                 maxLength={32}
                 value={inputCode}
                 onChange={(e) => setInputCode(e.target.value)}
-                autoFocus
-                className="code-input"
-                aria-label="Paylaşım kodu"
               />
-              <button type="submit" disabled={loading || !inputCode.trim()} className="submit-btn">
-                {loading ? "Konum Aranıyor…" : "Konumu Haritada Göster →"}
-              </button>
-            </form>
-
-            {error && (
-              <p role="alert" className="error-msg">
-                {error}
-              </p>
             )}
+          </Field>
+          <Button type="submit" fullWidth size="lg" loading={loading} disabled={!inputCode.trim()}>
+            {loading ? "Konum Aranıyor…" : "Konumu Haritada Göster →"}
+          </Button>
+        </form>
 
-            <button
-              type="button"
-              className="return-map-action"
-              onClick={() => setShowLookupModal(false)}
-            >
-              ← Haritayı İncele / Vazgeç
-            </button>
-          </div>
-        </div>
-      )}
+        {error && (
+          <Alert tone="danger" live="assertive">
+            {error}
+          </Alert>
+        )}
+
+        <Button variant="link" fullWidth onClick={() => setShowLookupModal(false)}>
+          ← Haritayı İncele / Vazgeç
+        </Button>
+      </Modal>
 
       {/* Floating Bottom Card When Location Found */}
       {shareData && !showLookupModal && (
@@ -289,6 +281,6 @@ export default function FindByCodePage() {
           </div>
         </section>
       )}
-    </main>
+    </PageShell>
   );
 }

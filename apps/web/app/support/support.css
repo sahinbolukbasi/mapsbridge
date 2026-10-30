@@ -1,0 +1,71 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* /support/ yerleşimi (design §4.4 satır 8). Kontroller primitive; burada yalnızca düzen. */
+  .support-page-shell {
+    display: grid;
+    gap: var(--space-4);
+    padding-block-end: var(--space-16);
+  }
+  .support-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+    align-items: start;
+  }
+  .support-form {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .support-tickets {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .support-ticket {
+    display: grid;
+    gap: var(--space-1);
+    inline-size: 100%;
+    min-block-size: var(--touch-target);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border-control);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .support-ticket:hover {
+    background: var(--color-surface-sunken);
+  }
+  .support-ticket__subject {
+    font-weight: var(--font-weight-semibold);
+  }
+  .support-ticket__meta,
+  .support-thread__time {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-regular);
+  }
+  .support-thread__message {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-sunken);
+  }
+  .support-thread__message--staff {
+    background: var(--color-surface-brand);
+  }
+  .support-thread__body {
+    margin: var(--space-2) 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 767.98px) {
+    .support-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

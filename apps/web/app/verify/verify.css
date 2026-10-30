@@ -1,0 +1,15 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* /verify/ (design §4.4 satır 35). .phone-card/.sms-icon/.fineprint auth.css'te (legacy). */
+  .verify-page {
+    padding-block-end: var(--space-16);
+  }
+  .verify-card {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .verify-form {
+    display: grid;
+    gap: var(--space-4);
+  }
+}
