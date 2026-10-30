@@ -17,11 +17,6 @@
     flex-direction: column;
   }
 
-  [data-theme="dark"] .odeme-page-root {
-    background: #091a13;
-    color: #f1f5f9;
-  }
-
   /* ── Top Header Navigation Bar ── */
   .odeme-header-bar {
     background: #ffffff;
@@ -31,11 +26,6 @@
     z-index: 100;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-  }
-
-  [data-theme="dark"] .odeme-header-bar {
-    background: rgba(13, 40, 30, 0.95);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   .odeme-header-container {
@@ -80,10 +70,6 @@
     letter-spacing: -0.02em;
   }
 
-  [data-theme="dark"] .odeme-brand-title {
-    color: #ffffff;
-  }
-
   .odeme-brand-sub {
     font-size: 11px;
     font-weight: 600;
@@ -111,12 +97,6 @@
     color: #0f172a;
   }
 
-  [data-theme="dark"] .odeme-wallet-pill {
-    background: rgba(30, 77, 62, 0.35);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-  }
-
   .odeme-wallet-credits {
     display: flex;
     align-items: center;
@@ -129,10 +109,6 @@
     align-items: center;
     gap: 0.25rem;
     color: #286954;
-  }
-
-  [data-theme="dark"] .odeme-wallet-earnings {
-    color: #34d399;
   }
 
   .btn-odeme-back {
@@ -177,11 +153,6 @@
     margin-bottom: 1rem;
   }
 
-  [data-theme="dark"] .odeme-eyebrow {
-    background: rgba(16, 185, 129, 0.2);
-    color: #34d399;
-  }
-
   .odeme-hero-title {
     font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 2.5rem;
@@ -190,10 +161,6 @@
     line-height: 1.15;
     color: #0d281e;
     margin-bottom: 1rem;
-  }
-
-  [data-theme="dark"] .odeme-hero-title {
-    color: #ffffff;
   }
 
   .odeme-hero-title span {
@@ -208,10 +175,6 @@
     line-height: 1.5;
     max-width: 680px;
     margin: 0 auto;
-  }
-
-  [data-theme="dark"] .odeme-hero-sub {
-    color: #94a3b8;
   }
 
   /* ── Main Tab Switcher ── */
@@ -240,19 +203,9 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
   }
 
-  [data-theme="dark"] .odeme-tab-btn {
-    background: rgba(30, 41, 59, 0.7);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #cbd5e1;
-  }
-
   .odeme-tab-btn:hover {
     border-color: #10b981;
     color: #0d281e;
-  }
-
-  [data-theme="dark"] .odeme-tab-btn:hover {
-    color: #ffffff;
   }
 
   .odeme-tab-btn.active {
@@ -260,13 +213,6 @@
     border-color: #0d281e;
     color: #ffffff;
     box-shadow: 0 8px 20px -4px rgba(13, 40, 30, 0.4);
-  }
-
-  [data-theme="dark"] .odeme-tab-btn.active {
-    background: #10b981;
-    border-color: #10b981;
-    color: #0d281e;
-    box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
   }
 
   /* ── Content Body Container ── */
@@ -297,12 +243,6 @@
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
   }
 
-  [data-theme="dark"] .credit-pack-card {
-    background: rgba(13, 40, 30, 0.6);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-  }
-
   .credit-pack-card:hover {
     transform: translateY(-4px);
     border-color: #10b981;
@@ -313,10 +253,6 @@
     border-color: #10b981;
     background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
     box-shadow: 0 18px 36px -8px rgba(16, 185, 129, 0.22);
-  }
-
-  [data-theme="dark"] .credit-pack-card.popular {
-    background: linear-gradient(180deg, rgba(13, 40, 30, 0.9) 0%, rgba(6, 78, 59, 0.4) 100%);
   }
 
   .credit-pack-badge {
@@ -348,18 +284,10 @@
     margin-bottom: 0.25rem;
   }
 
-  [data-theme="dark"] .credit-pack-title {
-    color: #ffffff;
-  }
-
   .credit-pack-desc {
     font-size: 12.5px;
     color: #64748b;
     line-height: 1.4;
-  }
-
-  [data-theme="dark"] .credit-pack-desc {
-    color: #94a3b8;
   }
 
   .credit-pack-amount-box {
@@ -381,19 +309,11 @@
     gap: 0.25rem;
   }
 
-  [data-theme="dark"] .credit-pack-total {
-    color: #ffffff;
-  }
-
   .credit-pack-unit {
     font-size: 11.5px;
     font-weight: 600;
     color: #286954;
     margin-top: 0.25rem;
-  }
-
-  [data-theme="dark"] .credit-pack-unit {
-    color: #34d399;
   }
 
   .credit-pack-price-row {
@@ -403,10 +323,6 @@
     margin-top: auto;
     padding: 1rem 0 1.25rem;
     border-top: 1px solid rgba(226, 232, 240, 0.8);
-  }
-
-  [data-theme="dark"] .credit-pack-price-row {
-    border-top-color: rgba(255, 255, 255, 0.08);
   }
 
   .credit-pack-price-label {
@@ -420,10 +336,6 @@
     font-size: 1.75rem;
     font-weight: 800;
     color: #0d281e;
-  }
-
-  [data-theme="dark"] .credit-pack-price-val {
-    color: #ffffff;
   }
 
   .btn-buy-pack {
@@ -487,22 +399,10 @@
     transition: all 0.2s ease;
   }
 
-  [data-theme="dark"] .cycle-toggle-btn {
-    background: #1e293b;
-    border-color: #334155;
-    color: #94a3b8;
-  }
-
   .cycle-toggle-btn.active {
     background: #0d281e;
     border-color: #0d281e;
     color: #ffffff;
-  }
-
-  [data-theme="dark"] .cycle-toggle-btn.active {
-    background: #10b981;
-    border-color: #10b981;
-    color: #0d281e;
   }
 
   .savings-tag {
@@ -531,21 +431,12 @@
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  [data-theme="dark"] .plan-card {
-    background: rgba(13, 40, 30, 0.6);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
   .plan-card.highlight {
     border-color: #10b981;
     background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%);
     box-shadow: 0 20px 45px -10px rgba(16, 185, 129, 0.25);
     transform: scale(1.02);
     z-index: 2;
-  }
-
-  [data-theme="dark"] .plan-card.highlight {
-    background: linear-gradient(180deg, rgba(13, 40, 30, 0.95) 0%, rgba(6, 78, 59, 0.5) 100%);
   }
 
   .plan-badge {
@@ -572,20 +463,12 @@
     margin-bottom: 0.35rem;
   }
 
-  [data-theme="dark"] .plan-name {
-    color: #ffffff;
-  }
-
   .plan-tagline {
     font-size: 12.5px;
     color: #64748b;
     min-height: 36px;
     line-height: 1.4;
     margin-bottom: 1.25rem;
-  }
-
-  [data-theme="dark"] .plan-tagline {
-    color: #94a3b8;
   }
 
   .plan-price-block {
@@ -598,10 +481,6 @@
     font-weight: 800;
     color: #0d281e;
     line-height: 1;
-  }
-
-  [data-theme="dark"] .plan-price {
-    color: #ffffff;
   }
 
   .plan-period {
@@ -631,11 +510,6 @@
     margin-bottom: 1.5rem;
   }
 
-  [data-theme="dark"] .plan-credits-pill {
-    background: rgba(16, 185, 129, 0.2);
-    color: #34d399;
-  }
-
   .plan-features-list {
     list-style: none;
     padding: 0;
@@ -654,17 +528,9 @@
     line-height: 1.4;
   }
 
-  [data-theme="dark"] .plan-feature-item {
-    color: #cbd5e1;
-  }
-
   .plan-feature-item.highlight {
     font-weight: 700;
     color: #0d281e;
-  }
-
-  [data-theme="dark"] .plan-feature-item.highlight {
-    color: #34d399;
   }
 
   .plan-feature-item.disabled {
@@ -688,10 +554,6 @@
   .plan-feature-icon.check {
     background: #ecfdf5;
     color: #10b981;
-  }
-
-  [data-theme="dark"] .plan-feature-icon.check {
-    background: rgba(16, 185, 129, 0.2);
   }
 
   .plan-feature-icon.cross {
@@ -816,11 +678,6 @@
     padding: 2.25rem;
   }
 
-  [data-theme="dark"] .creator-payout-form {
-    background: rgba(13, 40, 30, 0.7);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
   .payout-form-title {
     font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 1.35rem;
@@ -829,18 +686,10 @@
     margin-bottom: 0.35rem;
   }
 
-  [data-theme="dark"] .payout-form-title {
-    color: #ffffff;
-  }
-
   .payout-form-sub {
     font-size: 13px;
     color: #64748b;
     margin-bottom: 1.5rem;
-  }
-
-  [data-theme="dark"] .payout-form-sub {
-    color: #94a3b8;
   }
 
   .form-field {
@@ -855,10 +704,6 @@
     margin-bottom: 0.35rem;
   }
 
-  [data-theme="dark"] .form-label {
-    color: #cbd5e1;
-  }
-
   .form-input {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -870,12 +715,6 @@
     font-size: 13.5px;
     outline: none;
     transition: all 0.2s ease;
-  }
-
-  [data-theme="dark"] .form-input {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
   }
 
   .form-input:focus {
@@ -932,11 +771,6 @@
     animation: checkout-scale-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  [data-theme="dark"] .checkout-modal-card {
-    background: #0d281e;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
   @keyframes checkout-scale-up {
     from {
       transform: scale(0.95);
@@ -990,11 +824,6 @@
     border: 1px solid #e2e8f0;
   }
 
-  [data-theme="dark"] .checkout-order-summary {
-    background: rgba(30, 41, 59, 0.5);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
   .checkout-summary-row {
     display: flex;
     align-items: center;
@@ -1002,10 +831,6 @@
     font-size: 13px;
     color: #475569;
     margin-bottom: 0.5rem;
-  }
-
-  [data-theme="dark"] .checkout-summary-row {
-    color: #cbd5e1;
   }
 
   .checkout-summary-row.total {
@@ -1016,11 +841,6 @@
     font-size: 1.15rem;
     font-weight: 800;
     color: #0d281e;
-  }
-
-  [data-theme="dark"] .checkout-summary-row.total {
-    color: #ffffff;
-    border-top-color: rgba(255, 255, 255, 0.15);
   }
 
   .checkout-row-2col {
@@ -1085,11 +905,6 @@
     gap: 1.5rem;
   }
 
-  [data-theme="dark"] .odeme-trust-banner {
-    background: rgba(13, 40, 30, 0.6);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
   .trust-item {
     display: flex;
     align-items: center;
@@ -1097,10 +912,6 @@
     font-size: 13px;
     font-weight: 700;
     color: #334155;
-  }
-
-  [data-theme="dark"] .trust-item {
-    color: #cbd5e1;
   }
 
   .trust-icon-box {
@@ -1114,10 +925,6 @@
     justify-content: center;
   }
 
-  [data-theme="dark"] .trust-icon-box {
-    background: rgba(16, 185, 129, 0.15);
-  }
-
   /* ── Gezgin Rota Pazarı Nasıl Çalışır Banner ── */
   .odeme-nasil-calisir-card {
     margin-top: 2.5rem;
@@ -1127,12 +934,6 @@
     border: 1px solid #e2e8f0;
     box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
     transition: all 0.25s ease;
-  }
-
-  [data-theme="dark"] .odeme-nasil-calisir-card {
-    background: rgba(13, 34, 26, 0.85);
-    border-color: rgba(45, 110, 88, 0.4);
-    box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.3);
   }
 
   .odeme-nasil-calisir-title {
@@ -1146,10 +947,6 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
-  }
-
-  [data-theme="dark"] .odeme-nasil-calisir-title {
-    color: #f1f5f9;
   }
 
   .odeme-nasil-calisir-grid {
@@ -1171,11 +968,6 @@
     border-color: rgba(16, 185, 129, 0.3);
   }
 
-  [data-theme="dark"] .odeme-nasil-calisir-step {
-    background: rgba(15, 23, 42, 0.6);
-    border-color: rgba(45, 110, 88, 0.3);
-  }
-
   .odeme-nasil-calisir-step h4 {
     font-weight: 800;
     margin: 0.5rem 0 0.25rem;
@@ -1183,19 +975,11 @@
     font-size: 0.9375rem;
   }
 
-  [data-theme="dark"] .odeme-nasil-calisir-step h4 {
-    color: #e2e8f0;
-  }
-
   .odeme-nasil-calisir-step p {
     font-size: 0.8125rem;
     color: #64748b;
     margin: 0;
     line-height: 1.45;
-  }
-
-  [data-theme="dark"] .odeme-nasil-calisir-step p {
-    color: #94a3b8;
   }
 
   .odeme-nasil-link {

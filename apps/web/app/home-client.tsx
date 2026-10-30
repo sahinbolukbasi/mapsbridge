@@ -27,7 +27,6 @@ export default function Home() {
       router.push("/maps/");
       return;
     }
-    document.documentElement.dataset.theme = "light";
   }, [router]);
 
   function handleDestinationSubmit(e: React.FormEvent) {

@@ -24,11 +24,6 @@
       border-color 0.25s ease;
   }
 
-  [data-theme="dark"] .global-site-header {
-    background: rgba(13, 30, 24, 0.92);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
   .global-site-header-inner {
     width: 100%;
     max-width: min(100%, 1840px);
@@ -76,10 +71,6 @@
     line-height: 1;
   }
 
-  [data-theme="dark"] .header-brand-title {
-    color: #eef0ff;
-  }
-
   .header-brand-emerald {
     color: #10b981;
   }
@@ -92,10 +83,6 @@
     background: #f1f5f9;
     padding: 0.25rem;
     border-radius: 9999px;
-  }
-
-  [data-theme="dark"] .header-nav-center {
-    background: rgba(255, 255, 255, 0.06);
   }
 
   @media (min-width: 1280px) {
@@ -117,18 +104,9 @@
     white-space: nowrap;
   }
 
-  [data-theme="dark"] .header-nav-pill {
-    color: #cbd5e1;
-  }
-
   .header-nav-pill:hover {
     color: #013628;
     background: rgba(255, 255, 255, 0.7);
-  }
-
-  [data-theme="dark"] .header-nav-pill:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.12);
   }
 
   .header-nav-pill.active {
@@ -178,20 +156,11 @@
     transition: all 0.2s ease;
   }
 
-  [data-theme="dark"] .header-code-search-input {
-    background: rgba(255, 255, 255, 0.08);
-    color: #eef0ff;
-  }
-
   .header-code-search-input:focus {
     width: 240px;
     background: #ffffff;
     border-color: #10b981;
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-  }
-
-  [data-theme="dark"] .header-code-search-input:focus {
-    background: rgba(255, 255, 255, 0.14);
   }
 
   /* Auth Buttons */
@@ -208,18 +177,9 @@
     transition: all 0.2s ease;
   }
 
-  [data-theme="dark"] .header-btn-login {
-    color: #cbd5e1;
-  }
-
   .header-btn-login:hover {
     background: #f1f5f9;
     color: #013628;
-  }
-
-  [data-theme="dark"] .header-btn-login:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
   }
 
   @media (min-width: 640px) {
@@ -319,12 +279,6 @@
     white-space: nowrap;
   }
 
-  [data-theme="dark"] .nav-quota-badge-stitch {
-    background: rgba(16, 185, 129, 0.12);
-    border-color: rgba(52, 211, 153, 0.25);
-    color: #a7f3d0;
-  }
-
   .nav-quota-badge-stitch:hover {
     background: rgba(16, 185, 129, 0.16);
     border-color: rgba(16, 185, 129, 0.4);
@@ -346,11 +300,6 @@
     border: 1px solid rgba(226, 232, 240, 0.8);
     cursor: pointer;
     transition: all 0.2s ease;
-  }
-
-  [data-theme="dark"] .header-user-pill-trigger {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.12);
   }
 
   .header-user-pill-trigger:hover {
@@ -397,10 +346,6 @@
     border: 1.5px solid #ffffff;
   }
 
-  [data-theme="dark"] .header-user-online-dot {
-    border-color: #0d1e18;
-  }
-
   .header-user-pill-info {
     display: none;
     flex-direction: column;
@@ -420,20 +365,12 @@
     line-height: 1.1;
   }
 
-  [data-theme="dark"] .header-user-pill-name {
-    color: #f1f5f9;
-  }
-
   .header-user-pill-role {
     font-size: 10px;
     font-weight: 700;
     color: #286954;
     line-height: 1;
     margin-top: 2px;
-  }
-
-  [data-theme="dark"] .header-user-pill-role {
-    color: #34d399;
   }
 
   .header-user-pill-arrow {
@@ -467,13 +404,6 @@
     animation: dropdownIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  [data-theme="dark"] .header-stitch-dropdown {
-    background: rgba(15, 31, 26, 0.98);
-    box-shadow:
-      0 20px 40px -8px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
-
   /* 1. Üst Kullanıcı Kartı */
   .header-stitch-user-card {
     padding: 1rem;
@@ -488,16 +418,6 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-  }
-
-  [data-theme="dark"] .header-stitch-user-card {
-    background: linear-gradient(
-      135deg,
-      rgba(16, 185, 129, 0.15) 0%,
-      rgba(15, 31, 26, 0.9) 60%,
-      rgba(21, 37, 40, 0.7) 100%
-    );
-    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   .header-stitch-avatar-large {
@@ -534,10 +454,6 @@
     border: 2px solid #ffffff;
   }
 
-  [data-theme="dark"] .header-stitch-online-dot-large {
-    border-color: #0f1f1a;
-  }
-
   .header-stitch-name-wrap {
     min-width: 0;
     flex: 1;
@@ -558,10 +474,6 @@
     text-overflow: ellipsis;
   }
 
-  [data-theme="dark"] .header-stitch-fullname {
-    color: #f1f5f9;
-  }
-
   .header-stitch-pro-badge {
     padding: 0.1rem 0.45rem;
     border-radius: 9999px;
@@ -571,11 +483,6 @@
     font-weight: 800;
     letter-spacing: 0.04em;
     flex-shrink: 0;
-  }
-
-  [data-theme="dark"] .header-stitch-pro-badge {
-    background: rgba(16, 185, 129, 0.25);
-    color: #34d399;
   }
 
   .header-stitch-handle {
@@ -602,12 +509,6 @@
     flex-shrink: 0;
   }
 
-  [data-theme="dark"] .header-stitch-edit-btn {
-    background: #182e27;
-    color: #34d399;
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-
   .header-stitch-edit-btn:hover {
     background: #ecfdf5;
     color: #013628;
@@ -624,11 +525,6 @@
     border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   }
 
-  [data-theme="dark"] .header-stitch-grid {
-    background: rgba(0, 0, 0, 0.2);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-  }
-
   .header-stitch-stat-box {
     padding: 0.6rem 0.75rem;
     border-radius: 0.85rem;
@@ -640,11 +536,6 @@
     border: 1px solid rgba(226, 232, 240, 0.7);
   }
 
-  [data-theme="dark"] .header-stitch-stat-box {
-    background: #142823;
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
   .header-stitch-stat-top {
     display: flex;
     align-items: center;
@@ -654,18 +545,10 @@
     color: #286954;
   }
 
-  [data-theme="dark"] .header-stitch-stat-top {
-    color: #34d399;
-  }
-
   .header-stitch-stat-val {
     font-size: 15px;
     font-weight: 800;
     color: #013628;
-  }
-
-  [data-theme="dark"] .header-stitch-stat-val {
-    color: #f1f5f9;
   }
 
   /* Scrollable Nav List */
@@ -687,10 +570,6 @@
     color: #717974;
   }
 
-  [data-theme="dark"] .header-stitch-section-label {
-    color: #64748b;
-  }
-
   .header-stitch-item {
     display: flex;
     align-items: center;
@@ -710,18 +589,9 @@
     box-sizing: border-box;
   }
 
-  [data-theme="dark"] .header-stitch-item {
-    color: #f1f5f9;
-  }
-
   .header-stitch-item:hover {
     background: #f1f5f9;
     color: #013628;
-  }
-
-  [data-theme="dark"] .header-stitch-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #34d399;
   }
 
   .header-stitch-item-left {
@@ -737,10 +607,6 @@
     flex-shrink: 0;
   }
 
-  [data-theme="dark"] .header-stitch-item-left .material-symbols-outlined {
-    color: #34d399;
-  }
-
   .header-stitch-badge-pill {
     padding: 0.15rem 0.45rem;
     border-radius: 9999px;
@@ -749,11 +615,6 @@
     background: #f1f5f9;
     color: #286954;
     flex-shrink: 0;
-  }
-
-  [data-theme="dark"] .header-stitch-badge-pill {
-    background: rgba(255, 255, 255, 0.1);
-    color: #34d399;
   }
 
   .header-stitch-badge-green {
@@ -773,21 +634,12 @@
     justify-content: space-between;
   }
 
-  [data-theme="dark"] .header-stitch-code-card {
-    background: rgba(16, 185, 129, 0.12);
-    border-color: rgba(16, 185, 129, 0.25);
-  }
-
   .header-stitch-code-text {
     font-size: 11px;
     color: #013628;
     display: flex;
     align-items: center;
     gap: 0.4rem;
-  }
-
-  [data-theme="dark"] .header-stitch-code-text {
-    color: #f1f5f9;
   }
 
   .header-stitch-code-btn {
@@ -801,11 +653,6 @@
     align-items: center;
     justify-content: center;
     transition: all 0.15s ease;
-  }
-
-  [data-theme="dark"] .header-stitch-code-btn {
-    background: #162a24;
-    color: #34d399;
   }
 
   .header-stitch-code-btn:hover {
@@ -824,21 +671,12 @@
     font-weight: 700;
   }
 
-  [data-theme="dark"] .header-stitch-theme-pills {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
   .header-stitch-theme-pill-active {
     padding: 0.2rem 0.5rem;
     border-radius: 0.4rem;
     background: #ffffff;
     color: #013628;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  }
-
-  [data-theme="dark"] .header-stitch-theme-pill-active {
-    background: #10b981;
-    color: #ffffff;
   }
 
   .header-stitch-theme-pill-inactive {
@@ -855,11 +693,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-  }
-
-  [data-theme="dark"] .header-stitch-footer {
-    background: rgba(0, 0, 0, 0.2);
-    border-top-color: rgba(255, 255, 255, 0.08);
   }
 
   .header-stitch-logout-btn {
@@ -1050,31 +883,6 @@
       font-weight: 700;
       line-height: 1;
     }
-    [data-theme="dark"] .mobile-nav-track {
-      background: rgb(25 38 32 / 96%);
-      border-color: #34483c;
-      box-shadow: 0 6px 28px rgb(0 0 0 / 30%);
-    }
-    [data-theme="dark"] .mobile-nav-item {
-      color: #a4b4ac;
-    }
-    [data-theme="dark"] .mobile-nav-item[aria-current="page"] {
-      color: #b0e3c8;
-    }
-    [data-theme="dark"] .mobile-nav-item[aria-current="page"] .mobile-nav-icon-wrap {
-      background: #2a493a;
-    }
-    [data-theme="dark"] .mobile-nav-assistant .mobile-nav-icon-wrap {
-      color: #122d20;
-      background: #a7dfbd;
-    }
-    [data-theme="dark"] .mobile-nav-assistant[aria-current="page"] .mobile-nav-icon-wrap {
-      background: #a7dfbd;
-      box-shadow: 0 0 0 3px #365b46;
-    }
-    [data-theme="dark"] .mobile-nav-badge {
-      border-color: #192620;
-    }
   }
   @media (min-width: 375px) and (max-width: 1279px) {
     .mobile-nav-label {
@@ -1118,10 +926,6 @@
       box-shadow: none;
       backdrop-filter: none;
     }
-    [data-theme="dark"] .mobile-nav-track {
-      background: transparent;
-      box-shadow: none;
-    }
     .mobile-nav-assistant .mobile-nav-icon-wrap {
       box-shadow: none;
     }
@@ -1158,11 +962,6 @@
         0 2px 6px rgba(0, 0, 0, 0.04);
       pointer-events: auto;
     }
-    [data-platform="ios"][data-theme="dark"] .mobile-nav-track {
-      background: rgba(18, 30, 24, 0.85);
-      border-color: rgba(255, 255, 255, 0.14);
-      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
-    }
     [data-platform="ios"] .mobile-nav-item {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
     }
@@ -1172,11 +971,6 @@
     [data-platform="ios"] .mobile-nav-item[aria-current="page"] .mobile-nav-icon-wrap {
       background: rgba(16, 185, 129, 0.15);
       border-radius: 14px;
-    }
-    [data-platform="ios"][data-theme="dark"]
-      .mobile-nav-item[aria-current="page"]
-      .mobile-nav-icon-wrap {
-      background: rgba(16, 185, 129, 0.25);
     }
 
     /* Android Material 3 Tonal Navigation Bar */

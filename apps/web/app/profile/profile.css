@@ -1,13 +1,5 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
-  [data-theme="dark"] {
-    --sb-mint-subtle: #122e25;
-    --sb-primary-container: #225746;
-    --sb-secondary-container: #1c4537;
-    --sb-on-secondary-container: #a5eed2;
-    --sb-text-outline: #6b827a;
-  }
-
   /* Page Root */
   .stitch-main-profile-root {
     min-height: 100vh;
@@ -62,10 +54,6 @@
     z-index: 50;
     display: flex;
     align-items: center;
-  }
-
-  [data-theme="dark"] .profile-top-navbar {
-    background: rgba(11, 19, 17, 0.9);
   }
 
   .profile-nav-inner {
@@ -123,10 +111,6 @@
     line-height: 1.15;
   }
 
-  [data-theme="dark"] .brand-main-title {
-    color: #f8fafc;
-  }
-
   .brand-sub-title {
     font-family: "Inter", sans-serif;
     font-size: 10px;
@@ -138,10 +122,6 @@
     margin-top: 2px;
   }
 
-  [data-theme="dark"] .brand-sub-title {
-    color: var(--sb-mint-glow);
-  }
-
   .profile-nav-pills {
     display: flex;
     align-items: center;
@@ -149,10 +129,6 @@
     background: var(--sb-canvas-subtle);
     padding: 0.25rem;
     border-radius: 9999px;
-  }
-
-  [data-theme="dark"] .profile-nav-pills {
-    background: rgba(30, 77, 62, 0.35);
   }
 
   .profile-nav-pill {
@@ -191,11 +167,6 @@
     padding: 0.35rem 0.6rem 0.35rem 1rem;
     transition: all 0.2s ease;
     border: 1px solid transparent;
-  }
-
-  [data-theme="dark"] .profile-search-wrap {
-    background: rgba(30, 77, 62, 0.3);
-    border-color: rgba(52, 211, 153, 0.15);
   }
 
   .profile-search-wrap:focus-within {
@@ -261,11 +232,6 @@
     font-family: "Inter", sans-serif;
     font-size: 12px;
     font-weight: 700;
-  }
-
-  [data-theme="dark"] .profile-credits-badge {
-    background: rgba(30, 77, 62, 0.4);
-    color: var(--sb-mint-glow);
   }
 
   .profile-notif-btn {
@@ -409,11 +375,6 @@
     color: var(--sb-text-main);
   }
 
-  [data-theme="dark"] .stitch-hero-tag {
-    background: rgba(13, 40, 30, 0.85);
-    color: #eef5f1;
-  }
-
   /* Main Container & Profile Card */
   .stitch-profile-container {
     width: 100%;
@@ -530,10 +491,6 @@
     margin: 0;
   }
 
-  [data-theme="dark"] .stitch-user-fullname {
-    color: #c4f3df;
-  }
-
   .stitch-user-handle-tag {
     font-size: 0.95rem;
     color: var(--sb-text-muted);
@@ -635,10 +592,6 @@
     background-color: #e2e8f0;
   }
 
-  [data-theme="dark"] .stitch-action-btn-neutral:hover {
-    background-color: #1f362e;
-  }
-
   .stitch-action-btn-primary {
     display: inline-flex;
     align-items: center;
@@ -723,10 +676,6 @@
     color: var(--color-brand);
     line-height: 1.1;
     letter-spacing: -0.02em;
-  }
-
-  [data-theme="dark"] .stitch-metric-number {
-    color: #c4f3df;
   }
 
   .stitch-metric-label {
@@ -1007,10 +956,6 @@
     text-overflow: ellipsis;
   }
 
-  [data-theme="dark"] .stitch-route-title {
-    color: #c4f3df;
-  }
-
   .stitch-route-desc {
     font-size: 0.84rem;
     color: var(--sb-text-muted);
@@ -1065,10 +1010,6 @@
     background-color: #e2e8f0;
   }
 
-  [data-theme="dark"] .stitch-route-btn:hover {
-    background-color: #1f362e;
-  }
-
   .stitch-route-btn.primary {
     background-color: var(--color-brand);
     color: #ffffff;
@@ -1118,10 +1059,6 @@
     font-weight: 700;
     color: var(--color-brand);
     margin: 0;
-  }
-
-  [data-theme="dark"] .stitch-activity-title {
-    color: #c4f3df;
   }
 
   .stitch-activity-item {
@@ -1204,10 +1141,6 @@
     gap: 1rem;
   }
 
-  [data-theme="dark"] .stitch-empty-state-box {
-    background: rgba(30, 77, 62, 0.05);
-  }
-
   .stitch-empty-icon {
     font-size: 44px;
     color: var(--sb-secondary);
@@ -1219,10 +1152,6 @@
     font-weight: 700;
     color: var(--color-brand);
     margin: 0 0 0.4rem 0;
-  }
-
-  [data-theme="dark"] .stitch-empty-title {
-    color: #c4f3df;
   }
 
   .stitch-empty-desc {
@@ -1330,10 +1259,6 @@
     line-height: 1.3;
   }
 
-  [data-theme="dark"] .stitch-pool-card-title {
-    color: #c4f3df;
-  }
-
   .stitch-pool-card-address {
     font-size: 0.8rem;
     color: var(--sb-text-muted);
@@ -1425,10 +1350,6 @@
     margin: 0;
   }
 
-  [data-theme="dark"] .stitch-collection-title {
-    color: #c4f3df;
-  }
-
   .stitch-collection-desc {
     font-size: 0.83rem;
     color: var(--sb-text-muted);
@@ -1510,10 +1431,6 @@
     color: var(--color-brand);
     line-height: 1.1;
     letter-spacing: -0.02em;
-  }
-
-  [data-theme="dark"] .stitch-analytics-value {
-    color: #c4f3df;
   }
 
   .stitch-analytics-label {

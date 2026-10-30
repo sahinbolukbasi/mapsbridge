@@ -16,12 +16,6 @@
     margin-top: auto;
   }
 
-  [data-theme="dark"] .global-site-footer {
-    background: #0b1319;
-    border-top-color: rgba(51, 65, 85, 0.6);
-    color: #f1f5f9;
-  }
-
   .global-footer-inner {
     max-width: 1280px;
     margin: 0 auto;
@@ -77,10 +71,6 @@
     letter-spacing: -0.02em;
   }
 
-  [data-theme="dark"] .global-footer-brand-title {
-    color: #ffffff;
-  }
-
   .global-footer-brand-emerald {
     color: #10b981;
   }
@@ -91,10 +81,6 @@
     color: #404945;
     margin: 0;
     max-width: 360px;
-  }
-
-  [data-theme="dark"] .global-footer-tagline {
-    color: #94a3b8;
   }
 
   .global-footer-status {
@@ -110,12 +96,6 @@
     border-radius: 9999px;
     border: 1px solid rgba(16, 185, 129, 0.25);
     width: fit-content;
-  }
-
-  [data-theme="dark"] .global-footer-status {
-    background: rgba(16, 185, 129, 0.1);
-    border-color: rgba(52, 211, 153, 0.25);
-    color: #34d399;
   }
 
   .global-footer-status-dot {
@@ -159,10 +139,6 @@
     display: block;
   }
 
-  [data-theme="dark"] .global-footer-group-title {
-    color: #64748b;
-  }
-
   .global-footer-links {
     list-style: none;
     margin: 0;
@@ -186,11 +162,6 @@
     font-family: inherit;
   }
 
-  [data-theme="dark"] .global-footer-links li a,
-  [data-theme="dark"] .global-footer-links li button {
-    color: #cbd5e1;
-  }
-
   .global-footer-links li a:hover,
   .global-footer-links li button:hover {
     color: #10b981;
@@ -205,10 +176,6 @@
     gap: 1rem;
     align-items: center;
     justify-content: space-between;
-  }
-
-  [data-theme="dark"] .global-footer-bottom {
-    border-top-color: rgba(51, 65, 85, 0.6);
   }
 
   @media (min-width: 640px) {
@@ -239,11 +206,6 @@
     transition: all 0.2s ease;
   }
 
-  [data-theme="dark"] .global-footer-action-btn {
-    border-color: rgba(51, 65, 85, 0.8);
-    color: #cbd5e1;
-  }
-
   .global-footer-action-btn:hover {
     border-color: #10b981;
     color: #10b981;
@@ -262,19 +224,10 @@
     background: #ecfdf5;
   }
 
-  [data-theme="dark"] .global-footer-security-pill {
-    background: rgba(40, 105, 84, 0.2);
-    color: #34d399;
-  }
-
   .global-footer-copyright {
     font-size: 12px;
     color: #717974;
     margin: 0;
-  }
-
-  [data-theme="dark"] .global-footer-copyright {
-    color: #64748b;
   }
 
   /* Mobil Uygulama İndirme Linkleri */
@@ -291,10 +244,6 @@
     letter-spacing: 0.06em;
     color: #717974;
     text-transform: uppercase;
-  }
-
-  [data-theme="dark"] .global-footer-app-title {
-    color: #94a3b8;
   }
 
   .global-footer-app-buttons {
@@ -331,19 +280,9 @@
     border: 1px solid #e2e8f0;
   }
 
-  [data-theme="dark"] .global-footer-app-btn.google-play {
-    background: #0f172a;
-    color: #ffffff;
-    border-color: #334155;
-  }
-
   .global-footer-app-btn.google-play:hover {
     background: #f8fafc;
     transform: translateY(-1px);
-  }
-
-  [data-theme="dark"] .global-footer-app-btn.google-play:hover {
-    background: #1e293b;
   }
 
   .global-footer-app-btn .app-icon {

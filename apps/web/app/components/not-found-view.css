@@ -25,17 +25,6 @@
       15px 15px;
   }
 
-  [data-theme="dark"] .not-found-topography {
-    background-color: #0d1512;
-    background-image:
-      radial-gradient(rgba(52, 211, 153, 0.18) 0.75px, transparent 0.75px),
-      radial-gradient(rgba(52, 211, 153, 0.18) 0.75px, #0d1512 0.75px);
-    background-size: 30px 30px;
-    background-position:
-      0 0,
-      15px 15px;
-  }
-
   /* Main Container */
   .not-found-main {
     flex: 1;
@@ -75,12 +64,6 @@
     letter-spacing: 0.08em;
     margin-bottom: 24px;
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
-  }
-
-  [data-theme="dark"] .not-found-badge {
-    background: rgba(16, 185, 129, 0.15);
-    border-color: rgba(52, 211, 153, 0.3);
-    color: #6ffbbe;
   }
 
   .not-found-badge .material-symbols-outlined {
@@ -132,20 +115,6 @@
     flex-shrink: 0;
   }
 
-  [data-theme="dark"] .not-found-path-pill {
-    background: rgba(186, 26, 26, 0.12);
-    border-color: rgba(248, 113, 113, 0.2);
-    color: #fca5a5;
-  }
-
-  [data-theme="dark"] .not-found-path-pill .material-symbols-outlined {
-    color: #f87171;
-  }
-
-  [data-theme="dark"] .not-found-path-status {
-    color: #f87171;
-  }
-
   /* 404 Centerpiece Graphic */
   .not-found-graphic-container {
     position: relative;
@@ -178,14 +147,6 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 4px 12px rgba(1, 54, 40, 0.08));
-  }
-
-  [data-theme="dark"] .not-found-giant-number {
-    background: linear-gradient(180deg, #6ffbbe 0%, #10b981 50%, rgba(5, 81, 61, 0.4) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 4px 20px rgba(16, 185, 129, 0.2));
   }
 
   /* SVG Route Overlay */
@@ -261,12 +222,6 @@
     transition: all 0.2s ease;
   }
 
-  [data-theme="dark"] .not-found-coord-card {
-    background: rgba(20, 32, 27, 0.92);
-    border-color: rgba(52, 211, 153, 0.35);
-    box-shadow: 0 12px 28px -5px rgba(0, 0, 0, 0.4);
-  }
-
   .not-found-coord-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.12);
@@ -281,11 +236,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  [data-theme="dark"] .not-found-coord-icon-box {
-    background: rgba(16, 185, 129, 0.2);
-    color: #6ffbbe;
   }
 
   .not-found-coord-info {
@@ -312,10 +262,6 @@
     gap: 8px;
   }
 
-  [data-theme="dark"] .not-found-coord-value {
-    color: #e2fbf1;
-  }
-
   .not-found-signal-badge {
     display: inline-flex;
     align-items: center;
@@ -327,12 +273,6 @@
     background: rgba(239, 68, 68, 0.12);
     color: #dc2626;
     border: 1px solid rgba(239, 68, 68, 0.2);
-  }
-
-  [data-theme="dark"] .not-found-signal-badge {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
-    border-color: rgba(239, 68, 68, 0.3);
   }
 
   /* Typography & Headings */
@@ -355,10 +295,6 @@
     font-weight: 400;
     line-height: 1.65;
     color: var(--text-muted, #5e6d65);
-  }
-
-  [data-theme="dark"] .not-found-desc {
-    color: #9bb0a5;
   }
 
   /* Action Buttons */
@@ -405,17 +341,6 @@
     box-shadow: 0 6px 20px rgba(1, 54, 40, 0.3);
   }
 
-  [data-theme="dark"] .not-found-btn-primary {
-    background: #10b981;
-    color: #042f21 !important;
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-  }
-
-  [data-theme="dark"] .not-found-btn-primary:hover {
-    background: #34d399;
-    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.45);
-  }
-
   .not-found-btn-secondary {
     flex: 1;
     width: 100%;
@@ -436,22 +361,11 @@
     cursor: pointer;
   }
 
-  [data-theme="dark"] .not-found-btn-secondary {
-    background: #16241e;
-    border-color: rgba(52, 211, 153, 0.3);
-    color: #6ffbbe !important;
-  }
-
   .not-found-btn-secondary:hover {
     background: #ecfdf5;
     transform: translateY(-2px);
     border-color: #6ee7b7;
     box-shadow: 0 6px 16px rgba(16, 185, 129, 0.12);
-  }
-
-  [data-theme="dark"] .not-found-btn-secondary:hover {
-    background: #1c2e26;
-    border-color: #34d399;
   }
 
   /* Popular Destinations / Alternative Coordinates Grid */
@@ -462,10 +376,6 @@
     border-top: 1px solid rgba(226, 232, 240, 0.8);
     padding-top: 40px;
     margin-top: 12px;
-  }
-
-  [data-theme="dark"] .not-found-destinations {
-    border-top-color: rgba(52, 211, 153, 0.15);
   }
 
   .not-found-destinations-header {
@@ -531,20 +441,10 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
   }
 
-  [data-theme="dark"] .not-found-card {
-    background: #14201b;
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
   .not-found-card:hover {
     transform: translateY(-3px);
     border-color: #93d4ba;
     box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.08);
-  }
-
-  [data-theme="dark"] .not-found-card:hover {
-    border-color: rgba(52, 211, 153, 0.4);
-    box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.4);
   }
 
   .not-found-card-icon {
@@ -558,11 +458,6 @@
     justify-content: center;
     margin-bottom: 12px;
     transition: transform 0.2s ease;
-  }
-
-  [data-theme="dark"] .not-found-card-icon {
-    background: rgba(16, 185, 129, 0.15);
-    color: #6ffbbe;
   }
 
   .not-found-card:hover .not-found-card-icon {
@@ -588,10 +483,6 @@
     color: #013628;
   }
 
-  [data-theme="dark"] .not-found-card:hover .not-found-card-name {
-    color: #34d399;
-  }
-
   .not-found-card-path {
     font-family: ui-monospace, SFMono-Regular, monospace;
     font-size: 11px;
@@ -605,10 +496,6 @@
     margin: 0;
   }
 
-  [data-theme="dark"] .not-found-card-desc {
-    color: #9bb0a5;
-  }
-
   .not-found-card-foot {
     margin-top: 14px;
     padding-top: 10px;
@@ -620,11 +507,6 @@
     font-weight: 700;
     color: #286954;
     transition: transform 0.2s ease;
-  }
-
-  [data-theme="dark"] .not-found-card-foot {
-    border-top-color: rgba(255, 255, 255, 0.05);
-    color: #34d399;
   }
 
   .not-found-card:hover .not-found-card-foot {
@@ -644,12 +526,6 @@
     border-radius: 8px;
     background: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.05);
-  }
-
-  [data-theme="dark"] .not-found-node-status {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.06);
-    color: #8fa097;
   }
 
   .not-found-node-dot {

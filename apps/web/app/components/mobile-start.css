@@ -105,11 +105,6 @@
       color: #ffffff;
     }
 
-    [data-theme="dark"] .mobile-apple-btn {
-      background: #ffffff;
-      color: #000000;
-    }
-
     .mobile-google-btn {
       background: var(--surface);
       color: var(--text);

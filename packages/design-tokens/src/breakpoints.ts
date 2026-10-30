@@ -4,7 +4,7 @@
 // çünkü en yakın breakpoint'e taşımak yerleşimin kırıldığı genişliği kaydırır).
 // Ölçüm (C2.1b, 2026-10-30): apps/web/app/**/*.css, yorumlar atılmış, @media başına; 64 koşul,
 // 26 farklı küme dışı değer, 20 dosya. Anahtar apps/web/app'e göre yol, query boşlukları
-// tek boşluğa indirilmiş ve küçük harfli @media metnidir.
+// tek boşluğa indirilmiş ve küçük harfli @media metnidir. C4: u/u.css silindi (63 koşul, 19 dosya).
 
 export const BREAKPOINTS = { sm: 640, md: 768, lg: 1024, xl: 1280 } as const;
 
@@ -82,5 +82,4 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
     { query: "(max-width: 1100px)", count: 1 },
     { query: "(max-width: 650px)", count: 1 },
   ],
-  "u/u.css": [{ query: "(max-width: 900px)", count: 1 }],
 };

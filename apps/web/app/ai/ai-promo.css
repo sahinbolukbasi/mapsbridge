@@ -1,23 +1,5 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
-  [data-theme="dark"] {
-    --promo-deep-forest: #f1f5f9;
-    --promo-primary: #34d399;
-    --promo-primary-container: #1e4d3e;
-    --promo-secondary: #286954;
-    --promo-secondary-container: rgba(40, 105, 84, 0.4);
-    --promo-emerald: #10b981;
-    --promo-mint-glow: #34d399;
-    --promo-mint-subtle: rgba(16, 185, 129, 0.12);
-    --promo-canvas-base: #0b1319;
-    --promo-canvas-subtle: #121e25;
-    --promo-surface-card: #16242c;
-    --promo-on-surface: #f1f5f9;
-    --promo-on-surface-variant: #94a3b8;
-    --promo-outline: #64748b;
-    --promo-border-subtle: rgba(51, 65, 85, 0.6);
-  }
-
   .ai-promo-wrapper {
     background: var(--promo-canvas-base);
     color: var(--promo-on-surface);
@@ -42,10 +24,6 @@
     );
     padding: 3.5rem 1.5rem 2.5rem;
     text-align: center;
-  }
-
-  [data-theme="dark"] .ai-promo-hero {
-    background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--promo-canvas-base) 100%);
   }
 
   .ai-promo-hero-inner {
@@ -263,10 +241,6 @@
     flex-direction: column;
     gap: 1.25rem;
     background: rgba(248, 250, 252, 0.7);
-  }
-
-  [data-theme="dark"] .ai-promo-chat-feed {
-    background: rgba(18, 30, 37, 0.6);
   }
 
   .ai-promo-bubble-row {

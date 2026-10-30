@@ -91,7 +91,6 @@ export function HeaderNav({ onOpenSaved, savedCount }: HeaderNavProps) {
     } else {
       setUserEmail(null);
     }
-    document.documentElement.dataset.theme = "light";
     try {
       const stored = userStorage.getItem("mapsbridge.savedAddresses");
       if (stored) {

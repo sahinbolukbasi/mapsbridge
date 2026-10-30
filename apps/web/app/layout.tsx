@@ -64,7 +64,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="en"
-      data-theme="light"
       suppressHydrationWarning
       className={`${inter.variable} ${plusJakartaSans.variable}`}
     >
@@ -74,7 +73,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var p=location.pathname;if(p!='/en'&&!p.startsWith('/en/'))document.documentElement.lang='tr';document.documentElement.dataset.theme='light';localStorage.setItem('mapsbridge.theme','light');}catch(e){}})();`,
+            __html: `(function(){try{var p=location.pathname;if(p!='/en'&&!p.startsWith('/en/'))document.documentElement.lang='tr';}catch(e){}})();`,
           }}
         />
         <link

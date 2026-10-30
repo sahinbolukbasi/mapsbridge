@@ -1,25 +1,5 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer legacy {
-  [data-theme="dark"] {
-    color-scheme: dark;
-    --error-bg: #291b2b;
-    --error-border: #7f3445;
-    --on-brand: #121b18;
-    --focus-ring: #b0ddc3;
-    --bg: #121b18; /* Derin Lacivert Gece */
-    --surface: #192620; /* Koyu Lacivert Kartlar */
-    --surface-alt: #22332b; /* Açık Lacivert Zemin */
-    --border: #34483c; /* Lacivert Çerçeve */
-    --border-focus: #8bc9a9;
-    --text: #f8fafc;
-    --text-muted: #94a3b8;
-    --brand: #8bc9a9;
-    --brand-hover: #b0ddc3;
-    --brand-soft: #243c30;
-    --danger: #f87171;
-    --success: #34d399;
-  }
-
   /* ========================================================= */
   /* Global Navigation Bar (Logo + Kodla Bul + Profil Dropdown) */
   /* ========================================================= */
@@ -34,10 +14,6 @@
     transition:
       background-color 0.25s ease,
       border-color 0.25s ease;
-  }
-
-  [data-theme="dark"] .global-header-nav {
-    background: rgba(12, 25, 56, 0.88);
   }
 
   .header-inner {
@@ -246,10 +222,6 @@
     font-weight: 800;
   }
 
-  [data-theme="dark"] .profile-icon {
-    color: #121b18;
-  }
-
   .caret-icon {
     transition: transform 0.2s ease;
     color: var(--text-muted);
@@ -278,11 +250,6 @@
     padding: 0.65rem;
     z-index: 2000;
     animation: dropdown-pop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  [data-theme="dark"] .profile-dropdown-menu,
-  [data-theme="dark"] .panel-profile-dropdown {
-    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
   }
 
   @keyframes dropdown-pop {
@@ -460,10 +427,6 @@
     border: 0;
   }
 
-  [data-theme="dark"] .login-menu-btn {
-    color: #121b18;
-  }
-
   /* ========================================================= */
   /* Mobile-First Responsive Adjustments                        */
   /* ========================================================= */
@@ -529,9 +492,6 @@
   .global-header-nav {
     background: var(--surface);
     backdrop-filter: none;
-  }
-  [data-theme="dark"] .global-header-nav {
-    background: var(--surface);
   }
   .global-header-nav .nav-btn-action {
     border: 0;
@@ -642,11 +602,6 @@
     width: 100%;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
     overflow: hidden;
-  }
-
-  [data-theme="dark"] .modal-card-dialog {
-    background: #0b152d;
-    border-color: #1e3a6e;
   }
 
   .modal-dialog-header {

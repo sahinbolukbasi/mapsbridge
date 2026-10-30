@@ -1,23 +1,5 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
-  [data-theme="dark"] {
-    --mb-forest: #10b981;
-    --mb-forest-hover: #059669;
-    --mb-forest-dark: #f8fafc;
-    --mb-emerald: #34d399;
-    --mb-mint: rgba(16, 185, 129, 0.12);
-    --mb-mint-hover: rgba(16, 185, 129, 0.2);
-    --mb-canvas: #09120e;
-    --mb-canvas-subtle: #11221b;
-    --mb-card: #0e1c16;
-    --mb-border: rgba(45, 78, 65, 0.5);
-    --mb-border-strong: #234235;
-    --mb-text-main: #eef5f1;
-    --mb-text-muted: #8da598;
-    --mb-secondary-container: rgba(16, 185, 129, 0.2);
-    --mb-on-secondary-variant: #6ee7b7;
-  }
-
   .ai-studio-root {
     min-height: 100vh;
     background-color: var(--mb-canvas);
@@ -1442,9 +1424,6 @@
     border-top: 1px solid rgba(226, 232, 240, 0.6);
     flex-wrap: wrap;
   }
-  [data-theme="dark"] .ai-msg-actions-row {
-    border-top-color: rgba(45, 78, 65, 0.4);
-  }
   .ai-msg-action-btn {
     display: inline-flex;
     align-items: center;
@@ -1489,10 +1468,6 @@
     color: #0284c7;
     cursor: pointer;
     transition: all 0.15s ease;
-  }
-  [data-theme="dark"] .ai-followup-chip {
-    color: #38bdf8;
-    background-color: rgba(56, 189, 248, 0.15);
   }
   .ai-followup-chip:hover {
     background-color: rgba(56, 189, 248, 0.2);
@@ -1557,9 +1532,6 @@
     font-size: 0.8rem;
     font-weight: 600;
     color: #dc2626;
-  }
-  [data-theme="dark"] .ai-error-text {
-    color: #f87171;
   }
   .ai-error-actions {
     display: flex;
@@ -1731,9 +1703,6 @@
     border-radius: 8px;
     animation: ai-fade-in 0.5s ease;
   }
-  [data-theme="dark"] .ai-thinking-fact {
-    background-color: rgba(16, 185, 129, 0.1);
-  }
 
   /* ─── Smart Actions ──────────────────────────────────────────────────── */
   .ai-smart-actions {
@@ -1862,14 +1831,6 @@
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
-  }
-  [data-theme="dark"] .ai-contextual-chip {
-    color: #34d399;
-    background-color: rgba(16, 185, 129, 0.1);
-    border-color: rgba(16, 185, 129, 0.25);
-  }
-  [data-theme="dark"] .ai-contextual-chip:hover {
-    background-color: rgba(16, 185, 129, 0.2);
   }
 
   /* ─── Welcome Hub: Destination & Activity Grids ──────────────────────── */

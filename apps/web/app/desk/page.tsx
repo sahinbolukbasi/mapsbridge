@@ -308,7 +308,6 @@ export default function Panel() {
   const [_userHandle, setUserHandle] = useState("gezgin");
   const [_userAvatar, setUserAvatar] = useState("");
   const [_unreadMessagesCount, setUnreadMessagesCount] = useState(0);
-  const [_isDark, setIsDark] = useState(false);
   const { isEnglish } = useLocale();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -529,9 +528,6 @@ export default function Panel() {
     } catch {}
     refreshSession();
 
-    // Theme is always light
-    setIsDark(false);
-    document.documentElement.dataset.theme = "light";
 
     // Language is derived from useLocale() hook
 
@@ -777,8 +773,7 @@ export default function Panel() {
     if (groupItems.length === 0) return;
 
     const featureGroup = L.featureGroup();
-    const isDarkTheme = document.documentElement.dataset.theme === "dark";
-    const lineColor = isDarkTheme ? "#38bdf8" : "#2563eb";
+    const lineColor = "#2563eb";
 
     // 1. Gruptaki tüm durak pinlerini oluştur ve haritaya ekle
     groupItems.forEach((item) => {

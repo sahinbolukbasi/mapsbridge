@@ -57,24 +57,12 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
-  [data-theme="dark"] .mb-upgrade-modal-dialog {
-    background: #0d211a;
-    color: #f1f5f9;
-    box-shadow:
-      0 25px 60px -12px rgba(0, 0, 0, 0.7),
-      0 0 0 1px rgba(16, 185, 129, 0.3);
-  }
-
   .mb-upgrade-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 24px 28px 16px;
     border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  }
-
-  [data-theme="dark"] .mb-upgrade-modal-header {
-    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   .mb-upgrade-modal-title-wrap {
@@ -108,10 +96,6 @@
     margin: 2px 0 0;
   }
 
-  [data-theme="dark"] .mb-upgrade-modal-title-wrap p {
-    color: #94a3b8;
-  }
-
   .mb-upgrade-modal-close-btn {
     background: transparent;
     border: none;
@@ -130,11 +114,6 @@
   .mb-upgrade-modal-close-btn:hover {
     background: rgba(0, 0, 0, 0.05);
     color: #0f172a;
-  }
-
-  [data-theme="dark"] .mb-upgrade-modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
   }
 
   .mb-upgrade-modal-body {
@@ -184,11 +163,6 @@
     border: 1px solid rgba(16, 185, 129, 0.3);
   }
 
-  [data-theme="dark"] .mb-upgrade-status-badge {
-    background: rgba(16, 185, 129, 0.2);
-    color: #34d399;
-  }
-
   /* ── Main Category Tabs ── */
   .mb-upgrade-category-tabs {
     display: flex;
@@ -196,10 +170,6 @@
     padding: 4px;
     border-radius: 14px;
     gap: 4px;
-  }
-
-  [data-theme="dark"] .mb-upgrade-category-tabs {
-    background: rgba(255, 255, 255, 0.06);
   }
 
   .mb-upgrade-cat-tab-btn {
@@ -215,19 +185,10 @@
     transition: all 0.2s ease;
   }
 
-  [data-theme="dark"] .mb-upgrade-cat-tab-btn {
-    color: #94a3b8;
-  }
-
   .mb-upgrade-cat-tab-btn.active {
     background: #ffffff;
     color: #065f46;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  [data-theme="dark"] .mb-upgrade-cat-tab-btn.active {
-    background: #15392e;
-    color: #34d399;
   }
 
   /* ── Cycle Switcher (Monthly / Yearly) ── */
@@ -249,10 +210,6 @@
   .mb-upgrade-cycle-label.active {
     color: #0f172a;
     font-weight: 800;
-  }
-
-  [data-theme="dark"] .mb-upgrade-cycle-label.active {
-    color: #ffffff;
   }
 
   .mb-upgrade-cycle-toggle {
@@ -321,11 +278,6 @@
       box-shadow 0.2s ease;
   }
 
-  [data-theme="dark"] .mb-upgrade-plan-card {
-    background: #102820;
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
   .mb-upgrade-plan-card.highlight {
     border-color: #10b981;
     background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%);
@@ -363,10 +315,6 @@
     font-weight: 700;
     color: #059669;
     margin-top: 4px;
-  }
-
-  [data-theme="dark"] .mb-upgrade-plan-credits {
-    color: #34d399;
   }
 
   .mb-upgrade-plan-price-wrap {
@@ -407,10 +355,6 @@
     color: #334155;
   }
 
-  [data-theme="dark"] .mb-upgrade-plan-features li {
-    color: #cbd5e1;
-  }
-
   .mb-upgrade-feature-check {
     color: #10b981;
     font-weight: 800;
@@ -428,11 +372,6 @@
     transition: all 0.18s ease;
     background: #f1f5f9;
     color: #0f172a;
-  }
-
-  [data-theme="dark"] .mb-upgrade-plan-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
   }
 
   .mb-upgrade-plan-btn.primary {
@@ -475,11 +414,6 @@
     transition: all 0.2s ease;
   }
 
-  [data-theme="dark"] .mb-upgrade-pack-card {
-    background: #102820;
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
   .mb-upgrade-pack-card.popular {
     border-color: #10b981;
     box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.25);
@@ -504,19 +438,11 @@
     letter-spacing: -0.02em;
   }
 
-  [data-theme="dark"] .mb-upgrade-pack-amount {
-    color: #34d399;
-  }
-
   .mb-upgrade-pack-desc {
     font-size: 0.8rem;
     color: #64748b;
     margin-bottom: 16px;
     flex-grow: 1;
-  }
-
-  [data-theme="dark"] .mb-upgrade-pack-desc {
-    color: #94a3b8;
   }
 
   .mb-upgrade-pack-price {
@@ -531,10 +457,6 @@
     color: #64748b;
     text-align: center;
     margin: 0;
-  }
-
-  [data-theme="dark"] .mb-upgrade-footer-note {
-    color: #94a3b8;
   }
 
   .mb-upgrade-alert {

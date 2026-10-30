@@ -1669,11 +1669,6 @@
     border: 1px solid rgba(16, 185, 129, 0.3);
   }
 
-  [data-theme="dark"] .chat-friend-badge {
-    background: rgba(16, 185, 129, 0.2);
-    color: #6ee7b7;
-  }
-
   .chat-interest-tags-wrap {
     display: flex;
     flex-wrap: wrap;
@@ -1846,36 +1841,5 @@
     .chat-stream-scroll {
       padding: 12px;
     }
-  }
-
-  [data-theme="dark"] .chat-page-root {
-    --chat-primary: #9ed9b9;
-    --chat-secondary: #a2cbb5;
-    --chat-mint-subtle: #223d30;
-    --chat-background: #121b18;
-    --chat-surface: #121b18;
-    --chat-surface-card: #192620;
-    --chat-surface-low: #22332b;
-    --chat-surface-container: #293d32;
-    --chat-surface-high: #304638;
-    --chat-on-surface: #eef5f1;
-    --chat-on-surface-variant: #bdcec4;
-    --chat-outline: #9db2a5;
-    --chat-outline-variant: #45604e;
-    --chat-canvas-base: #142019;
-    --chat-canvas-subtle: #192a20;
-    --chat-border-subtle: #34483c;
-  }
-  [data-theme="dark"] .chat-middle-header {
-    background: var(--chat-surface-card);
-  }
-  [data-theme="dark"] .chat-mobile-tabs button[aria-pressed="true"] {
-    color: #123122;
-  }
-  [data-theme="dark"] .chat-stream-scroll {
-    background: var(--chat-canvas-base);
-  }
-  [data-theme="dark"] .chat-msg-avatar.owner {
-    color: #123122;
   }
 }

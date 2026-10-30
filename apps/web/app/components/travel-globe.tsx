@@ -80,7 +80,7 @@ export function TravelGlobe({ addresses }: TravelGlobeProps) {
 
       // 2. Dünya Küresi (Gövde)
       const sphereGrad = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.35, R * 0.1, cx, cy, R);
-      const isDark = document.documentElement.dataset.theme === "dark" || isExpanded;
+      const isDark = isExpanded;
       if (isDark) {
         sphereGrad.addColorStop(0, "#172554");
         sphereGrad.addColorStop(0.65, "#0b1329");
