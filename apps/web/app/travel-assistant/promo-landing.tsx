@@ -222,7 +222,7 @@ export function AIPromoLanding() {
             <span className="ai-promo-stat-pill">
               <span
                 className="material-symbols-outlined"
-                style={{ fontSize: "16px", color: "#10b981" }}
+                style={{ fontSize: "16px", color: "var(--color-accent)" }}
               >
                 bolt
               </span>
@@ -231,7 +231,7 @@ export function AIPromoLanding() {
             <span className="ai-promo-stat-pill">
               <span
                 className="material-symbols-outlined"
-                style={{ fontSize: "16px", color: "#286954" }}
+                style={{ fontSize: "16px", color: "var(--color-link)" }}
               >
                 verified
               </span>
@@ -240,7 +240,7 @@ export function AIPromoLanding() {
             <span className="ai-promo-stat-pill">
               <span
                 className="material-symbols-outlined"
-                style={{ fontSize: "16px", color: "#013628" }}
+                style={{ fontSize: "16px", color: "var(--color-text-brand)" }}
               >
                 sync
               </span>
@@ -276,7 +276,7 @@ export function AIPromoLanding() {
                         width: "6px",
                         height: "6px",
                         borderRadius: "9999px",
-                        background: "#10b981",
+                        background: "var(--color-accent)",
                       }}
                     ></span>
                     Çevrimiçi • Yanıt süresi &lt; 1sn
@@ -312,7 +312,7 @@ export function AIPromoLanding() {
                 <div className="ai-promo-bubble-content">
                   <p style={{ margin: 0 }}>
                     Merhaba! Ben{" "}
-                    <strong style={{ color: "#013628", fontWeight: 700 }}>
+                    <strong style={{ color: "var(--color-text-brand)", fontWeight: 700 }}>
                       MapsBridge AI Seyahat Asistanı
                     </strong>
                     . Aklındaki şehri, gezi süreni ve zevklerini söyle; sana dinlenmeli, yürümeli ve
@@ -416,7 +416,7 @@ export function AIPromoLanding() {
                             width: "8px",
                             height: "8px",
                             borderRadius: "9999px",
-                            background: "#10b981",
+                            background: "var(--color-accent)",
                             animation: "promoPulse 2s infinite",
                           }}
                         ></span>
@@ -431,7 +431,7 @@ export function AIPromoLanding() {
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "14px", color: "#286954" }}
+                          style={{ fontSize: "14px", color: "var(--color-link)" }}
                         >
                           calendar_today
                         </span>{" "}
@@ -441,7 +441,7 @@ export function AIPromoLanding() {
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "14px", color: "#286954" }}
+                          style={{ fontSize: "14px", color: "var(--color-link)" }}
                         >
                           location_on
                         </span>{" "}
@@ -451,7 +451,7 @@ export function AIPromoLanding() {
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "14px", color: "#286954" }}
+                          style={{ fontSize: "14px", color: "var(--color-link)" }}
                         >
                           directions_walk
                         </span>{" "}
@@ -463,7 +463,7 @@ export function AIPromoLanding() {
                       <Link
                         href="/maps/?kod=RM-841"
                         className="ai-promo-sub-btn"
-                        style={{ background: "#1e4d3e", color: "#ffffff", border: "none" }}
+                        style={{ background: "var(--color-brand-hover)", color: "var(--color-on-primary)", border: "none" }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
                           map
@@ -573,7 +573,7 @@ export function AIPromoLanding() {
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "20px", color: "#286954" }}
+                    style={{ fontSize: "20px", color: "var(--color-link)" }}
                   >
                     map
                   </span>
@@ -589,7 +589,7 @@ export function AIPromoLanding() {
                   </h2>
                 </div>
                 <span style={{ fontSize: "12px", color: "var(--promo-on-surface-variant)" }}>
-                  Kod: <strong style={{ color: "#013628", fontWeight: 700 }}>RM-841</strong> • Roma,
+                  Kod: <strong style={{ color: "var(--color-text-brand)", fontWeight: 700 }}>RM-841</strong> • Roma,
                   İtalya
                 </span>
               </div>
@@ -618,7 +618,7 @@ export function AIPromoLanding() {
                     width: "7px",
                     height: "7px",
                     borderRadius: "9999px",
-                    background: "#10b981",
+                    background: "var(--color-accent)",
                     animation: "promoPulse 2s infinite",
                   }}
                 ></span>
@@ -702,7 +702,7 @@ export function AIPromoLanding() {
                 <button type="button" className="ai-promo-sub-btn" onClick={handleCopyCode}>
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "16px", color: "#10b981" }}
+                    style={{ fontSize: "16px", color: "var(--color-accent)" }}
                   >
                     {copiedCode ? "check" : "content_copy"}
                   </span>
@@ -715,7 +715,7 @@ export function AIPromoLanding() {
                 >
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "16px", color: "#286954" }}
+                    style={{ fontSize: "16px", color: "var(--color-link)" }}
                   >
                     download
                   </span>
@@ -752,7 +752,7 @@ export function AIPromoLanding() {
               </div>
               <div className="ai-promo-metric-divider"></div>
               <div className="ai-promo-metric-item">
-                <span className="ai-promo-metric-number" style={{ color: "#10b981" }}>
+                <span className="ai-promo-metric-number" style={{ color: "var(--color-accent)" }}>
                   120+
                 </span>
                 <span className="ai-promo-metric-label">Desteklenen Ülke</span>
@@ -1001,14 +1001,14 @@ export function AIPromoLanding() {
       </section>
 
       {/* ── 5. Bottom Call-to-Action Banner ── */}
-      <section className="ai-promo-cta-banner">
+      <section className="ai-promo-cta-banner" data-surface="inverse">
         <div className="ai-promo-cta-inner">
           <div
             className="ai-promo-badge"
             style={{
-              background: "rgba(255,255,255,0.15)",
-              color: "#ffffff",
-              borderColor: "rgba(255,255,255,0.3)",
+              background: "color-mix(in srgb, var(--color-surface) 15%, transparent)",
+              color: "var(--color-on-primary)",
+              borderColor: "color-mix(in srgb, var(--color-neutral-0) 30%, transparent)",
             }}
           >
             ✨ MapsBridge AI Seyahat Platformu

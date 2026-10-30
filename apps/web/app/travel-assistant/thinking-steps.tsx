@@ -116,7 +116,7 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
         <div className="ai-thinking-fact" key={factIndex}>
           <span
             className="material-symbols-outlined"
-            style={{ fontSize: "13px", color: "#10b981" }}
+            style={{ fontSize: "13px", color: "var(--color-accent)" }}
           >
             lightbulb
           </span>

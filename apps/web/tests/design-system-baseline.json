@@ -24,24 +24,21 @@
     "app/register/register.css": 10,
     "app/reset-password/reset-password.css": 24,
     "app/styles.css": 10,
-    "app/travel-assistant/assistant.css": 129,
-    "app/travel-assistant/promo-landing.css": 52,
+    "app/travel-assistant/assistant.css": 33,
+    "app/travel-assistant/promo-landing.css": 7,
     "app/tw-utils.css": 38,
     "app/welcome/welcome.css": 6
   },
   "G4": {
     "app/articles/page.tsx": 1,
-    "app/maps/maps-client.tsx": 1,
-    "app/travel-assistant/travel-assistant-client.tsx": 1
+    "app/maps/maps-client.tsx": 1
   },
   "G4m": {
     "app/articles/page.tsx": 1,
-    "app/maps/maps-client.tsx": 1,
-    "app/travel-assistant/travel-assistant-client.tsx": 2
+    "app/maps/maps-client.tsx": 1
   },
   "G5": {
-    "app/components/trip/mobile-pin-sheet.tsx": 1,
-    "app/travel-assistant/travel-assistant-client.tsx": 3
+    "app/components/trip/mobile-pin-sheet.tsx": 1
   },
   "G6": {
     "app/components/soft-icon.tsx": 8,
@@ -92,19 +89,15 @@
     "app/profile/photo/page.tsx": 14,
     "app/register/page.tsx": 1,
     "app/reset-password/page.tsx": 9,
-    "app/travel-assistant/loading.tsx": 3,
-    "app/travel-assistant/promo-landing.tsx": 20,
-    "app/travel-assistant/smart-actions.tsx": 1,
-    "app/travel-assistant/thinking-steps.tsx": 1,
-    "app/travel-assistant/travel-affiliate-cards.tsx": 16,
-    "app/travel-assistant/travel-assistant-client.tsx": 62
+    "app/travel-assistant/loading.tsx": 1,
+    "app/travel-assistant/travel-affiliate-cards.tsx": 15,
+    "app/travel-assistant/travel-assistant-client.tsx": 32
   },
   "G8": {
     "app/styles.css": 3
   },
   "G10": {
-    "app/articles/page.tsx": 1,
-    "app/travel-assistant/travel-assistant-client.tsx": 1
+    "app/articles/page.tsx": 1
   },
   "G11": {
     "app/checkout/checkout.css": 1,

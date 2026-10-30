@@ -67,7 +67,7 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
   return (
     <div className="tp-affiliate-bundle" aria-label="Seyahat fırsatları">
       <div className="tp-bundle-header">
-        <span className="material-symbols-outlined" style={{ fontSize: "15px", color: "#10b981" }}>
+        <span className="material-symbols-outlined" style={{ fontSize: "15px", color: "var(--color-accent)" }}>
           sell
         </span>
         <span>

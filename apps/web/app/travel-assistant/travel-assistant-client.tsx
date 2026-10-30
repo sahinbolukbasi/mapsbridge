@@ -22,7 +22,7 @@ import { tripToMarkdown, saveTripMarkdown } from "../lib/trip/trip-markdown";
 import type { Trip, Pin } from "../lib/trip/models";
 import { interactionTracker } from "../lib/analytics/tracker";
 import { AIPromoLanding } from "./promo-landing";
-import { PageHeader } from "../components/ui";
+import { PageHeader, PageShell } from "../components/ui";
 import { DealTrackerPanel } from "../components/tracker/deal-tracker-panel";
 import "./assistant.css";
 import { AssistantMessage } from "./assistant-message";
@@ -868,6 +868,7 @@ export default function AIPage() {
 
   if (isAuthenticated === null) {
     return (
+      <PageShell layout="app" className="ai-studio-shell">
       <div
         className="ai-studio-root"
         style={{
@@ -875,18 +876,19 @@ export default function AIPage() {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          background: "#0a0f1d",
+          background: "var(--color-neutral-900)",
         }}
       >
-        <main
+        <div
           className="ai-studio-main"
           style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
           <PageHeader variant="hidden" />
           <div className="ai-thinking-dot" style={{ width: "2rem", height: "2rem" }} />
-        </main>
+        </div>
       </div>
+      </PageShell>
     );
   }
 
@@ -895,8 +897,11 @@ export default function AIPage() {
   }
 
   return (
+    <PageShell layout="app" className="ai-studio-shell">
     <div className="ai-studio-root">
-      <main className="ai-studio-main">
+      <div className="ai-studio-main">
+        {/* AC-34: tek h1 "Seyahat asistanı" (registry, görsel olarak gizli); marka satırı <p>. */}
+        <PageHeader variant="hidden" />
         <div className={`ai-studio-workspace ${panelWide ? "ai-panel-wide" : ""}`}>
           <aside className="ai-studio-aside-left" aria-label="Sohbetler">
             <div>
@@ -994,7 +999,7 @@ export default function AIPage() {
             </div>
           </aside>
           <section className="ai-studio-chat-section" aria-label="Seyahat sohbeti">
-            <header className="ai-chat-header">
+            <div className="ai-chat-header">
               <div className="ai-chat-header-brand">
                 <div className="ai-chat-brand-icon">
                   <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
@@ -1003,7 +1008,7 @@ export default function AIPage() {
                 </div>
                 <div>
                   <div className="ai-chat-brand-title-row">
-                    <h1 className="ai-chat-title">MapsBridge AI</h1>
+                    <p className="ai-chat-title">MapsBridge AI</p>
                     <span className="ai-online-dot" aria-label="Çevrimiçi" />
                   </div>
                   <span className="ai-muted" style={{ fontSize: "11.5px" }}>
@@ -1030,7 +1035,7 @@ export default function AIPage() {
                   </span>
                 </button>
               </div>
-            </header>
+            </div>
 
             {session?.context && (
               <div className="ai-context-strip" aria-label="Gezi tercihleri">
@@ -1043,10 +1048,10 @@ export default function AIPage() {
             )}
             {(memory.interests.length > 0 || memory.destinations.length > 0 || memory.budgetHabit) && (
               <div className="ai-user-memory-strip" aria-label="Kullanıcı hafızası">
-                <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#10b981" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "var(--color-accent)" }}>
                   psychology
                 </span>
-                <span style={{ fontWeight: 600, color: "#059669" }}>Seni tanıyorum:</span>
+                <span style={{ fontWeight: 600, color: "var(--color-success-strong)" }}>Seni tanıyorum:</span>
                 {memory.destinations.slice(-2).map((d) => (
                   <span key={d} className="ai-user-memory-pill">{d}</span>
                 ))}
@@ -1218,7 +1223,7 @@ export default function AIPage() {
                           >
                             <span
                               className="material-symbols-outlined"
-                              style={{ fontSize: "13px", color: "#10b981" }}
+                              style={{ fontSize: "13px", color: "var(--color-accent)" }}
                             >
                               map
                             </span>
@@ -1252,8 +1257,8 @@ export default function AIPage() {
                             marginTop: "0.55rem",
                             padding: "0.55rem 0.7rem",
                             borderRadius: "10px",
-                            background: "rgba(16,185,129,0.08)",
-                            border: "1px solid rgba(16,185,129,0.2)",
+                            background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+                            border: "1px solid var(--color-accent-a20)",
                           }}
                         >
                           <div
@@ -1322,7 +1327,7 @@ export default function AIPage() {
                                 fontSize: "11.5px",
                                 padding: "3px 9px",
                                 borderRadius: "12px",
-                                background: "rgba(56,189,248,0.1)",
+                                background: "color-mix(in srgb, var(--color-accent-sky-soft) 10%, transparent)",
                                 border: "1px solid rgba(56,189,248,0.3)",
                                 color: "#38bdf8",
                               }}
@@ -1343,8 +1348,8 @@ export default function AIPage() {
                             fontSize: "11.5px",
                             padding: "3px 9px",
                             borderRadius: "12px",
-                            background: "rgba(148,163,184,0.08)",
-                            border: "1px solid rgba(148,163,184,0.25)",
+                            background: "color-mix(in srgb, var(--color-neutral-400) 8%, transparent)",
+                            border: "1px solid color-mix(in srgb, var(--color-neutral-400) 25%, transparent)",
                             color: "#94a3b8",
                           }}
                           onClick={() => {
@@ -1656,7 +1661,7 @@ export default function AIPage() {
                 <div className="ai-composer-credits-pill">
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "15px", color: "#10b981" }}
+                    style={{ fontSize: "15px", color: "var(--color-accent)" }}
                   >
                     bolt
                   </span>
@@ -1698,7 +1703,7 @@ export default function AIPage() {
               className={`ai-studio-aside-right ${mobileTab === "draft" ? "mobile-visible" : ""}`}
               aria-label="Oluşturulan rota"
             >
-              <header className="ai-draft-header">
+              <div className="ai-draft-header">
                 <strong>Oluşturulan rota</strong>
                 <div className="ai-header-actions">
                   <button
@@ -1719,7 +1724,7 @@ export default function AIPage() {
                     Kapat
                   </button>
                 </div>
-              </header>
+              </div>
               {!route ? (
                 <div className="ai-route-empty">
                   <span className="material-symbols-outlined">map</span>
@@ -1737,27 +1742,37 @@ export default function AIPage() {
                   </div>
                   <div
                     className="ai-day-tabs-bar"
+                    role="group"
+                    aria-label="Taslak bölümleri"
                     style={{ marginBottom: "0.5rem", flexWrap: "wrap", gap: "4px" }}
                   >
                     <button
+                      type="button"
+                      aria-pressed={draftTab === "route"}
                       className={`ai-day-tab-btn ${draftTab === "route" ? "active" : ""}`}
                       onClick={() => setDraftTab("route")}
                     >
                       🗺️ Duraklar
                     </button>
                     <button
+                      type="button"
+                      aria-pressed={draftTab === "stay"}
                       className={`ai-day-tab-btn ${draftTab === "stay" ? "active" : ""}`}
                       onClick={() => setDraftTab("stay")}
                     >
                       🏨 Konaklama
                     </button>
                     <button
+                      type="button"
+                      aria-pressed={draftTab === "discovery"}
                       className={`ai-day-tab-btn ${draftTab === "discovery" ? "active" : ""}`}
                       onClick={() => setDraftTab("discovery")}
                     >
                       ✨ Keşif
                     </button>
                     <button
+                      type="button"
+                      aria-pressed={draftTab === "flights"}
                       className={`ai-day-tab-btn ${draftTab === "flights" ? "active" : ""}`}
                       onClick={() => setDraftTab("flights")}
                     >
@@ -1767,6 +1782,8 @@ export default function AIPage() {
                         : ""}
                     </button>
                     <button
+                      type="button"
+                      aria-pressed={draftTab === "advisory"}
                       className={`ai-day-tab-btn ${draftTab === "advisory" ? "active" : ""}`}
                       onClick={() => setDraftTab("advisory")}
                     >
@@ -1776,6 +1793,8 @@ export default function AIPage() {
                         : ""}
                     </button>
                     <button
+                      type="button"
+                      aria-pressed={draftTab === "emergency"}
                       className={`ai-day-tab-btn ${draftTab === "emergency" ? "active" : ""}`}
                       onClick={() => setDraftTab("emergency")}
                     >
@@ -1788,6 +1807,8 @@ export default function AIPage() {
                         {Array.from({ length: route.estimatedDays }, (_, i) => (
                           <button
                             key={i}
+                            type="button"
+                            aria-pressed={day === i + 1}
                             className={`ai-day-tab-btn ${day === i + 1 ? "active" : ""}`}
                             onClick={() => setDay(i + 1)}
                           >
@@ -2093,8 +2114,8 @@ export default function AIPage() {
                               padding: "0.75rem 1rem",
                               borderRadius: "12px",
                               background:
-                                "linear-gradient(135deg,rgba(16,185,129,0.12),rgba(56,189,248,0.08))",
-                              border: "1px solid rgba(16,185,129,0.3)",
+                                "linear-gradient(135deg,color-mix(in srgb, var(--color-accent) 12%, transparent),color-mix(in srgb, var(--color-accent-sky-soft) 8%, transparent))",
+                              border: "1px solid var(--color-accent-a30)",
                             }}
                           >
                             <div
@@ -2148,8 +2169,8 @@ export default function AIPage() {
                                     style={{
                                       padding: "0.75rem 1rem",
                                       borderRadius: "10px",
-                                      background: "rgba(16,185,129,0.06)",
-                                      border: "1px solid rgba(16,185,129,0.2)",
+                                      background: "color-mix(in srgb, var(--color-accent) 6%, transparent)",
+                                      border: "1px solid var(--color-accent-a20)",
                                       cursor: "pointer",
                                       transition: "border-color 0.2s",
                                     }}
@@ -2201,7 +2222,7 @@ export default function AIPage() {
                                             fontSize: "11px",
                                             padding: "2px 8px",
                                             borderRadius: "6px",
-                                            background: "rgba(16,185,129,0.15)",
+                                            background: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
                                             color: "var(--mb-emerald)",
                                             fontWeight: 600,
                                           }}
@@ -2228,12 +2249,12 @@ export default function AIPage() {
                                 marginTop: "12px",
                                 padding: "12px",
                                 borderRadius: "12px",
-                                background: "linear-gradient(135deg,#10b981,#0ea5e9)",
-                                color: "#fff",
+                                background: "linear-gradient(135deg,var(--color-accent),var(--color-accent-sky-soft))",
+                                color: "var(--color-on-primary)",
                                 fontWeight: 700,
                                 fontSize: "14px",
                                 textDecoration: "none",
-                                boxShadow: "0 2px 12px rgba(16,185,129,0.3)",
+                                boxShadow: "0 2px 12px var(--color-accent-a30)",
                               }}
                             >
                               ✈️ Tüm Uçuşları Karşılaştır
@@ -2339,7 +2360,7 @@ export default function AIPage() {
                               className="ai-stop-card"
                               style={{
                                 marginBottom: "8px",
-                                background: "rgba(56,189,248,0.06)",
+                                background: "color-mix(in srgb, var(--color-accent-sky-soft) 6%, transparent)",
                                 border: "1px solid rgba(56,189,248,0.2)",
                               }}
                             >
@@ -2511,7 +2532,7 @@ export default function AIPage() {
                       )}
                     </div>
                   )}
-                  <footer className="ai-draft-footer-actions">
+                  <div className="ai-draft-footer-actions">
                     <p className="ai-muted">
                       Değişiklik için sohbete yaz: “İkinci güne kahve ekle” veya “Daha sakin olsun”.
                     </p>
@@ -2526,13 +2547,13 @@ export default function AIPage() {
                         Metin olarak indir
                       </button>
                     </div>
-                  </footer>
+                  </div>
                 </>
               )}
             </aside>
           )}
         </div>
-      </main>
+      </div>
 
       {/* Seyahat Manifestosu (.md) Modalı */}
       {showManifestoModal && (
@@ -2554,8 +2575,8 @@ export default function AIPage() {
         >
           <div
             style={{
-              backgroundColor: "#111927",
-              border: "1px solid rgba(51, 65, 85, 0.8)",
+              backgroundColor: "var(--color-neutral-900)",
+              border: "1px solid color-mix(in srgb, var(--color-neutral-700) 80%, transparent)",
               borderRadius: "16px",
               width: "100%",
               maxWidth: "640px",
@@ -2572,8 +2593,8 @@ export default function AIPage() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "1rem 1.5rem",
-                borderBottom: "1px solid #1e293b",
-                backgroundColor: "#0d1424",
+                borderBottom: "1px solid var(--color-neutral-800)",
+                backgroundColor: "var(--color-neutral-900)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -2616,10 +2637,10 @@ export default function AIPage() {
               </p>
               <pre
                 style={{
-                  backgroundColor: "#0b101c",
+                  backgroundColor: "var(--color-neutral-900)",
                   padding: "12px",
                   borderRadius: "10px",
-                  border: "1px solid #1e293b",
+                  border: "1px solid var(--color-neutral-800)",
                   fontSize: "11.5px",
                   fontFamily: "monospace",
                   color: "#e2e8f0",
@@ -2641,8 +2662,8 @@ export default function AIPage() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "0.85rem 1.5rem",
-                borderTop: "1px solid #1e293b",
-                backgroundColor: "#0d1424",
+                borderTop: "1px solid var(--color-neutral-800)",
+                backgroundColor: "var(--color-neutral-900)",
                 flexWrap: "wrap",
                 gap: "8px",
               }}
@@ -2653,7 +2674,7 @@ export default function AIPage() {
                   style={{
                     fontSize: "12px",
                     fontWeight: 600,
-                    color: "#34d399",
+                    color: "var(--color-accent-strong)",
                     textDecoration: "none",
                     display: "flex",
                     alignItems: "center",
@@ -2774,5 +2795,6 @@ export default function AIPage() {
         nextUrl="/travel-assistant/"
       />
     </div>
+    </PageShell>
   );
 }

@@ -8,7 +8,7 @@ export default function TravelAssistantLoading() {
         alignItems: "center",
         justifyContent: "center",
         gap: 16,
-        background: "#0a0f1d",
+        background: "var(--color-neutral-900)",
       }}
     >
       <span
@@ -17,7 +17,7 @@ export default function TravelAssistantLoading() {
       >
         neurology
       </span>
-      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Loading assistant…</div>
+      <div style={{ color: "color-mix(in srgb, var(--color-on-primary) 40%, transparent)", fontSize: 14 }}>Loading assistant…</div>
     </div>
   );
 }
