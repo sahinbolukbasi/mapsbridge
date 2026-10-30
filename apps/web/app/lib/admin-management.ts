@@ -1,22 +1,10 @@
-import { apiFetch } from "./api-client";
-export type AdminSession = {
-  userId: string;
-  role: "admin" | "moderator" | "support";
-  permissions: string[];
-  paymentsConfigured: boolean;
-  userManagement: boolean;
-};
+// Yönetim paneli CSV yardımcıları. Uç nokta çağrıları tipli istemcidedir (lib/admin/client.ts,
+// design §8.2); tipsiz managementApi C16'da kaldırıldı.
+
 // Admin paneli backend'den gelen heterojen (şema-esnek) kayıtları işler.
 // Index signature + any: dinamik alan erişimine izin verir, runtime davranışı değişmez.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ManagedRecord = Record<string, any>;
-export const managementApi = {
-  session: () => apiFetch<{ session: AdminSession }>("/admin/session"),
-  list: (section: string) => apiFetch<Record<string, ManagedRecord[]>>(`/admin/${section}`),
-  user: (id: string) => apiFetch<ManagedRecord>(`/admin/users/${encodeURIComponent(id)}`),
-  save: (path: string, data: ManagedRecord) =>
-    apiFetch<ManagedRecord>(`/admin/${path}`, { method: "POST", body: JSON.stringify(data) }),
-};
 export function csvText(records: ManagedRecord[], columns: string[]): string {
   const cell = (value: unknown) => {
     let text =

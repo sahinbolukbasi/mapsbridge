@@ -13,14 +13,17 @@ vm.runInNewContext(
   {
     module: moduleUnderTest,
     exports: moduleUnderTest.exports,
-    require: () => ({
-      apiFetch() {
-        throw new Error("No network expected");
-      },
-    }),
+    require: () => {
+      throw new Error("admin-management.ts import içermemeli (C16: managementApi kaldırıldı)");
+    },
   },
 );
-const { csvText } = moduleUnderTest.exports;
+const { csvText, download, managementApi } = moduleUnderTest.exports;
+test("tipsiz managementApi kaldırıldı; csvText ve download korunur (design §8.2, C16)", () => {
+  assert.equal(managementApi, undefined);
+  assert.equal(typeof csvText, "function");
+  assert.equal(typeof download, "function");
+});
 test("admin CSV export neutralizes spreadsheet formulas without corrupting quoted text", () => {
   const output = csvText(
     [{ name: '=HYPERLINK("bad")', note: 'He said "hello"\nagain', value: -3 }],

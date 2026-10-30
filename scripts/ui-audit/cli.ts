@@ -90,7 +90,11 @@ function list(value: string | undefined, fallback: string[]): string[] {
 
 function normalizeRoute(r: string): string {
   const withLead = r.startsWith("/") ? r : `/${r}`;
-  return withLead.endsWith("/") ? withLead : `${withLead}/`;
+  // Query'li rota (ör. /u/admin/?alan=finans): eğik çizgi path'e eklenir, query korunur.
+  const q = withLead.indexOf("?");
+  const pathPart = q < 0 ? withLead : withLead.slice(0, q);
+  const query = q < 0 ? "" : withLead.slice(q);
+  return (pathPart.endsWith("/") ? pathPart : `${pathPart}/`) + query;
 }
 
 function writeJson(file: string, data: unknown): void {
