@@ -1,0 +1,92 @@
+{
+  "_note": "ui-audit --leaflet /maps/ seed'i (design §2.6 Kapsam). scoped anahtarlar lib/user-storage.ts:5-16 biçimine (mapsbridge.account.<encodeURIComponent(e-posta küçük harf)>.<anahtar>) çevrilir, plain anahtarlar birebir yazılır. Değerler lib/trip/models.ts (Trip, TripDay, Pin) ve desk/page.tsx SavedAddress tiplerine uyar. Planlayıcı pin'leri desk'te lib/trip/use-travel-planner.ts 'mapsbridge.travelPlanner.v5' anahtarından okunur.",
+  "scoped": {
+    "mapsbridge.savedAddresses": [
+      {
+        "id": "ui-audit-addr-1",
+        "label": "Galata Kulesi",
+        "address": "Bereketzade, Galata Kulesi, 34421 Beyoğlu/İstanbul",
+        "lat": 41.0256,
+        "lng": 28.9741,
+        "group": "Genel",
+        "category": "genel",
+        "visited": false,
+        "order": 1
+      },
+      {
+        "id": "ui-audit-addr-2",
+        "label": "Karaköy İskelesi",
+        "address": "Kemankeş Karamustafa Paşa, 34425 Beyoğlu/İstanbul",
+        "lat": 41.0222,
+        "lng": 28.9772,
+        "group": "Genel",
+        "category": "genel",
+        "visited": true,
+        "order": 2
+      }
+    ]
+  },
+  "plain": {
+    "mapsbridge.travelPlanner.v5": [
+      {
+        "id": "trip-ui-audit",
+        "title": "Denetim Gezisi",
+        "destination": "İstanbul",
+        "transportMode": "walking",
+        "isPublic": false,
+        "groups": [],
+        "days": [
+          {
+            "dayIndex": 1,
+            "label": "1. Gün",
+            "color": "#2563eb",
+            "subtitle": "Keşif Başlangıcı",
+            "startTime": "09:00",
+            "pins": []
+          }
+        ],
+        "pins": [
+          {
+            "id": "ui-audit-pin-1",
+            "label": "Ayasofya",
+            "address": "Sultan Ahmet, Ayasofya Meydanı No:1, 34122 Fatih/İstanbul",
+            "lat": 41.0086,
+            "lng": 28.9802,
+            "category": "muze",
+            "dayIndex": 1,
+            "order": 1,
+            "group": "",
+            "visited": false,
+            "durationMinutes": 60
+          },
+          {
+            "id": "ui-audit-pin-2",
+            "label": "Sultanahmet Camii",
+            "address": "Sultan Ahmet, Atmeydanı Cd. No:7, 34122 Fatih/İstanbul",
+            "lat": 41.0054,
+            "lng": 28.9768,
+            "category": "muze",
+            "dayIndex": 1,
+            "order": 2,
+            "group": "",
+            "visited": false,
+            "durationMinutes": 45
+          },
+          {
+            "id": "ui-audit-pin-3",
+            "label": "Kapalıçarşı",
+            "address": "Beyazıt, Kalpakçılar Cd. No:22, 34126 Fatih/İstanbul",
+            "lat": 41.0107,
+            "lng": 28.968,
+            "category": "genel",
+            "dayIndex": 1,
+            "order": 3,
+            "group": "",
+            "visited": false,
+            "durationMinutes": 90
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -4,6 +4,7 @@
  */
 import { fileURLToPath } from "node:url";
 import { decide } from "./route-policy.ts";
+import { unwrapLayers } from "./unlayer.ts";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
@@ -33,6 +34,10 @@ export interface ScanOptions {
   sessionToken: string | null;
   sessionEmail: string;
   sessionAll: boolean;
+  /** K1 (design §2.6): yerel _next/static CSS yanıtlarını @layer sarmaları açılmış servis et. */
+  unlayer?: boolean;
+  /** `unlayer` modunda servis edilemeyen CSS URL'leri (ölümcül; çağıran exit 1 döner). */
+  unlayerErrors?: string[];
 }
 
 interface RuntimeChrome {
@@ -96,7 +101,7 @@ export function fakeJwt(email: string): string {
   ].join(".");
 }
 
-async function prepareContext(
+export async function prepareContext(
   ctx: BrowserContext,
   opts: ScanOptions,
   withSession: boolean,
@@ -132,7 +137,23 @@ async function prepareContext(
       baseOrigin: base.origin,
       allowExternal: Boolean(opts.allowExternal),
       leafletDist: LEAFLET_DIST,
+      unlayer: Boolean(opts.unlayer),
     });
+    if (decision.action === "fulfill-unlayered") {
+      try {
+        const resp = await route.fetch();
+        const body = unwrapLayers(await resp.text());
+        const headers = { ...resp.headers() };
+        delete headers["content-length"];
+        delete headers["content-encoding"];
+        await route.fulfill({ status: resp.status(), headers, body });
+      } catch {
+        opts.unlayerErrors?.push(url);
+        console.error(`Katmansız CSS servis edilemedi: ${url}`);
+        await route.abort("failed");
+      }
+      return;
+    }
     if (decision.action === "continue") await route.continue();
     else if (decision.action === "fulfill-file") await route.fulfill({ path: decision.path });
     else await route.abort("blockedbyclient");

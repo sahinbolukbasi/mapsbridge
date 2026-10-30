@@ -50,6 +50,30 @@ test("diğer external istekler ve dizin kaçışları engellenir", () => {
   });
 });
 
+test("unlayer: yerel _next/static CSS katmansız servis edilir (Rev 6 K1)", () => {
+  assert.deepEqual(decide("http://127.0.0.1:4100/_next/static/chunks/a.css", { unlayer: true }), {
+    action: "fulfill-unlayered",
+  });
+});
+
+test("unlayer: yerel .js isteği devam eder", () => {
+  assert.deepEqual(decide("http://127.0.0.1:4100/_next/static/chunks/a.js", { unlayer: true }), {
+    action: "continue",
+  });
+});
+
+test("unlayer: başka origin'deki .css engellenir", () => {
+  assert.deepEqual(decide("https://example.com/_next/static/chunks/a.css", { unlayer: true }), {
+    action: "abort",
+  });
+});
+
+test("unlayer kapalıyken yerel .css devam eder", () => {
+  assert.deepEqual(decide("http://127.0.0.1:4100/_next/static/chunks/a.css", { unlayer: false }), {
+    action: "continue",
+  });
+});
+
 test("--allow-external her şeye izin verir", () => {
   assert.deepEqual(decide("https://example.com/x", { allowExternal: true }), {
     action: "continue",

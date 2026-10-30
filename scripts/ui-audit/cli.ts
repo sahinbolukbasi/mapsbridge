@@ -3,19 +3,30 @@
  *
  *   npm run ui:audit -- --metrics [--out metrics.json]
  *   npm run ui:audit -- --screenshots <dir> --axe-out <file.json> [--base-url http://localhost:3000]
+ *   npm run ui:audit -- --leaflet <snapshot.json> [--unlayer] [--session-all] [--out-dir <out>]
+ *   npm run ui:audit -- --leaflet-compare <a.json> <b.json> --mode cascade|commits --report <rapor.json>
+ *   npm run ui:audit -- --compare <before-dir> <after-dir> [--out compare.html]
  *
  * Varsayılan olarak apps/web/out statik export'unu 127.0.0.1'de sunar (önce `npm run build`).
  * Ayrıntılı seçenekler: `npm run ui:audit -- --help`.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { basename, dirname, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
+import { runLeaflet } from "./checks.ts";
+import {
+  compareLeaflet,
+  LeafletCompareError,
+  summarize,
+  type ExpectedChange,
+} from "./leaflet-compare.ts";
 import { collectMetrics } from "./metrics.ts";
 import { allRoutes, discoverPages } from "./routes.ts";
 import { PROD_API_ORIGIN, runScan } from "./scan.ts";
 import { serveStatic } from "./static-server.ts";
 
 const WEB_ROOT = resolve(import.meta.dirname, "../../apps/web");
+const FIXTURES = resolve(import.meta.dirname, "fixtures");
 
 const HELP = `MapsBridge UI denetimi
 
@@ -25,9 +36,21 @@ Kullanım:
 Modlar:
   --metrics                 Statik CSS/sayfa metriklerini JSON olarak yazdır (tarayıcı yok)
   (varsayılan)              Tüm rotaları ziyaret et: ekran görüntüsü + axe taraması
+  --leaflet <dosya>         Leaflet anlık görüntüsü (/gezgin/ popup + /maps/ marker'ları, schema 2)
+                            dosyaya yazılır. Adım zaman aşımı ya da marker/popup yoksa exit 1
+  --unlayer                 Yalnızca --leaflet ile: yerel _next/static CSS'i @layer sarmaları
+                            açılmış servis edilir (K1 kaskad eşdeğerliği)
+  --leaflet-compare <a> <b> İki anlık görüntüyü karşılaştır; fail varsa exit 1
+  --mode <cascade|commits>  --leaflet-compare modu: cascade = K1 (aynı build, layer'lı ↔
+                            layer'sız), commits = K2/K3 (iki layer'lı anlık görüntü)
+  --report <dosya>          --leaflet-compare JSON raporu
+  --expected-changes <dosya> K2 beklenen değişiklikler (varsayılan
+                            scripts/ui-audit/fixtures/leaflet-expected-changes.json)
+  --compare <önce> <sonra>  İki ekran görüntüsü dizinini yan yana gösteren statik HTML raporu
+                            (yalnızca <img>; varsayılan <sonra>/../compare.html, --out ile değişir)
 
 Seçenekler:
-  --out <dosya>             --metrics çıktısını dosyaya da yaz
+  --out <dosya>             --metrics çıktısını (ya da --compare raporunu) dosyaya yaz
   --base-url <url>          Çalışan sunucu (ör. http://localhost:3000). Yoksa apps/web/out sunulur
   --out-dir <dizin>         Statik export dizini (varsayılan apps/web/out)
   --screenshots <dizin>     Ekran görüntüsü dizini (varsayılan .agents/ui-audit/latest/screenshots)
@@ -71,9 +94,17 @@ function writeJson(file: string, data: unknown): void {
 }
 
 async function main(): Promise<void> {
-  const { values } = parseArgs({
+  const { values, positionals } = parseArgs({
+    allowPositionals: true,
     options: {
       metrics: { type: "boolean", default: false },
+      leaflet: { type: "string" },
+      unlayer: { type: "boolean", default: false },
+      "leaflet-compare": { type: "string" },
+      mode: { type: "string" },
+      report: { type: "string" },
+      "expected-changes": { type: "string" },
+      compare: { type: "string" },
       out: { type: "string" },
       "base-url": { type: "string" },
       "out-dir": { type: "string" },
@@ -99,6 +130,99 @@ async function main(): Promise<void> {
 
   if (values.help) {
     process.stdout.write(HELP);
+    return;
+  }
+
+  if (values.unlayer && !values.leaflet) {
+    console.error("--unlayer yalnızca --leaflet ile birlikte kullanılabilir.");
+    process.exit(1);
+  }
+
+  if (values["leaflet-compare"]) {
+    if (positionals.length !== 1) {
+      console.error(
+        "Kullanım: --leaflet-compare <a.json> <b.json> --mode cascade|commits --report <rapor.json>",
+      );
+      process.exit(1);
+    }
+    runLeafletCompare(
+      resolve(values["leaflet-compare"]),
+      resolve(positionals[0]),
+      values.mode,
+      values.report ? resolve(values.report) : null,
+      resolve(values["expected-changes"] ?? `${FIXTURES}/leaflet-expected-changes.json`),
+    );
+    return;
+  }
+
+  if (values.compare) {
+    if (positionals.length !== 1) {
+      console.error("Kullanım: --compare <önce-dizini> <sonra-dizini> [--out compare.html]");
+      process.exit(1);
+    }
+    const before = resolve(values.compare);
+    const after = resolve(positionals[0]);
+    const out = resolve(values.out ?? `${dirname(after)}/compare.html`);
+    writeCompareHtml(before, after, out);
+    console.error(`[ui-audit] karşılaştırma raporu: ${out}`);
+    return;
+  }
+
+  if (positionals.length) {
+    console.error(`Beklenmeyen argüman: ${positionals.join(" ")} (bkz. --help)`);
+    process.exit(1);
+  }
+
+  if (values.leaflet) {
+    const outDir = resolve(values["out-dir"] ?? `${WEB_ROOT}/out`);
+    const server = await serveStatic(outDir);
+    const unlayerErrors: string[] = [];
+    const sessionEmail = values["session-email"] ?? "admin@example.com";
+    console.error(
+      `[ui-audit] Leaflet anlık görüntüsü · ${server.url} · ${outDir}${values.unlayer ? " · katmansız" : ""}`,
+    );
+    try {
+      const snapshot = await runLeaflet({
+        outDir,
+        seedFile: `${FIXTURES}/workspace.json`,
+        scan: {
+          baseUrl: server.url,
+          routes: [],
+          widths: [1280],
+          axeWidth: 1280,
+          screenshotsDir: null,
+          runAxe: false,
+          concurrency: 1,
+          settleMs: 0,
+          allowExternal: values["allow-external"] === true,
+          adminApi: null,
+          apiOrigins: [PROD_API_ORIGIN, ...(values["api-origin"] ?? [])],
+          sessionToken: values["session-token"] ?? null,
+          sessionEmail,
+          sessionAll: values["session-all"] === true,
+          unlayer: values.unlayer === true,
+          unlayerErrors,
+        },
+      });
+      if (unlayerErrors.length) {
+        for (const u of unlayerErrors) console.error(`Katmansız CSS servis edilemedi: ${u}`);
+        process.exit(1);
+      }
+      writeJson(resolve(values.leaflet), snapshot);
+      const counts = Object.entries(snapshot.scenarios)
+        .map(([k, v]) => `${k} ${v.length} öğe`)
+        .join(", ");
+      console.error(
+        `[ui-audit] Leaflet anlık görüntüsü yazıldı: ${values.leaflet} (buildId ${snapshot.build.buildId ?? "yok"}; ${counts})`,
+      );
+    } catch (err) {
+      console.error(
+        `[ui-audit] Leaflet anlık görüntüsü geçersiz: ${err instanceof Error ? err.message : err}`,
+      );
+      process.exit(1);
+    } finally {
+      await server.close();
+    }
     return;
   }
 
@@ -159,6 +283,93 @@ async function main(): Promise<void> {
   } finally {
     await server?.close();
   }
+}
+
+function runLeafletCompare(
+  aPath: string,
+  bPath: string,
+  mode: string | undefined,
+  reportPath: string | null,
+  expectedPath: string,
+): void {
+  if (mode !== "cascade" && mode !== "commits") {
+    console.error("--mode cascade ya da commits olmalı.");
+    process.exit(1);
+  }
+  const a = JSON.parse(readFileSync(aPath, "utf8"));
+  const b = JSON.parse(readFileSync(bPath, "utf8"));
+  const expectedChanges = existsSync(expectedPath)
+    ? (JSON.parse(readFileSync(expectedPath, "utf8")) as ExpectedChange[])
+    : [];
+  let result: ReturnType<typeof compareLeaflet>;
+  try {
+    result = compareLeaflet(a, b, { mode, expectedChanges });
+  } catch (err) {
+    if (err instanceof LeafletCompareError) {
+      console.error(`[leaflet-compare] HATA: ${err.message}`);
+      process.exit(1);
+    }
+    throw err;
+  }
+  const summary = summarize(result.rows);
+  const label = mode === "cascade" ? "K1 (kaskad)" : "K2/K3 (commit'ler)";
+  const line =
+    `${label}: eşit ${summary.equal} · expected-fold ${summary["expected-fold"]} · ` +
+    `expected-change ${summary["expected-change"]} · info ${summary.info} · fail ${summary.fail}`;
+  if (reportPath)
+    writeJson(reportPath, {
+      mode,
+      a: aPath,
+      b: bPath,
+      summary,
+      failed: result.failed,
+      rows: result.rows,
+    });
+  for (const r of result.rows.filter((x) => x.verdict === "fail").slice(0, 40))
+    console.log(
+      `  FAIL ${r.key} ${r.property}: ${r.before} → ${r.after}${r.note ? ` (${r.note})` : ""}`,
+    );
+  console.log(`[leaflet-compare] ${line}${result.failed ? " → BAŞARISIZ" : ""}`);
+  if (result.failed) process.exit(1);
+}
+
+/** §16: iki ekran görüntüsü dizinini slug bazında yan yana gösteren statik HTML (yalnızca <img>). */
+function writeCompareHtml(before: string, after: string, out: string): void {
+  const pngs = (dir: string) =>
+    existsSync(dir) ? readdirSync(dir).filter((n) => n.endsWith(".png")) : [];
+  const names = [...new Set([...pngs(before), ...pngs(after)])].sort();
+  const esc = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const cell = (dir: string, name: string, label: string) =>
+    existsSync(`${dir}/${name}`)
+      ? `<td><img src="${esc(relative(dirname(out), `${dir}/${name}`))}" alt="${esc(`${label}: ${name}`)}" width="600" loading="lazy"></td>`
+      : `<td>Görüntü yok</td>`;
+  const rows = names
+    .map(
+      (n) =>
+        `<tr><th scope="row">${esc(n)}</th>${cell(before, n, "Önce")}${cell(after, n, "Sonra")}</tr>`,
+    )
+    .join("\n");
+  const html = `<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Ekran görüntüsü karşılaştırması</title>
+</head>
+<body>
+<h1>Ekran görüntüsü karşılaştırması</h1>
+<p>Önce: ${esc(basename(before))} · Sonra: ${esc(basename(after))} · ${names.length} görüntü</p>
+<table>
+<thead><tr><th scope="col">Görüntü</th><th scope="col">Önce</th><th scope="col">Sonra</th></tr></thead>
+<tbody>
+${rows}
+</tbody>
+</table>
+</body>
+</html>
+`;
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, html);
 }
 
 main().catch((err) => {

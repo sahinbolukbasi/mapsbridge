@@ -1,0 +1,2437 @@
+[
+  {
+    "name": "app-header-height",
+    "values": [
+      "calc(76px + env(safe-area-inset-top, 0px))",
+      "calc(64px + env(safe-area-inset-top, 0px))"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --app-header-height)",
+    "kind": "native"
+  },
+  {
+    "name": "bg",
+    "values": [
+      "#f8f7f4"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-bg)",
+    "kind": "fixed"
+  },
+  {
+    "name": "border",
+    "values": [
+      "#dde2da"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-border)",
+    "kind": "fixed"
+  },
+  {
+    "name": "border-focus",
+    "values": [
+      "#94a3b8"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-border-control)",
+    "kind": "fixed"
+  },
+  {
+    "name": "brand",
+    "values": [
+      "#24634d"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-brand)",
+    "kind": "fixed"
+  },
+  {
+    "name": "brand-hover",
+    "values": [
+      "#184c39"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-brand-hover)",
+    "kind": "fixed"
+  },
+  {
+    "name": "brand-soft",
+    "values": [
+      "#e9f2ec"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "kind": "fixed"
+  },
+  {
+    "name": "chat-background",
+    "values": [
+      "#faf8ff"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 2.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-border-subtle",
+    "values": [
+      "rgba(226, 232, 240, 0.85)"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-border-subtle)",
+    "dE": 0,
+    "kind": "color"
+  },
+  {
+    "name": "chat-canvas-base",
+    "values": [
+      "#f8fafc"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-canvas-subtle",
+    "values": [
+      "#f1f5f9"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-surface-sunken)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-deep-forest",
+    "values": [
+      "#0d281e"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-surface-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-emerald-accent",
+    "values": [
+      "#10b981"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-accent)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-font-label",
+    "values": [
+      "\"Inter\", system-ui, -apple-system, sans-serif"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "\"Inter\", system-ui, -apple-system, sans-serif",
+    "kind": "literal"
+  },
+  {
+    "name": "chat-font-sans",
+    "values": [
+      "\"Plus Jakarta Sans\", system-ui, -apple-system, sans-serif"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "\"Plus Jakarta Sans\", system-ui, -apple-system, sans-serif",
+    "kind": "literal"
+  },
+  {
+    "name": "chat-mint-glow",
+    "values": [
+      "#34d399"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-link-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-mint-subtle",
+    "values": [
+      "#ecfdf5"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-on-primary",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-on-primary)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-on-primary-container",
+    "values": [
+      "#8dbda9"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-text-inverse-brand)",
+    "dE": 7.2,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "chat-on-secondary-container",
+    "values": [
+      "#2d6e58"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-on-surface",
+    "values": [
+      "#131b2e"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-text)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-on-surface-variant",
+    "values": [
+      "#404945"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-text-muted)",
+    "dE": 0,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "chat-outline",
+    "values": [
+      "#717974"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-border-control)",
+    "dE": 16.7,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "chat-outline-variant",
+    "values": [
+      "#c0c8c3"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-border-strong)",
+    "dE": 10.3,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "chat-primary",
+    "values": [
+      "#013628"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-text-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-primary-container",
+    "values": [
+      "#1e4d3e"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-brand-hover)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-secondary",
+    "values": [
+      "#286954"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-secondary-container",
+    "values": [
+      "#abedd3"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-surface-brand-soft)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-surface",
+    "values": [
+      "#faf8ff"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 2.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-surface-card",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-surface)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-surface-container",
+    "values": [
+      "#eaedff"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 1.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-surface-high",
+    "values": [
+      "#e2e7ff"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 5.7,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-surface-low",
+    "values": [
+      "#f2f3ff"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 1.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "chat-tertiary",
+    "values": [
+      "#003723"
+    ],
+    "files": [
+      "messages/messages.css"
+    ],
+    "target": "var(--color-text-brand)",
+    "dE": 4.3,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "content-form",
+    "values": [
+      "500px"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --content-form)",
+    "kind": "native"
+  },
+  {
+    "name": "content-reading",
+    "values": [
+      "720px"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --content-reading)",
+    "kind": "native"
+  },
+  {
+    "name": "content-width",
+    "values": [
+      "min(100%, 1800px)"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--container-full)",
+    "kind": "non-color"
+  },
+  {
+    "name": "control-height",
+    "values": [
+      "44px"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --control-height)",
+    "kind": "native"
+  },
+  {
+    "name": "danger",
+    "values": [
+      "#b91c1c"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-danger)",
+    "kind": "fixed"
+  },
+  {
+    "name": "error-bg",
+    "values": [
+      "#fef2f2"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-danger-bg)",
+    "kind": "fixed"
+  },
+  {
+    "name": "error-border",
+    "values": [
+      "#fecaca"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-danger-border)",
+    "kind": "fixed"
+  },
+  {
+    "name": "focus-ring",
+    "values": [
+      "#184c39"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--focus-ring-color)",
+    "kind": "fixed"
+  },
+  {
+    "name": "font-body",
+    "values": [
+      "1rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--font-size-base)",
+    "kind": "non-color"
+  },
+  {
+    "name": "font-heading",
+    "values": [
+      "clamp(1.6rem, 4vw, 1.85rem)"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "clamp(1.6rem, 4vw, 1.85rem)",
+    "kind": "literal"
+  },
+  {
+    "name": "font-sans",
+    "values": [
+      "var(--font-inter), var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--font-family-sans)",
+    "kind": "non-color"
+  },
+  {
+    "name": "font-section",
+    "values": [
+      "clamp(2rem, 4.5vw, 2.75rem)"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--font-size-display)",
+    "kind": "non-color"
+  },
+  {
+    "name": "font-sm",
+    "values": [
+      "0.875rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--font-size-md)",
+    "kind": "non-color"
+  },
+  {
+    "name": "line-body",
+    "values": [
+      "1.6"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--line-height-body)",
+    "kind": "non-color"
+  },
+  {
+    "name": "line-heading",
+    "values": [
+      "1.2"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--line-height-heading)",
+    "kind": "non-color"
+  },
+  {
+    "name": "mb-bg-gray",
+    "values": [
+      "#f7f9f8"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 1.6,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-border",
+    "values": [
+      "rgba(226, 232, 240, 0.85)"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-border-subtle)",
+    "dE": 0,
+    "kind": "color"
+  },
+  {
+    "name": "mb-border-strong",
+    "values": [
+      "#cbd5e1"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-border-strong)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-border-subtle",
+    "values": [
+      "#e5e7eb"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-border)",
+    "dE": 2.5,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-btn-green",
+    "values": [
+      "#6f9687"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 21.4,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-btn-green-hover",
+    "values": [
+      "#5b8373"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 14.5,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-canvas",
+    "values": [
+      "#f8fafc"
+    ],
+    "files": [
+      "ai/ai.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-canvas-base",
+    "values": [
+      "#f8fafc"
+    ],
+    "files": [
+      "register/register.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-canvas-subtle",
+    "values": [
+      "#f1f5f9"
+    ],
+    "files": [
+      "ai/ai.css",
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-surface-sunken)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-card",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-surface)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-deep-forest",
+    "values": [
+      "#0d281e"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-surface-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-emerald",
+    "values": [
+      "#10b981"
+    ],
+    "files": [
+      "ai/ai.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-accent)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-emerald-accent",
+    "values": [
+      "#10b981"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-accent)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-emerald-glow",
+    "values": [
+      "#34d399"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-link-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest",
+    "values": [
+      "#059669",
+      "#013628"
+    ],
+    "files": [
+      "ai/ai.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-primary)",
+    "kind": "conflict"
+  },
+  {
+    "name": "mb-forest-100",
+    "values": [
+      "#dcfce7"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-surface-brand-strong)",
+    "dE": 3.3,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-200",
+    "values": [
+      "#bbf7d0"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-surface-brand-soft)",
+    "dE": 7.6,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-50",
+    "values": [
+      "#f0fdf4"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 1.5,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-600",
+    "values": [
+      "#16a34a"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-success-strong)",
+    "dE": 24.1,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-700",
+    "values": [
+      "#15803d"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-success-strong)",
+    "dE": 15.9,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-800",
+    "values": [
+      "#1e4d3e"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-brand-hover)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-900",
+    "values": [
+      "#13352b"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-text-brand)",
+    "dE": 5.5,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-950",
+    "values": [
+      "#0b201a"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-primary-active)",
+    "dE": 5,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-dark",
+    "values": [
+      "#0d281e"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-surface-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-forest-hover",
+    "values": [
+      "#024735"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-brand-hover)",
+    "dE": 5.7,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint",
+    "values": [
+      "#ecfdf5"
+    ],
+    "files": [
+      "ai/ai.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint-100",
+    "values": [
+      "#e1f6ee"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 3,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint-50",
+    "values": [
+      "#f2fbf7"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 3.5,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint-500",
+    "values": [
+      "#10b981"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-accent)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint-600",
+    "values": [
+      "#059669"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-success-strong)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint-700",
+    "values": [
+      "#047857"
+    ],
+    "files": [
+      "reset-password/reset-password.css"
+    ],
+    "target": "var(--color-success)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint-glow",
+    "values": [
+      "#34d399"
+    ],
+    "files": [
+      "register/register.css"
+    ],
+    "target": "var(--color-link-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint-hover",
+    "values": [
+      "#d1fae5"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-surface-brand-strong)",
+    "dE": 0,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-mint-subtle",
+    "values": [
+      "#ecfdf5"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-on-secondary-fixed",
+    "values": [
+      "#002117"
+    ],
+    "files": [
+      "login/login.css"
+    ],
+    "target": "var(--color-on-accent)",
+    "dE": 4.1,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-on-secondary-variant",
+    "values": [
+      "#05513d"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-on-surface-brand)",
+    "dE": 6.8,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-on-surface",
+    "values": [
+      "#131b2e"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-text)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-on-surface-variant",
+    "values": [
+      "#404945"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-text-muted)",
+    "dE": 0,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-outline",
+    "values": [
+      "#717974"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-border-control)",
+    "dE": 16.7,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "mb-primary",
+    "values": [
+      "#013628"
+    ],
+    "files": [
+      "register/register.css"
+    ],
+    "target": "var(--color-text-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-primary-container",
+    "values": [
+      "#1e4d3e"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-brand-hover)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-secondary",
+    "values": [
+      "#286954"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-secondary-container",
+    "values": [
+      "#abedd3"
+    ],
+    "files": [
+      "ai/ai.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-surface-brand-soft)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-secondary-fixed",
+    "values": [
+      "#aef0d5"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-surface-brand-soft)",
+    "dE": 1.1,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-surface",
+    "values": [
+      "#faf8ff"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 2.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-surface-card",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-surface)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-surface-container-high",
+    "values": [
+      "#e2e7ff"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 5.7,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-surface-container-low",
+    "values": [
+      "#f2f3ff"
+    ],
+    "files": [
+      "login/login.css",
+      "register/register.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 1.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-text-main",
+    "values": [
+      "#131b2e"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-text)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mb-text-muted",
+    "values": [
+      "#64748b"
+    ],
+    "files": [
+      "ai/ai.css"
+    ],
+    "target": "var(--color-text-subtle)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "mobile-nav-height",
+    "values": [
+      "0px"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --mobile-nav-height)",
+    "kind": "native"
+  },
+  {
+    "name": "nav-height",
+    "values": [
+      "64px"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--header-height)",
+    "kind": "non-color"
+  },
+  {
+    "name": "on-brand",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-on-primary)",
+    "kind": "fixed"
+  },
+  {
+    "name": "page-gutter",
+    "values": [
+      "clamp(1rem, 3vw, 1.5rem)"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --page-gutter)",
+    "kind": "native"
+  },
+  {
+    "name": "profile-canvas",
+    "values": [
+      "#f8fafc"
+    ],
+    "files": [
+      "profile/profile.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-border-subtle",
+    "values": [
+      "rgba(226, 232, 240, 0.85)"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-border-subtle)",
+    "dE": 0,
+    "kind": "color"
+  },
+  {
+    "name": "promo-canvas-base",
+    "values": [
+      "#f8fafc"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-canvas-subtle",
+    "values": [
+      "#f1f5f9"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-surface-sunken)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-deep-forest",
+    "values": [
+      "#0d281e"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-surface-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-emerald",
+    "values": [
+      "#10b981"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-accent)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-mint-glow",
+    "values": [
+      "#34d399"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-link-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-mint-subtle",
+    "values": [
+      "#ecfdf5"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-on-surface",
+    "values": [
+      "#131b2e"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-text)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-on-surface-variant",
+    "values": [
+      "#404945"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-text-muted)",
+    "dE": 0,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "promo-outline",
+    "values": [
+      "#717974"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-border-control)",
+    "dE": 16.7,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "promo-primary",
+    "values": [
+      "#013628"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-text-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-primary-container",
+    "values": [
+      "#1e4d3e"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-brand-hover)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-secondary",
+    "values": [
+      "#286954"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-secondary-container",
+    "values": [
+      "#abedd3"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-surface-brand-soft)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "promo-surface-card",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "ai/ai-promo.css"
+    ],
+    "target": "var(--color-surface)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "radius",
+    "values": [
+      "12px"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--radius-md)",
+    "kind": "non-color"
+  },
+  {
+    "name": "radius-lg",
+    "values": [
+      "18px"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --radius-lg)",
+    "kind": "native"
+  },
+  {
+    "name": "radius-sm",
+    "values": [
+      "8px"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --radius-sm)",
+    "kind": "native"
+  },
+  {
+    "name": "sb-bg-page",
+    "values": [
+      "#faf8ff",
+      "var(--bg, #f8f7f4)"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-bg)",
+    "kind": "conflict"
+  },
+  {
+    "name": "sb-border-subtle",
+    "values": [
+      "rgba(226, 232, 240, 0.85)",
+      "var(--border, #dde2da)"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-border-subtle)",
+    "kind": "conflict"
+  },
+  {
+    "name": "sb-canvas-base",
+    "values": [
+      "#f8fafc",
+      "var(--surface-alt, #f0f2ed)"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-bg)",
+    "kind": "conflict"
+  },
+  {
+    "name": "sb-canvas-subtle",
+    "values": [
+      "#f1f5f9",
+      "var(--surface-alt, #f0f2ed)"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-surface-sunken)",
+    "kind": "conflict"
+  },
+  {
+    "name": "sb-deep-forest",
+    "values": [
+      "#0d281e"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-surface-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-emerald-accent",
+    "values": [
+      "#10b981"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-accent)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-error",
+    "values": [
+      "#ba1a1a"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-danger)",
+    "dE": 1.3,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-error-container",
+    "values": [
+      "#ffdad6"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-danger-border)",
+    "dE": 7.5,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "sb-mint-glow",
+    "values": [
+      "#34d399"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-link-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-mint-subtle",
+    "values": [
+      "#ecfdf5"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-on-secondary-container",
+    "values": [
+      "#2d6e58"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-on-surface",
+    "values": [
+      "#131b2e"
+    ],
+    "files": [
+      "desk/desk.css"
+    ],
+    "target": "var(--color-text)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-on-surface-variant",
+    "values": [
+      "#404945"
+    ],
+    "files": [
+      "desk/desk.css"
+    ],
+    "target": "var(--color-text-muted)",
+    "dE": 0,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "sb-outline",
+    "values": [
+      "#717974"
+    ],
+    "files": [
+      "desk/desk.css"
+    ],
+    "target": "var(--color-border-control)",
+    "dE": 16.7,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "sb-primary",
+    "values": [
+      "#013628",
+      "var(--brand, #24634d)"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-primary)",
+    "kind": "conflict"
+  },
+  {
+    "name": "sb-primary-container",
+    "values": [
+      "#1e4d3e"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-brand-hover)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-secondary",
+    "values": [
+      "#286954"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-secondary-container",
+    "values": [
+      "#abedd3"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-surface-brand-soft)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-surface-card",
+    "values": [
+      "#ffffff",
+      "var(--surface, #ffffff)"
+    ],
+    "files": [
+      "desk/desk.css",
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-surface)",
+    "kind": "conflict"
+  },
+  {
+    "name": "sb-surface-container",
+    "values": [
+      "#eaedff"
+    ],
+    "files": [
+      "desk/desk.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 1.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-surface-container-high",
+    "values": [
+      "#e2e7ff"
+    ],
+    "files": [
+      "desk/desk.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 5.7,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-surface-container-low",
+    "values": [
+      "#f2f3ff"
+    ],
+    "files": [
+      "desk/desk.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 1.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "sb-text-main",
+    "values": [
+      "#131b2e",
+      "var(--text, #202e29)"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-text)",
+    "kind": "conflict"
+  },
+  {
+    "name": "sb-text-muted",
+    "values": [
+      "#404945",
+      "var(--text-muted, #5e6d65)"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-text-muted)",
+    "kind": "conflict"
+  },
+  {
+    "name": "sb-text-outline",
+    "values": [
+      "#717974"
+    ],
+    "files": [
+      "profile/edit/edit.css",
+      "profile/profile.css"
+    ],
+    "target": "var(--color-border-control)",
+    "dE": 16.7,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "shadow-lg",
+    "values": [
+      "0 16px 48px rgb(20 40 30 / 10%)"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --shadow-lg)",
+    "kind": "native"
+  },
+  {
+    "name": "shadow-sm",
+    "values": [
+      "0 2px 8px rgb(20 40 30 / 4%)"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --shadow-sm)",
+    "kind": "native"
+  },
+  {
+    "name": "space-1",
+    "values": [
+      "0.25rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-1)",
+    "kind": "native"
+  },
+  {
+    "name": "space-12",
+    "values": [
+      "3rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-12)",
+    "kind": "native"
+  },
+  {
+    "name": "space-16",
+    "values": [
+      "4rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-16)",
+    "kind": "native"
+  },
+  {
+    "name": "space-2",
+    "values": [
+      "0.5rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-2)",
+    "kind": "native"
+  },
+  {
+    "name": "space-3",
+    "values": [
+      "0.75rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-3)",
+    "kind": "native"
+  },
+  {
+    "name": "space-4",
+    "values": [
+      "1rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-4)",
+    "kind": "native"
+  },
+  {
+    "name": "space-5",
+    "values": [
+      "1.25rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-5)",
+    "kind": "native"
+  },
+  {
+    "name": "space-6",
+    "values": [
+      "1.5rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-6)",
+    "kind": "native"
+  },
+  {
+    "name": "space-8",
+    "values": [
+      "2rem"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "(tokens.css --space-8)",
+    "kind": "native"
+  },
+  {
+    "name": "stitch-background",
+    "values": [
+      "#faf8ff"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 2.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-border-subtle",
+    "values": [
+      "rgba(226, 232, 240, 0.85)"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-border-subtle)",
+    "dE": 0,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-canvas-base",
+    "values": [
+      "#f8fafc"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-canvas-subtle",
+    "values": [
+      "#f1f5f9"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface-sunken)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-deep-forest",
+    "values": [
+      "#0d281e"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-emerald-accent",
+    "values": [
+      "#10b981"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-accent)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-font-label",
+    "values": [
+      "\"Inter\", system-ui, -apple-system, sans-serif"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "\"Inter\", system-ui, -apple-system, sans-serif",
+    "kind": "literal"
+  },
+  {
+    "name": "stitch-font-sans",
+    "values": [
+      "\"Plus Jakarta Sans\", system-ui, -apple-system, sans-serif"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "\"Plus Jakarta Sans\", system-ui, -apple-system, sans-serif",
+    "kind": "literal"
+  },
+  {
+    "name": "stitch-mint-glow",
+    "values": [
+      "#34d399"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-link-inverse)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-mint-subtle",
+    "values": [
+      "#ecfdf5"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-on-background",
+    "values": [
+      "#131b2e"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-text)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-on-primary",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-on-primary)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-on-primary-container",
+    "values": [
+      "#8dbda9"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-text-inverse-brand)",
+    "dE": 7.2,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-on-secondary-container",
+    "values": [
+      "#2d6e58"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-on-surface",
+    "values": [
+      "#131b2e"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-text)",
+    "dE": 2,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-on-surface-variant",
+    "values": [
+      "#404945"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-text-muted)",
+    "dE": 0,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-outline",
+    "values": [
+      "#717974"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-border-control)",
+    "dE": 16.7,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-outline-variant",
+    "values": [
+      "#c0c8c3"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-border-strong)",
+    "dE": 10.3,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-primary",
+    "values": [
+      "#013628"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-text-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-primary-container",
+    "values": [
+      "#1e4d3e"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-brand-hover)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-secondary",
+    "values": [
+      "#286954"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-brand)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-secondary-container",
+    "values": [
+      "#abedd3"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface-brand-soft)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-surface",
+    "values": [
+      "#faf8ff"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-bg)",
+    "dE": 2.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-surface-container",
+    "values": [
+      "#eaedff"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 1.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-surface-container-high",
+    "values": [
+      "#e2e7ff"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 5.7,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-surface-container-highest",
+    "values": [
+      "#dae2fd"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 8.3,
+    "decided": true,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-surface-container-low",
+    "values": [
+      "#f2f3ff"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface-tint)",
+    "dE": 1.9,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-surface-container-lowest",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-surface)",
+    "dE": 0,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "stitch-tertiary",
+    "values": [
+      "#003723"
+    ],
+    "files": [
+      "[username]/public-profile.css"
+    ],
+    "target": "var(--color-text-brand)",
+    "dE": 4.3,
+    "decided": false,
+    "kind": "color"
+  },
+  {
+    "name": "success",
+    "values": [
+      "#047857"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-success)",
+    "kind": "fixed"
+  },
+  {
+    "name": "surface",
+    "values": [
+      "#ffffff"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-surface)",
+    "kind": "fixed"
+  },
+  {
+    "name": "surface-alt",
+    "values": [
+      "#f0f2ed"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-surface-sunken)",
+    "kind": "fixed"
+  },
+  {
+    "name": "text",
+    "values": [
+      "#202e29"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-text)",
+    "kind": "fixed"
+  },
+  {
+    "name": "text-muted",
+    "values": [
+      "#5e6d65"
+    ],
+    "files": [
+      "styles.css"
+    ],
+    "target": "var(--color-text-muted)",
+    "kind": "fixed"
+  }
+]
