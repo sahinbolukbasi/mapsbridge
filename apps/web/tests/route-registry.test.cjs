@@ -36,7 +36,7 @@ const SITEMAP_13 = [
 ];
 // AC-34 bekleyen sayfalar: MobileStart ikinci <main>/<h1>'i çiziyor (ana sayfa iskeleti C10).
 // Liste yalnızca küçülür: sayfa düzelince bu test listeden çıkarılmasını ister.
-const AC34_PENDING = { "/": "C10", "/en/": "C10" };
+const AC34_PENDING = {};
 
 function requireBuild(t) {
   const s = buildState();

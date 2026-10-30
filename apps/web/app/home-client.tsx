@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getStoredSession } from "./lib/cognito";
 import "./home.css";
 import { MobileStart } from "./components/mobile-start";
+import { PageHeader, PageShell } from "./components/ui";
 import { FAQ_ITEMS, FAQ_ITEMS_EN, COMMUNITY_STORIES, COMMUNITY_POSTS } from "./features/landing";
 import { useLocale } from "./lib/locale-context";
 
@@ -57,9 +58,12 @@ export default function Home() {
   const faqList = isEnglish ? FAQ_ITEMS_EN : FAQ_ITEMS;
 
   return (
-    <div className="home-container">
+    <PageShell layout="landing" className="home-container">
+      {/* Tek h1 (AC-34): registry başlığı, görsel olarak gizli; masaüstü hero ve mobil başlangıç
+          görünür başlıklarını kendi içinde taşır (mobilde masaüstü içerik display:none). */}
+      <PageHeader variant="hidden" />
       <MobileStart />
-      <main className="home-desktop-content">
+      <div className="home-desktop-content">
         {/* ========================================================= */}
         {/* Hero Section — Story & Search Interface                    */}
         {/* ========================================================= */}
@@ -77,20 +81,24 @@ export default function Home() {
               </div>
 
               {/* Main Display Headline */}
-              <h1 className="hero-display">
+              <p className="hero-display">
                 <>
                   {t("home.hero.headline1")}
                   <br />
                   <span className="hero-display-em">{t("home.hero.headline2")}</span>
                 </>
-              </h1>
+              </p>
 
               {/* Subheading Description */}
               <p className="hero-sub">{t("home.hero.sub")}</p>
 
               {/* Dual Action Buttons */}
               <div className="hero-actions">
-                <a href={isLoggedIn ? "/maps/" : "/register/"} className="hero-btn-primary">
+                <a
+                  href={isLoggedIn ? "/maps/" : "/register/"}
+                  className="hero-btn-primary"
+                  data-surface="inverse"
+                >
                   <span>{isLoggedIn ? t("home.hero.goToDesk") : t("home.hero.startFree")}</span>
                   <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
                     {isLoggedIn ? "map" : "bolt"}
@@ -99,7 +107,7 @@ export default function Home() {
                 <a href="#nasil-calisir" className="hero-btn-secondary">
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "1.25rem", color: "#286954" }}
+                    style={{ fontSize: "1.25rem", color: "var(--color-link)" }}
                   >
                     play_circle
                   </span>
@@ -120,7 +128,7 @@ export default function Home() {
                     aria-label={t("home.hero.searchLabel")}
                   />
                 </div>
-                <button type="submit" className="hero-search-btn">
+                <button type="submit" className="hero-search-btn" data-surface="inverse">
                   <span>{t("home.hero.generateRoute")}</span>
                   <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
                     arrow_forward
@@ -147,7 +155,7 @@ export default function Home() {
 
             {/* Right Column: Interactive Route Product Mockup */}
             <div className="hero-right">
-              <div className="hero-mockup-glow" />
+              <div className="hero-mockup-glow" data-surface="inverse" />
               <div className="hero-mockup">
                 {/* Interactive Top Tab Switcher */}
                 <div
@@ -190,7 +198,9 @@ export default function Home() {
                 {/* View 1: AI Seyahat Asistanı (AWS Bedrock) */}
                 {activeHeroTab === "ai" && (
                   <div className="mockup-chat-view">
-                    <div className="mockup-chat-bubble-user">{t("home.mockup.ai.userPrompt")}</div>
+                    <div className="mockup-chat-bubble-user" data-surface="inverse">
+                      {t("home.mockup.ai.userPrompt")}
+                    </div>
 
                     <div className="mockup-chat-bubble-ai">
                       <div className="mockup-ai-head">
@@ -242,6 +252,7 @@ export default function Home() {
                       <a
                         href="/travel-assistant/?q=Floransa%27da%203%20g%C3%BCn%20sanat%20ve%20kahve"
                         className="mockup-action-btn primary"
+                        data-surface="inverse"
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
                           auto_awesome
@@ -280,7 +291,9 @@ export default function Home() {
 
                     {/* Day Selector Tabs */}
                     <div className="mockup-day-selector">
-                      <span className="mockup-day-pill active">{t("home.mockup.desk.day1")}</span>
+                      <span className="mockup-day-pill active" data-surface="inverse">
+                        {t("home.mockup.desk.day1")}
+                      </span>
                       <span className="mockup-day-pill">{t("home.mockup.desk.day2")}</span>
                       <span className="mockup-day-pill">{t("home.mockup.desk.day3")}</span>
                     </div>
@@ -320,14 +333,16 @@ export default function Home() {
                         <span className="mockup-map-label-dot" />
                         <span>{t("home.mockup.desk.mapLabel")}</span>
                       </div>
-                      <div className="mockup-share-badge">
+                      <div className="mockup-share-badge" data-surface="inverse">
                         <span className="material-symbols-outlined">share</span>{" "}
                         {t("home.mockup.desk.code")} <strong>RM-841</strong>
                       </div>
 
                       {/* Waypoints */}
                       <div className="mockup-waypoint" style={{ top: "105px", right: "48px" }}>
-                        <div className="mockup-waypoint-marker">1</div>
+                        <div className="mockup-waypoint-marker" data-surface="inverse">
+                          1
+                        </div>
                         <span className="mockup-waypoint-label">
                           {t("home.mockup.desk.colosseum")}
                         </span>
@@ -336,11 +351,15 @@ export default function Home() {
                         className="mockup-waypoint"
                         style={{ top: "28px", left: "50%", transform: "translateX(-50%)" }}
                       >
-                        <div className="mockup-waypoint-marker">2</div>
+                        <div className="mockup-waypoint-marker" data-surface="inverse">
+                          2
+                        </div>
                         <span className="mockup-waypoint-label">Pantheon</span>
                       </div>
                       <div className="mockup-waypoint" style={{ bottom: "16px", left: "32px" }}>
-                        <div className="mockup-waypoint-marker">3</div>
+                        <div className="mockup-waypoint-marker" data-surface="inverse">
+                          3
+                        </div>
                         <span className="mockup-waypoint-label">Trastevere</span>
                       </div>
                     </div>
@@ -362,7 +381,7 @@ export default function Home() {
                       {/* Timeline Stops */}
                       <div className="mockup-timeline">
                         <div className="mockup-stop">
-                          <span className="mockup-stop-dot" />
+                          <span className="mockup-stop-dot" data-surface="inverse" />
                           <div className="mockup-stop-row">
                             <span className="mockup-stop-name">
                               {t("home.mockup.desk.stop1Name")}
@@ -372,7 +391,7 @@ export default function Home() {
                           <p className="mockup-stop-desc">{t("home.mockup.desk.stop1Desc")}</p>
                         </div>
                         <div className="mockup-stop">
-                          <span className="mockup-stop-dot" />
+                          <span className="mockup-stop-dot" data-surface="inverse" />
                           <div className="mockup-stop-row">
                             <span className="mockup-stop-name">
                               {t("home.mockup.desk.stop2Name")}
@@ -382,7 +401,7 @@ export default function Home() {
                           <p className="mockup-stop-desc">{t("home.mockup.desk.stop2Desc")}</p>
                         </div>
                         <div className="mockup-stop">
-                          <span className="mockup-stop-dot" />
+                          <span className="mockup-stop-dot" data-surface="inverse" />
                           <div className="mockup-stop-row">
                             <span className="mockup-stop-name">
                               {t("home.mockup.desk.stop3Name")}
@@ -397,6 +416,7 @@ export default function Home() {
                         <button
                           type="button"
                           className="mockup-action-btn primary"
+                          data-surface="inverse"
                           onClick={openCodeModal}
                         >
                           <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
@@ -465,6 +485,7 @@ export default function Home() {
                       <button
                         type="button"
                         className="mockup-action-btn primary"
+                        data-surface="inverse"
                         onClick={openCodeModal}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
@@ -534,7 +555,12 @@ export default function Home() {
           <div className="bento-grid">
             {/* Feature 1: AI Route Engine (7 Cols) */}
             <div className="bento-card bento-card-col7">
-              <div className="bento-card-glow" style={{ background: "rgba(52,211,153,0.15)" }} />
+              <div
+                className="bento-card-glow"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent-strong) 15%, transparent)",
+                }}
+              />
               <div>
                 <div className="bento-icon">
                   <span className="material-symbols-outlined">psychology</span>
@@ -545,7 +571,9 @@ export default function Home() {
               </div>
               <div className="bento-demo-box ai">
                 <div className="bento-demo-badge">
-                  <div className="bento-demo-avatar">AI</div>
+                  <div className="bento-demo-avatar" data-surface="inverse">
+                    AI
+                  </div>
                   <div className="bento-demo-text">
                     <strong>{t("home.feature1.demoTitle")}</strong>
                     <span>{t("home.feature1.demoDesc")}</span>
@@ -557,7 +585,13 @@ export default function Home() {
 
             {/* Feature 2: Multi-day Map Desk & OSRM (5 Cols) */}
             <div className="bento-card bento-card-col5">
-              <div className="bento-card-glow" style={{ background: "rgba(174,240,213,0.25)" }} />
+              <div
+                className="bento-card-glow"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--color-surface-brand-soft) 25%, transparent)",
+                }}
+              />
               <div>
                 <div className="bento-icon">
                   <span className="material-symbols-outlined">map</span>
@@ -569,7 +603,7 @@ export default function Home() {
               <div className="bento-demo-box">
                 <span
                   className="material-symbols-outlined"
-                  style={{ color: "#10b981", fontSize: "1.625rem" }}
+                  style={{ color: "var(--color-accent)", fontSize: "1.625rem" }}
                 >
                   route
                 </span>
@@ -582,7 +616,12 @@ export default function Home() {
 
             {/* Feature 3: 6-Digit Share Code (5 Cols) */}
             <div className="bento-card bento-card-col5">
-              <div className="bento-card-glow" style={{ background: "rgba(52,211,153,0.15)" }} />
+              <div
+                className="bento-card-glow"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent-strong) 15%, transparent)",
+                }}
+              />
               <div>
                 <div className="bento-icon">
                   <span className="material-symbols-outlined">pin</span>
@@ -608,7 +647,10 @@ export default function Home() {
 
             {/* Feature 4: Privacy & Offline Mode (7 Cols) */}
             <div className="bento-card bento-card-col7">
-              <div className="bento-card-glow" style={{ background: "rgba(1,54,40,0.1)" }} />
+              <div
+                className="bento-card-glow"
+                style={{ background: "color-mix(in srgb, var(--color-primary) 10%, transparent)" }}
+              />
               <div>
                 <div className="bento-icon">
                   <span className="material-symbols-outlined">shield</span>
@@ -670,7 +712,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "1rem", color: "#10b981" }}
+                      style={{ fontSize: "1rem", color: "var(--color-accent)" }}
                     >
                       auto_awesome
                     </span>
@@ -704,7 +746,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "1rem", color: "#10b981" }}
+                      style={{ fontSize: "1rem", color: "var(--color-accent)" }}
                     >
                       route
                     </span>
@@ -739,7 +781,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "1rem", color: "#10b981" }}
+                      style={{ fontSize: "1rem", color: "var(--color-accent)" }}
                     >
                       touch_app
                     </span>
@@ -773,7 +815,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "1rem", color: "#10b981" }}
+                      style={{ fontSize: "1rem", color: "var(--color-accent)" }}
                     >
                       pin
                     </span>
@@ -797,7 +839,7 @@ export default function Home() {
               <a href="/how-it-works/" className="nasil-guide-link-btn">
                 <span
                   className="material-symbols-outlined"
-                  style={{ fontSize: "1.25rem", color: "#10b981" }}
+                  style={{ fontSize: "1.25rem", color: "var(--color-accent)" }}
                 >
                   menu_book
                 </span>
@@ -924,8 +966,12 @@ export default function Home() {
                   <div key={story.initials} className="community-story-item">
                     <div
                       className={`community-story-ring ${story.gradient ? "gradient" : "plain"}`}
+                      data-surface={story.gradient ? "inverse" : undefined}
                     >
-                      <div className={`community-story-avatar ${story.live ? "has-live-dot" : ""}`}>
+                      <div
+                        className={`community-story-avatar ${story.live ? "has-live-dot" : ""}`}
+                        data-surface="inverse"
+                      >
                         {story.initials}
                       </div>
                     </div>
@@ -947,7 +993,14 @@ export default function Home() {
                     <div className="community-post-author">
                       <div className="community-post-author-left">
                         <div className="community-post-avatar-wrap">
-                          <div className={`community-post-avatar ${post.avatarClass}`}>
+                          <div
+                            className={`community-post-avatar ${post.avatarClass}`}
+                            data-surface={
+                              post.avatarClass === "community-avatar-primary"
+                                ? "inverse"
+                                : undefined
+                            }
+                          >
                             {post.initials}
                           </div>
                           {post.live && <span className="community-post-live-dot" />}
@@ -999,7 +1052,9 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
-                      <div className="community-route-code">{post.code}</div>
+                      <div className="community-route-code" data-surface="inverse">
+                        {post.code}
+                      </div>
                     </div>
                   </div>
 
@@ -1036,7 +1091,9 @@ export default function Home() {
             <div className="community-engagement-bar">
               <div className="community-engagement-left">
                 <div className="community-avatar-stack">
-                  <span className="community-stack-avatar stack-primary">ED</span>
+                  <span className="community-stack-avatar stack-primary" data-surface="inverse">
+                    ED
+                  </span>
                   <span className="community-stack-avatar stack-secondary">CY</span>
                   <span className="community-stack-avatar stack-tertiary">MK</span>
                   <span className="community-stack-avatar stack-more">+8K</span>
@@ -1050,6 +1107,7 @@ export default function Home() {
                 <a
                   href={isLoggedIn ? "/travel-assistant/" : "/register/"}
                   className="community-share-btn"
+                  data-surface="inverse"
                 >
                   <span className="material-symbols-outlined">add_circle</span>
                   <span>{t("home.community.shareRoute")}</span>
@@ -1093,7 +1151,7 @@ export default function Home() {
         {/* Final Conversion CTA Section                                */}
         {/* ========================================================= */}
         <section className="cta-section" id="kayit">
-          <div className="cta-card">
+          <div className="cta-card" data-surface="inverse">
             <div className="cta-glow-1" />
             <div className="cta-glow-2" />
             <div className="cta-inner">
@@ -1122,19 +1180,19 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </main>
-
+      </div>
       {/* ========================================================= */}
       {/* 6-Digit Code Verification Floating Sheet / Modal            */}
       {/* ========================================================= */}
       <div
         className={`code-modal-overlay ${codeModalOpen ? "open" : ""}`}
+        data-surface="inverse"
         id="code-modal"
         role="dialog"
         aria-modal="true"
         aria-label={t("home.codeModal.label")}
       >
-        <div className="code-modal">
+        <div className="code-modal" data-surface="default">
           <button
             className="code-modal-close"
             onClick={closeCodeModal}
@@ -1181,7 +1239,7 @@ export default function Home() {
                 />
               ))}
             </div>
-            <button type="submit" className="code-modal-submit">
+            <button type="submit" className="code-modal-submit" data-surface="inverse">
               <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
                 map
               </span>
@@ -1190,6 +1248,6 @@ export default function Home() {
           </form>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

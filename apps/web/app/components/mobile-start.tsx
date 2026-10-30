@@ -45,10 +45,10 @@ export function MobileStart() {
   }, []);
 
   return (
-    <main className="mobile-start" aria-label="Seyahat başlangıcı">
+    <section className="mobile-start" aria-label="Seyahat başlangıcı">
       <div className="mobile-start-heading">
         <span>YENİ BİR KEŞİF</span>
-        <h1>Bugün nereye?</h1>
+        <h2 className="mobile-start-title">Bugün nereye?</h2>
         <p>Seyahatini planla, rotanı yanında taşı.</p>
       </div>
 
@@ -107,6 +107,6 @@ export function MobileStart() {
           <Link href="/login/">Giriş Yap</Link>
         )}
       </div>
-    </main>
+    </section>
   );
 }

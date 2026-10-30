@@ -2,7 +2,7 @@
 @layer pages {
   .mobile-apps-container {
     min-height: 100vh;
-    background-color: #faf8ff;
+    background-color: var(--color-bg);
     color: #131b2e;
     display: flex;
     flex-direction: column;
@@ -17,7 +17,7 @@
     position: relative;
     overflow: hidden;
     padding: 4rem 1.5rem 5rem;
-    background: linear-gradient(180deg, #faf8ff 0%, #f2f3ff 100%);
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface-tint) 100%);
   }
 
   .mobile-apps-glow {
@@ -29,8 +29,8 @@
     height: 450px;
     background: radial-gradient(
       circle,
-      rgba(174, 240, 213, 0.4) 0%,
-      rgba(236, 253, 245, 0.2) 60%,
+      color-mix(in srgb, var(--color-surface-brand-soft) 40%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-brand) 20%, transparent) 60%,
       transparent 80%
     );
     filter: blur(80px);
@@ -55,8 +55,8 @@
     gap: 0.5rem;
     padding: 0.4rem 1rem;
     border-radius: 9999px;
-    background: #ecfdf5;
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: var(--color-surface-brand);
+    border: 1px solid var(--color-accent-a20);
     margin-bottom: 1.5rem;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
   }
@@ -65,7 +65,7 @@
     width: 8px;
     height: 8px;
     border-radius: 9999px;
-    background: #10b981;
+    background: var(--color-accent);
     animation: pulse 2s infinite;
   }
 
@@ -73,20 +73,9 @@
     font-size: 11.5px;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: #065f46;
+    color: var(--color-on-surface-brand);
     text-transform: uppercase;
   }
-
-  .mobile-apps-title {
-    font-size: 2.75rem;
-    font-weight: 800;
-    line-height: 1.15;
-    color: #0d281e;
-    letter-spacing: -0.025em;
-    max-width: 800px;
-    margin-bottom: 1.25rem;
-  }
-
   .mobile-apps-title-gradient {
     color: #1e4d3e;
     position: relative;
@@ -96,7 +85,7 @@
   .mobile-apps-desc {
     font-size: 1.125rem;
     line-height: 1.6;
-    color: #404945;
+    color: var(--color-text-muted);
     max-width: 650px;
     margin-bottom: 2.5rem;
   }
@@ -116,8 +105,8 @@
     gap: 1rem;
     padding: 1rem 1.5rem;
     border-radius: 1rem;
-    background: #ffffff;
-    border: 1px solid rgba(226, 232, 240, 0.9);
+    background: var(--color-surface);
+    border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     transition:
       transform 0.2s ease,
@@ -135,8 +124,8 @@
     width: 44px;
     height: 44px;
     border-radius: 0.75rem;
-    background: #013628;
-    color: #ffffff;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -159,7 +148,7 @@
   .store-card-name {
     font-size: 16px;
     font-weight: 700;
-    color: #0d281e;
+    color: var(--color-on-accent);
   }
 
   .store-badge-soon {
@@ -167,19 +156,19 @@
     display: inline-block;
     font-size: 10px;
     font-weight: 700;
-    color: #047857;
-    background: #ecfdf5;
+    color: var(--color-success);
+    background: var(--color-surface-brand);
     padding: 2px 8px;
     border-radius: 9999px;
     width: fit-content;
   }
 
   .waitlist-card {
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: 1.5rem;
     padding: 2.25rem 2rem;
-    box-shadow: 0 10px 40px rgba(1, 54, 40, 0.06);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 10px 40px color-mix(in srgb, var(--color-primary) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
     max-width: 580px;
     width: 100%;
     margin-bottom: 4rem;
@@ -188,13 +177,13 @@
   .waitlist-card h3 {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #0d281e;
+    color: var(--color-on-accent);
     margin-bottom: 0.5rem;
   }
 
   .waitlist-card p {
     font-size: 14px;
-    color: #404945;
+    color: var(--color-text-muted);
     margin-bottom: 1.25rem;
   }
 
@@ -213,23 +202,23 @@
     flex: 1;
     padding: 0.85rem 1.25rem;
     border-radius: 9999px;
-    border: 1px solid #c0c8c3;
+    border: 1px solid var(--color-border-strong);
     font-size: 14px;
     outline: none;
-    background: #f8fafc;
+    background: var(--color-bg);
     color: #131b2e;
   }
 
   .waitlist-input:focus {
-    border-color: #10b981;
-    background: #ffffff;
+    border-color: var(--color-accent);
+    background: var(--color-surface);
   }
 
   .waitlist-btn {
     padding: 0.85rem 1.5rem;
     border-radius: 9999px;
-    background: #1e4d3e;
-    color: #ffffff;
+    background: var(--color-brand-hover);
+    color: var(--color-text-inverse);
     font-size: 14px;
     font-weight: 600;
     border: none;
@@ -243,15 +232,15 @@
   }
 
   .waitlist-btn:hover {
-    background: #013628;
+    background: var(--color-primary);
     transform: translateY(-1px);
   }
 
   .waitlist-success {
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    background: #ecfdf5;
-    color: #065f46;
+    background: var(--color-surface-brand);
+    color: var(--color-on-surface-brand);
     font-size: 14px;
     font-weight: 600;
     display: flex;
@@ -275,7 +264,7 @@
   .mobile-features-header h2 {
     font-size: 2rem;
     font-weight: 800;
-    color: #0d281e;
+    color: var(--color-on-accent);
     margin-bottom: 0.5rem;
   }
 
@@ -286,10 +275,10 @@
   }
 
   .mobile-feat-card {
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: 1.25rem;
     padding: 1.75rem;
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
     display: flex;
     flex-direction: column;
@@ -300,8 +289,8 @@
     width: 48px;
     height: 48px;
     border-radius: 1rem;
-    background: #ecfdf5;
-    color: #10b981;
+    background: var(--color-surface-brand);
+    color: var(--color-accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -310,13 +299,13 @@
   .mobile-feat-card h4 {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #0d281e;
+    color: var(--color-on-accent);
     margin: 0;
   }
 
   .mobile-feat-card p {
     font-size: 14px;
-    color: #404945;
+    color: var(--color-text-muted);
     line-height: 1.55;
     margin: 0;
   }
@@ -328,8 +317,8 @@
   }
 
   .desk-cta-inner {
-    background: #013628;
-    color: #ffffff;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
     border-radius: 2rem;
     padding: 3rem 2rem;
     text-align: center;
@@ -348,7 +337,7 @@
 
   .desk-cta-inner p {
     font-size: 15px;
-    color: #a0d1bd;
+    color: var(--color-text-inverse-brand);
     max-width: 550px;
     margin-bottom: 2rem;
   }
@@ -359,8 +348,8 @@
     gap: 0.5rem;
     padding: 0.9rem 2rem;
     border-radius: 9999px;
-    background: #ffffff;
-    color: #013628;
+    background: var(--color-surface);
+    color: var(--color-text-brand);
     font-weight: 700;
     font-size: 15px;
     text-decoration: none;
@@ -369,7 +358,7 @@
   }
 
   .desk-cta-btn:hover {
-    background: #ecfdf5;
+    background: var(--color-surface-brand);
     transform: translateY(-2px);
   }
 

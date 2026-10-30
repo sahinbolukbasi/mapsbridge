@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import "./mobile-apps.css";
+import { PageHeader, PageShell } from "../components/ui";
 
 export default function MobileAppsComingSoonPage() {
   const [email, setEmail] = useState("");
@@ -19,15 +20,15 @@ export default function MobileAppsComingSoonPage() {
         prev.push(email.trim());
         localStorage.setItem(key, JSON.stringify(prev));
       }
-    } catch { // ignore
+    } catch {
+      // ignore
     }
     setSubmitted(true);
   }
 
   return (
-    <div className="mobile-apps-container">
-
-      <main className="mobile-apps-main">
+    <PageShell layout="landing" className="mobile-apps-container">
+      <div className="mobile-apps-main">
         {/* Hero Section */}
         <section className="mobile-apps-hero">
           <div className="mobile-apps-glow" />
@@ -40,10 +41,16 @@ export default function MobileAppsComingSoonPage() {
               </span>
             </div>
 
-            <h1 className="mobile-apps-title">
-              MapsBridge Mobil Uygulaması{" "}
-              <span className="mobile-apps-title-gradient">Çok Yakında</span> Cebinizde!
-            </h1>
+            <PageHeader
+              variant="hero"
+              titleText="Mobil uygulamalar"
+              title={
+                <>
+                  MapsBridge Mobil Uygulaması{" "}
+                  <span className="mobile-apps-title-gradient">Çok Yakında</span> Cebinizde!
+                </>
+              }
+            />
 
             <p className="mobile-apps-desc">
               Web Harita Masasında hazırladığınız rotalar, anında iPhone ve Android cihazınıza
@@ -54,7 +61,7 @@ export default function MobileAppsComingSoonPage() {
             {/* Store Preview Cards */}
             <div className="store-buttons-grid">
               <div className="store-coming-card">
-                <div className="store-icon-wrap">
+                <div className="store-icon-wrap" data-surface="inverse">
                   <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.21-1.98 1.08-3.11-1.05.05-2.31.7-3.06 1.55-.67.76-1.26 1.98-1.1 3.09 1.17.09 2.37-.74 3.08-1.53z" />
                   </svg>
@@ -67,7 +74,7 @@ export default function MobileAppsComingSoonPage() {
               </div>
 
               <div className="store-coming-card">
-                <div className="store-icon-wrap">
+                <div className="store-icon-wrap" data-surface="inverse">
                   <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
                     <path d="M3 20.5v-17c0-.59.34-1.11.84-1.35L13.69 12l-9.85 9.85c-.5-.24-.84-.76-.84-1.35m13.81-5.38L6.05 21.34l8.49-8.49 2.27 2.27m5.63-2.54L16.5 12l2.97-2.97 2.12 1.21c.63.36.63 1.26 0 1.62M6.05 2.66l10.76 6.22-2.27 2.27L6.05 2.66z" />
                   </svg>
@@ -105,7 +112,7 @@ export default function MobileAppsComingSoonPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="waitlist-input"
                   />
-                  <button type="submit" className="waitlist-btn">
+                  <button type="submit" className="waitlist-btn" data-surface="inverse">
                     <span>Haberdar Et</span>
                     <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
                       arrow_forward
@@ -121,7 +128,7 @@ export default function MobileAppsComingSoonPage() {
         <section className="mobile-features-section">
           <div className="mobile-features-header">
             <h2>Mobil Uygulamada Neler Olacak?</h2>
-            <p style={{ color: "#404945", fontSize: "15px" }}>
+            <p style={{ color: "var(--color-text-muted)", fontSize: "15px" }}>
               Masaüstündeki gücü cebinize taşıyan akıllı saha araçları.
             </p>
           </div>
@@ -175,21 +182,20 @@ export default function MobileAppsComingSoonPage() {
 
         {/* Web Desk CTA Banner */}
         <section className="mobile-desk-cta-banner">
-          <div className="desk-cta-inner">
+          <div className="desk-cta-inner" data-surface="inverse">
             <h3>Şimdilik Web Harita Masasını Keşfedin</h3>
             <p>
               Mobil sürüm hazırlanırken, tarayıcınızdan harita masasını tam kapasiteyle
               kullanabilir, rotalarınızı oluşturup Google Maps veya Apple Haritalara GPX olarak
               aktarabilirsiniz.
             </p>
-            <Link href="/maps/" className="desk-cta-btn">
+            <Link href="/maps/" className="desk-cta-btn" data-surface="default">
               <span>Web Harita Masasını Aç</span>
               <span className="material-symbols-outlined">open_in_new</span>
             </Link>
           </div>
         </section>
-      </main>
-
-    </div>
+      </div>
+    </PageShell>
   );
 }
