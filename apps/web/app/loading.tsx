@@ -16,10 +16,9 @@ export default function Loading() {
           borderRadius: "50%",
           border: "3px solid rgba(255,255,255,0.1)",
           borderTopColor: "#22c55e",
-          animation: "spin 0.8s linear infinite",
+          animation: "ui-spin 0.8s linear infinite",
         }}
       />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

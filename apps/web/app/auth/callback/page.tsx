@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { handleGoogleCredentialResponse } from "../../lib/cognito";
+import "./callback.css";
 
 export default function AuthCallbackPage() {
   const [status, setStatus] = useState("Oturum doğrulanıyor...");
@@ -78,6 +79,7 @@ export default function AuthCallbackPage() {
         }}
       >
         <div
+          className="auth-callback-spinner"
           style={{
             width: "48px",
             height: "48px",
@@ -85,7 +87,6 @@ export default function AuthCallbackPage() {
             borderTopColor: "transparent",
             borderRadius: "50%",
             margin: "0 auto 1.5rem auto",
-            animation: "spin 1s linear infinite",
           }}
         />
         <h2 style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0 0 0.5rem 0" }}>
@@ -95,14 +96,6 @@ export default function AuthCallbackPage() {
           {status}
         </p>
       </div>
-
-      <style jsx>{`
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
     </main>
   );
 }

@@ -86,7 +86,14 @@ test("dosyalar doğru layer'dadır (legacy / chrome / pages)", () => {
   for (const rel of cssFiles) {
     if (UNLAYERED.has(rel)) continue;
     const first = strip(read(rel)).split("\n")[1] ?? "";
-    const expected = LEGACY.includes(rel) ? "legacy" : CHROME.includes(rel) ? "chrome" : "pages";
+    const expected =
+      rel === "styles/base.css"
+        ? "base"
+        : LEGACY.includes(rel)
+          ? "legacy"
+          : CHROME.includes(rel)
+            ? "chrome"
+            : "pages";
     if (!first.startsWith(`@layer ${expected} {`))
       problems.push(`${rel}: beklenen @layer ${expected}, bulunan "${first}"`);
   }

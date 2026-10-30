@@ -1,4 +1,5 @@
 import "./styles/tokens.css";
+import "./styles/base.css";
 import { OperationsBanner } from "./components/operations-banner";
 import "./operations.css";
 import { siteOrigin } from "./lib/site-metadata";

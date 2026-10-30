@@ -248,8 +248,7 @@
     "app/k/k.css": 4,
     "app/messages/messages.css": 2,
     "app/profile/edit/edit.css": 1,
-    "app/profile/profile.css": 2,
-    "app/styles.css": 11
+    "app/profile/profile.css": 2
   },
   "G16c": {
     "app/ai-asistan/ai-asistan.css": 1,
@@ -268,7 +267,7 @@
     "app/profile/edit/edit.css": 4,
     "app/register/register.css": 2,
     "app/reset-password/reset-password.css": 3,
-    "app/styles.css": 24,
+    "app/styles.css": 4,
     "app/u/admin/admin.css": 22,
     "app/u/admin/ai-dashboard.css": 3
   },
@@ -293,7 +292,7 @@
     "app/operations.css": 2,
     "app/profile/edit/edit.css": 1,
     "app/profile/profile.css": 1,
-    "app/styles.css": 8,
+    "app/styles.css": 3,
     "app/u/admin/admin.css": 15,
     "app/u/admin/ai-dashboard.css": 6,
     "app/u/u.css": 2
@@ -315,16 +314,6 @@
     "app/messages/messages.css": 2,
     "app/profile/profile.css": 2,
     "app/styles.css": 7
-  },
-  "G20": {
-    "app/auth/callback/page.tsx": 1,
-    "app/desk/loading.tsx": 1,
-    "app/gezi-asistani/page.tsx": 1,
-    "app/haritalar/loading.tsx": 1,
-    "app/haritalar/page.tsx": 1,
-    "app/loading.tsx": 1,
-    "app/maps/loading.tsx": 1,
-    "app/travel-assistant/loading.tsx": 1
   },
   "G21": {
     "app/gezi-asistani/page.tsx": 1,

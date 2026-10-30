@@ -520,10 +520,18 @@ const RULES = {
   },
   G8() {
     const c = collector();
+    // base.css yalnızca konumlu/global yardımcıları taşır (design §2.6 base satırı, §3 SkipLink).
+    const BASE_UI = new Set([
+      "ui-visually-hidden",
+      "ui-visually-hidden--focusable",
+      "ui-skip-link",
+    ]);
     for (const abs of CSS_FILES) {
       if (appRel(abs) === "components/ui/ui.css") continue;
+      const isBase = appRel(abs) === "styles/base.css";
       for (const r of cssRules(abs))
-        for (const _ of r.selector.matchAll(/\.ui-[\w-]/g)) c.add(rel(abs), r.line, r.selector);
+        for (const m of r.selector.matchAll(/\.(ui-[\w-]+)/g))
+          if (!(isBase && BASE_UI.has(m[1]))) c.add(rel(abs), r.line, r.selector);
     }
     return c.result;
   },

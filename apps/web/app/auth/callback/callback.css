@@ -1,0 +1,7 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* Eski <style jsx> keyframes'i base.css'teki ui-spin'e taşındı (design §2.6, G20). */
+  .auth-callback-spinner {
+    animation: ui-spin 1s linear infinite;
+  }
+}
