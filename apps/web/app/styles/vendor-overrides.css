@@ -1,0 +1,18 @@
+/* Leaflet'e karşı yazılan kurallar (design §2.6 D16, guard G22).
+   Bu dosya BİLEREK layer'sızdır: Leaflet CSS'i runtime'da layer'sız <link> olarak eklenir ve
+   aynı özgüllükte kaynak sırasıyla karşılaştırılır. Yalnızca Leaflet'in ürettiği öğeleri
+   (L.divIcon className'leri) hedefleyen kurallar buraya girer. Renkler token'dır. */
+.custom-route-pin {
+  position: relative;
+  transition: transform 0.2s ease;
+}
+.custom-route-pin.is-visited .route-pin-wrapper {
+  opacity: 0.82;
+}
+.custom-route-pin.is-visited .route-pin-body {
+  background: var(--color-accent) !important;
+}
+.stitch-leaflet-marker-wrap {
+  background: transparent !important;
+  border: none !important;
+}

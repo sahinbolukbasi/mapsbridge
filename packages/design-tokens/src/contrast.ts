@@ -26,20 +26,40 @@ const UI = 3.0;
 
 // Açık yüzeylerde metin ve UI çiftleri.
 const LIGHT_SURFACES = ["color-bg", "color-surface"];
-const ALL_LIGHT = [...LIGHT_SURFACES, "color-surface-sunken", "color-surface-tint", "color-surface-brand"];
+const ALL_LIGHT = [
+  ...LIGHT_SURFACES,
+  "color-surface-sunken",
+  "color-surface-tint",
+  "color-surface-brand",
+];
 
 export const REQUIRED_PAIRS: Pair[] = [
   ...ALL_LIGHT.map((bg) => ({ fg: "color-text", bg, min: TEXT, note: "gövde metni" })),
   ...ALL_LIGHT.map((bg) => ({ fg: "color-text-muted", bg, min: TEXT, note: "ikincil metin" })),
-  ...LIGHT_SURFACES.map((bg) => ({ fg: "color-text-subtle", bg, min: TEXT, note: "ince metin yalnız bg/surface" })),
+  ...LIGHT_SURFACES.map((bg) => ({
+    fg: "color-text-subtle",
+    bg,
+    min: TEXT,
+    note: "ince metin yalnız bg/surface",
+  })),
   ...LIGHT_SURFACES.map((bg) => ({ fg: "color-link", bg, min: TEXT, note: "link" })),
   ...LIGHT_SURFACES.map((bg) => ({ fg: "color-text-brand", bg, min: TEXT, note: "marka metni" })),
   ...LIGHT_SURFACES.map((bg) => ({ fg: "focus-ring-color", bg, min: UI, note: "focus ring" })),
-  ...LIGHT_SURFACES.map((bg) => ({ fg: "color-border-control", bg, min: UI, note: "kontrol kenarlığı" })),
+  ...LIGHT_SURFACES.map((bg) => ({
+    fg: "color-border-control",
+    bg,
+    min: UI,
+    note: "kontrol kenarlığı",
+  })),
   { fg: "color-on-surface-brand", bg: "color-surface-brand", min: TEXT, note: "marka-soft üstü" },
   { fg: "color-on-surface-brand", bg: "color-surface-brand-strong", min: TEXT, note: "rozet" },
   { fg: "button-primary-fg", bg: "button-primary-bg", min: TEXT, note: "primary buton" },
-  { fg: "button-primary-fg", bg: "button-primary-bg-hover", min: TEXT, note: "primary buton hover" },
+  {
+    fg: "button-primary-fg",
+    bg: "button-primary-bg-hover",
+    min: TEXT,
+    note: "primary buton hover",
+  },
   { fg: "button-brand-fg", bg: "button-brand-bg", min: TEXT, note: "brand buton" },
   { fg: "button-brand-fg", bg: "button-brand-bg-hover", min: TEXT, note: "brand buton hover" },
   { fg: "button-secondary-fg", bg: "button-secondary-bg", min: TEXT, note: "secondary buton" },
@@ -59,11 +79,17 @@ export const REQUIRED_PAIRS: Pair[] = [
     { fg: "color-text-inverse-muted", bg, min: TEXT, note: "ters ikincil" },
     { fg: "color-text-inverse-subtle", bg, min: TEXT, note: "ters ince" },
     { fg: "color-link-inverse", bg, min: TEXT, note: "ters link" },
+    { fg: "color-text-inverse-brand", bg, min: TEXT, note: "ters marka metni" },
     { fg: "focus-ring-color-inverse", bg, min: UI, note: "ters focus" },
   ]),
   // Inverse kapsamındaki primary buton (emerald-400 + on-accent)
   { fg: "color-on-accent", bg: "color-accent-strong", min: TEXT, note: "inverse primary buton" },
-  { fg: "color-on-accent", bg: "color-link-inverse-hover", min: TEXT, note: "inverse primary buton hover" },
+  {
+    fg: "color-on-accent",
+    bg: "color-link-inverse-hover",
+    min: TEXT,
+    note: "inverse primary buton hover",
+  },
 ];
 
 export type Failure = Pair & { ratio: number };
@@ -79,7 +105,13 @@ export function checkPairs(pairs: Pair[] = REQUIRED_PAIRS): Failure[] {
 
 /** Inverse kapsamındaki her override hedefinin koyu yüzeyde okunur olduğunu doğrular. */
 export function checkInverseScope(): Failure[] {
-  const textLike = ["color-text", "color-text-muted", "color-text-subtle", "color-link", "color-text-brand"];
+  const textLike = [
+    "color-text",
+    "color-text-muted",
+    "color-text-subtle",
+    "color-link",
+    "color-text-brand",
+  ];
   const pairs: Pair[] = textLike.map((name) => ({
     fg: inverseOverrides[name],
     bg: "color-surface-inverse",

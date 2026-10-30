@@ -2,11 +2,15 @@
  * Tarayıcı taraması: her rota için verilen genişliklerde tam sayfa ekran görüntüsü,
  * tek genişlikte axe taraması ve çalışma anı header/footer tespiti.
  */
+import { fileURLToPath } from "node:url";
+import { decide } from "./route-policy.ts";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { chromium, type BrowserContext, type Page } from "playwright";
 import { isAdminRoute, routeSlug } from "./routes.ts";
+
+const LEAFLET_DIST = fileURLToPath(new URL("../../node_modules/leaflet/dist/", import.meta.url));
 
 export const PROD_API_ORIGIN = "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com";
 const IMPACTS = ["critical", "serious", "moderate", "minor"] as const;
@@ -98,8 +102,6 @@ async function prepareContext(
   withSession: boolean,
 ): Promise<void> {
   const base = new URL(opts.baseUrl);
-  const isLocal = (u: URL) =>
-    u.origin === base.origin || u.protocol === "data:" || u.protocol === "blob:";
   const apiMatch = (url: string) => opts.apiOrigins.some((o) => url.startsWith(o));
 
   await ctx.route("**/*", async (route) => {
@@ -126,14 +128,13 @@ async function prepareContext(
       }
       return;
     }
-    let parsed: URL;
-    try {
-      parsed = new URL(url);
-    } catch {
-      await route.abort();
-      return;
-    }
-    if (opts.allowExternal || isLocal(parsed)) await route.continue();
+    const decision = decide(url, {
+      baseOrigin: base.origin,
+      allowExternal: Boolean(opts.allowExternal),
+      leafletDist: LEAFLET_DIST,
+    });
+    if (decision.action === "continue") await route.continue();
+    else if (decision.action === "fulfill-file") await route.fulfill({ path: decision.path });
     else await route.abort("blockedbyclient");
   });
 

@@ -6,7 +6,13 @@ export type Rgba = { r: number; g: number; b: number; a: number };
 
 export function hexToRgb(hex: string): Rgba {
   const h = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const full =
+    h.length === 3
+      ? h
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : h;
   const n = Number.parseInt(full, 16);
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255, a: 1 };
 }
@@ -19,7 +25,8 @@ export function isPaletteName(name: string): name is PaletteName {
 
 /** Bir token'ı somut RGBA'ya çözer; döngü ve bilinmeyen ad hata verir. */
 export function resolveColor(name: string, seen: string[] = []): Rgba {
-  if (seen.includes(name)) throw new Error(`Döngüsel token referansı: ${[...seen, name].join(" → ")}`);
+  if (seen.includes(name))
+    throw new Error(`Döngüsel token referansı: ${[...seen, name].join(" → ")}`);
   const value = ALL[name];
   if (!value) throw new Error(`Bilinmeyen token: ${name}`);
   return resolveValue(value, [...seen, name]);

@@ -1,44 +1,47 @@
-/* Legal Pages (Gizlilik, Kosullar, Cerezler) */
-.legal {
-  max-width: var(--content-reading);
-  margin: 0 auto;
-  padding: 4rem var(--page-gutter) 6rem;
-  line-height: 1.65;
-}
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer legacy {
+  /* Legal Pages (Gizlilik, Kosullar, Cerezler) */
+  .legal {
+    max-width: var(--content-reading);
+    margin: 0 auto;
+    padding: 4rem var(--page-gutter) 6rem;
+    line-height: 1.65;
+  }
 
-.legal .brand {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--text);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 2rem;
-}
+  .legal .brand {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 2rem;
+  }
 
-.legal .brand span {
-  color: var(--brand);
-}
+  .legal .brand span {
+    color: var(--brand);
+  }
 
-.legal h1 {
-  font-size: var(--font-section);
-  line-height: var(--line-heading);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  margin: 0 0 1rem;
-}
+  .legal h1 {
+    font-size: var(--font-section);
+    line-height: var(--line-heading);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0 0 1rem;
+  }
 
-.legal h2 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--text);
-  margin: 2.5rem 0 0.75rem;
-}
+  .legal h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 2.5rem 0 0.75rem;
+  }
 
-.legal p {
-  color: var(--text-muted);
-  font-size: var(--font-body);
-  margin: 0 0 1rem;
+  .legal p {
+    color: var(--text-muted);
+    font-size: var(--font-body);
+    margin: 0 0 1rem;
+  }
 }

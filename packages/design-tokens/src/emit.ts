@@ -1,4 +1,5 @@
 // Token'lardan üç çıktı metni üretir (saf fonksiyonlar): web CSS, web TS, React Native teması.
+import { legacyAliases } from "./legacy-aliases.ts";
 import { dataPalette, illustration, palette, thirdParty } from "./palette.ts";
 import { resolveColor, resolveValue, rgbaString, type Rgba } from "./resolve.ts";
 import {
@@ -29,7 +30,8 @@ const HEADER = "OTOMATİK ÜRETİLDİ — packages/design-tokens. Elle düzenlem
 
 function cssColor(value: ColorValue): string {
   if ("ref" in value) return palette[value.ref];
-  if ("mix" in value) return `color-mix(in srgb, ${palette[value.mix]} ${value.percent}%, transparent)`;
+  if ("mix" in value)
+    return `color-mix(in srgb, ${palette[value.mix]} ${value.percent}%, transparent)`;
   return `var(--${value.token})`;
 }
 
@@ -43,8 +45,13 @@ export function toCss(): string {
   const decl = (name: string, value: string | number) => lines.push(`    --${name}: ${value};`);
   lines.push(`/* ${HEADER} */`);
   lines.push(LAYER_ORDER);
-  lines.push("/* Breakpoint'ler (px; @media içinde var() çalışmaz): " +
-    Object.entries(breakpoints).map(([k, v]) => `${k} ${v}`).join(", ") + " */");
+  lines.push(
+    "/* Breakpoint'ler (px; @media içinde var() çalışmaz): " +
+      Object.entries(breakpoints)
+        .map(([k, v]) => `${k} ${v}`)
+        .join(", ") +
+      " */",
+  );
   lines.push("@layer tokens {");
   lines.push("  :root {");
   lines.push("    color-scheme: light;");
@@ -74,6 +81,13 @@ export function toCss(): string {
   decl("focus-ring-offset", `${focusRing.offset}px`);
   for (const [name, v] of Object.entries(layout)) decl(name, v);
   decl("mobile-nav-height", "0px");
+  const aliases = Object.entries(legacyAliases);
+  if (aliases.length > 0) {
+    lines.push(
+      "    /* Geçici legacy alias'lar (legacy-aliases.ts; sayfalar taşındıkça boşalır) */",
+    );
+    for (const [name, value] of aliases) decl(name, value);
+  }
   lines.push("  }");
   // Breakpoint'e bağlı token'lar: taban da html'de (eşit özgüllük, kaynak sırası kazanır).
   lines.push("  html {");
@@ -152,7 +166,8 @@ export function toWebTs(): string {
 
 export function toNative(): string {
   const spacePx: Record<string, number> = {};
-  for (const [k, v] of Object.entries(space)) spacePx[k] = v === "0" ? 0 : Math.round(Number.parseFloat(v) * 16);
+  for (const [k, v] of Object.entries(space))
+    spacePx[k] = v === "0" ? 0 : Math.round(Number.parseFloat(v) * 16);
   const sizePx: Record<string, number> = {};
   for (const [k, rem] of Object.entries(fontSize)) sizePx[k] = Math.round(rem * 16 * 100) / 100;
   sizePx.display = 36;
@@ -179,7 +194,11 @@ export function toNative(): string {
     shadow: shadows,
     motion: { duration: motion.duration },
     touch: { min: control.touch },
-    control: { heightSm: control["height-sm"], height: control.height, heightLg: control["height-lg"] },
+    control: {
+      heightSm: control["height-sm"],
+      height: control.height,
+      heightLg: control["height-lg"],
+    },
     focusRing,
   };
   return [

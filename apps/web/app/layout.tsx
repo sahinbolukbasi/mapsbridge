@@ -17,6 +17,8 @@ import "./auth.css";
 import "./extras.css";
 import "./tw-utils.css";
 import "./components/header-nav.css";
+// Leaflet'e karşı layer'sız muaf kurallar; legacy global'lerden sonra (design §2.6).
+import "./styles/vendor-overrides.css";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],

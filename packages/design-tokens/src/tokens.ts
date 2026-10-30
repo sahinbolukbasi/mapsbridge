@@ -31,6 +31,10 @@ export const color: Record<string, ColorValue> = {
   "color-text-inverse-muted": r("slate-300"),
   "color-text-inverse-subtle": r("slate-400"),
   "color-text-brand": r("forest-900"),
+  // Koyu yüzey üstü soluk marka yeşili (Stitch on-primary-container)
+  "color-text-inverse-brand": r("forest-300"),
+  // Koyu zemin üstü vurgu/rozet yeşili (Stitch secondary-container)
+  "color-surface-brand-soft": r("forest-200"),
   // Marka ve etkileşim
   "color-brand": r("forest-700"),
   "color-brand-hover": r("forest-800"),
@@ -79,6 +83,7 @@ export const color: Record<string, ColorValue> = {
   "color-warning-bg-strong": r("amber-100"),
   "color-warning-border": r("amber-200"),
   "color-warning-icon": r("amber-500"),
+  "color-warning-strong": r("amber-700"),
   "color-danger": r("red-700"),
   "color-danger-bg": r("red-50"),
   "color-danger-border": r("red-200"),
@@ -170,7 +175,13 @@ export const fontSize = {
 } as const;
 export const fontSizeDisplay = "clamp(2rem, 4.5vw, 2.75rem)";
 
-export const fontWeight = { regular: 400, medium: 500, semibold: 600, bold: 700, extrabold: 800 } as const;
+export const fontWeight = {
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+  extrabold: 800,
+} as const;
 export const lineHeight = { tight: 1.15, heading: 1.2, body: 1.6 } as const;
 
 // px
@@ -221,7 +232,9 @@ export const layout = {
 export const responsive = {
   "app-header-height": {
     base: "calc(76px + env(safe-area-inset-top, 0px))",
-    overrides: [{ media: "(max-width: 767.98px)", value: "calc(64px + env(safe-area-inset-top, 0px))" }],
+    overrides: [
+      { media: "(max-width: 767px)", value: "calc(64px + env(safe-area-inset-top, 0px))" },
+    ],
   },
 } as const;
 

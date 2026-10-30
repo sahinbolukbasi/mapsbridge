@@ -1,0 +1,951 @@
+{
+  "_source": "design §2.4b / ART fold-decisions-r3.json",
+  "method": "CIE76 ΔE (Lab D65); canlı sayım: apps/web/app/**/*.{css,ts,tsx} (silinecek dosyalar, [data-theme=dark] kuralları ve lambda bundle yolları hariç) + apps/mobile/App.tsx,src/**; yalnızca en yakın UI primitive’ine ΔE > 6 olan değerler",
+  "rows": [
+    {
+      "hex": "#717974",
+      "target": "slate-500",
+      "code": "K",
+      "dE": 16.7,
+      "note": "beyazda 4.48 → 4.76"
+    },
+    {
+      "hex": "#404945",
+      "target": "sage-600",
+      "code": "P",
+      "dE": 0,
+      "note": "ikincil metin (text-muted)"
+    },
+    {
+      "hex": "#475569",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 16.1,
+      "note": "kabul 10: nötr birleştirme"
+    },
+    {
+      "hex": "#065f46",
+      "target": "emerald-800",
+      "code": "P",
+      "dE": 0,
+      "note": "marka-soft üstü metin"
+    },
+    {
+      "hex": "#dc2626",
+      "target": "red-700",
+      "code": "K",
+      "dE": 12,
+      "note": "tehlike tek rol, 4.83 → 6.47"
+    },
+    {
+      "hex": "#0284c7",
+      "target": "sky-600",
+      "code": "P",
+      "dE": 0,
+      "note": "gökmavisi ikon/vurgu (ulaşım, otel, Telegram); sky-400 beyazda 2.15 verirdi"
+    },
+    {
+      "hex": "#173b32",
+      "target": "forest-900",
+      "code": "B",
+      "dE": 6.3,
+      "note": "yüzey primitive ile yeniden yazılır (operations-banner → Alert, admin C16)"
+    },
+    {
+      "hex": "#d1fae5",
+      "target": "mint-100",
+      "code": "P",
+      "dE": 0,
+      "note": "rozet/seçili marka zemini"
+    },
+    {
+      "hex": "#fee2e2",
+      "target": "red-50",
+      "code": "E",
+      "dE": 7.3,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#d97706",
+      "target": "amber-700",
+      "code": "K",
+      "dE": 17.9,
+      "note": "metin olarak 3.19 → 4.84"
+    },
+    {
+      "hex": "#c0c8c3",
+      "target": "slate-300",
+      "code": "E",
+      "dE": 10.3,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#05513d",
+      "target": "emerald-800",
+      "code": "E",
+      "dE": 6.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#5e6d65",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 14.8,
+      "note": "kabul 7 (calm --text-muted)"
+    },
+    {
+      "hex": "#fef3c7",
+      "target": "amber-100",
+      "code": "P",
+      "dE": 0,
+      "note": "uyarı rozeti zemini"
+    },
+    {
+      "hex": "#0ea5e9",
+      "target": "sky-400",
+      "code": "E",
+      "dE": 10.6,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#bbf7d0",
+      "target": "forest-200",
+      "code": "E",
+      "dE": 7.6,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#b5e5c5",
+      "target": "forest-200",
+      "code": "B",
+      "dE": 6.6,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#16a34a",
+      "target": "emerald-600",
+      "code": "E",
+      "dE": 24.1,
+      "note": "UI kullanımı; models.ts:193 veri olarak birebir"
+    },
+    {
+      "hex": "#93c5fd",
+      "target": "blue-200",
+      "code": "E",
+      "dE": 15.2,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#dde2da",
+      "target": "slate-200",
+      "code": "E",
+      "dE": 8.7,
+      "note": "kabul 7 (calm --border)"
+    },
+    {
+      "hex": "#ef6b5b",
+      "target": "red-500",
+      "code": "E",
+      "dE": 17,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#4b5563",
+      "target": "slate-700",
+      "code": "E",
+      "dE": 9.7,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#031c13",
+      "target": "forest-950",
+      "code": "E",
+      "dE": 6,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#ffdad6",
+      "target": "red-200",
+      "code": "E",
+      "dE": 7.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#65776f",
+      "target": "slate-500",
+      "code": "B",
+      "dE": 18.5,
+      "note": "yüzey primitive ile yeniden yazılır (operations-banner → Alert, admin C16)"
+    },
+    {
+      "hex": "#0f766e",
+      "target": "forest-700",
+      "code": "E",
+      "dE": 10.5,
+      "note": "kabul 9 (mobil teal)"
+    },
+    {
+      "hex": "#202e29",
+      "target": "slate-900",
+      "code": "E",
+      "dE": 21,
+      "note": "kabul 7 (calm --text)"
+    },
+    {
+      "hex": "#15803d",
+      "target": "emerald-600",
+      "code": "E",
+      "dE": 15.9,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#005035",
+      "target": "emerald-800",
+      "code": "E",
+      "dE": 6.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#22c55e",
+      "target": "emerald-500",
+      "code": "B",
+      "dE": 24.8,
+      "note": "yüzey primitive ile yeniden yazılır (LoadingState)"
+    },
+    {
+      "hex": "#237146",
+      "target": "emerald-700",
+      "code": "B",
+      "dE": 7.8,
+      "note": "yüzey primitive ile yeniden yazılır (operations-banner → Alert, admin C16)"
+    },
+    {
+      "hex": "#dae2fd",
+      "target": "lavender-100",
+      "code": "E",
+      "dE": 8.3,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#6ee7b7",
+      "target": "emerald-400",
+      "code": "E",
+      "dE": 12.5,
+      "note": "koyu zeminde açık zümrüt"
+    },
+    {
+      "hex": "#4338ca",
+      "target": "blue-700",
+      "code": "E",
+      "dE": 12.6,
+      "note": "indigo → info mavisi"
+    },
+    {
+      "hex": "#e11d48",
+      "target": "red-500",
+      "code": "E",
+      "dE": 13.9,
+      "note": "beğeni/rose vurgusu"
+    },
+    {
+      "hex": "#dfe7e2",
+      "target": "slate-200",
+      "code": "B",
+      "dE": 6.8,
+      "note": "yüzey primitive ile yeniden yazılır (operations-banner → Alert, admin C16)"
+    },
+    {
+      "hex": "#cbd9d0",
+      "target": "slate-300",
+      "code": "B",
+      "dE": 11.2,
+      "note": "yüzey primitive ile yeniden yazılır (operations-banner → Alert, admin C16)"
+    },
+    {
+      "hex": "#991b1b",
+      "target": "red-700",
+      "code": "E",
+      "dE": 14,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#fef08a",
+      "target": "amber-200",
+      "code": "E",
+      "dE": 6.2,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#854d0e",
+      "target": "amber-800",
+      "code": "E",
+      "dE": 13,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#818cf8",
+      "target": "data-indigo",
+      "code": "E",
+      "dE": 24,
+      "note": "kategori/etiket vurgusu → veri paleti"
+    },
+    {
+      "hex": "#f87171",
+      "target": "red-500",
+      "code": "E",
+      "dE": 21,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#93d4ba",
+      "target": "forest-300",
+      "code": "E",
+      "dE": 6.3,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#1a1a1a",
+      "target": "forest-990",
+      "code": "E",
+      "dE": 7.3,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#166534",
+      "target": "emerald-700",
+      "code": "E",
+      "dE": 13.2,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#dce7e0",
+      "target": "mint-50",
+      "code": "E",
+      "dE": 7.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#7c3aed",
+      "target": "data-violet",
+      "code": "E",
+      "dE": 16.5,
+      "note": "kategori ikon/vurgu → veri paleti"
+    },
+    {
+      "hex": "#0d1117",
+      "target": "forest-990",
+      "code": "B",
+      "dE": 6.4,
+      "note": "yüzey primitive ile yeniden yazılır (LoadingState)"
+    },
+    {
+      "hex": "#0d9488",
+      "target": "data-teal",
+      "code": "E",
+      "dE": 14.2,
+      "note": "avatar zemini paleti → veri paleti"
+    },
+    {
+      "hex": "#96b7a7",
+      "target": "forest-300",
+      "code": "B",
+      "dE": 10.1,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#a34627",
+      "target": "amber-800",
+      "code": "B",
+      "dE": 9.1,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#153c36",
+      "target": "forest-900",
+      "code": "B",
+      "dE": 7.7,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#66756e",
+      "target": "slate-500",
+      "code": "B",
+      "dE": 17.8,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#8dbda9",
+      "target": "forest-300",
+      "code": "E",
+      "dE": 7.2,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#fbbf24",
+      "target": "amber-500",
+      "code": "E",
+      "dE": 16.8,
+      "note": "yıldız/vurgu"
+    },
+    {
+      "hex": "#0b101c",
+      "target": "slate-900",
+      "code": "E",
+      "dE": 6.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#60a5fa",
+      "target": "sky-600",
+      "code": "E",
+      "dE": 17.7,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#4f46e5",
+      "target": "blue-700",
+      "code": "E",
+      "dE": 14.7,
+      "note": "indigo → info mavisi"
+    },
+    {
+      "hex": "#61736a",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 17.2,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#fca5a5",
+      "target": "red-200",
+      "code": "E",
+      "dE": 17.9,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#a33030",
+      "target": "red-700",
+      "code": "B",
+      "dE": 19.3,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#2ea858",
+      "target": "emerald-500",
+      "code": "B",
+      "dE": 15.4,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#d3e4da",
+      "target": "mint-50",
+      "code": "B",
+      "dE": 8.9,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#8b2020",
+      "target": "amber-800",
+      "code": "B",
+      "dE": 21,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#52605b",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 9.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#fb923c",
+      "target": "data-orange",
+      "code": "E",
+      "dE": 17,
+      "note": "affiliate kart vurgusu → veri paleti"
+    },
+    {
+      "hex": "#3367d6",
+      "target": "google-blue-hover",
+      "code": "V",
+      "dE": 0,
+      "note": "Google buton hover (marka)"
+    },
+    {
+      "hex": "#bde6ce",
+      "target": "mint-100",
+      "code": "E",
+      "dE": 7.3,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#e1e9e3",
+      "target": "mint-50",
+      "code": "E",
+      "dE": 7.1,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#526559",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 12.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#fff6d8",
+      "target": "amber-100",
+      "code": "E",
+      "dE": 7.3,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#604716",
+      "target": "amber-800",
+      "code": "E",
+      "dE": 29.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#ccdcd2",
+      "target": "slate-200",
+      "code": "E",
+      "dE": 11.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#d8e6dd",
+      "target": "mint-50",
+      "code": "E",
+      "dE": 7.9,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#53695d",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 14.1,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#58685e",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 13.1,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#cf9c21",
+      "target": "amber-500",
+      "code": "E",
+      "dE": 18.6,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#635bff",
+      "target": "stripe",
+      "code": "V",
+      "dE": 0,
+      "note": "Stripe rozeti (marka)"
+    },
+    {
+      "hex": "#080d1a",
+      "target": "slate-900",
+      "code": "E",
+      "dE": 7.4,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#64746c",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 17.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#d7ecdf",
+      "target": "mint-50",
+      "code": "E",
+      "dE": 7,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#c84436",
+      "target": "red-700",
+      "code": "E",
+      "dE": 12.1,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#7f1d1d",
+      "target": "red-700",
+      "code": "E",
+      "dE": 27,
+      "note": "koyu kırmızı (en yakın amber-800 ton dışı)"
+    },
+    {
+      "hex": "#004d39",
+      "target": "forest-800",
+      "code": "E",
+      "dE": 6.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#333333",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 10,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#3730a3",
+      "target": "blue-700",
+      "code": "B",
+      "dE": 17.5,
+      "note": "SoftIcon indigo → Badge info"
+    },
+    {
+      "hex": "#9f1239",
+      "target": "red-700",
+      "code": "B",
+      "dE": 26.4,
+      "note": "SoftIcon rose → Badge danger"
+    },
+    {
+      "hex": "#172554",
+      "target": "globe-navy",
+      "code": "V",
+      "dE": 0,
+      "note": "küre illüstrasyonu (genişletilmiş görünüm)"
+    },
+    {
+      "hex": "#bae6fd",
+      "target": "globe-sky-100",
+      "code": "V",
+      "dE": 0,
+      "note": "küre illüstrasyonu"
+    },
+    {
+      "hex": "#0369a1",
+      "target": "globe-sky-700",
+      "code": "V",
+      "dE": 0,
+      "note": "küre illüstrasyonu (canvas)"
+    },
+    {
+      "hex": "#1e40af",
+      "target": "blue-700",
+      "code": "E",
+      "dE": 15.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#9333ea",
+      "target": "data-purple",
+      "code": "E",
+      "dE": 13.3,
+      "note": "travel-planner kategori vurgusu → veri paleti"
+    },
+    {
+      "hex": "#14532d",
+      "target": "emerald-800",
+      "code": "E",
+      "dE": 10.2,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#25d366",
+      "target": "whatsapp",
+      "code": "V",
+      "dE": 0,
+      "note": "WhatsApp paylaşım butonu (marka); beyaz metin 1.98 → metin slate-900 (K)"
+    },
+    {
+      "hex": "#4a5568",
+      "target": "slate-700",
+      "code": "E",
+      "dE": 8.9,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#89e4c0",
+      "target": "forest-200",
+      "code": "E",
+      "dE": 10.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#c4d1c9",
+      "target": "slate-300",
+      "code": "E",
+      "dE": 10.9,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#c7d6cc",
+      "target": "slate-300",
+      "code": "E",
+      "dE": 11.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#d7a438",
+      "target": "amber-500",
+      "code": "E",
+      "dE": 21.2,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#16213e",
+      "target": "slate-900",
+      "code": "E",
+      "dE": 8.4,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#e0e0ff",
+      "target": "lavender-100",
+      "code": "E",
+      "dE": 9.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#2a2a4a",
+      "target": "slate-800",
+      "code": "E",
+      "dE": 11,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#252547",
+      "target": "slate-800",
+      "code": "E",
+      "dE": 12.5,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#1e2d50",
+      "target": "slate-800",
+      "code": "E",
+      "dE": 11.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#003399",
+      "target": "blue-700",
+      "code": "E",
+      "dE": 21.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#e25847",
+      "target": "red-500",
+      "code": "E",
+      "dE": 12.1,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#ffe3e3",
+      "target": "red-50",
+      "code": "E",
+      "dE": 7.1,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#0b69a3",
+      "target": "sky-600",
+      "code": "E",
+      "dE": 11.5,
+      "note": "k.css rozet metni"
+    },
+    {
+      "hex": "#fc3f1d",
+      "target": "yandex",
+      "code": "V",
+      "dE": 0,
+      "note": "Yandex navigasyon butonu (marka); metin K kuralı"
+    },
+    {
+      "hex": "#805322",
+      "target": "amber-800",
+      "code": "B",
+      "dE": 19.8,
+      "note": "yüzey primitive ile yeniden yazılır (operations-banner → Alert)"
+    },
+    {
+      "hex": "#a33c25",
+      "target": "amber-800",
+      "code": "B",
+      "dE": 12.3,
+      "note": "yüzey primitive ile yeniden yazılır (operations-banner → Alert)"
+    },
+    {
+      "hex": "#6ffbbe",
+      "target": "emerald-400",
+      "code": "E",
+      "dE": 14.2,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#6f9687",
+      "target": "forest-700",
+      "code": "K",
+      "dE": 21.4,
+      "note": "beyaz metinle 3.29 → 6.48"
+    },
+    {
+      "hex": "#5b8373",
+      "target": "forest-700",
+      "code": "K",
+      "dE": 14.5,
+      "note": "beyaz metinle 4.25 → 6.48"
+    },
+    {
+      "hex": "#37a781",
+      "target": "emerald-600",
+      "code": "B",
+      "dE": 8.8,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#c4dace",
+      "target": "mint-100",
+      "code": "B",
+      "dE": 12.6,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#54665c",
+      "target": "sage-600",
+      "code": "B",
+      "dE": 12.4,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#886318",
+      "target": "amber-800",
+      "code": "B",
+      "dE": 25.2,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#ebcab2",
+      "target": "amber-100",
+      "code": "B",
+      "dE": 17.7,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#874921",
+      "target": "amber-800",
+      "code": "B",
+      "dE": 12.6,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#f0d4d4",
+      "target": "red-200",
+      "code": "B",
+      "dE": 9.5,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#7a2020",
+      "target": "amber-800",
+      "code": "B",
+      "dE": 23.8,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#c94040",
+      "target": "red-700",
+      "code": "B",
+      "dE": 14.5,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#f0d490",
+      "target": "amber-200",
+      "code": "B",
+      "dE": 12.6,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#b8dcc5",
+      "target": "forest-300",
+      "code": "B",
+      "dE": 6.5,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#fff0d2",
+      "target": "amber-100",
+      "code": "B",
+      "dE": 7.2,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#785119",
+      "target": "amber-800",
+      "code": "B",
+      "dE": 21.8,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#545f58",
+      "target": "sage-600",
+      "code": "B",
+      "dE": 9.3,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#dde5dd",
+      "target": "mint-50",
+      "code": "B",
+      "dE": 8.3,
+      "note": "yüzey primitive ile yeniden yazılır (admin C16)"
+    },
+    {
+      "hex": "#22382e",
+      "target": "forest-950",
+      "code": "E",
+      "dE": 7.9,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#fcd34d",
+      "target": "amber-200",
+      "code": "E",
+      "dE": 22.4,
+      "note": "mobil AI kartı uyarı metni (forest-950 üstünde 12.59)"
+    },
+    {
+      "hex": "#a5b4fc",
+      "target": "blue-200",
+      "code": "E",
+      "dE": 24.7,
+      "note": "mobil AI kartı ipucu metni (forest-950 üstünde 11.03)"
+    },
+    {
+      "hex": "#1c1917",
+      "target": "forest-990",
+      "code": "E",
+      "dE": 7.8,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#44403c",
+      "target": "sage-600",
+      "code": "E",
+      "dE": 6.4,
+      "note": "ton içi eşanlamlı"
+    },
+    {
+      "hex": "#f3e8ff",
+      "target": "lavender-100",
+      "code": "E",
+      "dE": 6.4,
+      "note": "ton içi eşanlamlı"
+    }
+  ]
+}

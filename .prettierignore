@@ -8,3 +8,8 @@ infra/terraform
 figma/
 apps/mobile/ios/Pods/
 results.sarif
+
+# design-tokens üretimi (npm run tokens:build); biçim üreticiye aittir
+apps/web/app/styles/tokens.css
+apps/web/app/lib/design-tokens.ts
+apps/mobile/src/theme/tokens.ts

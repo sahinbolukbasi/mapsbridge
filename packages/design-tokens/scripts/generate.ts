@@ -15,7 +15,9 @@ const outputs: Array<[string, () => string]> = [
 const failures = [...checkPairs(), ...checkInverseScope()];
 if (failures.length > 0) {
   for (const f of failures) {
-    console.error(`Kontrast yetersiz: ${f.fg} / ${f.bg} = ${f.ratio.toFixed(2)} (eşik ${f.min}; ${f.note})`);
+    console.error(
+      `Kontrast yetersiz: ${f.fg} / ${f.bg} = ${f.ratio.toFixed(2)} (eşik ${f.min}; ${f.note})`,
+    );
   }
   process.exit(1);
 }
@@ -31,7 +33,9 @@ for (const [rel, render] of outputs) {
       const a = current.split("\n");
       const b = next.split("\n");
       const i = b.findIndex((line, idx) => line !== a[idx]);
-      console.error(`Token çıktısı güncel değil: ${rel} (satır ${i + 1}). Çalıştır: npm run tokens:build`);
+      console.error(
+        `Token çıktısı güncel değil: ${rel} (satır ${i + 1}). Çalıştır: npm run tokens:build`,
+      );
       drift = true;
     }
   } else {
