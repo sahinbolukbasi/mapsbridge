@@ -1613,7 +1613,9 @@
     transform: translate(-50%, -100%);
     cursor: pointer;
     user-select: none;
-    filter: drop-shadow(0 6px 12px color-mix(in srgb, var(--color-surface-inverse) 28%, transparent));
+    filter: drop-shadow(
+      0 6px 12px color-mix(in srgb, var(--color-surface-inverse) 28%, transparent)
+    );
     transition:
       transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
       filter 0.2s ease;

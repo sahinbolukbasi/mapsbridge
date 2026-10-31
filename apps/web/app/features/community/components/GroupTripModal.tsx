@@ -235,9 +235,7 @@ export function GroupTripModal({
 
                 {/* Gezi Rotası Paylaş & Arkadaş Bul Barı */}
                 <div className="chat-route-share-bar">
-                  <span className="material-symbols-outlined">
-                    route
-                  </span>
+                  <span className="material-symbols-outlined">route</span>
                   <select
                     className="chat-route-select"
                     value={attachedRouteTitle}

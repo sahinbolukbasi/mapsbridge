@@ -171,7 +171,10 @@ export function SmartActions({ messages, route, currentTrip, onAction, busy }: S
   return (
     <div className="ai-smart-actions">
       <div className="ai-smart-actions-header">
-        <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "var(--color-accent)" }}>
+        <span
+          className="material-symbols-outlined"
+          style={{ fontSize: "14px", color: "var(--color-accent)" }}
+        >
           auto_awesome
         </span>
         <span>Hızlı İşlemler</span>

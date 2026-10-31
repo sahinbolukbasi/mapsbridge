@@ -201,7 +201,8 @@
     background: var(--color-surface-sunken);
     color: #58685e;
     cursor: not-allowed;
-  }  .billing-home button:focus-visible,
+  }
+  .billing-home button:focus-visible,
   .billing-home a:focus-visible {
     outline: 3px solid var(--color-warning-icon);
     outline-offset: 3px;

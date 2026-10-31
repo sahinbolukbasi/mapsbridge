@@ -10,7 +10,11 @@
     min-height: 100vh;
     background-color: var(--color-bg);
     color: var(--color-text);
-    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Plus Jakarta Sans",
+      system-ui,
+      -apple-system,
+      sans-serif;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -116,7 +120,11 @@
     border-radius: 9999px;
     background: color-mix(in srgb, var(--color-surface) 14%, transparent);
     color: var(--color-on-primary);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
@@ -350,7 +358,11 @@
     gap: 0.3rem;
     padding: 0.2rem 0.65rem;
     border-radius: 9999px;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -461,7 +473,11 @@
     border-radius: 9999px;
     background: var(--color-surface-tint);
     color: var(--color-text-brand);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 13px;
     font-weight: 600;
     border: none;
@@ -481,7 +497,11 @@
     border-radius: 9999px;
     background: var(--color-text-brand);
     color: var(--color-on-primary);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 13px;
     font-weight: 600;
     border: none;
@@ -597,7 +617,11 @@
     gap: 0.45rem;
     padding: 0.65rem 1.25rem;
     border-radius: 9999px;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
@@ -644,7 +668,11 @@
   .pub-filter-pill {
     padding: 0.35rem 0.85rem;
     border-radius: 9999px;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 500;
     border: none;
@@ -675,7 +703,11 @@
   .pub-city-chip {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 500;
     border: none;
@@ -759,7 +791,11 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     color: var(--color-text);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 700;
     display: flex;
@@ -820,7 +856,11 @@
   }
 
   .pub-route-price-label {
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 10px;
     font-weight: 700;
     color: var(--color-text-muted);
@@ -839,7 +879,11 @@
     gap: 0.35rem;
     padding: 0.5rem 1rem;
     border-radius: 9999px;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 600;
     border: none;
@@ -882,7 +926,11 @@
     border-radius: 9999px;
     background: var(--color-surface-tint);
     color: var(--color-text-brand);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 13px;
     font-weight: 600;
     border: none;
@@ -965,7 +1013,11 @@
   }
 
   .pub-badge-sub {
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 10px;
     color: var(--color-text-muted);
     font-weight: 500;
@@ -985,18 +1037,18 @@
     border-radius: 9999px;
     background: var(--color-surface-brand);
     color: var(--color-brand);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 600;
   }
 
   /* Collaborative CTA Card (Arda ile Birlikte Gez) */
   .pub-collaborate-card {
-    background: linear-gradient(
-      135deg,
-      var(--color-text-brand) 0%,
-      var(--color-brand-hover) 100%
-    );
+    background: linear-gradient(135deg, var(--color-text-brand) 0%, var(--color-brand-hover) 100%);
     color: var(--color-text-inverse);
     border-radius: 24px;
     padding: 1.75rem;
@@ -1021,7 +1073,11 @@
   }
 
   .pub-collab-tag {
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 11px;
     font-weight: 700;
     color: var(--color-link-inverse);
@@ -1055,7 +1111,11 @@
     border-radius: 9999px;
     background: var(--color-link-inverse);
     color: var(--color-surface-inverse);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 13px;
     font-weight: 700;
     border: none;
@@ -1078,7 +1138,11 @@
     border-radius: 9999px;
     background: var(--color-white-a12);
     color: var(--color-on-primary);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 600;
     border: none;

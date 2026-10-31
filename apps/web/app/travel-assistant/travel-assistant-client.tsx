@@ -173,18 +173,78 @@ const ACTIVITY_STARTERS = [
 // Quick guides map to exact KB documents — answered with minimal tokens via RAG context.
 // Order: vary by month so the selection feels fresh across seasons.
 const KB_QUICK_GUIDES = [
-  { flag: "🇹🇷", city: "İstanbul", topic: "Semtler", prompt: "İstanbul'un semtleri hakkında bilgi ver: Beyoğlu, Kadıköy, Karaköy" },
-  { flag: "🇪🇸", city: "Barcelona", topic: "Gaudi", prompt: "Barcelona'da Gaudí eserleri: Sagrada Família ve Park Güell ziyaret rehberi" },
-  { flag: "🇫🇷", city: "Paris", topic: "Müzeler", prompt: "Paris müzeleri rehberi: Louvre, Orsay ve Paris Müze Kartı" },
-  { flag: "🇯🇵", city: "Tokyo", topic: "Ulaşım", prompt: "Tokyo toplu ulaşım rehberi: JR, metro ve Suica kart nasıl kullanılır?" },
-  { flag: "🇮🇹", city: "Roma", topic: "Mutfak", prompt: "Roma mutfağı: cacio e pepe, carbonara ve pizza al taglio nerede yenir?" },
-  { flag: "🇳🇱", city: "Amsterdam", topic: "Müzeler", prompt: "Amsterdam müzeleri: Rijksmuseum, Van Gogh ve I Amsterdam City Card" },
-  { flag: "🇦🇪", city: "Dubai", topic: "Pratik", prompt: "Dubai seyahati pratik bilgiler: iklim, kıyafet kuralları ve metro rehberi" },
-  { flag: "🇬🇧", city: "Londra", topic: "Ücretsiz", prompt: "Londra'da ücretsiz müzeler: British Museum, Natural History Museum ziyaret rehberi" },
-  { flag: "🇹🇷", city: "Antalya", topic: "Doğa", prompt: "Antalya'da doğa: Düden Şelalesi, Köprülü Kanyon ve Kaş rehberi" },
-  { flag: "🇹🇷", city: "İstanbul", topic: "Ulaşım", prompt: "İstanbul toplu ulaşım rehberi: İstanbulkart, metro, tramvay ve vapur" },
-  { flag: "🇪🇸", city: "Barcelona", topic: "Yemek", prompt: "Barcelona mutfağı: tapas, vermouth kültürü ve La Boqueria pazarı" },
-  { flag: "🇫🇷", city: "Paris", topic: "Semtler", prompt: "Paris semtleri: Marais, Montmartre, Saint-Germain ve Bastille karakterleri" },
+  {
+    flag: "🇹🇷",
+    city: "İstanbul",
+    topic: "Semtler",
+    prompt: "İstanbul'un semtleri hakkında bilgi ver: Beyoğlu, Kadıköy, Karaköy",
+  },
+  {
+    flag: "🇪🇸",
+    city: "Barcelona",
+    topic: "Gaudi",
+    prompt: "Barcelona'da Gaudí eserleri: Sagrada Família ve Park Güell ziyaret rehberi",
+  },
+  {
+    flag: "🇫🇷",
+    city: "Paris",
+    topic: "Müzeler",
+    prompt: "Paris müzeleri rehberi: Louvre, Orsay ve Paris Müze Kartı",
+  },
+  {
+    flag: "🇯🇵",
+    city: "Tokyo",
+    topic: "Ulaşım",
+    prompt: "Tokyo toplu ulaşım rehberi: JR, metro ve Suica kart nasıl kullanılır?",
+  },
+  {
+    flag: "🇮🇹",
+    city: "Roma",
+    topic: "Mutfak",
+    prompt: "Roma mutfağı: cacio e pepe, carbonara ve pizza al taglio nerede yenir?",
+  },
+  {
+    flag: "🇳🇱",
+    city: "Amsterdam",
+    topic: "Müzeler",
+    prompt: "Amsterdam müzeleri: Rijksmuseum, Van Gogh ve I Amsterdam City Card",
+  },
+  {
+    flag: "🇦🇪",
+    city: "Dubai",
+    topic: "Pratik",
+    prompt: "Dubai seyahati pratik bilgiler: iklim, kıyafet kuralları ve metro rehberi",
+  },
+  {
+    flag: "🇬🇧",
+    city: "Londra",
+    topic: "Ücretsiz",
+    prompt: "Londra'da ücretsiz müzeler: British Museum, Natural History Museum ziyaret rehberi",
+  },
+  {
+    flag: "🇹🇷",
+    city: "Antalya",
+    topic: "Doğa",
+    prompt: "Antalya'da doğa: Düden Şelalesi, Köprülü Kanyon ve Kaş rehberi",
+  },
+  {
+    flag: "🇹🇷",
+    city: "İstanbul",
+    topic: "Ulaşım",
+    prompt: "İstanbul toplu ulaşım rehberi: İstanbulkart, metro, tramvay ve vapur",
+  },
+  {
+    flag: "🇪🇸",
+    city: "Barcelona",
+    topic: "Yemek",
+    prompt: "Barcelona mutfağı: tapas, vermouth kültürü ve La Boqueria pazarı",
+  },
+  {
+    flag: "🇫🇷",
+    city: "Paris",
+    topic: "Semtler",
+    prompt: "Paris semtleri: Marais, Montmartre, Saint-Germain ve Bastille karakterleri",
+  },
 ];
 
 function getSeasonalGuides(count = 6): typeof KB_QUICK_GUIDES {
@@ -305,7 +365,8 @@ export default function AIPage() {
     }
     try {
       userStorage.setItem(STORAGE_KEY, JSON.stringify(remaining.slice(0, 15)));
-    } catch { // ignore
+    } catch {
+      // ignore
     }
   }
 
@@ -318,12 +379,14 @@ export default function AIPage() {
         if (Array.isArray(trips) && trips.length > 0) {
           const tripIdParam = new URLSearchParams(window.location.search).get("tripId");
           const target =
-            (tripIdParam ? (trips as Trip[]).find((t) => t.id === tripIdParam) : null) || (trips as Trip[])[0];
+            (tripIdParam ? (trips as Trip[]).find((t) => t.id === tripIdParam) : null) ||
+            (trips as Trip[])[0];
           setCurrentTrip(target || null);
           return;
         }
       }
-    } catch { // ignore
+    } catch {
+      // ignore
     }
     setCurrentTrip(null);
   }
@@ -368,7 +431,9 @@ export default function AIPage() {
         address: place.address || place.label,
         lat: place.lat ?? 41.0082,
         lng: place.lng ?? 28.9784,
-        category: place.isHotel ? "otel" : ((place.category as import("../lib/trip/models").PinCategory) || "genel"),
+        category: place.isHotel
+          ? "otel"
+          : (place.category as import("../lib/trip/models").PinCategory) || "genel",
         dayIndex: 1,
         order: (trip!.days?.[0]?.pins?.length || 0) + 1,
         group: place.isHotel ? "Konaklama" : "Öneriler",
@@ -529,10 +594,9 @@ export default function AIPage() {
     const behavioralContext = interactionTracker.getPredictiveAIPrompt();
     const userMemoryContext = buildContextString(memory);
     // Append past destinations in a format supervisor.ts can extract
-    const destMemoryLine =
-      memory?.destinations?.length
-        ? `destinations: ${memory.destinations.slice(-5).join(", ")}`
-        : "";
+    const destMemoryLine = memory?.destinations?.length
+      ? `destinations: ${memory.destinations.slice(-5).join(", ")}`
+      : "";
     const combinedManifesto = [manifesto, behavioralContext, userMemoryContext, destMemoryLine]
       .filter(Boolean)
       .join("\n\n---\n\n");
@@ -548,13 +612,14 @@ export default function AIPage() {
             conversationId: target.id,
             trainingConsent,
             tripManifestoMarkdown: combinedManifesto || undefined,
-            conversationFlow: conversationFlow.activeTopic !== "none"
-              ? {
-                  activeTopic: conversationFlow.activeTopic,
-                  stage: conversationFlow.stage,
-                  gathered: conversationFlow.gathered,
-                }
-              : undefined,
+            conversationFlow:
+              conversationFlow.activeTopic !== "none"
+                ? {
+                    activeTopic: conversationFlow.activeTopic,
+                    stage: conversationFlow.stage,
+                    gathered: conversationFlow.gathered,
+                  }
+                : undefined,
           };
     if (!retry) {
       const message: ChatMessage = { id: crypto.randomUUID(), role: "user", text: promptToSend };
@@ -626,14 +691,21 @@ export default function AIPage() {
                   throw Object.assign(new Error(ev.message || "Stream error"), {
                     code: ev.code,
                     status:
-                      ev.code === "UNAUTHORIZED" ? 401
-                      : ev.code === "EMAIL_NOT_VERIFIED" ? 403
-                      : ev.code === "WALLET_FROZEN" ? 403
-                      : ev.code === "INSUFFICIENT_CREDITS" ? 402
-                      : ev.code === "USER_DAILY_LIMIT" || ev.code === "SERVICE_DAILY_LIMIT" ? 429
-                      : ev.code === "AI_DISABLED" ? 503
-                      : ev.code === "REQUEST_IN_PROGRESS" ? 409
-                      : 503,
+                      ev.code === "UNAUTHORIZED"
+                        ? 401
+                        : ev.code === "EMAIL_NOT_VERIFIED"
+                          ? 403
+                          : ev.code === "WALLET_FROZEN"
+                            ? 403
+                            : ev.code === "INSUFFICIENT_CREDITS"
+                              ? 402
+                              : ev.code === "USER_DAILY_LIMIT" || ev.code === "SERVICE_DAILY_LIMIT"
+                                ? 429
+                                : ev.code === "AI_DISABLED"
+                                  ? 503
+                                  : ev.code === "REQUEST_IN_PROGRESS"
+                                    ? 409
+                                    : 503,
                   });
               } catch (parseErr) {
                 if ((parseErr as { status?: unknown }).status) throw parseErr;
@@ -652,7 +724,9 @@ export default function AIPage() {
       setTrainingConsent(false);
       if (!result.orchestratorSummary?.trim() || (result.route && !isRoutePlan(result.route)))
         throw Error("Yanıt tamamlanamadı.");
-      const detectedDest = !result.route ? extractDestinationFromText(result.orchestratorSummary) : undefined;
+      const detectedDest = !result.route
+        ? extractDestinationFromText(result.orchestratorSummary)
+        : undefined;
 
       // Advance conversation flow after each AI response
       const updatedFlow = advanceFlow(
@@ -671,12 +745,15 @@ export default function AIPage() {
         flowReplies.length > 0
           ? flowReplies.map((r) => ({ label: r.label, prompt: r.message }))
           : detectedDest && !result.clarification?.quickOptions?.length
-          ? [
-              { label: `${detectedDest} rotası planla`, prompt: `${detectedDest} için rota planı oluştur` },
-              { label: "Uçuş fiyatları?", prompt: `${detectedDest} uçuş biletleri ne kadar?` },
-              { label: "Otel önerileri?", prompt: `${detectedDest} otel tavsiyeleri ver` },
-            ]
-          : undefined;
+            ? [
+                {
+                  label: `${detectedDest} rotası planla`,
+                  prompt: `${detectedDest} için rota planı oluştur`,
+                },
+                { label: "Uçuş fiyatları?", prompt: `${detectedDest} uçuş biletleri ne kadar?` },
+                { label: "Otel önerileri?", prompt: `${detectedDest} otel tavsiyeleri ver` },
+              ]
+            : undefined;
 
       const message: ChatMessage = {
         id: crypto.randomUUID(),
@@ -685,7 +762,9 @@ export default function AIPage() {
         ...(result.decisionSummary?.length ? { decisionSummary: result.decisionSummary } : {}),
         ...(result.clarification?.quickOptions?.length
           ? { quickReplies: result.clarification.quickOptions }
-          : travelQuickReplies ? { quickReplies: travelQuickReplies } : {}),
+          : travelQuickReplies
+            ? { quickReplies: travelQuickReplies }
+            : {}),
         ...(result.route
           ? {
               route: result.route,
@@ -757,17 +836,23 @@ export default function AIPage() {
           setAuthModal(true);
         }
       } else if (code === "EMAIL_NOT_VERIFIED") {
-        setError("AI asistanı kullanmak için e-postanızı onaylamanız gerekiyor. Giriş ekranından onay maili gönderebilirsiniz.");
+        setError(
+          "AI asistanı kullanmak için e-postanızı onaylamanız gerekiyor. Giriş ekranından onay maili gönderebilirsiniz.",
+        );
       } else if (code === "WALLET_FROZEN") {
         setError("Kredi hesabınız geçici olarak durduruldu. Detay için destek ekibine ulaşın.");
       } else if (code === "INSUFFICIENT_CREDITS" || err?.status === 402) {
         setError(err?.message || "Bu işlem için yeterli krediniz yok.");
         if (typeof window !== "undefined")
-          window.dispatchEvent(new CustomEvent("mapsbridge:open_upgrade_modal", {
-            detail: { reason: err?.message || "Krediniz yetersiz." },
-          }));
+          window.dispatchEvent(
+            new CustomEvent("mapsbridge:open_upgrade_modal", {
+              detail: { reason: err?.message || "Krediniz yetersiz." },
+            }),
+          );
       } else if (code === "USER_DAILY_LIMIT") {
-        setError("Bugünlük 20 mesaj sınırına ulaştınız. Sayaç her gece saat 03:00'te (Türkiye saati) sıfırlanır.");
+        setError(
+          "Bugünlük 20 mesaj sınırına ulaştınız. Sayaç her gece saat 03:00'te (Türkiye saati) sıfırlanır.",
+        );
       } else if (code === "SERVICE_DAILY_LIMIT") {
         setError("Servis kapasitesi şu an yoğun. Birkaç dakika sonra tekrar deneyin.");
         setRetryAvailable(true);
@@ -777,7 +862,11 @@ export default function AIPage() {
       } else if (code === "REQUEST_IN_PROGRESS") {
         setError("Önceki isteğin sonucu bekleniyor. Sonuç gelince otomatik gösterilecek.");
         setRetryAvailable(true);
-      } else if (shouldRecheckRequest(err) || err?.status === 408 || ((err?.status ?? 0) >= 500 && code !== "AI_RESULT_UNCONFIRMED")) {
+      } else if (
+        shouldRecheckRequest(err) ||
+        err?.status === 408 ||
+        ((err?.status ?? 0) >= 500 && code !== "AI_RESULT_UNCONFIRMED")
+      ) {
         setError("Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.");
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;
@@ -841,7 +930,10 @@ export default function AIPage() {
   }
   function dictate() {
     type SpeechRecognitionCtor = new () => SpeechRecognition;
-    const win = window as Window & { SpeechRecognition?: SpeechRecognitionCtor; webkitSpeechRecognition?: SpeechRecognitionCtor };
+    const win = window as Window & {
+      SpeechRecognition?: SpeechRecognitionCtor;
+      webkitSpeechRecognition?: SpeechRecognitionCtor;
+    };
     const Recognition = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (!Recognition) {
       setNotice("Bu tarayıcı sesli girişi desteklemiyor. Mesajını yazarak gönderebilirsin.");
@@ -888,25 +980,25 @@ export default function AIPage() {
   if (isAuthenticated === null) {
     return (
       <PageShell layout="app" className="ai-studio-shell">
-      <div
-        className="ai-studio-root"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          background: "var(--color-neutral-900)",
-        }}
-      >
         <div
-          className="ai-studio-main"
-          style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+          className="ai-studio-root"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "100vh",
+            background: "var(--color-neutral-900)",
+          }}
         >
-          {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
-          <PageHeader variant="hidden" />
-          <div className="ai-thinking-dot" style={{ width: "2rem", height: "2rem" }} />
+          <div
+            className="ai-studio-main"
+            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+          >
+            {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
+            <PageHeader variant="hidden" />
+            <div className="ai-thinking-dot" style={{ width: "2rem", height: "2rem" }} />
+          </div>
         </div>
-      </div>
       </PageShell>
     );
   }
@@ -917,1916 +1009,2044 @@ export default function AIPage() {
 
   return (
     <PageShell layout="app" className="ai-studio-shell">
-    <div className="ai-studio-root">
-      <div className="ai-studio-main">
-        {/* AC-34: tek h1 "Seyahat asistanı" (registry, görsel olarak gizli); marka satırı <p>. */}
-        <PageHeader variant="hidden" />
-        <div className={`ai-studio-workspace ${panelWide ? "ai-panel-wide" : ""}`}>
-          <aside className="ai-studio-aside-left" aria-label="Sohbetler">
-            <div>
-              <button className="ai-new-plan-btn" onClick={startNew} disabled={busy}>
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                  add
-                </span>
-                Yeni Seyahat Planla
-              </button>
-              <div className="ai-section-label-row">
-                <span className="ai-section-label">SOHBET GEÇMİŞİ</span>
-                {sessions.length > 0 && (
-                  <span className="ai-section-count">{sessions.length} Kayıt</span>
+      <div className="ai-studio-root">
+        <div className="ai-studio-main">
+          {/* AC-34: tek h1 "Seyahat asistanı" (registry, görsel olarak gizli); marka satırı <p>. */}
+          <PageHeader variant="hidden" />
+          <div className={`ai-studio-workspace ${panelWide ? "ai-panel-wide" : ""}`}>
+            <aside className="ai-studio-aside-left" aria-label="Sohbetler">
+              <div>
+                <button className="ai-new-plan-btn" onClick={startNew} disabled={busy}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    add
+                  </span>
+                  Yeni Seyahat Planla
+                </button>
+                <div className="ai-section-label-row">
+                  <span className="ai-section-label">SOHBET GEÇMİŞİ</span>
+                  {sessions.length > 0 && (
+                    <span className="ai-section-count">{sessions.length} Kayıt</span>
+                  )}
+                </div>
+                <div className="ai-session-list ai-custom-scrollbar">
+                  {sessions.map((s, idx) => (
+                    <div key={s.id} className="ai-history-item-wrap">
+                      <button
+                        disabled={busy}
+                        className={`ai-history-item ${s.id === activeId ? "active" : ""}`}
+                        onClick={() => select(s.id)}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            flex: 1,
+                            overflow: "hidden",
+                          }}
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            style={{
+                              fontSize: "16px",
+                              flexShrink: 0,
+                              color:
+                                s.id === activeId
+                                  ? "var(--color-accent)"
+                                  : "var(--color-text-subtle)",
+                            }}
+                          >
+                            {s.id === activeId ? "chat_bubble" : "history"}
+                          </span>
+                          <span
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {s.title}
+                          </span>
+                        </div>
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            flexShrink: 0,
+                            opacity: 0.7,
+                            letterSpacing: "0.04em",
+                          }}
+                        >
+                          {s.id.slice(0, 2).toUpperCase()}-{(idx + 1).toString().padStart(3, "0")}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="ai-history-delete-btn"
+                        onClick={(e) => deleteSession(s.id, e)}
+                        title="Sohbeti Sil"
+                        aria-label="Sohbeti Sil"
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                          delete
+                        </span>
+                      </button>
+                    </div>
+                  ))}
+                  {!sessions.length && <p className="ai-muted">Birlikte ilk gezini planlayalım.</p>}
+                </div>
+              </div>
+              <div className="ai-quota-card">
+                <strong>{wallet ? `${wallet.credits} kredi` : "Seyahat danışmanın"}</strong>
+                <p>
+                  Tercih soruları ücretsiz · Sohbet 1 kredi · Rota oluşturma / düzenleme 5 kredi
+                </p>
+                {wallet?.usage && (
+                  <p>
+                    Bugün {wallet.usage.requestsToday} / {wallet.usage.dailyLimit} mesaj denemesi.
+                    Yenilenme:{" "}
+                    {new Date(wallet.usage.resetsAt).toLocaleTimeString("tr-TR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    .
+                  </p>
                 )}
               </div>
-              <div className="ai-session-list ai-custom-scrollbar">
-                {sessions.map((s, idx) => (
-                  <div key={s.id} className="ai-history-item-wrap">
-                    <button
-                      disabled={busy}
-                      className={`ai-history-item ${s.id === activeId ? "active" : ""}`}
-                      onClick={() => select(s.id)}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          flex: 1,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{
-                            fontSize: "16px",
-                            flexShrink: 0,
-                            color: s.id === activeId ? "var(--color-accent)" : "var(--color-text-subtle)",
-                          }}
-                        >
-                          {s.id === activeId ? "chat_bubble" : "history"}
-                        </span>
-                        <span
-                          style={{
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {s.title}
+            </aside>
+            <section className="ai-studio-chat-section" aria-label="Seyahat sohbeti">
+              <div className="ai-chat-header">
+                <div className="ai-chat-header-brand">
+                  <div className="ai-chat-brand-icon">
+                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      neurology
+                    </span>
+                  </div>
+                  <div>
+                    <div className="ai-chat-brand-title-row">
+                      <p className="ai-chat-title">MapsBridge AI</p>
+                      <span className="ai-online-dot" aria-label="Çevrimiçi" />
+                    </div>
+                    <span className="ai-muted" style={{ fontSize: "11.5px" }}>
+                      Seyahat asistanın hazır
+                    </span>
+                  </div>
+                </div>
+                <div className="ai-header-actions">
+                  <button className="ai-small-btn ai-new-mobile" onClick={startNew} disabled={busy}>
+                    Yeni
+                  </button>
+                  <button
+                    className="ai-icon-btn"
+                    aria-expanded={panelOpen}
+                    aria-controls="route-draft"
+                    onClick={() => {
+                      setPanelOpen(!panelOpen);
+                      setMobileTab(panelOpen ? "chat" : "draft");
+                    }}
+                    title={panelOpen ? "Sohbeti büyüt" : "Rota panelini aç"}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      {panelOpen ? "close_fullscreen" : "open_in_full"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {session?.context && (
+                <div className="ai-context-strip" aria-label="Gezi tercihleri">
+                  {session.context.destination && <span>{session.context.destination}</span>}
+                  {session.context.days && <span>{session.context.days} gün</span>}
+                  {session.context.interests?.map((i) => (
+                    <span key={i}>{i}</span>
+                  ))}
+                </div>
+              )}
+              {(memory.interests.length > 0 ||
+                memory.destinations.length > 0 ||
+                memory.budgetHabit) && (
+                <div className="ai-user-memory-strip" aria-label="Kullanıcı hafızası">
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "14px", color: "var(--color-accent)" }}
+                  >
+                    psychology
+                  </span>
+                  <span style={{ fontWeight: 600, color: "var(--color-success-strong)" }}>
+                    Seni tanıyorum:
+                  </span>
+                  {memory.destinations.slice(-2).map((d) => (
+                    <span key={d} className="ai-user-memory-pill">
+                      {d}
+                    </span>
+                  ))}
+                  {memory.interests.slice(-3).map((i) => (
+                    <span key={i} className="ai-user-memory-pill">
+                      {i}
+                    </span>
+                  ))}
+                  {memory.budgetHabit && (
+                    <span className="ai-user-memory-pill">
+                      {memory.budgetHabit === "budget"
+                        ? "ekonomik"
+                        : memory.budgetHabit === "luxury"
+                          ? "lüks"
+                          : "orta bütçe"}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="ai-user-memory-clear"
+                    onClick={clearMemory}
+                    title="Hafızayı sıfırla"
+                  >
+                    Sıfırla
+                  </button>
+                </div>
+              )}
+              <div
+                className="ai-chat-feed ai-custom-scrollbar"
+                role="log"
+                aria-live="polite"
+                aria-busy={busy}
+              >
+                {!session?.messages.length && (
+                  <div className="ai-welcome-hub">
+                    <div className="ai-welcome-header">
+                      <div className="ai-welcome-avatar">
+                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                          waving_hand
                         </span>
                       </div>
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          flexShrink: 0,
-                          opacity: 0.7,
-                          letterSpacing: "0.04em",
-                        }}
-                      >
-                        {s.id.slice(0, 2).toUpperCase()}-{(idx + 1).toString().padStart(3, "0")}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      className="ai-history-delete-btn"
-                      onClick={(e) => deleteSession(s.id, e)}
-                      title="Sohbeti Sil"
-                      aria-label="Sohbeti Sil"
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
-                        delete
-                      </span>
-                    </button>
-                  </div>
-                ))}
-                {!sessions.length && <p className="ai-muted">Birlikte ilk gezini planlayalım.</p>}
-              </div>
-            </div>
-            <div className="ai-quota-card">
-              <strong>{wallet ? `${wallet.credits} kredi` : "Seyahat danışmanın"}</strong>
-              <p>Tercih soruları ücretsiz · Sohbet 1 kredi · Rota oluşturma / düzenleme 5 kredi</p>
-              {wallet?.usage && (
-                <p>
-                  Bugün {wallet.usage.requestsToday} / {wallet.usage.dailyLimit} mesaj denemesi.
-                  Yenilenme:{" "}
-                  {new Date(wallet.usage.resetsAt).toLocaleTimeString("tr-TR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                  .
-                </p>
-              )}
-            </div>
-          </aside>
-          <section className="ai-studio-chat-section" aria-label="Seyahat sohbeti">
-            <div className="ai-chat-header">
-              <div className="ai-chat-header-brand">
-                <div className="ai-chat-brand-icon">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                    neurology
-                  </span>
-                </div>
-                <div>
-                  <div className="ai-chat-brand-title-row">
-                    <p className="ai-chat-title">MapsBridge AI</p>
-                    <span className="ai-online-dot" aria-label="Çevrimiçi" />
-                  </div>
-                  <span className="ai-muted" style={{ fontSize: "11.5px" }}>
-                    Seyahat asistanın hazır
-                  </span>
-                </div>
-              </div>
-              <div className="ai-header-actions">
-                <button className="ai-small-btn ai-new-mobile" onClick={startNew} disabled={busy}>
-                  Yeni
-                </button>
-                <button
-                  className="ai-icon-btn"
-                  aria-expanded={panelOpen}
-                  aria-controls="route-draft"
-                  onClick={() => {
-                    setPanelOpen(!panelOpen);
-                    setMobileTab(panelOpen ? "chat" : "draft");
-                  }}
-                  title={panelOpen ? "Sohbeti büyüt" : "Rota panelini aç"}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                    {panelOpen ? "close_fullscreen" : "open_in_full"}
-                  </span>
-                </button>
-              </div>
-            </div>
+                      <div className="ai-welcome-title-wrap">
+                        <h2>İyi günler! Nereye gitmek istersin?</h2>
+                        <p>
+                          Bir şehir seç veya ne yapmak istediğini söyle — rotanı saniyeler içinde
+                          oluşturayım.
+                        </p>
+                      </div>
+                    </div>
 
-            {session?.context && (
-              <div className="ai-context-strip" aria-label="Gezi tercihleri">
-                {session.context.destination && <span>{session.context.destination}</span>}
-                {session.context.days && <span>{session.context.days} gün</span>}
-                {session.context.interests?.map((i) => (
-                  <span key={i}>{i}</span>
-                ))}
-              </div>
-            )}
-            {(memory.interests.length > 0 || memory.destinations.length > 0 || memory.budgetHabit) && (
-              <div className="ai-user-memory-strip" aria-label="Kullanıcı hafızası">
-                <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "var(--color-accent)" }}>
-                  psychology
-                </span>
-                <span style={{ fontWeight: 600, color: "var(--color-success-strong)" }}>Seni tanıyorum:</span>
-                {memory.destinations.slice(-2).map((d) => (
-                  <span key={d} className="ai-user-memory-pill">{d}</span>
-                ))}
-                {memory.interests.slice(-3).map((i) => (
-                  <span key={i} className="ai-user-memory-pill">{i}</span>
-                ))}
-                {memory.budgetHabit && (
-                  <span className="ai-user-memory-pill">
-                    {memory.budgetHabit === "budget" ? "ekonomik" : memory.budgetHabit === "luxury" ? "lüks" : "orta bütçe"}
-                  </span>
+                    <div className="ai-welcome-section">
+                      <h3 className="ai-welcome-section-title">
+                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                          flight_takeoff
+                        </span>
+                        Popüler Destinasyonlar
+                      </h3>
+                      <div className="ai-destination-grid">
+                        {POPULAR_DESTINATIONS.map((d) => (
+                          <button
+                            key={d.city}
+                            type="button"
+                            className="ai-destination-chip"
+                            onClick={() => {
+                              setInput(d.prompt);
+                              void send(false, d.prompt);
+                            }}
+                            disabled={busy}
+                          >
+                            <span className="ai-destination-flag">{d.flag}</span>
+                            <div className="ai-destination-text">
+                              <strong>{d.city}</strong>
+                              <span>{d.country}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="ai-welcome-section">
+                      <h3 className="ai-welcome-section-title">
+                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                          explore
+                        </span>
+                        Ne Yapmak İstersin?
+                      </h3>
+                      <div className="ai-activity-grid">
+                        {ACTIVITY_STARTERS.map((a) => (
+                          <button
+                            key={a.label}
+                            type="button"
+                            className="ai-activity-card"
+                            onClick={() => {
+                              setInput(a.prompt);
+                              void send(false, a.prompt);
+                            }}
+                            disabled={busy}
+                          >
+                            <span className="material-symbols-outlined ai-activity-icon">
+                              {a.icon}
+                            </span>
+                            <div className="ai-activity-text">
+                              <strong>{a.label}</strong>
+                              <span>{a.desc}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="ai-welcome-section">
+                      <h3 className="ai-welcome-section-title">
+                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                          menu_book
+                        </span>
+                        Hızlı Rehberler
+                      </h3>
+                      <div className="ai-kb-guide-grid">
+                        {getSeasonalGuides(6).map((g) => (
+                          <button
+                            key={`${g.city}-${g.topic}`}
+                            type="button"
+                            className="ai-kb-guide-chip"
+                            onClick={() => {
+                              setInput(g.prompt);
+                              void send(false, g.prompt);
+                            }}
+                            disabled={busy}
+                          >
+                            <span className="ai-kb-guide-flag">{g.flag}</span>
+                            <div className="ai-kb-guide-text">
+                              <strong>{g.city}</strong>
+                              <span>{g.topic}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 )}
-                <button
-                  type="button"
-                  className="ai-user-memory-clear"
-                  onClick={clearMemory}
-                  title="Hafızayı sıfırla"
-                >
-                  Sıfırla
-                </button>
-              </div>
-            )}
-            <div
-              className="ai-chat-feed ai-custom-scrollbar"
-              role="log"
-              aria-live="polite"
-              aria-busy={busy}
-            >
-              {!session?.messages.length && (
-                <div className="ai-welcome-hub">
-                  <div className="ai-welcome-header">
-                    <div className="ai-welcome-avatar">
-                      <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
-                        waving_hand
-                      </span>
-                    </div>
-                    <div className="ai-welcome-title-wrap">
-                      <h2>İyi günler! Nereye gitmek istersin?</h2>
-                      <p>
-                        Bir şehir seç veya ne yapmak istediğini söyle — rotanı saniyeler içinde
-                        oluşturayım.
-                      </p>
-                    </div>
-                  </div>
+                {session?.messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={m.role === "user" ? "ai-msg-user-container" : "ai-msg-bot-container"}
+                  >
+                    <div className={m.role === "user" ? "ai-msg-user-bubble" : "ai-msg-bot-bubble"}>
+                      {m.role === "assistant" ? (
+                        <AssistantMessage text={m.text} />
+                      ) : (
+                        <p style={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
+                          {m.text}
+                        </p>
+                      )}
 
-                  <div className="ai-welcome-section">
-                    <h3 className="ai-welcome-section-title">
-                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                        flight_takeoff
-                      </span>
-                      Popüler Destinasyonlar
-                    </h3>
-                    <div className="ai-destination-grid">
-                      {POPULAR_DESTINATIONS.map((d) => (
-                        <button
-                          key={d.city}
-                          type="button"
-                          className="ai-destination-chip"
-                          onClick={() => {
-                            setInput(d.prompt);
-                            void send(false, d.prompt);
-                          }}
-                          disabled={busy}
-                        >
-                          <span className="ai-destination-flag">{d.flag}</span>
-                          <div className="ai-destination-text">
-                            <strong>{d.city}</strong>
-                            <span>{d.country}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="ai-welcome-section">
-                    <h3 className="ai-welcome-section-title">
-                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                        explore
-                      </span>
-                      Ne Yapmak İstersin?
-                    </h3>
-                    <div className="ai-activity-grid">
-                      {ACTIVITY_STARTERS.map((a) => (
-                        <button
-                          key={a.label}
-                          type="button"
-                          className="ai-activity-card"
-                          onClick={() => {
-                            setInput(a.prompt);
-                            void send(false, a.prompt);
-                          }}
-                          disabled={busy}
-                        >
-                          <span className="material-symbols-outlined ai-activity-icon">
-                            {a.icon}
-                          </span>
-                          <div className="ai-activity-text">
-                            <strong>{a.label}</strong>
-                            <span>{a.desc}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="ai-welcome-section">
-                    <h3 className="ai-welcome-section-title">
-                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                        menu_book
-                      </span>
-                      Hızlı Rehberler
-                    </h3>
-                    <div className="ai-kb-guide-grid">
-                      {getSeasonalGuides(6).map((g) => (
-                        <button
-                          key={`${g.city}-${g.topic}`}
-                          type="button"
-                          className="ai-kb-guide-chip"
-                          onClick={() => {
-                            setInput(g.prompt);
-                            void send(false, g.prompt);
-                          }}
-                          disabled={busy}
-                        >
-                          <span className="ai-kb-guide-flag">{g.flag}</span>
-                          <div className="ai-kb-guide-text">
-                            <strong>{g.city}</strong>
-                            <span>{g.topic}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-              {session?.messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={m.role === "user" ? "ai-msg-user-container" : "ai-msg-bot-container"}
-                >
-                  <div className={m.role === "user" ? "ai-msg-user-bubble" : "ai-msg-bot-bubble"}>
-                    {m.role === "assistant" ? (
-                      <AssistantMessage text={m.text} />
-                    ) : (
-                      <p style={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
-                        {m.text}
-                      </p>
-                    )}
-
-                    {/* Bot Mesaj İşlem Araçları (Kopyala, Rotayı Aç) */}
-                    {m.role === "assistant" && (
-                      <div className="ai-msg-actions-row">
-                        <button
-                          type="button"
-                          className="ai-msg-action-btn"
-                          onClick={() => copyMessageText(m.id, m.text)}
-                          title="Mesajı Kopyala"
-                        >
-                          <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
-                            {copiedMsgId === m.id ? "check" : "content_copy"}
-                          </span>
-                          <span>{copiedMsgId === m.id ? "Kopyalandı" : "Kopyala"}</span>
-                        </button>
-                        {m.route && isRoutePlan(m.route) && (
+                      {/* Bot Mesaj İşlem Araçları (Kopyala, Rotayı Aç) */}
+                      {m.role === "assistant" && (
+                        <div className="ai-msg-actions-row">
                           <button
                             type="button"
                             className="ai-msg-action-btn"
-                            onClick={() => showRoute(m.route!, m)}
-                            title="Rotayı Panoda Aç"
+                            onClick={() => copyMessageText(m.id, m.text)}
+                            title="Mesajı Kopyala"
                           >
                             <span
                               className="material-symbols-outlined"
-                              style={{ fontSize: "13px", color: "var(--color-accent)" }}
+                              style={{ fontSize: "13px" }}
                             >
-                              map
+                              {copiedMsgId === m.id ? "check" : "content_copy"}
                             </span>
-                            <span>Rotayı İncele ({m.route.stops.length} Durak)</span>
+                            <span>{copiedMsgId === m.id ? "Kopyalandı" : "Kopyala"}</span>
                           </button>
-                        )}
-                        {currentTrip && (
-                          <a
-                            href={`/maps/?tripId=${currentTrip.id}`}
-                            className="ai-msg-action-btn"
-                            title="Haritada İncele"
-                            style={{ textDecoration: "none" }}
-                          >
-                            <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: "13px", color: "#0ea5e9" }}
+                          {m.route && isRoutePlan(m.route) && (
+                            <button
+                              type="button"
+                              className="ai-msg-action-btn"
+                              onClick={() => showRoute(m.route!, m)}
+                              title="Rotayı Panoda Aç"
                             >
-                              open_in_new
-                            </span>
-                            <span>Haritada Aç</span>
-                          </a>
-                        )}
-                      </div>
-                    )}
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "13px", color: "var(--color-accent)" }}
+                              >
+                                map
+                              </span>
+                              <span>Rotayı İncele ({m.route.stops.length} Durak)</span>
+                            </button>
+                          )}
+                          {currentTrip && (
+                            <a
+                              href={`/maps/?tripId=${currentTrip.id}`}
+                              className="ai-msg-action-btn"
+                              title="Haritada İncele"
+                              style={{ textDecoration: "none" }}
+                            >
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "13px", color: "#0ea5e9" }}
+                              >
+                                open_in_new
+                              </span>
+                              <span>Haritada Aç</span>
+                            </a>
+                          )}
+                        </div>
+                      )}
 
-                    {m.role === "assistant" &&
-                      m.decisionSummary &&
-                      m.decisionSummary.length > 0 && (
+                      {m.role === "assistant" &&
+                        m.decisionSummary &&
+                        m.decisionSummary.length > 0 && (
+                          <div
+                            style={{
+                              marginTop: "0.55rem",
+                              padding: "0.55rem 0.7rem",
+                              borderRadius: "10px",
+                              background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+                              border: "1px solid var(--color-accent-a20)",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                color: "var(--color-accent)",
+                                marginBottom: "0.25rem",
+                              }}
+                            >
+                              🧭 Bu seçimi neden yaptım?
+                            </div>
+                            <ul
+                              style={{
+                                margin: 0,
+                                paddingLeft: "1.1rem",
+                                fontSize: "12px",
+                                lineHeight: 1.45,
+                              }}
+                            >
+                              {m.decisionSummary.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                      {m.role === "assistant" && m.route && isRoutePlan(m.route) && (
+                        <>
+                          <div className="ai-route-sync-card">
+                            <span>
+                              {m.route.title} · {m.route.stops.length} durak
+                            </span>
+                            <button className="ai-small-btn" onClick={() => showRoute(m.route!, m)}>
+                              Rotayı göster
+                            </button>
+                          </div>
+                          <Button variant="link" onClick={openPrep}>
+                            {t(
+                              "ai.prepLink",
+                              "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün",
+                            )}
+                          </Button>
+                        </>
+                      )}
+
+                      {m.role === "assistant" &&
+                        !m.route &&
+                        shouldSurfacePricing(conversationFlow) &&
+                        (() => {
+                          const dest = extractDestinationFromText(m.text);
+                          return dest ? (
+                            <Button variant="link" onClick={openPrep}>
+                              {t(
+                                "ai.prepLink",
+                                "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün",
+                              )}
+                            </Button>
+                          ) : null;
+                        })()}
+
+                      {m.role === "assistant" && m.quickReplies && m.quickReplies.length > 0 && (
                         <div
                           style={{
-                            marginTop: "0.55rem",
-                            padding: "0.55rem 0.7rem",
-                            borderRadius: "10px",
-                            background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
-                            border: "1px solid var(--color-accent-a20)",
+                            marginTop: "0.5rem",
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "6px",
                           }}
                         >
-                          <div
+                          {m.quickReplies.map((qr, qidx) => {
+                            const label = typeof qr === "string" ? qr : qr.label;
+                            const prompt = typeof qr === "string" ? qr : qr.prompt;
+                            return (
+                              <button
+                                key={qidx}
+                                type="button"
+                                className="ai-small-btn"
+                                style={{
+                                  fontSize: "11.5px",
+                                  padding: "3px 9px",
+                                  borderRadius: "12px",
+                                  background:
+                                    "color-mix(in srgb, var(--color-accent-sky-soft) 10%, transparent)",
+                                  border: "1px solid rgba(56,189,248,0.3)",
+                                  color: "#38bdf8",
+                                }}
+                                onClick={() => {
+                                  setInput(prompt);
+                                  void send(false, prompt);
+                                }}
+                                title="Bu yanıtı seç"
+                              >
+                                💡 {label}
+                              </button>
+                            );
+                          })}
+                          <button
+                            type="button"
+                            className="ai-small-btn"
+                            style={{
+                              fontSize: "11.5px",
+                              padding: "3px 9px",
+                              borderRadius: "12px",
+                              background:
+                                "color-mix(in srgb, var(--color-neutral-400) 8%, transparent)",
+                              border:
+                                "1px solid color-mix(in srgb, var(--color-neutral-400) 25%, transparent)",
+                              color: "#94a3b8",
+                            }}
+                            onClick={() => {
+                              setTimeout(() => textareaRef.current?.focus(), 50);
+                            }}
+                            title="Kendi cevabını yaz"
+                          >
+                            ✏️ Diğer
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Contextual follow-ups from AI response */}
+                      {m.role === "assistant" &&
+                        m === session?.messages[session.messages.length - 1] && (
+                          <ContextualFollowups
+                            message={m}
+                            route={route}
+                            onAction={(p) => {
+                              setInput(p);
+                              void send(false, p);
+                            }}
+                            busy={busy}
+                          />
+                        )}
+
+                      {m.role === "assistant" && m.nearbyPins && m.nearbyPins.length > 0 && (
+                        <div
+                          style={{
+                            marginTop: "0.5rem",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "4px",
+                          }}
+                        >
+                          <span
                             style={{
                               fontSize: "11px",
                               fontWeight: 700,
                               color: "var(--color-accent)",
-                              marginBottom: "0.25rem",
                             }}
                           >
-                            🧭 Bu seçimi neden yaptım?
-                          </div>
-                          <ul
-                            style={{
-                              margin: 0,
-                              paddingLeft: "1.1rem",
-                              fontSize: "12px",
-                              lineHeight: 1.45,
-                            }}
-                          >
-                            {m.decisionSummary.map((item, index) => (
-                              <li key={index}>{item}</li>
+                            📍 Yakındaki Mekanlar:
+                          </span>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                            {m.nearbyPins.map((pin) => (
+                              <div
+                                key={pin.id}
+                                style={{ display: "inline-flex", gap: "3px", alignItems: "center" }}
+                              >
+                                <button
+                                  className="ai-small-btn"
+                                  style={{ fontSize: "11px", padding: "3px 7px" }}
+                                  onClick={() => {
+                                    const q = `Rotaya ${pin.name} durağını ekle`;
+                                    setInput(q);
+                                    void send(false, q);
+                                  }}
+                                  title={pin.description}
+                                >
+                                  💬 {pin.name} ({pin.suggestedDuration})
+                                </button>
+                                <button
+                                  className="ai-action-chip"
+                                  style={{ fontSize: "10.5px", padding: "2px 6px" }}
+                                  onClick={() =>
+                                    addPlaceToActiveTrip({
+                                      label: pin.name,
+                                      address: pin.description,
+                                      lat: pin.lat,
+                                      lng: pin.lng,
+                                      note: pin.description,
+                                    })
+                                  }
+                                  title="Bu durağı doğrudan seyahat planına ekle"
+                                >
+                                  ➕ Rotaya Ekle
+                                </button>
+                              </div>
                             ))}
-                          </ul>
+                          </div>
                         </div>
                       )}
+                    </div>
+                  </div>
+                ))}
 
-                    {m.role === "assistant" && m.route && isRoutePlan(m.route) && (
-                      <>
-                        <div className="ai-route-sync-card">
-                          <span>
-                            {m.route.title} · {m.route.stops.length} durak
+                {busy && streamText ? (
+                  <div className="ai-msg-bot-container">
+                    <div
+                      className="ai-msg-bot-bubble"
+                      role="status"
+                      style={{ whiteSpace: "pre-wrap", opacity: 0.92 }}
+                    >
+                      {streamText}
+                      <span className="ai-stream-cursor" aria-hidden="true">
+                        ▋
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  busy && (
+                    <div className="ai-msg-bot-container">
+                      <div className="ai-msg-bot-bubble ai-thinking-bubble" role="status">
+                        <ThinkingSteps
+                          isRoute={input.length > 20 || (session?.messages.length || 0) >= 2}
+                          livePhase={streamPhase}
+                        />
+                      </div>
+                    </div>
+                  )
+                )}
+                <div ref={end} />
+              </div>
+              <div className="ai-chat-composer-area">
+                {error &&
+                  (() => {
+                    const isAuth =
+                      errorCode === "UNAUTHORIZED" ||
+                      (errorCode === "" && (error.includes("giriş") || error.includes("Oturum")));
+                    const isCreditLow = errorCode === "INSUFFICIENT_CREDITS";
+                    const isWalletFrozen = errorCode === "WALLET_FROZEN";
+                    const isEmailVerify = errorCode === "EMAIL_NOT_VERIFIED";
+                    const isDailyLimit = errorCode === "USER_DAILY_LIMIT";
+                    const isServiceLimit = errorCode === "SERVICE_DAILY_LIMIT";
+                    const isMaintenance = errorCode === "AI_DISABLED";
+                    const iconName =
+                      isCreditLow || isWalletFrozen
+                        ? "account_balance_wallet"
+                        : isEmailVerify
+                          ? "mark_email_unread"
+                          : isDailyLimit || isServiceLimit
+                            ? "timer"
+                            : isMaintenance
+                              ? "build_circle"
+                              : isAuth
+                                ? "lock"
+                                : "error";
+                    const iconColor = isCreditLow
+                      ? "#f59e0b"
+                      : isWalletFrozen
+                        ? "#ef4444"
+                        : isEmailVerify || isDailyLimit || isServiceLimit || isMaintenance
+                          ? "#6366f1"
+                          : "#ef4444";
+                    return (
+                      <div
+                        className="ai-error-banner"
+                        role="alert"
+                        data-code={errorCode || undefined}
+                      >
+                        <div className="ai-error-content">
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ color: iconColor, fontSize: "18px" }}
+                          >
+                            {iconName}
                           </span>
-                          <button className="ai-small-btn" onClick={() => showRoute(m.route!, m)}>
-                            Rotayı göster
+                          <span className="ai-error-text">{error}</span>
+                        </div>
+                        <div className="ai-error-actions">
+                          {isAuth && (
+                            <button
+                              type="button"
+                              className="ai-error-cta-btn"
+                              onClick={() => setAuthModal(true)}
+                            >
+                              Giriş Yap
+                            </button>
+                          )}
+                          {isEmailVerify && (
+                            <button
+                              type="button"
+                              className="ai-error-cta-btn"
+                              onClick={() => setAuthModal(true)}
+                            >
+                              Hesabıma Git
+                            </button>
+                          )}
+                          {isCreditLow && (
+                            <button
+                              type="button"
+                              className="ai-error-cta-btn"
+                              onClick={() =>
+                                typeof window !== "undefined" &&
+                                window.dispatchEvent(
+                                  new CustomEvent("mapsbridge:open_upgrade_modal", {
+                                    detail: { reason: error },
+                                  }),
+                                )
+                              }
+                            >
+                              Kredi Satın Al
+                            </button>
+                          )}
+                          {(retryAvailable ||
+                            (!isAuth &&
+                              !isEmailVerify &&
+                              !isCreditLow &&
+                              !isWalletFrozen &&
+                              !isDailyLimit &&
+                              pending.current)) && (
+                            <button
+                              disabled={busy}
+                              className="ai-error-cta-btn ai-retry-btn"
+                              onClick={() => {
+                                setRetryAvailable(false);
+                                setError("");
+                                setErrorCode("");
+                                const p = lastPromptRef.current || pending.current?.prompt;
+                                if (p) void send(false, p);
+                                else void send(true);
+                              }}
+                            >
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "14px", verticalAlign: "middle" }}
+                              >
+                                refresh
+                              </span>{" "}
+                              Tekrar Dene
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="ai-error-dismiss"
+                            onClick={() => {
+                              setError("");
+                              setErrorCode("");
+                              setRetryAvailable(false);
+                            }}
+                            aria-label="Kapat"
+                          >
+                            ✕
                           </button>
                         </div>
-                        <Button variant="link" onClick={openPrep}>
-                          {t("ai.prepLink", "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün")}
-                        </Button>
-                      </>
-                    )}
-
-                    {m.role === "assistant" && !m.route && shouldSurfacePricing(conversationFlow) && (() => {
-                      const dest = extractDestinationFromText(m.text);
-                      return dest ? (
-                        <Button variant="link" onClick={openPrep}>
-                          {t("ai.prepLink", "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün")}
-                        </Button>
-                      ) : null;
-                    })()}
-
-                    {m.role === "assistant" && m.quickReplies && m.quickReplies.length > 0 && (
-                      <div
-                        style={{
-                          marginTop: "0.5rem",
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "6px",
-                        }}
-                      >
-                        {m.quickReplies.map((qr, qidx) => {
-                          const label = typeof qr === "string" ? qr : qr.label;
-                          const prompt = typeof qr === "string" ? qr : qr.prompt;
-                          return (
-                            <button
-                              key={qidx}
-                              type="button"
-                              className="ai-small-btn"
-                              style={{
-                                fontSize: "11.5px",
-                                padding: "3px 9px",
-                                borderRadius: "12px",
-                                background: "color-mix(in srgb, var(--color-accent-sky-soft) 10%, transparent)",
-                                border: "1px solid rgba(56,189,248,0.3)",
-                                color: "#38bdf8",
-                              }}
-                              onClick={() => {
-                                setInput(prompt);
-                                void send(false, prompt);
-                              }}
-                              title="Bu yanıtı seç"
-                            >
-                              💡 {label}
-                            </button>
-                          );
-                        })}
-                        <button
-                          type="button"
-                          className="ai-small-btn"
-                          style={{
-                            fontSize: "11.5px",
-                            padding: "3px 9px",
-                            borderRadius: "12px",
-                            background: "color-mix(in srgb, var(--color-neutral-400) 8%, transparent)",
-                            border: "1px solid color-mix(in srgb, var(--color-neutral-400) 25%, transparent)",
-                            color: "#94a3b8",
-                          }}
-                          onClick={() => {
-                            setTimeout(() => textareaRef.current?.focus(), 50);
-                          }}
-                          title="Kendi cevabını yaz"
-                        >
-                          ✏️ Diğer
-                        </button>
                       </div>
-                    )}
-
-                    {/* Contextual follow-ups from AI response */}
-                    {m.role === "assistant" &&
-                      m === session?.messages[session.messages.length - 1] && (
-                        <ContextualFollowups
-                          message={m}
-                          route={route}
-                          onAction={(p) => {
-                            setInput(p);
-                            void send(false, p);
-                          }}
-                          busy={busy}
-                        />
-                      )}
-
-                    {m.role === "assistant" && m.nearbyPins && m.nearbyPins.length > 0 && (
-                      <div
-                        style={{
-                          marginTop: "0.5rem",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "4px",
-                        }}
-                      >
-                        <span
-                          style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-accent)" }}
-                        >
-                          📍 Yakındaki Mekanlar:
-                        </span>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                          {m.nearbyPins.map((pin) => (
-                            <div
-                              key={pin.id}
-                              style={{ display: "inline-flex", gap: "3px", alignItems: "center" }}
-                            >
-                              <button
-                                className="ai-small-btn"
-                                style={{ fontSize: "11px", padding: "3px 7px" }}
-                                onClick={() => {
-                                  const q = `Rotaya ${pin.name} durağını ekle`;
-                                  setInput(q);
-                                  void send(false, q);
-                                }}
-                                title={pin.description}
-                              >
-                                💬 {pin.name} ({pin.suggestedDuration})
-                              </button>
-                              <button
-                                className="ai-action-chip"
-                                style={{ fontSize: "10.5px", padding: "2px 6px" }}
-                                onClick={() =>
-                                  addPlaceToActiveTrip({
-                                    label: pin.name,
-                                    address: pin.description,
-                                    lat: pin.lat,
-                                    lng: pin.lng,
-                                    note: pin.description,
-                                  })
-                                }
-                                title="Bu durağı doğrudan seyahat planına ekle"
-                              >
-                                ➕ Rotaya Ekle
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {busy && streamText ? (
-                <div className="ai-msg-bot-container">
-                  <div
-                    className="ai-msg-bot-bubble"
-                    role="status"
-                    style={{ whiteSpace: "pre-wrap", opacity: 0.92 }}
-                  >
-                    {streamText}
-                    <span className="ai-stream-cursor" aria-hidden="true">
-                      ▋
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                busy && (
-                  <div className="ai-msg-bot-container">
-                    <div className="ai-msg-bot-bubble ai-thinking-bubble" role="status">
-                      <ThinkingSteps
-                        isRoute={input.length > 20 || (session?.messages.length || 0) >= 2}
-                        livePhase={streamPhase}
-                      />
-                    </div>
-                  </div>
-                )
-              )}
-              <div ref={end} />
-            </div>
-            <div className="ai-chat-composer-area">
-              {error && (() => {
-                const isAuth = errorCode === "UNAUTHORIZED" || errorCode === "" && (error.includes("giriş") || error.includes("Oturum"));
-                const isCreditLow = errorCode === "INSUFFICIENT_CREDITS";
-                const isWalletFrozen = errorCode === "WALLET_FROZEN";
-                const isEmailVerify = errorCode === "EMAIL_NOT_VERIFIED";
-                const isDailyLimit = errorCode === "USER_DAILY_LIMIT";
-                const isServiceLimit = errorCode === "SERVICE_DAILY_LIMIT";
-                const isMaintenance = errorCode === "AI_DISABLED";
-                const iconName =
-                  isCreditLow || isWalletFrozen ? "account_balance_wallet"
-                  : isEmailVerify ? "mark_email_unread"
-                  : isDailyLimit || isServiceLimit ? "timer"
-                  : isMaintenance ? "build_circle"
-                  : isAuth ? "lock"
-                  : "error";
-                const iconColor =
-                  isCreditLow ? "#f59e0b"
-                  : isWalletFrozen ? "#ef4444"
-                  : isEmailVerify || isDailyLimit || isServiceLimit || isMaintenance ? "#6366f1"
-                  : "#ef4444";
-                return (
-                  <div className="ai-error-banner" role="alert" data-code={errorCode || undefined}>
-                    <div className="ai-error-content">
-                      <span className="material-symbols-outlined" style={{ color: iconColor, fontSize: "18px" }}>
-                        {iconName}
-                      </span>
-                      <span className="ai-error-text">{error}</span>
-                    </div>
-                    <div className="ai-error-actions">
-                      {isAuth && (
-                        <button type="button" className="ai-error-cta-btn" onClick={() => setAuthModal(true)}>
-                          Giriş Yap
-                        </button>
-                      )}
-                      {isEmailVerify && (
-                        <button type="button" className="ai-error-cta-btn" onClick={() => setAuthModal(true)}>
-                          Hesabıma Git
-                        </button>
-                      )}
-                      {isCreditLow && (
-                        <button
-                          type="button"
-                          className="ai-error-cta-btn"
-                          onClick={() => typeof window !== "undefined" && window.dispatchEvent(
-                            new CustomEvent("mapsbridge:open_upgrade_modal", { detail: { reason: error } })
-                          )}
-                        >
-                          Kredi Satın Al
-                        </button>
-                      )}
-                      {(retryAvailable || (!isAuth && !isEmailVerify && !isCreditLow && !isWalletFrozen && !isDailyLimit && pending.current)) && (
-                        <button
-                          disabled={busy}
-                          className="ai-error-cta-btn ai-retry-btn"
-                          onClick={() => {
-                            setRetryAvailable(false);
-                            setError("");
-                            setErrorCode("");
-                            const p = lastPromptRef.current || pending.current?.prompt;
-                            if (p) void send(false, p);
-                            else void send(true);
-                          }}
-                        >
-                          <span className="material-symbols-outlined" style={{ fontSize: "14px", verticalAlign: "middle" }}>refresh</span>
-                          {" "}Tekrar Dene
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="ai-error-dismiss"
-                        onClick={() => { setError(""); setErrorCode(""); setRetryAvailable(false); }}
-                        aria-label="Kapat"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()}
-              {notice && (
-                <p className="ai-muted" role="status">
-                  {notice}
-                </p>
-              )}
-
-              <SmartActions
-                messages={session?.messages || []}
-                route={route}
-                currentTrip={currentTrip}
-                onAction={(p) => {
-                  setInput(p);
-                  void send(false, p);
-                }}
-                busy={busy}
-              />
-              <div className="ai-quick-modes-bar" aria-label="Rota tarzı">
-                {ROUTE_STYLES.map((style) => (
-                  <button
-                    key={style.key}
-                    type="button"
-                    className="ai-quick-mode-pill"
-                    aria-pressed={routeMode === style.key}
-                    onClick={() => setRouteMode(style.key)}
-                    title={style.hint}
-                  >
-                    <span>{style.icon}</span>
-                    <span>{style.label}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="ai-composer-note">
-                Rota tarzı seçimi yalnızca bu isteği etkiler; kalıcı tercihlerini değiştirmez.
-              </p>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void send();
-                }}
-                className="ai-input-wrapper ai-input-stitch"
-              >
-                <button
-                  type="button"
-                  className="ai-input-icon-btn"
-                  onClick={() => {
-                    if (navigator.geolocation) {
-                      navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                          setInput(
-                            (prev) =>
-                              `${prev} (Konumum: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`,
-                          );
-                        },
-                        () => setNotice("Konum izni alınamadı."),
-                      );
-                    }
-                  }}
-                  title="Konumumu Ekle"
-                  aria-label="Konumumu Ekle"
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                    add_location_alt
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className={`ai-input-icon-btn ${listening ? "ai-mic-pulsing" : ""}`}
-                  onClick={dictate}
-                  disabled={busy}
-                  aria-label={listening ? "Sesli girişi durdur" : "Sesli mesaj yazdır"}
-                  title={listening ? "Dinleniyor... Durdurmak için tıklayın" : "Sesli Mesaj"}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                    {listening ? "mic" : "mic"}
-                  </span>
-                </button>
-                <textarea
-                  ref={textareaRef}
-                  aria-label="Asistana mesaj"
-                  value={input}
-                  maxLength={2000}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-                      e.preventDefault();
-                      void send();
-                    }
-                  }}
-                  placeholder="Bir durak ekle, rotayı değiştir veya soru sor..."
-                  rows={1}
-                />
-                {input.length > 0 && (
-                  <button
-                    type="button"
-                    className="ai-input-clear-btn"
-                    onClick={() => setInput("")}
-                    title="Metni Temizle"
-                    aria-label="Metni Temizle"
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                      close
-                    </span>
-                  </button>
+                    );
+                  })()}
+                {notice && (
+                  <p className="ai-muted" role="status">
+                    {notice}
+                  </p>
                 )}
-                <button
-                  className="ai-send-btn-stitch"
-                  disabled={busy || !input.trim()}
-                  type="submit"
-                >
-                  <span>{busy ? "Hazırlanıyor…" : "Gönder"}</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                    send
-                  </span>
-                </button>
-              </form>
 
-              <div className="ai-composer-footer-bar">
-                <div className="ai-composer-credits-pill">
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "15px", color: "var(--color-accent)" }}
-                  >
-                    bolt
-                  </span>
-                  <span>{wallet ? `${wallet.credits} Kredi` : "Ücretsiz Danışmanlık"}</span>
+                <SmartActions
+                  messages={session?.messages || []}
+                  route={route}
+                  currentTrip={currentTrip}
+                  onAction={(p) => {
+                    setInput(p);
+                    void send(false, p);
+                  }}
+                  busy={busy}
+                />
+                <div className="ai-quick-modes-bar" aria-label="Rota tarzı">
+                  {ROUTE_STYLES.map((style) => (
+                    <button
+                      key={style.key}
+                      type="button"
+                      className="ai-quick-mode-pill"
+                      aria-pressed={routeMode === style.key}
+                      onClick={() => setRouteMode(style.key)}
+                      title={style.hint}
+                    >
+                      <span>{style.icon}</span>
+                      <span>{style.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="ai-composer-note">
+                  Rota tarzı seçimi yalnızca bu isteği etkiler; kalıcı tercihlerini değiştirmez.
+                </p>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void send();
+                  }}
+                  className="ai-input-wrapper ai-input-stitch"
+                >
                   <button
                     type="button"
+                    className="ai-input-icon-btn"
                     onClick={() => {
-                      if (typeof window !== "undefined") {
-                        window.dispatchEvent(
-                          new CustomEvent("mapsbridge:open_upgrade_modal", {
-                            detail: { reason: "Yapay Zeka Seyahat Asistanı için Kredi Yükleyin" },
-                          }),
+                      if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                          (pos) => {
+                            setInput(
+                              (prev) =>
+                                `${prev} (Konumum: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`,
+                            );
+                          },
+                          () => setNotice("Konum izni alınamadı."),
                         );
                       }
                     }}
-                    className="ai-buy-credits-link"
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 0,
-                      font: "inherit",
-                    }}
+                    title="Konumumu Ekle"
+                    aria-label="Konumumu Ekle"
                   >
-                    + Kredi Yükle
-                  </button>
-                </div>
-                <div className="ai-composer-disclaimer">
-                  <span>
-                    ✨ Sorular ve netleştirme ücretsizdir · Rota ve harita entegrasyonu 5 kredi
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-          {panelOpen && (
-            <aside
-              id="route-draft"
-              className={`ai-studio-aside-right ${mobileTab === "draft" ? "mobile-visible" : ""}`}
-              aria-label="Oluşturulan rota"
-            >
-              <div className="ai-draft-header">
-                <strong ref={draftHeadingRef} tabIndex={-1}>
-                  Oluşturulan rota
-                </strong>
-                <div className="ai-header-actions">
-                  <button
-                    className="ai-small-btn ai-panel-resize"
-                    onClick={() => setPanelWide(!panelWide)}
-                    aria-label={panelWide ? "Rota panelini küçült" : "Rota panelini büyüt"}
-                  >
-                    {panelWide ? "Küçült" : "Büyüt"}
+                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      add_location_alt
+                    </span>
                   </button>
                   <button
-                    className="ai-small-btn"
-                    onClick={() => {
-                      setPanelOpen(false);
-                      setMobileTab("chat");
-                    }}
-                    aria-label="Rota panelini kapat"
+                    type="button"
+                    className={`ai-input-icon-btn ${listening ? "ai-mic-pulsing" : ""}`}
+                    onClick={dictate}
+                    disabled={busy}
+                    aria-label={listening ? "Sesli girişi durdur" : "Sesli mesaj yazdır"}
+                    title={listening ? "Dinleniyor... Durdurmak için tıklayın" : "Sesli Mesaj"}
                   >
-                    Kapat
+                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      {listening ? "mic" : "mic"}
+                    </span>
                   </button>
-                </div>
-              </div>
-              {!route ? (
-                <div className="ai-route-empty">
-                  <span className="material-symbols-outlined">map</span>
-                  <h2>Henüz rota yok</h2>
-                  <p>Tercihlerini konuştuktan sonra oluşturduğumuz rota burada görünecek.</p>
-                  {prepContext.kind === "strip" && <PrepPanel context={prepContext} />}
-                </div>
-              ) : (
-                <>
-                  <div className="ai-route-heading">
-                    <h2>{route.title}</h2>
-                    <p>
-                      {route.destination} · {route.estimatedDays} gün · {route.stops.length} durak
-                    </p>
-                    <p className="ai-muted">{route.summary}</p>
-                  </div>
-                  <div
-                    className="ai-day-tabs-bar"
-                    role="group"
-                    aria-label="Taslak bölümleri"
-                    style={{ marginBottom: "0.5rem", flexWrap: "wrap", gap: "4px" }}
-                  >
+                  <textarea
+                    ref={textareaRef}
+                    aria-label="Asistana mesaj"
+                    value={input}
+                    maxLength={2000}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                        e.preventDefault();
+                        void send();
+                      }
+                    }}
+                    placeholder="Bir durak ekle, rotayı değiştir veya soru sor..."
+                    rows={1}
+                  />
+                  {input.length > 0 && (
                     <button
                       type="button"
-                      aria-pressed={draftTab === "route"}
-                      className={`ai-day-tab-btn ${draftTab === "route" ? "active" : ""}`}
-                      onClick={() => setDraftTab("route")}
+                      className="ai-input-clear-btn"
+                      onClick={() => setInput("")}
+                      title="Metni Temizle"
+                      aria-label="Metni Temizle"
                     >
-                      🗺️ Duraklar
+                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        close
+                      </span>
                     </button>
-                    <button
-                      type="button"
-                      aria-pressed={draftTab === "stay"}
-                      className={`ai-day-tab-btn ${draftTab === "stay" ? "active" : ""}`}
-                      onClick={() => setDraftTab("stay")}
-                    >
-                      🏨 Konaklama
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={draftTab === "discovery"}
-                      className={`ai-day-tab-btn ${draftTab === "discovery" ? "active" : ""}`}
-                      onClick={() => setDraftTab("discovery")}
-                    >
-                      ✨ Keşif
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={draftTab === "flights"}
-                      className={`ai-day-tab-btn ${draftTab === "flights" ? "active" : ""}`}
-                      onClick={() => setDraftTab("flights")}
-                    >
-                      <span aria-hidden="true">{prepIcon}</span> {prepLabel}
-                      {session?.flightPrices?.cheapestPrice
-                        ? ` · ${session.flightPrices.cheapestCurrency} ${session.flightPrices.cheapestPrice}`
-                        : ""}
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={draftTab === "advisory"}
-                      className={`ai-day-tab-btn ${draftTab === "advisory" ? "active" : ""}`}
-                      onClick={() => setDraftTab("advisory")}
-                    >
-                      📋 Tavsiye
-                      {session?.travelAdvisory?.level && session.travelAdvisory.level !== "normal"
-                        ? " ⚠️"
-                        : ""}
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={draftTab === "emergency"}
-                      className={`ai-day-tab-btn ${draftTab === "emergency" ? "active" : ""}`}
-                      onClick={() => setDraftTab("emergency")}
-                    >
-                      🛡️ Güvenlik
-                    </button>
-                  </div>
-                  {draftTab === "route" && (
-                    <>
-                      <div className="ai-day-tabs-bar">
-                        {Array.from({ length: route.estimatedDays }, (_, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            aria-pressed={day === i + 1}
-                            className={`ai-day-tab-btn ${day === i + 1 ? "active" : ""}`}
-                            onClick={() => setDay(i + 1)}
-                          >
-                            {i + 1}. Gün
-                          </button>
-                        ))}
-                      </div>
-                      <div className="ai-timeline-container ai-custom-scrollbar">
-                        {route.stops
-                          .filter((s) => s.day === day)
-                          .map((s, i) => (
-                            <article className="ai-stop-row" key={s.id}>
-                              <span className="ai-stop-badge-num">{i + 1}</span>
-                              <div className="ai-stop-card">
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "baseline",
-                                    gap: "0.5rem",
-                                  }}
-                                >
-                                  <strong>{s.name}</strong>
-                                  {s.timeSlot && (
-                                    <span
-                                      style={{
-                                        fontSize: "10.5px",
-                                        padding: "2px 6px",
-                                        borderRadius: "6px",
-                                        backgroundColor: "var(--color-surface-brand)",
-                                        color: "var(--color-accent)",
-                                        fontWeight: 700,
-                                      }}
-                                    >
-                                      {s.timeSlot === "morning"
-                                        ? "🌅 Sabah"
-                                        : s.timeSlot === "evening"
-                                          ? "🌆 Akşam"
-                                          : s.timeSlot === "night"
-                                            ? "🌙 Gece"
-                                            : "☀️ Öğle"}
-                                    </span>
-                                  )}
-                                </div>
-                                <span className="ai-muted">{s.address}</span>
-                                <p>{s.description}</p>
-                                <small>Önerilen ziyaret: {s.suggestedDuration}</small>
-                              </div>
-                              {s.distanceToNextKm !== undefined && (
-                                <div className="ai-travel-interval-badge">
-                                  <span>Sonraki durağa kuş uçuşu ~{s.distanceToNextKm} km</span>
-                                </div>
-                              )}
-                            </article>
-                          ))}
-                      </div>
-                    </>
                   )}
-                  {draftTab === "stay" && (
-                    <div
-                      className="ai-timeline-container ai-custom-scrollbar"
-                      style={{ padding: "0.5rem" }}
+                  <button
+                    className="ai-send-btn-stitch"
+                    disabled={busy || !input.trim()}
+                    type="submit"
+                  >
+                    <span>{busy ? "Hazırlanıyor…" : "Gönder"}</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                      send
+                    </span>
+                  </button>
+                </form>
+
+                <div className="ai-composer-footer-bar">
+                  <div className="ai-composer-credits-pill">
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "15px", color: "var(--color-accent)" }}
                     >
-                      {!session?.stayAndTransit ? (
-                        <p className="ai-muted">
-                          Bu rota için ulaşım ve konaklama önerilerini sohbette sorabilirsin.{" "}
-                          <button
-                            className="ai-small-btn"
-                            onClick={() =>
-                              setInput(
-                                "Mevcut rotama uygun konaklama bölgeleri ve şehir içi ulaşım seçenekleri öner; rotayı değiştirme.",
-                              )
-                            }
-                          >
-                            Sohbette sor
-                          </button>
-                        </p>
-                      ) : (
-                        <>
-                          <div style={{ marginBottom: "1rem" }}>
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              📍 Önerilen Konaklama Semtleri
-                            </h3>
-                            <ul
-                              style={{
-                                margin: 0,
-                                paddingLeft: "1.2rem",
-                                fontSize: "12.5px",
-                                color: "var(--mb-text-subtle)",
-                              }}
+                      bolt
+                    </span>
+                    <span>{wallet ? `${wallet.credits} Kredi` : "Ücretsiz Danışmanlık"}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== "undefined") {
+                          window.dispatchEvent(
+                            new CustomEvent("mapsbridge:open_upgrade_modal", {
+                              detail: { reason: "Yapay Zeka Seyahat Asistanı için Kredi Yükleyin" },
+                            }),
+                          );
+                        }
+                      }}
+                      className="ai-buy-credits-link"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 0,
+                        font: "inherit",
+                      }}
+                    >
+                      + Kredi Yükle
+                    </button>
+                  </div>
+                  <div className="ai-composer-disclaimer">
+                    <span>
+                      ✨ Sorular ve netleştirme ücretsizdir · Rota ve harita entegrasyonu 5 kredi
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+            {panelOpen && (
+              <aside
+                id="route-draft"
+                className={`ai-studio-aside-right ${mobileTab === "draft" ? "mobile-visible" : ""}`}
+                aria-label="Oluşturulan rota"
+              >
+                <div className="ai-draft-header">
+                  <strong ref={draftHeadingRef} tabIndex={-1}>
+                    Oluşturulan rota
+                  </strong>
+                  <div className="ai-header-actions">
+                    <button
+                      className="ai-small-btn ai-panel-resize"
+                      onClick={() => setPanelWide(!panelWide)}
+                      aria-label={panelWide ? "Rota panelini küçült" : "Rota panelini büyüt"}
+                    >
+                      {panelWide ? "Küçült" : "Büyüt"}
+                    </button>
+                    <button
+                      className="ai-small-btn"
+                      onClick={() => {
+                        setPanelOpen(false);
+                        setMobileTab("chat");
+                      }}
+                      aria-label="Rota panelini kapat"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+                </div>
+                {!route ? (
+                  <div className="ai-route-empty">
+                    <span className="material-symbols-outlined">map</span>
+                    <h2>Henüz rota yok</h2>
+                    <p>Tercihlerini konuştuktan sonra oluşturduğumuz rota burada görünecek.</p>
+                    {prepContext.kind === "strip" && <PrepPanel context={prepContext} />}
+                  </div>
+                ) : (
+                  <>
+                    <div className="ai-route-heading">
+                      <h2>{route.title}</h2>
+                      <p>
+                        {route.destination} · {route.estimatedDays} gün · {route.stops.length} durak
+                      </p>
+                      <p className="ai-muted">{route.summary}</p>
+                    </div>
+                    <div
+                      className="ai-day-tabs-bar"
+                      role="group"
+                      aria-label="Taslak bölümleri"
+                      style={{ marginBottom: "0.5rem", flexWrap: "wrap", gap: "4px" }}
+                    >
+                      <button
+                        type="button"
+                        aria-pressed={draftTab === "route"}
+                        className={`ai-day-tab-btn ${draftTab === "route" ? "active" : ""}`}
+                        onClick={() => setDraftTab("route")}
+                      >
+                        🗺️ Duraklar
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={draftTab === "stay"}
+                        className={`ai-day-tab-btn ${draftTab === "stay" ? "active" : ""}`}
+                        onClick={() => setDraftTab("stay")}
+                      >
+                        🏨 Konaklama
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={draftTab === "discovery"}
+                        className={`ai-day-tab-btn ${draftTab === "discovery" ? "active" : ""}`}
+                        onClick={() => setDraftTab("discovery")}
+                      >
+                        ✨ Keşif
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={draftTab === "flights"}
+                        className={`ai-day-tab-btn ${draftTab === "flights" ? "active" : ""}`}
+                        onClick={() => setDraftTab("flights")}
+                      >
+                        <span aria-hidden="true">{prepIcon}</span> {prepLabel}
+                        {session?.flightPrices?.cheapestPrice
+                          ? ` · ${session.flightPrices.cheapestCurrency} ${session.flightPrices.cheapestPrice}`
+                          : ""}
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={draftTab === "advisory"}
+                        className={`ai-day-tab-btn ${draftTab === "advisory" ? "active" : ""}`}
+                        onClick={() => setDraftTab("advisory")}
+                      >
+                        📋 Tavsiye
+                        {session?.travelAdvisory?.level && session.travelAdvisory.level !== "normal"
+                          ? " ⚠️"
+                          : ""}
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={draftTab === "emergency"}
+                        className={`ai-day-tab-btn ${draftTab === "emergency" ? "active" : ""}`}
+                        onClick={() => setDraftTab("emergency")}
+                      >
+                        🛡️ Güvenlik
+                      </button>
+                    </div>
+                    {draftTab === "route" && (
+                      <>
+                        <div className="ai-day-tabs-bar">
+                          {Array.from({ length: route.estimatedDays }, (_, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              aria-pressed={day === i + 1}
+                              className={`ai-day-tab-btn ${day === i + 1 ? "active" : ""}`}
+                              onClick={() => setDay(i + 1)}
                             >
-                              {session.stayAndTransit.recommendedAreas?.map((a, idx) => (
-                                <li key={idx} style={{ marginBottom: "3px" }}>
-                                  {a}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div style={{ marginBottom: "1rem" }}>
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              🏨 Önerilen Otel & Konaklama Tipleri
-                            </h3>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                              {session.stayAndTransit.stays?.map((stay, idx) => (
-                                <div key={idx} className="ai-stop-card">
-                                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                    <strong>{stay.name}</strong>
-                                    <span style={{ fontSize: "11px", fontWeight: 700 }}>
-                                      {stay.priceLevel} · {stay.type}
-                                    </span>
+                              {i + 1}. Gün
+                            </button>
+                          ))}
+                        </div>
+                        <div className="ai-timeline-container ai-custom-scrollbar">
+                          {route.stops
+                            .filter((s) => s.day === day)
+                            .map((s, i) => (
+                              <article className="ai-stop-row" key={s.id}>
+                                <span className="ai-stop-badge-num">{i + 1}</span>
+                                <div className="ai-stop-card">
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      alignItems: "baseline",
+                                      gap: "0.5rem",
+                                    }}
+                                  >
+                                    <strong>{s.name}</strong>
+                                    {s.timeSlot && (
+                                      <span
+                                        style={{
+                                          fontSize: "10.5px",
+                                          padding: "2px 6px",
+                                          borderRadius: "6px",
+                                          backgroundColor: "var(--color-surface-brand)",
+                                          color: "var(--color-accent)",
+                                          fontWeight: 700,
+                                        }}
+                                      >
+                                        {s.timeSlot === "morning"
+                                          ? "🌅 Sabah"
+                                          : s.timeSlot === "evening"
+                                            ? "🌆 Akşam"
+                                            : s.timeSlot === "night"
+                                              ? "🌙 Gece"
+                                              : "☀️ Öğle"}
+                                      </span>
+                                    )}
                                   </div>
-                                  <span className="ai-muted">{stay.area}</span>
-                                  <p style={{ fontSize: "12px", margin: "3px 0" }}>
-                                    {stay.description}
-                                  </p>
-                                  {stay.pros?.length > 0 && (
-                                    <small style={{ color: "var(--color-accent)" }}>
-                                      ✓ {stay.pros.join(" · ")}
-                                    </small>
-                                  )}
-                                  <div style={{ marginTop: "6px" }}>
-                                    <button
-                                      type="button"
-                                      className="ai-action-chip ai-hotel-chip"
-                                      onClick={() =>
-                                        addPlaceToActiveTrip({
-                                          label: stay.name,
-                                          address: stay.area,
-                                          isHotel: true,
-                                          category: "otel",
-                                          note: `${stay.type} · ${stay.priceLevel} - ${stay.description}`,
-                                        })
-                                      }
-                                    >
-                                      🏨 Bu Oteli Rotama Kaydet
-                                    </button>
+                                  <span className="ai-muted">{s.address}</span>
+                                  <p>{s.description}</p>
+                                  <small>Önerilen ziyaret: {s.suggestedDuration}</small>
+                                </div>
+                                {s.distanceToNextKm !== undefined && (
+                                  <div className="ai-travel-interval-badge">
+                                    <span>Sonraki durağa kuş uçuşu ~{s.distanceToNextKm} km</span>
                                   </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              🚇 Havalimanı & Şehir İçi Ulaşım
-                            </h3>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                              {session.stayAndTransit.transitTips?.map((tip, idx) => (
-                                <div key={idx} className="ai-stop-card">
-                                  <strong>{tip.title}</strong>
-                                  <p style={{ fontSize: "12px", margin: "3px 0" }}>
-                                    {tip.description}
-                                  </p>
-                                  {tip.estimatedCost && (
-                                    <small
-                                      style={{ color: "var(--color-surface-inverse)", fontWeight: 600 }}
-                                    >
-                                      Tahmini Ücret: {tip.estimatedCost}
-                                    </small>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                            {session.stayAndTransit.cityCardRecommendation && (
-                              <p
+                                )}
+                              </article>
+                            ))}
+                        </div>
+                      </>
+                    )}
+                    {draftTab === "stay" && (
+                      <div
+                        className="ai-timeline-container ai-custom-scrollbar"
+                        style={{ padding: "0.5rem" }}
+                      >
+                        {!session?.stayAndTransit ? (
+                          <p className="ai-muted">
+                            Bu rota için ulaşım ve konaklama önerilerini sohbette sorabilirsin.{" "}
+                            <button
+                              className="ai-small-btn"
+                              onClick={() =>
+                                setInput(
+                                  "Mevcut rotama uygun konaklama bölgeleri ve şehir içi ulaşım seçenekleri öner; rotayı değiştirme.",
+                                )
+                              }
+                            >
+                              Sohbette sor
+                            </button>
+                          </p>
+                        ) : (
+                          <>
+                            <div style={{ marginBottom: "1rem" }}>
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                📍 Önerilen Konaklama Semtleri
+                              </h3>
+                              <ul
                                 style={{
-                                  fontSize: "12px",
-                                  marginTop: "6px",
-                                  padding: "6px",
-                                  backgroundColor: "var(--color-surface-brand)",
-                                  borderRadius: "6px",
-                                  color: "var(--color-surface-inverse)",
+                                  margin: 0,
+                                  paddingLeft: "1.2rem",
+                                  fontSize: "12.5px",
+                                  color: "var(--mb-text-subtle)",
                                 }}
                               >
-                                💳 <strong>Kart Önerisi:</strong>{" "}
-                                {session.stayAndTransit.cityCardRecommendation}
-                              </p>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {draftTab === "discovery" && (
-                    <div
-                      className="ai-timeline-container ai-custom-scrollbar"
-                      style={{ padding: "0.5rem" }}
-                    >
-                      {!session?.discovery ? (
-                        <p className="ai-muted">
-                          Yerel lezzetler ve keşif önerilerini sohbette sorabilirsin.{" "}
-                          <button
-                            className="ai-small-btn"
-                            onClick={() =>
-                              setInput(
-                                "Mevcut rotamın şehrinde hangi yerel lezzetleri denemeliyim? Rotayı değiştirme.",
-                              )
-                            }
-                          >
-                            Sohbette sor
-                          </button>
-                        </p>
-                      ) : (
-                        <>
-                          <div style={{ marginBottom: "1rem" }}>
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              🍽️ Mutlaka Tadılması Gereken Spesiyaller
-                            </h3>
-                            <ul
-                              style={{
-                                margin: 0,
-                                paddingLeft: "1.2rem",
-                                fontSize: "12.5px",
-                                color: "var(--mb-text-subtle)",
-                              }}
-                            >
-                              {session.discovery.specialties?.map((s, idx) => (
-                                <li key={idx} style={{ marginBottom: "3px" }}>
-                                  {s}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div style={{ marginBottom: "1rem" }}>
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              💎 Gizli Köşeler & Otantik Noktalar
-                            </h3>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                              {session.discovery.gems?.map((gem, idx) => (
-                                <div key={idx} className="ai-stop-card">
-                                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                    <strong>{gem.name}</strong>
-                                    <span style={{ fontSize: "11px", fontWeight: 600 }}>
-                                      {gem.category}
-                                    </span>
-                                  </div>
-                                  <p style={{ fontSize: "12px", margin: "3px 0" }}>
-                                    {gem.description}
-                                  </p>
-                                  <small style={{ color: "var(--color-accent)" }}>
-                                    ✨ Özel: {gem.highlight}
-                                  </small>
-                                  <div style={{ marginTop: "6px" }}>
-                                    <button
-                                      type="button"
-                                      className="ai-action-chip"
-                                      onClick={() =>
-                                        addPlaceToActiveTrip({
-                                          label: gem.name,
-                                          category: (gem.category as import("../lib/trip/models").PinCategory) || "aktivite",
-                                          note: `${gem.highlight ? gem.highlight + " - " : ""}${gem.description}`,
-                                        })
-                                      }
-                                    >
-                                      ➕ Bu Noktayı Rotama Ekle
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
+                                {session.stayAndTransit.recommendedAreas?.map((a, idx) => (
+                                  <li key={idx} style={{ marginBottom: "3px" }}>
+                                    {a}
+                                  </li>
+                                ))}
+                              </ul>
                             </div>
-                          </div>
-                          <div>
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              💡 Yerel Yaşam & Kültürel İpuçları
-                            </h3>
-                            <ul
-                              style={{
-                                margin: 0,
-                                paddingLeft: "1.2rem",
-                                fontSize: "12.5px",
-                                color: "var(--mb-text-subtle)",
-                              }}
-                            >
-                              {session.discovery.cultureTips?.map((c, idx) => (
-                                <li key={idx} style={{ marginBottom: "3px" }}>
-                                  {c}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {draftTab === "flights" && (
-                    <div
-                      className="ai-timeline-container ai-custom-scrollbar"
-                      style={{ padding: "0.5rem" }}
-                    >
-                      <PrepPanel
-                        context={prepContext}
-                        flightBlock={
-                      !session?.flightPrices ? (
-                        <p className="ai-muted">
-                          Uçuş fiyatı bilgisi bu rota için mevcut değil. Rota oluştururken otomatik
-                          kontrol edilir.
-                        </p>
-                      ) : session.flightPrices.source === "unavailable" ? (
-                        <div className="ai-stop-card">
-                          <p className="ai-muted">{session.flightPrices.note}</p>
-                        </div>
-                      ) : (
-                        <>
-                          <div
-                            style={{
-                              marginBottom: "0.75rem",
-                              padding: "0.75rem 1rem",
-                              borderRadius: "12px",
-                              background:
-                                "linear-gradient(135deg,color-mix(in srgb, var(--color-accent) 12%, transparent),color-mix(in srgb, var(--color-accent-sky-soft) 8%, transparent))",
-                              border: "1px solid var(--color-accent-a30)",
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                marginBottom: "6px",
-                              }}
-                            >
-                              <span style={{ fontSize: "20px" }}>✈️</span>
-                              <div>
-                                <div
-                                  style={{
-                                    fontSize: "14px",
-                                    fontWeight: 700,
-                                    color: "var(--color-accent)",
-                                  }}
-                                >
-                                  Uçuş Fiyatları
-                                </div>
-                                <div style={{ fontSize: "11px", color: "var(--color-text-subtle)" }}>
-                                  Travelpayouts ·{" "}
-                                  {new Date(session.flightPrices.checkedAt).toLocaleDateString(
-                                    "tr-TR",
-                                  )}
-                                </div>
+                            <div style={{ marginBottom: "1rem" }}>
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                🏨 Önerilen Otel & Konaklama Tipleri
+                              </h3>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                {session.stayAndTransit.stays?.map((stay, idx) => (
+                                  <div key={idx} className="ai-stop-card">
+                                    <div
+                                      style={{ display: "flex", justifyContent: "space-between" }}
+                                    >
+                                      <strong>{stay.name}</strong>
+                                      <span style={{ fontSize: "11px", fontWeight: 700 }}>
+                                        {stay.priceLevel} · {stay.type}
+                                      </span>
+                                    </div>
+                                    <span className="ai-muted">{stay.area}</span>
+                                    <p style={{ fontSize: "12px", margin: "3px 0" }}>
+                                      {stay.description}
+                                    </p>
+                                    {stay.pros?.length > 0 && (
+                                      <small style={{ color: "var(--color-accent)" }}>
+                                        ✓ {stay.pros.join(" · ")}
+                                      </small>
+                                    )}
+                                    <div style={{ marginTop: "6px" }}>
+                                      <button
+                                        type="button"
+                                        className="ai-action-chip ai-hotel-chip"
+                                        onClick={() =>
+                                          addPlaceToActiveTrip({
+                                            label: stay.name,
+                                            address: stay.area,
+                                            isHotel: true,
+                                            category: "otel",
+                                            note: `${stay.type} · ${stay.priceLevel} - ${stay.description}`,
+                                          })
+                                        }
+                                      >
+                                        🏨 Bu Oteli Rotama Kaydet
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                            <p
-                              style={{
-                                fontSize: "12px",
-                                margin: 0,
-                                color: "var(--mb-text-subtle)",
-                              }}
+                            <div>
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                🚇 Havalimanı & Şehir İçi Ulaşım
+                              </h3>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                {session.stayAndTransit.transitTips?.map((tip, idx) => (
+                                  <div key={idx} className="ai-stop-card">
+                                    <strong>{tip.title}</strong>
+                                    <p style={{ fontSize: "12px", margin: "3px 0" }}>
+                                      {tip.description}
+                                    </p>
+                                    {tip.estimatedCost && (
+                                      <small
+                                        style={{
+                                          color: "var(--color-surface-inverse)",
+                                          fontWeight: 600,
+                                        }}
+                                      >
+                                        Tahmini Ücret: {tip.estimatedCost}
+                                      </small>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                              {session.stayAndTransit.cityCardRecommendation && (
+                                <p
+                                  style={{
+                                    fontSize: "12px",
+                                    marginTop: "6px",
+                                    padding: "6px",
+                                    backgroundColor: "var(--color-surface-brand)",
+                                    borderRadius: "6px",
+                                    color: "var(--color-surface-inverse)",
+                                  }}
+                                >
+                                  💳 <strong>Kart Önerisi:</strong>{" "}
+                                  {session.stayAndTransit.cityCardRecommendation}
+                                </p>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    {draftTab === "discovery" && (
+                      <div
+                        className="ai-timeline-container ai-custom-scrollbar"
+                        style={{ padding: "0.5rem" }}
+                      >
+                        {!session?.discovery ? (
+                          <p className="ai-muted">
+                            Yerel lezzetler ve keşif önerilerini sohbette sorabilirsin.{" "}
+                            <button
+                              className="ai-small-btn"
+                              onClick={() =>
+                                setInput(
+                                  "Mevcut rotamın şehrinde hangi yerel lezzetleri denemeliyim? Rotayı değiştirme.",
+                                )
+                              }
                             >
-                              {session.flightPrices.note}
-                            </p>
-                          </div>
-                          {session.flightPrices.deals.length > 0 && (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                              {session.flightPrices.deals.map((deal, idx) => (
-                                <a
-                                  key={idx}
-                                  href={deal.affiliateLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ textDecoration: "none", display: "block" }}
+                              Sohbette sor
+                            </button>
+                          </p>
+                        ) : (
+                          <>
+                            <div style={{ marginBottom: "1rem" }}>
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                🍽️ Mutlaka Tadılması Gereken Spesiyaller
+                              </h3>
+                              <ul
+                                style={{
+                                  margin: 0,
+                                  paddingLeft: "1.2rem",
+                                  fontSize: "12.5px",
+                                  color: "var(--mb-text-subtle)",
+                                }}
+                              >
+                                {session.discovery.specialties?.map((s, idx) => (
+                                  <li key={idx} style={{ marginBottom: "3px" }}>
+                                    {s}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div style={{ marginBottom: "1rem" }}>
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                💎 Gizli Köşeler & Otantik Noktalar
+                              </h3>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                {session.discovery.gems?.map((gem, idx) => (
+                                  <div key={idx} className="ai-stop-card">
+                                    <div
+                                      style={{ display: "flex", justifyContent: "space-between" }}
+                                    >
+                                      <strong>{gem.name}</strong>
+                                      <span style={{ fontSize: "11px", fontWeight: 600 }}>
+                                        {gem.category}
+                                      </span>
+                                    </div>
+                                    <p style={{ fontSize: "12px", margin: "3px 0" }}>
+                                      {gem.description}
+                                    </p>
+                                    <small style={{ color: "var(--color-accent)" }}>
+                                      ✨ Özel: {gem.highlight}
+                                    </small>
+                                    <div style={{ marginTop: "6px" }}>
+                                      <button
+                                        type="button"
+                                        className="ai-action-chip"
+                                        onClick={() =>
+                                          addPlaceToActiveTrip({
+                                            label: gem.name,
+                                            category:
+                                              (gem.category as import("../lib/trip/models").PinCategory) ||
+                                              "aktivite",
+                                            note: `${gem.highlight ? gem.highlight + " - " : ""}${gem.description}`,
+                                          })
+                                        }
+                                      >
+                                        ➕ Bu Noktayı Rotama Ekle
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                💡 Yerel Yaşam & Kültürel İpuçları
+                              </h3>
+                              <ul
+                                style={{
+                                  margin: 0,
+                                  paddingLeft: "1.2rem",
+                                  fontSize: "12.5px",
+                                  color: "var(--mb-text-subtle)",
+                                }}
+                              >
+                                {session.discovery.cultureTips?.map((c, idx) => (
+                                  <li key={idx} style={{ marginBottom: "3px" }}>
+                                    {c}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    {draftTab === "flights" && (
+                      <div
+                        className="ai-timeline-container ai-custom-scrollbar"
+                        style={{ padding: "0.5rem" }}
+                      >
+                        <PrepPanel
+                          context={prepContext}
+                          flightBlock={
+                            !session?.flightPrices ? (
+                              <p className="ai-muted">
+                                Uçuş fiyatı bilgisi bu rota için mevcut değil. Rota oluştururken
+                                otomatik kontrol edilir.
+                              </p>
+                            ) : session.flightPrices.source === "unavailable" ? (
+                              <div className="ai-stop-card">
+                                <p className="ai-muted">{session.flightPrices.note}</p>
+                              </div>
+                            ) : (
+                              <>
+                                <div
+                                  style={{
+                                    marginBottom: "0.75rem",
+                                    padding: "0.75rem 1rem",
+                                    borderRadius: "12px",
+                                    background:
+                                      "linear-gradient(135deg,color-mix(in srgb, var(--color-accent) 12%, transparent),color-mix(in srgb, var(--color-accent-sky-soft) 8%, transparent))",
+                                    border: "1px solid var(--color-accent-a30)",
+                                  }}
                                 >
                                   <div
                                     style={{
-                                      padding: "0.75rem 1rem",
-                                      borderRadius: "10px",
-                                      background: "color-mix(in srgb, var(--color-accent) 6%, transparent)",
-                                      border: "1px solid var(--color-accent-a20)",
-                                      cursor: "pointer",
-                                      transition: "border-color 0.2s",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "8px",
+                                      marginBottom: "6px",
                                     }}
                                   >
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      <div>
-                                        <strong
-                                          style={{ fontSize: "14px", color: "var(--mb-text)" }}
-                                        >
-                                          {deal.origin} → {deal.destination}
-                                        </strong>
-                                        {deal.departureMonth && (
-                                          <div
-                                            style={{
-                                              fontSize: "11px",
-                                              color: "var(--mb-text-subtle)",
-                                              marginTop: "2px",
-                                            }}
-                                          >
-                                            {deal.departureMonth}
-                                          </div>
-                                        )}
+                                    <span style={{ fontSize: "20px" }}>✈️</span>
+                                    <div>
+                                      <div
+                                        style={{
+                                          fontSize: "14px",
+                                          fontWeight: 700,
+                                          color: "var(--color-accent)",
+                                        }}
+                                      >
+                                        Uçuş Fiyatları
                                       </div>
                                       <div
                                         style={{
-                                          display: "flex",
-                                          flexDirection: "column",
-                                          alignItems: "flex-end",
-                                          gap: "4px",
+                                          fontSize: "11px",
+                                          color: "var(--color-text-subtle)",
                                         }}
                                       >
-                                        <strong
-                                          style={{
-                                            color: "var(--color-accent)",
-                                            fontSize: "18px",
-                                            lineHeight: 1,
-                                          }}
-                                        >
-                                          {deal.currency} {deal.price}
-                                        </strong>
-                                        <span
-                                          style={{
-                                            fontSize: "11px",
-                                            padding: "2px 8px",
-                                            borderRadius: "6px",
-                                            background: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
-                                            color: "var(--color-accent)",
-                                            fontWeight: 600,
-                                          }}
-                                        >
-                                          Bilet Ara →
-                                        </span>
+                                        Travelpayouts ·{" "}
+                                        {new Date(
+                                          session.flightPrices.checkedAt,
+                                        ).toLocaleDateString("tr-TR")}
                                       </div>
                                     </div>
                                   </div>
-                                </a>
-                              ))}
-                            </div>
-                          )}
-                          {session.flightPrices.deals[0] && (
-                            <a
-                              href={session.flightPrices.deals[0].affiliateLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "8px",
-                                marginTop: "12px",
-                                padding: "12px",
-                                borderRadius: "12px",
-                                background: "linear-gradient(135deg,var(--color-accent),var(--color-accent-sky-soft))",
-                                color: "var(--color-on-primary)",
-                                fontWeight: 700,
-                                fontSize: "14px",
-                                textDecoration: "none",
-                                boxShadow: "0 2px 12px var(--color-accent-a30)",
-                              }}
-                            >
-                              ✈️ Tüm Uçuşları Karşılaştır
-                            </a>
-                          )}
-                          <p
-                            style={{
-                              fontSize: "10px",
-                              color: "var(--color-text-subtle)",
-                              marginTop: "8px",
-                              lineHeight: 1.4,
-                              textAlign: "center",
-                            }}
-                          >
-                            Travelpayouts üzerinden arama yapılır. Fiyatlar değişkendir.
-                          </p>
-                        </>
-                      )
-                        }
-                      />
-                    </div>
-                  )}
+                                  <p
+                                    style={{
+                                      fontSize: "12px",
+                                      margin: 0,
+                                      color: "var(--mb-text-subtle)",
+                                    }}
+                                  >
+                                    {session.flightPrices.note}
+                                  </p>
+                                </div>
+                                {session.flightPrices.deals.length > 0 && (
+                                  <div
+                                    style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+                                  >
+                                    {session.flightPrices.deals.map((deal, idx) => (
+                                      <a
+                                        key={idx}
+                                        href={deal.affiliateLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ textDecoration: "none", display: "block" }}
+                                      >
+                                        <div
+                                          style={{
+                                            padding: "0.75rem 1rem",
+                                            borderRadius: "10px",
+                                            background:
+                                              "color-mix(in srgb, var(--color-accent) 6%, transparent)",
+                                            border: "1px solid var(--color-accent-a20)",
+                                            cursor: "pointer",
+                                            transition: "border-color 0.2s",
+                                          }}
+                                        >
+                                          <div
+                                            style={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <div>
+                                              <strong
+                                                style={{
+                                                  fontSize: "14px",
+                                                  color: "var(--mb-text)",
+                                                }}
+                                              >
+                                                {deal.origin} → {deal.destination}
+                                              </strong>
+                                              {deal.departureMonth && (
+                                                <div
+                                                  style={{
+                                                    fontSize: "11px",
+                                                    color: "var(--mb-text-subtle)",
+                                                    marginTop: "2px",
+                                                  }}
+                                                >
+                                                  {deal.departureMonth}
+                                                </div>
+                                              )}
+                                            </div>
+                                            <div
+                                              style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                alignItems: "flex-end",
+                                                gap: "4px",
+                                              }}
+                                            >
+                                              <strong
+                                                style={{
+                                                  color: "var(--color-accent)",
+                                                  fontSize: "18px",
+                                                  lineHeight: 1,
+                                                }}
+                                              >
+                                                {deal.currency} {deal.price}
+                                              </strong>
+                                              <span
+                                                style={{
+                                                  fontSize: "11px",
+                                                  padding: "2px 8px",
+                                                  borderRadius: "6px",
+                                                  background:
+                                                    "color-mix(in srgb, var(--color-accent) 15%, transparent)",
+                                                  color: "var(--color-accent)",
+                                                  fontWeight: 600,
+                                                }}
+                                              >
+                                                Bilet Ara →
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                                {session.flightPrices.deals[0] && (
+                                  <a
+                                    href={session.flightPrices.deals[0].affiliateLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      gap: "8px",
+                                      marginTop: "12px",
+                                      padding: "12px",
+                                      borderRadius: "12px",
+                                      background:
+                                        "linear-gradient(135deg,var(--color-accent),var(--color-accent-sky-soft))",
+                                      color: "var(--color-on-primary)",
+                                      fontWeight: 700,
+                                      fontSize: "14px",
+                                      textDecoration: "none",
+                                      boxShadow: "0 2px 12px var(--color-accent-a30)",
+                                    }}
+                                  >
+                                    ✈️ Tüm Uçuşları Karşılaştır
+                                  </a>
+                                )}
+                                <p
+                                  style={{
+                                    fontSize: "10px",
+                                    color: "var(--color-text-subtle)",
+                                    marginTop: "8px",
+                                    lineHeight: 1.4,
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  Travelpayouts üzerinden arama yapılır. Fiyatlar değişkendir.
+                                </p>
+                              </>
+                            )
+                          }
+                        />
+                      </div>
+                    )}
 
-                  {draftTab === "advisory" && (
-                    <div
-                      className="ai-timeline-container ai-custom-scrollbar"
-                      style={{ padding: "0.5rem" }}
-                    >
-                      {!session?.travelAdvisory ? (
-                        <p className="ai-muted">
-                          Seyahat tavsiyesi bu destinasyon için mevcut değil.
-                        </p>
-                      ) : (
-                        <>
-                          <div
-                            style={{
-                              marginBottom: "0.75rem",
-                              padding: "0.65rem 0.85rem",
-                              borderRadius: "10px",
-                              background:
-                                session.travelAdvisory.level === "avoid"
-                                  ? "rgba(239,68,68,0.1)"
-                                  : session.travelAdvisory.level === "avoid_non_essential"
-                                    ? "rgba(245,158,11,0.1)"
-                                    : session.travelAdvisory.level === "some_risk"
-                                      ? "rgba(251,191,36,0.08)"
-                                      : "rgba(16,185,129,0.08)",
-                              border:
-                                session.travelAdvisory.level === "avoid"
-                                  ? "1px solid rgba(239,68,68,0.3)"
-                                  : session.travelAdvisory.level === "avoid_non_essential"
-                                    ? "1px solid rgba(245,158,11,0.3)"
-                                    : session.travelAdvisory.level === "some_risk"
-                                      ? "1px solid rgba(251,191,36,0.3)"
-                                      : "1px solid rgba(16,185,129,0.2)",
-                            }}
-                          >
+                    {draftTab === "advisory" && (
+                      <div
+                        className="ai-timeline-container ai-custom-scrollbar"
+                        style={{ padding: "0.5rem" }}
+                      >
+                        {!session?.travelAdvisory ? (
+                          <p className="ai-muted">
+                            Seyahat tavsiyesi bu destinasyon için mevcut değil.
+                          </p>
+                        ) : (
+                          <>
                             <div
                               style={{
-                                fontSize: "13px",
-                                fontWeight: 700,
-                                marginBottom: "4px",
-                                color:
+                                marginBottom: "0.75rem",
+                                padding: "0.65rem 0.85rem",
+                                borderRadius: "10px",
+                                background:
                                   session.travelAdvisory.level === "avoid"
-                                    ? "#ef4444"
+                                    ? "rgba(239,68,68,0.1)"
                                     : session.travelAdvisory.level === "avoid_non_essential"
-                                      ? "#f59e0b"
+                                      ? "rgba(245,158,11,0.1)"
                                       : session.travelAdvisory.level === "some_risk"
-                                        ? "#fbbf24"
-                                        : "var(--color-accent)",
+                                        ? "rgba(251,191,36,0.08)"
+                                        : "rgba(16,185,129,0.08)",
+                                border:
+                                  session.travelAdvisory.level === "avoid"
+                                    ? "1px solid rgba(239,68,68,0.3)"
+                                    : session.travelAdvisory.level === "avoid_non_essential"
+                                      ? "1px solid rgba(245,158,11,0.3)"
+                                      : session.travelAdvisory.level === "some_risk"
+                                        ? "1px solid rgba(251,191,36,0.3)"
+                                        : "1px solid rgba(16,185,129,0.2)",
                               }}
                             >
-                              {session.travelAdvisory.level === "avoid"
-                                ? "🔴"
-                                : session.travelAdvisory.level === "avoid_non_essential"
-                                  ? "🟡"
-                                  : session.travelAdvisory.level === "some_risk"
-                                    ? "🟠"
-                                    : "🟢"}{" "}
-                              {session.travelAdvisory.levelLabel}
-                            </div>
-                            <strong style={{ fontSize: "12px" }}>
-                              {session.travelAdvisory.country}
-                            </strong>
-                          </div>
-                          {session.travelAdvisory.summary && (
-                            <div className="ai-stop-card" style={{ marginBottom: "8px" }}>
-                              <h3 style={{ fontSize: "12px", fontWeight: 700, margin: "0 0 6px" }}>
-                                📋 Özet Tavsiye
-                              </h3>
-                              <p
+                              <div
                                 style={{
-                                  fontSize: "12px",
-                                  margin: 0,
-                                  lineHeight: 1.5,
-                                  color: "var(--mb-text-subtle)",
-                                }}
-                              >
-                                {session.travelAdvisory.summary}
-                              </p>
-                            </div>
-                          )}
-                          {session.travelAdvisory.changeNote && (
-                            <div
-                              className="ai-stop-card"
-                              style={{
-                                marginBottom: "8px",
-                                background: "color-mix(in srgb, var(--color-accent-sky-soft) 6%, transparent)",
-                                border: "1px solid rgba(56,189,248,0.2)",
-                              }}
-                            >
-                              <h3
-                                style={{
-                                  fontSize: "12px",
+                                  fontSize: "13px",
                                   fontWeight: 700,
-                                  margin: "0 0 4px",
-                                  color: "#38bdf8",
+                                  marginBottom: "4px",
+                                  color:
+                                    session.travelAdvisory.level === "avoid"
+                                      ? "#ef4444"
+                                      : session.travelAdvisory.level === "avoid_non_essential"
+                                        ? "#f59e0b"
+                                        : session.travelAdvisory.level === "some_risk"
+                                          ? "#fbbf24"
+                                          : "var(--color-accent)",
                                 }}
                               >
-                                🔔 Son Güncelleme
-                              </h3>
-                              <p
-                                style={{
-                                  fontSize: "12px",
-                                  margin: 0,
-                                  color: "var(--mb-text-subtle)",
-                                }}
-                              >
-                                {session.travelAdvisory.changeNote}
-                              </p>
+                                {session.travelAdvisory.level === "avoid"
+                                  ? "🔴"
+                                  : session.travelAdvisory.level === "avoid_non_essential"
+                                    ? "🟡"
+                                    : session.travelAdvisory.level === "some_risk"
+                                      ? "🟠"
+                                      : "🟢"}{" "}
+                                {session.travelAdvisory.levelLabel}
+                              </div>
+                              <strong style={{ fontSize: "12px" }}>
+                                {session.travelAdvisory.country}
+                              </strong>
                             </div>
-                          )}
-                          <p
-                            style={{
-                              fontSize: "10.5px",
-                              color: "var(--color-text-subtle)",
-                              lineHeight: 1.5,
-                              marginTop: "8px",
-                            }}
-                          >
-                            ⚠️ {session.travelAdvisory.disclaimer}
-                          </p>
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "8px",
-                              marginTop: "8px",
-                              flexWrap: "wrap",
-                            }}
-                          >
-                            <a
-                              href={session.travelAdvisory.sourceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ai-small-btn"
-                              style={{ fontSize: "11px" }}
-                            >
-                              🇬🇧 FCDO Kaynağı
-                            </a>
-                            <a
-                              href="https://www.mfa.gov.tr/default.tr.mfa"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ai-small-btn"
-                              style={{ fontSize: "11px" }}
-                            >
-                              🇹🇷 T.C. Dışişleri
-                            </a>
-                          </div>
-                          <p
-                            style={{
-                              fontSize: "10px",
-                              color: "var(--color-text-subtle)",
-                              marginTop: "6px",
-                            }}
-                          >
-                            Son kontrol:{" "}
-                            {new Date(session.travelAdvisory.lastChecked).toLocaleString("tr-TR")} ·
-                            Kaynak: FCDO GOV.UK
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {draftTab === "emergency" && (
-                    <div
-                      className="ai-timeline-container ai-custom-scrollbar"
-                      style={{ padding: "0.5rem" }}
-                    >
-                      {!session?.emergency ? (
-                        <p className="ai-muted">Bu rota için ek güvenlik bilgisi alınamadı.</p>
-                      ) : (
-                        <>
-                          <div style={{ marginBottom: "1rem" }} className="ai-stop-card">
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              🏛️{" "}
-                              {session.emergency.turkishEmbassyConsulate?.title ||
-                                "T.C. Temsilciliği"}
-                            </h3>
-                            <p style={{ fontSize: "12px", margin: "2px 0" }}>
-                              📍 {session.emergency.turkishEmbassyConsulate?.address}
-                            </p>
-                            <p style={{ fontSize: "12px", margin: "2px 0" }}>
-                              📞 Tel: {session.emergency.turkishEmbassyConsulate?.phone}
-                            </p>
+                            {session.travelAdvisory.summary && (
+                              <div className="ai-stop-card" style={{ marginBottom: "8px" }}>
+                                <h3
+                                  style={{ fontSize: "12px", fontWeight: 700, margin: "0 0 6px" }}
+                                >
+                                  📋 Özet Tavsiye
+                                </h3>
+                                <p
+                                  style={{
+                                    fontSize: "12px",
+                                    margin: 0,
+                                    lineHeight: 1.5,
+                                    color: "var(--mb-text-subtle)",
+                                  }}
+                                >
+                                  {session.travelAdvisory.summary}
+                                </p>
+                              </div>
+                            )}
+                            {session.travelAdvisory.changeNote && (
+                              <div
+                                className="ai-stop-card"
+                                style={{
+                                  marginBottom: "8px",
+                                  background:
+                                    "color-mix(in srgb, var(--color-accent-sky-soft) 6%, transparent)",
+                                  border: "1px solid rgba(56,189,248,0.2)",
+                                }}
+                              >
+                                <h3
+                                  style={{
+                                    fontSize: "12px",
+                                    fontWeight: 700,
+                                    margin: "0 0 4px",
+                                    color: "#38bdf8",
+                                  }}
+                                >
+                                  🔔 Son Güncelleme
+                                </h3>
+                                <p
+                                  style={{
+                                    fontSize: "12px",
+                                    margin: 0,
+                                    color: "var(--mb-text-subtle)",
+                                  }}
+                                >
+                                  {session.travelAdvisory.changeNote}
+                                </p>
+                              </div>
+                            )}
                             <p
                               style={{
-                                fontSize: "12px",
-                                margin: "2px 0",
-                                color: "#dc2626",
-                                fontWeight: 700,
+                                fontSize: "10.5px",
+                                color: "var(--color-text-subtle)",
+                                lineHeight: 1.5,
+                                marginTop: "8px",
                               }}
                             >
-                              🚨 7/24 Acil Çağrı:{" "}
-                              {session.emergency.turkishEmbassyConsulate?.emergencyHotline}
+                              ⚠️ {session.travelAdvisory.disclaimer}
                             </p>
-                            {session.emergency.turkishEmbassyConsulate?.workingHours && (
-                              <small className="ai-muted">
-                                Çalışma Saatleri:{" "}
-                                {session.emergency.turkishEmbassyConsulate.workingHours}
-                              </small>
-                            )}
-                          </div>
-                          <div style={{ marginBottom: "1rem" }}>
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              🚨 Yerel Acil Numaralar
-                            </h3>
                             <div
                               style={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 1fr",
-                                gap: "6px",
-                                fontSize: "12px",
+                                display: "flex",
+                                gap: "8px",
+                                marginTop: "8px",
+                                flexWrap: "wrap",
                               }}
                             >
-                              <div className="ai-stop-card">
-                                <strong>Polis</strong>
-                                <span>{session.emergency.localEmergencyNumbers?.police}</span>
-                              </div>
-                              <div className="ai-stop-card">
-                                <strong>Ambulans</strong>
-                                <span>{session.emergency.localEmergencyNumbers?.ambulance}</span>
-                              </div>
-                              <div className="ai-stop-card">
-                                <strong>İtfaiye</strong>
-                                <span>{session.emergency.localEmergencyNumbers?.fire}</span>
-                              </div>
-                              <div className="ai-stop-card">
-                                <strong>Genel Acil</strong>
-                                <span>
-                                  {session.emergency.localEmergencyNumbers?.generalEmergency}
-                                </span>
+                              <a
+                                href={session.travelAdvisory.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ai-small-btn"
+                                style={{ fontSize: "11px" }}
+                              >
+                                🇬🇧 FCDO Kaynağı
+                              </a>
+                              <a
+                                href="https://www.mfa.gov.tr/default.tr.mfa"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ai-small-btn"
+                                style={{ fontSize: "11px" }}
+                              >
+                                🇹🇷 T.C. Dışişleri
+                              </a>
+                            </div>
+                            <p
+                              style={{
+                                fontSize: "10px",
+                                color: "var(--color-text-subtle)",
+                                marginTop: "6px",
+                              }}
+                            >
+                              Son kontrol:{" "}
+                              {new Date(session.travelAdvisory.lastChecked).toLocaleString("tr-TR")}{" "}
+                              · Kaynak: FCDO GOV.UK
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {draftTab === "emergency" && (
+                      <div
+                        className="ai-timeline-container ai-custom-scrollbar"
+                        style={{ padding: "0.5rem" }}
+                      >
+                        {!session?.emergency ? (
+                          <p className="ai-muted">Bu rota için ek güvenlik bilgisi alınamadı.</p>
+                        ) : (
+                          <>
+                            <div style={{ marginBottom: "1rem" }} className="ai-stop-card">
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                🏛️{" "}
+                                {session.emergency.turkishEmbassyConsulate?.title ||
+                                  "T.C. Temsilciliği"}
+                              </h3>
+                              <p style={{ fontSize: "12px", margin: "2px 0" }}>
+                                📍 {session.emergency.turkishEmbassyConsulate?.address}
+                              </p>
+                              <p style={{ fontSize: "12px", margin: "2px 0" }}>
+                                📞 Tel: {session.emergency.turkishEmbassyConsulate?.phone}
+                              </p>
+                              <p
+                                style={{
+                                  fontSize: "12px",
+                                  margin: "2px 0",
+                                  color: "#dc2626",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                🚨 7/24 Acil Çağrı:{" "}
+                                {session.emergency.turkishEmbassyConsulate?.emergencyHotline}
+                              </p>
+                              {session.emergency.turkishEmbassyConsulate?.workingHours && (
+                                <small className="ai-muted">
+                                  Çalışma Saatleri:{" "}
+                                  {session.emergency.turkishEmbassyConsulate.workingHours}
+                                </small>
+                              )}
+                            </div>
+                            <div style={{ marginBottom: "1rem" }}>
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                🚨 Yerel Acil Numaralar
+                              </h3>
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns: "1fr 1fr",
+                                  gap: "6px",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                <div className="ai-stop-card">
+                                  <strong>Polis</strong>
+                                  <span>{session.emergency.localEmergencyNumbers?.police}</span>
+                                </div>
+                                <div className="ai-stop-card">
+                                  <strong>Ambulans</strong>
+                                  <span>{session.emergency.localEmergencyNumbers?.ambulance}</span>
+                                </div>
+                                <div className="ai-stop-card">
+                                  <strong>İtfaiye</strong>
+                                  <span>{session.emergency.localEmergencyNumbers?.fire}</span>
+                                </div>
+                                <div className="ai-stop-card">
+                                  <strong>Genel Acil</strong>
+                                  <span>
+                                    {session.emergency.localEmergencyNumbers?.generalEmergency}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            <h3 style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>
-                              ⚠️ Pasaport Kaybı ve Güvenlik Protokolü
-                            </h3>
-                            <ul
-                              style={{
-                                margin: 0,
-                                paddingLeft: "1.2rem",
-                                fontSize: "12px",
-                                color: "var(--mb-text-subtle)",
-                              }}
-                            >
-                              {session.emergency.safetyAndPassportTips?.map((tip, idx) => (
-                                <li key={idx} style={{ marginBottom: "4px" }}>
-                                  {tip}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  <div className="ai-draft-footer-actions">
-                    <p className="ai-muted">
-                      Değişiklik için sohbete yaz: “İkinci güne kahve ekle” veya “Daha sakin olsun”.
-                    </p>
-                    <button className="ai-open-in-map-btn" onClick={openMap}>
-                      Haritada aç
-                    </button>
-                    <div className="ai-header-actions">
-                      <button className="ai-small-btn" onClick={copy}>
-                        Planı kopyala
+                            <div>
+                              <h3
+                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
+                              >
+                                ⚠️ Pasaport Kaybı ve Güvenlik Protokolü
+                              </h3>
+                              <ul
+                                style={{
+                                  margin: 0,
+                                  paddingLeft: "1.2rem",
+                                  fontSize: "12px",
+                                  color: "var(--mb-text-subtle)",
+                                }}
+                              >
+                                {session.emergency.safetyAndPassportTips?.map((tip, idx) => (
+                                  <li key={idx} style={{ marginBottom: "4px" }}>
+                                    {tip}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    <div className="ai-draft-footer-actions">
+                      <p className="ai-muted">
+                        Değişiklik için sohbete yaz: “İkinci güne kahve ekle” veya “Daha sakin
+                        olsun”.
+                      </p>
+                      <button className="ai-open-in-map-btn" onClick={openMap}>
+                        Haritada aç
                       </button>
-                      <button className="ai-small-btn" onClick={download}>
-                        Metin olarak indir
-                      </button>
+                      <div className="ai-header-actions">
+                        <button className="ai-small-btn" onClick={copy}>
+                          Planı kopyala
+                        </button>
+                        <button className="ai-small-btn" onClick={download}>
+                          Metin olarak indir
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
-            </aside>
-          )}
+                  </>
+                )}
+              </aside>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Seyahat Manifestosu (.md) Modalı */}
-      {showManifestoModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-            backgroundColor: "rgba(0,0,0,0.65)",
-            backdropFilter: "blur(4px)",
-          }}
-        >
+        {/* Seyahat Manifestosu (.md) Modalı */}
+        {showManifestoModal && (
           <div
             style={{
-              backgroundColor: "var(--color-neutral-900)",
-              border: "1px solid color-mix(in srgb, var(--color-neutral-700) 80%, transparent)",
-              borderRadius: "16px",
-              width: "100%",
-              maxWidth: "640px",
-              maxHeight: "85vh",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9999,
               display: "flex",
-              flexDirection: "column",
-              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.6)",
-              overflow: "hidden",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1rem",
+              backgroundColor: "rgba(0,0,0,0.65)",
+              backdropFilter: "blur(4px)",
             }}
           >
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "1rem 1.5rem",
-                borderBottom: "1px solid var(--color-neutral-800)",
                 backgroundColor: "var(--color-neutral-900)",
+                border: "1px solid color-mix(in srgb, var(--color-neutral-700) 80%, transparent)",
+                borderRadius: "16px",
+                width: "100%",
+                maxWidth: "640px",
+                maxHeight: "85vh",
+                display: "flex",
+                flexDirection: "column",
+                boxShadow: "0 25px 50px -12px rgba(0,0,0,0.6)",
+                overflow: "hidden",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span
-                  className="material-symbols-outlined"
-                  style={{ color: "#38bdf8", fontSize: "20px" }}
-                >
-                  description
-                </span>
-                <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#f8fafc" }}>
-                  Seyahat Manifestosu (.md)
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowManifestoModal(false)}
+              <div
                 style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#94a3b8",
-                  cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  padding: "4px",
-                  borderRadius: "8px",
-                }}
-                title="Kapat"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                  close
-                </span>
-              </button>
-            </div>
-
-            <div style={{ padding: "1rem 1.5rem", flex: 1, overflowY: "auto" }}>
-              <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 12px 0" }}>
-                AI Asistanımız bu markdown manifestosunu her sorunuzda okuyarak otellerinizi, rota
-                duraklarınızı ve günlerinizi bilir; önerileri buna göre optimize eder.
-              </p>
-              <pre
-                style={{
+                  justifyContent: "space-between",
+                  padding: "1rem 1.5rem",
+                  borderBottom: "1px solid var(--color-neutral-800)",
                   backgroundColor: "var(--color-neutral-900)",
-                  padding: "12px",
-                  borderRadius: "10px",
-                  border: "1px solid var(--color-neutral-800)",
-                  fontSize: "11.5px",
-                  fontFamily: "monospace",
-                  color: "#e2e8f0",
-                  overflowX: "auto",
-                  whiteSpace: "pre-wrap",
-                  maxHeight: "45vh",
-                  lineHeight: "1.6",
                 }}
               >
-                {currentTrip
-                  ? tripToMarkdown(currentTrip)
-                  : "# Henüz aktif bir seyahat rotası seçilmedi."}
-              </pre>
-            </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ color: "#38bdf8", fontSize: "20px" }}
+                  >
+                    description
+                  </span>
+                  <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#f8fafc" }}>
+                    Seyahat Manifestosu (.md)
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowManifestoModal(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "4px",
+                    borderRadius: "8px",
+                  }}
+                  title="Kapat"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    close
+                  </span>
+                </button>
+              </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "0.85rem 1.5rem",
-                borderTop: "1px solid var(--color-neutral-800)",
-                backgroundColor: "var(--color-neutral-900)",
-                flexWrap: "wrap",
-                gap: "8px",
-              }}
-            >
-              {currentTrip && (
-                <a
-                  href={`/maps/?tripId=${currentTrip.id}`}
+              <div style={{ padding: "1rem 1.5rem", flex: 1, overflowY: "auto" }}>
+                <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 12px 0" }}>
+                  AI Asistanımız bu markdown manifestosunu her sorunuzda okuyarak otellerinizi, rota
+                  duraklarınızı ve günlerinizi bilir; önerileri buna göre optimize eder.
+                </p>
+                <pre
                   style={{
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    color: "var(--color-accent-strong)",
-                    textDecoration: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
+                    backgroundColor: "var(--color-neutral-900)",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    border: "1px solid var(--color-neutral-800)",
+                    fontSize: "11.5px",
+                    fontFamily: "monospace",
+                    color: "#e2e8f0",
+                    overflowX: "auto",
+                    whiteSpace: "pre-wrap",
+                    maxHeight: "45vh",
+                    lineHeight: "1.6",
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                    map
-                  </span>
-                  <span>Haritada Düzenle</span>
-                </a>
-              )}
+                  {currentTrip
+                    ? tripToMarkdown(currentTrip)
+                    : "# Henüz aktif bir seyahat rotası seçilmedi."}
+                </pre>
+              </div>
+
               <div
-                style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "auto" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0.85rem 1.5rem",
+                  borderTop: "1px solid var(--color-neutral-800)",
+                  backgroundColor: "var(--color-neutral-900)",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                }}
               >
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!currentTrip) return;
-                    await navigator.clipboard.writeText(tripToMarkdown(currentTrip));
-                    setNotice("✓ Markdown panoya kopyalandı!");
-                  }}
-                  className="ai-small-btn"
-                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                {currentTrip && (
+                  <a
+                    href={`/maps/?tripId=${currentTrip.id}`}
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: "var(--color-accent-strong)",
+                      textDecoration: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                      map
+                    </span>
+                    <span>Haritada Düzenle</span>
+                  </a>
+                )}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "auto" }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                    content_copy
-                  </span>
-                  <span>Kopyala</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!currentTrip) return;
-                    const content = tripToMarkdown(currentTrip);
-                    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `${(currentTrip.title || "seyahat").toLowerCase().replace(/[^a-z0-9]/gi, "_")}_manifesto.md`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    setNotice("✓ Markdown dosyası indirildi!");
-                  }}
-                  className="ai-send-btn"
-                  style={{
-                    fontSize: "12px",
-                    padding: "0.4rem 0.85rem",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                    download
-                  </span>
-                  <span>İndir (.md)</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!currentTrip) return;
+                      await navigator.clipboard.writeText(tripToMarkdown(currentTrip));
+                      setNotice("✓ Markdown panoya kopyalandı!");
+                    }}
+                    className="ai-small-btn"
+                    style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                      content_copy
+                    </span>
+                    <span>Kopyala</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!currentTrip) return;
+                      const content = tripToMarkdown(currentTrip);
+                      const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${(currentTrip.title || "seyahat").toLowerCase().replace(/[^a-z0-9]/gi, "_")}_manifesto.md`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      setNotice("✓ Markdown dosyası indirildi!");
+                    }}
+                    className="ai-send-btn"
+                    style={{
+                      fontSize: "12px",
+                      padding: "0.4rem 0.85rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                      download
+                    </span>
+                    <span>İndir (.md)</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Fiyat Takip & Ucuz Bilet/Otel Botu Modalı */}
-      {showDealTrackerModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-            backgroundColor: "rgba(0,0,0,0.65)",
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <div style={{ width: "100%", maxWidth: "820px", maxHeight: "90vh", overflowY: "auto" }}>
-            <DealTrackerPanel
-              initialDestination={currentTrip?.destination || currentTrip?.title || ""}
-              onClose={() => setShowDealTrackerModal(false)}
-            />
+        {/* Fiyat Takip & Ucuz Bilet/Otel Botu Modalı */}
+        {showDealTrackerModal && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1rem",
+              backgroundColor: "rgba(0,0,0,0.65)",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            <div style={{ width: "100%", maxWidth: "820px", maxHeight: "90vh", overflowY: "auto" }}>
+              <DealTrackerPanel
+                initialDestination={currentTrip?.destination || currentTrip?.title || ""}
+                onClose={() => setShowDealTrackerModal(false)}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="ai-mobile-switcher">
-        <button
-          className={`ai-mobile-switch-btn ${mobileTab === "chat" ? "active" : ""}`}
-          onClick={() => {
-            setMobileTab("chat");
-            setPanelOpen(false);
-          }}
-        >
-          Sohbet
-        </button>
-        <button
-          className={`ai-mobile-switch-btn ${mobileTab === "draft" ? "active" : ""}`}
-          onClick={() => {
-            setMobileTab("draft");
-            setPanelOpen(true);
-          }}
-        >
-          Rota {route ? `· ${route.stops.length} durak` : ""}
-        </button>
+        <div className="ai-mobile-switcher">
+          <button
+            className={`ai-mobile-switch-btn ${mobileTab === "chat" ? "active" : ""}`}
+            onClick={() => {
+              setMobileTab("chat");
+              setPanelOpen(false);
+            }}
+          >
+            Sohbet
+          </button>
+          <button
+            className={`ai-mobile-switch-btn ${mobileTab === "draft" ? "active" : ""}`}
+            onClick={() => {
+              setMobileTab("draft");
+              setPanelOpen(true);
+            }}
+          >
+            Rota {route ? `· ${route.stops.length} durak` : ""}
+          </button>
+        </div>
+        <AuthActionModal
+          isOpen={authModal}
+          onClose={() => setAuthModal(false)}
+          title="Seyahatini birlikte planlayalım"
+          subtitle="Sohbet için giriş yap ve e-postanı doğrula."
+          featureName="AI seyahat asistanı"
+          nextUrl="/travel-assistant/"
+        />
       </div>
-      <AuthActionModal
-        isOpen={authModal}
-        onClose={() => setAuthModal(false)}
-        title="Seyahatini birlikte planlayalım"
-        subtitle="Sohbet için giriş yap ve e-postanı doğrula."
-        featureName="AI seyahat asistanı"
-        nextUrl="/travel-assistant/"
-      />
-    </div>
     </PageShell>
   );
 }

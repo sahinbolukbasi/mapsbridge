@@ -49,7 +49,8 @@ export function BuddyTab({
       {/* AI Matching Info Banner */}
       <div
         style={{
-          background: "linear-gradient(135deg, color-mix(in srgb, var(--color-surface-inverse) 95%, transparent), color-mix(in srgb, var(--color-brand-hover) 90%, transparent))",
+          background:
+            "linear-gradient(135deg, color-mix(in srgb, var(--color-surface-inverse) 95%, transparent), color-mix(in srgb, var(--color-brand-hover) 90%, transparent))",
           border: "1px solid color-mix(in srgb, var(--color-accent) 35%, transparent)",
           borderRadius: "16px",
           padding: "1.25rem 1.5rem",
@@ -83,7 +84,14 @@ export function BuddyTab({
               AI Destekli Akıllı Gezgin Eşleşmesi
             </span>
           </div>
-          <h3 style={{ margin: "0 0 6px", fontSize: "17px", fontWeight: 700, color: "var(--color-on-primary)" }}>
+          <h3
+            style={{
+              margin: "0 0 6px",
+              fontSize: "17px",
+              fontWeight: 700,
+              color: "var(--color-on-primary)",
+            }}
+          >
             Ortak İlgi Alanları ve Rotalara Göre Gezi Arkadaşı Bulun
           </h3>
           <p
@@ -179,11 +187,14 @@ export function BuddyTab({
               textAlign: "center",
               background: "var(--card-bg, var(--color-surface))",
               borderRadius: "16px",
-              border: "1px dashed var(--card-border, color-mix(in srgb, var(--color-primary) 20%, transparent))",
+              border:
+                "1px dashed var(--card-border, color-mix(in srgb, var(--color-primary) 20%, transparent))",
             }}
           >
             <span style={{ fontSize: "2rem", display: "block", marginBottom: "0.5rem" }}>🤝</span>
-            <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, var(--color-on-accent))" }}>
+            <h3
+              style={{ margin: "0 0 0.5rem", color: "var(--text-primary, var(--color-on-accent))" }}
+            >
               Aramanıza uygun gezi arkadaşı bulunamadı
             </h3>
             <p style={{ margin: 0, color: "var(--color-text-muted)", fontSize: "0.9rem" }}>
@@ -200,7 +211,8 @@ export function BuddyTab({
                 style={{
                   background: "var(--card-bg, var(--color-surface))",
                   borderRadius: "16px",
-                  border: "1px solid var(--card-border, color-mix(in srgb, var(--color-primary) 12%, transparent))",
+                  border:
+                    "1px solid var(--card-border, color-mix(in srgb, var(--color-primary) 12%, transparent))",
                   padding: "1.25rem",
                   display: "flex",
                   flexDirection: "column",

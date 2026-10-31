@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import Svg, { Path, Circle, Text as SvgText, G } from "react-native-svg";
 
 import { ModalFrame } from "../ui";
@@ -35,209 +29,297 @@ export function RouteLoadingModal({
       dismissible={false}
       style={styles.safeContainer}
     >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Minimal Header / Cancellation Bar */}
-          <View style={styles.headerBar}>
-            <View style={styles.headerLeft}>
-              <View style={styles.headerIconCircle}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>🧭</Text>
-              </View>
-              <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.headerTitle}>MapsBridge</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headerSub}>ROTA MOTORU 4.2</Text>
-              </View>
-            </View>
-
-            <TouchableOpacity style={styles.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cancelBtnText}>Vazgeç</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cancelBtnCross}>✕</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Central Optimization & Radar Visual Card */}
-          <View style={styles.radarCard}>
-            <View style={styles.ambientGlow} />
-
-            {/* Radar / Spline Graphic */}
-            <View style={styles.radarGraphicBox}>
-              <Svg width="100%" height={140} viewBox="0 0 320 140">
-                {/* Trail Path */}
-                <Path
-                  d="M 30,110 C 70,120 100,40 160,50 C 220,60 240,110 290,30"
-                  stroke={tokens.color.accent}
-                  strokeDasharray="6 6"
-                  strokeLinecap="round"
-                  strokeWidth={3}
-                  fill="none"
-                />
-                {/* Waypoint 1 (Completed) */}
-                <Circle cx={30} cy={110} r={7} fill={tokens.color.textBrand} />
-                <Circle cx={30} cy={110} r={3} fill={tokens.color.onPrimary} />
-                <SvgText x={16} y={130} fill={tokens.color.link} fontSize="10" fontWeight="bold">
-                  Karaköy
-                </SvgText>
-
-                {/* Waypoint 2 (Active Scan Node) */}
-                <G>
-                  <Circle cx={160} cy={50} r={14} fill={withAlpha(tokens.color.accent, 0.25)} />
-                  <Circle cx={160} cy={50} r={8} fill={tokens.color.accent} />
-                  <Circle cx={160} cy={50} r={3.5} fill={tokens.color.onPrimary} />
-                  <SvgText x={126} y={30} fill={tokens.color.onAccent} fontSize="10" fontWeight="bold">
-                    Galata Kulesi
-                  </SvgText>
-                </G>
-
-                {/* Waypoint 3 (Pending Node) */}
-                <Circle cx={290} cy={30} r={6} fill={tokens.color.neutral300} />
-                <Circle cx={290} cy={30} r={2.5} fill={tokens.color.onPrimary} />
-                <SvgText x={245} y={18} fill={tokens.color.textSubtle} fontSize="10" fontWeight="bold">
-                  İstiklal Cad.
-                </SvgText>
-              </Svg>
-
-              {/* Live Radar Ping Indicator */}
-              <View style={styles.liveOptimizationBadge}>
-                <View style={styles.livePulseDot} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.liveOptimizationText}>Canlı Optimizasyon</Text>
-              </View>
-
-              {/* Percentage Float */}
-              <View style={styles.percentBadge}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.percentNum}>{progressPercent}%</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.percentLabel}>HESAPLANDI</Text>
-              </View>
-            </View>
-
-            {/* Title & Context */}
-            <View style={styles.cardTextBox}>
-              <View style={styles.titleRow}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardTitle}>{routeTitle}</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.syncSpin}>🔄</Text>
-              </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardDesc}>
-                Yapay zeka durak sıralamasını, eğim analizini ve çevrimdışı yürüyüş verilerini
-                optimize ediyor.
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Minimal Header / Cancellation Bar */}
+        <View style={styles.headerBar}>
+          <View style={styles.headerLeft}>
+            <View style={styles.headerIconCircle}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>
+                🧭
               </Text>
             </View>
-
-            {/* Step Progress Tracker Milestones */}
-            <View style={styles.milestonesList}>
-              {/* Step 1 */}
-              <View style={styles.milestoneItem}>
-                <View style={styles.stepIndicatorCol}>
-                  <View style={[styles.stepCircle, styles.stepCircleCompleted]}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepCheck}>✓</Text>
-                  </View>
-                  <View style={[styles.stepConnector, { backgroundColor: tokens.color.accent }]} />
-                </View>
-                <View style={styles.stepInfo}>
-                  <View style={styles.stepHeaderRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>GPS Koordinatları & Duraklar</Text>
-                    <View style={styles.completedTag}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.completedTagText}>Tamamlandı</Text>
-                    </View>
-                  </View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
-                    İlgi noktaları ve ara mola noktaları doğrulandı.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Step 2 */}
-              <View style={styles.milestoneItem}>
-                <View style={styles.stepIndicatorCol}>
-                  <View style={[styles.stepCircle, styles.stepCircleActive]}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, color: tokens.color.onPrimary }}>⚡</Text>
-                  </View>
-                  <View style={styles.stepConnector} />
-                </View>
-                <View style={styles.stepInfo}>
-                  <View style={styles.stepHeaderRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.stepTitle, { fontWeight: "800" }]}>
-                      En Hızlı Yürüyüş Yolu Analizi
-                    </Text>
-                    <View style={styles.activeTag}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.activeTagText}>İşleniyor</Text>
-                    </View>
-                  </View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
-                    Trafik, yaya kalabalığı ve güncel yol çalışmaları taranıyor.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Step 3 */}
-              <View style={[styles.milestoneItem, { opacity: 0.65 }]}>
-                <View style={styles.stepIndicatorCol}>
-                  <View style={styles.stepCircle}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>⏳</Text>
-                  </View>
-                  <View style={styles.stepConnector} />
-                </View>
-                <View style={styles.stepInfo}>
-                  <View style={styles.stepHeaderRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>Kaşif Notları & Yerel İpuçları</Text>
-                    <View style={styles.pendingTag}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.pendingTagText}>Sırada</Text>
-                    </View>
-                  </View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
-                    Gizli sokak lezzetleri ve manzara seyir noktaları eklenecek.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Step 4 */}
-              <View style={[styles.milestoneItem, { opacity: 0.45 }]}>
-                <View style={styles.stepIndicatorCol}>
-                  <View style={styles.stepCircle}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>☁️</Text>
-                  </View>
-                </View>
-                <View style={styles.stepInfo}>
-                  <View style={styles.stepHeaderRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>Çevrimdışı Harita Hazırlığı</Text>
-                    <View style={styles.pendingTag}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.pendingTagText}>Bekliyor</Text>
-                    </View>
-                  </View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
-                    Sinyalsiz dağ ve ara sokak moduna uygun paketleniyor.
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          {/* Travel Tip Banner */}
-          <View style={styles.tipBanner}>
-            <View style={styles.tipIconWrap}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>💡</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipHeading}>Gezgin İpucu</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipBody}>
-                MapsBridge ile oluşturulan rotaları internet bağlantınız kesildiğinde de GPS
-                üzerinden rota sapması uyarısıyla kullanabilirsiniz.
+            <View>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.headerTitle}>
+                MapsBridge
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headerSub}>
+                ROTA MOTORU 4.2
               </Text>
             </View>
           </View>
 
-          {/* Action CTA Area */}
-          <TouchableOpacity
-            style={styles.backgroundCtaBtn}
-            onPress={onRunInBackground || onCancel}
-            activeOpacity={0.8}
-          >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>🔔</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.backgroundCtaText}>Arka Planda Yükle ve Bildir</Text>
+          <TouchableOpacity style={styles.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cancelBtnText}>
+              Vazgeç
+            </Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cancelBtnCross}>
+              ✕
+            </Text>
           </TouchableOpacity>
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.footnote}>ROTA HAZIRLANDIĞINDA TİTREŞİMLİ BİLDİRİM GÖNDERİLİR</Text>
-        </ScrollView>
-      </ModalFrame>
+        </View>
+
+        {/* Central Optimization & Radar Visual Card */}
+        <View style={styles.radarCard}>
+          <View style={styles.ambientGlow} />
+
+          {/* Radar / Spline Graphic */}
+          <View style={styles.radarGraphicBox}>
+            <Svg width="100%" height={140} viewBox="0 0 320 140">
+              {/* Trail Path */}
+              <Path
+                d="M 30,110 C 70,120 100,40 160,50 C 220,60 240,110 290,30"
+                stroke={tokens.color.accent}
+                strokeDasharray="6 6"
+                strokeLinecap="round"
+                strokeWidth={3}
+                fill="none"
+              />
+              {/* Waypoint 1 (Completed) */}
+              <Circle cx={30} cy={110} r={7} fill={tokens.color.textBrand} />
+              <Circle cx={30} cy={110} r={3} fill={tokens.color.onPrimary} />
+              <SvgText x={16} y={130} fill={tokens.color.link} fontSize="10" fontWeight="bold">
+                Karaköy
+              </SvgText>
+
+              {/* Waypoint 2 (Active Scan Node) */}
+              <G>
+                <Circle cx={160} cy={50} r={14} fill={withAlpha(tokens.color.accent, 0.25)} />
+                <Circle cx={160} cy={50} r={8} fill={tokens.color.accent} />
+                <Circle cx={160} cy={50} r={3.5} fill={tokens.color.onPrimary} />
+                <SvgText
+                  x={126}
+                  y={30}
+                  fill={tokens.color.onAccent}
+                  fontSize="10"
+                  fontWeight="bold"
+                >
+                  Galata Kulesi
+                </SvgText>
+              </G>
+
+              {/* Waypoint 3 (Pending Node) */}
+              <Circle cx={290} cy={30} r={6} fill={tokens.color.neutral300} />
+              <Circle cx={290} cy={30} r={2.5} fill={tokens.color.onPrimary} />
+              <SvgText
+                x={245}
+                y={18}
+                fill={tokens.color.textSubtle}
+                fontSize="10"
+                fontWeight="bold"
+              >
+                İstiklal Cad.
+              </SvgText>
+            </Svg>
+
+            {/* Live Radar Ping Indicator */}
+            <View style={styles.liveOptimizationBadge}>
+              <View style={styles.livePulseDot} />
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.liveOptimizationText}
+              >
+                Canlı Optimizasyon
+              </Text>
+            </View>
+
+            {/* Percentage Float */}
+            <View style={styles.percentBadge}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.percentNum}>
+                {progressPercent}%
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.percentLabel}>
+                HESAPLANDI
+              </Text>
+            </View>
+          </View>
+
+          {/* Title & Context */}
+          <View style={styles.cardTextBox}>
+            <View style={styles.titleRow}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardTitle}>
+                {routeTitle}
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.syncSpin}>
+                🔄
+              </Text>
+            </View>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardDesc}>
+              Yapay zeka durak sıralamasını, eğim analizini ve çevrimdışı yürüyüş verilerini
+              optimize ediyor.
+            </Text>
+          </View>
+
+          {/* Step Progress Tracker Milestones */}
+          <View style={styles.milestonesList}>
+            {/* Step 1 */}
+            <View style={styles.milestoneItem}>
+              <View style={styles.stepIndicatorCol}>
+                <View style={[styles.stepCircle, styles.stepCircleCompleted]}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepCheck}>
+                    ✓
+                  </Text>
+                </View>
+                <View style={[styles.stepConnector, { backgroundColor: tokens.color.accent }]} />
+              </View>
+              <View style={styles.stepInfo}>
+                <View style={styles.stepHeaderRow}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>
+                    GPS Koordinatları & Duraklar
+                  </Text>
+                  <View style={styles.completedTag}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.completedTagText}
+                    >
+                      Tamamlandı
+                    </Text>
+                  </View>
+                </View>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
+                  İlgi noktaları ve ara mola noktaları doğrulandı.
+                </Text>
+              </View>
+            </View>
+
+            {/* Step 2 */}
+            <View style={styles.milestoneItem}>
+              <View style={styles.stepIndicatorCol}>
+                <View style={[styles.stepCircle, styles.stepCircleActive]}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={{ fontSize: 11, color: tokens.color.onPrimary }}
+                  >
+                    ⚡
+                  </Text>
+                </View>
+                <View style={styles.stepConnector} />
+              </View>
+              <View style={styles.stepInfo}>
+                <View style={styles.stepHeaderRow}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={[styles.stepTitle, { fontWeight: "800" }]}
+                  >
+                    En Hızlı Yürüyüş Yolu Analizi
+                  </Text>
+                  <View style={styles.activeTag}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.activeTagText}
+                    >
+                      İşleniyor
+                    </Text>
+                  </View>
+                </View>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
+                  Trafik, yaya kalabalığı ve güncel yol çalışmaları taranıyor.
+                </Text>
+              </View>
+            </View>
+
+            {/* Step 3 */}
+            <View style={[styles.milestoneItem, { opacity: 0.65 }]}>
+              <View style={styles.stepIndicatorCol}>
+                <View style={styles.stepCircle}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={{ fontSize: 10, color: tokens.color.textSubtle }}
+                  >
+                    ⏳
+                  </Text>
+                </View>
+                <View style={styles.stepConnector} />
+              </View>
+              <View style={styles.stepInfo}>
+                <View style={styles.stepHeaderRow}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>
+                    Kaşif Notları & Yerel İpuçları
+                  </Text>
+                  <View style={styles.pendingTag}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.pendingTagText}
+                    >
+                      Sırada
+                    </Text>
+                  </View>
+                </View>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
+                  Gizli sokak lezzetleri ve manzara seyir noktaları eklenecek.
+                </Text>
+              </View>
+            </View>
+
+            {/* Step 4 */}
+            <View style={[styles.milestoneItem, { opacity: 0.45 }]}>
+              <View style={styles.stepIndicatorCol}>
+                <View style={styles.stepCircle}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={{ fontSize: 10, color: tokens.color.textSubtle }}
+                  >
+                    ☁️
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.stepInfo}>
+                <View style={styles.stepHeaderRow}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>
+                    Çevrimdışı Harita Hazırlığı
+                  </Text>
+                  <View style={styles.pendingTag}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.pendingTagText}
+                    >
+                      Bekliyor
+                    </Text>
+                  </View>
+                </View>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
+                  Sinyalsiz dağ ve ara sokak moduna uygun paketleniyor.
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Travel Tip Banner */}
+        <View style={styles.tipBanner}>
+          <View style={styles.tipIconWrap}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>
+              💡
+            </Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipHeading}>
+              Gezgin İpucu
+            </Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipBody}>
+              MapsBridge ile oluşturulan rotaları internet bağlantınız kesildiğinde de GPS üzerinden
+              rota sapması uyarısıyla kullanabilirsiniz.
+            </Text>
+          </View>
+        </View>
+
+        {/* Action CTA Area */}
+        <TouchableOpacity
+          style={styles.backgroundCtaBtn}
+          onPress={onRunInBackground || onCancel}
+          activeOpacity={0.8}
+        >
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>
+            🔔
+          </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.backgroundCtaText}>
+            Arka Planda Yükle ve Bildir
+          </Text>
+        </TouchableOpacity>
+        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.footnote}>
+          ROTA HAZIRLANDIĞINDA TİTREŞİMLİ BİLDİRİM GÖNDERİLİR
+        </Text>
+      </ScrollView>
+    </ModalFrame>
   );
 }
 

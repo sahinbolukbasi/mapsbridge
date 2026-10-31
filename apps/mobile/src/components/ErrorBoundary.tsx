@@ -36,19 +36,29 @@ export class ErrorBoundary extends Component<Props, State> {
         <SafeArea style={styles.container}>
           <View style={styles.card}>
             <View style={styles.badge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badgeText}>SİSTEM KURTARMA</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badgeText}>
+                SİSTEM KURTARMA
+              </Text>
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.title}>Uygulama Güvenle Kurtarıldı</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.title}>
+              Uygulama Güvenle Kurtarıldı
+            </Text>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.message}>
               Beklenmedik bir ekran yükleme sorunu oluştu. Verileriniz koruma altında tutulmaktadır.
             </Text>
             {this.state.error?.message && (
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detail} numberOfLines={3}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.detail}
+                numberOfLines={3}
+              >
                 {this.state.error.message}
               </Text>
             )}
             <TouchableOpacity style={styles.button} onPress={this.handleReset} activeOpacity={0.85}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.buttonText}>Yeniden Başlat</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.buttonText}>
+                Yeniden Başlat
+              </Text>
             </TouchableOpacity>
           </View>
         </SafeArea>

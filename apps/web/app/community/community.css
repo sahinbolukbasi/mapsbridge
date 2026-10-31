@@ -7,7 +7,6 @@
   /* ========================================================= */
 
   .community-page-root {
-
     --c-bg: var(--color-bg);
     --c-card: var(--color-surface);
     --c-card-hover: var(--color-surface-sunken);
@@ -193,7 +192,11 @@
     flex-direction: column;
     align-items: center;
     gap: 0.4rem;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--color-brand) 6%, transparent), color-mix(in srgb, var(--color-brand) 2%, transparent));
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-brand) 6%, transparent),
+      color-mix(in srgb, var(--color-brand) 2%, transparent)
+    );
     border-color: color-mix(in srgb, var(--color-brand) 20%, transparent);
   }
 
@@ -219,7 +222,12 @@
   /* ── HERO BANNER ───────────────────────────────────────── */
   .community-hero {
     border-bottom: 1px solid var(--color-border);
-    background: linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg) 60%, var(--color-surface-brand) 100%);
+    background: linear-gradient(
+      160deg,
+      var(--color-bg) 0%,
+      var(--color-bg) 60%,
+      var(--color-surface-brand) 100%
+    );
     position: relative;
     overflow: hidden;
     padding: 2rem 0 1.5rem;
@@ -232,7 +240,11 @@
     right: -6rem;
     width: 28rem;
     height: 28rem;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 12%, transparent) 0%, transparent 70%);
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-accent) 12%, transparent) 0%,
+      transparent 70%
+    );
     border-radius: 50%;
     pointer-events: none;
   }
@@ -1824,11 +1836,15 @@
     }
     .community-page-root .hero-tab-badge {
       display: none;
-    }    .community-page-root .content-feed,
+    }
+    .community-page-root .content-feed,
     .community-page-root .content-sidebar {
       width: 100%;
       min-width: 0;
-    }  }  @media (max-width: 767px) {    .community-page-root .hero-headline-row {
+    }
+  }
+  @media (max-width: 767px) {
+    .community-page-root .hero-headline-row {
       flex-wrap: nowrap;
       align-items: center;
       justify-content: space-between;

@@ -4,7 +4,11 @@
     min-height: 100vh;
     background-color: var(--color-bg);
     color: var(--color-text);
-    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Plus Jakarta Sans",
+      system-ui,
+      -apple-system,
+      sans-serif;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -80,7 +84,11 @@
     border-radius: 9999px;
     background: var(--color-surface);
     color: var(--color-brand);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
@@ -100,7 +108,11 @@
     border-radius: 9999px;
     background: var(--color-brand-hover);
     color: var(--color-text-inverse);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 600;
     border: none;
@@ -195,7 +207,11 @@
     border-radius: 9999px;
     background: var(--color-surface-brand);
     color: var(--color-brand);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 11px;
     font-weight: 700;
   }
@@ -244,7 +260,11 @@
     flex: 1;
     padding: 0.4rem 0.65rem;
     border-radius: 8px;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 11px;
     font-weight: 600;
     border: none;
@@ -357,7 +377,11 @@
   }
 
   .chat-item-time {
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 10px;
     font-weight: 600;
     color: var(--color-brand);
@@ -368,7 +392,11 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 10px;
     font-weight: 600;
     color: var(--color-brand);
@@ -399,7 +427,11 @@
     border-radius: 50%;
     background: var(--color-accent);
     color: var(--color-on-primary);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 10px;
     font-weight: 700;
     display: flex;
@@ -495,7 +527,11 @@
     border-radius: 9999px;
     background: var(--color-brand-hover);
     color: var(--color-text-inverse);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
@@ -535,7 +571,11 @@
   }
 
   .chat-pinned-action {
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 11px;
     font-weight: 700;
     color: var(--color-brand);
@@ -568,7 +608,11 @@
     border-radius: 9999px;
     background: var(--color-surface-tint);
     color: var(--color-text-muted);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 11px;
     font-weight: 700;
   }
@@ -627,7 +671,11 @@
     padding: 0.1rem 0.4rem;
     border-radius: 4px;
     background: var(--color-surface-tint);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 9px;
     color: var(--color-text-muted);
   }
@@ -639,7 +687,11 @@
   }
 
   .chat-msg-time {
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 10px;
     color: var(--color-border-control);
   }
@@ -700,7 +752,11 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 10px;
     font-weight: 700;
     color: var(--color-text-brand);
@@ -761,7 +817,11 @@
     gap: 0.35rem;
     margin-top: 0.45rem;
     flex-wrap: wrap;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 10px;
   }
 
@@ -883,7 +943,11 @@
     border-radius: 9999px;
     background: var(--color-surface-tint);
     color: var(--color-text-muted);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 12px;
     font-weight: 500;
     border: none;
@@ -1006,7 +1070,11 @@
   }
 
   .chat-right-section-title {
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 11px;
     font-weight: 700;
     color: var(--color-text-brand);
@@ -1254,7 +1322,11 @@
   }
 
   .chat-personal-header-card {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--color-brand-hover) 8%, transparent) 0%, color-mix(in srgb, var(--color-accent) 5%, transparent) 100%);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-brand-hover) 8%, transparent) 0%,
+      color-mix(in srgb, var(--color-accent) 5%, transparent) 100%
+    );
     border: 1px solid var(--color-accent-a20);
     border-radius: 16px;
     padding: 1.5rem 1rem;

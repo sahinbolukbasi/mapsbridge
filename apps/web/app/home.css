@@ -21,7 +21,11 @@
     left: -5rem;
     width: 24rem;
     height: 24rem;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent-strong) 15%, transparent) 0%, transparent 70%);
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-accent-strong) 15%, transparent) 0%,
+      transparent 70%
+    );
     border-radius: 50%;
     filter: blur(80px);
     pointer-events: none;
@@ -34,7 +38,11 @@
     right: -8rem;
     width: 32rem;
     height: 32rem;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-surface-brand-soft) 25%, transparent) 0%, transparent 70%);
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-surface-brand-soft) 25%, transparent) 0%,
+      transparent 70%
+    );
     border-radius: 50%;
     filter: blur(80px);
     pointer-events: none;
@@ -1419,7 +1427,11 @@
     width: 3.25rem;
     height: 3.25rem;
     border-radius: 1.125rem;
-    background: linear-gradient(135deg, var(--color-surface-brand) 0%, var(--color-surface-brand-strong) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-surface-brand) 0%,
+      var(--color-surface-brand-strong) 100%
+    );
     color: var(--color-on-surface-brand);
     font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 1.25rem;
@@ -1777,7 +1789,12 @@
   }
 
   .community-story-ring.gradient {
-    background: linear-gradient(135deg, var(--color-accent-strong), var(--color-accent), var(--color-primary));
+    background: linear-gradient(
+      135deg,
+      var(--color-accent-strong),
+      var(--color-accent),
+      var(--color-primary)
+    );
   }
 
   .community-story-ring.plain {
@@ -2385,7 +2402,11 @@
     bottom: -5rem;
     width: 24rem;
     height: 24rem;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent-strong) 20%, transparent) 0%, transparent 70%);
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-accent-strong) 20%, transparent) 0%,
+      transparent 70%
+    );
     border-radius: 50%;
     filter: blur(60px);
     pointer-events: none;
@@ -2397,7 +2418,11 @@
     top: -5rem;
     width: 20rem;
     height: 20rem;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-brand) 30%, transparent) 0%, transparent 70%);
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-brand) 30%, transparent) 0%,
+      transparent 70%
+    );
     border-radius: 50%;
     filter: blur(60px);
     pointer-events: none;
@@ -2718,4 +2743,5 @@
     color: #131b2e;
     margin: 0;
     line-height: 1.35;
-  }}
+  }
+}

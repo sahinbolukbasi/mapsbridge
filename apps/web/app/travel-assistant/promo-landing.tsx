@@ -463,7 +463,11 @@ export function AIPromoLanding() {
                       <Link
                         href="/maps/?kod=RM-841"
                         className="ai-promo-sub-btn"
-                        style={{ background: "var(--color-brand-hover)", color: "var(--color-on-primary)", border: "none" }}
+                        style={{
+                          background: "var(--color-brand-hover)",
+                          color: "var(--color-on-primary)",
+                          border: "none",
+                        }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
                           map
@@ -499,7 +503,11 @@ export function AIPromoLanding() {
                     speed
                   </span>
                   <span>Tempo:</span>
-                  <select className="ai-promo-filter-select" aria-label="Tempo" defaultValue="Dengeli / Orta">
+                  <select
+                    className="ai-promo-filter-select"
+                    aria-label="Tempo"
+                    defaultValue="Dengeli / Orta"
+                  >
                     <option>Dengeli / Orta</option>
                     <option>Sakin &amp; Rahat</option>
                     <option>Hızlı &amp; Yoğun</option>
@@ -510,7 +518,11 @@ export function AIPromoLanding() {
                     payments
                   </span>
                   <span>Bütçe:</span>
-                  <select className="ai-promo-filter-select" aria-label="Bütçe" defaultValue="Orta Düzey (€€)">
+                  <select
+                    className="ai-promo-filter-select"
+                    aria-label="Bütçe"
+                    defaultValue="Orta Düzey (€€)"
+                  >
                     <option>Orta Düzey (€€)</option>
                     <option>Ekonomik (€)</option>
                     <option>Lüks &amp; Konfor (€€€)</option>
@@ -589,8 +601,11 @@ export function AIPromoLanding() {
                   </h2>
                 </div>
                 <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
-                  Kod: <strong style={{ color: "var(--color-text-brand)", fontWeight: 700 }}>RM-841</strong> • Roma,
-                  İtalya
+                  Kod:{" "}
+                  <strong style={{ color: "var(--color-text-brand)", fontWeight: 700 }}>
+                    RM-841
+                  </strong>{" "}
+                  • Roma, İtalya
                 </span>
               </div>
               <span
@@ -665,7 +680,12 @@ export function AIPromoLanding() {
             </div>
 
             {/* Timeline Stops Feed */}
-            <div className="ai-promo-timeline-feed" tabIndex={0} role="region" aria-label="Örnek rota akışı">
+            <div
+              className="ai-promo-timeline-feed"
+              tabIndex={0}
+              role="region"
+              aria-label="Örnek rota akışı"
+            >
               {DAY_STOPS[selectedDay].map((stop, idx) => (
                 <div className="ai-promo-stop-item" key={stop.num}>
                   {idx < DAY_STOPS[selectedDay].length - 1 && (

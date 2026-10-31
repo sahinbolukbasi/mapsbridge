@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { buildFlightCard, buildHotelCard, buildTripAffiliateBundle, extractDateFromText, toIataPublic } from "../lib/affiliate/travelpayouts";
+import {
+  buildFlightCard,
+  buildHotelCard,
+  buildTripAffiliateBundle,
+  extractDateFromText,
+  toIataPublic,
+} from "../lib/affiliate/travelpayouts";
 import type { AffiliateCard } from "../lib/affiliate/types";
 import type { UnifiedRoutePlan } from "../lib/ai/types";
 
@@ -60,14 +66,18 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("mapsbridge:affiliate_click", { detail: event }));
       }
-    } catch { // ignore
+    } catch {
+      // ignore
     }
   }
 
   return (
     <div className="tp-affiliate-bundle" aria-label="Seyahat fırsatları">
       <div className="tp-bundle-header">
-        <span className="material-symbols-outlined" style={{ fontSize: "15px", color: "var(--color-accent)" }}>
+        <span
+          className="material-symbols-outlined"
+          style={{ fontSize: "15px", color: "var(--color-accent)" }}
+        >
           sell
         </span>
         <span>
@@ -161,7 +171,9 @@ export function InlineAffiliateStrip({
           }),
           fetch(
             `/prices/hotels?location=${encodeURIComponent(destination)}&checkIn=${
-              departDate ? departDate.toISOString().slice(0, 10) : new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
+              departDate
+                ? departDate.toISOString().slice(0, 10)
+                : new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
             }&checkOut=${
               departDate
                 ? new Date(departDate.getTime() + 7 * 86400000).toISOString().slice(0, 10)
@@ -204,7 +216,9 @@ export function InlineAffiliateStrip({
     };
 
     fetchPrices();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [destination, authToken, departDate]);
 
   function track(card: AffiliateCard) {
@@ -220,7 +234,8 @@ export function InlineAffiliateStrip({
           },
         }),
       );
-    } catch { // ignore
+    } catch {
+      // ignore
     }
   }
 
@@ -295,6 +310,8 @@ function getISOWeek(): string {
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
   const week1 = new Date(d.getFullYear(), 0, 4);
-  const wn = 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+  const wn =
+    1 +
+    Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
   return `${d.getFullYear()}-W${String(wn).padStart(2, "0")}`;
 }

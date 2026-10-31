@@ -20,7 +20,8 @@ function requireBuild(t, needsOrigin = false) {
   t.skip(s.message);
   return null;
 }
-const htmlOf = (outDir, p) => path.join(outDir, p === "/" ? "index.html" : `${p.slice(1)}index.html`);
+const htmlOf = (outDir, p) =>
+  path.join(outDir, p === "/" ? "index.html" : `${p.slice(1)}index.html`);
 const page = (s, p) => fs.readFileSync(htmlOf(s.outDir, p), "utf8");
 const canonicalOf = (html) => html.match(/<link rel="canonical" href="([^"]+)"/)?.[1] ?? null;
 const hreflangs = (html) =>
@@ -61,7 +62,10 @@ test("(2) LEGACY: hedefi sitemap:true olan 7 sayfada canonical = hedef; diğerle
       assert.equal(canonicalOf(html), new URL(to, s.meta.siteOrigin).href, `${from} canonical`);
     } else {
       assert.equal(canonicalOf(html), null, `${from}: noindex hedefe canonical yazılmaz`);
-      assert.ok(html.includes('<meta name="robots" content="noindex, follow"'), `${from}: noindex, follow`);
+      assert.ok(
+        html.includes('<meta name="robots" content="noindex, follow"'),
+        `${from}: noindex, follow`,
+      );
     }
   }
   assert.equal(withCanonical, 7);

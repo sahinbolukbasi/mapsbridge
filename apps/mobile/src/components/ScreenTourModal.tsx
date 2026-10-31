@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Dimensions,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Dimensions, ScrollView } from "react-native";
 import { storage } from "../services/storage";
 import {
   MapIcon,
@@ -211,69 +204,85 @@ export function ScreenTourModal({
       onRequestClose={handleDismiss}
       style={styles.backdrop}
     >
-        <View style={styles.container}>
-          {/* Close button top right */}
-          <TouchableOpacity
-            style={styles.closeBtn}
-            onPress={handleDismiss}
-            activeOpacity={0.7}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.closeBtnText}>✕</Text>
+      <View style={styles.container}>
+        {/* Close button top right */}
+        <TouchableOpacity
+          style={styles.closeBtn}
+          onPress={handleDismiss}
+          activeOpacity={0.7}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.closeBtnText}>
+            ✕
+          </Text>
+        </TouchableOpacity>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Header Badge */}
+          <View style={styles.badgeRow}>
+            <View style={styles.pulsingDot} />
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badgeText}>
+              {content.badge}
+            </Text>
+          </View>
+
+          {/* Title & Subtitle */}
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.title}>
+            {content.title}
+          </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.subtitle}>
+            {content.subtitle}
+          </Text>
+
+          {/* Feature Steps */}
+          <View style={styles.stepsContainer}>
+            {content.steps.map((step, idx) => (
+              <View key={idx} style={styles.stepCard}>
+                <View style={styles.stepIconWrap}>{step.icon(tokens.color.accent)}</View>
+                <View style={styles.stepTextContainer}>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>
+                    {step.title}
+                  </Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>
+                    {step.desc}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          {/* Helpful Tip Box */}
+          <View style={styles.tipBox}>
+            <View style={styles.tipIconWrap}>
+              <LightbulbIcon size={16} color={tokens.color.warningStrong} />
+            </View>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipText}>
+              {content.tip}
+            </Text>
+          </View>
+
+          {/* CTA Button */}
+          <TouchableOpacity style={styles.primaryBtn} onPress={handleDismiss} activeOpacity={0.85}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryBtnText}>
+              Anladım, Keşfe Başla
+            </Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryBtnArrow}>
+              ➔
+            </Text>
           </TouchableOpacity>
 
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-          >
-            {/* Header Badge */}
-            <View style={styles.badgeRow}>
-              <View style={styles.pulsingDot} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badgeText}>{content.badge}</Text>
-            </View>
-
-            {/* Title & Subtitle */}
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.title}>{content.title}</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.subtitle}>{content.subtitle}</Text>
-
-            {/* Feature Steps */}
-            <View style={styles.stepsContainer}>
-              {content.steps.map((step, idx) => (
-                <View key={idx} style={styles.stepCard}>
-                  <View style={styles.stepIconWrap}>{step.icon(tokens.color.accent)}</View>
-                  <View style={styles.stepTextContainer}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepTitle}>{step.title}</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepDesc}>{step.desc}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-
-            {/* Helpful Tip Box */}
-            <View style={styles.tipBox}>
-              <View style={styles.tipIconWrap}>
-                <LightbulbIcon size={16} color={tokens.color.warningStrong} />
-              </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tipText}>{content.tip}</Text>
-            </View>
-
-            {/* CTA Button */}
-            <TouchableOpacity
-              style={styles.primaryBtn}
-              onPress={handleDismiss}
-              activeOpacity={0.85}
-            >
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryBtnText}>Anladım, Keşfe Başla</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryBtnArrow}>➔</Text>
-            </TouchableOpacity>
-
-            {/* Dismiss without seeing again */}
-            <TouchableOpacity style={styles.skipBtn} onPress={handleDismiss} activeOpacity={0.7}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.skipBtnText}>Tanıtımı Kapat</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-      </ModalFrame>
+          {/* Dismiss without seeing again */}
+          <TouchableOpacity style={styles.skipBtn} onPress={handleDismiss} activeOpacity={0.7}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.skipBtnText}>
+              Tanıtımı Kapat
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    </ModalFrame>
   );
 }
 

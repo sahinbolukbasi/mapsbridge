@@ -28,16 +28,16 @@ const QUICK_FACTS = [
 
 // Map SSE status phase strings to THINKING_PHASES indexes
 const PHASE_MAP: Record<string, number> = {
-  "intent": 0,
-  "research": 1,
-  "places": 1,
-  "flights": 2,
-  "advisory": 3,
-  "route": 4,
-  "stay": 5,
-  "discovery": 6,
-  "finalize": 7,
-  "complete": 7,
+  intent: 0,
+  research: 1,
+  places: 1,
+  flights: 2,
+  advisory: 3,
+  route: 4,
+  stay: 5,
+  discovery: 6,
+  finalize: 7,
+  complete: 7,
 };
 
 export interface LivePhase {
@@ -91,9 +91,7 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
     <div className="ai-thinking-steps">
       <div className="ai-thinking-steps-header">
         <div className="ai-thinking-pulse" />
-        <span className="ai-thinking-title">
-          {livePhase ? livePhase.label : "Planlıyorum"}
-        </span>
+        <span className="ai-thinking-title">{livePhase ? livePhase.label : "Planlıyorum"}</span>
       </div>
 
       <div className="ai-thinking-phases">

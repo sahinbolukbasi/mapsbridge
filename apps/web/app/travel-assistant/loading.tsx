@@ -17,7 +17,14 @@ export default function TravelAssistantLoading() {
       >
         neurology
       </span>
-      <div style={{ color: "color-mix(in srgb, var(--color-on-primary) 40%, transparent)", fontSize: 14 }}>Loading assistant…</div>
+      <div
+        style={{
+          color: "color-mix(in srgb, var(--color-on-primary) 40%, transparent)",
+          fontSize: 14,
+        }}
+      >
+        Loading assistant…
+      </div>
     </div>
   );
 }

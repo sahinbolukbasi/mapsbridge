@@ -473,11 +473,7 @@
 
   .ai-promo-route-header {
     padding: 1rem 1.5rem;
-    background: linear-gradient(
-      90deg,
-      var(--color-surface) 0%,
-      var(--color-surface-sunken) 100%
-    );
+    background: linear-gradient(90deg, var(--color-surface) 0%, var(--color-surface-sunken) 100%);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -958,7 +954,12 @@
 
   /* 5. Bottom CTA Banner */
   .ai-promo-cta-banner {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-brand-hover) 50%, var(--color-brand) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-primary) 0%,
+      var(--color-brand-hover) 50%,
+      var(--color-brand) 100%
+    );
     color: var(--color-text-inverse);
     padding: 3.5rem 1.5rem;
     text-align: center;

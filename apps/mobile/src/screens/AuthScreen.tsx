@@ -189,14 +189,24 @@ export function AuthScreen({
           {/* Top Navigation & Brand Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onCancel} style={styles.backBtn} activeOpacity={0.8}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.color.textBrand }}>←</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ fontSize: 16, color: tokens.color.textBrand }}
+              >
+                ←
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.headerCenter}>
               <View style={styles.headerLogoBadge}>
                 <ExploreIcon size={16} color={tokens.color.onPrimary} />
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headerBrandText}>MapsBridge</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.headerBrandText}
+              >
+                MapsBridge
+              </Text>
             </View>
 
             <View style={{ width: 40 }} />
@@ -224,13 +234,17 @@ export function AuthScreen({
           {/* Info & Error Alerts */}
           {errorMessage ? (
             <View style={styles.errorAlert}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.errorAlertText}>⚠️ {errorMessage}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.errorAlertText}>
+                ⚠️ {errorMessage}
+              </Text>
             </View>
           ) : null}
 
           {infoMessage ? (
             <View style={styles.infoAlert}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.infoAlertText}>ℹ️ {infoMessage}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.infoAlertText}>
+                ℹ️ {infoMessage}
+              </Text>
             </View>
           ) : null}
 
@@ -247,7 +261,10 @@ export function AuthScreen({
                   }}
                   activeOpacity={0.8}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.segmentText, mode === "login" && styles.segmentTextActive]}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={[styles.segmentText, mode === "login" && styles.segmentTextActive]}
+                  >
                     Giriş Yap
                   </Text>
                 </TouchableOpacity>
@@ -260,7 +277,8 @@ export function AuthScreen({
                   }}
                   activeOpacity={0.8}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
                     style={[styles.segmentText, mode === "register" && styles.segmentTextActive]}
                   >
                     Kayıt Ol
@@ -291,7 +309,10 @@ export function AuthScreen({
                     activeOpacity={0.85}
                   >
                     <AppleLogo size={18} color={tokens.color.onPrimary} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.appleBtnText}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.appleBtnText}
+                    >
                       {mode === "register" ? "Apple ile Kayıt Ol" : "Apple ile Giriş Yap"}
                     </Text>
                   </TouchableOpacity>
@@ -303,7 +324,10 @@ export function AuthScreen({
                     activeOpacity={0.85}
                   >
                     <GoogleLogo size={18} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.googleBtnText}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.googleBtnText}
+                    >
                       {mode === "register" ? "Google ile Kayıt Ol" : "Google ile Giriş Yap"}
                     </Text>
                   </TouchableOpacity>
@@ -312,7 +336,12 @@ export function AuthScreen({
                 {/* Minimal Separator */}
                 <View style={styles.separatorContainer}>
                   <View style={styles.separatorLine} />
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.separatorText}>veya e-posta ile</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.separatorText}
+                  >
+                    veya e-posta ile
+                  </Text>
                 </View>
               </>
             )}
@@ -321,9 +350,16 @@ export function AuthScreen({
             {mode === "register" && (
               <>
                 <View style={styles.fieldGroup}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Adınız</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                    Adınız
+                  </Text>
                   <View style={styles.inputWrap}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>👤</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.inputIcon}
+                    >
+                      👤
+                    </Text>
                     <TextInput
                       style={styles.input}
                       placeholder="Doğan"
@@ -336,9 +372,16 @@ export function AuthScreen({
                 </View>
 
                 <View style={styles.fieldGroup}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Soyadınız</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                    Soyadınız
+                  </Text>
                   <View style={styles.inputWrap}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>👤</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.inputIcon}
+                    >
+                      👤
+                    </Text>
                     <TextInput
                       style={styles.input}
                       placeholder="Demir"
@@ -351,9 +394,16 @@ export function AuthScreen({
                 </View>
 
                 <View style={styles.fieldGroup}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Telefon Numarası</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                    Telefon Numarası
+                  </Text>
                   <View style={styles.inputWrap}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>📱</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.inputIcon}
+                    >
+                      📱
+                    </Text>
                     <TextInput
                       style={styles.input}
                       placeholder="+905550000000"
@@ -370,9 +420,13 @@ export function AuthScreen({
 
             {(mode === "login" || mode === "register" || mode === "forgot_password") && (
               <View style={styles.fieldGroup}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>E-posta Adresi</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  E-posta Adresi
+                </Text>
                 <View style={styles.inputWrap}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>✉️</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>
+                    ✉️
+                  </Text>
                   <TextInput
                     style={styles.input}
                     placeholder="adiniz@ornek.com"
@@ -388,9 +442,13 @@ export function AuthScreen({
 
             {(mode === "login" || mode === "register") && (
               <View style={styles.fieldGroup}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Şifre</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  Şifre
+                </Text>
                 <View style={styles.inputWrap}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>🔒</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>
+                    🔒
+                  </Text>
                   <TextInput
                     style={styles.input}
                     placeholder="••••••••••••"
@@ -403,7 +461,12 @@ export function AuthScreen({
                     style={styles.eyeBtn}
                     onPress={() => setShowPassword(!showPassword)}
                   >
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>{showPassword ? "👁️" : "🙈"}</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={{ fontSize: 16 }}
+                    >
+                      {showPassword ? "👁️" : "🙈"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -414,13 +477,22 @@ export function AuthScreen({
               <View style={styles.rulesContainer}>
                 {rules.map((r) => (
                   <View key={r.id} style={styles.ruleRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, color: r.valid ? tokens.color.accent : tokens.color.neutral400 }}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={{
+                        fontSize: 11,
+                        color: r.valid ? tokens.color.accent : tokens.color.neutral400,
+                      }}
+                    >
                       {r.valid ? "✓" : "○"}
                     </Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
                       style={[
                         styles.ruleText,
-                        r.valid ? { color: tokens.color.accent } : { color: tokens.color.textSubtle },
+                        r.valid
+                          ? { color: tokens.color.accent }
+                          : { color: tokens.color.textSubtle },
                       ]}
                     >
                       {r.label}
@@ -439,9 +511,21 @@ export function AuthScreen({
                   activeOpacity={0.8}
                 >
                   <View style={[styles.checkbox, rememberMe && styles.checkboxActive]}>
-                    {rememberMe && <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontSize: 10 }}>✓</Text>}
+                    {rememberMe && (
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={{ color: tokens.color.onPrimary, fontSize: 10 }}
+                      >
+                        ✓
+                      </Text>
+                    )}
                   </View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.rememberText}>Beni hatırla</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.rememberText}
+                  >
+                    Beni hatırla
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -450,7 +534,12 @@ export function AuthScreen({
                     clearMessages();
                   }}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.forgotPassText}>Şifremi Unuttum?</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.forgotPassText}
+                  >
+                    Şifremi Unuttum?
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -458,9 +547,13 @@ export function AuthScreen({
             {/* Verification Code Fields */}
             {(mode === "confirm_signup" || mode === "reset_password") && (
               <View style={styles.fieldGroup}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Doğrulama Kodu</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  Doğrulama Kodu
+                </Text>
                 <View style={styles.inputWrap}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>🔢</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>
+                    🔢
+                  </Text>
                   <TextInput
                     style={styles.input}
                     placeholder="123456"
@@ -475,9 +568,13 @@ export function AuthScreen({
 
             {mode === "reset_password" && (
               <View style={styles.fieldGroup}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Yeni Şifre</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  Yeni Şifre
+                </Text>
                 <View style={styles.inputWrap}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>🔒</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>
+                    🔒
+                  </Text>
                   <TextInput
                     style={styles.input}
                     placeholder="••••••••••••"
@@ -507,7 +604,10 @@ export function AuthScreen({
                 <ActivityIndicator color={tokens.color.onPrimary} />
               ) : (
                 <View style={styles.primaryBtnInner}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryAuthBtnText}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.primaryAuthBtnText}
+                  >
                     {mode === "login" && "Giriş Yap"}
                     {mode === "register" && "Hesap Oluştur"}
                     {mode === "confirm_signup" && "Kodu Doğrula"}
@@ -529,8 +629,18 @@ export function AuthScreen({
                   }}
                   style={styles.switchTouch}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.switchMuted}>Hesabın yok mu? </Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.switchActive}>Hemen Kaydol ➔</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.switchMuted}
+                  >
+                    Hesabın yok mu?{" "}
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.switchActive}
+                  >
+                    Hemen Kaydol ➔
+                  </Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
@@ -540,8 +650,18 @@ export function AuthScreen({
                   }}
                   style={styles.switchTouch}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.switchMuted}>Zaten üye misin? </Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.switchActive}>Giriş Yap ➔</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.switchMuted}
+                  >
+                    Zaten üye misin?{" "}
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.switchActive}
+                  >
+                    Giriş Yap ➔
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -549,8 +669,15 @@ export function AuthScreen({
 
           {/* Trust Badges Footer */}
           <View style={styles.trustFooter}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 13, marginRight: 5 }}>🔒</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.trustFooterText}>256-Bit SSL uçtan uca güvenli şifreleme</Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={{ fontSize: 13, marginRight: 5 }}
+            >
+              🔒
+            </Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.trustFooterText}>
+              256-Bit SSL uçtan uca güvenli şifreleme
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

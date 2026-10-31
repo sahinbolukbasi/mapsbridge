@@ -85,7 +85,12 @@
   }
 
   .nasil-hero-highlight {
-    background: linear-gradient(135deg, var(--color-success-strong) 0%, var(--color-accent) 50%, var(--color-accent-strong) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-success-strong) 0%,
+      var(--color-accent) 50%,
+      var(--color-accent-strong) 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
@@ -286,7 +291,11 @@
     width: 3.5rem;
     height: 3.5rem;
     border-radius: 1.25rem;
-    background: linear-gradient(135deg, var(--color-surface-brand) 0%, var(--color-surface-brand-strong) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-surface-brand) 0%,
+      var(--color-surface-brand-strong) 100%
+    );
     color: var(--color-on-surface-brand);
     font-weight: 800;
     font-size: 1.5rem;
@@ -516,7 +525,11 @@
 
   /* ── Creator Marketplace 3 Steps ── */
   .nasil-creator-section {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--color-surface-brand) 70%, transparent) 0%, color-mix(in srgb, var(--color-surface-brand) 70%, transparent) 100%);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-surface-brand) 70%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-brand) 70%, transparent) 100%
+    );
     border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
     border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
     padding: 5rem 0;
@@ -631,7 +644,12 @@
   }
 
   .nasil-cta-card {
-    background: linear-gradient(135deg, var(--color-primary) 0%, #065f46 50%, var(--color-success) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-primary) 0%,
+      #065f46 50%,
+      var(--color-success) 100%
+    );
     border-radius: 2.25rem;
     padding: 4rem 2rem;
     text-align: center;

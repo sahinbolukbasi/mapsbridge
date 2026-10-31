@@ -185,12 +185,24 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
           {/* Top Floating Actions: Back Button & Badges */}
           <SafeArea style={styles.coverTopBar}>
             <TouchableOpacity style={styles.topBackBtn} onPress={onBack} activeOpacity={0.8}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.topBackArrow}>←</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.topBackArrow}>
+                ←
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.coverBadge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, marginRight: 4 }}>🏔️</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.coverBadgeText}>Vadi Kaşifi</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ fontSize: 11, marginRight: 4 }}
+              >
+                🏔️
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.coverBadgeText}
+              >
+                Vadi Kaşifi
+              </Text>
             </View>
           </SafeArea>
         </View>
@@ -203,7 +215,12 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             <View style={styles.avatarWrap}>
               <Image source={{ uri: user.avatar }} style={styles.avatar} />
               <View style={styles.verifiedBadge}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.verifiedCheckText}>✓</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.verifiedCheckText}
+                >
+                  ✓
+                </Text>
               </View>
             </View>
 
@@ -214,7 +231,9 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 onPress={handleStartChat}
                 activeOpacity={0.8}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>✉️</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>
+                  ✉️
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -222,7 +241,9 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 onPress={handleShareProfile}
                 activeOpacity={0.8}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>🔗</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>
+                  🔗
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -230,7 +251,10 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 onPress={handleToggleFollow}
                 activeOpacity={0.85}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.followBtnText, isFollowing && styles.followingBtnText]}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={[styles.followBtnText, isFollowing && styles.followingBtnText]}
+                >
                   {isFollowing ? "✓ Takip Ediliyor" : "+ Takip Et"}
                 </Text>
               </TouchableOpacity>
@@ -239,57 +263,100 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
 
           {/* Name & Handle */}
           <View style={styles.nameRow}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userNameText}>{user.name}</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userNameText}>
+              {user.name}
+            </Text>
             <View style={styles.masterBadge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, marginRight: 2 }}>⭐</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.masterBadgeText}>Master Gezgin</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ fontSize: 11, marginRight: 2 }}
+              >
+                ⭐
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.masterBadgeText}
+              >
+                Master Gezgin
+              </Text>
             </View>
           </View>
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userHandleText}>{user.handle}</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userHandleText}>
+            {user.handle}
+          </Text>
 
           {/* Bio Text */}
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.bioText}>{bioText}</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.bioText}>
+            {bioText}
+          </Text>
 
           {/* Location & Metadata Row */}
           <View style={styles.metaInfoRow}>
             <View style={styles.metaItem}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaIcon}>📍</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaText}>{user.location || "Nevşehir, Türkiye"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaIcon}>
+                📍
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaText}>
+                {user.location || "Nevşehir, Türkiye"}
+              </Text>
             </View>
             <View style={styles.metaItem}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaIcon}>📅</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaText}>{user.joinDate || "Mart 2024'te katıldı"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaIcon}>
+                📅
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaText}>
+                {user.joinDate || "Mart 2024'te katıldı"}
+              </Text>
             </View>
             <TouchableOpacity onPress={handleShareProfile}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaLinkText}>🔗 {user.website || "mapsbridge.com/canberk"}</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaLinkText}>
+                🔗 {user.website || "mapsbridge.com/canberk"}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Stats Summary Bar */}
           <View style={styles.statsBar}>
             <View style={styles.statBox}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>{user.postsCount || 14}</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>PAYLAŞIM</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>
+                {user.postsCount || 14}
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                PAYLAŞIM
+              </Text>
             </View>
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.statNumber, { color: tokens.color.textBrand }]}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={[styles.statNumber, { color: tokens.color.textBrand }]}
+              >
                 🛣️ {user.routesCount || 8}
               </Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>AÇIK ROTA</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                AÇIK ROTA
+              </Text>
             </View>
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>{user.followersCount || "1.4k"}</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>TAKİPÇİ</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>
+                {user.followersCount || "1.4k"}
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                TAKİPÇİ
+              </Text>
             </View>
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>{user.followingCount || "324"}</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>TAKİP</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNumber}>
+                {user.followingCount || "324"}
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                TAKİP
+              </Text>
             </View>
           </View>
         </View>
@@ -301,7 +368,10 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             onPress={() => setActiveTab("feed")}
             activeOpacity={0.8}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.tabBtnText, activeTab === "feed" && styles.tabBtnTextActive]}>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={[styles.tabBtnText, activeTab === "feed" && styles.tabBtnTextActive]}
+            >
               Yazılar & Akış
             </Text>
             {activeTab === "feed" && <View style={styles.tabIndicator} />}
@@ -313,11 +383,19 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             activeOpacity={0.8}
           >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.tabBtnText, activeTab === "routes" && styles.tabBtnTextActive]}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={[styles.tabBtnText, activeTab === "routes" && styles.tabBtnTextActive]}
+              >
                 Rotalar
               </Text>
               <View style={styles.routesCountPill}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routesCountPillText}>8</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  style={styles.routesCountPillText}
+                >
+                  8
+                </Text>
               </View>
             </View>
             {activeTab === "routes" && <View style={styles.tabIndicator} />}
@@ -328,7 +406,10 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             onPress={() => setActiveTab("media")}
             activeOpacity={0.8}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.tabBtnText, activeTab === "media" && styles.tabBtnTextActive]}>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={[styles.tabBtnText, activeTab === "media" && styles.tabBtnTextActive]}
+            >
               Medyalar
             </Text>
             {activeTab === "media" && <View style={styles.tabIndicator} />}
@@ -339,7 +420,10 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             onPress={() => setActiveTab("likes")}
             activeOpacity={0.8}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.tabBtnText, activeTab === "likes" && styles.tabBtnTextActive]}>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={[styles.tabBtnText, activeTab === "likes" && styles.tabBtnTextActive]}
+            >
               Beğeniler
             </Text>
             {activeTab === "likes" && <View style={styles.tabIndicator} />}
@@ -352,17 +436,42 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             {/* Pinned Experience Article */}
             <View style={styles.postCard}>
               <View style={styles.pinnedBadge}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, marginRight: 4 }}>📌</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.pinnedBadgeText}>Sabitlenmiş Gezgin Deneyimi</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ fontSize: 11, marginRight: 4 }}
+                >
+                  📌
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  style={styles.pinnedBadgeText}
+                >
+                  Sabitlenmiş Gezgin Deneyimi
+                </Text>
               </View>
 
               <View style={styles.postAuthorRow}>
                 <Image source={{ uri: user.avatar }} style={styles.miniAvatar} />
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.miniAuthorName}>{user.name}</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}>✓</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.miniAuthorHandle}>{user.handle} · 3g</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.miniAuthorName}
+                    >
+                      {user.name}
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}
+                    >
+                      ✓
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.miniAuthorHandle}
+                    >
+                      {user.handle} · 3g
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -371,7 +480,9 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 Sabah 05:30'da Aşk Vadisi'nde balonların yükselişini izlemek paha biçilemezdi 🎈🌅
                 Vadi içindeki gizli patikaları tek tek kaydettim, rotayı klonlayabilirsiniz!
               </Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.postHashtags}>#Kapadokya #Doğa #Doğadakiİz</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.postHashtags}>
+                #Kapadokya #Doğa #Doğadakiİz
+              </Text>
 
               {/* Route Attachment Card */}
               <View style={styles.routeCardContainer}>
@@ -384,33 +495,67 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                     resizeMode="cover"
                   />
                   <View style={styles.gpsRoutePill}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.gpsRoutePillText}>🧭 Canlı GPS Rotası</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.gpsRoutePillText}
+                    >
+                      🧭 Canlı GPS Rotası
+                    </Text>
                   </View>
                   <View style={styles.elevationPill}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.elevationPillText}>📈 +140m İrtifa</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.elevationPillText}
+                    >
+                      📈 +140m İrtifa
+                    </Text>
                   </View>
                 </View>
 
                 <View style={styles.routeCardInfoBox}>
                   <View style={styles.routeCardTitleRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeCardTitle} numberOfLines={1}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.routeCardTitle}
+                      numberOfLines={1}
+                    >
                       Kapadokya: Gün Doğumu Vadi Yürüyüşü
                     </Text>
                     <View style={styles.routeLevelPill}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeLevelPillText}>Kolay</Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                        style={styles.routeLevelPillText}
+                      >
+                        Kolay
+                      </Text>
                     </View>
                   </View>
 
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeStatsRow}>📍 8 Durak • 📏 5.1 km • ⏱️ 2s 15dk</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.routeStatsRow}
+                  >
+                    📍 8 Durak • 📏 5.1 km • ⏱️ 2s 15dk
+                  </Text>
 
                   <View style={styles.clonersAndActionRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.clonersText}>👥 42 gezgin klonladı</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.clonersText}
+                    >
+                      👥 42 gezgin klonladı
+                    </Text>
                     <TouchableOpacity
                       style={styles.importRouteBtn}
                       onPress={() => handleImportRoute("Kapadokya: Gün Doğumu Vadi Yürüyüşü")}
                       activeOpacity={0.85}
                     >
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.importRouteBtnText}>Haritama Al 📥</Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.importRouteBtnText}
+                      >
+                        Haritama Al 📥
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -422,23 +567,47 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                   style={styles.interactionItem}
                   onPress={() => Alert.alert("Yorumlar", "58 Gezgin Yorumu")}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>💬</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>58</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.interactionIcon}
+                  >
+                    💬
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.interactionCount}
+                  >
+                    58
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.interactionItem}
                   onPress={() => Alert.alert("Paylaşım", "93 kişi rotayı paylaştı")}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>🔁</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>93</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.interactionIcon}
+                  >
+                    🔁
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.interactionCount}
+                  >
+                    93
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem} onPress={handleLikePost1}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.interactionIcon, isPost1Liked && { color: tokens.color.danger }]}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={[styles.interactionIcon, isPost1Liked && { color: tokens.color.danger }]}
+                  >
                     {isPost1Liked ? "❤️" : "🤍"}
                   </Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
                     style={[
                       styles.interactionCount,
                       isPost1Liked && { color: tokens.color.danger, fontWeight: "800" },
@@ -452,12 +621,27 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                   style={styles.interactionItem}
                   onPress={() => setIsBookmarked(!isBookmarked)}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>{isBookmarked ? "🔖" : "📑"}</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>140</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.interactionIcon}
+                  >
+                    {isBookmarked ? "🔖" : "📑"}
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.interactionCount}
+                  >
+                    140
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem} onPress={handleShareProfile}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>↗️</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.interactionIcon}
+                  >
+                    ↗️
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -468,9 +652,24 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 <Image source={{ uri: user.avatar }} style={styles.miniAvatar} />
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.miniAuthorName}>{user.name}</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}>✓</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.miniAuthorHandle}>{user.handle} · 1hf</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.miniAuthorName}
+                    >
+                      {user.name}
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}
+                    >
+                      ✓
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.miniAuthorHandle}
+                    >
+                      {user.handle} · 1hf
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -501,20 +700,44 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
               {/* Interaction Bar */}
               <View style={styles.interactionRow}>
                 <TouchableOpacity style={styles.interactionItem}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>💬</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>24</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.interactionIcon}
+                  >
+                    💬
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.interactionCount}
+                  >
+                    24
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>🔁</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>31</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.interactionIcon}
+                  >
+                    🔁
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.interactionCount}
+                  >
+                    31
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem} onPress={handleLikePost2}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.interactionIcon, isPost2Liked && { color: tokens.color.danger }]}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={[styles.interactionIcon, isPost2Liked && { color: tokens.color.danger }]}
+                  >
                     {isPost2Liked ? "❤️" : "🤍"}
                   </Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
                     style={[
                       styles.interactionCount,
                       isPost2Liked && { color: tokens.color.danger, fontWeight: "800" },
@@ -525,12 +748,27 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>📑</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.interactionCount}>64</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.interactionIcon}
+                  >
+                    📑
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.interactionCount}
+                  >
+                    64
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.interactionItem} onPress={handleShareProfile}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.interactionIcon}>↗️</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.interactionIcon}
+                  >
+                    ↗️
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -568,8 +806,16 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
             ].map((route) => (
               <View key={route.id} style={styles.routeItemCard}>
                 <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeItemTitle}>{route.name}</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeItemSub}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.routeItemTitle}
+                  >
+                    {route.name}
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.routeItemSub}
+                  >
                     {route.stopsCount} Durak • {route.km} • {route.time} • {route.level}
                   </Text>
                 </View>
@@ -577,7 +823,12 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
                   style={styles.importRouteBtn}
                   onPress={() => handleImportRoute(route.name)}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.importRouteBtnText}>Haritama Al 📥</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.importRouteBtnText}
+                  >
+                    Haritama Al 📥
+                  </Text>
                 </TouchableOpacity>
               </View>
             ))}
@@ -603,8 +854,15 @@ export function PublicProfileView({ user, onBack, onOpenMap, onOpenChat }: Publi
         {/* Tab Content: Likes */}
         {activeTab === "likes" && (
           <View style={styles.likesEmptyContent}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 32, marginBottom: 8 }}>❤️</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.likesEmptyTitle}>Beğenilen Gönderiler</Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={{ fontSize: 32, marginBottom: 8 }}
+            >
+              ❤️
+            </Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.likesEmptyTitle}>
+              Beğenilen Gönderiler
+            </Text>
             <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.likesEmptySub}>
               {user.name} tarafından beğenilen 342 rota ve fotoğraf burada toplanıyor.
             </Text>

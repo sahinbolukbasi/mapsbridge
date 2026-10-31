@@ -144,7 +144,11 @@ export function EditPostModalWeb({
             <button type="button" onClick={onClose} className="px-4 cm-86 cm-u-text-600">
               Vazgeç
             </button>
-            <button type="submit" disabled={saving || !content.trim()} className="cm-87 cm-u-shadow-sm">
+            <button
+              type="submit"
+              disabled={saving || !content.trim()}
+              className="cm-87 cm-u-shadow-sm"
+            >
               <SoftIcon name="check" size={14} color="#ffffff" />
               <span>{saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}</span>
             </button>

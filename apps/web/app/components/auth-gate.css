@@ -124,7 +124,11 @@
     justify-content: center;
     gap: 0.6rem;
     padding: 0.95rem 1.85rem;
-    background: linear-gradient(135deg, var(--color-danger-icon) 0%, var(--color-danger-solid) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-danger-icon) 0%,
+      var(--color-danger-solid) 100%
+    );
     color: var(--color-on-primary);
     font-size: 1rem;
     font-weight: 700;
@@ -441,7 +445,11 @@
     gap: 0.5rem;
     width: 100%;
     padding: 0.85rem 1.2rem;
-    background: linear-gradient(135deg, var(--color-danger-icon) 0%, var(--color-danger-solid) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-danger-icon) 0%,
+      var(--color-danger-solid) 100%
+    );
     color: var(--color-on-primary);
     font-weight: 700;
     font-size: 0.96rem;

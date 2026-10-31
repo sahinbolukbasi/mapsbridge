@@ -21,18 +21,64 @@ const plain = (v) => JSON.parse(JSON.stringify(v));
 
 // R5-1: C1'de (92628d1) donmuş 42 çekirdek path. Fixture yalnızca büyür; buradan silinemez.
 const BASELINE_42 = [
-  "/", "/about/", "/admin/", "/ai-asistan/", "/ai/", "/articles/", "/auth/callback/",
-  "/checkout/", "/community/", "/contact/", "/cookies/", "/demo/", "/desk/", "/en/",
-  "/forgot-password/", "/gezgin/", "/gezi-asistani/", "/harita/", "/haritalar/",
-  "/how-it-works/", "/k/", "/kasif/", "/login/", "/maps/", "/messages/",
-  "/mobil-uygulamalar/", "/mobile-apps/", "/privacy/", "/profile/", "/profile/edit/",
-  "/profile/photo/", "/register/", "/reset-password/", "/sifre-sifirla/", "/support/",
-  "/terms/", "/travel-assistant/", "/traveler/", "/u/", "/u/admin/", "/verify/", "/welcome/",
+  "/",
+  "/about/",
+  "/admin/",
+  "/ai-asistan/",
+  "/ai/",
+  "/articles/",
+  "/auth/callback/",
+  "/checkout/",
+  "/community/",
+  "/contact/",
+  "/cookies/",
+  "/demo/",
+  "/desk/",
+  "/en/",
+  "/forgot-password/",
+  "/gezgin/",
+  "/gezi-asistani/",
+  "/harita/",
+  "/haritalar/",
+  "/how-it-works/",
+  "/k/",
+  "/kasif/",
+  "/login/",
+  "/maps/",
+  "/messages/",
+  "/mobil-uygulamalar/",
+  "/mobile-apps/",
+  "/privacy/",
+  "/profile/",
+  "/profile/edit/",
+  "/profile/photo/",
+  "/register/",
+  "/reset-password/",
+  "/sifre-sifirla/",
+  "/support/",
+  "/terms/",
+  "/travel-assistant/",
+  "/traveler/",
+  "/u/",
+  "/u/admin/",
+  "/verify/",
+  "/welcome/",
 ];
 // Başlangıçtaki 13 sitemap URL'si (design §5.1; AC-13).
 const SITEMAP_13 = [
-  "/en/", "/maps/", "/travel-assistant/", "/mobile-apps/", "/community/", "/how-it-works/",
-  "/welcome/", "/support/", "/about/", "/contact/", "/privacy/", "/terms/", "/cookies/",
+  "/en/",
+  "/maps/",
+  "/travel-assistant/",
+  "/mobile-apps/",
+  "/community/",
+  "/how-it-works/",
+  "/welcome/",
+  "/support/",
+  "/about/",
+  "/contact/",
+  "/privacy/",
+  "/terms/",
+  "/cookies/",
 ];
 // AC-34 bekleyen sayfalar: MobileStart ikinci <main>/<h1>'i çiziyor (ana sayfa iskeleti C10).
 // Liste yalnızca küçülür: sayfa düzelince bu test listeden çıkarılmasını ister.
@@ -45,7 +91,8 @@ function requireBuild(t) {
   t.skip(s.message);
   return null;
 }
-const htmlOf = (outDir, p) => path.join(outDir, p === "/" ? "index.html" : `${p.slice(1)}index.html`);
+const htmlOf = (outDir, p) =>
+  path.join(outDir, p === "/" ? "index.html" : `${p.slice(1)}index.html`);
 const count = (html, re) => (html.match(re) ?? []).length;
 
 test("AC-12: fixture 42 çekirdek path'i içerir ve yalnızca büyür", () => {
@@ -81,7 +128,8 @@ test("registry tutarlılığı: path biçimi, tekillik, LEGACY zinciri yok, hede
     assert.match(r.path, /^\/(.*\/)?$/, `${r.path} sonda / ile bitmeli`);
     assert.ok(fs.existsSync(path.join(WEB, r.file)), `${r.path}: ${r.file} yok`);
     assert.ok(r.title.tr && r.title.en, `${r.path}: title.tr/en zorunlu`);
-    if (r.sitemap) assert.ok(r.description?.tr && r.description?.en, `${r.path}: sitemap:true → description`);
+    if (r.sitemap)
+      assert.ok(r.description?.tr && r.description?.en, `${r.path}: sitemap:true → description`);
   }
   for (const [from, to] of Object.entries(LEGACY_REDIRECTS)) {
     assert.ok(!paths.includes(from), `${from} hem kanonik hem LEGACY`);
@@ -104,7 +152,11 @@ test("AC-13: sitemap.xml = generate-seo.cjs PAGES = registry sitemap:true = baş
   const registry = plain(CANONICAL_ROUTES.filter((r) => r.sitemap).map((r) => r.path)).sort();
   assert.deepEqual(sitemapPaths(), [...SITEMAP_13].sort(), "public/sitemap.xml değişti");
   assert.deepEqual(seoPages(), [...SITEMAP_13].sort(), "generate-seo.cjs PAGES değişti");
-  assert.deepEqual(registry, [...SITEMAP_13].sort(), "registry sitemap:true kümesi sitemap ile ayrıştı");
+  assert.deepEqual(
+    registry,
+    [...SITEMAP_13].sort(),
+    "registry sitemap:true kümesi sitemap ile ayrıştı",
+  );
 });
 
 test("AC-14: getAlternatePath/resolveAlternate registry dışı URL döndürmez", () => {
@@ -122,7 +174,10 @@ test("AC-14: [username] staticParams = generateStaticParams()", () => {
   const dir = path.join(APP, "[username]");
   const mod = loadTs(path.join(dir, "page.tsx"), {
     stubs: {
-      [path.join(dir, "public-profile-client.tsx")]: path.join(__dirname, "stubs/empty-component.cjs"),
+      [path.join(dir, "public-profile-client.tsx")]: path.join(
+        __dirname,
+        "stubs/empty-component.cjs",
+      ),
       [path.join(APP, "lib/site-metadata.ts")]: path.join(__dirname, "stubs/site-metadata.cjs"),
     },
   });
@@ -130,7 +185,8 @@ test("AC-14: [username] staticParams = generateStaticParams()", () => {
   const entry = CANONICAL_ROUTES.find((r) => r.path === "/[username]/");
   assert.ok(entry, "/[username]/ kaydı yok");
   assert.deepEqual(plain(entry.staticParams), generated);
-  for (const p of generated) assert.equal(findRoute(p)?.path, "/[username]/", `${p} → [username] kaydı`);
+  for (const p of generated)
+    assert.equal(findRoute(p)?.path, "/[username]/", `${p} → [username] kaydı`);
 });
 
 test("AC-11: her LEGACY sayfası anında meta refresh + noindex,follow taşır", (t) => {
@@ -145,9 +201,18 @@ test("AC-11: her LEGACY sayfası anında meta refresh + noindex,follow taşır",
       head.includes(`<meta http-equiv="refresh" content="0;url=${to}"/>`),
       `${from}: <head> içinde 0 sn refresh → ${to} yok`,
     );
-    assert.ok(head.includes('<meta name="robots" content="noindex, follow"/>'), `${from}: noindex, follow yok`);
-    assert.ok(html.includes(`location.replace(${JSON.stringify(to)}+location.search+location.hash)`), `${from}: query/hash koruyan script yok`);
-    assert.ok(html.includes(`href="${to}"`) && html.includes("Devam etmek için tıklayın"), `${from}: görünür bağlantı yok`);
+    assert.ok(
+      head.includes('<meta name="robots" content="noindex, follow"/>'),
+      `${from}: noindex, follow yok`,
+    );
+    assert.ok(
+      html.includes(`location.replace(${JSON.stringify(to)}+location.search+location.hash)`),
+      `${from}: query/hash koruyan script yok`,
+    );
+    assert.ok(
+      html.includes(`href="${to}"`) && html.includes("Devam etmek için tıklayın"),
+      `${from}: görünür bağlantı yok`,
+    );
   }
 });
 

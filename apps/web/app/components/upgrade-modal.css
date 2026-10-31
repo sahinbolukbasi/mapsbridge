@@ -19,7 +19,11 @@
     justify-content: space-between;
     padding: 16px 20px;
     border-radius: 16px;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 8%, transparent) 0%, color-mix(in srgb, var(--color-success-strong) 4%, transparent) 100%);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-accent) 8%, transparent) 0%,
+      color-mix(in srgb, var(--color-success-strong) 4%, transparent) 100%
+    );
     border: 1px solid var(--color-accent-a20);
   }
 
@@ -169,7 +173,11 @@
 
   .mb-upgrade-plan-card.highlight {
     border-color: var(--color-accent);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 5%, transparent) 0%, color-mix(in srgb, var(--color-accent) 1%, transparent) 100%);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-accent) 5%, transparent) 0%,
+      color-mix(in srgb, var(--color-accent) 1%, transparent) 100%
+    );
     box-shadow: 0 10px 30px -8px color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
 

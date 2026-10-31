@@ -310,7 +310,11 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent-sky-soft) 12%, transparent), color-mix(in srgb, var(--color-accent) 12%, transparent));
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-accent-sky-soft) 12%, transparent),
+      color-mix(in srgb, var(--color-accent) 12%, transparent)
+    );
     border: 1.5px solid rgba(14, 165, 233, 0.5);
     color: #0284c7;
     padding: 0.42rem 0.95rem;
@@ -1452,13 +1456,16 @@
       right: 0.85rem;
       width: 2.9rem;
       height: 2.9rem;
-    }    .map-layers-popover {
+    }
+    .map-layers-popover {
       right: 0.75rem;
       left: 0.75rem;
       width: auto;
       max-width: none;
       bottom: calc(var(--map-fab-bottom, 1.5rem) + 3.8rem + env(safe-area-inset-bottom));
-    }  }  .map-empty-state {
+    }
+  }
+  .map-empty-state {
     position: absolute;
     z-index: 500;
     top: 9rem;
@@ -3082,7 +3089,8 @@
   .ai-chat-link-btn:hover {
     background: var(--color-surface-tint);
   }
-  @media (max-width: 900px) {    .map-floating-context-bar {
+  @media (max-width: 900px) {
+    .map-floating-context-bar {
       display: none !important;
     }
     .map-live-route-hud {
@@ -3090,7 +3098,8 @@
     }
   }
 
-  @media (max-width: 640px) {    .panel-nav-center-stitch {
+  @media (max-width: 640px) {
+    .panel-nav-center-stitch {
       display: none !important;
     }
     .map-inspect-drawer {
@@ -3598,7 +3607,11 @@
     justify-content: center;
     gap: 8px;
     width: 100%;
-    background: linear-gradient(135deg, var(--color-neutral-900), var(--color-neutral-900)) !important;
+    background: linear-gradient(
+      135deg,
+      var(--color-neutral-900),
+      var(--color-neutral-900)
+    ) !important;
     color: #e0e0ff !important;
     border: 1px solid var(--color-neutral-800) !important;
     font-weight: 700;
@@ -3610,7 +3623,11 @@
     transition: all 0.2s;
   }
   .mobile-pin-ai-btn:hover {
-    background: linear-gradient(135deg, var(--color-neutral-800), var(--color-neutral-800)) !important;
+    background: linear-gradient(
+      135deg,
+      var(--color-neutral-800),
+      var(--color-neutral-800)
+    ) !important;
     box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
   }
   .mobile-pin-ai-btn .material-symbols-outlined {
@@ -4030,7 +4047,11 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
   }
   .gmap-tool-btn.active {
-    background: linear-gradient(135deg, var(--color-success-strong), var(--color-success)) !important;
+    background: linear-gradient(
+      135deg,
+      var(--color-success-strong),
+      var(--color-success)
+    ) !important;
     color: var(--color-on-primary) !important;
     border-color: transparent !important;
     box-shadow: 0 6px 18px color-mix(in srgb, var(--color-success-strong) 40%, transparent);

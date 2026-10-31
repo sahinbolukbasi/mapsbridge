@@ -465,7 +465,7 @@
     align-items: center;
     gap: 0.75rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  }  /* C9: Field tabanlı form yardımcıları (önceden satır içi stil) */
+  } /* C9: Field tabanlı form yardımcıları (önceden satır içi stil) */
   .signup-input--at {
     padding-left: 2.5rem;
   }

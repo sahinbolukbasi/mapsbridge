@@ -532,7 +532,11 @@ const RULES = {
       if (hasJsx(page, "PageShell")) continue;
       const clients = relTargets(page).filter((p) => p.endsWith("-client.tsx"));
       if (clients.length > 1) {
-        c.add(route.file, 0, `${route.path}: tek istemci kökü olmalı (${clients.length} *-client.tsx)`);
+        c.add(
+          route.file,
+          0,
+          `${route.path}: tek istemci kökü olmalı (${clients.length} *-client.tsx)`,
+        );
         continue;
       }
       // re-export zincirinin sonundaki *-client.tsx
@@ -611,15 +615,23 @@ const RULES = {
       const check = (node, at) => {
         for (const text of literals(node)) {
           const p = pathOf(text);
-          if (p && LEGACY_REDIRECTS[p]) c.add(rel(file), lineOfTs(sf, at), `${text} → ${LEGACY_REDIRECTS[p]}`);
+          if (p && LEGACY_REDIRECTS[p])
+            c.add(rel(file), lineOfTs(sf, at), `${text} → ${LEGACY_REDIRECTS[p]}`);
         }
       };
       for (const n of tsNodes(sf)) {
-        if (ts.isJsxAttribute(n) && ["href", "action"].includes(n.name.getText(sf)) && n.initializer)
+        if (
+          ts.isJsxAttribute(n) &&
+          ["href", "action"].includes(n.name.getText(sf)) &&
+          n.initializer
+        )
           check(n.initializer, n);
         else if (ts.isCallExpression(n) && n.arguments.length) {
           const callee = n.expression.getText(sf);
-          if (/(^|\.)(push|replace|assign)$/.test(callee) && !/(^|\.)(apiFetch|fetch|adminRequest)$/.test(callee))
+          if (
+            /(^|\.)(push|replace|assign)$/.test(callee) &&
+            !/(^|\.)(apiFetch|fetch|adminRequest)$/.test(callee)
+          )
             check(n.arguments[0], n);
         } else if (
           ts.isBinaryExpression(n) &&

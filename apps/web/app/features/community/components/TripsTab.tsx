@@ -80,11 +80,14 @@ export function TripsTab({
               textAlign: "center",
               background: "var(--card-bg, var(--color-surface))",
               borderRadius: "16px",
-              border: "1px dashed var(--card-border, color-mix(in srgb, var(--color-primary) 20%, transparent))",
+              border:
+                "1px dashed var(--card-border, color-mix(in srgb, var(--color-primary) 20%, transparent))",
             }}
           >
             <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>👥</span>
-            <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, var(--color-on-accent))" }}>
+            <h3
+              style={{ margin: "0 0 0.5rem", color: "var(--text-primary, var(--color-on-accent))" }}
+            >
               Aktif grup gezisi bulunamadı
             </h3>
             <p
