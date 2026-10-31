@@ -682,6 +682,13 @@
     font-size: 1rem;
   }
 
+  /* Zorlanmış renkler (AC-32): seçili sekme zemin/gölgeyle ayrışıyordu; sistem rengiyle kenar. */
+  @media (forced-colors: active) {
+    .hero-mockup-tab[aria-selected="true"] {
+      border: 2px solid Highlight;
+    }
+  }
+
   /* Tab 1: AI Chat View Mockup */
   .mockup-chat-view {
     padding: 1.25rem;
