@@ -516,7 +516,7 @@ export default function EditProfilePage() {
             {/* Explorer Status Card */}
             <div className="stitch-explorer-card">
               <div className="stitch-explorer-avatar-wrap">
-                <div className="stitch-explorer-avatar-inner">
+                <div data-surface="inverse" className="stitch-explorer-avatar-inner">
                   {userAvatar ? (
                     <img src={userAvatar} alt={fullName} className="stitch-explorer-avatar-img" />
                   ) : (
@@ -660,7 +660,7 @@ export default function EditProfilePage() {
                   {/* Cover Photo Studio */}
                   <div className="stitch-cover-block">
                     <label className="stitch-field-label">Profil Kapak Fotoğrafı</label>
-                    <div className="stitch-cover-container">
+                    <div data-surface="inverse" className="stitch-cover-container">
                       <img
                         src={coverPhoto}
                         alt="Profil Kapak Fotoğrafı"
@@ -695,7 +695,7 @@ export default function EditProfilePage() {
                   {/* Profile Avatar Studio */}
                   <div className="stitch-avatar-studio">
                     <div className="stitch-avatar-preview-wrap">
-                      <div className="stitch-avatar-circle">
+                      <div data-surface="inverse" className="stitch-avatar-circle">
                         <img src={userAvatar} alt={fullName} />
                       </div>
                       <div className="stitch-avatar-badge-icon" title="Profil Fotoğrafı">
@@ -951,7 +951,7 @@ export default function EditProfilePage() {
                   {/* PRO Badge Visibility Toggle */}
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
-                      <div className="stitch-badge-icon-box">
+                      <div data-surface="inverse" className="stitch-badge-icon-box">
                         <span
                           className="material-symbols-outlined"
                           style={{ fontVariationSettings: "'FILL' 1" }}
@@ -978,7 +978,7 @@ export default function EditProfilePage() {
                         checked={showProBadge}
                         onChange={(e) => setShowProBadge(e.target.checked)}
                       />
-                      <span className="stitch-slider" />
+                      <span data-surface="inverse" className="stitch-slider" />
                     </label>
                   </div>
                 </div>
@@ -1219,7 +1219,7 @@ export default function EditProfilePage() {
                 <div className="pe-8 gap-4">
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
-                      <div className="stitch-badge-icon-box">
+                      <div data-surface="inverse" className="stitch-badge-icon-box">
                         <span className="material-symbols-outlined">calendar_month</span>
                       </div>
                       <div className="pe-8">
@@ -1239,13 +1239,13 @@ export default function EditProfilePage() {
                         checked={notifTravelReminders}
                         onChange={(e) => setNotifTravelReminders(e.target.checked)}
                       />
-                      <span className="stitch-slider" />
+                      <span data-surface="inverse" className="stitch-slider" />
                     </label>
                   </div>
 
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
-                      <div className="stitch-badge-icon-box">
+                      <div data-surface="inverse" className="stitch-badge-icon-box">
                         <span className="material-symbols-outlined">mail</span>
                       </div>
                       <div className="pe-8">
@@ -1264,13 +1264,13 @@ export default function EditProfilePage() {
                         checked={notifEmailSummaries}
                         onChange={(e) => setNotifEmailSummaries(e.target.checked)}
                       />
-                      <span className="stitch-slider" />
+                      <span data-surface="inverse" className="stitch-slider" />
                     </label>
                   </div>
 
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
-                      <div className="stitch-badge-icon-box">
+                      <div data-surface="inverse" className="stitch-badge-icon-box">
                         <span className="material-symbols-outlined">tips_and_updates</span>
                       </div>
                       <div className="pe-8">
@@ -1290,7 +1290,7 @@ export default function EditProfilePage() {
                         checked={notifCommunityTips}
                         onChange={(e) => setNotifCommunityTips(e.target.checked)}
                       />
-                      <span className="stitch-slider" />
+                      <span data-surface="inverse" className="stitch-slider" />
                     </label>
                   </div>
 
@@ -1320,7 +1320,7 @@ export default function EditProfilePage() {
                 <div className="pe-18">
                   <div className="p-4 pe-19 bg-canvas-base border-subtle">
                     <div className="pe-20">
-                      <div className="w-10 h-10 pe-21 shadow-sm bg-surface-card">
+                      <div className="w-10 h-10 pe-21 pe-u-shadow-sm bg-surface-card">
                         <span className="text-xl">🌐</span>
                       </div>
                       <div>
@@ -1335,7 +1335,7 @@ export default function EditProfilePage() {
 
                   <div className="p-4 pe-19 bg-canvas-base border-subtle">
                     <div className="pe-20">
-                      <div className="w-10 h-10 pe-21 shadow-sm bg-surface-card">
+                      <div className="w-10 h-10 pe-21 pe-u-shadow-sm bg-surface-card">
                         <span className="text-xl">🗺️</span>
                       </div>
                       <div>
@@ -2616,7 +2616,7 @@ export default function EditProfilePage() {
 
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="stitch-toast-notification">
+        <div data-surface="inverse" className="stitch-toast-notification">
           <span className="material-symbols-outlined text-mint-glow">info</span>
           <span>{toastMessage}</span>
         </div>

@@ -2,9 +2,9 @@
 @layer pages {
   .chat-page-root {
     min-height: 100vh;
-    background-color: var(--chat-surface);
-    color: var(--chat-on-surface);
-    font-family: var(--chat-font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -58,8 +58,8 @@
     height: 38px;
     border-radius: 9999px;
     border: none;
-    background: var(--chat-surface-low);
-    color: var(--chat-on-surface-variant);
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -69,8 +69,8 @@
   }
 
   .chat-icon-btn:hover {
-    background: var(--chat-surface-high);
-    color: var(--chat-on-surface);
+    background: var(--color-surface-tint);
+    color: var(--color-text);
   }
   .chat-btn-map-split {
     display: inline-flex;
@@ -78,9 +78,9 @@
     gap: 0.4rem;
     padding: 0.4rem 0.85rem;
     border-radius: 9999px;
-    background: var(--chat-surface-card);
-    color: var(--chat-secondary);
-    font-family: var(--chat-font-label);
+    background: var(--color-surface);
+    color: var(--color-brand);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
@@ -89,7 +89,7 @@
   }
 
   .chat-btn-map-split:hover {
-    background: var(--chat-mint-subtle);
+    background: var(--color-surface-brand);
   }
 
   .chat-btn-new-group {
@@ -98,9 +98,9 @@
     gap: 0.4rem;
     padding: 0.4rem 0.95rem;
     border-radius: 9999px;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 600;
     border: none;
@@ -110,7 +110,7 @@
   }
 
   .chat-btn-new-group:hover {
-    background: var(--chat-secondary);
+    background: var(--color-brand);
     transform: translateY(-1px);
   }
 
@@ -149,11 +149,11 @@
 
   /* Left Column: Chats & Groups List */
   .chat-left-col {
-    background: var(--chat-surface-card);
+    background: var(--color-surface);
     border-radius: 16px;
     padding: 0.85rem;
     box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
-    border: 1px solid var(--chat-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -186,16 +186,16 @@
   .chat-left-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
     margin: 0;
   }
 
   .chat-left-count-badge {
     padding: 0.15rem 0.5rem;
     border-radius: 9999px;
-    background: var(--chat-mint-subtle);
-    color: var(--chat-secondary);
-    font-family: var(--chat-font-label);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 700;
   }
@@ -209,7 +209,7 @@
     position: absolute;
     left: 0.75rem;
     top: 0.65rem;
-    color: var(--chat-outline);
+    color: var(--color-border-control);
     font-size: 18px;
   }
 
@@ -218,16 +218,16 @@
     padding: 0.55rem 2rem 0.55rem 2.3rem;
     border-radius: 12px;
     border: 1px solid transparent;
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
     font-size: 13px;
-    color: var(--chat-on-surface);
+    color: var(--color-text);
     outline: none;
     box-sizing: border-box;
   }
 
   .chat-list-search-input:focus {
-    border-color: var(--chat-emerald-accent);
-    background: var(--chat-surface-card);
+    border-color: var(--color-accent);
+    background: var(--color-surface);
   }
 
   .chat-segmented-filter {
@@ -235,7 +235,7 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem;
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
     border-radius: 12px;
     overflow-x: auto;
   }
@@ -244,20 +244,20 @@
     flex: 1;
     padding: 0.4rem 0.65rem;
     border-radius: 8px;
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 600;
     border: none;
     background: transparent;
-    color: var(--chat-on-surface-variant);
+    color: var(--color-text-muted);
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s ease;
   }
 
   .chat-seg-btn.active {
-    background: var(--chat-surface-card);
-    color: var(--chat-primary);
+    background: var(--color-surface);
+    color: var(--color-text-brand);
     font-weight: 700;
     box-shadow: 0 1px 3px color-mix(in srgb, var(--color-neutral-900) 6%, transparent);
   }
@@ -285,11 +285,11 @@
   }
 
   .chat-item-card:hover {
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
   }
 
   .chat-item-card.active {
-    background: var(--chat-mint-subtle);
+    background: var(--color-surface-brand);
     border-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
 
@@ -301,7 +301,7 @@
     bottom: 0.75rem;
     width: 4px;
     border-radius: 0 4px 4px 0;
-    background: var(--chat-emerald-accent);
+    background: var(--color-accent);
   }
 
   .chat-item-avatar-wrap {
@@ -309,7 +309,7 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     display: flex;
     align-items: center;
@@ -325,14 +325,14 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--chat-emerald-accent);
+    background: var(--color-accent);
     color: var(--color-on-primary);
     font-size: 10px;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--chat-surface-card);
+    border: 2px solid var(--color-surface);
   }
 
   .chat-item-content {
@@ -350,17 +350,17 @@
   .chat-item-name {
     font-size: 13.5px;
     font-weight: 700;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .chat-item-time {
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 10px;
     font-weight: 600;
-    color: var(--chat-secondary);
+    color: var(--color-brand);
     flex-shrink: 0;
   }
 
@@ -368,16 +368,16 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 10px;
     font-weight: 600;
-    color: var(--chat-secondary);
+    color: var(--color-brand);
     margin-top: 2px;
   }
 
   .chat-item-snippet {
     font-size: 12.5px;
-    color: var(--chat-on-surface-variant);
+    color: var(--color-text-muted);
     margin: 3px 0 0;
     white-space: nowrap;
     overflow: hidden;
@@ -397,9 +397,9 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--chat-emerald-accent);
+    background: var(--color-accent);
     color: var(--color-on-primary);
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 10px;
     font-weight: 700;
     display: flex;
@@ -409,10 +409,10 @@
 
   /* Middle Column: Live Chat Stream */
   .chat-middle-col {
-    background: var(--chat-surface-card);
+    background: var(--color-surface);
     border-radius: 16px;
     box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
-    border: 1px solid var(--chat-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -426,7 +426,7 @@
     padding: 0.85rem 1.25rem;
     background: color-mix(in srgb, var(--color-surface) 95%, transparent);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--chat-border-subtle);
+    border-bottom: 1px solid var(--color-border-subtle);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -445,7 +445,7 @@
     width: 42px;
     height: 42px;
     border-radius: 12px;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     display: flex;
     align-items: center;
@@ -456,7 +456,7 @@
   .chat-middle-header-title {
     font-size: 1.05rem;
     font-weight: 700;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -468,7 +468,7 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 12px;
-    color: var(--chat-on-surface-variant);
+    color: var(--color-text-muted);
     margin-top: 2px;
   }
 
@@ -476,7 +476,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    color: var(--chat-secondary);
+    color: var(--color-brand);
     font-weight: 600;
   }
 
@@ -493,9 +493,9 @@
     gap: 0.35rem;
     padding: 0.45rem 0.9rem;
     border-radius: 9999px;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
@@ -503,13 +503,13 @@
   }
 
   .chat-btn-live-map:hover {
-    background: var(--chat-secondary);
+    background: var(--color-brand);
   }
 
   /* Pinned Alert Bar */
   .chat-pinned-alert {
     padding: 0.5rem 1.25rem;
-    background: linear-gradient(90deg, var(--chat-mint-subtle), var(--chat-surface-low));
+    background: linear-gradient(90deg, var(--color-surface-brand), var(--color-surface-tint));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -531,14 +531,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--chat-on-surface);
+    color: var(--color-text);
   }
 
   .chat-pinned-action {
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: var(--chat-secondary);
+    color: var(--color-brand);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -566,9 +566,9 @@
   .chat-date-pill {
     padding: 0.25rem 0.85rem;
     border-radius: 9999px;
-    background: var(--chat-surface-low);
-    color: var(--chat-on-surface-variant);
-    font-family: var(--chat-font-label);
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 700;
   }
@@ -590,8 +590,8 @@
     width: 36px;
     height: 36px;
     border-radius: 12px;
-    background: var(--chat-surface-high);
-    color: var(--chat-primary);
+    background: var(--color-surface-tint);
+    color: var(--color-text-brand);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -601,7 +601,7 @@
   }
 
   .chat-msg-avatar.owner {
-    background: var(--chat-primary);
+    background: var(--color-text-brand);
     color: var(--color-text-inverse);
   }
 
@@ -620,28 +620,28 @@
 
   .chat-msg-sender {
     font-weight: 700;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
   }
 
   .chat-msg-role-tag {
     padding: 0.1rem 0.4rem;
     border-radius: 4px;
-    background: var(--chat-surface-low);
-    font-family: var(--chat-font-label);
+    background: var(--color-surface-tint);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 9px;
-    color: var(--chat-on-surface-variant);
+    color: var(--color-text-muted);
   }
 
   .chat-msg-role-tag.pro {
-    background: var(--chat-mint-subtle);
-    color: var(--chat-secondary);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
     font-weight: 700;
   }
 
   .chat-msg-time {
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 10px;
-    color: var(--chat-outline);
+    color: var(--color-border-control);
   }
 
   .chat-bubble {
@@ -653,13 +653,13 @@
   }
 
   .chat-bubble.incoming {
-    background: var(--chat-surface-card);
-    color: var(--chat-on-surface);
+    background: var(--color-surface);
+    color: var(--color-text);
     border-top-left-radius: 4px;
   }
 
   .chat-bubble.outgoing {
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     border-top-right-radius: 4px;
     text-align: right;
@@ -671,17 +671,17 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 10px;
-    color: var(--chat-emerald-accent);
+    color: var(--color-accent);
     justify-content: flex-end;
   }
 
   /* Rich Shared Route Itinerary Card */
   .chat-route-embed-card {
-    background: var(--chat-surface-card);
+    background: var(--color-surface);
     border-radius: 18px;
     padding: 0.85rem;
     box-shadow: 0 3px 14px color-mix(in srgb, var(--color-neutral-900) 6%, transparent);
-    border: 1px solid var(--chat-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     overflow: hidden;
     width: 100%;
     max-width: 480px;
@@ -700,10 +700,10 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 10px;
     font-weight: 700;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -739,14 +739,14 @@
   .chat-route-embed-title {
     font-size: 13.5px;
     font-weight: 700;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
     margin: 0 0 4px;
     line-height: 1.3;
   }
 
   .chat-route-embed-desc {
     font-size: 12px;
-    color: var(--chat-on-surface-variant);
+    color: var(--color-text-muted);
     margin: 0;
     line-height: 1.4;
     display: -webkit-box;
@@ -761,15 +761,15 @@
     gap: 0.35rem;
     margin-top: 0.45rem;
     flex-wrap: wrap;
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 10px;
   }
 
   .chat-route-chip {
     padding: 0.15rem 0.45rem;
     border-radius: 4px;
-    background: var(--chat-surface-low);
-    color: var(--chat-secondary);
+    background: var(--color-surface-tint);
+    color: var(--color-brand);
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -782,16 +782,16 @@
     gap: 0.5rem;
     padding-top: 0.65rem;
     margin-top: 0.65rem;
-    border-top: 1px solid var(--chat-surface-low);
+    border-top: 1px solid var(--color-surface-tint);
   }
 
   /* Location Pin Drop Bubble */
   .chat-location-drop-card {
-    background: var(--chat-surface-card);
+    background: var(--color-surface);
     border-radius: 18px;
     padding: 0.65rem;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--color-neutral-900) 5%, transparent);
-    border: 1px solid var(--chat-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     width: 100%;
     max-width: 320px;
   }
@@ -812,7 +812,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--chat-emerald-accent);
+    background: var(--color-accent);
     color: var(--color-on-primary);
     display: flex;
     align-items: center;
@@ -838,14 +838,14 @@
     justify-content: center;
     gap: 0.5rem;
     font-size: 11.5px;
-    color: var(--chat-on-surface-variant);
+    color: var(--color-text-muted);
     margin: 0.35rem 0;
   }
 
   .chat-system-event-pill {
     padding: 0.25rem 0.85rem;
     border-radius: 9999px;
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -854,8 +854,8 @@
   /* Chat Input Bar with Rich Travel Tools */
   .chat-input-footer {
     padding: 0.85rem 1.25rem;
-    background: var(--chat-surface-card);
-    border-top: 1px solid var(--chat-border-subtle);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -881,9 +881,9 @@
     gap: 0.35rem;
     padding: 0.35rem 0.85rem;
     border-radius: 9999px;
-    background: var(--chat-surface-low);
-    color: var(--chat-on-surface-variant);
-    font-family: var(--chat-font-label);
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 500;
     border: none;
@@ -893,22 +893,22 @@
   }
 
   .chat-attach-pill:hover {
-    background: var(--chat-mint-subtle);
-    color: var(--chat-secondary);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
   }
 
   .chat-input-controls-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
     border-radius: 16px;
     padding: 0.35rem 0.5rem 0.35rem 0.85rem;
     transition: all 0.2s ease;
   }
 
   .chat-input-controls-row:focus-within {
-    background: var(--chat-surface-card);
+    background: var(--color-surface);
     box-shadow: 0 0 0 2px var(--color-accent-a30);
   }
 
@@ -917,7 +917,7 @@
     border: none;
     background: transparent;
     font-size: 14px;
-    color: var(--chat-on-surface);
+    color: var(--color-text);
     outline: none;
     font-family: inherit;
   }
@@ -926,7 +926,7 @@
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     border: none;
     cursor: pointer;
@@ -938,17 +938,17 @@
   }
 
   .chat-send-btn:hover {
-    background: var(--chat-secondary);
+    background: var(--color-brand);
     transform: scale(1.05);
   }
 
   /* Right Column: Travel Group & Route Details (Sidebar) */
   .chat-right-col {
-    background: var(--chat-surface-card);
+    background: var(--color-surface);
     border-radius: 16px;
     padding: 1rem;
     box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
-    border: 1px solid var(--chat-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -1006,17 +1006,17 @@
   }
 
   .chat-right-section-title {
-    font-family: var(--chat-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin: 0;
   }
 
   .chat-linked-route-box {
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
     border-radius: 14px;
     padding: 0.75rem;
     display: flex;
@@ -1041,7 +1041,7 @@
   }
 
   .chat-member-row:hover {
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
   }
 
   .chat-member-left {
@@ -1055,7 +1055,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     display: flex;
     align-items: center;
@@ -1072,7 +1072,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--chat-emerald-accent);
+    background: var(--color-accent);
     border: 1.5px solid var(--color-neutral-0);
   }
 
@@ -1085,7 +1085,7 @@
   .chat-waypoint-item {
     padding: 0.55rem 0.75rem;
     border-radius: 12px;
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1095,7 +1095,7 @@
   }
 
   .chat-waypoint-item:hover {
-    background: var(--chat-mint-subtle);
+    background: var(--color-surface-brand);
   }
 
   .chat-waypoint-left {
@@ -1109,7 +1109,7 @@
     width: 22px;
     height: 22px;
     border-radius: 6px;
-    background: var(--chat-emerald-accent);
+    background: var(--color-accent);
     color: var(--color-on-primary);
     font-size: 11px;
     font-weight: 700;
@@ -1134,18 +1134,18 @@
   }
 
   .chat-modal-window {
-    background: var(--chat-surface-card);
+    background: var(--color-surface);
     border-radius: 20px;
     width: 100%;
     max-width: 520px;
     box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
     overflow: hidden;
-    border: 1px solid var(--chat-border-subtle);
+    border: 1px solid var(--color-border-subtle);
   }
 
   .chat-modal-header {
     padding: 1.15rem 1.5rem;
-    border-bottom: 1px solid var(--chat-surface-low);
+    border-bottom: 1px solid var(--color-surface-tint);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1160,7 +1160,7 @@
 
   .chat-modal-footer {
     padding: 1rem 1.5rem;
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
@@ -1172,7 +1172,7 @@
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--chat-deep-forest);
+    background: var(--color-surface-inverse);
     color: var(--color-text-inverse);
     padding: 0.65rem 1.25rem;
     border-radius: 9999px;
@@ -1189,8 +1189,8 @@
   /* Privacy Control Box & Traveler Directory Styles          */
   /* ========================================================= */
   .chat-privacy-box {
-    background: var(--chat-surface-low);
-    border: 1px solid var(--chat-border-subtle);
+    background: var(--color-surface-tint);
+    border: 1px solid var(--color-border-subtle);
     border-radius: 12px;
     padding: 0.5rem 0.75rem;
     display: flex;
@@ -1205,17 +1205,17 @@
     justify-content: space-between;
     font-size: 11.5px;
     font-weight: 700;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
   }
 
   .chat-privacy-pills {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.35rem;
-    background: var(--chat-surface-card);
+    background: var(--color-surface);
     padding: 3px;
     border-radius: 8px;
-    border: 1px solid var(--chat-border-subtle);
+    border: 1px solid var(--color-border-subtle);
   }
 
   .chat-privacy-btn {
@@ -1229,21 +1229,21 @@
     font-weight: 600;
     border: none;
     background: transparent;
-    color: var(--chat-outline);
+    color: var(--color-border-control);
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
   }
 
   .chat-privacy-btn.active {
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     box-shadow: 0 1px 4px color-mix(in srgb, var(--color-primary) 20%, transparent);
   }
 
   .chat-privacy-btn:hover:not(.active) {
-    color: var(--chat-primary);
-    background: var(--chat-surface-low);
+    color: var(--color-text-brand);
+    background: var(--color-surface-tint);
   }
 
   /* Personal 1-on-1 Profile Sidebar (No Route) */
@@ -1268,7 +1268,7 @@
     width: 68px;
     height: 68px;
     border-radius: 50%;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     font-size: 24px;
     font-weight: 800;
@@ -1294,13 +1294,13 @@
   .chat-personal-name {
     font-size: 1.05rem;
     font-weight: 800;
-    color: var(--chat-primary);
+    color: var(--color-text-brand);
     margin: 0 0 2px;
   }
 
   .chat-personal-handle {
     font-size: 12px;
-    color: var(--chat-secondary);
+    color: var(--color-brand);
     font-weight: 600;
   }
 
@@ -1328,9 +1328,9 @@
   .chat-interest-pill {
     padding: 0.25rem 0.55rem;
     border-radius: 6px;
-    background: var(--chat-surface-low);
-    border: 1px solid var(--chat-border-subtle);
-    color: var(--chat-secondary);
+    background: var(--color-surface-tint);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-brand);
     font-size: 11px;
     font-weight: 600;
   }
@@ -1343,13 +1343,13 @@
     gap: 0.75rem;
     padding: 0.75rem;
     border-radius: 12px;
-    background: var(--chat-surface-card);
-    border: 1px solid var(--chat-border-subtle);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
     transition: all 0.2s ease;
   }
 
   .chat-traveler-card:hover {
-    background: var(--chat-surface-low);
+    background: var(--color-surface-tint);
     border-color: var(--color-accent-a30);
   }
 
@@ -1364,7 +1364,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     font-size: 14px;
     font-weight: 700;
@@ -1381,7 +1381,7 @@
     gap: 0.35rem;
     padding: 0.4rem 0.85rem;
     border-radius: 9999px;
-    background: var(--chat-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     font-size: 12px;
     font-weight: 700;
@@ -1392,7 +1392,7 @@
   }
 
   .chat-btn-direct-msg:hover {
-    background: var(--chat-secondary);
+    background: var(--color-brand);
     transform: translateY(-1px);
   }
 
@@ -1449,14 +1449,14 @@
     .chat-mobile-tabs button {
       flex: 1;
       min-height: 44px;
-      border: 1px solid var(--chat-border-subtle);
+      border: 1px solid var(--color-border-subtle);
       border-radius: 12px;
-      background: var(--chat-surface-card);
-      color: var(--chat-on-surface);
+      background: var(--color-surface);
+      color: var(--color-text);
       cursor: pointer;
     }
     .chat-mobile-tabs button[aria-pressed="true"] {
-      background: var(--chat-primary);
+      background: var(--color-text-brand);
       color: var(--color-text-inverse);
     }
     .chat-mobile-tabs button:disabled {

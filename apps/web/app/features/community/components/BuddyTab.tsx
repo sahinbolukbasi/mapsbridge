@@ -186,7 +186,7 @@ export function BuddyTab({
             <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-primary, var(--color-on-accent))" }}>
               Aramanıza uygun gezi arkadaşı bulunamadı
             </h3>
-            <p style={{ margin: 0, color: "var(--text-muted, #4b5563)", fontSize: "0.9rem" }}>
+            <p style={{ margin: 0, color: "var(--color-text-muted)", fontSize: "0.9rem" }}>
               Filtreleri sıfırlayarak tüm gezginleri listeleyebilirsiniz.
             </p>
           </div>
@@ -236,7 +236,7 @@ export function BuddyTab({
                       >
                         {buddy.name}
                       </h4>
-                      <span style={{ fontSize: "12px", color: "var(--text-muted, var(--color-text-subtle))" }}>
+                      <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
                         @{buddy.username} · {buddy.travelStyle}
                       </span>
                     </div>
@@ -324,7 +324,7 @@ export function BuddyTab({
                         background: "var(--tag-bg, rgba(0,0,0,0.05))",
                         fontSize: "11px",
                         fontWeight: 600,
-                        color: "var(--text-muted, #475569)",
+                        color: "var(--color-text-muted)",
                       }}
                     >
                       #{tag}

@@ -3,20 +3,20 @@
     "app/[username]/public-profile.css": 7,
     "app/auth.css": 4,
     "app/checkout/checkout.css": 12,
-    "app/community/community.css": 64,
+    "app/community/community.css": 42,
     "app/components/auth-gate.css": 21,
-    "app/components/header-nav.css": 133,
+    "app/components/header-nav.css": 127,
     "app/components/mobile-start.css": 2,
-    "app/components/site-footer.css": 34,
+    "app/components/site-footer.css": 27,
     "app/components/trip/travel-planner.css": 72,
     "app/components/upgrade-modal.css": 6,
     "app/home.css": 58,
     "app/how-it-works/how-it-works.css": 16,
     "app/k/k.css": 6,
     "app/login/login.css": 14,
-    "app/maps/maps.css": 93,
+    "app/maps/maps.css": 86,
     "app/messages/messages.css": 4,
-    "app/mobile-apps/mobile-apps.css": 9,
+    "app/mobile-apps/mobile-apps.css": 8,
     "app/operations.css": 9,
     "app/profile/edit/edit.css": 13,
     "app/profile/photo/photo.css": 6,
@@ -26,28 +26,11 @@
     "app/styles.css": 10,
     "app/travel-assistant/assistant.css": 33,
     "app/travel-assistant/promo-landing.css": 7,
-    "app/tw-utils.css": 38,
     "app/welcome/welcome.css": 6
-  },
-  "G4": {
-    "app/articles/page.tsx": 1
-  },
-  "G4m": {
-    "app/articles/page.tsx": 1
-  },
-  "G6": {
-    "app/components/soft-icon.tsx": 8,
-    "app/components/trip/travel-planner-sidebar.tsx": 5,
-    "app/features/community/components/DiscoverTab.tsx": 35,
-    "app/features/community/components/EditPostModalWeb.tsx": 2,
-    "app/maps/maps-client.tsx": 219,
-    "app/messages/page.tsx": 15,
-    "app/profile/edit/page.tsx": 2,
-    "app/reset-password/page.tsx": 3
   },
   "G7": {
     "app/[username]/public-profile-client.tsx": 12,
-    "app/articles/page.tsx": 24,
+    "app/articles/page.tsx": 19,
     "app/checkout/page.tsx": 9,
     "app/community/page.tsx": 3,
     "app/components/auth-guard.tsx": 19,
@@ -56,15 +39,13 @@
     "app/components/tracker/deal-tracker-panel.tsx": 62,
     "app/components/travel-globe.tsx": 27,
     "app/components/trip/google-planner-map.tsx": 10,
-    "app/components/trip/travel-planner-sidebar.tsx": 8,
+    "app/components/trip/travel-planner-sidebar.tsx": 7,
     "app/components/trip/trip-side-drawer.tsx": 19,
-    "app/features/community/components/BuddyTab.tsx": 11,
+    "app/features/community/components/BuddyTab.tsx": 9,
     "app/features/community/components/DirectMessageModal.tsx": 9,
-    "app/features/community/components/DiscoverTab.tsx": 37,
+    "app/features/community/components/DiscoverTab.tsx": 36,
     "app/features/community/components/EditPostModalWeb.tsx": 4,
     "app/features/community/components/NewPostModal.tsx": 2,
-    "app/features/community/components/RoutesTab.tsx": 1,
-    "app/features/community/components/TripsTab.tsx": 1,
     "app/features/trip-planner/ai-route-modifier.tsx": 24,
     "app/features/trip-planner/manual-pin-modal.tsx": 30,
     "app/features/trip-planner/map-styles.ts": 19,
@@ -77,8 +58,8 @@
     "app/lib/trip/use-trip-workspace.ts": 15,
     "app/login/page.tsx": 1,
     "app/maps/loading.tsx": 3,
-    "app/maps/maps-client.tsx": 47,
-    "app/messages/page.tsx": 5,
+    "app/maps/maps-client.tsx": 21,
+    "app/messages/page.tsx": 1,
     "app/profile/edit/page.tsx": 11,
     "app/profile/page.tsx": 12,
     "app/profile/photo/page.tsx": 14,
@@ -90,9 +71,6 @@
   },
   "G8": {
     "app/styles.css": 3
-  },
-  "G10": {
-    "app/articles/page.tsx": 1
   },
   "G11": {
     "app/checkout/checkout.css": 1,
@@ -109,11 +87,7 @@
     "app/reset-password/reset-password.css": 2,
     "app/styles.css": 1,
     "app/travel-assistant/assistant.css": 2,
-    "app/travel-assistant/promo-landing.css": 2,
-    "app/tw-utils.css": 1
-  },
-  "G14": {
-    "packages/design-tokens/src/legacy-aliases.ts": 173
+    "app/travel-assistant/promo-landing.css": 2
   },
   "G15": {
     "app/community/community.css": 1,

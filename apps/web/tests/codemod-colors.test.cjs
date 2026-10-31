@@ -207,41 +207,29 @@ test("koyu kap içindeki açık zeminli kural kapsamdan bağımsız token alır"
   assert.equal(report.manualContrast.length, 0);
 });
 
-test("tw modu: tanımsız arbitrary silinir, tanımlı utility üretilmiş sınıfa, renk token'a; rengi belirsiz utility korunur", () => {
+test("tw modu: tw-utils.css C18'de silindi → araç Türkçe hatayla durur (yeniden kullanılmaz)", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "codemod-tw-"));
   try {
     const tsx = path.join(dir, "x.tsx");
-    const out = path.join(dir, "x-layout.css");
-    fs.writeFileSync(
-      tsx,
-      [
-        'import React from "react";',
-        "export const X = ({ on }: { on: boolean }) => (",
-        '  <div className="card flex gap-2 text-[#0b101c] hover:bg-slate-50 group">',
-        '    <span className={`label ${on ? "text-white" : "text-slate-400"} shadow-sm`}>a</span>',
-        '    <b className="group-hover:scale-105 focus:outline-none">b</b>',
-        "  </div>",
-        ");",
-      ].join("\n"),
-    );
+    fs.writeFileSync(tsx, 'export const X = () => <div className="flex gap-2">a</div>;\n');
     const r = spawnSync(
       NODE[0],
-      [...NODE.slice(1), SCRIPT, "--mode", "tw", "--css", out, "--prefix", "tt", tsx],
+      [
+        ...NODE.slice(1),
+        SCRIPT,
+        "--mode",
+        "tw",
+        "--css",
+        path.join(dir, "x.css"),
+        "--prefix",
+        "tt",
+        tsx,
+      ],
       { encoding: "utf8" },
     );
-    assert.equal(r.status, 0, r.stderr);
-    const src = fs.readFileSync(tsx, "utf8");
-    assert.match(src, /import "\.\/x-layout\.css";/);
-    assert.match(src, /className="card tt-1 tt-group"/);
-    assert.doesNotMatch(src, /text-\[#0b101c\]|focus:outline-none/);
-    // text-slate-400 açık zeminde değer korunmadan token'a çevrilemez → tw sınıfı olarak kalır.
-    assert.match(src, /"text-slate-400"/);
-    const css = fs.readFileSync(out, "utf8");
-    assert.match(css, /^@layer tokens, base, legacy, chrome, pages, primitives;\n@layer legacy \{/);
-    assert.match(css, /\.tt-1 \{\s*display: flex;/);
-    assert.match(css, /\.tt-1:hover \{\s*background-color: var\(--color-bg\);/);
-    assert.match(css, /\.tt-group:hover \.tt-\d+ \{\s*transform: scale\(1\.05\);/);
-    assert.doesNotMatch(css, /outline: none/);
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /tw-utils\.css yok/);
+    assert.equal(fs.readFileSync(tsx, "utf8").includes("flex gap-2"), true, "dosya değişmemeli");
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -252,7 +240,7 @@ test("RN modu: string → tokens ifadesi, şablon → ${…}, alfa → hazır to
     'import { View } from "react-native";',
     'const s = { a: { color: "#0f172a", backgroundColor: "#ffffff", shadowColor: "#000" } };',
     'const b = { borderColor: "rgba(16, 185, 129, 0.2)", backgroundColor: "rgba(255,255,255,0.5)" };',
-    'const h = `body { background: #013628; }`;',
+    "const h = `body { background: #013628; }`;",
     'export const X = () => <Icon color="#ffffff" />;',
   ].join("\n");
   const script = `

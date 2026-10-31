@@ -144,7 +144,7 @@ export function RoutesTab({
             <p
               style={{
                 margin: "0 0 1rem",
-                color: "var(--text-muted, #4b5563)",
+                color: "var(--color-text-muted)",
                 fontSize: "0.9rem",
               }}
             >

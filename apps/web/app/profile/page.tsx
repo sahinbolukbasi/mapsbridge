@@ -487,17 +487,17 @@ export default function ProfilePage() {
                 <div className="stitch-stats-badges-row">
                   <div className="stitch-stat-pill">
                     <span>{savedTrips.length}</span>
-                    <span style={{ color: "var(--sb-text-muted)" }}>Rota</span>
+                    <span style={{ color: "var(--color-text-muted)" }}>Rota</span>
                   </div>
                   <div className="stitch-stat-divider" />
                   <div className="stitch-stat-pill">
                     <span>{savedPins.length}</span>
-                    <span style={{ color: "var(--sb-text-muted)" }}>Mekan</span>
+                    <span style={{ color: "var(--color-text-muted)" }}>Mekan</span>
                   </div>
                   <div className="stitch-stat-divider" />
                   <div className="stitch-stat-pill">
                     <span>{walletCredits}</span>
-                    <span style={{ color: "var(--sb-text-muted)" }}>Kredi</span>
+                    <span style={{ color: "var(--color-text-muted)" }}>Kredi</span>
                   </div>
                 </div>
               </div>
@@ -679,7 +679,7 @@ export default function ProfilePage() {
                         const dayCount = trip.days?.length || 1;
                         return (
                           <div key={trip.id} className="stitch-route-card">
-                            <div className="stitch-route-thumb-wrap">
+                            <div data-surface="inverse" className="stitch-route-thumb-wrap">
                               <div
                                 style={{
                                   width: "100%",
@@ -1454,7 +1454,7 @@ export default function ProfilePage() {
                 >
                   <span
                     className="material-symbols-outlined stitch-empty-icon"
-                    style={{ color: "var(--sb-mint-glow)" }}
+                    style={{ color: "var(--color-link-inverse)" }}
                   >
                     storefront
                   </span>
@@ -1484,7 +1484,7 @@ export default function ProfilePage() {
                         padding: "0.55rem 1.1rem",
                         background: "transparent",
                         borderColor: "color-mix(in srgb, var(--color-neutral-0) 20%, transparent)",
-                        color: "var(--sb-text-main)",
+                        color: "var(--color-text)",
                       }}
                     >
                       <span className="material-symbols-outlined">account_balance</span>

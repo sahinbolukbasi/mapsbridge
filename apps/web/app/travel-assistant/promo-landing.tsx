@@ -322,7 +322,7 @@ export function AIPromoLanding() {
                     style={{
                       margin: 0,
                       fontSize: "12px",
-                      color: "var(--promo-on-surface-variant)",
+                      color: "var(--color-text-muted)",
                     }}
                   >
                     Nereden başlamak istersin? Aşağıdaki örnek şablonlardan birine dokunabilir veya
@@ -420,7 +420,7 @@ export function AIPromoLanding() {
                             animation: "promoPulse 2s infinite",
                           }}
                         ></span>
-                        <strong style={{ fontSize: "14px", color: "var(--promo-deep-forest)" }}>
+                        <strong style={{ fontSize: "14px", color: "var(--color-surface-inverse)" }}>
                           Roma Antik &amp; Lezzet Rotası
                         </strong>
                       </div>
@@ -483,7 +483,7 @@ export function AIPromoLanding() {
                     </div>
                   </div>
 
-                  <p style={{ margin: 0, fontSize: "12px", color: "var(--promo-outline)" }}>
+                  <p style={{ margin: 0, fontSize: "12px", color: "var(--color-border-control)" }}>
                     💡 İpucu: 2. Gün sabahı Vatikan Müzeleri için erken bilet almayı unutmayın,
                     dilerseniz sizin için rezervasyon linkini ekleyebilirim.
                   </p>
@@ -499,7 +499,7 @@ export function AIPromoLanding() {
                     speed
                   </span>
                   <span>Tempo:</span>
-                  <select className="ai-promo-filter-select" defaultValue="Dengeli / Orta">
+                  <select className="ai-promo-filter-select" aria-label="Tempo" defaultValue="Dengeli / Orta">
                     <option>Dengeli / Orta</option>
                     <option>Sakin &amp; Rahat</option>
                     <option>Hızlı &amp; Yoğun</option>
@@ -510,7 +510,7 @@ export function AIPromoLanding() {
                     payments
                   </span>
                   <span>Bütçe:</span>
-                  <select className="ai-promo-filter-select" defaultValue="Orta Düzey (€€)">
+                  <select className="ai-promo-filter-select" aria-label="Bütçe" defaultValue="Orta Düzey (€€)">
                     <option>Orta Düzey (€€)</option>
                     <option>Ekonomik (€)</option>
                     <option>Lüks &amp; Konfor (€€€)</option>
@@ -520,7 +520,7 @@ export function AIPromoLanding() {
                   <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
                     directions_walk
                   </span>
-                  <span style={{ fontWeight: 600, color: "var(--promo-deep-forest)" }}>
+                  <span style={{ fontWeight: 600, color: "var(--color-surface-inverse)" }}>
                     Yürüyüş &amp; Metro
                   </span>
                 </div>
@@ -582,13 +582,13 @@ export function AIPromoLanding() {
                       fontSize: "15px",
                       fontWeight: 700,
                       margin: 0,
-                      color: "var(--promo-deep-forest)",
+                      color: "var(--color-surface-inverse)",
                     }}
                   >
                     Canlı Rota Önizlemesi
                   </h2>
                 </div>
-                <span style={{ fontSize: "12px", color: "var(--promo-on-surface-variant)" }}>
+                <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
                   Kod: <strong style={{ color: "var(--color-text-brand)", fontWeight: 700 }}>RM-841</strong> • Roma,
                   İtalya
                 </span>
@@ -623,7 +623,7 @@ export function AIPromoLanding() {
                   }}
                 ></span>
                 <span>{selectedDay}. Gün Canlı Yol Haritası</span>
-                <span style={{ color: "var(--promo-outline)", fontWeight: 400 }}>
+                <span style={{ color: "var(--color-border-control)", fontWeight: 400 }}>
                   {DAY_STOPS[selectedDay].length} Durak
                 </span>
               </div>
@@ -665,7 +665,7 @@ export function AIPromoLanding() {
             </div>
 
             {/* Timeline Stops Feed */}
-            <div className="ai-promo-timeline-feed">
+            <div className="ai-promo-timeline-feed" tabIndex={0} role="region" aria-label="Örnek rota akışı">
               {DAY_STOPS[selectedDay].map((stop, idx) => (
                 <div className="ai-promo-stop-item" key={stop.num}>
                   {idx < DAY_STOPS[selectedDay].length - 1 && (
@@ -752,7 +752,7 @@ export function AIPromoLanding() {
               </div>
               <div className="ai-promo-metric-divider"></div>
               <div className="ai-promo-metric-item">
-                <span className="ai-promo-metric-number" style={{ color: "var(--color-accent)" }}>
+                <span className="ai-promo-metric-number" style={{ color: "var(--color-success)" }}>
                   120+
                 </span>
                 <span className="ai-promo-metric-label">Desteklenen Ülke</span>
@@ -856,7 +856,7 @@ export function AIPromoLanding() {
                     fontSize: "18px",
                     fontWeight: 700,
                     margin: 0,
-                    color: "var(--promo-deep-forest)",
+                    color: "var(--color-surface-inverse)",
                   }}
                 >
                   Popüler İlham Şablonları
@@ -864,7 +864,7 @@ export function AIPromoLanding() {
                 <p
                   style={{
                     fontSize: "13px",
-                    color: "var(--promo-on-surface-variant)",
+                    color: "var(--color-text-muted)",
                     margin: "4px 0 0",
                   }}
                 >
@@ -874,7 +874,7 @@ export function AIPromoLanding() {
               <span
                 style={{
                   fontSize: "12px",
-                  color: "var(--promo-outline)",
+                  color: "var(--color-border-control)",
                   display: "flex",
                   alignItems: "center",
                   gap: "4px",

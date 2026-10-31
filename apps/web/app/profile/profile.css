@@ -3,8 +3,8 @@
   /* Page Root */
   .stitch-main-profile-root {
     min-height: 100vh;
-    background-color: var(--sb-bg-page);
-    color: var(--sb-text-main);
+    background-color: var(--color-bg);
+    color: var(--color-text);
     font-family:
       "Plus Jakarta Sans",
       -apple-system,
@@ -46,7 +46,7 @@
     left: 0;
     right: 0;
     height: 60%;
-    background: linear-gradient(to bottom, transparent, var(--profile-canvas, var(--color-bg)));
+    background: linear-gradient(to bottom, transparent, var(--color-bg));
   }
   /* Main Container & Profile Card */
   .stitch-profile-container {
@@ -59,11 +59,11 @@
 
   .stitch-profile-header-card {
     width: 100%;
-    background-color: var(--sb-surface-card);
+    background-color: var(--color-surface);
     border-radius: 1.25rem;
     padding: 1.75rem 2rem;
     box-shadow: var(--shadow-sm, 0 2px 8px color-mix(in srgb, var(--color-surface-inverse) 4%, transparent));
-    border: 1px solid var(--sb-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     margin-bottom: 1.5rem;
   }
 
@@ -104,7 +104,7 @@
     height: 7.5rem;
     border-radius: 1.5rem;
     overflow: hidden;
-    border: 3px solid var(--mb-emerald, var(--color-accent));
+    border: 3px solid var(--color-accent);
     box-shadow:
       0 0 0 4px color-mix(in srgb, var(--color-accent) 18%, transparent),
       0 6px 20px rgba(0, 0, 0, 0.12);
@@ -147,7 +147,7 @@
 
   .stitch-user-handle-tag {
     font-size: 0.95rem;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
   }
 
   .stitch-route-leader-badge {
@@ -156,8 +156,8 @@
     gap: 0.35rem;
     padding: 0.2rem 0.65rem;
     border-radius: 9999px;
-    background-color: var(--sb-mint-subtle);
-    color: var(--sb-secondary);
+    background-color: var(--color-surface-brand);
+    color: var(--color-brand);
     font-family: "Inter", sans-serif;
     font-size: 11px;
     font-weight: 800;
@@ -168,13 +168,13 @@
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background-color: var(--sb-emerald-accent);
-    box-shadow: 0 0 6px var(--sb-emerald-accent);
+    background-color: var(--color-accent);
+    box-shadow: 0 0 6px var(--color-accent);
   }
 
   .stitch-user-bio-text {
     font-size: 0.9rem;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
     line-height: 1.5;
     max-width: 44rem;
     margin: 0;
@@ -197,7 +197,7 @@
   }
 
   .stitch-stat-pill span:first-child {
-    color: var(--sb-text-main);
+    color: var(--color-text);
     font-weight: 800;
     font-size: 0.95rem;
   }
@@ -206,7 +206,7 @@
     width: 4px;
     height: 4px;
     border-radius: 9999px;
-    background-color: var(--sb-text-outline);
+    background-color: var(--color-border-control);
     opacity: 0.5;
   }
 
@@ -232,12 +232,12 @@
     gap: 0.4rem;
     padding: 0.65rem 1.25rem;
     border-radius: 9999px;
-    background-color: var(--sb-canvas-subtle);
-    color: var(--sb-text-main);
+    background-color: var(--color-surface-sunken);
+    color: var(--color-text);
     font-size: 0.84rem;
     font-weight: 700;
     text-decoration: none;
-    border: 1px solid var(--sb-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     cursor: pointer;
     transition: all 0.15s ease;
   }
@@ -264,7 +264,7 @@
   }
 
   .stitch-action-btn-primary:hover {
-    background-color: var(--sb-primary-container);
+    background-color: var(--color-brand-hover);
     box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent) 25%, transparent);
     transform: translateY(-1px);
   }
@@ -290,8 +290,8 @@
     gap: 0.25rem;
     overflow-x: auto;
     padding: 0.25rem;
-    background: var(--sb-canvas-base);
-    border: 1px solid var(--sb-border-subtle);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-subtle);
     border-radius: 999px;
     scrollbar-width: none;
     margin-bottom: 0.25rem;
@@ -312,19 +312,19 @@
     white-space: nowrap;
     border: none;
     background: transparent;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
     cursor: pointer;
     transition: all 0.15s ease;
     position: relative;
   }
 
   .stitch-workspace-tab:hover {
-    background-color: var(--sb-surface-card);
-    color: var(--sb-text-main);
+    background-color: var(--color-surface);
+    color: var(--color-text);
   }
 
   .stitch-workspace-tab.active {
-    background-color: var(--mb-forest, var(--color-primary));
+    background-color: var(--color-primary);
     color: var(--color-text-inverse);
     box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 25%, transparent);
   }
@@ -336,8 +336,8 @@
     gap: 0.75rem;
     padding: 0.85rem 1.25rem;
     border-radius: 1.25rem;
-    background-color: var(--sb-surface-card);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   }
 
@@ -364,17 +364,17 @@
     cursor: pointer;
     border: none;
     background: transparent;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
     transition: all 0.15s ease;
   }
 
   .stitch-filter-chip:hover {
-    background-color: var(--sb-canvas-subtle);
-    color: var(--sb-text-main);
+    background-color: var(--color-surface-sunken);
+    color: var(--color-text);
   }
 
   .stitch-filter-chip.active {
-    background-color: var(--mb-forest, var(--color-primary));
+    background-color: var(--color-primary);
     color: var(--color-text-inverse);
     font-weight: 700;
   }
@@ -391,7 +391,7 @@
     gap: 0.35rem;
     padding: 0.4rem 0.95rem;
     border-radius: 9999px;
-    background-color: var(--mb-forest, var(--color-primary));
+    background-color: var(--color-primary);
     color: var(--color-text-inverse);
     font-size: 0.78rem;
     font-weight: 700;
@@ -414,8 +414,8 @@
   .stitch-route-card {
     padding: 1.4rem;
     border-radius: 1.5rem;
-    background-color: var(--sb-surface-card);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
     box-shadow: 0 4px 20px color-mix(in srgb, var(--color-primary) 4%, transparent);
     display: flex;
     flex-direction: column;
@@ -441,7 +441,7 @@
     border-radius: 1.15rem;
     overflow: hidden;
     flex-shrink: 0;
-    background: var(--sb-deep-forest);
+    background: var(--color-surface-inverse);
   }
 
   @media (min-width: 768px) {
@@ -456,7 +456,7 @@
     left: 0.65rem;
     padding: 0.25rem 0.65rem;
     border-radius: 9999px;
-    background-color: var(--sb-primary-container);
+    background-color: var(--color-brand-hover);
     color: var(--color-text-inverse);
     font-family: "Inter", sans-serif;
     font-size: 10px;
@@ -469,14 +469,14 @@
   }
 
   .stitch-thumb-badge.free {
-    background-color: var(--sb-secondary-container);
-    color: var(--sb-on-secondary-container);
+    background-color: var(--color-surface-brand-soft);
+    color: var(--color-brand);
   }
 
   .stitch-thumb-badge.draft {
-    background-color: var(--sb-canvas-subtle);
-    color: var(--sb-text-main);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface-sunken);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-subtle);
   }
 
   .stitch-route-info-col {
@@ -499,7 +499,7 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    color: var(--sb-secondary);
+    color: var(--color-brand);
     font-family: "Inter", sans-serif;
     font-size: 11px;
     font-weight: 700;
@@ -518,7 +518,7 @@
 
   .stitch-route-desc {
     font-size: 0.84rem;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
     line-height: 1.45;
     margin: 0;
     display: -webkit-box;
@@ -531,7 +531,7 @@
     align-items: center;
     justify-content: space-between;
     padding-top: 0.75rem;
-    border-top: 1px solid var(--sb-border-subtle);
+    border-top: 1px solid var(--color-border-subtle);
   }
 
   .stitch-route-btn-group {
@@ -548,9 +548,9 @@
     border-radius: 9999px;
     font-size: 0.78rem;
     font-weight: 700;
-    border: 1px solid var(--sb-border-subtle);
-    background-color: var(--sb-canvas-subtle);
-    color: var(--sb-text-main);
+    border: 1px solid var(--color-border-subtle);
+    background-color: var(--color-surface-sunken);
+    color: var(--color-text);
     text-decoration: none;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -567,14 +567,14 @@
   }
 
   .stitch-route-btn.primary:hover {
-    background-color: var(--sb-primary-container);
+    background-color: var(--color-brand-hover);
   }
   /* Activity Feed Card */
   .stitch-activity-card {
     padding: 1.5rem;
     border-radius: 1.5rem;
-    background-color: var(--sb-surface-card);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     display: flex;
     flex-direction: column;
@@ -586,7 +586,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    border-bottom: 1px solid var(--sb-border-subtle);
+    border-bottom: 1px solid var(--color-border-subtle);
   }
 
   .stitch-activity-item:last-child {
@@ -605,8 +605,8 @@
     width: 2.25rem;
     height: 2.25rem;
     border-radius: 9999px;
-    background-color: var(--sb-secondary-container);
-    color: var(--sb-on-secondary-container);
+    background-color: var(--color-surface-brand-soft);
+    color: var(--color-brand);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -614,13 +614,13 @@
   }
 
   .stitch-activity-icon-box.gold {
-    background-color: var(--sb-mint-subtle);
-    color: var(--sb-secondary);
+    background-color: var(--color-surface-brand);
+    color: var(--color-brand);
   }
 
   .stitch-activity-text {
     font-size: 0.83rem;
-    color: var(--sb-text-main);
+    color: var(--color-text);
     margin: 0;
   }
 
@@ -628,7 +628,7 @@
     font-family: "Inter", sans-serif;
     font-size: 10px;
     font-weight: 700;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
   }
 
   /* Tab Notification Badge */
@@ -636,7 +636,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--sb-emerald-accent);
+    background-color: var(--color-accent);
     color: #042f20;
     font-size: 10px;
     font-weight: 800;
@@ -653,7 +653,7 @@
     padding: 3.5rem 1.5rem;
     background: color-mix(in srgb, var(--color-surface) 2%, transparent);
     border-radius: 1.5rem;
-    border: 1px dashed var(--sb-border-subtle);
+    border: 1px dashed var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -662,7 +662,7 @@
 
   .stitch-empty-icon {
     font-size: 44px;
-    color: var(--sb-secondary);
+    color: var(--color-brand);
     opacity: 0.8;
   }
 
@@ -675,7 +675,7 @@
 
   .stitch-empty-desc {
     font-size: 0.875rem;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
     max-width: 440px;
     margin: 0 auto;
     line-height: 1.5;
@@ -719,8 +719,8 @@
   .stitch-pool-card {
     padding: 1.25rem;
     border-radius: 1.25rem;
-    background-color: var(--sb-surface-card);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
     box-shadow: 0 4px 16px color-mix(in srgb, var(--color-primary) 3%, transparent);
     display: flex;
     flex-direction: column;
@@ -745,8 +745,8 @@
     gap: 0.3rem;
     padding: 0.2rem 0.6rem;
     border-radius: 9999px;
-    background-color: var(--sb-secondary-container);
-    color: var(--sb-on-secondary-container);
+    background-color: var(--color-surface-brand-soft);
+    color: var(--color-brand);
     font-family: "Inter", sans-serif;
     font-size: 11px;
     font-weight: 700;
@@ -755,7 +755,7 @@
   .stitch-pool-delete-btn {
     background: transparent;
     border: none;
-    color: var(--sb-text-outline);
+    color: var(--color-border-control);
     cursor: pointer;
     padding: 0.25rem;
     border-radius: 9999px;
@@ -766,7 +766,7 @@
   }
 
   .stitch-pool-delete-btn:hover {
-    background-color: var(--sb-canvas-subtle);
+    background-color: var(--color-surface-sunken);
     color: var(--color-danger-icon);
   }
 
@@ -780,15 +780,15 @@
 
   .stitch-pool-card-address {
     font-size: 0.8rem;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
     margin: 0;
     line-height: 1.4;
   }
 
   .stitch-pool-card-notes {
     font-size: 0.78rem;
-    color: var(--sb-text-outline);
-    background-color: var(--sb-canvas-subtle);
+    color: var(--color-border-control);
+    background-color: var(--color-surface-sunken);
     padding: 0.4rem 0.65rem;
     border-radius: 0.65rem;
     margin: 0;
@@ -798,7 +798,7 @@
   .stitch-pool-card-footer {
     margin-top: auto;
     padding-top: 0.75rem;
-    border-top: 1px solid var(--sb-border-subtle);
+    border-top: 1px solid var(--color-border-subtle);
   }
 
   /* ==========================================================================
@@ -831,8 +831,8 @@
   .stitch-collection-card {
     padding: 1.4rem;
     border-radius: 1.5rem;
-    background-color: var(--sb-surface-card);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
     box-shadow: 0 4px 16px color-mix(in srgb, var(--color-primary) 3%, transparent);
     display: flex;
     flex-direction: column;
@@ -855,8 +855,8 @@
     width: 44px;
     height: 44px;
     border-radius: 1rem;
-    background: var(--sb-primary-container);
-    color: var(--sb-mint-glow);
+    background: var(--color-brand-hover);
+    color: var(--color-link-inverse);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -871,7 +871,7 @@
 
   .stitch-collection-desc {
     font-size: 0.83rem;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
     line-height: 1.45;
     margin: 0;
     flex: 1;
@@ -882,7 +882,7 @@
     align-items: center;
     justify-content: space-between;
     padding-top: 0.75rem;
-    border-top: 1px solid var(--sb-border-subtle);
+    border-top: 1px solid var(--color-border-subtle);
   }
 
   .stitch-collection-count-pill {
@@ -891,7 +891,7 @@
     gap: 0.3rem;
     font-size: 0.78rem;
     font-weight: 700;
-    color: var(--sb-secondary);
+    color: var(--color-brand);
   }
 
   /* ==========================================================================
@@ -918,8 +918,8 @@
   .stitch-analytics-metric-card {
     padding: 1.35rem 1.5rem;
     border-radius: 1.35rem;
-    background-color: var(--sb-surface-card);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
     box-shadow: 0 4px 16px color-mix(in srgb, var(--color-primary) 3%, transparent);
     display: flex;
     align-items: center;
@@ -930,8 +930,8 @@
     width: 44px;
     height: 44px;
     border-radius: 1rem;
-    background: var(--sb-mint-subtle);
-    color: var(--sb-secondary);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -954,7 +954,7 @@
 
   .stitch-analytics-label {
     font-size: 0.78rem;
-    color: var(--sb-text-muted);
+    color: var(--color-text-muted);
     font-weight: 600;
   }
 
@@ -973,8 +973,8 @@
   .stitch-analytics-card {
     padding: 1.5rem;
     border-radius: 1.5rem;
-    background-color: var(--sb-surface-card);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
     box-shadow: 0 4px 16px color-mix(in srgb, var(--color-primary) 3%, transparent);
     display: flex;
     flex-direction: column;
@@ -998,8 +998,8 @@
     gap: 0.85rem;
     padding: 0.85rem;
     border-radius: 1rem;
-    background-color: var(--sb-canvas-subtle);
-    border: 1px solid var(--sb-border-subtle);
+    background-color: var(--color-surface-sunken);
+    border: 1px solid var(--color-border-subtle);
   }
 
   .stitch-badge-icon {
@@ -1018,8 +1018,8 @@
   }
 
   .stitch-badge-icon.mint {
-    background-color: var(--sb-mint-subtle);
-    color: var(--sb-secondary);
+    background-color: var(--color-surface-brand);
+    color: var(--color-brand);
   }
 
   /* ==========================================================================
@@ -1046,7 +1046,7 @@
   }
 
   .stitch-activity-item.unread {
-    background-color: var(--sb-mint-subtle);
+    background-color: var(--color-surface-brand);
     border-radius: 1rem;
     padding: 0.85rem 1rem;
     margin: 0.25rem 0;
@@ -1056,7 +1056,7 @@
     width: 8px;
     height: 8px;
     border-radius: 9999px;
-    background-color: var(--sb-emerald-accent);
+    background-color: var(--color-accent);
     display: inline-block;
   }
 

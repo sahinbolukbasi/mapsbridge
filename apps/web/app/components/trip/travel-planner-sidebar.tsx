@@ -16,6 +16,7 @@ import { isRoutePlan, type MultiAgentResponse } from "../../lib/ai/types";
 import { GooglePlaceInfo } from "./google-place-info";
 import { interactionTracker } from "../../lib/analytics/tracker";
 import { exportTripToGoogleMaps, ManualPinModal } from "../../features/trip-planner";
+import "../../maps/maps-layout.css";
 
 export interface TravelPlannerSidebarProps {
   planner: ReturnType<typeof useTravelPlanner>;
@@ -609,7 +610,7 @@ export function TravelPlannerSidebar({
           onClick={() => setPanelCollapsed(false)}
           title="Harita Planını Aç"
         >
-          <span className="material-symbols-outlined text-[18px]">left_panel_open</span>
+          <span className="material-symbols-outlined">left_panel_open</span>
           <span className="rail-label">Aç</span>
         </button>
 
@@ -621,7 +622,7 @@ export function TravelPlannerSidebar({
           onClick={() => setPanelCollapsed(false)}
           title="Harita Planı"
         >
-          <span className="material-symbols-outlined text-[18px] text-[#10B981]">explore</span>
+          <span className="material-symbols-outlined">explore</span>
           <span className="rail-label">Plan</span>
         </button>
       </div>
@@ -704,7 +705,7 @@ export function TravelPlannerSidebar({
                       onClick={() => handleCopyShare(selectedPin)}
                       title="Konumu Paylaş"
                     >
-                      <span className="material-symbols-outlined text-[17px]">share</span>
+                      <span className="material-symbols-outlined">share</span>
                       <span>Paylaş</span>
                     </button>
 
@@ -735,7 +736,7 @@ export function TravelPlannerSidebar({
                       }}
                       title="Kayıtlı Adreslerime Ekle"
                     >
-                      <span className="material-symbols-outlined text-[17px]">
+                      <span className="material-symbols-outlined">
                         {generalPins.some(
                           (p) => p.id === selectedPin.id || p.label === selectedPin.label,
                         )

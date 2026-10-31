@@ -1,8 +1,8 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
   .ai-promo-wrapper {
-    background: var(--promo-canvas-base);
-    color: var(--promo-on-surface);
+    background: var(--color-bg);
+    color: var(--color-text);
     min-height: 100vh;
     width: 100%;
     font-family:
@@ -20,7 +20,7 @@
     background: linear-gradient(
       180deg,
       color-mix(in srgb, var(--color-surface-brand) 65%, transparent) 0%,
-      var(--promo-canvas-base) 100%
+      var(--color-bg) 100%
     );
     padding: 3.5rem 1.5rem 2.5rem;
     text-align: center;
@@ -41,9 +41,9 @@
     gap: 0.5rem;
     padding: 0.45rem 1.15rem;
     border-radius: 9999px;
-    background: var(--promo-mint-subtle);
+    background: var(--color-surface-brand);
     border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
-    color: var(--promo-primary);
+    color: var(--color-text-brand);
     font-family: "Inter", system-ui, sans-serif;
     font-size: 11.5px;
     font-weight: 700;
@@ -56,7 +56,7 @@
     width: 8px;
     height: 8px;
     border-radius: 9999px;
-    background: var(--promo-emerald);
+    background: var(--color-accent);
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 70%, transparent);
     animation: promoPulse 2s infinite;
   }
@@ -79,14 +79,14 @@
   .ai-promo-hero-title {
     font-size: clamp(2rem, 4vw, 3.4rem);
     font-weight: 800;
-    color: var(--promo-deep-forest);
+    color: var(--color-surface-inverse);
     line-height: 1.15;
     letter-spacing: -0.025em;
     margin: 0;
   }
 
   .ai-promo-hero-highlight {
-    color: var(--promo-secondary);
+    color: var(--color-brand);
     text-decoration: underline;
     text-decoration-color: color-mix(in srgb, var(--color-accent-strong) 50%, transparent);
     text-decoration-style: wavy;
@@ -94,7 +94,7 @@
 
   .ai-promo-hero-desc {
     font-size: clamp(1rem, 1.5vw, 1.15rem);
-    color: var(--promo-on-surface-variant);
+    color: var(--color-text-muted);
     line-height: 1.6;
     max-width: 680px;
     margin: 0;
@@ -113,14 +113,14 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--promo-surface-card);
+    background: var(--color-surface);
     padding: 0.4rem 0.95rem;
     border-radius: 9999px;
     font-size: 12.5px;
     font-weight: 600;
-    color: var(--promo-on-surface-variant);
+    color: var(--color-text-muted);
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
   }
 
   /* 2. Central Interactive Workspace */
@@ -145,10 +145,10 @@
 
   /* Left: Interactive Chat Simulation Card */
   .ai-promo-chat-card {
-    background: var(--promo-surface-card);
+    background: var(--color-surface);
     border-radius: 24px;
     box-shadow: 0 16px 40px -12px color-mix(in srgb, var(--color-primary) 12%, transparent);
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -157,11 +157,11 @@
 
   .ai-promo-chat-header {
     padding: 1rem 1.5rem;
-    background: var(--promo-surface-card);
+    background: var(--color-surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--promo-border-subtle);
+    border-bottom: 1px solid var(--color-border-subtle);
     z-index: 5;
   }
 
@@ -179,8 +179,8 @@
     width: 42px;
     height: 42px;
     border-radius: 14px;
-    background: var(--promo-mint-subtle);
-    color: var(--promo-primary-container);
+    background: var(--color-surface-brand);
+    color: var(--color-brand-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -192,9 +192,9 @@
     right: -2px;
     width: 12px;
     height: 12px;
-    background: var(--promo-emerald);
+    background: var(--color-accent);
     border-radius: 9999px;
-    border: 2px solid var(--promo-surface-card);
+    border: 2px solid var(--color-surface);
   }
 
   .ai-promo-bot-meta {
@@ -212,7 +212,7 @@
   .ai-promo-bot-name {
     font-size: 15px;
     font-weight: 700;
-    color: var(--promo-deep-forest);
+    color: var(--color-surface-inverse);
   }
 
   .ai-promo-bot-version {
@@ -220,13 +220,13 @@
     font-weight: 700;
     padding: 1px 6px;
     border-radius: 6px;
-    background: var(--promo-secondary-container);
-    color: var(--promo-secondary);
+    background: var(--color-surface-brand-soft);
+    color: var(--color-brand);
   }
 
   .ai-promo-bot-subline {
     font-size: 11.5px;
-    color: var(--promo-emerald);
+    color: var(--color-success);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -260,8 +260,8 @@
     width: 34px;
     height: 34px;
     border-radius: 12px;
-    background: var(--promo-mint-subtle);
-    color: var(--promo-emerald);
+    background: var(--color-surface-brand);
+    color: var(--color-accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -271,12 +271,12 @@
   }
 
   .ai-promo-avatar-mini.user-avatar {
-    background: var(--promo-secondary);
+    background: var(--color-brand);
     color: var(--color-text-inverse);
   }
 
   .ai-promo-bubble-content {
-    background: var(--promo-surface-card);
+    background: var(--color-surface);
     padding: 1rem 1.2rem;
     border-radius: 18px;
     border-top-left-radius: 4px;
@@ -286,12 +286,12 @@
     gap: 0.65rem;
     font-size: 14px;
     line-height: 1.6;
-    color: var(--promo-deep-forest);
-    border: 1px solid var(--promo-border-subtle);
+    color: var(--color-surface-inverse);
+    border: 1px solid var(--color-border-subtle);
   }
 
   .ai-promo-bubble-content.user-bubble {
-    background: var(--promo-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     border-top-left-radius: 18px;
     border-top-right-radius: 4px;
@@ -309,9 +309,9 @@
   .ai-promo-chip-btn {
     padding: 0.4rem 0.85rem;
     border-radius: 9999px;
-    background: var(--promo-canvas-subtle);
-    border: 1px solid var(--promo-border-subtle);
-    color: var(--promo-deep-forest);
+    background: var(--color-surface-sunken);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-surface-inverse);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -320,21 +320,21 @@
   }
 
   .ai-promo-chip-btn:hover {
-    background: var(--promo-mint-subtle);
-    color: var(--promo-primary);
+    background: var(--color-surface-brand);
+    color: var(--color-text-brand);
     border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
     transform: translateY(-1px);
   }
 
   /* Micro-Route Generated Card inside Chat */
   .ai-promo-micro-card {
-    background: var(--promo-canvas-subtle);
+    background: var(--color-surface-sunken);
     border-radius: 14px;
     padding: 0.85rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
   }
 
   .ai-promo-micro-header {
@@ -352,7 +352,7 @@
   .ai-promo-micro-badge {
     padding: 2px 8px;
     border-radius: 9999px;
-    background: var(--promo-emerald);
+    background: var(--color-success);
     color: var(--color-on-primary);
     font-size: 11px;
     font-weight: 800;
@@ -364,7 +364,7 @@
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    color: var(--promo-on-surface-variant);
+    color: var(--color-text-muted);
   }
 
   .ai-promo-micro-actions {
@@ -376,8 +376,8 @@
   /* Bottom Chat Composer Dock */
   .ai-promo-chat-dock {
     padding: 0.85rem 1.25rem;
-    background: var(--promo-surface-card);
-    border-top: 1px solid var(--promo-border-subtle);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
@@ -397,9 +397,9 @@
     gap: 4px;
     padding: 0.3rem 0.65rem;
     border-radius: 9999px;
-    background: var(--promo-canvas-subtle);
+    background: var(--color-surface-sunken);
     font-size: 11.5px;
-    color: var(--promo-on-surface-variant);
+    color: var(--color-text-muted);
     white-space: nowrap;
   }
 
@@ -407,7 +407,7 @@
     background: transparent;
     border: none;
     font-weight: 600;
-    color: var(--promo-deep-forest);
+    color: var(--color-surface-inverse);
     outline: none;
     cursor: pointer;
   }
@@ -415,17 +415,17 @@
   .ai-promo-input-bar {
     display: flex;
     align-items: center;
-    background: var(--promo-canvas-subtle);
+    background: var(--color-surface-sunken);
     border-radius: 16px;
     padding: 4px 6px 4px 12px;
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     transition: all 0.2s ease;
   }
 
   .ai-promo-input-bar:focus-within {
-    border-color: var(--promo-emerald);
+    border-color: var(--color-accent);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
-    background: var(--promo-surface-card);
+    background: var(--color-surface);
   }
 
   .ai-promo-input-field {
@@ -434,7 +434,7 @@
     border: none;
     outline: none;
     font-size: 13.5px;
-    color: var(--promo-on-surface);
+    color: var(--color-text);
     padding: 8px 6px;
   }
 
@@ -442,7 +442,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: linear-gradient(135deg, var(--promo-primary-container), var(--promo-secondary));
+    background: linear-gradient(135deg, var(--color-brand-hover), var(--color-brand));
     color: var(--color-text-inverse);
     padding: 0.6rem 1.15rem;
     border-radius: 12px;
@@ -461,10 +461,10 @@
 
   /* Right: Real-time Live Generated Route Preview */
   .ai-promo-route-card {
-    background: var(--promo-surface-card);
+    background: var(--color-surface);
     border-radius: 24px;
     box-shadow: 0 16px 40px -12px color-mix(in srgb, var(--color-primary) 12%, transparent);
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -475,13 +475,13 @@
     padding: 1rem 1.5rem;
     background: linear-gradient(
       90deg,
-      var(--promo-surface-card) 0%,
-      var(--promo-canvas-subtle) 100%
+      var(--color-surface) 0%,
+      var(--color-surface-sunken) 100%
     );
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--promo-border-subtle);
+    border-bottom: 1px solid var(--color-border-subtle);
   }
 
   .ai-promo-map-banner {
@@ -505,7 +505,7 @@
     inset: 0;
     background: linear-gradient(
       0deg,
-      var(--promo-surface-card) 0%,
+      var(--color-surface) 0%,
       rgba(0, 0, 0, 0.05) 50%,
       rgba(0, 0, 0, 0.2) 100%
     );
@@ -530,11 +530,11 @@
 
   .ai-promo-day-tabs {
     padding: 0.75rem 1.25rem 0.5rem;
-    background: var(--promo-surface-card);
+    background: var(--color-surface);
     display: flex;
     align-items: center;
     gap: 6px;
-    border-bottom: 1px solid var(--promo-border-subtle);
+    border-bottom: 1px solid var(--color-border-subtle);
     overflow-x: auto;
   }
 
@@ -545,14 +545,14 @@
     font-weight: 700;
     border: none;
     cursor: pointer;
-    background: var(--promo-canvas-subtle);
-    color: var(--promo-on-surface-variant);
+    background: var(--color-surface-sunken);
+    color: var(--color-text-muted);
     transition: all 0.2s ease;
     white-space: nowrap;
   }
 
   .ai-promo-day-tab-btn.active {
-    background: var(--promo-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     box-shadow: 0 2px 6px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
@@ -580,8 +580,8 @@
     width: 2px;
     background: repeating-linear-gradient(
       to bottom,
-      var(--promo-secondary-container),
-      var(--promo-secondary-container) 4px,
+      var(--color-surface-brand-soft),
+      var(--color-surface-brand-soft) 4px,
       transparent 4px,
       transparent 8px
     );
@@ -594,24 +594,24 @@
     width: 20px;
     height: 20px;
     border-radius: 9999px;
-    background: var(--promo-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     font-size: 10.5px;
     font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 0 3px var(--promo-mint-subtle);
+    box-shadow: 0 0 0 3px var(--color-surface-brand);
   }
 
   .ai-promo-stop-content {
-    background: var(--promo-canvas-subtle);
+    background: var(--color-surface-sunken);
     border-radius: 14px;
     padding: 0.85rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
   }
 
   .ai-promo-stop-topline {
@@ -624,13 +624,13 @@
     font-size: 10.5px;
     font-weight: 800;
     letter-spacing: 0.05em;
-    color: var(--promo-secondary);
+    color: var(--color-brand);
     text-transform: uppercase;
   }
 
   .ai-promo-stop-slot {
     font-size: 11px;
-    color: var(--promo-outline);
+    color: var(--color-text-muted);
     display: flex;
     align-items: center;
     gap: 3px;
@@ -639,13 +639,13 @@
   .ai-promo-stop-title {
     font-size: 14.5px;
     font-weight: 700;
-    color: var(--promo-deep-forest);
+    color: var(--color-surface-inverse);
     margin: 0;
   }
 
   .ai-promo-stop-desc {
     font-size: 12.5px;
-    color: var(--promo-on-surface-variant);
+    color: var(--color-text-muted);
     line-height: 1.5;
     margin: 0;
   }
@@ -656,8 +656,8 @@
     gap: 4px;
     padding: 2px 7px;
     border-radius: 6px;
-    background: var(--promo-mint-subtle);
-    color: var(--promo-primary);
+    background: var(--color-surface-brand);
+    color: var(--color-text-brand);
     font-size: 11px;
     font-weight: 600;
     width: fit-content;
@@ -665,8 +665,8 @@
 
   .ai-promo-route-dock {
     padding: 1rem 1.25rem;
-    background: var(--promo-surface-card);
-    border-top: 1px solid var(--promo-border-subtle);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
@@ -679,7 +679,7 @@
     gap: 8px;
     width: 100%;
     padding: 0.85rem 1rem;
-    background: var(--promo-primary-container);
+    background: var(--color-brand-hover);
     color: var(--color-text-inverse);
     border-radius: 14px;
     font-size: 14px;
@@ -692,7 +692,7 @@
   }
 
   .ai-promo-main-action-btn:hover {
-    background: var(--promo-secondary);
+    background: var(--color-brand);
     transform: translateY(-1px);
   }
 
@@ -709,9 +709,9 @@
     gap: 6px;
     padding: 0.6rem 0.75rem;
     border-radius: 12px;
-    background: var(--promo-canvas-subtle);
-    border: 1px solid var(--promo-border-subtle);
-    color: var(--promo-deep-forest);
+    background: var(--color-surface-sunken);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-surface-inverse);
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
@@ -720,15 +720,15 @@
   }
 
   .ai-promo-sub-btn:hover {
-    background: var(--promo-mint-subtle);
-    color: var(--promo-primary);
+    background: var(--color-surface-brand);
+    color: var(--color-text-brand);
   }
 
   /* 3. Bottom Features & Capabilities (4 Pillars) */
   .ai-promo-features-sec {
-    background: var(--promo-surface-card);
+    background: var(--color-surface);
     padding: 4.5rem 1.5rem;
-    border-top: 1px solid var(--promo-border-subtle);
+    border-top: 1px solid var(--color-border-subtle);
   }
 
   .ai-promo-features-inner {
@@ -761,20 +761,20 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--promo-secondary);
+    color: var(--color-brand);
   }
 
   .ai-promo-features-title {
     font-size: clamp(1.8rem, 3vw, 2.4rem);
     font-weight: 800;
-    color: var(--promo-deep-forest);
+    color: var(--color-surface-inverse);
     letter-spacing: -0.02em;
     margin: 0.25rem 0 0.5rem;
   }
 
   .ai-promo-features-sub {
     font-size: 15px;
-    color: var(--promo-on-surface-variant);
+    color: var(--color-text-muted);
     max-width: 580px;
     line-height: 1.6;
     margin: 0;
@@ -785,9 +785,9 @@
     align-items: center;
     gap: 1.5rem;
     padding: 0.85rem 1.5rem;
-    background: var(--promo-canvas-subtle);
+    background: var(--color-surface-sunken);
     border-radius: 18px;
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     flex-shrink: 0;
   }
 
@@ -799,19 +799,19 @@
   .ai-promo-metric-number {
     font-size: 22px;
     font-weight: 800;
-    color: var(--promo-deep-forest);
+    color: var(--color-surface-inverse);
     line-height: 1.1;
   }
 
   .ai-promo-metric-label {
     font-size: 11.5px;
-    color: var(--promo-outline);
+    color: var(--color-text-muted);
   }
 
   .ai-promo-metric-divider {
     width: 1px;
     height: 36px;
-    background: var(--promo-border-subtle);
+    background: var(--color-border-subtle);
   }
 
   /* 4 Pillar Grid */
@@ -823,9 +823,9 @@
 
   .ai-promo-pillar-card {
     padding: 1.75rem;
-    background: var(--promo-canvas-base);
+    background: var(--color-bg);
     border-radius: 20px;
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -834,7 +834,7 @@
   }
 
   .ai-promo-pillar-card:hover {
-    background: var(--promo-canvas-subtle);
+    background: var(--color-surface-sunken);
     transform: translateY(-3px);
     box-shadow: 0 12px 28px -8px color-mix(in srgb, var(--color-primary) 8%, transparent);
   }
@@ -843,8 +843,8 @@
     width: 48px;
     height: 48px;
     border-radius: 16px;
-    background: var(--promo-mint-subtle);
-    color: var(--promo-primary-container);
+    background: var(--color-surface-brand);
+    color: var(--color-brand-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -859,13 +859,13 @@
   .ai-promo-pillar-title {
     font-size: 16.5px;
     font-weight: 700;
-    color: var(--promo-deep-forest);
+    color: var(--color-surface-inverse);
     margin: 0 0 0.5rem;
   }
 
   .ai-promo-pillar-desc {
     font-size: 13px;
-    color: var(--promo-on-surface-variant);
+    color: var(--color-text-muted);
     line-height: 1.6;
     margin: 0;
   }
@@ -874,7 +874,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: var(--promo-emerald);
+    color: var(--color-success);
     font-size: 12px;
     font-weight: 700;
   }
@@ -900,10 +900,10 @@
   }
 
   .ai-promo-template-card {
-    background: var(--promo-canvas-base);
+    background: var(--color-bg);
     padding: 1.25rem;
     border-radius: 18px;
-    border: 1px solid var(--promo-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -914,7 +914,7 @@
   }
 
   .ai-promo-template-card:hover {
-    background: var(--promo-mint-subtle);
+    background: var(--color-surface-brand);
     border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
     transform: translateY(-2px);
   }
@@ -923,8 +923,8 @@
     width: 36px;
     height: 36px;
     border-radius: 12px;
-    background: var(--promo-surface-card);
-    color: var(--promo-primary-container);
+    background: var(--color-surface);
+    color: var(--color-brand-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -935,13 +935,13 @@
   .ai-promo-template-title {
     font-size: 14.5px;
     font-weight: 700;
-    color: var(--promo-deep-forest);
+    color: var(--color-surface-inverse);
     margin: 0;
   }
 
   .ai-promo-template-desc {
     font-size: 12px;
-    color: var(--promo-on-surface-variant);
+    color: var(--color-text-muted);
     margin: 0.35rem 0 0;
     line-height: 1.4;
   }
@@ -952,7 +952,7 @@
     gap: 4px;
     font-size: 12px;
     font-weight: 700;
-    color: var(--promo-secondary);
+    color: var(--color-brand);
     margin-top: 0.75rem;
   }
 

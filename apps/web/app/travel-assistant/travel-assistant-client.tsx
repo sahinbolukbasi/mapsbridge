@@ -958,7 +958,7 @@ export default function AIPage() {
                           style={{
                             fontSize: "16px",
                             flexShrink: 0,
-                            color: s.id === activeId ? "var(--mb-emerald)" : "var(--mb-text-muted)",
+                            color: s.id === activeId ? "var(--color-accent)" : "var(--color-text-subtle)",
                           }}
                         >
                           {s.id === activeId ? "chat_bubble" : "history"}
@@ -1284,7 +1284,7 @@ export default function AIPage() {
                             style={{
                               fontSize: "11px",
                               fontWeight: 700,
-                              color: "var(--mb-emerald)",
+                              color: "var(--color-accent)",
                               marginBottom: "0.25rem",
                             }}
                           >
@@ -1410,7 +1410,7 @@ export default function AIPage() {
                         }}
                       >
                         <span
-                          style={{ fontSize: "11px", fontWeight: 700, color: "var(--mb-emerald)" }}
+                          style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-accent)" }}
                         >
                           📍 Yakındaki Mekanlar:
                         </span>
@@ -1865,8 +1865,8 @@ export default function AIPage() {
                                         fontSize: "10.5px",
                                         padding: "2px 6px",
                                         borderRadius: "6px",
-                                        backgroundColor: "var(--mb-mint)",
-                                        color: "var(--mb-emerald)",
+                                        backgroundColor: "var(--color-surface-brand)",
+                                        color: "var(--color-accent)",
                                         fontWeight: 700,
                                       }}
                                     >
@@ -1952,7 +1952,7 @@ export default function AIPage() {
                                     {stay.description}
                                   </p>
                                   {stay.pros?.length > 0 && (
-                                    <small style={{ color: "var(--mb-emerald)" }}>
+                                    <small style={{ color: "var(--color-accent)" }}>
                                       ✓ {stay.pros.join(" · ")}
                                     </small>
                                   )}
@@ -1990,7 +1990,7 @@ export default function AIPage() {
                                   </p>
                                   {tip.estimatedCost && (
                                     <small
-                                      style={{ color: "var(--mb-forest-dark)", fontWeight: 600 }}
+                                      style={{ color: "var(--color-surface-inverse)", fontWeight: 600 }}
                                     >
                                       Tahmini Ücret: {tip.estimatedCost}
                                     </small>
@@ -2004,9 +2004,9 @@ export default function AIPage() {
                                   fontSize: "12px",
                                   marginTop: "6px",
                                   padding: "6px",
-                                  backgroundColor: "var(--mb-mint)",
+                                  backgroundColor: "var(--color-surface-brand)",
                                   borderRadius: "6px",
-                                  color: "var(--mb-forest-dark)",
+                                  color: "var(--color-surface-inverse)",
                                 }}
                               >
                                 💳 <strong>Kart Önerisi:</strong>{" "}
@@ -2074,7 +2074,7 @@ export default function AIPage() {
                                   <p style={{ fontSize: "12px", margin: "3px 0" }}>
                                     {gem.description}
                                   </p>
-                                  <small style={{ color: "var(--mb-emerald)" }}>
+                                  <small style={{ color: "var(--color-accent)" }}>
                                     ✨ Özel: {gem.highlight}
                                   </small>
                                   <div style={{ marginTop: "6px" }}>
@@ -2162,12 +2162,12 @@ export default function AIPage() {
                                   style={{
                                     fontSize: "14px",
                                     fontWeight: 700,
-                                    color: "var(--mb-emerald)",
+                                    color: "var(--color-accent)",
                                   }}
                                 >
                                   Uçuş Fiyatları
                                 </div>
-                                <div style={{ fontSize: "11px", color: "var(--mb-text-muted)" }}>
+                                <div style={{ fontSize: "11px", color: "var(--color-text-subtle)" }}>
                                   Travelpayouts ·{" "}
                                   {new Date(session.flightPrices.checkedAt).toLocaleDateString(
                                     "tr-TR",
@@ -2240,7 +2240,7 @@ export default function AIPage() {
                                       >
                                         <strong
                                           style={{
-                                            color: "var(--mb-emerald)",
+                                            color: "var(--color-accent)",
                                             fontSize: "18px",
                                             lineHeight: 1,
                                           }}
@@ -2253,7 +2253,7 @@ export default function AIPage() {
                                             padding: "2px 8px",
                                             borderRadius: "6px",
                                             background: "color-mix(in srgb, var(--color-accent) 15%, transparent)",
-                                            color: "var(--mb-emerald)",
+                                            color: "var(--color-accent)",
                                             fontWeight: 600,
                                           }}
                                         >
@@ -2293,7 +2293,7 @@ export default function AIPage() {
                           <p
                             style={{
                               fontSize: "10px",
-                              color: "var(--mb-text-muted)",
+                              color: "var(--color-text-subtle)",
                               marginTop: "8px",
                               lineHeight: 1.4,
                               textAlign: "center",
@@ -2354,7 +2354,7 @@ export default function AIPage() {
                                       ? "#f59e0b"
                                       : session.travelAdvisory.level === "some_risk"
                                         ? "#fbbf24"
-                                        : "var(--mb-emerald)",
+                                        : "var(--color-accent)",
                               }}
                             >
                               {session.travelAdvisory.level === "avoid"
@@ -2420,7 +2420,7 @@ export default function AIPage() {
                           <p
                             style={{
                               fontSize: "10.5px",
-                              color: "var(--mb-text-muted)",
+                              color: "var(--color-text-subtle)",
                               lineHeight: 1.5,
                               marginTop: "8px",
                             }}
@@ -2457,7 +2457,7 @@ export default function AIPage() {
                           <p
                             style={{
                               fontSize: "10px",
-                              color: "var(--mb-text-muted)",
+                              color: "var(--color-text-subtle)",
                               marginTop: "6px",
                             }}
                           >

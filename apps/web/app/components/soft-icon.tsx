@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import "./soft-icon-layout.css";
 
 export type SoftIconName =
   | "compass"
@@ -360,7 +361,7 @@ export function SoftBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide transition-all ${className}`}
+      className={`si-1 px-2.5 tracking-wide ${className}`}
       style={{
         backgroundColor: v.bg,
         color: v.text,

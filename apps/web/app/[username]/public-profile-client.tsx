@@ -561,7 +561,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
               <span className="pub-pulse-dot" />
               <span
                 className="material-symbols-outlined"
-                style={{ fontSize: "18px", color: "var(--stitch-mint-glow)" }}
+                style={{ fontSize: "18px", color: "var(--color-link-inverse)" }}
               >
                 visibility
               </span>
@@ -589,7 +589,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
             <div className="pub-floating-location-chip" data-surface="inverse">
               <span
                 className="material-symbols-outlined"
-                style={{ fontSize: "16px", color: "var(--stitch-mint-glow)" }}
+                style={{ fontSize: "16px", color: "var(--color-link-inverse)" }}
               >
                 photo_camera
               </span>
@@ -623,7 +623,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span className="pub-badge-pill pro">
                         <span
                           className="material-symbols-outlined fill"
-                          style={{ fontSize: "13px", color: "var(--stitch-emerald-accent)" }}
+                          style={{ fontSize: "13px", color: "var(--color-accent)" }}
                         >
                           workspace_premium
                         </span>
@@ -632,7 +632,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span className="pub-badge-pill verified">
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "13px", color: "var(--stitch-secondary)" }}
+                          style={{ fontSize: "13px", color: "var(--color-brand)" }}
                         >
                           verified
                         </span>
@@ -645,7 +645,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span className="pub-meta-item">
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "16px", color: "var(--stitch-emerald-accent)" }}
+                          style={{ fontSize: "16px", color: "var(--color-accent)" }}
                         >
                           location_on
                         </span>
@@ -773,7 +773,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <span
                       style={{
                         fontSize: "12px",
-                        color: "var(--stitch-on-surface-variant)",
+                        color: "var(--color-text-muted)",
                         fontWeight: 500,
                       }}
                     >
@@ -868,7 +868,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <div className="pub-filter-right">
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "18px", color: "var(--stitch-outline)" }}
+                        style={{ fontSize: "18px", color: "var(--color-border-control)" }}
                       >
                         tune
                       </span>
@@ -915,9 +915,9 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                   padding: "0.3rem 0.75rem",
                                   borderRadius: "9999px",
                                   background:
-                                    "color-mix(in srgb, var(--color-surface-inverse) 80%, transparent)",
+                                    "color-mix(in srgb, var(--color-surface-inverse) 90%, transparent)",
                                   backdropFilter: "blur(8px)",
-                                  color: "var(--stitch-mint-glow)",
+                                  color: "var(--color-link-inverse)",
                                   fontSize: "10px",
                                   fontWeight: 700,
                                   letterSpacing: "0.06em",
@@ -943,7 +943,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                   background:
                                     "color-mix(in srgb, var(--color-surface-brand) 95%, transparent)",
                                   backdropFilter: "blur(8px)",
-                                  color: "var(--stitch-secondary)",
+                                  color: "var(--color-brand)",
                                   fontSize: "10px",
                                   fontWeight: 700,
                                   letterSpacing: "0.06em",
@@ -958,9 +958,9 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                   padding: "0.3rem 0.75rem",
                                   borderRadius: "9999px",
                                   background:
-                                    "color-mix(in srgb, var(--color-surface-inverse) 80%, transparent)",
+                                    "color-mix(in srgb, var(--color-surface-inverse) 90%, transparent)",
                                   backdropFilter: "blur(8px)",
-                                  color: "var(--stitch-mint-glow)",
+                                  color: "var(--color-link-inverse)",
                                   fontSize: "10px",
                                   fontWeight: 700,
                                   letterSpacing: "0.06em",
@@ -990,7 +990,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                             <span>{route.rating.toFixed(1)}</span>
                             <span
                               style={{
-                                color: "var(--stitch-outline)",
+                                color: "var(--color-border-control)",
                                 fontSize: "11px",
                                 fontWeight: 400,
                               }}
@@ -1008,7 +1008,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                               >
                                 <span
                                   className="material-symbols-outlined"
-                                  style={{ fontSize: "15px", color: "var(--stitch-secondary)" }}
+                                  style={{ fontSize: "15px", color: "var(--color-brand)" }}
                                 >
                                   schedule
                                 </span>
@@ -1020,14 +1020,14 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                               >
                                 <span
                                   className="material-symbols-outlined"
-                                  style={{ fontSize: "15px", color: "var(--stitch-secondary)" }}
+                                  style={{ fontSize: "15px", color: "var(--color-brand)" }}
                                 >
                                   pin_drop
                                 </span>
                                 {route.stopsCount} Durak
                               </span>
                               <span>•</span>
-                              <span style={{ color: "var(--stitch-secondary)", fontWeight: 600 }}>
+                              <span style={{ color: "var(--color-brand)", fontWeight: 600 }}>
                                 {route.category}
                               </span>
                             </div>
@@ -1069,7 +1069,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                     className="material-symbols-outlined"
                                     style={{
                                       fontSize: "16px",
-                                      color: "var(--stitch-emerald-accent)",
+                                      color: "var(--color-accent)",
                                     }}
                                   >
                                     map
@@ -1111,7 +1111,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}
+                        style={{ fontSize: "22px", color: "var(--color-brand)" }}
                       >
                         menu_book
                       </span>
@@ -1119,7 +1119,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         style={{
                           margin: 0,
                           fontSize: "1.1rem",
-                          color: "var(--stitch-primary)",
+                          color: "var(--color-text-brand)",
                           fontWeight: 700,
                         }}
                       >
@@ -1129,7 +1129,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <p
                       style={{
                         fontSize: "14px",
-                        color: "var(--stitch-on-surface-variant)",
+                        color: "var(--color-text-muted)",
                         margin: 0,
                         lineHeight: 1.6,
                       }}
@@ -1146,7 +1146,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         paddingTop: "0.5rem",
                       }}
                     >
-                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>
+                      <span style={{ fontSize: "12px", color: "var(--color-border-control)" }}>
                         4 gün önce güncellendi • 1.2K Okuma
                       </span>
                       <button
@@ -1163,7 +1163,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}
+                        style={{ fontSize: "22px", color: "var(--color-brand)" }}
                       >
                         tips_and_updates
                       </span>
@@ -1171,7 +1171,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         style={{
                           margin: 0,
                           fontSize: "1.1rem",
-                          color: "var(--stitch-primary)",
+                          color: "var(--color-text-brand)",
                           fontWeight: 700,
                         }}
                       >
@@ -1181,7 +1181,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <p
                       style={{
                         fontSize: "14px",
-                        color: "var(--stitch-on-surface-variant)",
+                        color: "var(--color-text-muted)",
                         margin: 0,
                         lineHeight: 1.6,
                       }}
@@ -1197,7 +1197,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         paddingTop: "0.5rem",
                       }}
                     >
-                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>
+                      <span style={{ fontSize: "12px", color: "var(--color-border-control)" }}>
                         2 hafta önce • 3.4K Okuma
                       </span>
                       <button
@@ -1214,7 +1214,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "22px", color: "var(--stitch-secondary)" }}
+                        style={{ fontSize: "22px", color: "var(--color-brand)" }}
                       >
                         backpack
                       </span>
@@ -1222,7 +1222,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         style={{
                           margin: 0,
                           fontSize: "1.1rem",
-                          color: "var(--stitch-primary)",
+                          color: "var(--color-text-brand)",
                           fontWeight: 700,
                         }}
                       >
@@ -1232,7 +1232,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <p
                       style={{
                         fontSize: "14px",
-                        color: "var(--stitch-on-surface-variant)",
+                        color: "var(--color-text-muted)",
                         margin: 0,
                         lineHeight: 1.6,
                       }}
@@ -1248,7 +1248,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         paddingTop: "0.5rem",
                       }}
                     >
-                      <span style={{ fontSize: "12px", color: "var(--stitch-outline)" }}>
+                      <span style={{ fontSize: "12px", color: "var(--color-border-control)" }}>
                         1 ay önce • 2.8K Okuma
                       </span>
                       <button
@@ -1369,7 +1369,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                               style={{
                                 fontWeight: 700,
                                 fontSize: "14px",
-                                color: "var(--stitch-primary)",
+                                color: "var(--color-text-brand)",
                               }}
                             >
                               {rev.name}
@@ -1377,7 +1377,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                             <div
                               style={{
                                 fontSize: "11px",
-                                color: "var(--stitch-on-surface-variant)",
+                                color: "var(--color-text-muted)",
                               }}
                             >
                               {rev.route} • {rev.time}
@@ -1411,7 +1411,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   <h3 className="pub-sidebar-card-title">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "20px", color: "var(--stitch-secondary)" }}
+                      style={{ fontSize: "20px", color: "var(--color-brand)" }}
                     >
                       military_tech
                     </span>
@@ -1422,7 +1422,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       fontSize: "10px",
                       fontWeight: 700,
                       letterSpacing: "0.04em",
-                      color: "var(--stitch-on-surface-variant)",
+                      color: "var(--color-text-muted)",
                     }}
                   >
                     4 KAZANILDI
@@ -1477,7 +1477,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 <h3 className="pub-sidebar-card-title">
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "20px", color: "var(--stitch-secondary)" }}
+                    style={{ fontSize: "20px", color: "var(--color-brand)" }}
                   >
                     loyalty
                   </span>
@@ -1561,7 +1561,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       fontSize: "10px",
                       fontWeight: 700,
                       letterSpacing: "0.04em",
-                      color: "var(--stitch-on-surface-variant)",
+                      color: "var(--color-text-muted)",
                     }}
                   >
                     SON GEZGİN İNCELEMESİ
@@ -1592,12 +1592,12 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       style={{
                         fontWeight: 600,
                         fontSize: "13px",
-                        color: "var(--stitch-on-surface)",
+                        color: "var(--color-text)",
                       }}
                     >
                       Canberk Y.
                     </div>
-                    <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>
+                    <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
                       Kapadokya Vadi Gezgini • 3 gün önce
                     </div>
                   </div>
@@ -1610,10 +1610,10 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
 
       {/* Toast Notification */}
       {toast && (
-        <div className="pub-toast" role="status">
+        <div data-surface="inverse" className="pub-toast" role="status">
           <span
             className="material-symbols-outlined"
-            style={{ fontSize: "18px", color: "var(--stitch-mint-glow)" }}
+            style={{ fontSize: "18px", color: "var(--color-link-inverse)" }}
           >
             check_circle
           </span>
@@ -1648,7 +1648,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     margin: 0,
                     fontSize: "14px",
                     fontWeight: 700,
-                    color: "var(--stitch-primary)",
+                    color: "var(--color-text-brand)",
                   }}
                 >
                   Rota Durakları ({previewRoute.stops.length})
@@ -1661,7 +1661,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       alignItems: "flex-start",
                       gap: "0.75rem",
                       padding: "0.5rem 0",
-                      borderBottom: "1px solid var(--stitch-surface-container-low)",
+                      borderBottom: "1px solid var(--color-surface-tint)",
                     }}
                   >
                     <span
@@ -1669,7 +1669,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         width: "24px",
                         height: "24px",
                         borderRadius: "50%",
-                        background: "var(--stitch-primary)",
+                        background: "var(--color-text-brand)",
                         color: "var(--color-on-primary)",
                         display: "flex",
                         alignItems: "center",
@@ -1682,7 +1682,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       {idx + 1}
                     </span>
                     <div>
-                      <strong style={{ fontSize: "13px", color: "var(--stitch-on-surface)" }}>
+                      <strong style={{ fontSize: "13px", color: "var(--color-text)" }}>
                         {s.label}
                       </strong>
                       {s.note && (
@@ -1690,7 +1690,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                           style={{
                             margin: "2px 0 0",
                             fontSize: "12px",
-                            color: "var(--stitch-on-surface-variant)",
+                            color: "var(--color-text-muted)",
                           }}
                         >
                           {s.note}
@@ -1746,7 +1746,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
               <p
                 style={{
                   fontSize: "14px",
-                  color: "var(--stitch-on-surface-variant)",
+                  color: "var(--color-text-muted)",
                   lineHeight: 1.6,
                   margin: 0,
                 }}
@@ -1758,32 +1758,32 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   display: "grid",
                   gridTemplateColumns: "repeat(3, 1fr)",
                   gap: "0.75rem",
-                  background: "var(--stitch-canvas-base)",
+                  background: "var(--color-bg)",
                   padding: "1rem",
                   borderRadius: "16px",
                 }}
               >
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>
+                  <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
                     Süre
                   </div>
-                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>
+                  <div style={{ fontWeight: 700, color: "var(--color-text-brand)" }}>
                     {selectedPlanRoute.duration}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>
+                  <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
                     Durak Sayısı
                   </div>
-                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>
+                  <div style={{ fontWeight: 700, color: "var(--color-text-brand)" }}>
                     {selectedPlanRoute.stopsCount} Durak
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--stitch-on-surface-variant)" }}>
+                  <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
                     Kategori
                   </div>
-                  <div style={{ fontWeight: 700, color: "var(--stitch-primary)" }}>
+                  <div style={{ fontWeight: 700, color: "var(--color-text-brand)" }}>
                     {selectedPlanRoute.category}
                   </div>
                 </div>
@@ -1800,14 +1800,14 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   <span
                     style={{
                       fontSize: "11px",
-                      color: "var(--stitch-on-surface-variant)",
+                      color: "var(--color-text-muted)",
                       display: "block",
                     }}
                   >
                     ROTA PAKETİ ÜCRETİ
                   </span>
                   <span
-                    style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--stitch-primary)" }}
+                    style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--color-text-brand)" }}
                   >
                     {selectedPlanRoute.priceTag}
                   </span>
@@ -1858,7 +1858,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     style={{
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "var(--stitch-on-surface)",
+                      color: "var(--color-text)",
                       display: "block",
                       marginBottom: "4px",
                     }}
@@ -1874,7 +1874,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       width: "100%",
                       padding: "0.65rem 1rem",
                       borderRadius: "12px",
-                      border: "1px solid var(--stitch-outline-variant)",
+                      border: "1px solid var(--color-border-strong)",
                       fontSize: "14px",
                     }}
                   />
@@ -1884,7 +1884,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     style={{
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "var(--stitch-on-surface)",
+                      color: "var(--color-text)",
                       display: "block",
                       marginBottom: "4px",
                     }}
@@ -1901,7 +1901,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       width: "100%",
                       padding: "0.75rem 1rem",
                       borderRadius: "12px",
-                      border: "1px solid var(--stitch-outline-variant)",
+                      border: "1px solid var(--color-border-strong)",
                       fontSize: "14px",
                       fontFamily: "inherit",
                     }}
@@ -1947,7 +1947,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 <p
                   style={{
                     fontSize: "14px",
-                    color: "var(--stitch-on-surface-variant)",
+                    color: "var(--color-text-muted)",
                     lineHeight: 1.6,
                     margin: 0,
                   }}
@@ -1960,7 +1960,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     style={{
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "var(--stitch-on-surface)",
+                      color: "var(--color-text)",
                       display: "block",
                       marginBottom: "4px",
                     }}
@@ -1977,7 +1977,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       width: "100%",
                       padding: "0.75rem 1rem",
                       borderRadius: "12px",
-                      border: "1px solid var(--stitch-outline-variant)",
+                      border: "1px solid var(--color-border-strong)",
                       fontSize: "14px",
                       fontFamily: "inherit",
                     }}

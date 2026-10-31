@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { forgotPassword, confirmForgotPassword, signIn } from "../lib/cognito";
 import { Alert, Field, IconButton, PageHeader, PageShell } from "../components/ui";
 import "./reset-password.css";
+import "./reset-password-layout.css";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -205,13 +206,13 @@ export default function ForgotPasswordPage() {
                 {/* Notification Banner */}
                 <div className="reset-notice-banner" data-purpose="email-sent-notice">
                   <svg
-                    className="w-5 h-5 flex-shrink-0 text-mint-600"
+                    className="w-5 h-5 rp-1 text-mint-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                     width="20"
                     height="20"
-                    style={{ color: "var(--mb-mint-600)", marginTop: "2px" }}
+                    style={{ color: "var(--color-success-strong)", marginTop: "2px" }}
                   >
                     <path
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
@@ -341,13 +342,13 @@ export default function ForgotPasswordPage() {
                           className={`reset-criteria-item ${rule.valid ? "valid" : "invalid"}`}
                         >
                           <svg
-                            className="w-4 h-4 flex-shrink-0"
+                            className="w-4 h-4 rp-1"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
                             width="16"
                             height="16"
-                            style={{ color: rule.valid ? "var(--mb-mint-600)" : "#9ca3af" }}
+                            style={{ color: rule.valid ? "var(--color-success-strong)" : "#9ca3af" }}
                           >
                             <path
                               d="M5 13l4 4L19 7"
@@ -481,7 +482,7 @@ export default function ForgotPasswordPage() {
                   >
                     <span
                       className="material-symbols-outlined"
-                      style={{ color: "var(--mb-mint-600)", flexShrink: 0 }}
+                      style={{ color: "var(--color-success-strong)", flexShrink: 0 }}
                     >
                       lock_clock
                     </span>
@@ -536,7 +537,7 @@ export default function ForgotPasswordPage() {
           {/* RIGHT COLUMN: Visual & Security Showcase */}
           <aside className="reset-aside" data-purpose="security-and-visual-aside">
             {/* Imagery Showcase Card with Frosted Overlay */}
-            <div className="reset-showcase-card group">
+            <div className="reset-showcase-card rp-group">
               {/* Background Image (Kapadokya Balloons) */}
               <img
                 alt="Kapadokya gün doğumu ve sıcak hava balonları manzarası"

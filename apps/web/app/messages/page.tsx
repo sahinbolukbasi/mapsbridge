@@ -546,7 +546,7 @@ export default function MessagesPage() {
                     >
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "18px", color: "var(--chat-primary)" }}
+                        style={{ fontSize: "18px", color: "var(--color-text-brand)" }}
                       >
                         group_add
                       </span>
@@ -558,7 +558,7 @@ export default function MessagesPage() {
                 <div className="chat-privacy-box">
                   <div className="chat-privacy-title-row">
                     <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span className="material-symbols-outlined text-[15px] text-[#10B981]">
+                      <span className="material-symbols-outlined">
                         {messagePrivacy === "friends" ? "lock" : "public"}
                       </span>
                       Mesajlaşma İzni
@@ -566,7 +566,7 @@ export default function MessagesPage() {
                     <span
                       style={{
                         fontSize: "10.5px",
-                        color: "var(--chat-secondary)",
+                        color: "var(--color-brand)",
                         fontWeight: 600,
                       }}
                     >
@@ -585,7 +585,7 @@ export default function MessagesPage() {
                       }}
                       title="Yalnızca arkadaş listenizdeki gezginler size mesaj gönderebilir"
                     >
-                      <span className="material-symbols-outlined text-[13px]">group</span>
+                      <span className="material-symbols-outlined">group</span>
                       <span>Sadece Arkadaşlarım</span>
                     </button>
                     <button
@@ -599,7 +599,7 @@ export default function MessagesPage() {
                       }}
                       title="Tüm MapsBridge gezginleri size mesaj gönderebilir"
                     >
-                      <span className="material-symbols-outlined text-[13px]">public</span>
+                      <span className="material-symbols-outlined">public</span>
                       <span>Herkes</span>
                     </button>
                   </div>
@@ -658,7 +658,7 @@ export default function MessagesPage() {
                     style={{
                       padding: "2.5rem 1rem",
                       textAlign: "center",
-                      color: "var(--chat-outline)",
+                      color: "var(--color-border-control)",
                     }}
                   >
                     <span
@@ -672,7 +672,7 @@ export default function MessagesPage() {
                         margin: "0 0 4px",
                         fontSize: "13px",
                         fontWeight: 700,
-                        color: "var(--chat-primary)",
+                        color: "var(--color-text-brand)",
                       }}
                     >
                       {searchQuery ? "Sohbet Bulunamadı" : "Henüz Mesajınız Yok"}
@@ -690,7 +690,7 @@ export default function MessagesPage() {
                           marginTop: "0.75rem",
                           padding: "6px 14px",
                           borderRadius: "8px",
-                          background: "var(--chat-primary)",
+                          background: "var(--color-text-brand)",
                           color: "var(--color-on-primary)",
                           fontSize: "11.5px",
                           fontWeight: 700,
@@ -753,7 +753,7 @@ export default function MessagesPage() {
                             <span
                               style={{
                                 fontSize: "10px",
-                                color: "var(--chat-secondary)",
+                                color: "var(--color-brand)",
                                 display: "block",
                               }}
                             >
@@ -768,7 +768,7 @@ export default function MessagesPage() {
                           {conv.pinned && (
                             <span
                               className="material-symbols-outlined"
-                              style={{ fontSize: "14px", color: "var(--chat-emerald-accent)" }}
+                              style={{ fontSize: "14px", color: "var(--color-accent)" }}
                             >
                               push_pin
                             </span>
@@ -806,7 +806,7 @@ export default function MessagesPage() {
                       width: "64px",
                       height: "64px",
                       borderRadius: "18px",
-                      background: "var(--chat-mint-subtle)",
+                      background: "var(--color-surface-brand)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -815,7 +815,7 @@ export default function MessagesPage() {
                   >
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "32px", color: "var(--chat-primary)" }}
+                      style={{ fontSize: "32px", color: "var(--color-text-brand)" }}
                     >
                       forum
                     </span>
@@ -825,7 +825,7 @@ export default function MessagesPage() {
                       margin: "0 0 6px",
                       fontSize: "16px",
                       fontWeight: 700,
-                      color: "var(--chat-primary)",
+                      color: "var(--color-text-brand)",
                     }}
                   >
                     Aktif Bir Sohbet Seçilmedi
@@ -834,7 +834,7 @@ export default function MessagesPage() {
                     style={{
                       margin: "0 0 1.25rem",
                       fontSize: "13px",
-                      color: "var(--chat-secondary)",
+                      color: "var(--color-brand)",
                       maxWidth: "340px",
                       lineHeight: "1.5",
                     }}
@@ -883,8 +883,8 @@ export default function MessagesPage() {
                               style={{
                                 padding: "0.15rem 0.5rem",
                                 borderRadius: "9999px",
-                                background: "var(--chat-mint-subtle)",
-                                color: "var(--chat-secondary)",
+                                background: "var(--color-surface-brand)",
+                                color: "var(--color-brand)",
                                 fontSize: "10px",
                                 fontWeight: 700,
                                 letterSpacing: "0.04em",
@@ -903,13 +903,13 @@ export default function MessagesPage() {
                                     width: "6px",
                                     height: "6px",
                                     borderRadius: "50%",
-                                    background: "var(--chat-emerald-accent)",
+                                    background: "var(--color-accent)",
                                   }}
                                 />
                                 {activeChat.memberCount || 0} Gezgin Aktif
                               </span>
                               <span>•</span>
-                              <span style={{ color: "var(--chat-primary)", fontWeight: 700 }}>
+                              <span style={{ color: "var(--color-text-brand)", fontWeight: 700 }}>
                                 {activeChat.routeInfo?.code
                                   ? `Bağlı Rota: ${activeChat.routeInfo.code}`
                                   : "Aktif Rota Masası"}
@@ -956,9 +956,9 @@ export default function MessagesPage() {
                         }}
                         style={{
                           background: showRightSidebar
-                            ? "var(--chat-mint-subtle)"
-                            : "var(--chat-surface-low)",
-                          color: "var(--chat-secondary)",
+                            ? "var(--color-surface-brand)"
+                            : "var(--color-surface-tint)",
+                          color: "var(--color-brand)",
                         }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
@@ -974,14 +974,14 @@ export default function MessagesPage() {
                       <div className="chat-pinned-left">
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "18px", color: "var(--chat-emerald-accent)" }}
+                          style={{ fontSize: "18px", color: "var(--color-accent)" }}
                         >
                           push_pin
                         </span>
                         <strong
                           style={{
                             fontSize: "11px",
-                            color: "var(--chat-primary)",
+                            color: "var(--color-text-brand)",
                             letterSpacing: "0.04em",
                           }}
                         >
@@ -1027,7 +1027,7 @@ export default function MessagesPage() {
                             <span className="chat-system-event-pill">
                               <span
                                 className="material-symbols-outlined"
-                                style={{ fontSize: "14px", color: "var(--chat-secondary)" }}
+                                style={{ fontSize: "14px", color: "var(--color-brand)" }}
                               >
                                 add_location_alt
                               </span>
@@ -1081,7 +1081,7 @@ export default function MessagesPage() {
                                       className="material-symbols-outlined"
                                       style={{
                                         fontSize: "16px",
-                                        color: "var(--chat-emerald-accent)",
+                                        color: "var(--color-accent)",
                                       }}
                                     >
                                       explore
@@ -1092,7 +1092,7 @@ export default function MessagesPage() {
                                     style={{
                                       padding: "0.15rem 0.5rem",
                                       borderRadius: "9999px",
-                                      background: "var(--chat-primary)",
+                                      background: "var(--color-text-brand)",
                                       color: "var(--color-on-primary)",
                                       fontSize: "10px",
                                       fontWeight: 700,
@@ -1157,7 +1157,7 @@ export default function MessagesPage() {
                                       <span
                                         className="chat-route-chip"
                                         style={{
-                                          background: "var(--chat-mint-subtle)",
+                                          background: "var(--color-surface-brand)",
                                           fontWeight: 700,
                                         }}
                                       >
@@ -1165,7 +1165,7 @@ export default function MessagesPage() {
                                           className="material-symbols-outlined"
                                           style={{
                                             fontSize: "12px",
-                                            color: "var(--chat-emerald-accent)",
+                                            color: "var(--color-accent)",
                                           }}
                                         >
                                           altitude
@@ -1183,7 +1183,7 @@ export default function MessagesPage() {
                                       flex: 1,
                                       padding: "0.5rem 0.75rem",
                                       borderRadius: "9999px",
-                                      background: "var(--chat-primary-container)",
+                                      background: "var(--color-brand-hover)",
                                       color: "var(--color-on-primary)",
                                       fontSize: "12px",
                                       fontWeight: 600,
@@ -1198,8 +1198,8 @@ export default function MessagesPage() {
                                     style={{
                                       padding: "0.5rem 0.75rem",
                                       borderRadius: "9999px",
-                                      background: "var(--chat-surface-low)",
-                                      color: "var(--chat-primary)",
+                                      background: "var(--color-surface-tint)",
+                                      color: "var(--color-text-brand)",
                                       fontSize: "12px",
                                       fontWeight: 600,
                                       border: "none",
@@ -1260,7 +1260,7 @@ export default function MessagesPage() {
                                   <strong
                                     style={{
                                       fontSize: "13px",
-                                      color: "var(--chat-primary)",
+                                      color: "var(--color-text-brand)",
                                       display: "block",
                                     }}
                                   >
@@ -1269,7 +1269,7 @@ export default function MessagesPage() {
                                   <p
                                     style={{
                                       fontSize: "12px",
-                                      color: "var(--chat-on-surface-variant)",
+                                      color: "var(--color-text-muted)",
                                       margin: "3px 0 0",
                                     }}
                                   >
@@ -1282,8 +1282,8 @@ export default function MessagesPage() {
                                       marginTop: "0.5rem",
                                       padding: "0.45rem",
                                       borderRadius: "8px",
-                                      background: "var(--chat-surface-low)",
-                                      color: "var(--chat-secondary)",
+                                      background: "var(--color-surface-tint)",
+                                      color: "var(--color-brand)",
                                       fontSize: "12px",
                                       fontWeight: 600,
                                       border: "none",
@@ -1338,7 +1338,7 @@ export default function MessagesPage() {
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "16px", color: "var(--chat-emerald-accent)" }}
+                          style={{ fontSize: "16px", color: "var(--color-accent)" }}
                         >
                           add_location
                         </span>
@@ -1354,7 +1354,7 @@ export default function MessagesPage() {
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "16px", color: "var(--chat-secondary)" }}
+                          style={{ fontSize: "16px", color: "var(--color-brand)" }}
                         >
                           polyline
                         </span>
@@ -1368,7 +1368,7 @@ export default function MessagesPage() {
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "16px", color: "var(--chat-outline)" }}
+                          style={{ fontSize: "16px", color: "var(--color-border-control)" }}
                         >
                           photo_camera
                         </span>
@@ -1384,7 +1384,7 @@ export default function MessagesPage() {
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "16px", color: "var(--chat-outline)" }}
+                          style={{ fontSize: "16px", color: "var(--color-border-control)" }}
                         >
                           event
                         </span>
@@ -1470,7 +1470,7 @@ export default function MessagesPage() {
                             <span
                               style={{
                                 fontSize: "11px",
-                                color: "var(--chat-on-surface-variant)",
+                                color: "var(--color-text-muted)",
                                 marginTop: "4px",
                               }}
                             >
@@ -1492,7 +1492,7 @@ export default function MessagesPage() {
                                 className="chat-friend-badge"
                                 style={{
                                   background: "color-mix(in srgb, var(--color-brand) 10%, transparent)",
-                                  color: "var(--chat-secondary)",
+                                  color: "var(--color-brand)",
                                   borderColor: "color-mix(in srgb, var(--color-brand) 30%, transparent)",
                                 }}
                               >
@@ -1513,7 +1513,7 @@ export default function MessagesPage() {
                             <p
                               style={{
                                 fontSize: "12px",
-                                color: "var(--chat-on-surface-variant)",
+                                color: "var(--color-text-muted)",
                                 margin: 0,
                                 lineHeight: 1.5,
                               }}
@@ -1542,13 +1542,13 @@ export default function MessagesPage() {
                                 alignItems: "center",
                                 gap: "6px",
                                 fontSize: "11px",
-                                color: "var(--chat-secondary)",
-                                background: "var(--chat-surface-low)",
+                                color: "var(--color-brand)",
+                                background: "var(--color-surface-tint)",
                                 padding: "0.5rem 0.65rem",
                                 borderRadius: "8px",
                               }}
                             >
-                              <span className="material-symbols-outlined text-[16px] text-[#10B981]">
+                              <span className="material-symbols-outlined">
                                 {messagePrivacy === "friends" ? "lock" : "chat"}
                               </span>
                               <span>
@@ -1574,7 +1574,7 @@ export default function MessagesPage() {
                               className="chat-btn-map-split"
                               style={{ justifyContent: "center", textDecoration: "none" }}
                             >
-                              <span className="material-symbols-outlined text-[16px]">
+                              <span className="material-symbols-outlined">
                                 account_circle
                               </span>
                               <span>Gezgin Profilini İncele</span>
@@ -1587,7 +1587,7 @@ export default function MessagesPage() {
                                 showToastMessage(`${contact.name} için bildirimler sessize alındı.`)
                               }
                             >
-                              <span className="material-symbols-outlined text-[16px]">
+                              <span className="material-symbols-outlined">
                                 notifications_off
                               </span>
                               <span>Bildirimleri Kapat</span>
@@ -1639,8 +1639,8 @@ export default function MessagesPage() {
                                 style={{
                                   padding: "0.15rem 0.5rem",
                                   borderRadius: "9999px",
-                                  background: "var(--chat-emerald-accent)",
-                                  color: "var(--chat-deep-forest)",
+                                  background: "var(--color-accent)",
+                                  color: "var(--color-surface-inverse)",
                                   fontSize: "9px",
                                   fontWeight: 700,
                                   textTransform: "uppercase",
@@ -1658,7 +1658,7 @@ export default function MessagesPage() {
                               >
                                 {activeChat.title}
                               </h3>
-                              <span style={{ fontSize: "11px", color: "var(--chat-mint-subtle)" }}>
+                              <span style={{ fontSize: "11px", color: "var(--color-surface-brand)" }}>
                                 {activeChat.memberCount || activeChat.members?.length || 0} Gezgin •
                                 Canlı Sefer
                               </span>
@@ -1673,8 +1673,8 @@ export default function MessagesPage() {
                                 style={{
                                   padding: "0.1rem 0.4rem",
                                   borderRadius: "4px",
-                                  background: "var(--chat-mint-subtle)",
-                                  color: "var(--chat-secondary)",
+                                  background: "var(--color-surface-brand)",
+                                  color: "var(--color-brand)",
                                   fontSize: "10px",
                                   fontWeight: 700,
                                 }}
@@ -1688,7 +1688,7 @@ export default function MessagesPage() {
                                 <strong
                                   style={{
                                     fontSize: "12.5px",
-                                    color: "var(--chat-primary)",
+                                    color: "var(--color-text-brand)",
                                     display: "block",
                                     whiteSpace: "nowrap",
                                     overflow: "hidden",
@@ -1700,7 +1700,7 @@ export default function MessagesPage() {
                                 <span
                                   style={{
                                     fontSize: "11px",
-                                    color: "var(--chat-on-surface-variant)",
+                                    color: "var(--color-text-muted)",
                                   }}
                                 >
                                   {routeStats}
@@ -1712,8 +1712,8 @@ export default function MessagesPage() {
                                   width: "32px",
                                   height: "32px",
                                   borderRadius: "50%",
-                                  background: "var(--chat-surface-card)",
-                                  color: "var(--chat-primary)",
+                                  background: "var(--color-surface)",
+                                  color: "var(--color-text-brand)",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1742,7 +1742,7 @@ export default function MessagesPage() {
                                   style={{
                                     padding: "0.1rem 0.35rem",
                                     borderRadius: "9999px",
-                                    background: "var(--chat-surface-high)",
+                                    background: "var(--color-surface-tint)",
                                     fontSize: "10px",
                                     fontWeight: 700,
                                   }}
@@ -1755,7 +1755,7 @@ export default function MessagesPage() {
                                 style={{
                                   fontSize: "11px",
                                   fontWeight: 700,
-                                  color: "var(--chat-secondary)",
+                                  color: "var(--color-brand)",
                                   background: "transparent",
                                   border: "none",
                                   cursor: "pointer",
@@ -1793,7 +1793,7 @@ export default function MessagesPage() {
                                       <strong
                                         style={{
                                           fontSize: "12.5px",
-                                          color: "var(--chat-on-surface)",
+                                          color: "var(--color-text)",
                                           display: "block",
                                         }}
                                       >
@@ -1802,7 +1802,7 @@ export default function MessagesPage() {
                                       <span
                                         style={{
                                           fontSize: "10px",
-                                          color: "var(--chat-on-surface-variant)",
+                                          color: "var(--color-text-muted)",
                                         }}
                                       >
                                         {mem.role}
@@ -1815,7 +1815,7 @@ export default function MessagesPage() {
                                       className="material-symbols-outlined"
                                       style={{
                                         fontSize: "16px",
-                                        color: "var(--chat-emerald-accent)",
+                                        color: "var(--color-accent)",
                                       }}
                                       title="Rehber Lider"
                                     >
@@ -1827,7 +1827,7 @@ export default function MessagesPage() {
                                       style={{
                                         fontSize: "10px",
                                         fontWeight: 700,
-                                        color: "var(--chat-secondary)",
+                                        color: "var(--color-brand)",
                                       }}
                                     >
                                       PRO
@@ -1842,7 +1842,7 @@ export default function MessagesPage() {
                                         borderRadius: "50%",
                                         background: "transparent",
                                         border: "none",
-                                        color: "var(--chat-outline)",
+                                        color: "var(--color-border-control)",
                                         cursor: "pointer",
                                       }}
                                       title="Birebir Yaz"
@@ -1890,7 +1890,7 @@ export default function MessagesPage() {
                                 style={{
                                   fontSize: "10px",
                                   fontWeight: 700,
-                                  color: "var(--chat-secondary)",
+                                  color: "var(--color-brand)",
                                 }}
                               >
                                 {waypoints.length} Durak
@@ -1914,7 +1914,7 @@ export default function MessagesPage() {
                                       <strong
                                         style={{
                                           fontSize: "12px",
-                                          color: "var(--chat-primary)",
+                                          color: "var(--color-text-brand)",
                                           display: "block",
                                           whiteSpace: "nowrap",
                                           overflow: "hidden",
@@ -1926,7 +1926,7 @@ export default function MessagesPage() {
                                       <span
                                         style={{
                                           fontSize: "11px",
-                                          color: "var(--chat-on-surface-variant)",
+                                          color: "var(--color-text-muted)",
                                         }}
                                       >
                                         {wp.sub}
@@ -1935,7 +1935,7 @@ export default function MessagesPage() {
                                   </div>
                                   <span
                                     className="material-symbols-outlined"
-                                    style={{ fontSize: "15px", color: "var(--chat-outline)" }}
+                                    style={{ fontSize: "15px", color: "var(--color-border-control)" }}
                                   >
                                     near_me
                                   </span>
@@ -1959,7 +1959,7 @@ export default function MessagesPage() {
                               className="chat-btn-map-split"
                               style={{ justifyContent: "center", textDecoration: "none" }}
                             >
-                              <span className="material-symbols-outlined text-[16px]">map</span>
+                              <span className="material-symbols-outlined">map</span>
                               <span>Harita Masasında Aç</span>
                             </Link>
                             <button
@@ -1968,7 +1968,7 @@ export default function MessagesPage() {
                               style={{ justifyContent: "center" }}
                               onClick={() => showToastMessage("Grup bildirimleri sessize alındı.")}
                             >
-                              <span className="material-symbols-outlined text-[16px]">
+                              <span className="material-symbols-outlined">
                                 notifications_off
                               </span>
                               <span>Grup Bildirimlerini Kapat</span>
@@ -1984,10 +1984,10 @@ export default function MessagesPage() {
       </div>
       {/* Toast Notification */}
       {toast && (
-        <div className="chat-toast" role="status">
+        <div data-surface="inverse" className="chat-toast" role="status">
           <span
             className="material-symbols-outlined"
-            style={{ fontSize: "18px", color: "var(--chat-mint-glow)" }}
+            style={{ fontSize: "18px", color: "var(--color-link-inverse)" }}
           >
             check_circle
           </span>
@@ -2005,7 +2005,7 @@ export default function MessagesPage() {
                   margin: 0,
                   fontSize: "15px",
                   fontWeight: 700,
-                  color: "var(--chat-primary)",
+                  color: "var(--color-text-brand)",
                 }}
               >
                 Yeni Gezi Grubu & Seferi Başlat
@@ -2041,7 +2041,7 @@ export default function MessagesPage() {
                       width: "100%",
                       padding: "0.65rem 0.85rem",
                       borderRadius: "10px",
-                      border: "1px solid var(--chat-outline-variant)",
+                      border: "1px solid var(--color-border-strong)",
                       fontSize: "13px",
                       boxSizing: "border-box",
                     }}
@@ -2067,7 +2067,7 @@ export default function MessagesPage() {
                       width: "100%",
                       padding: "0.65rem 0.85rem",
                       borderRadius: "10px",
-                      border: "1px solid var(--chat-outline-variant)",
+                      border: "1px solid var(--color-border-strong)",
                       fontSize: "13px",
                       boxSizing: "border-box",
                     }}
@@ -2098,7 +2098,7 @@ export default function MessagesPage() {
             <div className="chat-modal-header">
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span
-                  className="material-symbols-outlined text-[#10B981]"
+                  className="material-symbols-outlined"
                   style={{ fontSize: "20px" }}
                 >
                   person_search
@@ -2108,7 +2108,7 @@ export default function MessagesPage() {
                     margin: 0,
                     fontSize: "15px",
                     fontWeight: 700,
-                    color: "var(--chat-primary)",
+                    color: "var(--color-text-brand)",
                   }}
                 >
                   Gezgin Seç &amp; Mesaj Gönder
@@ -2130,14 +2130,14 @@ export default function MessagesPage() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  background: "var(--chat-surface-low)",
+                  background: "var(--color-surface-tint)",
                   padding: "0.5rem 0.75rem",
                   borderRadius: "10px",
-                  border: "1px solid var(--chat-border-subtle)",
+                  border: "1px solid var(--color-border-subtle)",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span className="material-symbols-outlined text-[16px] text-[#10B981]">
+                  <span className="material-symbols-outlined">
                     {messagePrivacy === "friends" ? "lock" : "public"}
                   </span>
                   <span style={{ fontSize: "11.5px", fontWeight: 600 }}>
@@ -2189,7 +2189,7 @@ export default function MessagesPage() {
                     className={`chat-privacy-btn ${travelerModalTab === "friends" ? "active" : ""}`}
                     onClick={() => setTravelerModalTab("friends")}
                   >
-                    <span className="material-symbols-outlined text-[13px]">group</span>
+                    <span className="material-symbols-outlined">group</span>
                     <span>
                       Arkadaşlarım ({DEFAULT_TRAVELER_CONTACTS.filter((c) => c.isFriend).length})
                     </span>
@@ -2199,7 +2199,7 @@ export default function MessagesPage() {
                     className={`chat-privacy-btn ${travelerModalTab === "all" ? "active" : ""}`}
                     onClick={() => setTravelerModalTab("all")}
                   >
-                    <span className="material-symbols-outlined text-[13px]">public</span>
+                    <span className="material-symbols-outlined">public</span>
                     <span>Tüm Gezginler ({DEFAULT_TRAVELER_CONTACTS.length})</span>
                   </button>
                 </div>
@@ -2241,7 +2241,7 @@ export default function MessagesPage() {
                       </div>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <strong style={{ fontSize: "13px", color: "var(--chat-primary)" }}>
+                          <strong style={{ fontSize: "13px", color: "var(--color-text-brand)" }}>
                             {traveler.name}
                           </strong>
                           {traveler.isFriend && (
@@ -2262,7 +2262,7 @@ export default function MessagesPage() {
                         <span
                           style={{
                             fontSize: "11px",
-                            color: "var(--chat-on-surface-variant)",
+                            color: "var(--color-text-muted)",
                             display: "block",
                           }}
                         >
@@ -2287,7 +2287,7 @@ export default function MessagesPage() {
 
               {/* Manual input fallback */}
               <div
-                style={{ borderTop: "1px solid var(--chat-border-subtle)", paddingTop: "0.75rem" }}
+                style={{ borderTop: "1px solid var(--color-border-subtle)", paddingTop: "0.75rem" }}
               >
                 <form onSubmit={handleCreateDirectChat} style={{ display: "flex", gap: "0.5rem" }}>
                   <input
@@ -2299,9 +2299,9 @@ export default function MessagesPage() {
                       flex: 1,
                       padding: "0.45rem 0.75rem",
                       borderRadius: "8px",
-                      border: "1px solid var(--chat-border-subtle)",
+                      border: "1px solid var(--color-border-subtle)",
                       fontSize: "12px",
-                      background: "var(--chat-surface-low)",
+                      background: "var(--color-surface-tint)",
                       outline: "none",
                     }}
                   />
@@ -2329,7 +2329,7 @@ export default function MessagesPage() {
                   margin: 0,
                   fontSize: "15px",
                   fontWeight: 700,
-                  color: "var(--chat-primary)",
+                  color: "var(--color-text-brand)",
                 }}
               >
                 Haritaya Yeni Durak Pinle
@@ -2365,7 +2365,7 @@ export default function MessagesPage() {
                       width: "100%",
                       padding: "0.65rem 0.85rem",
                       borderRadius: "10px",
-                      border: "1px solid var(--chat-outline-variant)",
+                      border: "1px solid var(--color-border-strong)",
                       fontSize: "13px",
                       boxSizing: "border-box",
                     }}
@@ -2391,7 +2391,7 @@ export default function MessagesPage() {
                       width: "100%",
                       padding: "0.65rem 0.85rem",
                       borderRadius: "10px",
-                      border: "1px solid var(--chat-outline-variant)",
+                      border: "1px solid var(--color-border-strong)",
                       fontSize: "13px",
                       boxSizing: "border-box",
                       fontFamily: "inherit",
@@ -2426,7 +2426,7 @@ export default function MessagesPage() {
                   margin: 0,
                   fontSize: "15px",
                   fontWeight: 700,
-                  color: "var(--chat-primary)",
+                  color: "var(--color-text-brand)",
                 }}
               >
                 Gezi Grubuna Üye Davet Et
@@ -2448,7 +2448,7 @@ export default function MessagesPage() {
               }}
             >
               <div className="chat-modal-body">
-                <p style={{ fontSize: "13px", color: "var(--chat-on-surface-variant)", margin: 0 }}>
+                <p style={{ fontSize: "13px", color: "var(--color-text-muted)", margin: 0 }}>
                   Grup davet kodu: <strong>#KPD-772</strong>. Bu kodu paylaşabilir veya doğrudan
                   kullanıcı davet edebilirsiniz.
                 </p>
@@ -2473,7 +2473,7 @@ export default function MessagesPage() {
                       width: "100%",
                       padding: "0.65rem 0.85rem",
                       borderRadius: "10px",
-                      border: "1px solid var(--chat-outline-variant)",
+                      border: "1px solid var(--color-border-strong)",
                       fontSize: "13px",
                       boxSizing: "border-box",
                     }}

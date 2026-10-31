@@ -333,7 +333,7 @@ export function HowItWorksClient() {
                   <strong>1. Gün Otel Çıkışı ➔ Trastevere</strong>
                 </div>
                 <span
-                  style={{ fontSize: "0.75rem", color: "var(--color-accent)", fontWeight: 700 }}
+                  style={{ fontSize: "0.75rem", color: "var(--color-success)", fontWeight: 700 }}
                 >
                   Sabit Durak
                 </span>
@@ -352,7 +352,7 @@ export function HowItWorksClient() {
                 <span
                   style={{
                     fontSize: "0.75rem",
-                    color: "var(--color-success-strong)",
+                    color: "var(--color-success)",
                     fontWeight: 700,
                   }}
                 >

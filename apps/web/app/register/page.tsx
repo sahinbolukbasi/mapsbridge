@@ -617,7 +617,7 @@ export default function SignUpPage() {
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "var(--mb-on-surface-variant)",
+                      color: "var(--color-text-muted)",
                       display: "block",
                       marginBottom: "0.5rem",
                     }}
@@ -630,7 +630,7 @@ export default function SignUpPage() {
                         <span
                           className="material-symbols-outlined"
                           style={{
-                            color: r.valid ? "var(--mb-emerald-accent)" : "var(--mb-outline)",
+                            color: r.valid ? "var(--color-accent)" : "var(--color-border-control)",
                           }}
                         >
                           {r.valid ? "check_circle" : "radio_button_unchecked"}
@@ -682,7 +682,7 @@ export default function SignUpPage() {
                     style={{
                       fontSize: "15px",
                       fontWeight: 700,
-                      color: "var(--mb-primary)",
+                      color: "var(--color-text-brand)",
                       textDecoration: "none",
                       display: "inline-flex",
                       alignItems: "center",
@@ -721,7 +721,7 @@ export default function SignUpPage() {
             </div>
 
             {/* Sağ Sütun: Tokyo Seyahat İlhamı & Güven Paneli (lg:col-span-5) */}
-            <div className="signup-card-right">
+            <div data-surface="inverse" className="signup-card-right">
               {/* Arka Plan Görseli */}
               <div
                 className="signup-bg-image"
@@ -736,7 +736,7 @@ export default function SignUpPage() {
                 <div className="signup-city-pill">
                   <span
                     className="material-symbols-outlined"
-                    style={{ color: "var(--mb-mint-glow)" }}
+                    style={{ color: "var(--color-link-inverse)" }}
                   >
                     explore
                   </span>
@@ -748,8 +748,8 @@ export default function SignUpPage() {
                       width: "8px",
                       height: "8px",
                       borderRadius: "9999px",
-                      backgroundColor: "var(--mb-mint-glow)",
-                      boxShadow: "0 0 6px var(--mb-mint-glow)",
+                      backgroundColor: "var(--color-link-inverse)",
+                      boxShadow: "0 0 6px var(--color-link-inverse)",
                     }}
                   ></span>
                   <span>Canlı Senkronizasyon</span>
@@ -765,7 +765,7 @@ export default function SignUpPage() {
                     style={{
                       backgroundColor:
                         "color-mix(in srgb, var(--color-accent-strong) 20%, transparent)",
-                      color: "var(--mb-mint-glow)",
+                      color: "var(--color-link-inverse)",
                     }}
                   >
                     <span className="material-symbols-outlined">pin</span>
@@ -800,7 +800,7 @@ export default function SignUpPage() {
                     style={{
                       backgroundColor:
                         "color-mix(in srgb, var(--color-surface-brand-soft) 20%, transparent)",
-                      color: "var(--mb-secondary-container)",
+                      color: "var(--color-surface-brand-soft)",
                     }}
                   >
                     <span className="material-symbols-outlined">auto_awesome</span>
@@ -873,7 +873,7 @@ export default function SignUpPage() {
                     height: "2.25rem",
                     borderRadius: "9999px",
                     backgroundColor: "var(--color-accent-a20)",
-                    color: "var(--mb-emerald-accent)",
+                    color: "var(--color-accent)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -886,7 +886,7 @@ export default function SignUpPage() {
                   style={{
                     margin: 0,
                     fontSize: "13px",
-                    color: "var(--mb-mint-subtle)",
+                    color: "var(--color-surface-brand)",
                     fontWeight: 500,
                     lineHeight: "1.5",
                   }}

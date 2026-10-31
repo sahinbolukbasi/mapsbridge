@@ -1,6 +1,5 @@
 "use client";
 
-
 import { userStorage } from "../lib/user-storage";
 
 import { API_ENDPOINT, readShare } from "../lib/api";
@@ -76,8 +75,16 @@ interface LeafletMouseEvent {
 }
 
 interface LeafletMap {
-  flyTo(latlng: [number, number] | LeafletLatLng, zoom: number, options?: Record<string, unknown>): this;
-  setView(center: [number, number] | LeafletLatLng, zoom: number, options?: Record<string, unknown>): this;
+  flyTo(
+    latlng: [number, number] | LeafletLatLng,
+    zoom: number,
+    options?: Record<string, unknown>,
+  ): this;
+  setView(
+    center: [number, number] | LeafletLatLng,
+    zoom: number,
+    options?: Record<string, unknown>,
+  ): this;
   zoomIn(): this;
   zoomOut(): this;
   getCenter(): LeafletLatLng;
@@ -114,9 +121,7 @@ interface WindowWithLeaflet {
 }
 
 import { useLocale, getAlternatePath } from "../lib/locale-context";
-import {
-  IconCopy,
-} from "../components/icons";
+import { IconCopy } from "../components/icons";
 import {
   CATEGORIES,
   MAP_STYLES,
@@ -127,6 +132,7 @@ import {
   type MapStyleId,
   type MapStyleOption,
 } from "../features/trip-planner/map-styles";
+import "./maps-layout.css";
 
 export { CATEGORIES, MAP_STYLES, PIN_COLORS, MAP_FILTERS };
 export type { PlaceCategory, CategoryMeta, MapStyleId, MapStyleOption };
@@ -514,7 +520,9 @@ export default function Panel() {
         const parsed = JSON.parse(rawMsg);
         if (Array.isArray(parsed)) {
           setUnreadMessagesCount(
-            parsed.filter((m: { status?: string; read?: boolean }) => m.status === "unread" || !m.read).length,
+            parsed.filter(
+              (m: { status?: string; read?: boolean }) => m.status === "unread" || !m.read,
+            ).length,
           );
         }
       }
@@ -526,7 +534,6 @@ export default function Panel() {
         setRecentShares(recent.filter((item) => item.expiresAt * 1000 > Date.now()));
     } catch {}
     refreshSession();
-
 
     // Language is derived from useLocale() hook
 
@@ -2302,7 +2309,7 @@ export default function Panel() {
                 aria-label="Harita Kontrol Menüsünü Aç"
               >
                 <div className="stitch-hub-trigger-icon-box">
-                  <span className="material-symbols-outlined text-[17px]">
+                  <span className="material-symbols-outlined">
                     {currentMapStyle === "uydu"
                       ? "satellite_alt"
                       : currentMapStyle === "koyu"
@@ -2330,9 +2337,7 @@ export default function Panel() {
                 {/* Header */}
                 <div className="stitch-hub-card-header">
                   <div className="stitch-hub-header-left">
-                    <span className="material-symbols-outlined text-[17px] text-[#047857]">
-                      tune
-                    </span>
+                    <span className="material-symbols-outlined">tune</span>
                     <span>Harita Kontrolleri</span>
                   </div>
                   <button
@@ -2342,7 +2347,7 @@ export default function Panel() {
                     title="Kapat"
                     aria-label="Harita Kontrol Menüsünü Kapat"
                   >
-                    <span className="material-symbols-outlined text-[16px]">close</span>
+                    <span className="material-symbols-outlined">close</span>
                   </button>
                 </div>
 
@@ -2368,7 +2373,7 @@ export default function Panel() {
                             localStorage.setItem("mapsbridge.mapStyle", st.id);
                         }}
                       >
-                        <span className="material-symbols-outlined text-[16px]">{st.icon}</span>
+                        <span className="material-symbols-outlined">{st.icon}</span>
                         <span>{st.label}</span>
                       </button>
                     ))}
@@ -2388,9 +2393,7 @@ export default function Panel() {
                     title="Raylı Sistem & Ulaşım Katmanı"
                   >
                     <div className="stitch-hub-toggle-left">
-                      <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                        traffic
-                      </span>
+                      <span className="material-symbols-outlined mp-1">traffic</span>
                       <span>Raylı Sistem & Ulaşım</span>
                     </div>
                     <div className={`stitch-hub-toggle-pill ${showTransitOverlay ? "active" : ""}`}>
@@ -2412,7 +2415,7 @@ export default function Panel() {
                         if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
                       }}
                     >
-                      <span className="material-symbols-outlined text-[18px]">add</span>
+                      <span className="material-symbols-outlined">add</span>
                       <span>Büyüt</span>
                     </button>
 
@@ -2425,7 +2428,7 @@ export default function Panel() {
                         if (mapInstanceRef.current) mapInstanceRef.current.zoomOut();
                       }}
                     >
-                      <span className="material-symbols-outlined text-[18px]">remove</span>
+                      <span className="material-symbols-outlined">remove</span>
                       <span>Küçült</span>
                     </button>
 
@@ -2444,9 +2447,7 @@ export default function Panel() {
                         }
                       }}
                     >
-                      <span className="material-symbols-outlined text-[18px] text-sky-600">
-                        explore
-                      </span>
+                      <span className="material-symbols-outlined text-sky-600">explore</span>
                       <span>Kuzey</span>
                     </button>
 
@@ -2459,7 +2460,7 @@ export default function Panel() {
                       disabled={isLocating}
                     >
                       <span
-                        className={`material-symbols-outlined text-[18px] text-emerald-600 ${isLocating ? "animate-spin" : ""}`}
+                        className={`material-symbols-outlined mp-1 ${isLocating ? "animate-spin" : ""}`}
                       >
                         my_location
                       </span>
@@ -2479,7 +2480,7 @@ export default function Panel() {
                     }}
                     title="Detaylı Harita Özelleştirme"
                   >
-                    <span className="material-symbols-outlined text-[15px]">palette</span>
+                    <span className="material-symbols-outlined">palette</span>
                     <span>Daha Fazla Özelleştirme...</span>
                   </button>
                 </div>
@@ -2492,9 +2493,7 @@ export default function Panel() {
             <div className="stitch-floating-share-card" id="share-modal-card">
               <div className="share-card-head">
                 <div className="share-card-title-box">
-                  <span className="material-symbols-outlined text-[#286954] text-[20px]">
-                    share_location
-                  </span>
+                  <span className="material-symbols-outlined">share_location</span>
                   <h3 className="share-card-title">Rotayı Anında Paylaş</h3>
                 </div>
                 <button
@@ -2504,7 +2503,7 @@ export default function Panel() {
                   onClick={() => setShowShareCard(false)}
                   title="Kapat"
                 >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
+                  <span className="material-symbols-outlined">close</span>
                 </button>
               </div>
               <p className="share-card-desc">
@@ -2524,7 +2523,7 @@ export default function Panel() {
                   title="Kodu Kopyala"
                   onClick={handleCopyCode}
                 >
-                  <span className="material-symbols-outlined text-[17px] text-white">
+                  <span className="material-symbols-outlined mp-2">
                     {copiedCode ? "check" : "content_copy"}
                   </span>
                 </button>
@@ -2581,7 +2580,7 @@ export default function Panel() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <span className="material-symbols-outlined text-[15px]">chat</span> WhatsApp
+                  <span className="material-symbols-outlined">chat</span> WhatsApp
                 </a>
                 <a
                   className="share-social-btn telegram"
@@ -2589,12 +2588,10 @@ export default function Panel() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <span className="material-symbols-outlined text-[15px]">send</span> Telegram
+                  <span className="material-symbols-outlined">send</span> Telegram
                 </a>
                 <button type="button" className="share-social-btn link" onClick={handleCopyLink}>
-                  <span className="material-symbols-outlined text-[15px]">
-                    {copiedLink ? "check" : "link"}
-                  </span>{" "}
+                  <span className="material-symbols-outlined">{copiedLink ? "check" : "link"}</span>{" "}
                   {copiedLink ? "Kopyalandı" : "Link"}
                 </button>
               </div>
@@ -2685,33 +2682,33 @@ export default function Panel() {
             aria-modal="true"
             aria-label="Harita Görünümü"
           >
-            <div className="layer-card-head flex items-center justify-between pb-1">
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[#286954] text-[20px]">map</span>
-                <h3 className="text-[16px] font-bold text-[#013628]">Harita Görünümü</h3>
+            <div className="layer-card-head mp-3 pb-1">
+              <div className="mp-4">
+                <span className="material-symbols-outlined">map</span>
+                <h3 className="mp-5">Harita Görünümü</h3>
               </div>
               <button
                 type="button"
-                className="w-7 h-7 rounded-full bg-[#F1F5F9] hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+                className="mp-6 hover:bg-slate-200"
                 id="close-layer-btn"
                 onClick={() => setShowMapCustomizeModal(false)}
                 title="Kapat"
               >
-                <span className="material-symbols-outlined text-[16px]">close</span>
+                <span className="material-symbols-outlined">close</span>
               </button>
             </div>
 
             {/* 6 Map Style Grid (3x2) */}
-            <div className="grid grid-cols-3 gap-2 my-2">
+            <div className="mp-7 grid-cols-3 my-2">
               {MAP_STYLES.map((style) => {
                 const isSelected = currentMapStyle === style.id;
                 return (
                   <div
                     key={style.id}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-xl cursor-pointer transition-all ${
+                    className={`mp-8 ${
                       isSelected
-                        ? "bg-[#ECFDF5] ring-1 ring-[#10B981] shadow-sm"
-                        : "bg-white hover:bg-[#F1F5F9] border border-slate-200/70"
+                        ? "ring-1 mp-u-shadow-sm"
+                        : "mp-u-bg-white mp-u-border border-slate-200/70"
                     }`}
                     onClick={() => {
                       setCurrentMapStyle(style.id);
@@ -2719,18 +2716,10 @@ export default function Panel() {
                         localStorage.setItem("mapsbridge.mapStyle", style.id);
                     }}
                   >
-                    <div
-                      className={`w-full h-9 rounded-lg flex items-center justify-center text-[18px] ${
-                        isSelected ? "bg-[#abedd3] text-[#013628]" : "bg-[#F1F5F9] text-[#404945]"
-                      }`}
-                    >
-                      <span className="text-[17px]">{style.icon}</span>
+                    <div className={`mp-9 ${""}`}>
+                      <span className="">{style.icon}</span>
                     </div>
-                    <span
-                      className={`text-[10px] text-center font-bold truncate max-w-full ${
-                        isSelected ? "text-[#013628]" : "text-[#404945]"
-                      }`}
-                    >
+                    <span className={`mp-10 text-center max-w-full ${""}`}>
                       {style.label.split("&")[0].trim()}
                     </span>
                   </div>
@@ -2739,12 +2728,10 @@ export default function Panel() {
             </div>
 
             {/* Overlays */}
-            <div className="flex flex-col gap-2 pt-1 border-t border-slate-200/70">
-              <label className="flex items-center justify-between cursor-pointer text-[12px] font-medium text-[#131b2e]">
-                <span className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[16px] text-[#286954]">
-                    subway
-                  </span>
+            <div className="mp-11 border-slate-200/70">
+              <label className="mp-12">
+                <span className="mp-4">
+                  <span className="material-symbols-outlined">subway</span>
                   <span>Metro & Raylı Hatlar</span>
                 </span>
                 <input
@@ -2755,15 +2742,13 @@ export default function Panel() {
                     if (typeof window !== "undefined")
                       localStorage.setItem("mapsbridge.transitOverlay", String(e.target.checked));
                   }}
-                  className="accent-[#10B981] w-4 h-4 cursor-pointer"
+                  className="w-4 h-4 mp-13"
                 />
               </label>
 
-              <label className="flex items-center justify-between cursor-pointer text-[12px] font-medium text-[#131b2e]">
-                <span className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[16px] text-[#286954]">
-                    apartment
-                  </span>
+              <label className="mp-12">
+                <span className="mp-4">
+                  <span className="material-symbols-outlined">apartment</span>
                   <span>3D Bina Gölgelendirmesi</span>
                 </span>
                 <input
@@ -2775,26 +2760,22 @@ export default function Panel() {
                     if (typeof window !== "undefined")
                       localStorage.setItem("mapsbridge.mapVisualFilter", nextFilter);
                   }}
-                  className="accent-[#10B981] w-4 h-4 cursor-pointer"
+                  className="w-4 h-4 mp-13"
                 />
               </label>
             </div>
 
             {/* Route Color Picker */}
-            <div className="flex flex-col gap-1.5 pt-2 border-t border-slate-200/70">
-              <span className="text-[10px] text-[#404945] font-bold uppercase tracking-wider">
-                Rota Vurgu Rengi
-              </span>
-              <div className="flex items-center justify-between pt-0.5">
+            <div className="mp-14 border-slate-200/70">
+              <span className="mp-15 uppercase tracking-wider">Rota Vurgu Rengi</span>
+              <div className="mp-3 pt-0.5">
                 {PIN_COLORS.map((c) => {
                   const isSelected = pinColor === c.id;
                   return (
                     <button
                       key={c.id}
                       type="button"
-                      className={`w-6 h-6 rounded-full transition-transform ${
-                        isSelected ? "ring-2 ring-[#013628] scale-110" : "hover:scale-105"
-                      }`}
+                      className={`mp-16 ${isSelected ? "ring-2 scale-110" : "hover:scale-105"}`}
                       style={{ backgroundColor: c.color }}
                       title={c.name}
                       onClick={() => {
@@ -2812,51 +2793,58 @@ export default function Panel() {
 
         {/* Seyahat Manifestosu (.md) Modalı */}
         {showTripManifestoModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-[#111927] border border-slate-700/80 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#0d1424]">
-                <div className="flex items-center gap-2">
+          <div className="mp-17 p-4 mp-u-scrim-60 backdrop-blur-sm animate-in fade-in">
+            <div className="mp-18 border-slate-700/80 rounded-2xl max-w-2xl shadow-2xl">
+              <div className="mp-3 px-6 py-4 border-b border-slate-800">
+                <div className="mp-19">
                   <span className="material-symbols-outlined text-sky-400 text-xl">
                     description
                   </span>
-                  <h3 className="text-base font-bold text-slate-100">Seyahat Manifestosu (.md)</h3>
+                  <h3 className="text-base mp-5 text-slate-100">Seyahat Manifestosu (.md)</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowTripManifestoModal(false)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+                  className="w-8 h-8 mp-20 mp-u-text-400 hover:text-white hover:bg-slate-800/80"
                   title="Kapat"
                 >
                   <span className="material-symbols-outlined text-lg">close</span>
                 </button>
               </div>
 
-              <div className="p-4 flex-1 overflow-y-auto">
-                <p className="text-xs text-slate-400 mb-3">
+              <div className="p-4 mp-21 overflow-y-auto">
+                <p className="mp-22 mp-u-text-400">
                   Bu markdown dosyası seyahatinizin tüm duraklarını, konaklamalarını ve notlarını
                   içerir. AI Asistanı (
-                  <a href="/travel-assistant/" className="text-emerald-400 underline hover:text-emerald-300">
+                  <a
+                    href="/travel-assistant/"
+                    className="text-emerald-400 underline hover:text-emerald-300"
+                  >
                     /ai
                   </a>
                   ) sorularınızı yanıtlarken bu dosyayı okuyarak rota ve otellerinizi tam olarak
                   bilir.
                 </p>
-                <pre className="bg-[#0b101c] p-4 rounded-xl border border-slate-800/80 text-xs font-mono text-slate-200 overflow-x-auto whitespace-pre-wrap max-h-[50vh] leading-relaxed select-all">
+                <pre className="p-4 mp-23 border-slate-800/80 font-mono text-slate-200 overflow-x-auto whitespace-pre-wrap select-all">
                   {planner.activeTrip
                     ? tripToMarkdown(planner.activeTrip)
                     : "# Henüz aktif seyahat yok."}
                 </pre>
               </div>
 
-              <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-800 bg-[#0d1424] gap-2 flex-wrap">
+              <div className="mp-24 px-6 py-3.5 border-slate-800">
                 <a
-                  href={planner.activeTrip ? `/travel-assistant/?tripId=${planner.activeTrip.id}` : "/travel-assistant/"}
-                  className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5"
+                  href={
+                    planner.activeTrip
+                      ? `/travel-assistant/?tripId=${planner.activeTrip.id}`
+                      : "/travel-assistant/"
+                  }
+                  className="mp-25 text-emerald-400 hover:text-emerald-300"
                 >
                   <span className="material-symbols-outlined text-base">smart_toy</span>
                   <span>AI Asistanda Bu Rota ile Konuş</span>
                 </a>
-                <div className="flex items-center gap-2">
+                <div className="mp-19">
                   <button
                     type="button"
                     onClick={async () => {
@@ -2864,9 +2852,9 @@ export default function Panel() {
                       await navigator.clipboard.writeText(tripToMarkdown(planner.activeTrip));
                       showPanelToast("✓ Markdown panoya kopyalandı!");
                     }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors flex items-center gap-1.5"
+                    className="mp-26 bg-slate-800 text-slate-200 hover:bg-slate-700"
                   >
-                    <span className="material-symbols-outlined text-sm">content_copy</span>
+                    <span className="material-symbols-outlined mp-27">content_copy</span>
                     <span>Kopyala</span>
                   </button>
                   <button
@@ -2883,9 +2871,9 @@ export default function Panel() {
                       URL.revokeObjectURL(url);
                       showPanelToast("✓ Markdown dosyası indirildi!");
                     }}
-                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-1.5 shadow-lg shadow-emerald-950/40"
+                    className="mp-28 hover:bg-emerald-500 shadow-lg shadow-emerald-950/40"
                   >
-                    <span className="material-symbols-outlined text-sm">download</span>
+                    <span className="material-symbols-outlined mp-27">download</span>
                     <span>İndir (.md)</span>
                   </button>
                 </div>
@@ -2896,8 +2884,8 @@ export default function Panel() {
 
         {/* Fiyat Takip & Ucuz Bilet/Otel Botu Modalı */}
         {showDealTrackerModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-            <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+          <div className="mp-17 p-4 mp-u-scrim-60 backdrop-blur-sm animate-in fade-in">
+            <div className="mp-29 max-w-3xl overflow-y-auto">
               <DealTrackerPanel
                 initialDestination={
                   planner.activeTrip?.destination || planner.activeTrip?.title || ""
@@ -2910,8 +2898,8 @@ export default function Panel() {
 
         {/* Panel Bilgilendirme Bildirimi */}
         {panelToast && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full border border-emerald-500/30 shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
-            <span className="material-symbols-outlined text-[16px] text-emerald-400">info</span>
+          <div className="mp-30 bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/95 px-4 py-2.5 border-emerald-500/30 shadow-2xl animate-in fade-in slide-in-from-bottom-2">
+            <span className="material-symbols-outlined text-emerald-400">info</span>
             <span>{panelToast}</span>
           </div>
         )}

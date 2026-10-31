@@ -14,12 +14,15 @@ const LEGACY = [
   "components/upgrade-modal.css",
   "styles.css",
   "auth.css",
-  "tw-utils.css",
   // tw-utils.css'ten üretilmiş yerleşim sınıfları (codemod --mode tw, design §2.7 8b): legacy
   // katmanında kalır, böylece utility'lerin sayfa CSS'ine karşı kaskadı birebir korunur.
+  // tw-utils.css C18'de silindi.
   "features/community/community-layout.css",
   "profile/profile-layout.css",
   "profile/edit/edit-layout.css",
+  "maps/maps-layout.css",
+  "reset-password/reset-password-layout.css",
+  "components/soft-icon-layout.css",
 ];
 const CHROME = ["components/header-nav.css", "components/site-footer.css"];
 
@@ -141,7 +144,9 @@ test("legacy alias hedefleri tokens.css'te tanımlıdır ve yeni ad içermez", (
     "utf8",
   );
   const entries = [...src.matchAll(/^\s+"([\w-]+)": "([^"]*)",$/gm)];
-  assert.ok(entries.length > 0);
+  // C18: tüm alias kullanımları semantik token'lara yazıldı; tablo boş obje (AC-6).
+  assert.match(src, /legacyAliases: Record<string, string> = \{\};/);
+  assert.equal(entries.length, 0);
   for (const [, name, value] of entries) {
     assert.doesNotMatch(name, /^color-/, `${name}: alias adı semantik ad alanında olamaz`);
     for (const ref of value.matchAll(/var\(--([\w-]+)\)/g)) {

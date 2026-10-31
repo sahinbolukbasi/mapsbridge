@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "../lib/api-client";
+import { PageHeader, PageShell } from "../components/ui";
 
 type Blog = {
   blogId: string;
@@ -43,20 +44,21 @@ export default function ArticlesPage() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "var(--bg, #f8fafc)",
+        background: "var(--color-bg)",
       }}
     >
-      <main
-        className="support-page"
-        style={{ maxWidth: "1000px", margin: "2rem auto", padding: "0 1.5rem", width: "100%" }}
-      >
+      <PageShell layout="landing" header={<PageHeader variant="hidden" />}>
+        <div
+          className="support-page"
+          style={{ maxWidth: "1000px", margin: "2rem auto", padding: "0 1.5rem", width: "100%" }}
+        >
         <div
           style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}
         >
           <Link
             href="/"
             style={{
-              color: "#10b981",
+              color: "var(--color-success)",
               textDecoration: "none",
               fontWeight: 600,
               display: "inline-flex",
@@ -71,9 +73,18 @@ export default function ArticlesPage() {
           </Link>
         </div>
 
-        <h1 style={{ fontSize: "2rem", fontWeight: 800, color: "#013628", marginBottom: "0.5rem" }}>
+        <p
+          style={{
+            fontSize: "2rem",
+            fontWeight: 800,
+            textWrap: "balance",
+            color: "var(--color-primary)",
+            marginTop: "0.67em",
+            marginBottom: "0.5rem",
+          }}
+        >
           MapsBridge Gezgin Yazıları &amp; Rehberler
-        </h1>
+        </p>
         <p style={{ color: "#64748b", marginBottom: "2rem" }}>
           Keşif rotaları, seyahat tüyoları ve topluluk hikayeleri.
         </p>
@@ -85,8 +96,8 @@ export default function ArticlesPage() {
             style={{
               padding: "1rem",
               borderRadius: "12px",
-              background: "rgba(239, 68, 68, 0.1)",
-              color: "#dc2626",
+              background: "var(--color-danger-bg)",
+              color: "var(--color-danger)",
               marginBottom: "1.5rem",
             }}
           >
@@ -243,7 +254,8 @@ export default function ArticlesPage() {
             ))}
           </div>
         )}
-      </main>
+        </div>
+      </PageShell>
     </div>
   );
 }

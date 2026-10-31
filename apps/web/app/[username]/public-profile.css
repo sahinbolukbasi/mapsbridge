@@ -8,9 +8,9 @@
   }
   .public-profile-root {
     min-height: 100vh;
-    background-color: var(--stitch-background);
-    color: var(--stitch-on-surface);
-    font-family: var(--stitch-font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -38,7 +38,7 @@
     border-radius: 9999px;
     border: none;
     background: transparent;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -48,8 +48,8 @@
   }
 
   .pub-icon-btn:hover {
-    background: var(--stitch-surface-container);
-    color: var(--stitch-on-surface);
+    background: var(--color-surface-tint);
+    color: var(--color-text);
   }
   /* Sticky Preview Mode Notification Banner */
   .pub-preview-banner {
@@ -57,8 +57,8 @@
     top: 80px;
     z-index: 40;
     width: 100%;
-    background: var(--stitch-primary);
-    color: var(--stitch-on-primary);
+    background: var(--color-text-brand);
+    color: var(--color-on-primary);
     box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
 
@@ -84,15 +84,15 @@
     align-items: center;
     gap: 0.65rem;
     font-size: 13px;
-    color: var(--stitch-surface-container-high);
+    color: var(--color-surface-tint);
   }
 
   .pub-pulse-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--stitch-mint-glow);
-    box-shadow: 0 0 10px var(--stitch-mint-glow);
+    background: var(--color-link-inverse);
+    box-shadow: 0 0 10px var(--color-link-inverse);
     animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
@@ -116,7 +116,7 @@
     border-radius: 9999px;
     background: color-mix(in srgb, var(--color-surface) 14%, transparent);
     color: var(--color-on-primary);
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
@@ -141,7 +141,7 @@
     height: 320px;
     position: relative;
     overflow: hidden;
-    background: var(--stitch-primary-container);
+    background: var(--color-brand-hover);
   }
 
   @media (min-width: 1024px) {
@@ -203,7 +203,7 @@
   .pub-masthead-card {
     position: relative;
     margin-top: -6rem;
-    background: var(--stitch-surface-container-lowest);
+    background: var(--color-surface);
     border-radius: 28px;
     padding: 2rem;
     box-shadow: 0 20px 48px -12px color-mix(in srgb, var(--color-surface-inverse) 12%, transparent);
@@ -272,8 +272,8 @@
     border-radius: 9999px;
     overflow: hidden;
     box-shadow: 0 8px 24px color-mix(in srgb, var(--color-surface-inverse) 15%, transparent);
-    border: 4px solid var(--stitch-surface-container-lowest);
-    background: var(--stitch-surface-container);
+    border: 4px solid var(--color-surface);
+    background: var(--color-surface-tint);
   }
 
   .pub-avatar-img-wrap img {
@@ -293,7 +293,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--stitch-primary), var(--stitch-secondary));
+    background: linear-gradient(135deg, var(--color-text-brand), var(--color-brand));
     color: var(--color-text-inverse);
     font-size: 2.5rem;
     font-weight: 800;
@@ -306,13 +306,13 @@
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background: var(--stitch-emerald-accent);
+    background: var(--color-accent);
     color: var(--color-on-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    border: 2.5px solid var(--stitch-surface-container-lowest);
+    border: 2.5px solid var(--color-surface);
   }
 
   .pub-user-details {
@@ -332,7 +332,7 @@
   .pub-user-name {
     font-size: 1.85rem;
     font-weight: 700;
-    color: var(--stitch-primary);
+    color: var(--color-text-brand);
     letter-spacing: -0.02em;
     margin: 0;
     line-height: 1.15;
@@ -350,20 +350,20 @@
     gap: 0.3rem;
     padding: 0.2rem 0.65rem;
     border-radius: 9999px;
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.04em;
   }
 
   .pub-badge-pill.pro {
-    background: var(--stitch-mint-subtle);
-    color: var(--stitch-secondary);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
   }
 
   .pub-badge-pill.verified {
-    background: var(--stitch-surface-container-high);
-    color: var(--stitch-on-surface-variant);
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
   }
 
   .pub-meta-row {
@@ -372,11 +372,11 @@
     align-items: center;
     gap: 1rem;
     font-size: 14px;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
   }
 
   .pub-handle-link {
-    color: var(--stitch-secondary);
+    color: var(--color-brand);
     font-weight: 600;
     text-decoration: none;
   }
@@ -407,7 +407,7 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    background: var(--stitch-surface-container-low);
+    background: var(--color-surface-tint);
     padding: 0.25rem;
     border-radius: 9999px;
     margin-right: 0.25rem;
@@ -420,7 +420,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
     text-decoration: none;
     transition: all 0.2s ease;
     border: none;
@@ -429,8 +429,8 @@
   }
 
   .pub-social-btn:hover {
-    background: var(--stitch-surface-container-lowest);
-    color: var(--stitch-primary);
+    background: var(--color-surface);
+    color: var(--color-text-brand);
   }
 
   .pub-circle-action-btn {
@@ -438,8 +438,8 @@
     height: 42px;
     border-radius: 50%;
     border: none;
-    background: var(--stitch-surface-container);
-    color: var(--stitch-on-surface-variant);
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -448,8 +448,8 @@
   }
 
   .pub-circle-action-btn:hover {
-    background: var(--stitch-surface-container-high);
-    color: var(--stitch-primary);
+    background: var(--color-surface-tint);
+    color: var(--color-text-brand);
     transform: translateY(-1px);
   }
 
@@ -459,9 +459,9 @@
     gap: 0.45rem;
     padding: 0.65rem 1.15rem;
     border-radius: 9999px;
-    background: var(--stitch-surface-container);
-    color: var(--stitch-primary);
-    font-family: var(--stitch-font-label);
+    background: var(--color-surface-tint);
+    color: var(--color-text-brand);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 13px;
     font-weight: 600;
     border: none;
@@ -470,7 +470,7 @@
   }
 
   .pub-btn-secondary:hover {
-    background: var(--stitch-surface-container-high);
+    background: var(--color-surface-tint);
   }
 
   .pub-btn-primary {
@@ -479,9 +479,9 @@
     gap: 0.5rem;
     padding: 0.65rem 1.5rem;
     border-radius: 9999px;
-    background: var(--stitch-primary);
-    color: var(--stitch-on-primary);
-    font-family: var(--stitch-font-label);
+    background: var(--color-text-brand);
+    color: var(--color-on-primary);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 13px;
     font-weight: 600;
     border: none;
@@ -491,14 +491,14 @@
   }
 
   .pub-btn-primary:hover {
-    background: var(--stitch-primary-container);
+    background: var(--color-brand-hover);
     transform: translateY(-1px);
     box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 28%, transparent);
   }
 
   .pub-btn-primary.following {
-    background: var(--stitch-mint-subtle);
-    color: var(--stitch-secondary);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
     box-shadow: none;
     border: 1px solid var(--color-accent-a30);
   }
@@ -507,7 +507,7 @@
   .pub-bio-text {
     font-size: 15px;
     line-height: 1.65;
-    color: var(--stitch-on-surface);
+    color: var(--color-text);
     max-width: 68rem;
     margin: 0;
   }
@@ -518,7 +518,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     padding: 1.25rem 1.5rem;
-    background: var(--stitch-canvas-base);
+    background: var(--color-bg);
     border-radius: 18px;
     border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
   }
@@ -537,7 +537,7 @@
   .pub-stat-num {
     font-size: 1.35rem;
     font-weight: 700;
-    color: var(--stitch-primary);
+    color: var(--color-text-brand);
     display: flex;
     align-items: center;
     gap: 0.3rem;
@@ -546,7 +546,7 @@
 
   .pub-stat-label {
     font-size: 12px;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
     margin-top: 2px;
   }
 
@@ -597,25 +597,25 @@
     gap: 0.45rem;
     padding: 0.65rem 1.25rem;
     border-radius: 9999px;
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
     border: none;
     cursor: pointer;
-    background: var(--stitch-surface-container-lowest);
-    color: var(--stitch-on-surface-variant);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
     box-shadow: 0 1px 4px color-mix(in srgb, var(--color-neutral-900) 4%, transparent);
     transition: all 0.2s ease;
   }
 
   .pub-tab-pill:hover {
-    color: var(--stitch-on-surface);
-    background: var(--stitch-surface-container);
+    color: var(--color-text);
+    background: var(--color-surface-tint);
   }
 
   .pub-tab-pill.active {
-    background: var(--stitch-primary);
+    background: var(--color-text-brand);
     color: var(--color-text-inverse);
     box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 18%, transparent);
   }
@@ -627,7 +627,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    background: var(--stitch-surface-container-lowest);
+    background: var(--color-surface);
     padding: 0.85rem 1.25rem;
     border-radius: 20px;
     box-shadow: 0 2px 10px color-mix(in srgb, var(--color-neutral-900) 3%, transparent);
@@ -644,23 +644,23 @@
   .pub-filter-pill {
     padding: 0.35rem 0.85rem;
     border-radius: 9999px;
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 500;
     border: none;
     cursor: pointer;
-    background: var(--stitch-surface-container-low);
-    color: var(--stitch-on-surface-variant);
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
     transition: all 0.2s ease;
   }
 
   .pub-filter-pill:hover {
-    color: var(--stitch-on-surface);
+    color: var(--color-text);
   }
 
   .pub-filter-pill.active {
-    background: var(--stitch-secondary-container);
-    color: var(--stitch-on-secondary-container);
+    background: var(--color-surface-brand-soft);
+    color: var(--color-brand);
     font-weight: 700;
   }
 
@@ -669,25 +669,25 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 12px;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
   }
 
   .pub-city-chip {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 500;
     border: none;
     cursor: pointer;
-    background: var(--stitch-surface-container);
-    color: var(--stitch-on-surface-variant);
+    background: var(--color-surface-tint);
+    color: var(--color-text-muted);
     transition: all 0.2s ease;
   }
 
   .pub-city-chip.active {
-    background: var(--stitch-mint-subtle);
-    color: var(--stitch-secondary);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
     font-weight: 600;
   }
 
@@ -705,7 +705,7 @@
   }
 
   .pub-route-card {
-    background: var(--stitch-surface-container-lowest);
+    background: var(--color-surface);
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 4px 16px color-mix(in srgb, var(--color-neutral-900) 5%, transparent);
@@ -727,7 +727,7 @@
     height: 200px;
     width: 100%;
     overflow: hidden;
-    background: var(--stitch-surface-container);
+    background: var(--color-surface-tint);
   }
 
   .pub-route-media img {
@@ -758,8 +758,8 @@
     background: color-mix(in srgb, var(--color-surface) 92%, transparent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    color: var(--stitch-on-surface);
-    font-family: var(--stitch-font-label);
+    color: var(--color-text);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 700;
     display: flex;
@@ -782,13 +782,13 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 12px;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
   }
 
   .pub-route-title {
     font-size: 1.05rem;
     font-weight: 700;
-    color: var(--stitch-primary);
+    color: var(--color-text-brand);
     line-height: 1.3;
     margin: 0.35rem 0;
     letter-spacing: -0.01em;
@@ -797,7 +797,7 @@
   .pub-route-desc {
     font-size: 13px;
     line-height: 1.5;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -811,7 +811,7 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid var(--stitch-surface-container-low);
+    border-top: 1px solid var(--color-surface-tint);
   }
 
   .pub-route-price-box {
@@ -820,17 +820,17 @@
   }
 
   .pub-route-price-label {
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 10px;
     font-weight: 700;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
     letter-spacing: 0.04em;
   }
 
   .pub-route-price-val {
     font-size: 1.15rem;
     font-weight: 700;
-    color: var(--stitch-primary);
+    color: var(--color-text-brand);
   }
 
   .pub-route-cta-btn {
@@ -839,7 +839,7 @@
     gap: 0.35rem;
     padding: 0.5rem 1rem;
     border-radius: 9999px;
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 600;
     border: none;
@@ -848,23 +848,23 @@
   }
 
   .pub-route-cta-btn.primary {
-    background: var(--stitch-primary);
+    background: var(--color-text-brand);
     color: var(--color-text-inverse);
     box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
 
   .pub-route-cta-btn.primary:hover {
-    background: var(--stitch-primary-container);
+    background: var(--color-brand-hover);
     transform: translateY(-1px);
   }
 
   .pub-route-cta-btn.secondary {
-    background: var(--stitch-surface-container);
-    color: var(--stitch-primary);
+    background: var(--color-surface-tint);
+    color: var(--color-text-brand);
   }
 
   .pub-route-cta-btn.secondary:hover {
-    background: var(--stitch-surface-container-high);
+    background: var(--color-surface-tint);
   }
 
   /* Pagination / View More */
@@ -880,9 +880,9 @@
     gap: 0.5rem;
     padding: 0.75rem 1.75rem;
     border-radius: 9999px;
-    background: var(--stitch-surface-container);
-    color: var(--stitch-primary);
-    font-family: var(--stitch-font-label);
+    background: var(--color-surface-tint);
+    color: var(--color-text-brand);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 13px;
     font-weight: 600;
     border: none;
@@ -891,7 +891,7 @@
   }
 
   .pub-load-more-btn:hover {
-    background: var(--stitch-surface-container-high);
+    background: var(--color-surface-tint);
   }
 
   /* Right Column Sidebar (4 Cols) */
@@ -902,7 +902,7 @@
   }
 
   .pub-sidebar-card {
-    background: var(--stitch-surface-container-lowest);
+    background: var(--color-surface);
     border-radius: 24px;
     padding: 1.5rem;
     box-shadow: 0 4px 16px color-mix(in srgb, var(--color-neutral-900) 4%, transparent);
@@ -921,7 +921,7 @@
   .pub-sidebar-card-title {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--stitch-primary);
+    color: var(--color-text-brand);
     display: flex;
     align-items: center;
     gap: 0.45rem;
@@ -937,7 +937,7 @@
   .pub-badge-item {
     padding: 0.85rem 0.5rem;
     border-radius: 16px;
-    background: var(--stitch-canvas-base);
+    background: var(--color-bg);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -950,8 +950,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--stitch-secondary-container);
-    color: var(--stitch-on-secondary-container);
+    background: var(--color-surface-brand-soft);
+    color: var(--color-brand);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -960,14 +960,14 @@
   .pub-badge-title {
     font-size: 12px;
     font-weight: 700;
-    color: var(--stitch-on-surface);
+    color: var(--color-text);
     line-height: 1.2;
   }
 
   .pub-badge-sub {
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 10px;
-    color: var(--stitch-on-surface-variant);
+    color: var(--color-text-muted);
     font-weight: 500;
   }
 
@@ -983,9 +983,9 @@
     gap: 0.35rem;
     padding: 0.45rem 0.85rem;
     border-radius: 9999px;
-    background: var(--stitch-mint-subtle);
-    color: var(--stitch-secondary);
-    font-family: var(--stitch-font-label);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 600;
   }
@@ -994,8 +994,8 @@
   .pub-collaborate-card {
     background: linear-gradient(
       135deg,
-      var(--stitch-primary) 0%,
-      var(--stitch-primary-container) 100%
+      var(--color-text-brand) 0%,
+      var(--color-brand-hover) 100%
     );
     color: var(--color-text-inverse);
     border-radius: 24px;
@@ -1021,10 +1021,10 @@
   }
 
   .pub-collab-tag {
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: var(--stitch-mint-glow);
+    color: var(--color-link-inverse);
     letter-spacing: 0.06em;
   }
 
@@ -1038,7 +1038,7 @@
   .pub-collab-desc {
     font-size: 13px;
     line-height: 1.55;
-    color: var(--stitch-surface-container-high);
+    color: var(--color-surface-tint);
     margin: 0;
   }
 
@@ -1053,9 +1053,9 @@
     width: 100%;
     padding: 0.75rem;
     border-radius: 9999px;
-    background: var(--stitch-mint-glow);
-    color: var(--stitch-deep-forest);
-    font-family: var(--stitch-font-label);
+    background: var(--color-link-inverse);
+    color: var(--color-surface-inverse);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 13px;
     font-weight: 700;
     border: none;
@@ -1069,7 +1069,7 @@
   }
 
   .pub-collab-btn-highlight:hover {
-    background: var(--stitch-emerald-accent);
+    background: var(--color-accent);
   }
 
   .pub-collab-btn-ghost {
@@ -1078,7 +1078,7 @@
     border-radius: 9999px;
     background: var(--color-white-a12);
     color: var(--color-on-primary);
-    font-family: var(--stitch-font-label);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     font-size: 12px;
     font-weight: 600;
     border: none;
@@ -1099,7 +1099,7 @@
     font-size: 13px;
     line-height: 1.6;
     font-style: italic;
-    color: var(--stitch-on-surface);
+    color: var(--color-text);
     margin: 0;
   }
 
@@ -1114,8 +1114,8 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--stitch-secondary-container);
-    color: var(--stitch-on-secondary-container);
+    background: var(--color-surface-brand-soft);
+    color: var(--color-brand);
     font-size: 12px;
     font-weight: 700;
     display: flex;
@@ -1149,14 +1149,14 @@
   }
 
   .pub-modal-window {
-    background: var(--stitch-surface-container-lowest);
+    background: var(--color-surface);
     border-radius: 24px;
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--stitch-border-subtle);
+    border: 1px solid var(--color-border-subtle);
     animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -1173,7 +1173,7 @@
 
   .pub-modal-header {
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--stitch-surface-container-low);
+    border-bottom: 1px solid var(--color-surface-tint);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1182,7 +1182,7 @@
   .pub-modal-title {
     font-size: 1.15rem;
     font-weight: 700;
-    color: var(--stitch-primary);
+    color: var(--color-text-brand);
     margin: 0;
   }
 
@@ -1195,8 +1195,8 @@
 
   .pub-modal-footer {
     padding: 1rem 1.5rem;
-    background: var(--stitch-surface-container-lowest);
-    border-top: 1px solid var(--stitch-surface-container-low);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-surface-tint);
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
@@ -1208,7 +1208,7 @@
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--stitch-deep-forest);
+    background: var(--color-surface-inverse);
     color: var(--color-text-inverse);
     padding: 0.75rem 1.5rem;
     border-radius: 9999px;

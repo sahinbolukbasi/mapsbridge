@@ -583,8 +583,8 @@
 
   /* Guest entry points share the same light/dark product language. */
   .promotion-page-root {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--color-bg);
+    color: var(--color-text);
   }
   .promo-ambient-glow-1,
   .promo-ambient-glow-2 {
@@ -592,55 +592,55 @@
   }
   .promotion-page-root .promo-hero-title {
     background: none;
-    -webkit-text-fill-color: var(--text);
+    -webkit-text-fill-color: var(--color-text);
     font-weight: 650;
   }
   .promotion-page-root :is(.promo-hero-subtitle, .promo-card-desc, .promo-sample-card p) {
-    color: var(--text-muted);
+    color: var(--color-text-muted);
   }
   .promotion-page-root :is(.promo-feature-card, .promo-teaser-container, .promo-sample-card) {
-    background: var(--surface);
-    border-color: var(--border);
-    border-radius: var(--radius);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
     box-shadow: none;
     backdrop-filter: none;
   }
   .promotion-page-root :is(.promo-card-title, .promo-teaser-title, .promo-sample-card strong) {
-    color: var(--text);
+    color: var(--color-text);
   }
   .promotion-page-root :is(.promo-badge, .promo-teaser-pill) {
-    background: var(--brand-soft);
-    color: var(--brand);
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
     border: 0;
     box-shadow: none;
   }
   .promotion-page-root .promo-btn-primary,
   .auth-modal-card .auth-modal-signup-btn {
-    background: var(--brand);
-    color: var(--on-brand);
+    background: var(--color-brand);
+    color: var(--color-on-primary);
     box-shadow: none;
     border-radius: var(--radius-sm);
     min-height: 44px;
   }
   .promotion-page-root .promo-btn-secondary,
   .auth-modal-card .auth-modal-login-btn {
-    background: var(--surface);
-    color: var(--text);
-    border-color: var(--border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border);
     border-radius: var(--radius-sm);
     min-height: 44px;
   }
   .auth-modal-overlay .auth-modal-card {
-    background: var(--surface);
-    color: var(--text);
+    background: var(--color-surface);
+    color: var(--color-text);
     box-shadow: var(--shadow-lg);
-    border-color: var(--border);
+    border-color: var(--color-border);
     border-radius: var(--radius-lg);
   }
   .auth-modal-card .auth-modal-title {
-    color: var(--text);
+    color: var(--color-text);
   }
   .auth-modal-card :is(.auth-modal-subtitle, .auth-modal-perk-item, .auth-modal-close-btn) {
-    color: var(--text-muted);
+    color: var(--color-text-muted);
   }
 }

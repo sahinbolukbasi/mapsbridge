@@ -1064,7 +1064,7 @@ export default function Home() {
                       <button
                         type="button"
                         className="community-engagement-btn like"
-                        aria-label="Like"
+                        aria-label={`${post.likes} beğeni`}
                       >
                         <span className="material-symbols-outlined">favorite</span>
                         <span className="community-engagement-count">{post.likes}</span>
@@ -1072,7 +1072,7 @@ export default function Home() {
                       <button
                         type="button"
                         className="community-engagement-btn"
-                        aria-label="Comment"
+                        aria-label={`${post.comments} yorum`}
                       >
                         <span className="material-symbols-outlined">chat_bubble</span>
                         <span>{post.comments}</span>

@@ -652,7 +652,7 @@
     font-family: Inter, sans-serif;
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--color-text-subtle);
+    color: var(--color-text-muted);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     white-space: nowrap;
@@ -984,7 +984,7 @@
   }
 
   .trust-metric-value.emerald {
-    color: var(--color-accent);
+    color: var(--color-success);
   }
 
   .trust-metric-value .rating-frac {
@@ -1325,7 +1325,7 @@
   }
 
   .bento-stat-value.emerald {
-    color: var(--color-accent);
+    color: var(--color-success);
   }
   .steps-grid-new {
     display: grid;
@@ -2057,7 +2057,7 @@
   }
 
   .community-route-sub.budget {
-    color: var(--color-accent);
+    color: var(--color-success);
     font-weight: 500;
   }
 

@@ -7,21 +7,16 @@
   /* ========================================================= */
 
   .community-page-root {
-    /* MapsBridge Design Tokens */
-    --mb-forest: #013628;
-    --mb-emerald: #10b981;
-    --mb-mint: #ecfdf5;
-    --mb-canvas: #f8fafc;
 
-    --c-bg: var(--bg, #f8f7f4);
-    --c-card: var(--surface, #ffffff);
-    --c-card-hover: var(--surface-alt, #f0f2ed);
-    --c-border: var(--border, #dde2da);
-    --c-text: var(--text, #202e29);
-    --c-text-secondary: var(--text-muted, #5e6d65);
-    --c-text-muted: var(--text-muted, #5e6d65);
-    --c-brand: var(--brand, #24634d);
-    --c-input-bg: var(--surface-alt, #f0f2ed);
+    --c-bg: var(--color-bg);
+    --c-card: var(--color-surface);
+    --c-card-hover: var(--color-surface-sunken);
+    --c-border: var(--color-border);
+    --c-text: var(--color-text);
+    --c-text-secondary: var(--color-text-muted);
+    --c-text-muted: var(--color-text-muted);
+    --c-brand: var(--color-brand);
+    --c-input-bg: var(--color-surface-sunken);
     --c-sticky-bg: rgba(248, 247, 244, 0.94);
     min-height: 100vh;
     background: var(--c-bg);
@@ -96,7 +91,7 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.45rem 0.9rem;
-    background: var(--mb-forest);
+    background: var(--color-primary);
     color: var(--color-text-inverse);
     border-radius: 0.75rem;
     font-size: 0.8rem;
@@ -114,7 +109,7 @@
   /* ── SIDEBAR ───────────────────────────────────────────── */
   .community-sidebar-col {
     position: sticky;
-    top: calc(var(--nav-height, 64px) + 1rem);
+    top: calc(var(--header-height) + 1rem);
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -161,9 +156,9 @@
   }
 
   .community-sidebar-cat-pill:hover {
-    background: var(--brand-soft, var(--color-surface-brand));
-    color: var(--brand, #24634d);
-    border-color: var(--brand, var(--color-brand));
+    background: var(--color-surface-brand);
+    color: var(--color-brand);
+    border-color: var(--color-brand);
   }
 
   .community-sidebar-links {
@@ -204,7 +199,7 @@
 
   .community-sidebar-cta-icon {
     font-size: 28px !important;
-    color: var(--brand, #24634d);
+    color: var(--color-brand);
     margin-bottom: 0.15rem;
   }
 
@@ -223,8 +218,8 @@
 
   /* ── HERO BANNER ───────────────────────────────────────── */
   .community-hero {
-    border-bottom: 1px solid var(--border, var(--color-border));
-    background: linear-gradient(160deg, var(--color-bg) 0%, var(--bg, var(--color-bg)) 60%, var(--color-surface-brand) 100%);
+    border-bottom: 1px solid var(--color-border);
+    background: linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg) 60%, var(--color-surface-brand) 100%);
     position: relative;
     overflow: hidden;
     padding: 2rem 0 1.5rem;
@@ -267,7 +262,7 @@
     font-size: 0.6875rem;
     font-weight: 600;
     background: var(--color-surface-brand);
-    color: var(--brand, #24634d);
+    color: var(--color-brand);
     border: 1px solid var(--color-accent-a20);
   }
 
@@ -276,7 +271,7 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-size: 0.6875rem;
-    color: var(--brand, #24634d);
+    color: var(--color-brand);
   }
 
   .hero-badge-sep {
@@ -316,7 +311,7 @@
 
   .hero-active-count {
     font-size: 0.75rem;
-    color: var(--text-muted, #5e6d65);
+    color: var(--color-text-muted);
     font-weight: 500;
   }
 
@@ -344,7 +339,7 @@
   .hero-title {
     font-size: 1.875rem;
     font-weight: 800;
-    color: var(--text, #202e29);
+    color: var(--color-text);
     letter-spacing: -0.03em;
     line-height: 1.2;
     margin: 0 0 0.5rem;
@@ -358,7 +353,7 @@
 
   .hero-subtitle {
     font-size: 0.875rem;
-    color: var(--text-muted, #5e6d65);
+    color: var(--color-text-muted);
     line-height: 1.6;
     max-width: 40rem;
     margin: 0;
@@ -375,7 +370,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: var(--brand, var(--color-brand));
+    background: var(--color-brand);
     color: var(--color-text-inverse);
     font-weight: 700;
     font-size: 0.875rem;
@@ -390,7 +385,7 @@
   }
 
   .hero-share-btn:hover {
-    background: var(--brand-hover, var(--color-brand-hover));
+    background: var(--color-brand-hover);
     transform: translateY(-1px);
     box-shadow: 0 6px 24px -2px color-mix(in srgb, var(--color-brand) 25%, transparent);
   }
@@ -402,7 +397,7 @@
     gap: 0.5rem;
     overflow-x: auto;
     padding: 0.25rem 0 0.5rem;
-    border-top: 1px solid var(--border, var(--color-border));
+    border-top: 1px solid var(--color-border);
     scrollbar-width: thin;
   }
 
@@ -414,24 +409,24 @@
     border-radius: 0.75rem;
     font-size: 0.875rem;
     font-weight: 600;
-    background: var(--surface, var(--color-surface));
-    color: var(--text-muted, #5e6d65);
-    border: 1px solid var(--border, var(--color-border));
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s ease;
   }
 
   .hero-tab:hover {
-    background: var(--surface-alt, var(--color-bg));
-    color: var(--text, #202e29);
-    border-color: var(--brand, var(--color-brand));
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+    border-color: var(--color-brand);
   }
 
   .hero-tab.active {
-    background: var(--mb-emerald);
-    color: var(--mb-forest);
-    border-color: var(--mb-emerald);
+    background: var(--color-accent);
+    color: var(--color-primary);
+    border-color: var(--color-accent);
     box-shadow: 0 4px 10px color-mix(in srgb, var(--color-accent) 25%, transparent);
     font-weight: 800;
   }
@@ -1870,4 +1865,44 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-  }}
+  }
+
+  /* C18: tw-utils.css kaldırıldı; kalan utility'ler sayfa katmanında, :where() ile özgüllük 0
+     (eskiden legacy katmanındaydı; sayfa kuralları yine kazanır). */
+  :where(.cm-u-scrim-60) {
+    background-color: color-mix(in srgb, var(--color-neutral-900) 60%, transparent);
+  }
+  :where(.cm-u-shadow-sm) {
+    box-shadow: var(--shadow-xs);
+  }
+  :where(.cm-u-shadow-xl) {
+    box-shadow: var(--shadow-xl);
+  }
+  :where(.cm-u-text-danger) {
+    color: var(--color-danger);
+  }
+  :where(.cm-u-text-300) {
+    color: var(--color-neutral-300);
+  }
+  :where(.cm-u-text-400) {
+    color: var(--color-neutral-400);
+  }
+  :where(.cm-u-text-600) {
+    color: var(--color-text-muted);
+  }
+  :where(.cm-u-border-200) {
+    border-color: var(--color-border);
+  }
+  :where(.cm-u-text-success-strong) {
+    color: var(--color-success-strong);
+  }
+  :where(.cm-u-bg-brand) {
+    background-color: var(--color-surface-brand);
+  }
+  :where(.cm-u-text-success) {
+    color: var(--color-success);
+  }
+  :where(.cm-u-bold) {
+    font-weight: 700;
+  }
+}

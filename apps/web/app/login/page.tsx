@@ -533,7 +533,7 @@ export default function LoginPage() {
                   <Link
                     style={{
                       fontSize: "12px",
-                      color: "var(--mb-primary-container)",
+                      color: "var(--color-brand-hover)",
                       fontWeight: 700,
                       textDecoration: "none",
                       display: "flex",
@@ -554,7 +554,7 @@ export default function LoginPage() {
                   style={{
                     margin: "0.375rem 0 0",
                     fontSize: "13px",
-                    color: "var(--mb-on-surface)",
+                    color: "var(--color-text)",
                     fontWeight: 500,
                   }}
                 >
@@ -566,12 +566,12 @@ export default function LoginPage() {
                     alignItems: "center",
                     gap: "0.375rem",
                     marginTop: "0.5rem",
-                    color: "var(--mb-on-surface-variant)",
+                    color: "var(--color-text-muted)",
                   }}
                 >
                   <span
                     className="material-symbols-outlined"
-                    style={{ color: "var(--mb-emerald-accent)" }}
+                    style={{ color: "var(--color-accent)" }}
                   >
                     verified_user
                   </span>
@@ -583,7 +583,7 @@ export default function LoginPage() {
             </div>
 
             {/* Sağ Panel: Kapadokya Görseli & Glassmorphic Kartlar */}
-            <div className="login-card-right">
+            <div data-surface="inverse" className="login-card-right">
               {/* Arka Plan Görseli */}
               <div
                 className="login-bg-image"
@@ -593,23 +593,23 @@ export default function LoginPage() {
               <div className="login-bg-overlay" data-surface="inverse"></div>
 
               {/* Üst Asılı Hap: Son Ziyaret Edilen Rota */}
-              <div className="login-top-pill">
+              <div className="login-top-pill" data-surface="default">
                 <span
                   className="material-symbols-outlined"
-                  style={{ color: "var(--mb-secondary)" }}
+                  style={{ color: "var(--color-brand)" }}
                 >
                   explore
                 </span>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--mb-on-surface)" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--color-text)" }}>
                   Son Ziyaret Edilen:
                 </span>
-                <span style={{ fontSize: "12px", color: "var(--mb-on-surface-variant)" }}>
+                <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
                   Roma Rönesans &amp; Antik Miras
                 </span>
                 <span
                   style={{
-                    backgroundColor: "var(--mb-secondary-fixed)",
-                    color: "var(--mb-on-secondary-fixed)",
+                    backgroundColor: "var(--color-surface-brand-soft)",
+                    color: "var(--color-on-accent)",
                     padding: "0.125rem 0.5rem",
                     borderRadius: "9999px",
                     fontSize: "11px",
@@ -624,19 +624,19 @@ export default function LoginPage() {
               {/* Alt Kısım: Sayısal Başarı ve Gezgin Yorumu */}
               <div className="login-bottom-showcase">
                 {/* Canlı Metrik Kartı */}
-                <div className="login-metrics-box">
+                <div className="login-metrics-box" data-surface="default">
                   <div>
                     <div
                       style={{
                         fontSize: "28px",
                         lineHeight: "36px",
                         fontWeight: 700,
-                        color: "var(--mb-on-surface)",
+                        color: "var(--color-text)",
                       }}
                     >
                       140K+
                     </div>
-                    <div style={{ fontSize: "13px", color: "var(--mb-on-surface-variant)" }}>
+                    <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
                       Kayıtlı Gezgin
                     </div>
                   </div>
@@ -646,25 +646,25 @@ export default function LoginPage() {
                         fontSize: "28px",
                         lineHeight: "36px",
                         fontWeight: 700,
-                        color: "var(--mb-secondary)",
+                        color: "var(--color-brand)",
                       }}
                     >
                       500K+
                     </div>
-                    <div style={{ fontSize: "13px", color: "var(--mb-on-surface-variant)" }}>
+                    <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
                       Canlı Keşif Noktası
                     </div>
                   </div>
                 </div>
 
                 {/* Yarı Saydam Gerçek Kullanıcı Deneyimi Kartı */}
-                <div className="login-testimonial-box">
+                <div className="login-testimonial-box" data-surface="default">
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
                       gap: "2px",
-                      color: "var(--mb-emerald-accent)",
+                      color: "var(--color-accent)",
                       marginBottom: "0.5rem",
                     }}
                   >
@@ -680,7 +680,7 @@ export default function LoginPage() {
                       fontStyle: "italic",
                       fontSize: "15px",
                       lineHeight: "22px",
-                      color: "var(--mb-on-surface)",
+                      color: "var(--color-text)",
                     }}
                   >
                     “MapsBridge sayesinde İtalya seyahatimiz tek bir aksama olmadan tamamlandı. 6
@@ -695,14 +695,14 @@ export default function LoginPage() {
                     }}
                   >
                     <span
-                      style={{ fontSize: "13px", fontWeight: 700, color: "var(--mb-on-surface)" }}
+                      style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-text)" }}
                     >
                       — Elif D.
                     </span>
                     <span
                       style={{
                         fontSize: "12px",
-                        color: "var(--mb-on-surface-variant)",
+                        color: "var(--color-text-muted)",
                         display: "flex",
                         alignItems: "center",
                         gap: "0.25rem",
@@ -710,7 +710,7 @@ export default function LoginPage() {
                     >
                       <span
                         className="material-symbols-outlined"
-                        style={{ color: "var(--mb-secondary)" }}
+                        style={{ color: "var(--color-brand)" }}
                       >
                         pin_drop
                       </span>{" "}

@@ -2,7 +2,6 @@ import "./styles/tokens.css";
 import "./styles/base.css";
 import "./operations.css";
 import { siteOrigin } from "./lib/site-metadata";
-import { DialogFocus } from "./components/dialog-focus";
 import { IconFontReady } from "./components/icon-font-ready";
 import { GoogleOneTap } from "./components/google-one-tap";
 import { MobilePlatformProvider } from "./components/mobile-platform-provider";
@@ -15,7 +14,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./styles.css";
 import "./auth.css";
-import "./tw-utils.css";
 // Leaflet'e karşı layer'sız muaf kurallar; legacy global'lerden sonra (design §2.6).
 import "./styles/vendor-overrides.css";
 
@@ -94,7 +92,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <AuthProvider>
           <WSProvider>
             <IconFontReady />
-            <DialogFocus />
             <GoogleOneTap />
             <UpgradeModal />
             <LocaleProvider>
