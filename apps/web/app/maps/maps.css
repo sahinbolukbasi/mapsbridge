@@ -316,7 +316,7 @@
       color-mix(in srgb, var(--color-accent) 12%, transparent)
     );
     border: 1.5px solid rgba(14, 165, 233, 0.5);
-    color: #0284c7;
+    color: var(--color-accent-sky);
     padding: 0.42rem 0.95rem;
     border-radius: 999px;
     font-size: 0.82rem;
@@ -4125,7 +4125,7 @@
   }
   .gmap-maptype-option.active {
     background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-    color: #059669;
+    color: var(--color-success-strong);
     border-color: var(--color-accent);
     font-weight: 700;
   }
@@ -4160,7 +4160,7 @@
   }
   .gmap-transit-toggle.active {
     background: color-mix(in srgb, var(--color-info-icon) 12%, transparent);
-    color: #3b82f6;
+    color: var(--color-info-icon);
     border-color: color-mix(in srgb, var(--color-info-icon) 30%, transparent);
   }
   .gmap-toggle-indicator {

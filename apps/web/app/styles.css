@@ -7,7 +7,7 @@
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.88);
+    background: color-mix(in srgb, var(--color-surface) 88%, transparent);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--color-border);
@@ -372,7 +372,7 @@
   .switch-knob {
     width: 16px;
     height: 16px;
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: 50%;
     position: absolute;
     top: 2px;
@@ -417,7 +417,7 @@
 
   .logout-btn:hover {
     color: var(--color-danger);
-    background: rgba(239, 68, 68, 0.08);
+    background: color-mix(in srgb, var(--color-danger-icon) 8%, transparent);
     border-color: rgba(239, 68, 68, 0.2);
   }
 
@@ -675,7 +675,7 @@
   .submit-dialog-btn {
     flex: 1;
     background: var(--color-brand);
-    color: #ffffff;
+    color: var(--color-text-inverse);
     border: none;
     border-radius: 12px;
     padding: 0.85rem 1.25rem;
