@@ -1,5 +1,5 @@
-// CSS yapısı: tek :root, her dosya layer'lı, legacy alias hedefleri mevcut, Leaflet muafiyeti dar
-// (design §2.5, §2.6; guard G16/G22'nin C2 kapsamı).
+// CSS yapısı: her dosya layer'lı ve doğru layer'da, legacy alias tablosu boş (design §2.5, §2.6).
+// C19: tek :root (G2) ve Leaflet muafiyeti (G22) kontrolleri design-system-guard.test.cjs'e devredildi.
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -61,18 +61,6 @@ function topLevel(css) {
   return out.filter(Boolean);
 }
 
-test("web genelinde tek :root bloğu tokens.css'tedir (koyu tema kalıntıları hariç)", () => {
-  const offenders = [];
-  for (const rel of cssFiles) {
-    if (rel === "styles/tokens.css") continue;
-    for (const m of strip(read(rel)).matchAll(/([^{}]*):root([^{]*)\{/g)) {
-      const sel = `${m[1]}:root${m[2]}`.trim();
-      if (!sel.includes("data-theme")) offenders.push(`${rel}: ${sel}`);
-    }
-  }
-  assert.deepEqual(offenders, []);
-});
-
 test("her web CSS dosyası sıra ifadesiyle başlar ve tüm kuralları layer bloğundadır", () => {
   const problems = [];
   for (const rel of cssFiles) {
@@ -124,15 +112,6 @@ test("legacy dosyalardaki ek pages bloğu yalnızca body-kapsamlı override içe
         );
       }
     }
-  }
-});
-
-test("vendor-overrides.css yalnızca Leaflet'in ürettiği sınıfları hedefler", () => {
-  const allowed = /\.(custom-route-pin|custom-map-pin|stitch-leaflet-marker-wrap|leaflet-[\w-]+)/;
-  for (const stmt of topLevel(read("styles/vendor-overrides.css"))) {
-    const sel = stmt.slice(0, stmt.indexOf("{"));
-    for (const part of sel.split(","))
-      assert.match(part, allowed, `izin dışı seçici: ${part.trim()}`);
   }
 });
 
