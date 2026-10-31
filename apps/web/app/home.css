@@ -1533,7 +1533,7 @@
   }
 
   .step-check-arrow {
-    color: #94a3b8;
+    color: var(--color-text-subtle);
     font-size: 1rem;
     transition: transform 0.2s ease;
   }

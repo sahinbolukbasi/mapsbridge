@@ -103,7 +103,7 @@
   .promo-hero-subtitle {
     font-size: clamp(1rem, 2.5vw, 1.2rem);
     line-height: 1.6;
-    color: var(--text-secondary, #94a3b8);
+    color: var(--text-secondary, var(--color-text-inverse-subtle));
     max-width: 680px;
     margin: 0 0 2.25rem;
   }
@@ -152,7 +152,7 @@
     gap: 0.5rem;
     padding: 0.95rem 1.65rem;
     background: color-mix(in srgb, var(--color-surface) 5%, transparent);
-    color: #f1f5f9;
+    color: var(--color-neutral-100);
     font-size: 1rem;
     font-weight: 600;
     border-radius: 14px;
@@ -221,7 +221,7 @@
   .promo-card-desc {
     font-size: 0.88rem;
     line-height: 1.5;
-    color: #94a3b8;
+    color: var(--color-text-inverse-subtle);
     margin: 0;
   }
 
@@ -248,7 +248,7 @@
   .promo-teaser-title {
     font-size: 1.15rem;
     font-weight: 700;
-    color: #f8fafc;
+    color: var(--color-neutral-50);
     margin: 0;
     display: flex;
     align-items: center;
@@ -287,13 +287,13 @@
   .promo-sample-card strong {
     display: block;
     font-size: 0.95rem;
-    color: #f1f5f9;
+    color: var(--color-neutral-100);
     margin-bottom: 0.35rem;
   }
 
   .promo-sample-card p {
     font-size: 0.82rem;
-    color: #94a3b8;
+    color: var(--color-text-inverse-subtle);
     margin: 0;
     line-height: 1.4;
   }
@@ -356,7 +356,7 @@
     right: 1rem;
     background: var(--color-white-a08);
     border: none;
-    color: #94a3b8;
+    color: var(--color-text-inverse-subtle);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -400,7 +400,7 @@
   .auth-modal-subtitle {
     font-size: 0.92rem;
     line-height: 1.5;
-    color: #94a3b8;
+    color: var(--color-text-inverse-subtle);
     margin: 0 0 1.5rem;
   }
 
@@ -419,7 +419,7 @@
     align-items: center;
     gap: 0.75rem;
     font-size: 0.88rem;
-    color: #cbd5e1;
+    color: var(--color-text-inverse-muted);
     background: color-mix(in srgb, var(--color-surface) 3%, transparent);
     padding: 0.55rem 0.85rem;
     border-radius: 10px;
@@ -473,7 +473,7 @@
     width: 100%;
     padding: 0.8rem 1.2rem;
     background: color-mix(in srgb, var(--color-surface) 6%, transparent);
-    color: #f1f5f9;
+    color: var(--color-neutral-100);
     font-weight: 600;
     font-size: 0.92rem;
     border-radius: 12px;
@@ -525,7 +525,7 @@
     align-items: center;
     gap: 0.6rem;
     font-size: 0.85rem;
-    color: #e2e8f0;
+    color: var(--color-neutral-200);
   }
 
   .panel-guest-banner-left strong {
@@ -561,7 +561,7 @@
   .panel-guest-sub-btn {
     padding: 0.45rem 0.85rem;
     background: var(--color-white-a08);
-    color: #cbd5e1;
+    color: var(--color-text-inverse-muted);
     border-radius: 8px;
     font-size: 0.82rem;
     font-weight: 600;

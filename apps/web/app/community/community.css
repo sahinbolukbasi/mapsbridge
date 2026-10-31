@@ -574,7 +574,7 @@
 
   .sidebar-trend-meta {
     font-size: 0.6875rem;
-    color: #94a3b8;
+    color: var(--color-text-subtle);
     margin: 0.125rem 0 0;
   }
 
@@ -648,7 +648,7 @@
 
   .sidebar-trip-desc {
     font-size: 0.6875rem;
-    color: #94a3b8;
+    color: var(--color-text-subtle);
     margin: 0 0 0.5rem;
   }
 
@@ -970,7 +970,7 @@
   .metric-box span {
     display: block;
     font-size: 0.6875rem;
-    color: #94a3b8;
+    color: var(--color-text-subtle);
     margin-bottom: 0.25rem;
   }
 
@@ -1224,7 +1224,7 @@
   .kpi-title {
     display: block;
     font-size: 0.6875rem;
-    color: #94a3b8;
+    color: var(--color-text-subtle);
     margin-bottom: 0.25rem;
   }
 
@@ -1242,7 +1242,7 @@
   .kpi-sub {
     display: block;
     font-size: 0.6875rem;
-    color: #94a3b8;
+    color: var(--color-text-subtle);
     margin-top: 0.25rem;
   }
 
@@ -1319,7 +1319,7 @@
 
   .creator-table-row span {
     font-size: 0.6875rem;
-    color: #94a3b8;
+    color: var(--color-text-subtle);
   }
 
   .table-row-metrics {
@@ -1577,7 +1577,7 @@
   }
 
   .x-tweet-textarea::placeholder {
-    color: #94a3b8;
+    color: var(--color-text-subtle);
   }
 
   /* Attached Photo Preview */
