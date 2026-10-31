@@ -277,8 +277,9 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                       {userName.length > 12 ? userName.slice(0, 11) + "…" : userName}
                     </span>
                     <span className="header-user-pill-role">PRO KAŞİF</span>
-                    <span className="ui-visually-hidden">{t("ui.userMenu")}</span>
                   </div>
+                  {/* Dar ekranda .header-user-pill-info gizlenir; erişilebilir ad her genişlikte kalsın. */}
+                  <span className="ui-visually-hidden">{t("ui.userMenu")}</span>
                   <span
                     aria-hidden="true"
                     translate="no"
