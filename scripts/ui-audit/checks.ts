@@ -623,6 +623,14 @@ async function navigationEquality(
     if ((await link.count()) === 0) return na(`${from} chrome'unda ${route} bağlantısı yok`);
     await link.first().click({ timeout: STEP_TIMEOUT_MS, force: true });
     await page.waitForURL((u) => u.pathname === route, { timeout: STEP_TIMEOUT_MS });
+    // İstemci navigasyonunda URL, yeni sayfanın RSC/chunk'ı gelmeden değişir; belge zaten
+    // "networkidle" olduğu için settlePage beklemez. Birincil düğmenin DOM'a girmesini bekle
+    // (yoksa zaman aşımı → aşağıda fail).
+    await page
+      .locator(".ui-button--primary")
+      .first()
+      .waitFor({ state: "attached", timeout: STEP_TIMEOUT_MS })
+      .catch(() => undefined);
     await settlePage(page);
     const after = await primaryStyle(page);
     if (!after) return fail([`${from} → ${route} sonrası .ui-button--primary yok`]);
