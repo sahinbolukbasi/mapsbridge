@@ -21,7 +21,7 @@ for (const width of [320, 390]) {
     await testInfo.attach("Mobile start", { path, contentType: "image/png" });
     await page.getByLabel("Nereye gitmek istiyorsun?").fill("İstanbul’da iki gün");
     await page.getByRole("button", { name: "Seyahat planla" }).tap();
-    await expect(page).toHaveURL(/\/ai\/\?q=/);
+    await expect(page).toHaveURL(/\/travel-assistant\/\?q=/);
     expect(new URL(page.url()).searchParams.get("q")).toBe("İstanbul’da iki gün");
     await expect(page.locator(".ai-studio-workspace")).toBeVisible();
   });

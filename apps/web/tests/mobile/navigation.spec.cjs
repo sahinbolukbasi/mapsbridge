@@ -82,7 +82,7 @@ for (const theme of ["light", "dark"]) {
     await checkBar(page);
     await capture(page, testInfo, `chat-${theme}.png`);
     await page.locator(".mobile-nav-assistant").tap();
-    await expect(page).toHaveURL(/\/ai\//);
+    await expect(page).toHaveURL(/\/travel-assistant\//);
     await expect(page.locator(".mobile-nav-assistant")).toHaveAttribute("aria-current", "page");
     await expect(page.locator(".ai-studio-workspace")).toBeVisible();
     const switcher = await page.locator(".ai-mobile-switcher").boundingBox();
@@ -129,8 +129,11 @@ test("compact profile menu stays above the dock and can be dismissed", async ({ 
   await prepare(page, { signedIn: true });
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("/messages/");
-  await page.getByRole("button", { name: "Profil ve Gezgin Menüsü" }).tap();
-  const menu = page.getByRole("menu", { name: "Kullanıcı Menüsü" });
+  // C6: kullanıcı menüsü disclosure deseni (role="menu" yok); ad ui.userMenu.
+  const trigger = page.getByRole("button", { name: "Profil menüsü" });
+  await trigger.tap();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  const menu = page.locator(".header-stitch-dropdown");
   await expect(menu).toBeVisible();
   const bounds = await menu.boundingBox();
   const dock = await page.locator(".mobile-primary-nav").boundingBox();
