@@ -29,8 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -58,15 +58,15 @@ jobs:
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.check.outputs.skip == 'false'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: steps.check.outputs.skip == 'false'
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v5
         if: steps.check.outputs.skip == 'false'
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
