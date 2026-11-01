@@ -5,7 +5,6 @@ import { cx } from "./cx";
 import { Icon } from "./material-icon";
 import type { UiError } from "./logic/http-error";
 import "./ui.css";
-
 /** role="alert"; UiError (logic/http-error.ts) Türkçe başlık/metin taşır. */
 export function ErrorState({
   error,
@@ -37,6 +36,16 @@ export function ErrorState({
       {error.action === "login" && (
         <Button variant="link" size="sm" href="/login/">
           {t("ui.signIn", "Giriş yap")}
+        </Button>
+      )}
+      {error.action === "verify-email" && (
+        <Button variant="primary" size="sm" href={error.actionUrl ?? "/profile/edit/"}>
+          {t("ui.verifyEmail", "E-postamı doğrula")}
+        </Button>
+      )}
+      {error.action === "upgrade" && (
+        <Button variant="primary" size="sm" href={error.actionUrl ?? "/odeme/?tab=plans"}>
+          {t("ui.upgrade", "Planları gör")}
         </Button>
       )}
     </div>

@@ -103,6 +103,36 @@ test("http-error: tablo (design §8.5)", () => {
   );
   assert.equal(toUiError(api(504)).message, "Hizmet şu anda yanıt vermiyor (504).");
 });
+test("http-error: 403/402 koda göre ayrışır (e-posta/cüzdan/plan/kredi)", () => {
+  const api = (status, message, code, upgradeUrl) => ({ status, message, code, upgradeUrl });
+  // E-posta doğrulanmamış: kod ile
+  const emailByCode = toUiError(api(403, "AI kullanmadan önce e-postanızı doğrulayın.", "EMAIL_UNVERIFIED"));
+  assert.deepEqual(
+    [emailByCode.kind, emailByCode.action, emailByCode.actionUrl],
+    ["email-unverified", "verify-email", "/profile/edit/"],
+  );
+  // E-posta doğrulanmamış: kod yoksa mesaj örüntüsünden
+  const emailByMsg = toUiError(api(403, "AI kullanmadan önce e-postanızı doğrulayın."));
+  assert.deepEqual([emailByMsg.kind, emailByMsg.action], ["email-unverified", "verify-email"]);
+  // Cüzdan donduruldu: desteğe yönlendir, upgrade DEĞİL
+  const frozen = toUiError(api(403, "Kredi hesabı geçici olarak durduruldu.", "WALLET_FROZEN"));
+  assert.deepEqual([frozen.kind, frozen.action], ["wallet-frozen", "refresh"]);
+  // Plan limiti: upgradeUrl sunucudan gelir
+  const limit = toUiError(api(403, "Ücretsiz planda en fazla 3 rota.", "ROUTE_LIMIT_REACHED", "/odeme/?tab=plans"));
+  assert.deepEqual(
+    [limit.kind, limit.action, limit.actionUrl],
+    ["plan-limit", "upgrade", "/odeme/?tab=plans"],
+  );
+  // Düz 403 (kod/upgradeUrl yok): eski davranış korunur (regresyon kalkanı)
+  const plain403 = toUiError(api(403, "İşlem başarısız oldu (403)"));
+  assert.deepEqual([plain403.kind, plain403.action, plain403.message], ["forbidden", undefined, "Bu bölüm için yetkiniz bulunmuyor."]);
+  // 402 kredi yetersiz: upgrade aksiyonu + varsayılan plan URL'i
+  const credit = toUiError(api(402, "İşlem başarısız oldu (402)"));
+  assert.deepEqual(
+    [credit.kind, credit.action, credit.actionUrl],
+    ["insufficient-credit", "upgrade", "/odeme/?tab=plans"],
+  );
+});
 
 test("breadcrumb: son öğe mevcut sayfa ve link değil; boş etiketler atılır", () => {
   const v = normalizeBreadcrumb([

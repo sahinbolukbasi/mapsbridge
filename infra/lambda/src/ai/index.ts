@@ -171,7 +171,7 @@ async function handleRequest(event: Event) {
     console.error("[ai] initializeTrial failed:", (err as Error).message);
   }
   if (!user.emailVerified)
-    return reply(403, { error: "AI kullanmadan önce e-postanızı doğrulayın." });
+    return reply(403, { error: "AI kullanmadan önce e-postanızı doğrulayın.", code: "EMAIL_UNVERIFIED" });
   if (
     body.action === "forgetPreferences" ||
     /^(tercihlerimi unut|seyahat tercihlerimi sil)[.!]?$/iu.test(
