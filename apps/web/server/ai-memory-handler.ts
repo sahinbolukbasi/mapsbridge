@@ -41,6 +41,42 @@ export async function handler(event: {
   try {
     if (method === "GET" && path === "/ai/memory/deletion-status")
       return reply(200, await deletionStatus(user.sub));
+    // KVKK m.11 / GDPR m.20 — veri taşınabilirliği: kullanıcının tüm AI verisini
+    // makine-okur JSON olarak indirmesi. Yeni veri toplanmaz; var olan GET /ai/memory
+    // içeriği indirilebilir bir zarfla sunulur. İndirme olarak işaretlenir.
+    if (method === "GET" && path === "/ai/memory/export") {
+      const settings = await getMemorySettings(user.sub);
+      const preferences = sanitizePreferences(await read(`USER#${user.sub}`, "AI_PREFERENCES"));
+      const memories = await retrievePersonalMemory(
+        user.sub,
+        settings,
+        "Önceki seyahatler ve seyahat deneyimleri",
+      );
+      const pkg = {
+        format: "mapsbridge-ai-memory-export",
+        formatVersion: 1,
+        exportedAt: new Date().toISOString(),
+        subject: user.sub,
+        data: {
+          enabled: settings.enabled,
+          version: settings.version,
+          preferences,
+          memories,
+        },
+        notice:
+          "Bu dosya yalnızca hakkınızda saklanan AI hafıza ve tercih verisini içerir. " +
+          "İstediğiniz zaman 'Hatırladıklarım' bölümünden silebilirsiniz.",
+      };
+      return {
+        statusCode: 200,
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "no-store",
+          "content-disposition": 'attachment; filename="mapsbridge-verilerim.json"',
+        },
+        body: JSON.stringify(pkg, null, 2),
+      };
+    }
     if (method === "GET" && path === "/ai/memory") {
       const settings = await getMemorySettings(user.sub);
       const preferences = sanitizePreferences(await read(`USER#${user.sub}`, "AI_PREFERENCES"));

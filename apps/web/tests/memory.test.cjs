@@ -300,3 +300,22 @@ test("purging an actor with no events or extracted namespace records is a succes
   assert.ok(job.emptySince);
   assert.equal(job.status, "pending");
 });
+
+test("KVKK export ucu: handler indirilebilir JSON zarfı döndürür (kaynak sözleşmesi)", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const src = fs.readFileSync(
+    path.resolve(__dirname, "../server/ai-memory-handler.ts"),
+    "utf8",
+  );
+  // Export ucu doğru path + GET ile var
+  assert.match(src, /path === "\/ai\/memory\/export"/);
+  // İndirme olarak işaretlenir (content-disposition attachment)
+  assert.match(src, /content-disposition[^\n]*attachment/i);
+  assert.match(src, /mapsbridge-verilerim\.json/);
+  // Zarf alanları: format + exportedAt + data (yeni veri kaynağı değil, mevcut içerik)
+  assert.match(src, /mapsbridge-ai-memory-export/);
+  assert.match(src, /exportedAt/);
+  // Silme (unutulma hakkı) hâlâ scope=all ile duruyor — regresyon kalkanı
+  assert.match(src, /eraseHistory: body\.scope === "all"/);
+});

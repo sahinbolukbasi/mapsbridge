@@ -53,6 +53,30 @@ export function AIMemorySettings() {
       setConfirm(false);
     }
   }
+  async function downloadData() {
+    setBusy(true);
+    setMessage("");
+    try {
+      // KVKK/GDPR veri taşınabilirliği: tüm AI verisini JSON olarak indir.
+      const pkg = await apiFetch<unknown>("/ai/memory/export");
+      const blob = new Blob([JSON.stringify(pkg, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "mapsbridge-verilerim.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setMessage("Verileriniz indirildi.");
+    } catch (e: unknown) {
+      setMessage(e instanceof Error ? e.message : "Veri indirilemedi.");
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <section className="stitch-form-section" aria-labelledby="ai-memory-title">
       <h2 id="ai-memory-title">Hatırladıklarım</h2>
@@ -163,6 +187,13 @@ export function AIMemorySettings() {
               kayıtlar için kontroller 31 gün devam eder.
             </p>
           )}
+          <p>
+            Hakkınızda saklanan tüm AI hafıza ve tercih verisini makine-okur (JSON) biçiminde
+            indirebilirsiniz (KVKK/GDPR veri taşınabilirliği).
+          </p>
+          <button type="button" disabled={busy} onClick={() => void downloadData()}>
+            Verilerimi indir (JSON)
+          </button>{" "}
           <button type="button" disabled={busy} onClick={() => setConfirm(true)}>
             Tüm AI hafızasını ve sohbet geçmişini sil
           </button>
