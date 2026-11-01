@@ -1,0 +1,56 @@
+name: Mobile Preview Build (no submit)
+# Store'a SUBMIT ETMEZ. preview profili (internal dağıtım) ile iOS + Android build
+# üretir; görsel kontrol / onay için kurulabilir binary sağlar. Yalnızca elle tetiklenir.
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Hangi platform(lar)"
+        type: choice
+        options: [all, ios, android]
+        default: all
+concurrency:
+  group: mobile-preview-build
+  cancel-in-progress: false
+env:
+  NODE_VERSION: "22"
+jobs:
+  build:
+    name: EAS Preview Build
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 40
+    steps:
+      - name: Check EAS token
+        id: check
+        run: |
+          if [ -z "${{ secrets.EAS_TOKEN }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "::warning::EAS_TOKEN tanımlı değil — build atlandı"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.skip == 'false'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip == 'false'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install EAS CLI
+        if: steps.check.outputs.skip == 'false'
+        run: npm install -g eas-cli
+      - name: Install dependencies
+        if: steps.check.outputs.skip == 'false'
+        run: npm ci
+      - name: Build iOS (preview, no submit)
+        if: steps.check.outputs.skip == 'false' && (inputs.platform == 'all' || inputs.platform == 'ios')
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: eas build --platform ios --profile preview --non-interactive
+      - name: Build Android (preview, no submit)
+        if: steps.check.outputs.skip == 'false' && (inputs.platform == 'all' || inputs.platform == 'android')
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EAS_TOKEN }}
+        run: eas build --platform android --profile preview --non-interactive
