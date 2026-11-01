@@ -225,8 +225,16 @@ export async function getVerifiedUser(token: unknown): Promise<VerifiedUser | nu
           const role = user.UserAttributes.find((a) => a?.Name === "custom:role")?.Value;
           const rawEmail = user.UserAttributes.find((a) => a?.Name === "email")?.Value;
           const email = rawEmail ? rawEmail.trim().toLowerCase() : undefined;
-          const emailVerified =
+          // Cognito'nun access token GetUser yanıtı email_verified attribute'unu
+          // çoğu zaman döndürmez. Attribute yoksa, imzası/issuer/client/exp'si yukarıda
+          // doğrulanmış access token'ın kendi claim'ine fallback yap (Google/Apple yoluyla
+          // aynı mantık). Bu, doğrulanmamış bir e-postayı doğrulanmış yapmaz; yalnızca
+          // Cognito attribute'u atladığında imzalı claim'i kullanır.
+          const emailVerifiedAttr =
             user.UserAttributes.find((a) => a?.Name === "email_verified")?.Value === "true";
+          const emailVerifiedClaim =
+            claims.email_verified === true || claims.email_verified === "true";
+          const emailVerified = emailVerifiedAttr || emailVerifiedClaim;
 
           const effectiveSub = sub;
 

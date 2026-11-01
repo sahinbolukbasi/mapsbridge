@@ -287,6 +287,37 @@ test("valid access token is verified with Cognito and mapped to its subject", as
   assert.ok(request.signal);
   assert.equal(request.redirect, "error");
 });
+test("access token email verification falls back to the signed claim when Cognito omits the attribute", async () => {
+  const withAttr = {
+    UserAttributes: [
+      { Name: "sub", Value: "user-a" },
+      { Name: "custom:role", Value: "user" },
+      { Name: "email_verified", Value: "true" },
+    ],
+  };
+  const withoutAttr = {
+    UserAttributes: [
+      { Name: "sub", Value: "user-a" },
+      { Name: "custom:role", Value: "user" },
+    ],
+  };
+  // 1. Attribute present and true -> verified
+  let h = harness({ fetch: async () => ({ ok: true, json: async () => withAttr }) });
+  let r = await h.load("shared/auth.ts").getVerifiedUser(token());
+  assert.equal(r.emailVerified, true, "email_verified attribute true => verified");
+  // 2. Attribute absent but signed access token carries email_verified=true -> verified (bug fix)
+  h = harness({ fetch: async () => ({ ok: true, json: async () => withoutAttr }) });
+  r = await h.load("shared/auth.ts").getVerifiedUser(token({ email_verified: true }));
+  assert.equal(r.emailVerified, true, "attribute yoksa imzalı claim'e fallback");
+  // 2b. claim as string "true" also accepted
+  h = harness({ fetch: async () => ({ ok: true, json: async () => withoutAttr }) });
+  r = await h.load("shared/auth.ts").getVerifiedUser(token({ email_verified: "true" }));
+  assert.equal(r.emailVerified, true, "claim string 'true' da kabul");
+  // 3. Neither attribute nor claim -> NOT verified (security preserved: no silent true)
+  h = harness({ fetch: async () => ({ ok: true, json: async () => withoutAttr }) });
+  r = await h.load("shared/auth.ts").getVerifiedUser(token());
+  assert.equal(r.emailVerified, false, "kanıt yoksa doğrulanmamış kalır");
+});
 
 test("invalid shape, issuer, client, token kind, expiry and future validity are rejected before data access", async () => {
   const cases = [
