@@ -1,11 +1,10 @@
 name: Deploy Android
 
+# GÜVENLİK: Store'a submit geri alması zor bir işlemdir. Otomatik push
+# tetikleyicisi KALDIRILDI — mobil release YALNIZCA elle (workflow_dispatch)
+# başlatılır. Böylece bir workflow/kod değişikliği istemeden App Store/Play'e
+# submit etmez (bkz. docs/DEVOPS-TODO.md #12).
 on:
-  push:
-    branches: [main]
-    paths:
-      - "apps/mobile/**"
-      - ".github/workflows/deploy-android.yml"
   workflow_dispatch:
 
 concurrency:

@@ -18,7 +18,7 @@
 | 9 | Mimari borç: yapısal logger (tek trace-id) | Orta | Orta | ⬜ Bekliyor (refactor) |
 | 10 | Ölü kod: services/identity-billing sil | Düşük | Düşük | ⬜ Bekliyor (kullanıcı onayı) |
 | 11 | Eski duraklamış workflow run kapatma (wf_66fe74f7c98e37f1) | Düşük | Düşük | ⛔ Bu oturumdan kapatılamıyor |
-| 12 | Mobil deploy path filtresi: workflow değişikliği mobili tetikliyor | Yüksek | Orta | ⬜ Bekliyor (yeni bulgu) |
+| 12 | Mobil deploy path filtresi: workflow değişikliği mobili tetikliyor | Yüksek | Orta | ✅ Tamamlandı (yalnız workflow_dispatch) |
 | 13 | Dependabot: setup-node v5→v7 PR'ı açık, "CI" job fail | Orta | Düşük | ⬜ Bekliyor (yeni bulgu) |
 | 14 | AI chat: stream fail → /ai/route-planner otomatik fallback | Yüksek | Düşük | ✅ Deploy edildi (doğrulama bekliyor) |
 
