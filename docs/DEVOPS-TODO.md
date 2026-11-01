@@ -1,7 +1,7 @@
 # DevOps / Sistem Yapılacaklar Takip Listesi
 
 > Tek takip kaynağı. Bir iş bitince durumu **✅ Tamamlandı** yapılır, commit/tarih yazılır.
-> Son güncelleme: 2026-11-01
+> Son güncelleme: 2026-11-01 (AI chat dayanıklılık fix eklendi)
 
 ## Durum Özeti
 
@@ -12,12 +12,15 @@
 | 3 | Hijyen: .worktrees/ gitignore + eski worktree temizliği | Orta | Düşük | ✅ Tamamlandı |
 | 4 | CI/CD action sürümleri v4→v5 (terraform-apply hariç) | Orta | Orta | ✅ Tamamlandı |
 | 5 | Turbopack flaky build (next/font/google) kök neden | Orta | Orta | ⬜ Bekliyor |
-| 6 | Mobil release (iOS/Android EAS + görsel kontrol) | Yüksek | Yüksek | ⛔ Karar/dış bağımlılık bekliyor |
+| 6 | Mobil release (iOS/Android EAS + görsel kontrol) | Yüksek | Yüksek | ⚠️ KISMİ — iOS submit edildi (istenmeden), Android Gradle fail |
 | 7 | Model seçimi "Derin Analiz" modu (supervisor'a bağlama) | Düşük | Orta | ⬜ Bekliyor (invariant-uyumlu) |
 | 8 | Mimari borç: 6 lambda→apps ters import | Orta | Yüksek | ⬜ Bekliyor (refactor) |
 | 9 | Mimari borç: yapısal logger (tek trace-id) | Orta | Orta | ⬜ Bekliyor (refactor) |
 | 10 | Ölü kod: services/identity-billing sil | Düşük | Düşük | ⬜ Bekliyor (kullanıcı onayı) |
 | 11 | Eski duraklamış workflow run kapatma (wf_66fe74f7c98e37f1) | Düşük | Düşük | ⛔ Bu oturumdan kapatılamıyor |
+| 12 | Mobil deploy path filtresi: workflow değişikliği mobili tetikliyor | Yüksek | Orta | ⬜ Bekliyor (yeni bulgu) |
+| 13 | Dependabot: setup-node v5→v7 PR'ı açık, "CI" job fail | Orta | Düşük | ⬜ Bekliyor (yeni bulgu) |
+| 14 | AI chat: stream fail → /ai/route-planner otomatik fallback | Yüksek | Düşük | ✅ Deploy edildi (doğrulama bekliyor) |
 
 ---
 
@@ -29,44 +32,50 @@
 - Commit: `2ad3c3d` · 2026-11-01
 
 ### ✅ 2. Synthetic monitoring düzeltmesi
-- `webBaseUrl` → `https://mapsbridge.com` (placeholder CloudFront yerine).
-- `/maps/` beklenen status 302 (canlı giriş yönlendirmesi).
-- Özet mesaj doğru raporluyor (geçen/DNS-fail ayrımı). Web kontrolleri geçiyor.
+- `webBaseUrl` → `https://mapsbridge.com`; `/maps/` beklenen status 302; özet mesaj düzeltildi.
 - Commit: `1ee648e` · 2026-11-01
 
 ### ✅ 3. Hijyen
-- `.worktrees/` gitignore'a eklendi. Merge olmuş `ui-design-system` worktree'si zaten kaldırılmıştı.
-- Commit: `1ee648e` · 2026-11-01
+- `.worktrees/` gitignore'a eklendi. Commit: `1ee648e` · 2026-11-01
 
 ### ✅ 4. CI/CD action sürümleri v4→v5
-- `actions/checkout`, `setup-node`, `upload/download-artifact`, `aws-actions/configure-aws-credentials` → v5 (Node 24; Node 20 deprecation uyarısı giderildi).
-- 12 workflow dosyası, 44 satır. **terraform-apply.yml dokunulmadı** (production infra, ayrı ele alınacak).
-- Doğrulama: push sonrası CI workflow'ları v5 ile çalıştı.
-- Commit: `<pending>` · 2026-11-01
+- 12 workflow, 44 satır; terraform-apply hariç. Web+API deploy v5 ile yeşil (bump sağlam).
+- Commit: `abdc158` · 2026-11-01
 
 ---
 
 ## Bekleyen işler (detay ve plan)
 
-### ⬜ 5. Turbopack flaky build
-- `next/font/google` ara sıra CI build'de patlıyor (retry'da geçiyor).
-- Font importunu sabitlemek / resolver davranışını araştırmak gerekli.
+### ✅ 14. AI chat dayanıklılık (stream fallback)
+- Stream endpoint'i iş-hatası olmayan sebeple fail olursa çalışan `/ai/route-planner`'a otomatik düşüyor. Stream katmanı sorunluyken chat ölmüyor.
+- İş hataları (401/402/403/409/429, AI_DISABLED) fallback'e düşmez — gerçek durum gösterilir.
+- Commit `6372fe9` · deploy başarılı. **Doğrulama bekliyor:** canlıda chat denenip Network/console belirtisi görülmeli. Kök neden stream katmanı DEĞİLSE (API_BASE_URL/backend/e-posta) ek inceleme gerekir.
 
-### ⛔ 6. Mobil release
-- iOS preview build: EAS ad-hoc kimlik bilgisi (cihaz + provisioning) eksik, non-interactive kurulamıyor.
-- Android preview build de fail (sebep incelenmedi).
-- Mobil görsel kontrol yapılmadı (1484 renk + 19 modal değişti).
-- **Gerekli:** kullanıcı kararı + EAS'te interaktif kimlik kurulumu.
+
+
+### ⬜ 5. Turbopack flaky build
+- `next/font/google` ara sıra CI build'de patlıyor (retry'da geçiyor). Font importu sabitlenmeli.
+
+### ⚠️ 6. Mobil release — KISMİ / DİKKAT
+- **iOS: App Store'a SUBMIT EDİLDİ** (run 41298245208, "Submit to App Store" ✓). Bu **istenmeden** oldu — #12'deki path filtresi yüzünden v5 bump push'u mobil deploy'u tetikledi. Görsel kontrol YAPILMADAN gitti. App Store inceleme sürecinde; otomatik yayınlanmaz ama submit edildi. **Kullanıcı kararı gerekli:** TestFlight'ta kontrol / gerekiyorsa submit'i App Store Connect'ten geri çekme.
+- **Android: Gradle build FAIL** (run 41298245196). Kimlik bilgisi değil, EAS uzak derleme hatası. EAS build log: expo.dev/.../builds/d9d2fecc-bf91-4314-a58d-46de2c68d346 — Gradle "Run gradlew" fazı. İncelenecek.
+- Mobil görsel kontrol hâlâ yapılmadı (1484 renk + 19 modal).
 
 ### ⬜ 7. Model "Derin Analiz" modu
-- model-router'a `deepAnalysis` eklenebilir ama canlı akış onu çağırmıyor; supervisor/bedrock-client akışına doğru bağlanmalı. I7 (≤2s p95) korunmalı. Kritik yolda keyfi büyük model YOK (spec).
+- supervisor/bedrock-client akışına bağlanmalı. I7 korunmalı. Kritik yolda keyfi büyük model YOK.
 
 ### ⬜ 8-9. Mimari borç
-- 6 lambda→apps ters import (ESLint warn). Strangler-fig ile kademeli.
-- Yapısal logger: 21 dosyada dağınık console.*; tek trace-id/korelasyon yok.
+- 6 lambda→apps ters import; yapısal logger eksik (21 dosya dağınık console.*).
 
 ### ⬜ 10. Ölü kod
-- `services/identity-billing` (grep=0) silinecek — kullanıcı onayı ile.
+- `services/identity-billing` (grep=0) — kullanıcı onayı ile silinir.
 
 ### ⛔ 11. Eski duraklamış run
-- `wf_66fe74f7c98e37f1` bu oturumdan kontrol edilemiyor; kullanıcı kendi oturumundan/panelden kapatmalı.
+- `wf_66fe74f7c98e37f1` bu oturumdan kapatılamıyor; kullanıcı panelden kapatmalı.
+
+### ⬜ 12. Mobil deploy path filtresi (YENİ BULGU — önemli)
+- `deploy-ios.yml` / `deploy-android.yml` `on.push.paths` içinde `.github/workflows/...` var; bu yüzden HERHANGİ bir workflow değişikliği mobili tetikleyip store'a submit edebiliyor.
+- **Öneri:** mobil deploy'u otomatik push yerine yalnızca `workflow_dispatch` (elle) veya `apps/mobile/**` değişikliğiyle sınırla; en azından submit adımını manuel onaya bağla.
+
+### ⬜ 13. Dependabot setup-node v5→v7 PR
+- v5'e çıkınca Dependabot v7 PR'ı açtı (github_actions). PR'ın "CI" job'u fail; incelenip ya v7'ye alınmalı ya kapatılmalı.
