@@ -768,6 +768,35 @@ export function TravelPlannerSidebar({
                           : "📌 Genel Havuz"}
                       </span>
                     </div>
+                    {selectedPin.calculatedStartTime && selectedPin.calculatedEndTime && (
+                      <div className="info-meta-row">
+                        <span className="info-meta-label">Planlanan Zaman</span>
+                        <span className="info-meta-value">
+                          🕐 {selectedPin.calculatedStartTime}–{selectedPin.calculatedEndTime}
+                        </span>
+                      </div>
+                    )}
+                    {selectedPin.isLocked && selectedPin.fixedTime && (
+                      <div className="info-meta-row">
+                        <span className="info-meta-label">Sabit Saat</span>
+                        <span className="info-meta-value">🔒 {selectedPin.fixedTime}</span>
+                      </div>
+                    )}
+                    {typeof selectedPin.transitDurationFromPrevious === "number" &&
+                      selectedPin.transitDurationFromPrevious > 0 && (
+                        <div className="info-meta-row">
+                          <span className="info-meta-label">Önceki Duraktan</span>
+                          <span className="info-meta-value">
+                            🚶 ~{selectedPin.transitDurationFromPrevious} dk yol
+                          </span>
+                        </div>
+                      )}
+                    {selectedPin.interestTag && (
+                      <div className="info-meta-row">
+                        <span className="info-meta-label">İlgi Etiketi</span>
+                        <span className="info-meta-value">🏷 {selectedPin.interestTag}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
