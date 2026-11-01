@@ -11,7 +11,7 @@
 | 2 | Synthetic monitoring: gerçek canlı URL + doğru status | Yüksek | Düşük | ✅ Tamamlandı |
 | 3 | Hijyen: .worktrees/ gitignore + eski worktree temizliği | Orta | Düşük | ✅ Tamamlandı |
 | 4 | CI/CD action sürümleri v4→v5 (terraform-apply hariç) | Orta | Orta | ✅ Tamamlandı |
-| 5 | Turbopack flaky build (next/font/google) kök neden | Orta | Orta | ⬜ Bekliyor |
+| 5 | Turbopack flaky build (next/font/google) — build retry | Orta | Düşük | ✅ Tamamlandı (operasyonel retry) |
 | 6 | Mobil release (iOS/Android EAS + görsel kontrol) | Yüksek | Yüksek | ⚠️ KISMİ — iOS submit edildi (istenmeden), Android Gradle fail |
 | 7 | Model seçimi "Derin Analiz" modu (supervisor'a bağlama) | Düşük | Orta | ⬜ Bekliyor (invariant-uyumlu) |
 | 8 | Mimari borç: 6 lambda→apps ters import | Orta | Yüksek | ⬜ Bekliyor (refactor) |
@@ -69,8 +69,9 @@ Kör merge YAPILMADI — her biri CI yeşili + risk değerlendirmesiyle ele alı
 
 
 
-### ⬜ 5. Turbopack flaky build
-- `next/font/google` ara sıra CI build'de patlıyor (retry'da geçiyor). Font importu sabitlenmeli.
+### ✅ 5. Turbopack flaky build — operasyonel retry
+- `deploy-web.yml` ve `ci-web.yml` build adımına en fazla 2 deneme eklendi. Flaky font/Turbopack hatasında otomatik tekrar; gerçek hata iki denemede de fail edip görünür kalır.
+- NOT: Kök neden (build-time Google Fonts indirme flakiness) kalıcı çözümü `next/font/local`/self-host olurdu — özel Next sürümü + font dosyası ekleme gerektirir, ayrı iş. Şimdilik belirti operasyonel olarak giderildi.
 
 ### ⚠️ 6. Mobil release — KISMİ / DİKKAT
 - **iOS: App Store'a SUBMIT EDİLDİ** (run 41298245208, "Submit to App Store" ✓). Bu **istenmeden** oldu — #12'deki path filtresi yüzünden v5 bump push'u mobil deploy'u tetikledi. Görsel kontrol YAPILMADAN gitti. App Store inceleme sürecinde; otomatik yayınlanmaz ama submit edildi. **Kullanıcı kararı gerekli:** TestFlight'ta kontrol / gerekiyorsa submit'i App Store Connect'ten geri çekme.

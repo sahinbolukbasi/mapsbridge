@@ -62,7 +62,13 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build
-        run: npm run build
+        # Transient next/font/google (Turbopack) hatasına karşı en fazla 2 deneme.
+        run: |
+          npm run build || {
+            echo "::warning::İlk build denemesi başarısız (muhtemelen transient font/Turbopack) — 1 kez daha deneniyor";
+            sleep 5;
+            npm run build;
+          }
         env:
           NEXT_PUBLIC_COGNITO_REGION: eu-central-1
           NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}

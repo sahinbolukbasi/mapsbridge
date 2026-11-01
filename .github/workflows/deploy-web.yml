@@ -38,7 +38,15 @@ jobs:
       - run: npm ci
 
       - name: Build
-        run: npm run build
+        # next/font/google Turbopack build'de ara sıra transient bir font-resolver
+        # hatasıyla patlıyor (ağ/CDN flakiness; retry'da geçiyor). En fazla 2 deneme:
+        # gerçek bir build hatası iki denemede de fail edip görünür kalır.
+        run: |
+          npm run build || {
+            echo "::warning::İlk build denemesi başarısız (muhtemelen transient font/Turbopack) — 1 kez daha deneniyor";
+            sleep 5;
+            npm run build;
+          }
         env:
           NEXT_PUBLIC_COGNITO_REGION: eu-central-1
           NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
