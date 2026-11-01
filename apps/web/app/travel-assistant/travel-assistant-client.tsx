@@ -652,7 +652,11 @@ export default function AIPage() {
         cost?: number;
       };
       if (STREAM_URL) {
-        result = await (async () => {
+        // Stream dene; iş-hatası olmayan bir sebeple (ağ, 5xx, boş gövde, stream
+        // kapanması) başarısız olursa çalışan /ai/route-planner yoluna düş. Böylece
+        // stream endpoint'i sorunluyken chat tamamen ölmez. İş hataları
+        // (401/402/403/409/429 ve AI_DISABLED/REQUEST_IN_PROGRESS) fallback'e düşmez.
+        const runStream = async () => {
           const session = getStoredSession();
           const resp = await fetch(STREAM_URL, {
             method: "POST",
@@ -713,7 +717,39 @@ export default function AIPage() {
             }
           }
           throw new Error("Yanıt tamamlanamadı — stream kapandı.");
-        })();
+        };
+        const nonStreamFallback = () =>
+          apiFetch<
+            MultiAgentResponse & { billing?: { credits: number; cost: number }; cost?: number }
+          >("/ai/route-planner", { method: "POST", timeoutMs: 35000, body: JSON.stringify(request) });
+        // İş hatası taşıyan kodlar: bunlarda fallback YAPMA, gerçek durumu göster.
+        const businessCodes = [
+          "UNAUTHORIZED",
+          "EMAIL_NOT_VERIFIED",
+          "WALLET_FROZEN",
+          "INSUFFICIENT_CREDITS",
+          "USER_DAILY_LIMIT",
+          "SERVICE_DAILY_LIMIT",
+          "AI_DISABLED",
+          "REQUEST_IN_PROGRESS",
+        ];
+        try {
+          result = await runStream();
+        } catch (streamErr: unknown) {
+          const se = streamErr as { code?: string; status?: number };
+          const isBusiness =
+            (se?.code && businessCodes.includes(se.code)) ||
+            se?.status === 401 ||
+            se?.status === 402 ||
+            se?.status === 403;
+          if (isBusiness) throw streamErr;
+          // Stream altyapısı sorunlu — çalışan düz endpoint'e düş.
+          console.warn(
+            "AI stream başarısız, /ai/route-planner'a düşülüyor",
+            se?.status || se?.code || "bilinmiyor",
+          );
+          result = await nonStreamFallback();
+        }
         setStreamText("");
         setStreamPhase(null);
       } else {
