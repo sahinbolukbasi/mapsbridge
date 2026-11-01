@@ -10,6 +10,29 @@ docs-legacy/
 .agent-advisor/
 # Local MCP/agent configurations (may contain API keys)
 .agents/
+.mcp.json
 # Git worktrees (local only, never committed)
 .worktrees/
-node_modules
+# Secrets & environment (NEVER commit — only *.example templates are tracked)
+.env
+.env.*
+!.env.example
+*.tfvars
+!*.tfvars.example
+*.auto.tfvars.json
+# Terraform state & local dirs (contain secrets / infra identifiers)
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform/
+errored.tfstate
+# Build artifacts
+.build/
+**/.build/
+apps/web/.next/
+apps/web/out/
+*.tsbuildinfo
+__pycache__/
+# OS
+.DS_Store
+**/.DS_Store
