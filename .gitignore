@@ -1,62 +1,15 @@
-# OS
-.DS_Store
-Thumbs.db
-
-# Environment
-.env
-.env.*
-!.env.example
-
-# Dependencies
-node_modules/
-
-# Frameworks
-.next/
-.expo/
-*.tsbuildinfo
-
-# Python
-__pycache__/
-.pytest_cache/
-.ruff_cache/
-*.pyc
-
-# Terraform
-.terraform/
-*.tfstate
-*.tfstate.*
-*.tfplan
-tfplan
-*.auto.tfvars.json
-.state-backup-old-account/
-infra/*/terraform.tfvars
-!infra/*/terraform.tfvars.example
-crash.log
-
-# Build artifacts
-apps/web/out/
-.build/
-infra/*/.build/
-
-# Secrets
-client_secret*.json
-*.pem
-.mcp.json
-
-# Test artifacts
-apps/web/test-results/
 apps/web/playwright-report/
 apps/web/test-results-google/
 coverage/
-
 # IDE
 .idea/
 *.swp
 *.swo
-
 # Legacy / generated
 docs-legacy/
 .agent-advisor/
-
 # Local MCP/agent configurations (may contain API keys)
 .agents/
+# Git worktrees (local only, never committed)
+.worktrees/
+node_modules

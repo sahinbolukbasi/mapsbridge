@@ -78,17 +78,19 @@ async function runCanary() {
     );
   }
 
+  const passed = results.filter((r) => r.passed);
   const failures = results.filter((r) => !r.passed);
   if (failures.length > 0) {
-    const allDns = failures.every((f) => f.code === "ENOTFOUND");
-    if (allDns) {
+    const allFailuresDns = failures.every((f) => f.code === "ENOTFOUND");
+    if (allFailuresDns) {
       console.error(
-        "[Synthetics] TÜM endpoint'ler DNS ile çözülemedi — altyapı deploy edilmemiş " +
-          "veya endpoint adresleri güncel değil. SYNTHETICS_WEB_URL ve SYNTHETICS_API_URL " +
-          "ortam değişkenlerini canlı değerlerle ayarlayın.",
+        `[Synthetics] Başarısız ${failures.length} kontrolün tamamı DNS çözümleme hatası ` +
+          "(ENOTFOUND) — bu ortamdan ilgili host'a çıkılamıyor ya da adres güncel değil. " +
+          "Canlı ölçüm için SYNTHETICS_WEB_URL / SYNTHETICS_API_URL ortam değişkenlerini " +
+          `doğru değerlerle verin. (Geçen kontrol: ${passed.length}/${results.length})`,
       );
     }
-    console.error(`[Synthetics] ${failures.length} canary checks failed!`);
+    console.error(`[Synthetics] ${failures.length}/${results.length} canary checks failed!`);
     return false;
   }
 
