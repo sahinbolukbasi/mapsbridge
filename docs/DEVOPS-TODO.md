@@ -19,7 +19,7 @@
 | 10 | Ölü kod: services/identity-billing sil | Düşük | Düşük | ⬜ Bekliyor (kullanıcı onayı) |
 | 11 | Eski duraklamış workflow run kapatma (wf_66fe74f7c98e37f1) | Düşük | Düşük | ⛔ Bu oturumdan kapatılamıyor |
 | 12 | Mobil deploy path filtresi: workflow değişikliği mobili tetikliyor | Yüksek | Orta | ✅ Tamamlandı (yalnız workflow_dispatch) |
-| 13 | Dependabot: setup-node v5→v7 PR'ı açık, "CI" job fail | Orta | Düşük | ⬜ Bekliyor (yeni bulgu) |
+| 13 | Dependabot: 9 açık PR (actions major + npm runtime) triage | Orta | Orta | 🔶 Triage edildi, merge bekliyor |
 | 14 | AI chat: stream fail → /ai/route-planner otomatik fallback | Yüksek | Düşük | ✅ Deploy edildi (doğrulama bekliyor) |
 
 ---
@@ -45,6 +45,22 @@
 ---
 
 ## Bekleyen işler (detay ve plan)
+
+### 🔶 13. Dependabot PR triage (9 açık PR, 19 Ekim'den beri)
+Kör merge YAPILMADI — her biri CI yeşili + risk değerlendirmesiyle ele alınmalı. Benim v5 action bump'ım bu PR'ların bazısını eskitti (rebase gerekebilir).
+
+**GitHub Actions (major sıçrama — DİKKAT, v5 üstüne):**
+- #47 setup-node 5→7 · #48 upload-artifact 4→7 · #49 download-artifact 4→8 · #46 setup-terraform 3→4
+- upload/download-artifact v4→v7/v8 davranış değiştirir (artifact immutability). Önce changelog okunmalı; terraform-apply'ı etkiler.
+- **Öneri:** bu ortamda v5 zaten güncel; v7/v8'e ACELE ETME. Changelog + tek workflow'da deneme sonrası.
+
+**npm runtime (RİSKLİ):**
+- #54 react-native 0.86→0.88 (mobil — Android zaten Gradle fail, bu bump durumu değiştirebilir) · #50 react-dom 19.0→19.3 (web runtime)
+- #53/#52 aws-sdk minor · #51 @playwright/test minor (görece güvenli)
+
+**Plan:** önce güvenli minor'lar (aws-sdk, playwright) CI yeşiliyle; sonra react-dom; react-native mobil düzeldikten sonra; actions major'lar en son changelog ile.
+
+
 
 ### ✅ 14. AI chat dayanıklılık (stream fallback)
 - Stream endpoint'i iş-hatası olmayan sebeple fail olursa çalışan `/ai/route-planner`'a otomatik düşüyor. Stream katmanı sorunluyken chat ölmüyor.
