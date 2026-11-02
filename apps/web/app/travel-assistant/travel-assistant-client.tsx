@@ -729,7 +729,9 @@ export default function AIPage() {
         // anlamsız — net bir yapılandırma hatası fırlat ki sessizce "rota üretmedi"
         // durumuna düşmesin.
         throw Object.assign(
-          new Error("AI servisi şu an yapılandırılmadı (stream URL yok). Lütfen daha sonra tekrar deneyin."),
+          new Error(
+            "AI servisi şu an yapılandırılmadı (stream URL yok). Lütfen daha sonra tekrar deneyin.",
+          ),
           { code: "AI_DISABLED", status: 503 },
         );
       }
