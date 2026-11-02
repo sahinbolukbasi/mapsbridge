@@ -52,11 +52,10 @@
 ## Bekleyen işler (detay ve plan)
 
 ### ⚠️ 5 (güncel). next/font/google CDN transient fail — KÖK NEDEN NETLEŞTİ
+
 - Build lokalde HEP geçiyor; CI'da Google Fonts (fonts.gstatic.com) fetch'i **ara sıra** başarısız → Turbopack "font not found". Flaky, deterministik değil (son 5 deploy geçti, 1'i fail, re-trigger'da geçti).
 - Retry bekleme 5s→30s yapıldı (CDN kesintisinin geçmesine daha iyi şans).
 - **KALICI ÇÖZÜM (öneri, ayrı iş):** fontları `next/font/local` ile self-host et (font dosyaları repoda) → build-time ağ bağımlılığı tamamen kalkar. Özel Next 16.4.1 sürümü olduğu için önce node_modules/next/dist/docs okunmalı, test edilmeli. Yüksek değerli ama dikkatli.
-
-
 
 ### ✅ 15. Prettier format drift — DÜZELTİLDİ
 
