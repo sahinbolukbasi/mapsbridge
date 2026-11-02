@@ -718,48 +718,20 @@ export default function AIPage() {
           }
           throw new Error("Yanıt tamamlanamadı — stream kapandı.");
         };
-        const nonStreamFallback = () =>
-          apiFetch<
-            MultiAgentResponse & { billing?: { credits: number; cost: number }; cost?: number }
-          >("/ai/route-planner", {
-            method: "POST",
-            timeoutMs: 35000,
-            body: JSON.stringify(request),
-          });
-        // İş hatası taşıyan kodlar: bunlarda fallback YAPMA, gerçek durumu göster.
-        const businessCodes = [
-          "UNAUTHORIZED",
-          "EMAIL_NOT_VERIFIED",
-          "WALLET_FROZEN",
-          "INSUFFICIENT_CREDITS",
-          "USER_DAILY_LIMIT",
-          "SERVICE_DAILY_LIMIT",
-          "AI_DISABLED",
-          "REQUEST_IN_PROGRESS",
-        ];
-        try {
-          result = await runStream();
-        } catch (streamErr: unknown) {
-          const se = streamErr as { code?: string; status?: number };
-          const isBusiness =
-            (se?.code && businessCodes.includes(se.code)) ||
-            se?.status === 401 ||
-            se?.status === 402 ||
-            se?.status === 403;
-          if (isBusiness) throw streamErr;
-          // Stream altyapısı sorunlu — çalışan düz endpoint'e düş.
-          console.warn(
-            "AI stream başarısız, /ai/route-planner'a düşülüyor",
-            se?.status || se?.code || "bilinmiyor",
-          );
-          result = await nonStreamFallback();
-        }
+        // NOT: /ai/route-planner emekli (410 Gone). Tek canlı AI yolu stream'dir.
+        // Stream başarısız olursa ölü endpoint'e düşmek rota üretmez; gerçek durumu
+        // kullanıcıya göster. İş hataları zaten catch bloğunda ele alınıyor.
+        result = await runStream();
         setStreamText("");
         setStreamPhase(null);
       } else {
-        result = await apiFetch<
-          MultiAgentResponse & { billing?: { credits: number; cost: number }; cost?: number }
-        >("/ai/route-planner", { method: "POST", timeoutMs: 35000, body: JSON.stringify(request) });
+        // Stream URL yapılandırılmamış. /ai/route-planner 410 döndüğü için ona düşmek
+        // anlamsız — net bir yapılandırma hatası fırlat ki sessizce "rota üretmedi"
+        // durumuna düşmesin.
+        throw Object.assign(
+          new Error("AI servisi şu an yapılandırılmadı (stream URL yok). Lütfen daha sonra tekrar deneyin."),
+          { code: "AI_DISABLED", status: 503 },
+        );
       }
       setTrainingConsent(false);
       if (!result.orchestratorSummary?.trim() || (result.route && !isRoutePlan(result.route)))
