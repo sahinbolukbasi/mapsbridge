@@ -159,7 +159,12 @@ function harness() {
 test("promo: oluştur + başarılı redeem kredi ekler", async () => {
   const h = harness();
   const promo = h.load("billing/promo.ts");
-  await promo.createPromoCode({ code: "WELCOME10", credits: 10, maxRedemptions: 2, createdBy: "admin" });
+  await promo.createPromoCode({
+    code: "WELCOME10",
+    credits: 10,
+    maxRedemptions: 2,
+    createdBy: "admin",
+  });
   const r = await promo.redeemPromoCode("userA", "welcome10"); // küçük harf de kabul
   assert.equal(r.credits, 10);
   assert.equal(h.rows.get("USER#userA|CREDITS").credits, 10);
@@ -169,7 +174,12 @@ test("promo: oluştur + başarılı redeem kredi ekler", async () => {
 test("promo: aynı kullanıcı aynı kodu İKİNCİ kez kullanamaz (double-redeem reddi)", async () => {
   const h = harness();
   const promo = h.load("billing/promo.ts");
-  await promo.createPromoCode({ code: "ONCE", credits: 5, maxRedemptions: 100, createdBy: "admin" });
+  await promo.createPromoCode({
+    code: "ONCE",
+    credits: 5,
+    maxRedemptions: 100,
+    createdBy: "admin",
+  });
   await promo.redeemPromoCode("userA", "ONCE");
   await assert.rejects(() => promo.redeemPromoCode("userA", "ONCE"), /zaten kullandınız/);
   // Bakiye tek artış, sayaç tek artış — çift harcama YOK.
@@ -180,7 +190,12 @@ test("promo: aynı kullanıcı aynı kodu İKİNCİ kez kullanamaz (double-redee
 test("promo: kullanım limiti aşılamaz", async () => {
   const h = harness();
   const promo = h.load("billing/promo.ts");
-  await promo.createPromoCode({ code: "LIMIT1", credits: 3, maxRedemptions: 1, createdBy: "admin" });
+  await promo.createPromoCode({
+    code: "LIMIT1",
+    credits: 3,
+    maxRedemptions: 1,
+    createdBy: "admin",
+  });
   await promo.redeemPromoCode("userA", "LIMIT1");
   await assert.rejects(() => promo.redeemPromoCode("userB", "LIMIT1"), /limiti dolmuş/);
   assert.equal(h.rows.get("BILLING#PROMO#LIMIT1|META").redeemedCount, 1);

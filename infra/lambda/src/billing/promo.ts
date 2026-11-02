@@ -45,7 +45,8 @@ export async function createPromoCode(input: {
   note?: string;
 }): Promise<PromoCode> {
   const code = normalizeCode(input.code);
-  if (!CODE_RE.test(code)) throw new BillingError(400, "PROMO_INVALID_CODE", "Geçersiz kod biçimi.");
+  if (!CODE_RE.test(code))
+    throw new BillingError(400, "PROMO_INVALID_CODE", "Geçersiz kod biçimi.");
   if (!Number.isSafeInteger(input.credits) || input.credits <= 0 || input.credits > 100000)
     throw new BillingError(400, "PROMO_INVALID_CREDITS", "Geçersiz kredi miktarı.");
   if (!Number.isSafeInteger(input.maxRedemptions) || input.maxRedemptions < 0)
@@ -135,7 +136,10 @@ export async function deactivatePromoCode(code: string): Promise<void> {
  *  3) Kullanıcı bakiyesi += credits.
  * Biri koşulu sağlamazsa transaction tümüyle iptal → kredi verilmez.
  */
-export async function redeemPromoCode(userId: string, rawCode: string): Promise<{ credits: number }> {
+export async function redeemPromoCode(
+  userId: string,
+  rawCode: string,
+): Promise<{ credits: number }> {
   const code = normalizeCode(rawCode);
   if (!userId) throw new BillingError(401, "UNAUTHORIZED", "Oturum doğrulanamadı.");
   if (!CODE_RE.test(code)) throw new BillingError(400, "PROMO_INVALID_CODE", "Geçersiz kod.");
