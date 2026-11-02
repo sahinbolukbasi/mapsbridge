@@ -32,7 +32,7 @@ resource "aws_lambda_function_url" "ai_stream" {
   cors {
     allow_credentials = false
     allow_origins     = [var.frontend_origin, "http://localhost:3000"]
-    allow_methods     = ["POST"]
+    allow_methods     = ["POST", "OPTIONS"]
     allow_headers     = ["content-type", "authorization"]
     max_age           = 300
   }
