@@ -19,8 +19,9 @@
 | 10 | Ölü kod + doküman drift: identity-billing | Düşük | Düşük | ✅ Tamamlandı (dizin zaten yok; docs düzeltildi) |
 | 11 | Eski duraklamış workflow run kapatma (wf_66fe74f7c98e37f1) | Düşük | Düşük | ⛔ Bu oturumdan kapatılamıyor |
 | 12 | Mobil deploy path filtresi: workflow değişikliği mobili tetikliyor | Yüksek | Orta | ✅ Tamamlandı (yalnız workflow_dispatch) |
-| 13 | Dependabot: 9 açık PR (actions major + npm runtime) triage | Orta | Orta | 🔶 Triage edildi, merge bekliyor |
+| 13 | Dependabot: 9 açık PR — format gate bloke ediyor | Orta | Orta | 🔶 Engellendi (bkz #15) |
 | 14 | AI chat: stream fail → /ai/route-planner otomatik fallback | Yüksek | Düşük | ✅ Deploy edildi (doğrulama bekliyor) |
+| 15 | Repo-geneli Prettier format drift (112 dosya) — CI gate fail | Orta | Orta | ⬜ Karar bekliyor (geniş değişiklik) |
 
 ---
 
@@ -45,6 +46,15 @@
 ---
 
 ## Bekleyen işler (detay ve plan)
+
+### ⬜ 15. Prettier format drift (YENİ BULGU — Dependabot bloke edicisi)
+- `npm run format:check` **main'de 112 dosyada fail** (prettier --check). Benim bu oturumdaki commit'lerim değil — çoğu önceden var olan drift: `.kiro/specs/*.md`, `.github/workflows/*.yml`, `services/*/tests/*.cjs` vb.
+- Bu gate Dependabot PR'larının "Lint & Format" job'unu kırıyor → #51 (playwright) dahil hiçbiri merge edilemiyor (diğer tüm check'ler ✓ geçiyordu).
+- **Neden şimdi fark edildi:** ana deploy (deploy-web/ci-web) format:check koşmuyor; yalnızca PR CI'ındaki "Lint & Format" job'u koşuyor. Faturalandırma düzelince PR CI'ı gerçek sonuç verdi.
+- **Karar gerekli:** (A) `npm run format` ile 112 dosyayı toplu düzelt → tek büyük format commit'i (geniş, gözden geçirilmeli; .kiro/ dahil). (B) format:check gate'ini uyarıya indir. **Öneri: A**, ama ayrı/bilinçli — tek "devam"da kör yapılmamalı.
+- NOT: #51 MERGEABLE ama Lint gate kırmızı; format drift çözülmeden Dependabot akışı açılamaz.
+
+
 
 ### 🔶 13. Dependabot PR triage (9 açık PR, 19 Ekim'den beri)
 Kör merge YAPILMADI — her biri CI yeşili + risk değerlendirmesiyle ele alınmalı. Benim v5 action bump'ım bu PR'ların bazısını eskitti (rebase gerekebilir).
