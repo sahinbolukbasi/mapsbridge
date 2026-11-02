@@ -75,7 +75,7 @@ aws sqs start-message-move-task \
 
 **Schema change → update handler:**
 
-- Update the Stripe event parser in `services/identity-billing/` to handle the new schema
+- Update the Stripe event parser in `infra/lambda/src/stripe/` (canlı billing/stripe backend) to handle the new schema
 - Deploy, then replay DLQ (see above)
 
 **Idempotency key conflict → purge duplicate:**

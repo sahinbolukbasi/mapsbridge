@@ -16,7 +16,7 @@
 | 7 | Model seçimi "Derin Analiz" modu (supervisor'a bağlama) | Düşük | Orta | ⬜ Bekliyor (invariant-uyumlu) |
 | 8 | Mimari borç: 6 lambda→apps ters import | Orta | Yüksek | ⬜ Bekliyor (refactor) |
 | 9 | Mimari borç: yapısal logger (tek trace-id) | Orta | Orta | ⬜ Bekliyor (refactor) |
-| 10 | Ölü kod: services/identity-billing sil | Düşük | Düşük | ⬜ Bekliyor (kullanıcı onayı) |
+| 10 | Ölü kod + doküman drift: identity-billing | Düşük | Düşük | ✅ Tamamlandı (dizin zaten yok; docs düzeltildi) |
 | 11 | Eski duraklamış workflow run kapatma (wf_66fe74f7c98e37f1) | Düşük | Düşük | ⛔ Bu oturumdan kapatılamıyor |
 | 12 | Mobil deploy path filtresi: workflow değişikliği mobili tetikliyor | Yüksek | Orta | ✅ Tamamlandı (yalnız workflow_dispatch) |
 | 13 | Dependabot: 9 açık PR (actions major + npm runtime) triage | Orta | Orta | 🔶 Triage edildi, merge bekliyor |
@@ -84,8 +84,11 @@ Kör merge YAPILMADI — her biri CI yeşili + risk değerlendirmesiyle ele alı
 ### ⬜ 8-9. Mimari borç
 - 6 lambda→apps ters import; yapısal logger eksik (21 dosya dağınık console.*).
 
-### ⬜ 10. Ölü kod
-- `services/identity-billing` (grep=0) — kullanıcı onayı ile silinir.
+### ✅ 10. Ölü kod + doküman drift
+- `services/identity-billing` dizini ZATEN SİLİNMİŞ (drift-guard testi koruyor). TODO eskimiş.
+- Gerçek sorun doküman drift'iydi: 3 doküman silinmiş servisi canlı sanıyordu. Düzeltildi:
+  - `docs/runbooks/stripe-dlq-depth.md` → gerçek yol `infra/lambda/src/stripe/` (operatör yanlış yönlendirmesi giderildi)
+  - `docs/architecture/00-mevcut-durum.md` ve `folder-structure.md` → disk gerçeğine (3 servis) hizalandı
 
 ### ⛔ 11. Eski duraklamış run
 - `wf_66fe74f7c98e37f1` bu oturumdan kapatılamıyor; kullanıcı panelden kapatmalı.

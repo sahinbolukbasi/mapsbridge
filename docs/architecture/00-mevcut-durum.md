@@ -25,14 +25,12 @@ Monorepo. Workspaces: `apps/*`, `packages/*`, `services/*`.
 apps/
   web/          → Next.js 16 SPA + Server Actions
   mobile/       → Expo 57 (iOS + Android)
-services/
-  admin/        → Moderasyon, denetim
-  ai-assistant/ → AI orkestrasyon, model yönlendirme, soru motoru
-  community/    → Kılavuzlar, makaleler, marketplace içerikleri
-  identity-billing/ → Kimlik, kredi, abonelik
-  map-trip/     → Seyahat planları, harita masası, konum paylaşımı
-  messaging/    → WebSocket, birebir mesajlaşma
-  place-intelligence/ → Çok kaynaklı mekan toplama ve normalizasyon
+services/   (DİSK GERÇEĞİ: yalnızca 3 canlı domain servisi)
+  ai-assistant/ → AI guardrails/scoring/clustering (kısmen canlı, apps/web üzerinden)
+  messaging/    → Gerçek zamanlı sohbet domain/application (canlı)
+  place-intelligence/ → Çok kaynaklı mekan toplama ve normalizasyon (canlı)
+  # NOT: admin/community/map-trip/identity-billing ARTIK YOK. Gerçek billing/auth/
+  # stripe/admin canlı backend'i infra/lambda/src altındadır (bkz. architecture-truth.md).
 packages/
   contracts/    → credit-costs.ts, domain tipleri — tek kaynak
   shared/       → Paylaşılan yardımcılar

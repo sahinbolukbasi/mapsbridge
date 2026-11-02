@@ -193,10 +193,8 @@ services/
 │   ├── guides/               # Guide publishing, discovery
 │   ├── social/               # Following, activity feed
 │   └── moderation/          # Content reports, auto-moderation
-├── identity-billing/          # Identity and billing service
-│   ├── identity/             # User profile, preferences
-│   ├── billing/              # Subscription management, credit operations
-│   └── stripe/              # Stripe adapter (checkout, webhooks)
+│   # NOTE: identity-billing REMOVED (dead skeleton). Live billing/auth/stripe
+│   # backend lives in infra/lambda/src/{billing,auth,stripe}. See architecture-truth.md.
 ├── map-trip/                  # Map and trip service
 │   ├── routes/               # Route CRUD, sharing, export
 │   ├── places/               # Place search, details, caching
