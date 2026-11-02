@@ -19,6 +19,7 @@ import {
   subscription,
   initializeTrial,
 } from "../billing/store";
+import { redeemPromoCode } from "../billing/promo";
 import { catalog } from "../billing/catalog";
 import { getDynamoClient } from "../shared/dynamo";
 import { UpdateItemCommand } from "@aws-sdk/client-dynamodb";
@@ -103,6 +104,27 @@ export async function handler(event: ApiGatewayEvent & { Records?: Array<{ messa
       }
       if (!body || typeof body !== "object" || Array.isArray(body))
         return jsonResponse(400, { error: "Geçersiz istek." });
+    }
+    if (method === "POST" && path === "/stripe/promo/redeem") {
+      if (!user?.emailVerified)
+        return jsonResponse(403, {
+          error: "Kod kullanmadan önce e-postanızı doğrulayın.",
+          code: "EMAIL_NOT_VERIFIED",
+        });
+      const code = typeof body.code === "string" ? body.code : "";
+      try {
+        const result = await redeemPromoCode(userId, code);
+        const current = await wallet(userId);
+        return jsonResponse(200, {
+          status: "redeemed",
+          credits: result.credits,
+          balance: current.credits,
+        });
+      } catch (err: unknown) {
+        if (err instanceof BillingError)
+          return jsonResponse(err.status, { error: err.message, code: err.code });
+        return jsonResponse(503, { error: "Kod kullanılamadı, tekrar deneyin." });
+      }
     }
     if (method === "POST" && path === "/stripe/checkout") {
       if (process.env.BILLING_ENABLED !== "true")

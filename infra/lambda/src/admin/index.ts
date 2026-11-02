@@ -54,6 +54,7 @@ import {
   handleGetCreditPacks,
   handleUpdateCreditPack,
 } from "./finance";
+import { handleListPromoCodes, handleCreatePromoCode, handleDeactivatePromoCode } from "./promo";
 import {
   handleGetSystemConfig,
   handleUpdateSystemConfig,
@@ -121,6 +122,9 @@ const routes: Record<string, Handler> = {
   "POST /admin/plans/{id}": handleUpdatePlan,
   "GET /admin/credit-packs": handleGetCreditPacks,
   "POST /admin/credit-packs/{id}": handleUpdateCreditPack,
+  "GET /admin/promo": handleListPromoCodes,
+  "POST /admin/promo": handleCreatePromoCode,
+  "POST /admin/promo/{code}/deactivate": handleDeactivatePromoCode,
 };
 
 Object.assign(routes, managementRoutes);
