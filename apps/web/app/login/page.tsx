@@ -594,10 +594,7 @@ export default function LoginPage() {
 
               {/* Üst Asılı Hap: Son Ziyaret Edilen Rota */}
               <div className="login-top-pill" data-surface="default">
-                <span
-                  className="material-symbols-outlined"
-                  style={{ color: "var(--color-brand)" }}
-                >
+                <span className="material-symbols-outlined" style={{ color: "var(--color-brand)" }}>
                   explore
                 </span>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--color-text)" }}>
@@ -694,9 +691,7 @@ export default function LoginPage() {
                       justifyContent: "space-between",
                     }}
                   >
-                    <span
-                      style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-text)" }}
-                    >
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-text)" }}>
                       — Elif D.
                     </span>
                     <span

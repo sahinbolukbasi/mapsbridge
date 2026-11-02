@@ -30,7 +30,8 @@ export function AIMemorySettings() {
       const value = await apiFetch<MemoryView>("/ai/memory");
       if (epoch.current === id && getStoredSession()?.token === token) setData(value);
     } catch (e: unknown) {
-      if (epoch.current === id) setMessage(e instanceof Error ? e.message : "Hafıza bilgisi alınamadı.");
+      if (epoch.current === id)
+        setMessage(e instanceof Error ? e.message : "Hafıza bilgisi alınamadı.");
     }
   }
   useEffect(() => {

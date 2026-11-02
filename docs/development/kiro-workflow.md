@@ -8,36 +8,39 @@ Bu doküman, MapsBridge monorepo'sunu Kiro IDE içinde en verimli şekilde geli�
 
 Her Kiro konuşmasına **otomatik** dahil olur. Projeyi her seferinde yeniden keşfetme ihtiyacını ortadan kaldırır.
 
-| Dosya | İçerik |
-| --- | --- |
-| `product.md` | Ürün tanımı, kredi modeli, abonelik kademeleri, dil kuralı |
-| `structure.md` | Monorepo ağacı, hangi klasör ne işe yarar, katman kuralları |
-| `tech.md` | Stack, kod standartları, komutlar, doğrulama kuralı, Next.js uyarısı |
-| `danger-zones.md` | Billing/auth/webhook gibi "dokunursan patlar" alanları |
+| Dosya             | İçerik                                                               |
+| ----------------- | -------------------------------------------------------------------- |
+| `product.md`      | Ürün tanımı, kredi modeli, abonelik kademeleri, dil kuralı           |
+| `structure.md`    | Monorepo ağacı, hangi klasör ne işe yarar, katman kuralları          |
+| `tech.md`         | Stack, kod standartları, komutlar, doğrulama kuralı, Next.js uyarısı |
+| `danger-zones.md` | Billing/auth/webhook gibi "dokunursan patlar" alanları               |
 
 Güncelleme: Bu dosyalar kaynak gerçeğin (`README.md`, `ARCHITECTURE.md`, `agents/*.md`) damıtılmış halidir. Mimari değiştiğinde steering'i de güncelle.
 
 ### 2. Agent Hook'ları (`.kiro/hooks/`)
 
-| Hook | Tetikleyici | İşlev |
-| --- | --- | --- |
+| Hook           | Tetikleyici           | İşlev                                        |
+| -------------- | --------------------- | -------------------------------------------- |
 | `lint-on-save` | `.ts`/`.tsx` kaydetme | Kaydedilen dosyada `eslint --fix` çalıştırır |
 
 Yeni hook önerileri (ihtiyaç halinde eklenebilir):
+
 - Backend dosyası kaydetmede `npm run test:backend`
 - Commit öncesi `npm run typecheck`
 
 ### 3. MCP Serverları (`.mcp.json`)
 
-| Server | Amaç |
-| --- | --- |
-| `cloudflare` | Cloudflare kaynak yönetimi. Token `${CLOUDFLARE_API_TOKEN}` env değişkeninden okunur. |
-| `aws-docs` | AWS güncel dokümantasyonu (Bedrock, Lambda, DynamoDB, maliyet optimizasyonu). `uvx` gerektirir. |
+| Server       | Amaç                                                                                            |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| `cloudflare` | Cloudflare kaynak yönetimi. Token `${CLOUDFLARE_API_TOKEN}` env değişkeninden okunur.           |
+| `aws-docs`   | AWS güncel dokümantasyonu (Bedrock, Lambda, DynamoDB, maliyet optimizasyonu). `uvx` gerektirir. |
 
 **Gerekli env değişkeni** (`~/.zshrc` veya shell profiline ekle):
+
 ```bash
 export CLOUDFLARE_API_TOKEN="<cloudflare-token>"
 ```
+
 `.mcp.json` zaten `.gitignore`'da; token commit edilmez.
 
 ## Önerilen Çalışma Düzeni
@@ -55,6 +58,7 @@ export CLOUDFLARE_API_TOKEN="<cloudflare-token>"
 ### Context Verme
 
 Monorepo büyük; Kiro'nun tüm ağacı taramasını önlemek için:
+
 - `#Folder` ile ilgili klasörü ver: ör. `#apps/web/app/panel/`
 - `#File` ile tek dosya ver
 - İlgili dosyayı editörde açık tut (Kiro aktif dosyayı görür)
@@ -63,6 +67,7 @@ Monorepo büyük; Kiro'nun tüm ağacı taramasını önlemek için:
 ### Doğrulama
 
 Kod değişikliğinden sonra değişen alana göre çalıştır:
+
 - Web → `npm run typecheck` + `npm run test:web`
 - Backend (Lambda) → `npm run test:backend`
 - Servisler → `npm run test:services`

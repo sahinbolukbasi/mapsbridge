@@ -178,7 +178,9 @@ test("POST /places/discover reddeder: geçersiz ülke (URL şeması)", async () 
   const h = harness();
   const res = await h
     .load("places/index.ts")
-    .handler(event("POST", "/places/discover", token(), { city: "Roma", country: "https://evil.example" }));
+    .handler(
+      event("POST", "/places/discover", token(), { city: "Roma", country: "https://evil.example" }),
+    );
   assert.equal(res.statusCode, 400, "URL şemalı ülke reddedilmeli");
 });
 

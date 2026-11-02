@@ -2,7 +2,6 @@ import { createTrainingJob } from "../../../../apps/web/server/ai/training-outbo
 
 // Lambda streaming global — only available in Lambda runtime
 declare global {
-   
   var awslambda:
     | {
         streamifyResponse: (
@@ -47,7 +46,10 @@ import {
   buildPersonalContext,
   normalizeRequest,
 } from "../../../../apps/web/server/ai/context-builder";
-import { createInteractionEvent, ANALYTICS_PARTITION as _ANALYTICS_PARTITION } from "../../../../apps/web/server/ai/recommendation-tracker";
+import {
+  createInteractionEvent,
+  ANALYTICS_PARTITION as _ANALYTICS_PARTITION,
+} from "../../../../apps/web/server/ai/recommendation-tracker";
 import {
   memoryTable,
   changeMemory,
@@ -159,7 +161,7 @@ async function handleRequest(event: Event) {
         typeof m !== "object" ||
         !["user", "assistant"].includes((m as Record<string, unknown>).role as string) ||
         typeof (m as Record<string, unknown>).content !== "string" ||
-        ((m as Record<string, string>).content.length > 1500),
+        (m as Record<string, string>).content.length > 1500,
     )
   )
     return reply(400, { error: "Konuşma geçmişi geçersiz." });
@@ -171,7 +173,10 @@ async function handleRequest(event: Event) {
     console.error("[ai] initializeTrial failed:", (err as Error).message);
   }
   if (!user.emailVerified)
-    return reply(403, { error: "AI kullanmadan önce e-postanızı doğrulayın.", code: "EMAIL_UNVERIFIED" });
+    return reply(403, {
+      error: "AI kullanmadan önce e-postanızı doğrulayın.",
+      code: "EMAIL_UNVERIFIED",
+    });
   if (
     body.action === "forgetPreferences" ||
     /^(tercihlerimi unut|seyahat tercihlerimi sil)[.!]?$/iu.test(

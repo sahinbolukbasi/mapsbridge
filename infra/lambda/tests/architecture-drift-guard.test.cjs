@@ -113,7 +113,11 @@ test("drift-guard: identity-billing SİLİNDİ kalır (R2) — klasör + import 
     ...grepFiles("identity-billing", "apps/web/app"),
     ...grepFiles("identity-billing", "apps/web/server"),
   ];
-  assert.equal(live.length, 0, `identity-billing import ediliyor: [${live}]. R2'de silindi — importu kaldır.`);
+  assert.equal(
+    live.length,
+    0,
+    `identity-billing import ediliyor: [${live}]. R2'de silindi — importu kaldır.`,
+  );
 });
 
 test("drift-guard: messaging ve place-intelligence CANLI kalır", () => {
@@ -166,9 +170,7 @@ test("drift-guard: danger-zones.md'deki tüm kod ve test dosyaları diskte var",
     referenced.size > 0,
     "danger-zones.md'de hiç dosya yolu bulunamadı — regex bozulmuş olabilir.",
   );
-  const missing = [...referenced].filter(
-    (p) => !existsSync(path.join(repoRoot, p)),
-  );
+  const missing = [...referenced].filter((p) => !existsSync(path.join(repoRoot, p)));
   assert.deepEqual(
     missing,
     [],

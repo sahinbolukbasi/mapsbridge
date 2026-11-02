@@ -6,7 +6,10 @@
  * place collection (OSM, Google Places, Foursquare) and external APIs.
  */
 
-import type { NormalizedPlace, PlaceCategory } from "../../../place-intelligence/src/domain/types.js";
+import type {
+  NormalizedPlace,
+  PlaceCategory,
+} from "../../../place-intelligence/src/domain/types.js";
 
 export interface ToolExecutionRequest {
   toolName: string;
@@ -161,7 +164,11 @@ export class ToolExecutor {
       const cats = category
         ? [category]
         : ["attraction", "museum", "park", "monument", "viewpoint"];
-      const result = await discoverCityByCategory(city, params.country as string || "", cats as PlaceCategory[]);
+      const result = await discoverCityByCategory(
+        city,
+        (params.country as string) || "",
+        cats as PlaceCategory[],
+      );
       places = result.places;
 
       const { storePlaces } =

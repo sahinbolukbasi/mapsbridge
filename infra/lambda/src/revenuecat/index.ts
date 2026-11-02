@@ -118,7 +118,9 @@ async function handleWebhook(event: ApiGatewayEvent) {
     store?: string;
     environment?: string;
   }
-  interface RCPayload { event?: RCEvent }
+  interface RCPayload {
+    event?: RCEvent;
+  }
 
   let payload: RCPayload;
   try {
@@ -325,7 +327,11 @@ async function createWebCheckoutUrl(
   return url.href;
 }
 
-async function syncFromSubscriber(userId: string, subscriber: Record<string, unknown>, eventTime: number) {
+async function syncFromSubscriber(
+  userId: string,
+  subscriber: Record<string, unknown>,
+  eventTime: number,
+) {
   const entitlements = (subscriber.entitlements as Record<string, { expires_date?: string }>) || {};
   // Find the highest-tier active entitlement
   const tiers = ["agency", "pro", "explorer"];

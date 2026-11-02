@@ -14,13 +14,27 @@ function loadModule(filePath) {
     module: mod,
     exports: mod.exports,
     require(spec) {
-      if (spec === "./models" || spec === "./models.ts") return loadModule("../app/lib/trip/models.ts");
+      if (spec === "./models" || spec === "./models.ts")
+        return loadModule("../app/lib/trip/models.ts");
       if (spec === "../ai/types" || spec === "../ai/types.ts") return {};
-      if (spec === "./domain" || spec === "./domain.ts") return loadModule("../app/lib/trip/domain.ts");
+      if (spec === "./domain" || spec === "./domain.ts")
+        return loadModule("../app/lib/trip/domain.ts");
       return {};
     },
     crypto,
-    Math, Number, Array, Object, Set, Map, JSON, Error, String, RegExp, parseInt, parseFloat, console,
+    Math,
+    Number,
+    Array,
+    Object,
+    Set,
+    Map,
+    JSON,
+    Error,
+    String,
+    RegExp,
+    parseInt,
+    parseFloat,
+    console,
   });
   return mod.exports;
 }
@@ -101,72 +115,95 @@ test("parseWorkspace throws on invalid data", () => {
   assert.throws(
     () => parseWorkspace(JSON.stringify({ version: 2, trips: [], generalPins: [], imports: [] })),
     /Kayıtlı plan okunamadı/,
-    "version !== 1"
+    "version !== 1",
   );
 
   // missing trips array
   assert.throws(
-    () => parseWorkspace(JSON.stringify({ version: 1, trips: "not-array", generalPins: [], imports: [] })),
+    () =>
+      parseWorkspace(
+        JSON.stringify({ version: 1, trips: "not-array", generalPins: [], imports: [] }),
+      ),
     /Kayıtlı plan okunamadı/,
-    "trips not an array"
+    "trips not an array",
   );
 
   // missing generalPins array
   assert.throws(
     () => parseWorkspace(JSON.stringify({ version: 1, trips: [], generalPins: "x", imports: [] })),
     /Kayıtlı plan okunamadı/,
-    "generalPins not an array"
+    "generalPins not an array",
   );
 
   // missing imports array
   assert.throws(
     () => parseWorkspace(JSON.stringify({ version: 1, trips: [], generalPins: [], imports: null })),
     /Kayıtlı plan okunamadı/,
-    "imports not an array"
+    "imports not an array",
   );
 
   // duplicate trip IDs
   const dupTrip = {
-    id: "trip-1", title: "Trip", pins: [], days: [], groups: [],
-    transportMode: "walking", isPublic: false,
+    id: "trip-1",
+    title: "Trip",
+    pins: [],
+    days: [],
+    groups: [],
+    transportMode: "walking",
+    isPublic: false,
   };
   assert.throws(
-    () => parseWorkspace(JSON.stringify({
-      version: 1,
-      trips: [dupTrip, dupTrip],
-      generalPins: [],
-      imports: [],
-    })),
+    () =>
+      parseWorkspace(
+        JSON.stringify({
+          version: 1,
+          trips: [dupTrip, dupTrip],
+          generalPins: [],
+          imports: [],
+        }),
+      ),
     /Gezi kaydı geçersiz/,
-    "duplicate trip IDs"
+    "duplicate trip IDs",
   );
 
   // invalid pin coordinates inside generalPins
   assert.throws(
-    () => parseWorkspace(JSON.stringify({
-      version: 1,
-      trips: [],
-      generalPins: [{ id: "p1", label: "X", address: "A", lat: NaN, lng: 29 }],
-      imports: [],
-    })),
+    () =>
+      parseWorkspace(
+        JSON.stringify({
+          version: 1,
+          trips: [],
+          generalPins: [{ id: "p1", label: "X", address: "A", lat: NaN, lng: 29 }],
+          imports: [],
+        }),
+      ),
     /Konum kaydı geçersiz/,
-    "invalid pin coordinates"
+    "invalid pin coordinates",
   );
 
   // invalid day indexes (dayIndex < 1)
   assert.throws(
-    () => parseWorkspace(JSON.stringify({
-      version: 1,
-      trips: [{
-        id: "t1", title: "T", pins: [], groups: [],
-        days: [{ dayIndex: 0, label: "Day 0", color: "#fff", pins: [] }],
-        transportMode: "walking", isPublic: false,
-      }],
-      generalPins: [],
-      imports: [],
-    })),
+    () =>
+      parseWorkspace(
+        JSON.stringify({
+          version: 1,
+          trips: [
+            {
+              id: "t1",
+              title: "T",
+              pins: [],
+              groups: [],
+              days: [{ dayIndex: 0, label: "Day 0", color: "#fff", pins: [] }],
+              transportMode: "walking",
+              isPublic: false,
+            },
+          ],
+          generalPins: [],
+          imports: [],
+        }),
+      ),
     /Gezi günleri geçersiz/,
-    "dayIndex < 1"
+    "dayIndex < 1",
   );
 });
 
@@ -188,66 +225,34 @@ test("isValidPlaceRef validates place references", () => {
   assert.equal(isValidPlaceRef(valid), true, "valid Google place ref");
 
   // overture prefix
-  assert.equal(
-    isValidPlaceRef({ ...valid, id: "overture:place/abc" }),
-    true,
-    "overture prefix"
-  );
+  assert.equal(isValidPlaceRef({ ...valid, id: "overture:place/abc" }), true, "overture prefix");
 
   // fsq prefix
-  assert.equal(
-    isValidPlaceRef({ ...valid, id: "fsq:abc123" }),
-    true,
-    "fsq prefix"
-  );
+  assert.equal(isValidPlaceRef({ ...valid, id: "fsq:abc123" }), true, "fsq prefix");
 
   // manual prefix
-  assert.equal(
-    isValidPlaceRef({ ...valid, id: "manual:custom-1" }),
-    true,
-    "manual prefix"
-  );
+  assert.equal(isValidPlaceRef({ ...valid, id: "manual:custom-1" }), true, "manual prefix");
 
   // invalid: missing prefix
-  assert.equal(
-    isValidPlaceRef({ ...valid, id: "ChIJ-no-prefix" }),
-    false,
-    "missing prefix"
-  );
+  assert.equal(isValidPlaceRef({ ...valid, id: "ChIJ-no-prefix" }), false, "missing prefix");
 
   // invalid: empty name
-  assert.equal(
-    isValidPlaceRef({ ...valid, name: "" }),
-    false,
-    "empty name"
-  );
+  assert.equal(isValidPlaceRef({ ...valid, name: "" }), false, "empty name");
 
   // invalid: whitespace-only name
-  assert.equal(
-    isValidPlaceRef({ ...valid, name: "   " }),
-    false,
-    "whitespace-only name"
-  );
+  assert.equal(isValidPlaceRef({ ...valid, name: "   " }), false, "whitespace-only name");
 
   // invalid: NaN lat
-  assert.equal(
-    isValidPlaceRef({ ...valid, lat: NaN }),
-    false,
-    "NaN lat"
-  );
+  assert.equal(isValidPlaceRef({ ...valid, lat: NaN }), false, "NaN lat");
 
   // invalid: lng out of range
-  assert.equal(
-    isValidPlaceRef({ ...valid, lng: 200 }),
-    false,
-    "lng out of range"
-  );
+  assert.equal(isValidPlaceRef({ ...valid, lng: 200 }), false, "lng out of range");
 
   // invalid: missing retrievedAt
   assert.equal(
     isValidPlaceRef({ id: "google:abc", source: "google_places", name: "X", lat: 41, lng: 29 }),
     false,
-    "missing retrievedAt"
+    "missing retrievedAt",
   );
 
   // invalid: null input
@@ -338,97 +343,145 @@ test("routeToTrip rejects invalid routes", () => {
 
   // no title
   assert.throws(
-    () => routeToTrip({
-      title: "",
-      summary: "", theme: "", destination: "X",
-      estimatedDays: 1,
-      stops: [validStop],
-    }, "id-1"),
+    () =>
+      routeToTrip(
+        {
+          title: "",
+          summary: "",
+          theme: "",
+          destination: "X",
+          estimatedDays: 1,
+          stops: [validStop],
+        },
+        "id-1",
+      ),
     /AI planı geçerli günler ve duraklar içermeli/,
-    "empty title"
+    "empty title",
   );
 
   // whitespace-only title
   assert.throws(
-    () => routeToTrip({
-      title: "   ",
-      summary: "", theme: "", destination: "X",
-      estimatedDays: 1,
-      stops: [validStop],
-    }, "id-2"),
+    () =>
+      routeToTrip(
+        {
+          title: "   ",
+          summary: "",
+          theme: "",
+          destination: "X",
+          estimatedDays: 1,
+          stops: [validStop],
+        },
+        "id-2",
+      ),
     /AI planı geçerli günler ve duraklar içermeli/,
-    "whitespace-only title"
+    "whitespace-only title",
   );
 
   // empty stops
   assert.throws(
-    () => routeToTrip({
-      title: "Valid Title",
-      summary: "", theme: "", destination: "X",
-      estimatedDays: 1,
-      stops: [],
-    }, "id-3"),
+    () =>
+      routeToTrip(
+        {
+          title: "Valid Title",
+          summary: "",
+          theme: "",
+          destination: "X",
+          estimatedDays: 1,
+          stops: [],
+        },
+        "id-3",
+      ),
     /AI planı geçerli günler ve duraklar içermeli/,
-    "empty stops"
+    "empty stops",
   );
 
   // estimatedDays = 0
   assert.throws(
-    () => routeToTrip({
-      title: "Valid Title",
-      summary: "", theme: "", destination: "X",
-      estimatedDays: 0,
-      stops: [validStop],
-    }, "id-4"),
+    () =>
+      routeToTrip(
+        {
+          title: "Valid Title",
+          summary: "",
+          theme: "",
+          destination: "X",
+          estimatedDays: 0,
+          stops: [validStop],
+        },
+        "id-4",
+      ),
     /AI planı geçerli günler ve duraklar içermeli/,
-    "estimatedDays = 0"
+    "estimatedDays = 0",
   );
 
   // estimatedDays = 31
   assert.throws(
-    () => routeToTrip({
-      title: "Valid Title",
-      summary: "", theme: "", destination: "X",
-      estimatedDays: 31,
-      stops: [validStop],
-    }, "id-5"),
+    () =>
+      routeToTrip(
+        {
+          title: "Valid Title",
+          summary: "",
+          theme: "",
+          destination: "X",
+          estimatedDays: 31,
+          stops: [validStop],
+        },
+        "id-5",
+      ),
     /AI planı geçerli günler ve duraklar içermeli/,
-    "estimatedDays = 31"
+    "estimatedDays = 31",
   );
 
   // estimatedDays not integer
   assert.throws(
-    () => routeToTrip({
-      title: "Valid Title",
-      summary: "", theme: "", destination: "X",
-      estimatedDays: 1.5,
-      stops: [validStop],
-    }, "id-6"),
+    () =>
+      routeToTrip(
+        {
+          title: "Valid Title",
+          summary: "",
+          theme: "",
+          destination: "X",
+          estimatedDays: 1.5,
+          stops: [validStop],
+        },
+        "id-6",
+      ),
     /AI planı geçerli günler ve duraklar içermeli/,
-    "estimatedDays not integer"
+    "estimatedDays not integer",
   );
 
   // stop with invalid coordinates
   assert.throws(
-    () => routeToTrip({
-      title: "Valid Title",
-      summary: "", theme: "", destination: "X",
-      estimatedDays: 1,
-      stops: [{ ...validStop, lat: NaN }],
-    }, "id-7"),
+    () =>
+      routeToTrip(
+        {
+          title: "Valid Title",
+          summary: "",
+          theme: "",
+          destination: "X",
+          estimatedDays: 1,
+          stops: [{ ...validStop, lat: NaN }],
+        },
+        "id-7",
+      ),
     /AI planında geçersiz konum veya gün var/,
-    "stop with NaN lat"
+    "stop with NaN lat",
   );
 
   // stop with day out of range
   assert.throws(
-    () => routeToTrip({
-      title: "Valid Title",
-      summary: "", theme: "", destination: "X",
-      estimatedDays: 1,
-      stops: [{ ...validStop, day: 2 }],
-    }, "id-8"),
+    () =>
+      routeToTrip(
+        {
+          title: "Valid Title",
+          summary: "",
+          theme: "",
+          destination: "X",
+          estimatedDays: 1,
+          stops: [{ ...validStop, day: 2 }],
+        },
+        "id-8",
+      ),
     /AI planında geçersiz konum veya gün var/,
-    "stop day exceeds estimatedDays"
+    "stop day exceeds estimatedDays",
   );
 });

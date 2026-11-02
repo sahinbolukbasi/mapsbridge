@@ -10,10 +10,7 @@ const { transformSync } = require("esbuild");
  * which we stub out; only the pure ChatService class is under test.
  */
 function loadChatService() {
-  const fullPath = path.resolve(
-    __dirname,
-    "../src/application/chat-service.ts",
-  );
+  const fullPath = path.resolve(__dirname, "../src/application/chat-service.ts");
   const code = readFileSync(fullPath, "utf8");
   const transformed = transformSync(code, { loader: "ts", format: "cjs" }).code;
   const mod = { exports: {} };

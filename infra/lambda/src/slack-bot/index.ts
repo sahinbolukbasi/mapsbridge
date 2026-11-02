@@ -257,7 +257,11 @@ export async function handler(event: {
           try {
             return await d.status();
           } catch (e: unknown) {
-            return { service: name, status: "error", details: e instanceof Error ? e.message : String(e) };
+            return {
+              service: name,
+              status: "error",
+              details: e instanceof Error ? e.message : String(e),
+            };
           }
         }),
       );
@@ -273,7 +277,10 @@ export async function handler(event: {
             { type: "header", text: { type: "plain_text", text: "📊 Deploy Durumu" } },
             fields.length > 0
               ? { type: "section", fields: fields.slice(0, 10) }
-              : { type: "section", text: { type: "mrkdwn", text: "DEPLOY_TARGETS yapılandırılmamış." } },
+              : {
+                  type: "section",
+                  text: { type: "mrkdwn", text: "DEPLOY_TARGETS yapılandırılmamış." },
+                },
           ],
         }),
       };
@@ -290,7 +297,11 @@ export async function handler(event: {
             try {
               return await d.status();
             } catch (e: unknown) {
-              return { service: name, status: "error", details: e instanceof Error ? e.message : String(e) };
+              return {
+                service: name,
+                status: "error",
+                details: e instanceof Error ? e.message : String(e),
+              };
             }
           }),
         ),
@@ -368,7 +379,9 @@ export async function handler(event: {
       return {
         statusCode: 200,
         body: JSON.stringify(
-          ephemeral(`📋 ${service} logları (${result.lines.length} satır) dosya olarak gönderildi.`),
+          ephemeral(
+            `📋 ${service} logları (${result.lines.length} satır) dosya olarak gönderildi.`,
+          ),
         ),
       };
     }
@@ -439,9 +452,9 @@ export async function handler(event: {
           } catch (e: unknown) {
             console.error(`[slack-bot] ${opLabel} error`, e);
             if (responseUrl) {
-              await postToUrl(responseUrl, { text: `❌ ${opLabel} hatası: ${e instanceof Error ? e.message : String(e)}` }).catch(
-                () => {},
-              );
+              await postToUrl(responseUrl, {
+                text: `❌ ${opLabel} hatası: ${e instanceof Error ? e.message : String(e)}`,
+              }).catch(() => {});
             }
           } finally {
             deployLocks.delete(service);

@@ -254,7 +254,8 @@ async function eraseHistory(job: MemoryJob) {
           );
         }
       } catch (error: unknown) {
-        if (!(error instanceof Error) || error.name !== "ConditionalCheckFailedException") throw error;
+        if (!(error instanceof Error) || error.name !== "ConditionalCheckFailedException")
+          throw error;
       }
     }
     cursor = result.LastEvaluatedKey;

@@ -6,10 +6,7 @@ import {
   UpdateAliasCommand,
   PublishVersionCommand,
 } from "@aws-sdk/client-lambda";
-import {
-  CloudWatchLogsClient,
-  FilterLogEventsCommand,
-} from "@aws-sdk/client-cloudwatch-logs";
+import { CloudWatchLogsClient, FilterLogEventsCommand } from "@aws-sdk/client-cloudwatch-logs";
 
 export interface DeployResult {
   ok: boolean;
@@ -58,7 +55,11 @@ class EcsDeployer implements Deployer {
     const ecs = new ECSClient({ region: region() });
     try {
       await ecs.send(
-        new UpdateServiceCommand({ cluster: this.t.cluster, service: this.t.service, forceNewDeployment: true }),
+        new UpdateServiceCommand({
+          cluster: this.t.cluster,
+          service: this.t.service,
+          forceNewDeployment: true,
+        }),
       );
       return { ok: true, message: "ECS deployment started", service: this.t.service! };
     } finally {
@@ -78,7 +79,11 @@ class EcsDeployer implements Deployer {
       if (!match) throw new Error(`Cannot parse task definition: ${taskDef}`);
       const prev = `${match[1]}:${Math.max(1, parseInt(match[2]) - 1)}`;
       await ecs.send(
-        new UpdateServiceCommand({ cluster: this.t.cluster, service: this.t.service, taskDefinition: prev }),
+        new UpdateServiceCommand({
+          cluster: this.t.cluster,
+          service: this.t.service,
+          taskDefinition: prev,
+        }),
       );
       return { ok: true, message: `ECS rollback to ${prev} started`, service: this.t.service! };
     } finally {
@@ -93,7 +98,8 @@ class EcsDeployer implements Deployer {
         new DescribeServicesCommand({ cluster: this.t.cluster, services: [this.t.service!] }),
       );
       const svc = desc.services?.[0];
-      if (!svc) return { service: this.t.service!, status: "not_found", details: "Service not found" };
+      if (!svc)
+        return { service: this.t.service!, status: "not_found", details: "Service not found" };
       const rollout = svc.deployments?.[0]?.rolloutState ?? svc.status ?? "";
       const details = `running: ${svc.runningCount}/${svc.desiredCount}, rollout: ${rollout}`;
       const status = svc.runningCount === svc.desiredCount ? "healthy" : "deploying";
@@ -131,9 +137,17 @@ class LambdaDeployer implements Deployer {
       }
       const prevVersion = String(Math.max(1, parseInt(alias.FunctionVersion) - 1));
       await client.send(
-        new UpdateAliasCommand({ FunctionName: this.t.name, Name: alias.Name!, FunctionVersion: prevVersion }),
+        new UpdateAliasCommand({
+          FunctionName: this.t.name,
+          Name: alias.Name!,
+          FunctionVersion: prevVersion,
+        }),
       );
-      return { ok: true, message: `Lambda alias rolled back to version ${prevVersion}`, service: this.t.name! };
+      return {
+        ok: true,
+        message: `Lambda alias rolled back to version ${prevVersion}`,
+        service: this.t.name!,
+      };
     } finally {
       client.destroy();
     }
@@ -142,9 +156,15 @@ class LambdaDeployer implements Deployer {
   async status(): Promise<StatusResult> {
     const client = new LambdaClient({ region: region() });
     try {
-      const cfg = await client.send(new GetFunctionConfigurationCommand({ FunctionName: this.t.name }));
+      const cfg = await client.send(
+        new GetFunctionConfigurationCommand({ FunctionName: this.t.name }),
+      );
       const status = cfg.State === "Active" ? "healthy" : (cfg.State || "unknown").toLowerCase();
-      return { service: this.t.name!, status, details: `state: ${cfg.State}, update: ${cfg.LastUpdateStatus}` };
+      return {
+        service: this.t.name!,
+        status,
+        details: `state: ${cfg.State}, update: ${cfg.LastUpdateStatus}`,
+      };
     } finally {
       client.destroy();
     }
@@ -170,7 +190,7 @@ async function fetchCwLogs(logGroup: string, opts?: LogOptions): Promise<LogResu
     );
     const lines = (result.events || []).map((e) => {
       const ts = e.timestamp ? new Date(e.timestamp).toISOString() : "";
-      return ts ? `[${ts}] ${e.message || ""}` : (e.message || "");
+      return ts ? `[${ts}] ${e.message || ""}` : e.message || "";
     });
     return { lines, logGroup };
   } finally {

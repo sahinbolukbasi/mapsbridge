@@ -25,13 +25,13 @@ export function getDynamoClient(): DynamoDBClient {
 
 12 dosya bunu kullanıyor; 16 dosya hâlâ `new DynamoDBClient(...)` yapıyor. Çağrıların dağılımı:
 
-| Kategori | Dosyalar | Config |
-| --- | --- | --- |
-| Standart | `admin/*` (analytics, management, moderation, users, finance, system), `routes/index.ts`, `ws/*`, `auth.ts` | `{ region: process.env.AWS_REGION }` — singleton ile birebir uyumlu |
-| Özel config | `shared/ai-operations.ts` | `{ region, maxAttempts: 1 }` |
-| Özel config | `ai/training-worker.ts` | `{ maxAttempts: 2 }` |
-| Özel fallback | `operations/tracker-worker.ts` | `{ region: AWS_REGION \|\| "eu-central-1" }` |
-| Özel değişken | `kb-ingest/index.ts` | `{ region: REGION }` (modül sabiti) |
+| Kategori      | Dosyalar                                                                                                    | Config                                                              |
+| ------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Standart      | `admin/*` (analytics, management, moderation, users, finance, system), `routes/index.ts`, `ws/*`, `auth.ts` | `{ region: process.env.AWS_REGION }` — singleton ile birebir uyumlu |
+| Özel config   | `shared/ai-operations.ts`                                                                                   | `{ region, maxAttempts: 1 }`                                        |
+| Özel config   | `ai/training-worker.ts`                                                                                     | `{ maxAttempts: 2 }`                                                |
+| Özel fallback | `operations/tracker-worker.ts`                                                                              | `{ region: AWS_REGION \|\| "eu-central-1" }`                        |
+| Özel değişken | `kb-ingest/index.ts`                                                                                        | `{ region: REGION }` (modül sabiti)                                 |
 
 ### Hedef Tasarım
 
@@ -54,6 +54,7 @@ export function getDynamoClient(options?: { maxAttempts?: number }): DynamoDBCli
 ```
 
 **İstisnalar (Requirement 1, kriter 2 gereği belgelenmiştir):**
+
 - `ai-operations.ts` → `getDynamoClient({ maxAttempts: 1 })` — hızlı-başarısızlık davranışı korunur.
 - `ai/training-worker.ts` → `getDynamoClient({ maxAttempts: 2 })` — retry davranışı korunur.
 - `tracker-worker.ts` → fallback `"eu-central-1"` zaten singleton'ın `AWS_REGION` davranışıyla örtüşür; Lambda'da `AWS_REGION` her zaman set olduğundan standart singleton kullanılabilir.
@@ -106,31 +107,37 @@ Veri modeli değişmez. Hiçbir DynamoDB şeması, PK/SK pattern'i veya item yap
 Bu değişikliklerin davranış-koruyucu olduğunu garantileyen özellikler:
 
 ### Property 1: DynamoDB işlem eşdeğerliği
+
 Bir handler'ın ürettiği DynamoDB komutları (PutItem, Query, TransactWriteItems vb.) singleton geçişinden önce ve sonra birebir aynı olmalıdır — yalnızca client örneğinin kaynağı değişir.
 
 **Validates: Requirements 1.1, 1.3**
 
 ### Property 2: Retry davranışı korunumu
+
 `maxAttempts` özel ayarı olan handler'lar (ai-operations, training-worker) geçiş sonrası aynı `maxAttempts` değeriyle çalışmalıdır.
 
 **Validates: Requirements 1.2**
 
 ### Property 3: Bölge tutarlılığı
+
 Tüm singleton tüketicileri `process.env.AWS_REGION` ile aynı bölgeyi kullanmalıdır; Lambda runtime'da bu değişken her zaman tanımlıdır.
 
 **Validates: Requirements 1.1**
 
 ### Property 4: Girdi doğrulama monotonluğu (R3)
+
 `discoverCity` guard'ı, önceden reddedilen hiçbir girdiyi artık kabul etmemelidir — koruma yalnızca güçlenir, gevşemez.
 
 **Validates: Requirements 3.2, 3.3**
 
 ### Property 5: Konfigürasyon geri-uyumluluğu (R2)
+
 Env var tanımlıyken davranış, değişiklik öncesiyle aynı olmalıdır; yalnızca env var yokken fallback devreye girer.
 
 **Validates: Requirements 2.1, 2.2, 2.3**
 
 ### Property 6: Test değişmezliği
+
 Mevcut 231 backend testi ve web testleri, hiçbir test gevşetilmeden veya silinmeden yeşil kalmalıdır.
 
 **Validates: Requirements 1.4, 3.4, 4.4**

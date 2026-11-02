@@ -268,7 +268,8 @@ async function webhook(event: ApiGatewayEvent) {
       const invoice = await stripe.invoices.retrieve(object.id);
       if (invoice.status !== "paid" || !invoice.paid || !invoice.subscription) break;
       // Proration invoices do not create a second monthly credit allocation.
-      if (!["subscription_create", "subscription_cycle"].includes(invoice.billing_reason || "")) break;
+      if (!["subscription_create", "subscription_cycle"].includes(invoice.billing_reason || ""))
+        break;
       const sub = await stripe.subscriptions.retrieve(
         typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription.id,
       );

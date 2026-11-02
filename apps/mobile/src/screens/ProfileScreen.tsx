@@ -71,7 +71,9 @@ export function ProfileScreen({
 
       // Load RevenueCat entitlement status
       getCustomerInfo()
-        .then((info) => { if (info) setPlanTier(getActiveTier(info)); })
+        .then((info) => {
+          if (info) setPlanTier(getActiveTier(info));
+        })
         .catch(() => {});
 
       const userProf = await socialSyncService.getUserProfile();
@@ -176,7 +178,9 @@ export function ProfileScreen({
           <View style={styles.headerLogoBadge}>
             <ExploreIcon size={18} color={tokens.color.accentStrong} />
           </View>
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.headerTitle}>Profil</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.headerTitle}>
+            Profil
+          </Text>
         </View>
 
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -187,7 +191,12 @@ export function ProfileScreen({
           >
             <ChatIcon size={18} color={tokens.color.textBrand} />
             <View style={styles.chatHeaderBadge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.chatHeaderBadgeText}>1</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.chatHeaderBadgeText}
+              >
+                1
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -217,7 +226,9 @@ export function ProfileScreen({
                 <Image source={{ uri: profile.avatarUrl }} style={styles.avatarRealImage} />
               ) : (
                 <View style={styles.avatarImagePlaceholder}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.avatarText}>
+                    {displayName.charAt(0).toUpperCase()}
+                  </Text>
                 </View>
               )}
               <View style={styles.avatarEditPenBadge}>
@@ -228,19 +239,33 @@ export function ProfileScreen({
             {/* User Info */}
             <View style={styles.profileInfo}>
               <View style={styles.nameRow}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userName} numberOfLines={1}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.userName}
+                  numberOfLines={1}
+                >
                   {displayName}
                 </Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.verifiedIcon}>✓</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.verifiedIcon}>
+                  ✓
+                </Text>
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userHandle} numberOfLines={1}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.userHandle}
+                numberOfLines={1}
+              >
                 {userHandle}
               </Text>
 
               {/* Location Badge */}
               <View style={styles.userLocationBadge}>
                 <MapPinIcon size={11} color={tokens.color.successStrong} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userLocationText} numberOfLines={1}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.userLocationText}
+                  numberOfLines={1}
+                >
                   {profile?.location || "İstanbul, Türkiye"}
                 </Text>
               </View>
@@ -270,20 +295,30 @@ export function ProfileScreen({
           {/* Minimal Stats Row */}
           <View style={styles.statsRow}>
             <View style={styles.statCol}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNum}>{allRoutes.length}</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>Rotalar</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNum}>
+                {allRoutes.length}
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                Rotalar
+              </Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statCol}>
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNum}>
                 {allRoutes.reduce((acc, r) => acc + (r.stops?.length || 0), 0) + savedPool.length}
               </Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>Duraklar</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                Duraklar
+              </Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statCol}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNum}>{myPosts.length}</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>Paylaşım</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statNum}>
+                {myPosts.length}
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                Paylaşım
+              </Text>
             </View>
           </View>
 
@@ -295,7 +330,12 @@ export function ProfileScreen({
               activeOpacity={0.85}
             >
               <ChatIcon size={15} color={tokens.color.onPrimary} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.chatActionBtnText}>Mesajlaş</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.chatActionBtnText}
+              >
+                Mesajlaş
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -304,7 +344,12 @@ export function ProfileScreen({
               activeOpacity={0.85}
             >
               <EditIcon size={15} color={tokens.color.textBrand} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.editProfileBtnText}>Düzenle</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.editProfileBtnText}
+              >
+                Düzenle
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -313,7 +358,12 @@ export function ProfileScreen({
               activeOpacity={0.85}
             >
               <ExploreIcon size={15} color={tokens.color.textBrand} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareProfileBtnText}>Paylaş</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.shareProfileBtnText}
+              >
+                Paylaş
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -321,13 +371,25 @@ export function ProfileScreen({
         {/* My Community Posts (Paylaşımlarım) Section */}
         <View style={styles.sectionHeaderRow}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeading}>Paylaşımlarım</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeading}>
+              Paylaşımlarım
+            </Text>
             <View style={styles.postCountBadge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.postCountBadgeText}>{myPosts.length}</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.postCountBadgeText}
+              >
+                {myPosts.length}
+              </Text>
             </View>
           </View>
           <TouchableOpacity onPress={() => setShowChatScreen(false)}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeadingLink}>Topluluk Akışı →</Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.sectionHeadingLink}
+            >
+              Topluluk Akışı →
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -335,7 +397,12 @@ export function ProfileScreen({
           {myPosts.length === 0 ? (
             <View style={styles.emptyPostsCard}>
               <ChatIcon size={24} color={tokens.color.textSubtle} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyPostsTitle}>Henüz paylaşımınız yok</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emptyPostsTitle}
+              >
+                Henüz paylaşımınız yok
+              </Text>
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyPostsSub}>
                 Keşif sekmesinden ilk seyahat hikayenizi veya rotanızı paylaşabilirsiniz.
               </Text>
@@ -345,11 +412,21 @@ export function ProfileScreen({
               <View key={post.id} style={styles.myPostCard}>
                 <View style={styles.myPostHeader}>
                   <View style={{ flex: 1 }}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostTime}>{post.timeAgo}</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.myPostTime}
+                    >
+                      {post.timeAgo}
+                    </Text>
                     {post.locationTag && (
                       <View style={styles.myPostLocationRow}>
                         <MapPinIcon size={12} color={tokens.color.accent} />
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostLocationText}>{post.locationTag}</Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.myPostLocationText}
+                        >
+                          {post.locationTag}
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -360,7 +437,12 @@ export function ProfileScreen({
                       activeOpacity={0.7}
                     >
                       <EditIcon size={13} color={tokens.color.textBrand} />
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.postEditSmallText}>Düzenle</Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.postEditSmallText}
+                      >
+                        Düzenle
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.postDeleteSmallBtn}
@@ -384,12 +466,21 @@ export function ProfileScreen({
                   </View>
                 </View>
 
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostContent}>{post.content}</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.myPostContent}
+                >
+                  {post.content}
+                </Text>
 
                 {post.hashtags && post.hashtags.length > 0 && (
                   <View style={styles.myPostHashtags}>
                     {post.hashtags.map((h, i) => (
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} key={i} style={styles.myPostTag}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        key={i}
+                        style={styles.myPostTag}
+                      >
                         {h}
                       </Text>
                     ))}
@@ -398,12 +489,26 @@ export function ProfileScreen({
 
                 <View style={styles.myPostStatsRow}>
                   <View style={styles.myPostStatItem}>
-                    <HeartIcon size={13} color={tokens.color.dangerIcon} fill={post.isLiked ? tokens.color.dangerIcon : "none"} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostStatText}>{post.likesCount} Beğeni</Text>
+                    <HeartIcon
+                      size={13}
+                      color={tokens.color.dangerIcon}
+                      fill={post.isLiked ? tokens.color.dangerIcon : "none"}
+                    />
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.myPostStatText}
+                    >
+                      {post.likesCount} Beğeni
+                    </Text>
                   </View>
                   <View style={styles.myPostStatItem}>
                     <ChatIcon size={13} color={tokens.color.accent} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.myPostStatText}>{post.commentsCount || 0} Yorum</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.myPostStatText}
+                    >
+                      {post.commentsCount || 0} Yorum
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -414,13 +519,25 @@ export function ProfileScreen({
         {/* Saved Routes Section: Gerçek Kayıtlı Plan Rotaları */}
         <View style={styles.sectionHeaderRow}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeading}>Kayıtlı Rotalarım</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeading}>
+              Kayıtlı Rotalarım
+            </Text>
             <View style={styles.postCountBadge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.postCountBadgeText}>{allRoutes.length}</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.postCountBadgeText}
+              >
+                {allRoutes.length}
+              </Text>
             </View>
           </View>
           <TouchableOpacity onPress={() => (onOpenPlan ? onOpenPlan() : onOpenMap())}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionHeadingLink}>Plan Masasında Gör →</Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.sectionHeadingLink}
+            >
+              Plan Masasında Gör →
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -428,7 +545,12 @@ export function ProfileScreen({
           {allRoutes.length === 0 ? (
             <View style={styles.emptyRoutesCard}>
               <BookmarkIcon size={24} color={tokens.color.textSubtle} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyRoutesTitle}>Henüz kayıtlı bir rotanız yok</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emptyRoutesTitle}
+              >
+                Henüz kayıtlı bir rotanız yok
+              </Text>
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyRoutesSub}>
                 Planım sekmesinden dilediğiniz gibi durak seçip gezi rotanızı oluşturabilirsiniz.
               </Text>
@@ -441,13 +563,23 @@ export function ProfileScreen({
                 }}
                 activeOpacity={0.8}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.createRouteBtnText}>+ Yeni Rota Oluştur</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.createRouteBtnText}
+                >
+                  + Yeni Rota Oluştur
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
             allRoutes.map((r, index) => {
               const isActive = r.id === activeRoute.id;
-              const bgColors = [tokens.color.brandHover, tokens.color.onSurfaceBrand, tokens.color.primary, tokens.dataPalette.teal];
+              const bgColors = [
+                tokens.color.brandHover,
+                tokens.color.onSurfaceBrand,
+                tokens.color.primary,
+                tokens.dataPalette.teal,
+              ];
               const bgColor = bgColors[index % bgColors.length];
 
               return (
@@ -482,15 +614,33 @@ export function ProfileScreen({
                             }}
                           >
                             <View style={styles.statusLiveDot} />
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeBadgeText}>AKTİF PLANDA</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                              style={styles.routeBadgeText}
+                            >
+                              AKTİF PLANDA
+                            </Text>
                           </View>
                         )}
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeSub}>{r.stops.length} Durak</Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.routeSub}
+                        >
+                          {r.stops.length} Durak
+                        </Text>
                       </View>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeTitle} numberOfLines={1}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.routeTitle}
+                        numberOfLines={1}
+                      >
                         {r.name}
                       </Text>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeSub} numberOfLines={1}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.routeSub}
+                        numberOfLines={1}
+                      >
                         {r.stops.length > 0
                           ? r.stops
                               .map((s) => s.name)
@@ -549,7 +699,9 @@ export function ProfileScreen({
 
         {/* Hesap & Araçlar Section (Gereksiz mock alertler kaldırıldı, hepsi çalışan işlevler) */}
         <View style={styles.toolsCard}>
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolsCardHeading}>Hesap & Araçlar</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolsCardHeading}>
+            Hesap & Araçlar
+          </Text>
 
           {/* Seyahat Masam & Rota Planım */}
           <TouchableOpacity
@@ -558,21 +710,35 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: tokens.color.surfaceBrandStrong }]}>
+              <View
+                style={[styles.toolIconWrap, { backgroundColor: tokens.color.surfaceBrandStrong }]}
+              >
                 <BookmarkIcon size={16} color={tokens.color.onSurfaceBrand} />
               </View>
               <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>Seyahat Masam & Rota Planım</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>
+                  Seyahat Masam & Rota Planım
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ fontSize: 10, color: tokens.color.textSubtle }}
+                >
                   {allRoutes.length} kayıtlı rota • {activeRoute.stops.length} aktif durak
                 </Text>
               </View>
             </View>
             <View style={styles.toolRight}>
               <View style={[styles.newBadge, { backgroundColor: tokens.color.accent }]}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={[styles.newBadgeText, { color: tokens.color.onPrimary }]}>AÇ</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  style={[styles.newBadgeText, { color: tokens.color.onPrimary }]}
+                >
+                  AÇ
+                </Text>
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>
+                ›
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -583,18 +749,27 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: tokens.color.surfaceBrandSoft }]}>
+              <View
+                style={[styles.toolIconWrap, { backgroundColor: tokens.color.surfaceBrandSoft }]}
+              >
                 <MapPinIcon size={16} color={tokens.color.onSurfaceBrand} />
               </View>
               <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>Kayıtlı Durak Havuzum</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>
+                  Kayıtlı Durak Havuzum
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ fontSize: 10, color: tokens.color.textSubtle }}
+                >
                   {savedPool.length} adet durak kaydedildi
                 </Text>
               </View>
             </View>
             <View style={styles.toolRight}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>
+                ›
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -605,25 +780,63 @@ export function ProfileScreen({
             activeOpacity={0.75}
           >
             <View style={styles.toolLeft}>
-              <View style={[styles.toolIconWrap, { backgroundColor: planTier === "pro" ? withAlpha(tokens.color.accentStrong, 0.15) : tokens.color.warningBgStrong }]}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>{planTier === "pro" ? "⭐" : "🔓"}</Text>
+              <View
+                style={[
+                  styles.toolIconWrap,
+                  {
+                    backgroundColor:
+                      planTier === "pro"
+                        ? withAlpha(tokens.color.accentStrong, 0.15)
+                        : tokens.color.warningBgStrong,
+                  },
+                ]}
+              >
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16 }}>
+                  {planTier === "pro" ? "⭐" : "🔓"}
+                </Text>
               </View>
               <View>
                 <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>
                   {planTier === "pro" ? "MapsBridge Pro ✓" : "Ücretsiz Plan"}
                 </Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: planTier === "pro" ? tokens.color.accentStrong : tokens.color.textSubtle }}>
-                  {planTier === "pro" ? "Tüm özellikler aktif" : "Pro'ya geçerek tüm özellikleri aç"}
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{
+                    fontSize: 10,
+                    color: planTier === "pro" ? tokens.color.accentStrong : tokens.color.textSubtle,
+                  }}
+                >
+                  {planTier === "pro"
+                    ? "Tüm özellikler aktif"
+                    : "Pro'ya geçerek tüm özellikleri aç"}
                 </Text>
               </View>
             </View>
             <View style={styles.toolRight}>
               {planTier !== "pro" && (
-                <View style={{ backgroundColor: tokens.color.accentStrong, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, fontWeight: "800", color: tokens.color.surfaceInverseStrong }}>UPGRADE</Text>
+                <View
+                  style={{
+                    backgroundColor: tokens.color.accentStrong,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={{
+                      fontSize: 10,
+                      fontWeight: "800",
+                      color: tokens.color.surfaceInverseStrong,
+                    }}
+                  >
+                    UPGRADE
+                  </Text>
                 </View>
               )}
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>
+                ›
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -638,14 +851,21 @@ export function ProfileScreen({
                 <ChatIcon size={16} color={tokens.color.accentSky} />
               </View>
               <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>Gezgin Sohbet & Mesajlaşma</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>
+                  Gezgin Sohbet & Mesajlaşma
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ fontSize: 10, color: tokens.color.textSubtle }}
+                >
                   Birebir sohbet & rota paylaşımı
                 </Text>
               </View>
             </View>
             <View style={styles.toolRight}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>
+                ›
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -660,13 +880,20 @@ export function ProfileScreen({
                 <ExploreIcon size={16} color={tokens.dataPalette.violet} />
               </View>
               <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>Profilimi Paylaş</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, color: tokens.color.textSubtle }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolLabel}>
+                  Profilimi Paylaş
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ fontSize: 10, color: tokens.color.textSubtle }}
+                >
                   Seyahat profilini arkadaşlarınla paylaş
                 </Text>
               </View>
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>›</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.toolChevron}>
+              ›
+            </Text>
           </TouchableOpacity>
 
           {/* Çıkış Yap */}
@@ -679,17 +906,30 @@ export function ProfileScreen({
               <View style={[styles.toolIconWrap, { backgroundColor: tokens.color.dangerBorder }]}>
                 <LogoutIcon size={16} color={tokens.color.danger} />
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.toolLabel, { color: tokens.color.danger, fontWeight: "700" }]}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={[styles.toolLabel, { color: tokens.color.danger, fontWeight: "700" }]}
+              >
                 Çıkış Yap
               </Text>
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.toolChevron, { color: tokens.color.danger }]}>›</Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={[styles.toolChevron, { color: tokens.color.danger }]}
+            >
+              ›
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Subtle Footer Note */}
         <View style={styles.botanicalFooter}>
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botanicalFooterText}>MAPSBRIDGE BOTANICAL • v3.4.1</Text>
+          <Text
+            maxFontSizeMultiplier={tokens.font.maxScale.body}
+            style={styles.botanicalFooterText}
+          >
+            MAPSBRIDGE BOTANICAL • v3.4.1
+          </Text>
         </View>
       </ScrollView>
 
@@ -711,50 +951,69 @@ export function ProfileScreen({
         onRequestClose={() => setRenamingRoute(null)}
         style={styles.modalOverlay}
       >
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeaderRow}>
-              <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalHeading}>Rotanın İsmini Düzenle</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSubheading}>Rotanız için yeni bir isim belirleyin</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.modalCloseCircle}
-                onPress={() => setRenamingRoute(null)}
+        <View style={styles.modalCard}>
+          <View style={styles.modalHeaderRow}>
+            <View>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalHeading}>
+                Rotanın İsmini Düzenle
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalSubheading}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseCircleText}>✕</Text>
-              </TouchableOpacity>
+                Rotanız için yeni bir isim belirleyin
+              </Text>
             </View>
-
-            <TextInput
-              style={styles.modalRenameInput}
-              value={renameRouteText}
-              onChangeText={setRenameRouteText}
-              placeholder="Örn: Hafta Sonu Ege Rotası"
-              placeholderTextColor={tokens.color.neutral400}
-              autoFocus
-            />
-
-            <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
-              <TouchableOpacity
-                style={styles.renameCancelBtn}
-                onPress={() => setRenamingRoute(null)}
+            <TouchableOpacity
+              style={styles.modalCloseCircle}
+              onPress={() => setRenamingRoute(null)}
+            >
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalCloseCircleText}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.renameCancelText}>Vazgeç</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.renameConfirmBtn}
-                onPress={() => {
-                  if (renamingRoute && renameRouteText.trim()) {
-                    tripStore.updateRouteName(renamingRoute.id, renameRouteText.trim());
-                    setRenamingRoute(null);
-                  }
-                }}
-              >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.renameConfirmText}>İsmi Kaydet</Text>
-              </TouchableOpacity>
-            </View>
+                ✕
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ModalFrame>
+
+          <TextInput
+            style={styles.modalRenameInput}
+            value={renameRouteText}
+            onChangeText={setRenameRouteText}
+            placeholder="Örn: Hafta Sonu Ege Rotası"
+            placeholderTextColor={tokens.color.neutral400}
+            autoFocus
+          />
+
+          <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
+            <TouchableOpacity style={styles.renameCancelBtn} onPress={() => setRenamingRoute(null)}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.renameCancelText}
+              >
+                Vazgeç
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.renameConfirmBtn}
+              onPress={() => {
+                if (renamingRoute && renameRouteText.trim()) {
+                  tripStore.updateRouteName(renamingRoute.id, renameRouteText.trim());
+                  setRenamingRoute(null);
+                }
+              }}
+            >
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.renameConfirmText}
+              >
+                İsmi Kaydet
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ModalFrame>
 
       {/* Edit Profile Modal */}
       <EditProfileModal

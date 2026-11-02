@@ -523,17 +523,19 @@ export const aiService = {
     if (res.ok) {
       const json = await res.json();
       const routeData = json.route;
-      const stops: RouteStop[] = (routeData?.stops || []).map((s: Record<string, any>, idx: number) => ({
-        id: s.id || `stop-${idx}`,
-        name: s.name,
-        category: s.category || "Gezi",
-        lat: s.lat,
-        lng: s.lng,
-        address: s.address || "",
-        duration: s.suggestedDuration || s.duration,
-        day: s.day,
-        timeSlot: s.timeSlot,
-      }));
+      const stops: RouteStop[] = (routeData?.stops || []).map(
+        (s: Record<string, any>, idx: number) => ({
+          id: s.id || `stop-${idx}`,
+          name: s.name,
+          category: s.category || "Gezi",
+          lat: s.lat,
+          lng: s.lng,
+          address: s.address || "",
+          duration: s.suggestedDuration || s.duration,
+          day: s.day,
+          timeSlot: s.timeSlot,
+        }),
+      );
 
       const isRoute = json.responseMode === "route";
       if (
@@ -584,7 +586,30 @@ export const aiService = {
     }
   },
 
-  async getLatestSession(): Promise<{ conversation?: { messages?: Array<{ role: string; content: string }>; route?: { title?: string; destination?: string; estimatedDays?: number; stops?: Array<{ id?: string; name: string; category?: string; day?: number; timeSlot?: string; suggestedDuration?: string; duration?: string; address?: string; lat?: number; lng?: number }> } }; latestConversationId?: string; conversationId?: string } | null> {
+  async getLatestSession(): Promise<{
+    conversation?: {
+      messages?: Array<{ role: string; content: string }>;
+      route?: {
+        title?: string;
+        destination?: string;
+        estimatedDays?: number;
+        stops?: Array<{
+          id?: string;
+          name: string;
+          category?: string;
+          day?: number;
+          timeSlot?: string;
+          suggestedDuration?: string;
+          duration?: string;
+          address?: string;
+          lat?: number;
+          lng?: number;
+        }>;
+      };
+    };
+    latestConversationId?: string;
+    conversationId?: string;
+  } | null> {
     try {
       return await apiRequest("/ai/route-planner");
     } catch (e) {
@@ -593,7 +618,30 @@ export const aiService = {
     }
   },
 
-  async getSession(convId: string): Promise<{ conversation?: { messages?: Array<{ role: string; content: string }>; route?: { title?: string; destination?: string; estimatedDays?: number; stops?: Array<{ id?: string; name: string; category?: string; day?: number; timeSlot?: string; suggestedDuration?: string; duration?: string; address?: string; lat?: number; lng?: number }> } }; latestConversationId?: string; conversationId?: string } | null> {
+  async getSession(convId: string): Promise<{
+    conversation?: {
+      messages?: Array<{ role: string; content: string }>;
+      route?: {
+        title?: string;
+        destination?: string;
+        estimatedDays?: number;
+        stops?: Array<{
+          id?: string;
+          name: string;
+          category?: string;
+          day?: number;
+          timeSlot?: string;
+          suggestedDuration?: string;
+          duration?: string;
+          address?: string;
+          lat?: number;
+          lng?: number;
+        }>;
+      };
+    };
+    latestConversationId?: string;
+    conversationId?: string;
+  } | null> {
     try {
       return await apiRequest(`/ai/route-planner?conversationId=${encodeURIComponent(convId)}`);
     } catch (e) {
@@ -607,7 +655,9 @@ export const aiService = {
 export const chatService = {
   async getMessages(): Promise<ChatMessage[]> {
     try {
-      const data = await apiRequest<{ messages: Record<string, string>[] }>("/chat/threads/default/messages");
+      const data = await apiRequest<{ messages: Record<string, string>[] }>(
+        "/chat/threads/default/messages",
+      );
       if (data?.messages?.length) {
         return data.messages.map((m) => ({
           id: m.id || m.messageId || `msg-${Math.random()}`,

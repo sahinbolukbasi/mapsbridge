@@ -8,13 +8,7 @@
 // yalnız ham olay yazar, yorumlamaz. TTL 90 gün.
 
 import type { ApiGatewayEvent } from "../shared/http";
-import {
-  extractBearerToken,
-  unauthorized,
-  badRequest,
-  ok,
-  parseBody,
-} from "../shared/http";
+import { extractBearerToken, unauthorized, badRequest, ok, parseBody } from "../shared/http";
 import { verifiedUserId } from "../shared/auth";
 import { getDynamoClient, getTableName } from "../shared/dynamo";
 

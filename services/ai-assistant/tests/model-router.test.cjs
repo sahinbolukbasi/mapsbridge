@@ -11,11 +11,20 @@ function loadRouter() {
   let contractsExports = {};
   try {
     const contractsCode = readFileSync(contractsFile, "utf8");
-    const contractsTransformed = transformSync(contractsCode, { loader: "ts", format: "cjs", target: "node22" }).code;
+    const contractsTransformed = transformSync(contractsCode, {
+      loader: "ts",
+      format: "cjs",
+      target: "node22",
+    }).code;
     const contractsMod = { exports: {} };
     vm.runInNewContext(contractsTransformed, {
-      module: contractsMod, exports: contractsMod.exports,
-      require, console, Math, Number, JSON,
+      module: contractsMod,
+      exports: contractsMod.exports,
+      require,
+      console,
+      Math,
+      Number,
+      JSON,
     });
     contractsExports = contractsMod.exports;
   } catch {
@@ -30,12 +39,16 @@ function loadRouter() {
   const transformed = transformSync(code, { loader: "ts", format: "cjs", target: "node22" }).code;
   const mod = { exports: {} };
   vm.runInNewContext(transformed, {
-    module: mod, exports: mod.exports,
+    module: mod,
+    exports: mod.exports,
     require(spec) {
       if (spec === "@mapsbridge/contracts") return contractsExports;
       return require(spec);
     },
-    console, Math, Number, JSON,
+    console,
+    Math,
+    Number,
+    JSON,
   });
   return mod.exports.ModelRouter;
 }
@@ -62,7 +75,10 @@ test("very short prompt (≤3 words) with no day/multiCity resolves to tier1", (
 // ─── Tier 4: Replanning ───────────────────────────────────────────
 
 test("isReplanning flag resolves to tier4", () => {
-  const config = ModelRouter.resolveTier({ prompt: "İstanbul ve Paris için rota planla lütfen", isReplanning: true });
+  const config = ModelRouter.resolveTier({
+    prompt: "İstanbul ve Paris için rota planla lütfen",
+    isReplanning: true,
+  });
   assert.equal(config.tier, "tier4");
 });
 
@@ -94,12 +110,18 @@ test("dayCount exactly 4 resolves to tier3", () => {
 });
 
 test("constraintsCount >= 3 resolves to tier3", () => {
-  const config = ModelRouter.resolveTier({ prompt: "İstanbul için seyahat planı yapmak istiyorum", constraintsCount: 3 });
+  const config = ModelRouter.resolveTier({
+    prompt: "İstanbul için seyahat planı yapmak istiyorum",
+    constraintsCount: 3,
+  });
   assert.equal(config.tier, "tier3");
 });
 
 test("vegan + dayCount 2 resolves to tier3", () => {
-  const config = ModelRouter.resolveTier({ prompt: "vegan restoran 2 günlük program", dayCount: 2 });
+  const config = ModelRouter.resolveTier({
+    prompt: "vegan restoran 2 günlük program",
+    dayCount: 2,
+  });
   assert.equal(config.tier, "tier3");
 });
 

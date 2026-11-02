@@ -3,14 +3,7 @@
 // ============================================================
 
 import { useState, useCallback, useMemo, useEffect } from "react";
-import {
-  Pin,
-  TripDay,
-  TripWorkspace,
-  DrawerState,
-  DrawerView,
-  RouteSegment,
-} from "./models";
+import { Pin, TripDay, TripWorkspace, DrawerState, DrawerView, RouteSegment } from "./models";
 
 const STORAGE_KEY = "mapsbridge.tripWorkspace";
 

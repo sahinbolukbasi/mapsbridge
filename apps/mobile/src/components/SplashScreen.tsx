@@ -1,16 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Animated,
-  StatusBar,
-} from "react-native";
+import { StyleSheet, Text, View, Animated, StatusBar } from "react-native";
 import Svg, { Path, Circle } from "react-native-svg";
 
 import { ExploreIcon, MapIcon, LeafIcon, TreesIcon, SparkIcon, ShieldIcon } from "./Icons";
-
-
 
 import { SafeArea, motion } from "../ui";
 import { tokens, withAlpha } from "../theme";
@@ -60,19 +52,23 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
         setCurrentStepIdx(step);
         const targetPercent = SPLASH_STEPS[step].percent;
         setPercentDisplay(targetPercent);
-        motion.animate(progressAnim, targetPercent / 100, {
-          duration: 350,
-          useNativeDriver: false,
-        }).start();
+        motion
+          .animate(progressAnim, targetPercent / 100, {
+            duration: 350,
+            useNativeDriver: false,
+          })
+          .start();
       } else {
         clearInterval(interval);
         setTimeout(() => {
-          motion.animate(fadeAnim, 0, {
-            duration: 350,
-            useNativeDriver: true,
-          }).start(() => {
-            if (onFinish) onFinish();
-          });
+          motion
+            .animate(fadeAnim, 0, {
+              duration: 350,
+              useNativeDriver: true,
+            })
+            .start(() => {
+              if (onFinish) onFinish();
+            });
         }, 200);
       }
     }, minDurationMs / 3.5);
@@ -95,12 +91,16 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
         <View style={styles.topBar}>
           <View style={styles.liveBridgePill}>
             <View style={styles.pulsingLiveDot} />
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.liveBridgeText}>CANLI KÖPRÜ MODU</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.liveBridgeText}>
+              CANLI KÖPRÜ MODU
+            </Text>
           </View>
 
           <View style={styles.ecoPill}>
             <LeafIcon size={13} color={tokens.color.link} />
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.ecoPillText}>Eco-Path Active</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.ecoPillText}>
+              Eco-Path Active
+            </Text>
           </View>
         </View>
 
@@ -137,32 +137,47 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
 
             {/* Route OS badge */}
             <View style={styles.routeOsBadge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeOsBadgeText}>ROUTE OS</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.routeOsBadgeText}
+              >
+                ROUTE OS
+              </Text>
             </View>
           </Animated.View>
 
           {/* Title & Slogan */}
           <View style={styles.titleBox}>
             <View style={styles.appNameRow}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.appName}>MapsBridge</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.appName}>
+                MapsBridge
+              </Text>
               <ExploreIcon size={24} color={tokens.color.accent} />
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.appTagline}>Akıllı Seyahat ve Keşif Ağı</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.appTagline}>
+              Akıllı Seyahat ve Keşif Ağı
+            </Text>
           </View>
 
           {/* 3 Quick Stat Badges */}
           <View style={styles.statsRow}>
             <View style={styles.statBadge}>
               <MapIcon size={16} color={tokens.color.onSurfaceBrand} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>4.8K+ ROTA</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                4.8K+ ROTA
+              </Text>
             </View>
             <View style={styles.statBadge}>
               <TreesIcon size={16} color={tokens.color.onSurfaceBrand} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>%100 DOĞAL</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                %100 DOĞAL
+              </Text>
             </View>
             <View style={styles.statBadge}>
               <SparkIcon size={16} color={tokens.color.onSurfaceBrand} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>ÇEVRİMDIŞI</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
+                ÇEVRİMDIŞI
+              </Text>
             </View>
           </View>
         </View>
@@ -173,11 +188,20 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
             <View style={styles.progressHeaderRow}>
               <View style={styles.progressStatusLeft}>
                 <View style={styles.miniGreenPulse} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.progressStatusText} numberOfLines={1}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.progressStatusText}
+                  numberOfLines={1}
+                >
                   {currentStep.text}
                 </Text>
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.progressPercentText}>{percentDisplay}%</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.progressPercentText}
+              >
+                {percentDisplay}%
+              </Text>
             </View>
 
             {/* Track Bar */}
@@ -199,11 +223,21 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
             <View style={styles.progressInfoRow}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <ExploreIcon size={12} color={tokens.color.link} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.progressInfoLeft}>Topoğrafya Katmanı</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.progressInfoLeft}
+                >
+                  Topoğrafya Katmanı
+                </Text>
               </View>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <SparkIcon size={12} color={tokens.color.accent} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.progressInfoRight}>Çevrimdışı Düğümler</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.progressInfoRight}
+                >
+                  Çevrimdışı Düğümler
+                </Text>
               </View>
             </View>
           </View>
@@ -212,9 +246,13 @@ export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenPro
           <View style={styles.footerNoteBox}>
             <View style={styles.securityRow}>
               <ShieldIcon size={14} color={tokens.color.link} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.securityText}>MapsBridge Güvenli Bağlantı</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.securityText}>
+                MapsBridge Güvenli Bağlantı
+              </Text>
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.versionText}>V2.4 • KEŞFETMEYE HAZIRLANIYOR</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.versionText}>
+              V2.4 • KEŞFETMEYE HAZIRLANIYOR
+            </Text>
           </View>
         </View>
       </SafeArea>

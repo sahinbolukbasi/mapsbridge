@@ -31,7 +31,8 @@ export async function createStripeCheckoutSession(
   } catch (err: unknown) {
     return {
       success: false,
-      message: err instanceof Error ? err.message : "Ödeme başlatılamadı. Hesabınıza kredi eklenmedi.",
+      message:
+        err instanceof Error ? err.message : "Ödeme başlatılamadı. Hesabınıza kredi eklenmedi.",
     };
   }
 }

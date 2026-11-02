@@ -6,9 +6,7 @@
  * state diffing, and backward-compatible conversion to/from TripProfile.
  */
 
-import type {
-  TripProfile,
-} from "./types";
+import type { TripProfile } from "./types";
 
 // ---------------------------------------------------------------------------
 // Core Interfaces

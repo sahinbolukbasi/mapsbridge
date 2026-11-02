@@ -41,15 +41,18 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-require-imports": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        caughtErrorsIgnorePattern: "^_",
-        destructuredArrayIgnorePattern: "^_",
-      }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+        },
+      ],
       "@typescript-eslint/no-unsafe-function-type": "warn",
-      "no-console": ["warn", { "allow": ["warn", "error"] }],
-      "no-empty": ["warn", { "allowEmptyCatch": true }],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-empty": ["warn", { allowEmptyCatch: true }],
       "no-useless-assignment": "warn",
       "no-useless-catch": "warn",
       "no-useless-escape": "warn",
@@ -95,7 +98,12 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ["**/components/header-nav", "**/header-nav", "**/components/site-footer", "**/site-footer"],
+              group: [
+                "**/components/header-nav",
+                "**/header-nav",
+                "**/components/site-footer",
+                "**/site-footer",
+              ],
               message:
                 "Header/footer yalnızca SiteChrome'dan render edilir (components/ui/site-chrome.tsx; bkz. .kiro/steering/design-system.md §Chrome).",
             },
@@ -117,7 +125,12 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ["**/components/header-nav", "**/header-nav", "**/components/site-footer", "**/site-footer"],
+              group: [
+                "**/components/header-nav",
+                "**/header-nav",
+                "**/components/site-footer",
+                "**/site-footer",
+              ],
               message:
                 "Header/footer yalnızca SiteChrome'dan render edilir (components/ui/site-chrome.tsx; bkz. .kiro/steering/design-system.md §Chrome).",
             },

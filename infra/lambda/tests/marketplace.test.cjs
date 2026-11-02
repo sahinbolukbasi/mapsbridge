@@ -49,63 +49,128 @@ function harness(opts = {}) {
     const transformed = transformSync(code, { loader: "ts", format: "cjs", target: "node22" }).code;
     const mod = { exports: {} };
     vm.runInNewContext(transformed, {
-      module: mod, exports: mod.exports,
+      module: mod,
+      exports: mod.exports,
       require(spec) {
         if (spec.startsWith(".")) return loadShared(path.basename(spec));
         if (spec === "@aws-sdk/client-dynamodb") return makeAwsDDB();
         if (spec === "@aws-sdk/util-dynamodb") return require("@aws-sdk/util-dynamodb");
         return require(spec);
       },
-      process: { env }, console, Buffer, crypto: require("crypto"),
+      process: { env },
+      console,
+      Buffer,
+      crypto: require("crypto"),
     });
     return mod.exports;
   }
 
   function makeAwsDDB() {
     return {
-      DynamoDBClient: class { async send(cmd) { return makeDDB().send(cmd); } },
-      GetItemCommand: class GetItemCommand { constructor(i) { this.input = i; } },
-      PutItemCommand: class PutItemCommand { constructor(i) { this.input = i; } },
-      ScanCommand: class ScanCommand { constructor(i) { this.input = i; } },
-      QueryCommand: class QueryCommand { constructor(i) { this.input = i; } },
-      DeleteItemCommand: class DeleteItemCommand { constructor(i) { this.input = i; } },
-      UpdateItemCommand: class UpdateItemCommand { constructor(i) { this.input = i; } },
-      TransactWriteItemsCommand: class TransactWriteItemsCommand { constructor(i) { this.input = i; } },
+      DynamoDBClient: class {
+        async send(cmd) {
+          return makeDDB().send(cmd);
+        }
+      },
+      GetItemCommand: class GetItemCommand {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+      PutItemCommand: class PutItemCommand {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+      ScanCommand: class ScanCommand {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+      QueryCommand: class QueryCommand {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+      DeleteItemCommand: class DeleteItemCommand {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+      UpdateItemCommand: class UpdateItemCommand {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+      TransactWriteItemsCommand: class TransactWriteItemsCommand {
+        constructor(i) {
+          this.input = i;
+        }
+      },
     };
   }
 
   function loadHandler() {
     const code = readFileSync(path.join(sourceRoot, "marketplace", "index.ts"), "utf8");
-    const transformed = transformSync(code, { loader: "ts", format: "cjs", target: "node22" }).code
-      .replace(/\bawait import\(([^)]+)\)/g, "require($1)");
+    const transformed = transformSync(code, {
+      loader: "ts",
+      format: "cjs",
+      target: "node22",
+    }).code.replace(/\bawait import\(([^)]+)\)/g, "require($1)");
     const mod = { exports: {} };
     vm.runInNewContext(transformed, {
-      module: mod, exports: mod.exports,
+      module: mod,
+      exports: mod.exports,
       require(spec) {
         if (spec === "@aws-sdk/client-dynamodb") return makeAwsDDB();
         if (spec === "@aws-sdk/util-dynamodb") {
           const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
           return { marshall, unmarshall };
         }
-        if (spec === "@aws-sdk/s3-request-presigner") return { getSignedUrl: async () => "https://signed.example.com/file.pdf" };
-        if (spec === "@aws-sdk/client-s3") return {
-          S3Client: class { send() { return {}; } },
-          PutObjectCommand: class { constructor(i) { this.input = i; } },
-          GetObjectCommand: class { constructor(i) { this.input = i; } },
-        };
-        if (spec === "@aws-sdk/client-firehose") return {
-          FirehoseClient: class { send() { return {}; } },
-          PutRecordCommand: class {},
-        };
+        if (spec === "@aws-sdk/s3-request-presigner")
+          return { getSignedUrl: async () => "https://signed.example.com/file.pdf" };
+        if (spec === "@aws-sdk/client-s3")
+          return {
+            S3Client: class {
+              send() {
+                return {};
+              }
+            },
+            PutObjectCommand: class {
+              constructor(i) {
+                this.input = i;
+              }
+            },
+            GetObjectCommand: class {
+              constructor(i) {
+                this.input = i;
+              }
+            },
+          };
+        if (spec === "@aws-sdk/client-firehose")
+          return {
+            FirehoseClient: class {
+              send() {
+                return {};
+              }
+            },
+            PutRecordCommand: class {},
+          };
         if (spec.startsWith("../shared/")) {
           const name = spec.replace("../shared/", "").replace(/\.ts$/, "");
-          if (name === "auth") return {
-            verifiedUserId: async (token) => token === "valid-token" ? "user-test" : null,
-            getVerifiedUser: async (token) => token === "valid-token" ? { sub: "user-test" } : null,
-          };
+          if (name === "auth")
+            return {
+              verifiedUserId: async (token) => (token === "valid-token" ? "user-test" : null),
+              getVerifiedUser: async (token) =>
+                token === "valid-token" ? { sub: "user-test" } : null,
+            };
           if (name === "dynamo") return { getDynamoClient: () => makeDDB() };
           if (name === "http") {
-            const j = (code, body) => ({ statusCode: code, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+            const j = (code, body) => ({
+              statusCode: code,
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify(body),
+            });
             return {
               jsonResponse: j,
               ok: (b) => j(200, b),
@@ -121,21 +186,44 @@ function harness(opts = {}) {
                 const auth = event.headers?.authorization || event.headers?.Authorization || "";
                 return auth.startsWith("Bearer ") ? auth.slice(7) : null;
               },
-              parseBody: (event) => { try { return event.body ? JSON.parse(event.body) : null; } catch { return null; } },
+              parseBody: (event) => {
+                try {
+                  return event.body ? JSON.parse(event.body) : null;
+                } catch {
+                  return null;
+                }
+              },
               getSecret: async (path) => process.env[path] || "",
               resolveEnvSecret: async (v) => v || "",
-              memoize: (fn) => { let p; return () => p || (p = fn()); },
+              memoize: (fn) => {
+                let p;
+                return () => p || (p = fn());
+              },
             };
           }
           if (name === "router") {
             class Router {
-              constructor() { this._exact = new Map(); this._params = []; }
+              constructor() {
+                this._exact = new Map();
+                this._params = [];
+              }
               add(routeKey, handler) {
                 const [method, path] = routeKey.trim().split(/\s+/);
-                if (!path.includes("{")) { this._exact.set(`${method.toUpperCase()} ${path}`, handler); return this; }
+                if (!path.includes("{")) {
+                  this._exact.set(`${method.toUpperCase()} ${path}`, handler);
+                  return this;
+                }
                 const paramNames = [];
-                const rx = path.replace(/\{([^}]+)\}/g, (_, n) => { paramNames.push(n); return "([^/]+)"; });
-                this._params.push({ method: method.toUpperCase(), pattern: new RegExp(`^${rx}$`), paramNames, handler });
+                const rx = path.replace(/\{([^}]+)\}/g, (_, n) => {
+                  paramNames.push(n);
+                  return "([^/]+)";
+                });
+                this._params.push({
+                  method: method.toUpperCase(),
+                  pattern: new RegExp(`^${rx}$`),
+                  paramNames,
+                  handler,
+                });
                 return this;
               }
               async dispatch(event) {
@@ -149,11 +237,17 @@ function harness(opts = {}) {
                   const match = p.match(r.pattern);
                   if (match) {
                     event.pathParameters = { ...(event.pathParameters || {}) };
-                    r.paramNames.forEach((n, i) => { event.pathParameters[n] = decodeURIComponent(match[i + 1]); });
+                    r.paramNames.forEach((n, i) => {
+                      event.pathParameters[n] = decodeURIComponent(match[i + 1]);
+                    });
                     return r.handler(event);
                   }
                 }
-                return { statusCode: 404, headers: { "content-type": "application/json" }, body: JSON.stringify({ error: `Not found: ${m} ${p}` }) };
+                return {
+                  statusCode: 404,
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({ error: `Not found: ${m} ${p}` }),
+                };
               }
             }
             return { Router };
@@ -162,7 +256,14 @@ function harness(opts = {}) {
         }
         return require(spec);
       },
-      process: { env }, console, Buffer, crypto: require("crypto"), Date, Math, Number, JSON,
+      process: { env },
+      console,
+      Buffer,
+      crypto: require("crypto"),
+      Date,
+      Math,
+      Number,
+      JSON,
     });
     return mod.exports.handler;
   }
@@ -197,7 +298,14 @@ test("GET /marketplace/guides returns guide list without filePath", async () => 
   const { marshall } = require("@aws-sdk/util-dynamodb");
   const { handler } = harness({
     rows: {
-      "GUIDE#g1|META": marshall({ PK: "GUIDE#g1", SK: "META", guideId: "g1", title: "Rome Guide", filePath: "/private/rome.pdf", price: 1000 }),
+      "GUIDE#g1|META": marshall({
+        PK: "GUIDE#g1",
+        SK: "META",
+        guideId: "g1",
+        title: "Rome Guide",
+        filePath: "/private/rome.pdf",
+        price: 1000,
+      }),
     },
   });
   const res = await handler(event("GET", "/marketplace/guides"));
@@ -214,7 +322,9 @@ test("GET /marketplace/guides returns guide list without filePath", async () => 
 
 test("GET /marketplace/guides/{id} returns 404 for unknown guide", async () => {
   const { handler } = harness();
-  const res = await handler(event("GET", "/marketplace/guides/nonexistent", { params: { id: "nonexistent" } }));
+  const res = await handler(
+    event("GET", "/marketplace/guides/nonexistent", { params: { id: "nonexistent" } }),
+  );
   assert.equal(res.statusCode, 404);
 });
 
@@ -222,27 +332,33 @@ test("GET /marketplace/guides/{id} returns 404 for unknown guide", async () => {
 
 test("POST /marketplace/guides requires auth", async () => {
   const { handler } = harness();
-  const res = await handler(event("POST", "/marketplace/guides", {
-    body: { title: "Test", price: 10 },
-  }));
+  const res = await handler(
+    event("POST", "/marketplace/guides", {
+      body: { title: "Test", price: 10 },
+    }),
+  );
   assert.equal(res.statusCode, 401);
 });
 
 test("POST /marketplace/guides with valid token requires title and price", async () => {
   const { handler } = harness();
-  const res = await handler(event("POST", "/marketplace/guides", {
-    headers: { authorization: "Bearer valid-token" },
-    body: { description: "no title" },
-  }));
+  const res = await handler(
+    event("POST", "/marketplace/guides", {
+      headers: { authorization: "Bearer valid-token" },
+      body: { description: "no title" },
+    }),
+  );
   assert.equal(res.statusCode, 400);
 });
 
 test("POST /marketplace/guides with valid token and data returns 201", async () => {
   const { handler } = harness();
-  const res = await handler(event("POST", "/marketplace/guides", {
-    headers: { authorization: "Bearer valid-token" },
-    body: { title: "Istanbul Guide", price: 9.99, description: "Great guide" },
-  }));
+  const res = await handler(
+    event("POST", "/marketplace/guides", {
+      headers: { authorization: "Bearer valid-token" },
+      body: { title: "Istanbul Guide", price: 9.99, description: "Great guide" },
+    }),
+  );
   assert.equal(res.statusCode, 201);
   const body = JSON.parse(res.body);
   assert.ok(body.guideId);
@@ -253,11 +369,13 @@ test("POST /marketplace/guides with valid token and data returns 201", async () 
 
 test("POST /marketplace/guides/{id}/purchase returns 503 (disabled)", async () => {
   const { handler } = harness();
-  const res = await handler(event("POST", "/marketplace/guides/g1/purchase", {
-    headers: { authorization: "Bearer valid-token" },
-    params: { id: "g1" },
-    body: { paymentIntentId: "pi_test" },
-  }));
+  const res = await handler(
+    event("POST", "/marketplace/guides/g1/purchase", {
+      headers: { authorization: "Bearer valid-token" },
+      params: { id: "g1" },
+      body: { paymentIntentId: "pi_test" },
+    }),
+  );
   assert.equal(res.statusCode, 503);
 });
 
@@ -273,18 +391,22 @@ test("GET /marketplace/blogs returns blog list", async () => {
 
 test("POST /marketplace/blogs requires auth", async () => {
   const { handler } = harness();
-  const res = await handler(event("POST", "/marketplace/blogs", {
-    body: { title: "Test Blog", content: "Hello world" },
-  }));
+  const res = await handler(
+    event("POST", "/marketplace/blogs", {
+      body: { title: "Test Blog", content: "Hello world" },
+    }),
+  );
   assert.equal(res.statusCode, 401);
 });
 
 test("POST /marketplace/blogs with valid token creates blog", async () => {
   const { handler } = harness();
-  const res = await handler(event("POST", "/marketplace/blogs", {
-    headers: { authorization: "Bearer valid-token" },
-    body: { title: "Travel Tips", content: "Content here", tags: ["travel"] },
-  }));
+  const res = await handler(
+    event("POST", "/marketplace/blogs", {
+      headers: { authorization: "Bearer valid-token" },
+      body: { title: "Travel Tips", content: "Content here", tags: ["travel"] },
+    }),
+  );
   assert.equal(res.statusCode, 201);
   const body = JSON.parse(res.body);
   assert.ok(body.blogId);

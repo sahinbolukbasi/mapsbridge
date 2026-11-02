@@ -351,7 +351,7 @@ export async function handleUpdatePlan(event: ApiGatewayEvent) {
   if (!reason || reason.length > 1000) return badRequest("Gerekçe zorunludur.");
 
   const previous = await get(`PLAN#${planId}`);
-  const defaults: Record<string, unknown> =DEFAULT_PLANS.find((p) => p.id === planId) || {
+  const defaults: Record<string, unknown> = DEFAULT_PLANS.find((p) => p.id === planId) || {
     monthlyPriceTry: 0,
     yearlyPriceTry: 0,
     monthlyCredits: 0,
@@ -446,7 +446,7 @@ export async function handleUpdateCreditPack(event: ApiGatewayEvent) {
   if (!reason || reason.length > 1000) return badRequest("Gerekçe zorunludur.");
 
   const previous = await get(`CREDITPACK#${packId}`);
-  const defaults: Record<string, unknown> =DEFAULT_CREDIT_PACKS.find((p) => p.id === packId) || {
+  const defaults: Record<string, unknown> = DEFAULT_CREDIT_PACKS.find((p) => p.id === packId) || {
     credits: 0,
     bonusCredits: 0,
     priceTry: 0,

@@ -304,10 +304,7 @@ test("purging an actor with no events or extracted namespace records is a succes
 test("KVKK export ucu: handler indirilebilir JSON zarfı döndürür (kaynak sözleşmesi)", () => {
   const fs = require("node:fs");
   const path = require("node:path");
-  const src = fs.readFileSync(
-    path.resolve(__dirname, "../server/ai-memory-handler.ts"),
-    "utf8",
-  );
+  const src = fs.readFileSync(path.resolve(__dirname, "../server/ai-memory-handler.ts"), "utf8");
   // Export ucu doğru path + GET ile var
   assert.match(src, /path === "\/ai\/memory\/export"/);
   // İndirme olarak işaretlenir (content-disposition attachment)

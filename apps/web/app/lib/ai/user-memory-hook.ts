@@ -150,23 +150,18 @@ export function useUserMemory() {
     });
   }, []);
 
-  const buildContextString = useCallback(
-    (mem: UserMemoryData): string | undefined => {
-      const parts: string[] = [];
-      if (mem.destinations.length)
-        parts.push(
-          `Daha önce ilgi duyduğu destinasyonlar: ${mem.destinations.slice(-3).join(", ")}`,
-        );
-      if (mem.interests.length) parts.push(`İlgi alanları: ${mem.interests.join(", ")}`);
-      if (mem.budgetHabit)
-        parts.push(
-          `Bütçe tercihi: ${mem.budgetHabit === "budget" ? "ekonomik" : mem.budgetHabit === "luxury" ? "lüks" : "orta"}`,
-        );
-      if (mem.travelStyle) parts.push(`Seyahat tarzı: ${mem.travelStyle}`);
-      return parts.length ? `[Kullanıcı hafızası: ${parts.join(" | ")}]` : undefined;
-    },
-    [],
-  );
+  const buildContextString = useCallback((mem: UserMemoryData): string | undefined => {
+    const parts: string[] = [];
+    if (mem.destinations.length)
+      parts.push(`Daha önce ilgi duyduğu destinasyonlar: ${mem.destinations.slice(-3).join(", ")}`);
+    if (mem.interests.length) parts.push(`İlgi alanları: ${mem.interests.join(", ")}`);
+    if (mem.budgetHabit)
+      parts.push(
+        `Bütçe tercihi: ${mem.budgetHabit === "budget" ? "ekonomik" : mem.budgetHabit === "luxury" ? "lüks" : "orta"}`,
+      );
+    if (mem.travelStyle) parts.push(`Seyahat tarzı: ${mem.travelStyle}`);
+    return parts.length ? `[Kullanıcı hafızası: ${parts.join(" | ")}]` : undefined;
+  }, []);
 
   const clearMemory = useCallback(() => {
     const fresh = { ...EMPTY, totalSessions: memory.totalSessions };

@@ -13,21 +13,13 @@
  *   DRY_RUN                — "true" → generate but don't upload/ingest
  */
 
-import {
-  BedrockRuntimeClient,
-  InvokeModelCommand,
-} from "@aws-sdk/client-bedrock-runtime";
-import {
-  BedrockAgentClient,
-  StartIngestionJobCommand,
-} from "@aws-sdk/client-bedrock-agent";
+import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import { BedrockAgentClient, StartIngestionJobCommand } from "@aws-sdk/client-bedrock-agent";
 import { S3Client, PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { DESTINATION_TOPICS, TTL_90_DAYS, type DestinationTopic } from "./destinations";
 
 const REGION = process.env.BEDROCK_REGION || "eu-central-1";
-const MODEL_ID =
-  process.env.FILL_MODEL_ID ||
-  "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
+const MODEL_ID = process.env.FILL_MODEL_ID || "eu.anthropic.claude-haiku-4-5-20251001-v1:0";
 const DRY_RUN = process.env.DRY_RUN === "true";
 
 let bedrockRuntime: BedrockRuntimeClient | undefined;
@@ -201,7 +193,10 @@ export async function handler(event?: { force?: boolean }): Promise<FillResult> 
       result.ingestionJobId = await startIngestion(kbId, dataSourceId);
       console.log(`[ingest] Started job ${result.ingestionJobId}`);
     } catch (err: unknown) {
-      console.error("[ingest] Failed to start ingestion job:", err instanceof Error ? err.message : err);
+      console.error(
+        "[ingest] Failed to start ingestion job:",
+        err instanceof Error ? err.message : err,
+      );
     }
   }
 

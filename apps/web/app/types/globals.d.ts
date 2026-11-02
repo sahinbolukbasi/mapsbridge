@@ -61,7 +61,6 @@ declare global {
     webkitSpeechRecognition?: new () => SpeechRecognition;
   }
 
-   
   var SpeechRecognition: { prototype: SpeechRecognition; new (): SpeechRecognition } | undefined;
 }
 

@@ -75,5 +75,7 @@ const publicDir = path.resolve(__dirname, "../public");
 fs.writeFileSync(path.join(publicDir, "sitemap.xml"), sitemap);
 fs.writeFileSync(path.join(publicDir, "robots.txt"), robots);
 
-console.log(`[generate-seo] sitemap.xml (${PAGES.length} URL) + robots.txt üretildi → ${publicDir}`);
+console.log(
+  `[generate-seo] sitemap.xml (${PAGES.length} URL) + robots.txt üretildi → ${publicDir}`,
+);
 console.log(`[generate-seo] origin: ${origin}`);

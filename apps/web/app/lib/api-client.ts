@@ -9,7 +9,8 @@
 import { getStoredSession, refreshSession, isTokenExpired } from "./cognito";
 
 export const API_ENDPOINT = (
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com"
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com"
 ).replace(/\/$/, "");
 
 export interface ApiFetchOptions extends RequestInit {
@@ -175,7 +176,12 @@ export const routesApi = {
 
   async update(
     id: string,
-    data: { name?: string; stops?: RouteStop[]; days?: Record<string, unknown>[]; isPublic?: boolean },
+    data: {
+      name?: string;
+      stops?: RouteStop[];
+      days?: Record<string, unknown>[];
+      isPublic?: boolean;
+    },
   ): Promise<{ routeId: string; status: string }> {
     return apiFetch<{ routeId: string; status: string }>(`/routes/${encodeURIComponent(id)}`, {
       method: "PUT",
@@ -210,9 +216,12 @@ export const routesApi = {
     profile: "driving" | "walking" | "cycling",
     coordinatesStr: string,
   ): Promise<unknown> {
-    return apiFetch<unknown>(`/routes/osrm/${profile}?coords=${encodeURIComponent(coordinatesStr)}`, {
-      skipAuth: true,
-    });
+    return apiFetch<unknown>(
+      `/routes/osrm/${profile}?coords=${encodeURIComponent(coordinatesStr)}`,
+      {
+        skipAuth: true,
+      },
+    );
   },
 };
 
@@ -609,7 +618,9 @@ export const adminApi = {
   },
 
   async listAdminRoutes(limit = 50): Promise<{ routes: Record<string, unknown>[]; count: number }> {
-    return apiFetch<{ routes: Record<string, unknown>[]; count: number }>(`/admin/routes?limit=${limit}`);
+    return apiFetch<{ routes: Record<string, unknown>[]; count: number }>(
+      `/admin/routes?limit=${limit}`,
+    );
   },
 
   async routeAction(

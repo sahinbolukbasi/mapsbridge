@@ -171,9 +171,18 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
         )}
         <div className="global-site-header-inner">
           <div style={{ display: "flex", alignItems: "center", gap: "1.75rem" }}>
-            <Link className="header-brand-link" href={mounted && userEmail ? "/maps/" : "/"} prefetch={false}>
+            <Link
+              className="header-brand-link"
+              href={mounted && userEmail ? "/maps/" : "/"}
+              prefetch={false}
+            >
               <div className="header-brand-icon">
-                <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "22px" }}>
+                <span
+                  aria-hidden="true"
+                  translate="no"
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "22px" }}
+                >
                   explore
                 </span>
               </div>
@@ -265,7 +274,12 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                       {userAvatar ? (
                         <img src={userAvatar} alt={userName} />
                       ) : (
-                        <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                        <span
+                          aria-hidden="true"
+                          translate="no"
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "18px" }}
+                        >
                           person
                         </span>
                       )}
@@ -332,7 +346,12 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                         aria-label="Profili Düzenle"
                         onClick={() => setIsOpen(false)}
                       >
-                        <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        <span
+                          aria-hidden="true"
+                          translate="no"
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "16px" }}
+                        >
                           edit
                         </span>
                       </a>
@@ -441,7 +460,12 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                         }}
                       >
                         <div className="header-stitch-item-left">
-                          <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ color: "#10b981" }}>
+                          <span
+                            aria-hidden="true"
+                            translate="no"
+                            className="material-symbols-outlined"
+                            style={{ color: "#10b981" }}
+                          >
                             workspace_premium
                           </span>
                           <span>Üyelik &amp; Kredi Masası</span>
@@ -463,7 +487,13 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                         onClick={() => setIsOpen(false)}
                       >
                         <div className="header-stitch-item-left">
-                          <span aria-hidden="true" translate="no" className="material-symbols-outlined">account_circle</span>
+                          <span
+                            aria-hidden="true"
+                            translate="no"
+                            className="material-symbols-outlined"
+                          >
+                            account_circle
+                          </span>
                           <span>Ana Profilim &amp; Gezgin Paneli</span>
                         </div>
                         <span
@@ -482,7 +512,13 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                         onClick={() => setIsOpen(false)}
                       >
                         <div className="header-stitch-item-left">
-                          <span aria-hidden="true" translate="no" className="material-symbols-outlined">map</span>
+                          <span
+                            aria-hidden="true"
+                            translate="no"
+                            className="material-symbols-outlined"
+                          >
+                            map
+                          </span>
                           <span>Rotalarım &amp; Gezilerim</span>
                         </div>
                         <span className="header-stitch-badge-pill">
@@ -498,7 +534,13 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                         onClick={handleOpenSavedAddresses}
                       >
                         <div className="header-stitch-item-left">
-                          <span aria-hidden="true" translate="no" className="material-symbols-outlined">bookmark_added</span>
+                          <span
+                            aria-hidden="true"
+                            translate="no"
+                            className="material-symbols-outlined"
+                          >
+                            bookmark_added
+                          </span>
                           <span>Kayıtlı Noktalarım &amp; Havuz</span>
                         </div>
                         <span className="header-stitch-badge-pill">{localSavedCount} Nokta</span>
@@ -510,7 +552,12 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                         onClick={() => setIsOpen(false)}
                       >
                         <div className="header-stitch-item-left">
-                          <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ color: "#10b981" }}>
+                          <span
+                            aria-hidden="true"
+                            translate="no"
+                            className="material-symbols-outlined"
+                            style={{ color: "#10b981" }}
+                          >
                             forum
                           </span>
                           <span>Gezgin Sohbetleri &amp; Gruplar</span>
@@ -536,10 +583,21 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                         onClick={() => setIsOpen(false)}
                       >
                         <div className="header-stitch-item-left">
-                          <span aria-hidden="true" translate="no" className="material-symbols-outlined">public</span>
+                          <span
+                            aria-hidden="true"
+                            translate="no"
+                            className="material-symbols-outlined"
+                          >
+                            public
+                          </span>
                           <span style={{ fontSize: "12px" }}>mapsbridge.com/@{userHandle}</span>
                         </div>
-                        <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                        <span
+                          aria-hidden="true"
+                          translate="no"
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "14px" }}
+                        >
                           open_in_new
                         </span>
                       </a>
@@ -572,7 +630,12 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
                         onClick={handleLogout}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                          <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                          <span
+                            aria-hidden="true"
+                            translate="no"
+                            className="material-symbols-outlined"
+                            style={{ fontSize: "18px" }}
+                          >
                             logout
                           </span>
                           <span>Çıkış Yap</span>
@@ -608,7 +671,12 @@ export function HeaderNav({ variant = "default" }: HeaderNavProps) {
               }}
               title={isEnglish ? "Türkçe ana sayfaya geç" : "İngilizce ana sayfaya geç"}
             >
-              <span aria-hidden="true" translate="no" className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+              <span
+                aria-hidden="true"
+                translate="no"
+                className="material-symbols-outlined"
+                style={{ fontSize: "1.125rem" }}
+              >
                 translate
               </span>
               <span>{isEnglish ? "TR" : "EN"}</span>
@@ -660,10 +728,7 @@ export function MobileNav() {
       ] as const);
 
   return (
-    <nav
-      className="mobile-primary-nav"
-      aria-label={t("ui.mobileMenu")}
-    >
+    <nav className="mobile-primary-nav" aria-label={t("ui.mobileMenu")}>
       <div className="mobile-nav-track">
         {items.map((item) => {
           const target = item.href.replace(/\/$/, "") || "/";

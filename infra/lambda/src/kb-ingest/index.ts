@@ -88,9 +88,7 @@ async function collectAndUpload(): Promise<{ status: string; uploaded: number }>
         `Destination: ${item.destination || "unknown"}`,
         `Query: ${item.prompt}`,
         `Summary: ${item.summary}`,
-        Array.isArray(item.themes) && item.themes.length
-          ? `Themes: ${item.themes.join(", ")}`
-          : "",
+        Array.isArray(item.themes) && item.themes.length ? `Themes: ${item.themes.join(", ")}` : "",
       ]
         .filter(Boolean)
         .join("\n");

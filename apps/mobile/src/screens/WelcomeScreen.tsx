@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-} from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { AppleLogo, GoogleLogo, ArrowRightIcon, ExploreIcon } from "../components/Icons";
 
@@ -15,8 +8,6 @@ import { tokens, withAlpha } from "../theme";
 interface WelcomeScreenProps {
   onSelectAuth: (mode: "login" | "register" | "apple" | "google") => void;
 }
-
-
 
 const HERO_BG_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCaPLUeaEdYQRXIb63qG6CQVE5pIsJ3pdFATx3iB93-HGlrPZfQ6s64wc_Z7beqhxGveCM4xVoGOJBKUebET4EYp8dSe1Dg2hWdnn18naZZbABJb2nXG3uwSKtTfBPHJdai8N29ElVda23JdLDmPbm4iPlFjPrBVMJBKtDHTpEf1uY6S5_1DNw_u5WTbiGVIvbpmd-qgM8k8hOyziGwozLL1E7IH4cAF88BIHfe_c_Q4kH9d33y9Um3Pw";
@@ -51,7 +42,9 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
               <View style={styles.brandIconCircle}>
                 <ExploreIcon size={14} color={tokens.color.onAccent} />
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.brandText}>MapsBridge</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.brandText}>
+                MapsBridge
+              </Text>
               <View style={styles.pulseDot} />
             </View>
           </View>
@@ -65,15 +58,40 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
                   <View style={styles.cardPulseDot} />
                   <View>
                     <View style={styles.cardStatusRow}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardStatusAi}>AI CANLI ROTA</Text>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardStatusDot}>•</Text>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardStatusGps}>GPS Aktif</Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.cardStatusAi}
+                      >
+                        AI CANLI ROTA
+                      </Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.cardStatusDot}
+                      >
+                        •
+                      </Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.cardStatusGps}
+                      >
+                        GPS Aktif
+                      </Text>
                     </View>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardTitle}>Kapadokya Balon Vadisi</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.cardTitle}
+                    >
+                      Kapadokya Balon Vadisi
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.savingsPill}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.savingsPillText}>⚡ 30 sn • %40 Tasarruf</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.savingsPillText}
+                  >
+                    ⚡ 30 sn • %40 Tasarruf
+                  </Text>
                 </View>
               </View>
 
@@ -85,48 +103,105 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
                 {/* Stop 1 */}
                 <View style={styles.waypointRow}>
                   <View style={styles.badge1}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge1Text}>1</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.badge1Text}
+                    >
+                      1
+                    </Text>
                   </View>
                   <View style={styles.waypointInfo}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointName} numberOfLines={1}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.waypointName}
+                      numberOfLines={1}
+                    >
                       Aşk Vadisi (Seyir Terası)
                     </Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointTime}>05:45 • Gün Doğumu & Balonlar</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.waypointTime}
+                    >
+                      05:45 • Gün Doğumu & Balonlar
+                    </Text>
                   </View>
                   <View style={styles.distPill}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.distPillText}>1.8 km • ~12 dk</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.distPillText}
+                    >
+                      1.8 km • ~12 dk
+                    </Text>
                   </View>
                 </View>
 
                 {/* Stop 2 */}
                 <View style={styles.waypointRow}>
                   <View style={styles.badge2}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge2Text}>2</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.badge2Text}
+                    >
+                      2
+                    </Text>
                   </View>
                   <View style={styles.waypointInfo}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointName} numberOfLines={1}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.waypointName}
+                      numberOfLines={1}
+                    >
                       Göreme Açık Hava Müzesi
                     </Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointTimeDim}>07:15 • 4 Tarihi Durak</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.waypointTimeDim}
+                    >
+                      07:15 • 4 Tarihi Durak
+                    </Text>
                   </View>
                   <View style={styles.distPillDim}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.distPillDimText}>2.4 km</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.distPillDimText}
+                    >
+                      2.4 km
+                    </Text>
                   </View>
                 </View>
 
                 {/* Stop 3 */}
                 <View style={styles.waypointRow}>
                   <View style={styles.badge3}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge3Text}>🏁</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.badge3Text}
+                    >
+                      🏁
+                    </Text>
                   </View>
                   <View style={styles.waypointInfo}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointName} numberOfLines={1}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.waypointName}
+                      numberOfLines={1}
+                    >
                       Uçhisar Kalesi
                     </Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.waypointTimeDim}>09:30 • Panoramik Gün Sonu</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.waypointTimeDim}
+                    >
+                      09:30 • Panoramik Gün Sonu
+                    </Text>
                   </View>
                   <View style={styles.distPillAccent}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.distPillAccentText}>Varış</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.distPillAccentText}
+                    >
+                      Varış
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -134,10 +209,25 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
               {/* Card Footer Bar */}
               <View style={styles.cardFooterBar}>
                 <View style={styles.cardFooterStats}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.cardFooterStatPill}>📍 8 Durak</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.cardFooterStatPill}>🧭 5.1 km Toplam</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.cardFooterStatPill}
+                  >
+                    📍 8 Durak
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.cardFooterStatPill}
+                  >
+                    🧭 5.1 km Toplam
+                  </Text>
                 </View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardFooterAction}>✨ AKILLI SIRALAMA</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.cardFooterAction}
+                >
+                  ✨ AKILLI SIRALAMA
+                </Text>
               </View>
             </View>
           </View>
@@ -154,7 +244,9 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
 
           <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headline}>
             Daha az planla,{"\n"}
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headlineAccent}>daha çok keşfet.</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headlineAccent}>
+              daha çok keşfet.
+            </Text>
           </Text>
 
           <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.subtitle}>
@@ -172,8 +264,15 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
             activeOpacity={0.88}
           >
             <View style={styles.primaryEmailLeft}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 18 }}>✉️</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryEmailText}>E-posta ile Ücretsiz Başla</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 18 }}>
+                ✉️
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.primaryEmailText}
+              >
+                E-posta ile Ücretsiz Başla
+              </Text>
             </View>
             <View style={styles.arrowCircle}>
               <ArrowRightIcon size={14} color={tokens.color.accentStrong} />
@@ -189,7 +288,9 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
               activeOpacity={0.85}
             >
               <GoogleLogo size={18} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.socialBtnText}>Google</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.socialBtnText}>
+                Google
+              </Text>
             </TouchableOpacity>
 
             {/* Apple */}
@@ -199,24 +300,37 @@ export function WelcomeScreen({ onSelectAuth }: WelcomeScreenProps) {
               activeOpacity={0.85}
             >
               <AppleLogo size={18} color={tokens.color.text} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.socialBtnText}>Apple</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.socialBtnText}>
+                Apple
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Sign In Navigation Link */}
         <View style={styles.loginLinkRow}>
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.loginLinkMuted}>Zaten hesabın var mı? </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.loginLinkMuted}>
+            Zaten hesabın var mı?{" "}
+          </Text>
           <TouchableOpacity onPress={() => onSelectAuth("login")}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.loginLinkActive}>Giriş Yap ➔</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.loginLinkActive}>
+              Giriş Yap ➔
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Legal Footer */}
         <View style={styles.legalSection}>
           <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legalText}>
-            Devam ederek <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legalLink}>Kullanım Şartları</Text> ve{" "}
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legalLink}>Gizlilik Politikası</Text>'nı onaylamış olursunuz.
+            Devam ederek{" "}
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legalLink}>
+              Kullanım Şartları
+            </Text>{" "}
+            ve{" "}
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legalLink}>
+              Gizlilik Politikası
+            </Text>
+            'nı onaylamış olursunuz.
           </Text>
         </View>
       </ScrollView>

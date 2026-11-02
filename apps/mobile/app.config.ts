@@ -60,9 +60,7 @@ export default {
       ],
       predictiveBackGestureEnabled: false,
     },
-    plugins: [
-      "expo-secure-store",
-    ],
+    plugins: ["expo-secure-store"],
     web: {
       favicon: "./assets/favicon.png",
     },

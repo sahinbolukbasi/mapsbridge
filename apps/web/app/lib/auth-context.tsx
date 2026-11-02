@@ -93,21 +93,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 30 dakikada bir token refresh (SessionKeepAlive'ın yerini alır)
   useEffect(() => {
-    intervalRef.current = setInterval(async () => {
-      const session = getStoredSession();
-      if (!session) return;
-      if (isTokenExpired(session.token)) {
-        const refreshed = await refreshSession();
-        if (refreshed) {
-          document.cookie = `mb_session=1; Max-Age=${24 * 60 * 60}; path=/; SameSite=Strict`;
-          setUser((prev) => (prev ? { ...prev, token: refreshed.token } : null));
-        } else {
-          cognitoSignOut();
-          document.cookie = "mb_session=; Max-Age=0; path=/";
-          setUser(null);
+    intervalRef.current = setInterval(
+      async () => {
+        const session = getStoredSession();
+        if (!session) return;
+        if (isTokenExpired(session.token)) {
+          const refreshed = await refreshSession();
+          if (refreshed) {
+            document.cookie = `mb_session=1; Max-Age=${24 * 60 * 60}; path=/; SameSite=Strict`;
+            setUser((prev) => (prev ? { ...prev, token: refreshed.token } : null));
+          } else {
+            cognitoSignOut();
+            document.cookie = "mb_session=; Max-Age=0; path=/";
+            setUser(null);
+          }
         }
-      }
-    }, 30 * 60 * 1000);
+      },
+      30 * 60 * 1000,
+    );
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);

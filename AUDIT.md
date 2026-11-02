@@ -1,8 +1,7 @@
 # MapsBridge Monorepo Denetim Raporu
 
-
-
 > **GÜNCELLEME 2026-10-28 (drift düzeltmesi):** Bu rapor 2026-10-15 tarihlidir ve bazı bulguları ARTIK GEÇERSİZDİR. Kodun güncel gerçeği için `.kiro/steering/architecture-truth.md` TEK DOĞRULUK KAYNAĞIDIR. Diske karşı doğrulanan değişiklikler:
+>
 > - "admin/index.ts 1936 satır, parçala" → **ÖDENDİ**: admin/index.ts = 204 satır; domain `management/finance/users/analytics/...`'e bölünmüş.
 > - "18 dosyada `new DynamoDBClient()`" → **ÖDENDİ**: 0; `getDynamoClient()` singleton kullanılıyor.
 > - "Hiç kullanılmayan 6 paket" → bu paketler diskten **silinmiş**; artık yalnızca `packages/contracts` var.

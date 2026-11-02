@@ -10,6 +10,7 @@ Mevcut deterministik araçlar zaten var; bu spec onları route akışına bağla
 ## Architecture
 
 ### Mevcut akış (I2 ihlali)
+
 ```
 LLM output.data.route.stops[] -> her stop'ta {placeId, day}
   -> buildResearchedRoute: place = research.places[placeId]  (I1 ✓)
@@ -18,6 +19,7 @@ LLM output.data.route.stops[] -> her stop'ta {placeId, day}
 ```
 
 ### Hedef akış (I2 uyumlu)
+
 ```
 LLM output.data.route.stops[] -> her stop'ta {placeId}  (day YOK SAYILIR)
   -> buildResearchedRoute:
@@ -34,12 +36,14 @@ kullanılmaz). Bu, LLM'in rolünü spec'e indirger: yalnızca POI seçimi.
 ## Components and Interfaces
 
 ### Değişen: `buildResearchedRoute` (supervisor.ts)
+
 - Girdi aynı (`candidate`, `context`, `research`).
 - `stop.day` yerine: seçilen POI'leri topla → `autoSplitPinsIntoDays` ile güne dağıt.
 - `autoSplitPinsIntoDays` `Pin[]` alır; `RouteStop`↔`Pin` köprü adaptörü gerekir (lat/lng/id/category map'leme).
 - Çıktı tipi (`UnifiedRoutePlan`) değişmez — downstream (narration, map) etkilenmez.
 
 ### Köprü adaptörü
+
 ```
 RouteStop -> Pin:  { id, lat, lng, category, label=name, ... }
 autoSplitPinsIntoDays(pins, days) -> { days: [{dayIndex, pins}] }
@@ -47,6 +51,7 @@ Pin -> RouteStop:  geri dönüşümde name/description/estimatedMinutes korunur
 ```
 
 ### Yeniden kullanılan (değişmeyen)
+
 - `autoSplitPinsIntoDays` (routing-service.ts) — deterministik k-means
 - `optimizeRouteOrder` (routing-service.ts) — TSP
 - `sortAndEnrichDayStops` (supervisor.ts) — timeSlot enrich
@@ -75,26 +80,31 @@ aynı veri yapısını alır.
 ## Correctness Properties
 
 ### Property 1: Güne-atama determinizmi
+
 Aynı POI seti + gün sayısı için güne-atama her zaman aynı sonucu vermeli.
 
 **Validates: Requirements 1.1, 1.4**
 
 ### Property 2: LLM clustering yapmaz
+
 Route çıktısındaki `stop.day` LLM'in verdiği değere değil, k-means sonucuna eşit olmalı.
 
 **Validates: Requirements 1.1, 1.2**
 
 ### Property 3: I1 korunumu
+
 Güne-atama değişikliği sonrası LLM hâlâ yalnızca araştırılmış POI seçebilmeli.
 
 **Validates: Requirements 3.1, 3.3**
 
 ### Property 4: Her gün dolu
+
 k-means sonrası her gün (1..k) en az bir durak içermeli.
 
 **Validates: Requirements 1.3, 4.4**
 
 ### Property 5: Regresyon yokluğu
+
 Mevcut servis testleri ve canlı rota senaryosu değişiklik sonrası geçmeli.
 
 **Validates: Requirements 4.2, 4.3**

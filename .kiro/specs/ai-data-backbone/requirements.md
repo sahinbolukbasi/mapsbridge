@@ -3,6 +3,7 @@
 ## Introduction
 
 MapsBridge AI asistanının "doğru yanıt vermesi" için güvenilir bir veri omurgası gerekir. Canlı doğrulama (Bedrock + supervisor smoke test) gösterdi ki:
+
 - AI çekirdeği çalışıyor (rota üretimi, hafıza, netleştirme — hepsi kanıtlandı)
 - ANCAK yanıtlar doğrulanmış veriye değil, modelin kendi eğitim bilgisine dayanıyor (`citedSourceIds: []` — grounding devreye girmiyor)
 - Doğrulanmış corpus çok küçük (5 kayıt: Tokyo/İstanbul/Roma/Lima) ve çoğu şehir için veri yok

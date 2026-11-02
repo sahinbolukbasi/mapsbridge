@@ -11,8 +11,13 @@ function loadEngine() {
   const transformed = transformSync(code, { loader: "ts", format: "cjs", target: "node22" }).code;
   const mod = { exports: {} };
   vm.runInNewContext(transformed, {
-    module: mod, exports: mod.exports,
-    require, console, Math, Number, JSON,
+    module: mod,
+    exports: mod.exports,
+    require,
+    console,
+    Math,
+    Number,
+    JSON,
   });
   return mod.exports.RecommendationScoringEngine;
 }
@@ -46,19 +51,34 @@ test("diet incompatibility (<=0) returns 0", () => {
 
 test("closed restaurant gets heavily penalized", () => {
   const open = Engine.calculateRestaurantScore({ ...perfectRestaurant, isOpenAtPlannedTime: true });
-  const closed = Engine.calculateRestaurantScore({ ...perfectRestaurant, isOpenAtPlannedTime: false });
+  const closed = Engine.calculateRestaurantScore({
+    ...perfectRestaurant,
+    isOpenAtPlannedTime: false,
+  });
   assert.ok(closed < open, `closed (${closed}) should be less than open (${open})`);
 });
 
 test("distance > 3000m reduces score", () => {
-  const near = Engine.calculateRestaurantScore({ ...perfectRestaurant, distanceFromRouteMeters: 0 });
-  const far = Engine.calculateRestaurantScore({ ...perfectRestaurant, distanceFromRouteMeters: 5000 });
+  const near = Engine.calculateRestaurantScore({
+    ...perfectRestaurant,
+    distanceFromRouteMeters: 0,
+  });
+  const far = Engine.calculateRestaurantScore({
+    ...perfectRestaurant,
+    distanceFromRouteMeters: 5000,
+  });
   assert.ok(far < near, `far (${far}) should be less than near (${near})`);
 });
 
 test("budget mismatch reduces score", () => {
-  const matches = Engine.calculateRestaurantScore({ ...perfectRestaurant, priceMatchesBudget: true });
-  const noMatch = Engine.calculateRestaurantScore({ ...perfectRestaurant, priceMatchesBudget: false });
+  const matches = Engine.calculateRestaurantScore({
+    ...perfectRestaurant,
+    priceMatchesBudget: true,
+  });
+  const noMatch = Engine.calculateRestaurantScore({
+    ...perfectRestaurant,
+    priceMatchesBudget: false,
+  });
   assert.ok(noMatch < matches);
 });
 

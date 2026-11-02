@@ -6,13 +6,7 @@
 // Not (I2): rota GEOMETRİSİ deterministik koddur (OSRM API), LLM çıktısı değil — bu dosya onu korur.
 
 import type { ApiGatewayEvent } from "../shared/http";
-import {
-  extractBearerToken,
-  unauthorized,
-  badRequest,
-  ok,
-  serverError,
-} from "../shared/http";
+import { extractBearerToken, unauthorized, badRequest, ok, serverError } from "../shared/http";
 import { verifiedUserId } from "../shared/auth";
 
 type OsrmStep = {

@@ -12,8 +12,10 @@ const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
 
 // Endpoint'ler önce ortam değişkenlerinden okunur (deploy sonrası kod değişmeden güncellenir).
 // Ortam değişkeni yoksa endpoints.json'daki değer kullanılır.
-const webBaseUrl = process.env.SYNTHETICS_WEB_URL || process.env.NEXT_PUBLIC_SITE_URL || config.webBaseUrl;
-const apiBaseUrl = process.env.SYNTHETICS_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || config.apiBaseUrl;
+const webBaseUrl =
+  process.env.SYNTHETICS_WEB_URL || process.env.NEXT_PUBLIC_SITE_URL || config.webBaseUrl;
+const apiBaseUrl =
+  process.env.SYNTHETICS_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || config.apiBaseUrl;
 
 async function checkEndpoint(check) {
   const baseUrl = check.target === "api" ? apiBaseUrl : webBaseUrl;

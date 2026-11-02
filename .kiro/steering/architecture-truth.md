@@ -41,6 +41,7 @@ infra/lambda/src/<context>/
 ├── <context>.service.ts  # application: iş kuralları (AWS SDK YOK, port/repo alır)
 └── <context>.repo.ts     # infrastructure: DynamoDB/Cognito/Stripe/Bedrock adaptörü
 ```
+
 - `packages/ai-core` (YENİ): supervisor, context-builder, guardrails (I1/I5), planning, scoring, clustering (I2). `apps/web/server/ai/*` + `services/ai-assistant` buraya birleşir → lambda→apps importu 0'a iner.
 - `packages/contracts`: büyür (lambda'nın da ihtiyaç duyduğu AI tipleri buraya).
 - `services/`: yalnızca çok-tüketicili canlı domain (bugün `messaging`, `place-intelligence`). `identity-billing` silinir.
@@ -62,6 +63,6 @@ Hedefe big-bang değil, küçük/bağımsız/geri-alınabilir adımlarla gidilir
 
 ## 7. Gözlemlenebilirlik (gerçek durum, 2026-10-28)
 
-- **monitoring/services/*.json** adları koddaki `services/*` klasörleri DEĞİL, mantıksal ürün yetenek alanlarıdır. Her JSON'da `_note` ile canlı kod eşlemesi var. `map-trip`→routes/shares, `community`→marketplace/articles, `identity-billing`→auth/billing/stripe (klasör ölü ama işlev canlı, monitör korunur).
+- **monitoring/services/\*.json** adları koddaki `services/*` klasörleri DEĞİL, mantıksal ürün yetenek alanlarıdır. Her JSON'da `_note` ile canlı kod eşlemesi var. `map-trip`→routes/shares, `community`→marketplace/articles, `identity-billing`→auth/billing/stripe (klasör ölü ama işlev canlı, monitör korunur).
 - **Structured logger EKSİK:** `packages/monitoring` paketi silinmiş; logging 21 lambda dosyasında dağınık `console.*` + lokal yardımcılarla yapılıyor. Tek tip trace-id/korelasyon yok. → HEDEF (FAZ 2): tek structured logger (ör. `packages/ai-core` ya da yeni `packages/observability`), X-Ray trace-id entegrasyonu. Bu bir refactor işi; FAZ 1'de yalnızca gerçek belgelendi.
 - **monitoring/ altyapısı sağlam:** alarms/, dashboards/, synthetics/ (`npm run monitor:synthetics`), tracing/, runbooks/ mevcut.

@@ -47,7 +47,7 @@ function backendRegisteredPaths() {
   try {
     out = execFileSync(
       "grep",
-      ["-rhoE", "--exclude-dir=node_modules", "\"[A-Z]+ /[^\"]*\"", "infra/lambda/src"],
+      ["-rhoE", "--exclude-dir=node_modules", '"[A-Z]+ /[^"]*"', "infra/lambda/src"],
       { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
     );
   } catch (err) {

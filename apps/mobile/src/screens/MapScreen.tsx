@@ -331,12 +331,22 @@ export function MapScreen({
           } catch {}
         }
 
-        const reviews: PlaceReview[] = (topPoi.reviews || []).slice(0, 4).map((r: { authorAttribution?: { displayName?: string }; rating?: number; text?: { text?: string }; originalText?: { text?: string }; relativePublishTimeDescription?: string }) => ({
-          author: r.authorAttribution?.displayName || "Gezgin",
-          rating: r.rating || 5,
-          text: r.text?.text || r.originalText?.text || "",
-          relativeTime: r.relativePublishTimeDescription || "",
-        }));
+        const reviews: PlaceReview[] = (topPoi.reviews || [])
+          .slice(0, 4)
+          .map(
+            (r: {
+              authorAttribution?: { displayName?: string };
+              rating?: number;
+              text?: { text?: string };
+              originalText?: { text?: string };
+              relativePublishTimeDescription?: string;
+            }) => ({
+              author: r.authorAttribution?.displayName || "Gezgin",
+              rating: r.rating || 5,
+              text: r.text?.text || r.originalText?.text || "",
+              relativeTime: r.relativePublishTimeDescription || "",
+            }),
+          );
 
         const info: ClickedPlaceInfo = {
           name: topPoi.displayName?.text || "Seçilen Mekan",
@@ -529,16 +539,26 @@ export function MapScreen({
       const data = await res.json();
 
       if (data.places && data.places.length > 0) {
-        const mapped = data.places.map((p: { displayName?: { text?: string }; formattedAddress?: string; location: { latitude: number; longitude: number }; rating?: number; primaryTypeDisplayName?: { text?: string }; types?: string[]; photos?: { name: string }[] }) => ({
-          name: p.displayName?.text || "Mekan",
-          formatted_address: p.formattedAddress,
-          geometry: { location: { lat: p.location.latitude, lng: p.location.longitude } },
-          rating: p.rating,
-          category: p.primaryTypeDisplayName?.text || getCategoryFromTypes(p.types),
-          photoUrl: p.photos?.[0]?.name
-            ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxHeightPx=600&maxWidthPx=800&key=${GOOGLE_MAPS_API_KEY}`
-            : undefined,
-        }));
+        const mapped = data.places.map(
+          (p: {
+            displayName?: { text?: string };
+            formattedAddress?: string;
+            location: { latitude: number; longitude: number };
+            rating?: number;
+            primaryTypeDisplayName?: { text?: string };
+            types?: string[];
+            photos?: { name: string }[];
+          }) => ({
+            name: p.displayName?.text || "Mekan",
+            formatted_address: p.formattedAddress,
+            geometry: { location: { lat: p.location.latitude, lng: p.location.longitude } },
+            rating: p.rating,
+            category: p.primaryTypeDisplayName?.text || getCategoryFromTypes(p.types),
+            photoUrl: p.photos?.[0]?.name
+              ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxHeightPx=600&maxWidthPx=800&key=${GOOGLE_MAPS_API_KEY}`
+              : undefined,
+          }),
+        );
         setSearchResults(mapped.slice(0, 6));
         setShowSearchResults(true);
         return;
@@ -565,7 +585,13 @@ export function MapScreen({
   };
 
   // Add search result to active route
-  const handleSelectSearchResult = (place: { name?: string; geometry?: { location?: { lat: number; lng: number } }; types?: string[]; formatted_address?: string; rating?: number }) => {
+  const handleSelectSearchResult = (place: {
+    name?: string;
+    geometry?: { location?: { lat: number; lng: number } };
+    types?: string[];
+    formatted_address?: string;
+    rating?: number;
+  }) => {
     const loc = place.geometry?.location;
     if (!loc) return;
 
@@ -593,13 +619,17 @@ export function MapScreen({
       distanceFromPrev: "500m",
     };
 
-    Alert.alert(place.name || "Mekan", place.formatted_address || "Rotanıza eklemek ister misiniz?", [
-      { text: "Vazgeç", style: "cancel" },
-      {
-        text: "Rotaya Ekle",
-        onPress: () => tripStore.addStop(newStop),
-      },
-    ]);
+    Alert.alert(
+      place.name || "Mekan",
+      place.formatted_address || "Rotanıza eklemek ister misiniz?",
+      [
+        { text: "Vazgeç", style: "cancel" },
+        {
+          text: "Rotaya Ekle",
+          onPress: () => tripStore.addStop(newStop),
+        },
+      ],
+    );
   };
 
   // Add clicked place to active route
@@ -1211,7 +1241,12 @@ export function MapScreen({
                   setShowSearchResults(false);
                 }}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 13, color: tokens.color.textSubtle }}>✕</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ fontSize: 13, color: tokens.color.textSubtle }}
+                >
+                  ✕
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1222,7 +1257,11 @@ export function MapScreen({
           <View style={styles.pendingAddStopBanner}>
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
               <View style={styles.pulsingDot} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pendingAddStopText} numberOfLines={1}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.pendingAddStopText}
+                numberOfLines={1}
+              >
                 📍 Haritada eklemek istediğiniz mekana dokunun
               </Text>
             </View>
@@ -1234,7 +1273,12 @@ export function MapScreen({
               }}
               activeOpacity={0.7}
             >
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pendingAddStopCancelText}>Vazgeç</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.pendingAddStopCancelText}
+              >
+                Vazgeç
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -1251,12 +1295,28 @@ export function MapScreen({
                 onPress={() => handleSelectSearchResult(item)}
               >
                 <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.searchResultName}>{item.name}</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.searchResultAddr} numberOfLines={1}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.searchResultName}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.searchResultAddr}
+                    numberOfLines={1}
+                  >
                     {item.formatted_address}
                   </Text>
                 </View>
-                {item.rating && <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.searchResultRating}>★ {item.rating}</Text>}
+                {item.rating && (
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.searchResultRating}
+                  >
+                    ★ {item.rating}
+                  </Text>
+                )}
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -1286,7 +1346,8 @@ export function MapScreen({
           activeOpacity={0.8}
         >
           {showMyLocation && <View style={styles.gpsPulseDot} />}
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+          <Text
+            maxFontSizeMultiplier={tokens.font.maxScale.body}
             style={[
               styles.floatingControlIcon,
               showMyLocation && { color: tokens.color.textBrand, fontWeight: "900" },
@@ -1301,7 +1362,9 @@ export function MapScreen({
       {isLoadingPlace && (
         <View style={styles.poiLoadingPill}>
           <ActivityIndicator size="small" color={tokens.color.accent} />
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poiLoadingText}>Mekan bilgisi alınıyor...</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poiLoadingText}>
+            Mekan bilgisi alınıyor...
+          </Text>
         </View>
       )}
 
@@ -1338,10 +1401,18 @@ export function MapScreen({
               >
                 <MapPinIcon size={15} color={tokens.color.successStrong} />
                 <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.collapsedTitle} numberOfLines={1}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.collapsedTitle}
+                    numberOfLines={1}
+                  >
                     {clickedPlace.name}
                   </Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.collapsedSub} numberOfLines={1}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.collapsedSub}
+                    numberOfLines={1}
+                  >
                     {clickedPlace.category} • ★ {clickedPlace.rating || 4.8}
                   </Text>
                 </View>
@@ -1352,7 +1423,12 @@ export function MapScreen({
               >
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                   <PlusIcon size={12} color={tokens.color.onPrimary} />
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.collapsedActionPillText}>Ekle</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.collapsedActionPillText}
+                  >
+                    Ekle
+                  </Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
@@ -1361,7 +1437,12 @@ export function MapScreen({
               >
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                   <Share2Icon size={12} color={tokens.color.textBrand} />
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={[styles.collapsedActionPillText, { color: tokens.color.textBrand }]}>Paylaş</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={[styles.collapsedActionPillText, { color: tokens.color.textBrand }]}
+                  >
+                    Paylaş
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -1372,7 +1453,12 @@ export function MapScreen({
               <View style={styles.clickedPlaceTopRow}>
                 <View style={styles.liveIndicatorRow}>
                   <View style={styles.pulsingDot} />
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.cardHeaderTitle}>HARİTADAN SEÇİLEN MEKAN</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={styles.cardHeaderTitle}
+                  >
+                    HARİTADAN SEÇİLEN MEKAN
+                  </Text>
                 </View>
 
                 <View style={styles.clickedPlaceHeaderRightActions}>
@@ -1385,7 +1471,12 @@ export function MapScreen({
                     activeOpacity={0.8}
                   >
                     <RobotIcon size={13} color={tokens.color.onPrimary} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.aiAskButtonText}>AI Sor</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.aiAskButtonText}
+                    >
+                      AI Sor
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1393,7 +1484,12 @@ export function MapScreen({
                     onPress={() => setClickedPlace(null)}
                     activeOpacity={0.7}
                   >
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.closeCircleBtnText}>✕</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.closeCircleBtnText}
+                    >
+                      ✕
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1402,23 +1498,39 @@ export function MapScreen({
                 <View style={{ flex: 1 }}>
                   <View style={styles.categoryRatingRow}>
                     <View style={styles.categoryPill}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.categoryPillText}>{clickedPlace.category}</Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                        style={styles.categoryPillText}
+                      >
+                        {clickedPlace.category}
+                      </Text>
                     </View>
                     {clickedPlace.rating && (
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.ratingBadge}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                        style={styles.ratingBadge}
+                      >
                         ★ {clickedPlace.rating} ({clickedPlace.userRatingsTotal || 120})
                       </Text>
                     )}
                   </View>
 
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopTitle} numberOfLines={1}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.stopTitle}
+                    numberOfLines={1}
+                  >
                     {clickedPlace.name}
                   </Text>
                   <View
                     style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 }}
                   >
                     <PinIcon size={12} color={tokens.color.accent} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopAddress} numberOfLines={2}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.stopAddress}
+                      numberOfLines={2}
+                    >
                       {clickedPlace.address}
                     </Text>
                   </View>
@@ -1444,9 +1556,19 @@ export function MapScreen({
                     <View style={{ marginRight: 5 }}>
                       <MonumentIcon size={13} color={tokens.color.textBrand} />
                     </View>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.placeDescLabel}>MEKAN HAKKINDA</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.placeDescLabel}
+                    >
+                      MEKAN HAKKINDA
+                    </Text>
                   </View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.placeDescText}>{clickedPlace.description}</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.placeDescText}
+                  >
+                    {clickedPlace.description}
+                  </Text>
                 </View>
               ) : null}
 
@@ -1457,7 +1579,12 @@ export function MapScreen({
                     <View style={{ marginRight: 5 }}>
                       <ChatIcon size={13} color={tokens.color.textBrand} />
                     </View>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.reviewsBoxHeader}>GEZGİN YORUMLARI</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.reviewsBoxHeader}
+                    >
+                      GEZGİN YORUMLARI
+                    </Text>
                   </View>
                   <ScrollView
                     style={styles.reviewsScroll}
@@ -1467,13 +1594,25 @@ export function MapScreen({
                     {clickedPlace.reviews.map((rev, rIdx) => (
                       <View key={rIdx} style={styles.reviewItem}>
                         <View style={styles.reviewItemHeader}>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.reviewAuthor}>{rev.author}</Text>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.reviewRating}>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.reviewAuthor}
+                          >
+                            {rev.author}
+                          </Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.reviewRating}
+                          >
                             {"★".repeat(Math.min(5, Math.max(1, Math.round(rev.rating))))}{" "}
                             {rev.relativeTime}
                           </Text>
                         </View>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.reviewText} numberOfLines={3}>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.reviewText}
+                          numberOfLines={3}
+                        >
                           {rev.text}
                         </Text>
                       </View>
@@ -1491,7 +1630,12 @@ export function MapScreen({
                 >
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                     <PlusIcon size={15} color={tokens.color.onPrimary} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryActionBtnText}>Bu Mekanı Rotaya Ekle</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.primaryActionBtnText}
+                    >
+                      Bu Mekanı Rotaya Ekle
+                    </Text>
                   </View>
                 </TouchableOpacity>
 
@@ -1502,7 +1646,12 @@ export function MapScreen({
                 >
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                     <QrCodeIcon size={15} color={tokens.color.textBrand} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareActionBtnText}>QR Kod & Yol Tarifi Paylaş</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.shareActionBtnText}
+                    >
+                      QR Kod & Yol Tarifi Paylaş
+                    </Text>
                   </View>
                 </TouchableOpacity>
               </View>
@@ -1525,10 +1674,18 @@ export function MapScreen({
                   <PlanIcon size={18} color={tokens.color.accent} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.collapsedTitle} numberOfLines={1}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.collapsedTitle}
+                    numberOfLines={1}
+                  >
                     Henüz Rota Bulunmuyor
                   </Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.collapsedSub} numberOfLines={1}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.collapsedSub}
+                    numberOfLines={1}
+                  >
                     Yeni seyahat rotanı hemen oluştur
                   </Text>
                 </View>
@@ -1538,8 +1695,18 @@ export function MapScreen({
                 onPress={() => onOpenPlan?.()}
                 activeOpacity={0.8}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyPlanCtaBtnText}>Hemen Rotanı Planla</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontSize: 13, fontWeight: "800" }}>➔</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.emptyPlanCtaBtnText}
+                >
+                  Hemen Rotanı Planla
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ color: tokens.color.onPrimary, fontSize: 13, fontWeight: "800" }}
+                >
+                  ➔
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -1549,10 +1716,23 @@ export function MapScreen({
               </View>
               <View style={styles.emptyRouteBadgeRow}>
                 <View style={styles.pulsingDot} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.emptyRouteBadgeText}>YENİ SEYAHAT PLANI</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  style={styles.emptyRouteBadgeText}
+                >
+                  YENİ SEYAHAT PLANI
+                </Text>
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyRouteExpandedTitle}>Seyahat Rotanı Başlat</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyRouteExpandedSubtitle}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emptyRouteExpandedTitle}
+              >
+                Seyahat Rotanı Başlat
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emptyRouteExpandedSubtitle}
+              >
                 Haritada henüz aktif bir rota bulunmuyor. İster AI asistan ile ister adım adım
                 duraklarını ekleyerek mükemmel seyahatini planla.
               </Text>
@@ -1562,12 +1742,25 @@ export function MapScreen({
                 activeOpacity={0.85}
               >
                 <SparkIcon size={18} color={tokens.color.onPrimary} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyRouteExpandedPrimaryBtnText}>Hemen Rotanı Planla</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontSize: 15, fontWeight: "900" }}>➔</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.emptyRouteExpandedPrimaryBtnText}
+                >
+                  Hemen Rotanı Planla
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ color: tokens.color.onPrimary, fontSize: 15, fontWeight: "900" }}
+                >
+                  ➔
+                </Text>
               </TouchableOpacity>
               <View style={styles.emptyRouteHintRow}>
                 <LightbulbIcon size={14} color={tokens.color.warningStrong} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyRouteHintText}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.emptyRouteHintText}
+                >
                   İpucu: Haritada herhangi bir mekana dokunarak da ilk durağını ekleyebilirsin.
                 </Text>
               </View>
@@ -1578,13 +1771,26 @@ export function MapScreen({
           /* Collapsed Route Stop Capsule */
           <View style={styles.collapsedRow}>
             <View style={styles.collapsedStopBadge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.collapsedStopBadgeText}>{currentStopIdx + 1}</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.collapsedStopBadgeText}
+              >
+                {currentStopIdx + 1}
+              </Text>
             </View>
             <View style={{ flex: 1, marginHorizontal: 8 }}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.collapsedTitle} numberOfLines={1}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.collapsedTitle}
+                numberOfLines={1}
+              >
                 {currentStop?.name || "Durak"}
               </Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.collapsedSub} numberOfLines={1}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.collapsedSub}
+                numberOfLines={1}
+              >
                 {currentStop?.walkTimeFromPrev || "~4 dk"} •{" "}
                 {currentStop?.distanceFromPrev || "320m"}
               </Text>
@@ -1595,11 +1801,21 @@ export function MapScreen({
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <DirectionsIcon size={13} color={tokens.color.onPrimary} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.collapsedNavPillText}>Yol Tarifi</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  style={styles.collapsedNavPillText}
+                >
+                  Yol Tarifi
+                </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.collapsedArrowBtn} onPress={handleNextStop}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.collapsedArrowBtnText}>›</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.collapsedArrowBtnText}
+              >
+                ›
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -1613,14 +1829,28 @@ export function MapScreen({
                 activeOpacity={0.8}
               >
                 <View style={styles.pulsingDot} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeHeaderTitle} numberOfLines={1}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  style={styles.routeHeaderTitle}
+                  numberOfLines={1}
+                >
                   {activeRoute.name} • 1. Gün
                 </Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 12, color: tokens.color.link }}>▼</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ fontSize: 12, color: tokens.color.link }}
+                >
+                  ▼
+                </Text>
               </TouchableOpacity>
 
               <View style={styles.stopsCountBadge}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.stopsCountText}>{activeRoute.stops.length} Durak</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  style={styles.stopsCountText}
+                >
+                  {activeRoute.stops.length} Durak
+                </Text>
               </View>
             </View>
 
@@ -1631,7 +1861,12 @@ export function MapScreen({
                 onPress={handlePrevStop}
                 activeOpacity={0.7}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepperArrowText}>◀</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.stepperArrowText}
+                >
+                  ◀
+                </Text>
               </TouchableOpacity>
 
               <ScrollView
@@ -1654,7 +1889,8 @@ export function MapScreen({
                         });
                       }}
                     >
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={[styles.stepCircleText, isCurrent && styles.stepCircleTextActive]}
                       >
                         {sIdx + 1}
@@ -1669,7 +1905,12 @@ export function MapScreen({
                 onPress={handleNextStop}
                 activeOpacity={0.7}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stepperArrowText}>▶</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.stepperArrowText}
+                >
+                  ▶
+                </Text>
               </TouchableOpacity>
             </View>
 
@@ -1712,14 +1953,26 @@ export function MapScreen({
                       <View style={{ flex: 1 }}>
                         <View style={styles.categoryRatingRow}>
                           <View style={styles.categoryPill}>
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.categoryPillText}>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                              style={styles.categoryPillText}
+                            >
                               {sIdx + 1}. DURAK • {stop.category}
                             </Text>
                           </View>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.ratingBadge}>★ {stop.rating || 4.8}</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                            style={styles.ratingBadge}
+                          >
+                            ★ {stop.rating || 4.8}
+                          </Text>
                         </View>
 
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopTitle} numberOfLines={1}>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.stopTitle}
+                          numberOfLines={1}
+                        >
                           {stop.name}
                         </Text>
                         <View
@@ -1731,7 +1984,11 @@ export function MapScreen({
                           }}
                         >
                           <MapPinIcon size={12} color={tokens.color.successStrong} />
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopAddress} numberOfLines={1}>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.stopAddress}
+                            numberOfLines={1}
+                          >
                             {stop.address}
                           </Text>
                         </View>
@@ -1757,10 +2014,16 @@ export function MapScreen({
                           <WalkIcon size={14} color={tokens.color.successStrong} />
                         </View>
                         <View>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.microStatTitle}>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.microStatTitle}
+                          >
                             {stop.walkTimeFromPrev || "~4 dk yürüyüş"}
                           </Text>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.microStatSub}>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.microStatSub}
+                          >
                             {stop.distanceFromPrev || "320m"} mesafe
                           </Text>
                         </View>
@@ -1773,8 +2036,18 @@ export function MapScreen({
                           <ClockIcon size={14} color={tokens.color.successStrong} />
                         </View>
                         <View>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.microStatTitle}>Tahmini süre: {stop.duration}</Text>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.microStatSub}>İdeal gezi payı</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.microStatTitle}
+                          >
+                            Tahmini süre: {stop.duration}
+                          </Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.microStatSub}
+                          >
+                            İdeal gezi payı
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -1786,8 +2059,17 @@ export function MapScreen({
                           <LightbulbIcon size={14} color={tokens.color.warningStrong} />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.travelerNoteLabel}>GEZGİN NOTU</Text>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.travelerNoteText} numberOfLines={2}>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.travelerNoteLabel}
+                          >
+                            GEZGİN NOTU
+                          </Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.travelerNoteText}
+                            numberOfLines={2}
+                          >
                             {stop.notes}
                           </Text>
                         </View>
@@ -1802,8 +2084,18 @@ export function MapScreen({
                         activeOpacity={0.88}
                       >
                         <DirectionsIcon size={14} color={tokens.color.onPrimary} />
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.primaryActionBtnText}>Yol Tarifi Başlat</Text>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 14, color: tokens.color.onPrimary }}>➔</Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.primaryActionBtnText}
+                        >
+                          Yol Tarifi Başlat
+                        </Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={{ fontSize: 14, color: tokens.color.onPrimary }}
+                        >
+                          ➔
+                        </Text>
                       </TouchableOpacity>
 
                       <View style={styles.secondaryActionsSplit}>
@@ -1811,7 +2103,8 @@ export function MapScreen({
                           style={[styles.secondaryBtn, stop.visited && styles.visitedBtnActive]}
                           onPress={() => tripStore.toggleVisited(stop.id)}
                         >
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
                             style={[
                               styles.secondaryBtnText,
                               stop.visited && { color: tokens.color.textBrand, fontWeight: "800" },
@@ -1836,7 +2129,12 @@ export function MapScreen({
                           }
                         >
                           <Share2Icon size={12} color={tokens.color.link} />
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.secondaryBtnText}>Paylaş & QR</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.secondaryBtnText}
+                          >
+                            Paylaş & QR
+                          </Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -1847,7 +2145,12 @@ export function MapScreen({
                           onPress={onOpenPlan}
                         >
                           <PlanIcon size={12} color={tokens.color.link} />
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.secondaryBtnText}>Plan</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.secondaryBtnText}
+                          >
+                            Plan
+                          </Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -1867,49 +2170,67 @@ export function MapScreen({
         onRequestClose={() => setShowRouteModal(false)}
         style={styles.modalOverlay}
       >
-          <View style={styles.modalContent}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rotayı Değiştir</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Haritada incelemek istediğiniz rotayı seçin</Text>
+        <View style={styles.modalContent}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>
+            Rotayı Değiştir
+          </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
+            Haritada incelemek istediğiniz rotayı seçin
+          </Text>
 
-            <ScrollView style={{ maxHeight: 260, marginVertical: 12 }}>
-              {allRoutes.map((r) => {
-                const isActive = r.id === activeRoute.id;
-                return (
-                  <TouchableOpacity
-                    key={r.id}
-                    style={[styles.routeModalItem, isActive && styles.routeModalItemActive]}
-                    onPress={() => {
-                      tripStore.switchActiveRoute(r.id);
-                      setCurrentStopIdx(0);
-                      setShowRouteModal(false);
-                    }}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
-                        style={[
-                          styles.routeModalName,
-                          isActive && { color: tokens.color.textBrand, fontWeight: "800" },
-                        ]}
-                      >
-                        {r.name}
-                      </Text>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeModalStopsCount}>
-                        {r.stops.length} Durak • Akıcı Sıralı
-                      </Text>
-                    </View>
-                    {isActive && (
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 16 }}>✓</Text>
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+          <ScrollView style={{ maxHeight: 260, marginVertical: 12 }}>
+            {allRoutes.map((r) => {
+              const isActive = r.id === activeRoute.id;
+              return (
+                <TouchableOpacity
+                  key={r.id}
+                  style={[styles.routeModalItem, isActive && styles.routeModalItemActive]}
+                  onPress={() => {
+                    tripStore.switchActiveRoute(r.id);
+                    setCurrentStopIdx(0);
+                    setShowRouteModal(false);
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={[
+                        styles.routeModalName,
+                        isActive && { color: tokens.color.textBrand, fontWeight: "800" },
+                      ]}
+                    >
+                      {r.name}
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.routeModalStopsCount}
+                    >
+                      {r.stops.length} Durak • Akıcı Sıralı
+                    </Text>
+                  </View>
+                  {isActive && (
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 16 }}
+                    >
+                      ✓
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
 
-            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowRouteModal(false)}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseBtnText}>Kapat</Text>
-            </TouchableOpacity>
-          </View>
-        </ModalFrame>
+          <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowRouteModal(false)}>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.modalCloseBtnText}
+            >
+              Kapat
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ModalFrame>
 
       {/* Comprehensive Share Modal (QR Kod + Toplu Taşıma + Canlı Yol Tarifi) */}
       <ModalFrame
@@ -1919,115 +2240,183 @@ export function MapScreen({
         onRequestClose={() => setShareTarget(null)}
         style={styles.shareModalBackdrop}
       >
-          <View style={styles.shareModalCard}>
-            <View style={styles.shareModalHeader}>
-              <View style={{ flex: 1 }}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareModalSubtitle}>YOL TARİFİ & PAYLAŞIM</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareModalTitle} numberOfLines={1}>
-                  {shareTarget?.name}
-                </Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareModalAddress} numberOfLines={1}>
-                  {shareTarget?.address}
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.shareCloseBtn} onPress={() => setShareTarget(null)}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareCloseText}>✕</Text>
-              </TouchableOpacity>
+        <View style={styles.shareModalCard}>
+          <View style={styles.shareModalHeader}>
+            <View style={{ flex: 1 }}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.shareModalSubtitle}
+              >
+                YOL TARİFİ & PAYLAŞIM
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.shareModalTitle}
+                numberOfLines={1}
+              >
+                {shareTarget?.name}
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.shareModalAddress}
+                numberOfLines={1}
+              >
+                {shareTarget?.address}
+              </Text>
             </View>
+            <TouchableOpacity style={styles.shareCloseBtn} onPress={() => setShareTarget(null)}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareCloseText}>
+                ✕
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-            {/* QR Code Container */}
-            <View style={styles.qrCodeBox}>
-              {shareTarget && (
-                <Image
-                  source={{
-                    uri: `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=${encodeURIComponent(
-                      `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}&travelmode=transit`,
-                    )}`,
-                  }}
-                  style={styles.qrImage}
-                  resizeMode="contain"
-                />
-              )}
-              <View style={styles.qrHintRow}>
-                <View style={{ marginRight: 6 }}>
-                  <QrCodeIcon size={14} color={tokens.color.successStrong} />
-                </View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.qrHintText}>
-                  Kamerayla okutulduğunda hedefe anında canlı yol tarifi açılır.
-                </Text>
+          {/* QR Code Container */}
+          <View style={styles.qrCodeBox}>
+            {shareTarget && (
+              <Image
+                source={{
+                  uri: `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=${encodeURIComponent(
+                    `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}&travelmode=transit`,
+                  )}`,
+                }}
+                style={styles.qrImage}
+                resizeMode="contain"
+              />
+            )}
+            <View style={styles.qrHintRow}>
+              <View style={{ marginRight: 6 }}>
+                <QrCodeIcon size={14} color={tokens.color.successStrong} />
               </View>
-            </View>
-
-            {/* Direction & Share Options */}
-            <View style={styles.shareOptionsCol}>
-              {/* Toplu Taşıma Yol Tarifi */}
-              <TouchableOpacity
-                style={styles.shareOptionBtn}
-                onPress={() => {
-                  if (!shareTarget) return;
-                  const transitUrl = `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}&travelmode=transit`;
-                  Linking.openURL(transitUrl);
-                }}
-              >
-                <View style={[styles.shareOptionIconBox, { backgroundColor: tokens.color.infoBg }]}>
-                  <TrainIcon size={18} color={tokens.color.accentSky} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareOptionTitle}>Toplu Taşıma Yol Tarifi</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareOptionSub}>
-                    Metro, otobüs, marmaray ve vapur hatları
-                  </Text>
-                </View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.color.accentSky }}>➔</Text>
-              </TouchableOpacity>
-
-              {/* Araç ve Yürüyüş Yol Tarifi */}
-              <TouchableOpacity
-                style={styles.shareOptionBtn}
-                onPress={() => {
-                  if (!shareTarget) return;
-                  const url = Platform.select({
-                    ios: `maps://app?daddr=${shareTarget.lat},${shareTarget.lng}`,
-                    default: `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}`,
-                  });
-                  Linking.openURL(url);
-                }}
-              >
-                <View style={[styles.shareOptionIconBox, { backgroundColor: tokens.color.warningBgStrong }]}>
-                  <DirectionsIcon size={18} color={tokens.color.warningStrong} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareOptionTitle}>Yol Tarifi & Navigasyon</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareOptionSub}>Bulunduğun konumdan anlık yönlendirme</Text>
-                </View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.color.warningStrong }}>➔</Text>
-              </TouchableOpacity>
-
-              {/* Sistem Paylaşımı (WhatsApp, Mesajlar, Link) */}
-              <TouchableOpacity
-                style={styles.shareOptionBtn}
-                onPress={async () => {
-                  if (!shareTarget) return;
-                  const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}&travelmode=transit`;
-                  await Share.share({
-                    title: shareTarget.name,
-                    message: `${shareTarget.name}\n${shareTarget.address}\n\nCanlı Yol Tarifi:\n${navUrl}`,
-                    url: navUrl,
-                  });
-                }}
-              >
-                <View style={[styles.shareOptionIconBox, { backgroundColor: tokens.color.surfaceBrandStrong }]}>
-                  <Share2Icon size={18} color={tokens.dataPalette.green} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareOptionTitle}>WhatsApp & Mesajla Paylaş</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareOptionSub}>Bağlantı ve konum koordinatlarını ilet</Text>
-                </View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.dataPalette.green }}>➔</Text>
-              </TouchableOpacity>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.qrHintText}>
+                Kamerayla okutulduğunda hedefe anında canlı yol tarifi açılır.
+              </Text>
             </View>
           </View>
-        </ModalFrame>
+
+          {/* Direction & Share Options */}
+          <View style={styles.shareOptionsCol}>
+            {/* Toplu Taşıma Yol Tarifi */}
+            <TouchableOpacity
+              style={styles.shareOptionBtn}
+              onPress={() => {
+                if (!shareTarget) return;
+                const transitUrl = `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}&travelmode=transit`;
+                Linking.openURL(transitUrl);
+              }}
+            >
+              <View style={[styles.shareOptionIconBox, { backgroundColor: tokens.color.infoBg }]}>
+                <TrainIcon size={18} color={tokens.color.accentSky} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.shareOptionTitle}
+                >
+                  Toplu Taşıma Yol Tarifi
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.shareOptionSub}
+                >
+                  Metro, otobüs, marmaray ve vapur hatları
+                </Text>
+              </View>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ fontSize: 16, color: tokens.color.accentSky }}
+              >
+                ➔
+              </Text>
+            </TouchableOpacity>
+
+            {/* Araç ve Yürüyüş Yol Tarifi */}
+            <TouchableOpacity
+              style={styles.shareOptionBtn}
+              onPress={() => {
+                if (!shareTarget) return;
+                const url = Platform.select({
+                  ios: `maps://app?daddr=${shareTarget.lat},${shareTarget.lng}`,
+                  default: `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}`,
+                });
+                Linking.openURL(url);
+              }}
+            >
+              <View
+                style={[
+                  styles.shareOptionIconBox,
+                  { backgroundColor: tokens.color.warningBgStrong },
+                ]}
+              >
+                <DirectionsIcon size={18} color={tokens.color.warningStrong} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.shareOptionTitle}
+                >
+                  Yol Tarifi & Navigasyon
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.shareOptionSub}
+                >
+                  Bulunduğun konumdan anlık yönlendirme
+                </Text>
+              </View>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ fontSize: 16, color: tokens.color.warningStrong }}
+              >
+                ➔
+              </Text>
+            </TouchableOpacity>
+
+            {/* Sistem Paylaşımı (WhatsApp, Mesajlar, Link) */}
+            <TouchableOpacity
+              style={styles.shareOptionBtn}
+              onPress={async () => {
+                if (!shareTarget) return;
+                const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${shareTarget.lat},${shareTarget.lng}&travelmode=transit`;
+                await Share.share({
+                  title: shareTarget.name,
+                  message: `${shareTarget.name}\n${shareTarget.address}\n\nCanlı Yol Tarifi:\n${navUrl}`,
+                  url: navUrl,
+                });
+              }}
+            >
+              <View
+                style={[
+                  styles.shareOptionIconBox,
+                  { backgroundColor: tokens.color.surfaceBrandStrong },
+                ]}
+              >
+                <Share2Icon size={18} color={tokens.dataPalette.green} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.shareOptionTitle}
+                >
+                  WhatsApp & Mesajla Paylaş
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.shareOptionSub}
+                >
+                  Bağlantı ve konum koordinatlarını ilet
+                </Text>
+              </View>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ fontSize: 16, color: tokens.dataPalette.green }}
+              >
+                ➔
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ModalFrame>
 
       {/* Map Settings Modal */}
       <ModalFrame
@@ -2037,121 +2426,170 @@ export function MapScreen({
         onRequestClose={() => setShowMapSettingsModal(false)}
         style={styles.mapSettingsBackdrop}
       >
-          <View style={styles.mapSettingsCard}>
-            <View style={styles.mapSettingsHeader}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <SettingsIcon size={16} color={tokens.color.textBrand} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapSettingsTitle}>Harita Ayarları</Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowMapSettingsModal(false)} activeOpacity={0.7}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapSettingsClose}>✕</Text>
-              </TouchableOpacity>
+        <View style={styles.mapSettingsCard}>
+          <View style={styles.mapSettingsHeader}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <SettingsIcon size={16} color={tokens.color.textBrand} />
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.mapSettingsTitle}
+              >
+                Harita Ayarları
+              </Text>
             </View>
+            <TouchableOpacity onPress={() => setShowMapSettingsModal(false)} activeOpacity={0.7}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.mapSettingsClose}
+              >
+                ✕
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-            {/* Route Lines Toggle */}
-            <View style={styles.mapSettingItem}>
-              <View style={styles.mapSettingLeft}>
-                <View style={styles.softIconBox}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.softIconText}>⇄</Text>
-                </View>
-                <View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapSettingLabel}>Rota Çizgileri</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapSettingSub}>Duraklar arası bağlantı çizgileri</Text>
-                </View>
+          {/* Route Lines Toggle */}
+          <View style={styles.mapSettingItem}>
+            <View style={styles.mapSettingLeft}>
+              <View style={styles.softIconBox}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.softIconText}>
+                  ⇄
+                </Text>
               </View>
-              <TouchableOpacity
-                style={[styles.mapSettingToggle, showRouteLines && styles.mapSettingToggleActive]}
-                onPress={() => {
-                  const newValue = !showRouteLines;
-                  setShowRouteLines(newValue);
-                  webViewRef.current?.injectJavaScript(`
+              <View>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.mapSettingLabel}
+                >
+                  Rota Çizgileri
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.mapSettingSub}
+                >
+                  Duraklar arası bağlantı çizgileri
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={[styles.mapSettingToggle, showRouteLines && styles.mapSettingToggleActive]}
+              onPress={() => {
+                const newValue = !showRouteLines;
+                setShowRouteLines(newValue);
+                webViewRef.current?.injectJavaScript(`
                     if (window.toggleRouteLines) window.toggleRouteLines(${newValue});
                     true;
                   `);
-                }}
-              >
-                <View
-                  style={[
-                    styles.mapSettingToggleKnob,
-                    showRouteLines && styles.mapSettingToggleKnobActive,
-                  ]}
-                />
-              </TouchableOpacity>
-            </View>
+              }}
+            >
+              <View
+                style={[
+                  styles.mapSettingToggleKnob,
+                  showRouteLines && styles.mapSettingToggleKnobActive,
+                ]}
+              />
+            </TouchableOpacity>
+          </View>
 
-            {/* Road-based Routing Toggle */}
-            <View style={styles.mapSettingItem}>
-              <View style={styles.mapSettingLeft}>
-                <View style={styles.softIconBox}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.softIconText}>⤹</Text>
-                </View>
-                <View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapSettingLabel}>Yol Bazlı Rotalama</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapSettingSub}>Yolları takip eden rota çizgileri</Text>
-                </View>
+          {/* Road-based Routing Toggle */}
+          <View style={styles.mapSettingItem}>
+            <View style={styles.mapSettingLeft}>
+              <View style={styles.softIconBox}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.softIconText}>
+                  ⤹
+                </Text>
               </View>
-              <TouchableOpacity
-                style={[styles.mapSettingToggle, useRoadRouting && styles.mapSettingToggleActive]}
-                onPress={() => {
-                  const newValue = !useRoadRouting;
-                  setUseRoadRouting(newValue);
-                  webViewRef.current?.injectJavaScript(`
+              <View>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.mapSettingLabel}
+                >
+                  Yol Bazlı Rotalama
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.mapSettingSub}
+                >
+                  Yolları takip eden rota çizgileri
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={[styles.mapSettingToggle, useRoadRouting && styles.mapSettingToggleActive]}
+              onPress={() => {
+                const newValue = !useRoadRouting;
+                setUseRoadRouting(newValue);
+                webViewRef.current?.injectJavaScript(`
                     if (window.updateRouteLines) window.updateRouteLines(${newValue});
                     true;
                   `);
-                }}
-              >
-                <View
-                  style={[
-                    styles.mapSettingToggleKnob,
-                    useRoadRouting && styles.mapSettingToggleKnobActive,
-                  ]}
-                />
-              </TouchableOpacity>
-            </View>
+              }}
+            >
+              <View
+                style={[
+                  styles.mapSettingToggleKnob,
+                  useRoadRouting && styles.mapSettingToggleKnobActive,
+                ]}
+              />
+            </TouchableOpacity>
+          </View>
 
-            {/* Map Layer Selection */}
-            <View style={styles.mapSettingSection}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapSettingSectionTitle}>Harita Görünümü</Text>
-              <View style={styles.mapLayerOptions}>
-                {[
-                  { key: "light", label: "Standart", iconType: "sun" },
-                  { key: "dark", label: "Koyu", iconType: "moon" },
-                  { key: "satellite", label: "Uydu", iconType: "satellite" },
-                ].map((layer) => {
-                  const isActive = activeTileLayer === layer.key;
-                  return (
-                    <TouchableOpacity
-                      key={layer.key}
-                      style={[styles.mapLayerOption, isActive && styles.mapLayerOptionActive]}
-                      onPress={() =>
-                        handleSelectTileLayer(layer.key as "light" | "dark" | "satellite")
-                      }
+          {/* Map Layer Selection */}
+          <View style={styles.mapSettingSection}>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.mapSettingSectionTitle}
+            >
+              Harita Görünümü
+            </Text>
+            <View style={styles.mapLayerOptions}>
+              {[
+                { key: "light", label: "Standart", iconType: "sun" },
+                { key: "dark", label: "Koyu", iconType: "moon" },
+                { key: "satellite", label: "Uydu", iconType: "satellite" },
+              ].map((layer) => {
+                const isActive = activeTileLayer === layer.key;
+                return (
+                  <TouchableOpacity
+                    key={layer.key}
+                    style={[styles.mapLayerOption, isActive && styles.mapLayerOptionActive]}
+                    onPress={() =>
+                      handleSelectTileLayer(layer.key as "light" | "dark" | "satellite")
+                    }
+                  >
+                    {layer.iconType === "sun" && (
+                      <SunIcon
+                        size={18}
+                        color={isActive ? tokens.color.onPrimary : tokens.color.warningStrong}
+                      />
+                    )}
+                    {layer.iconType === "moon" && (
+                      <MoonIcon
+                        size={18}
+                        color={isActive ? tokens.color.onPrimary : tokens.dataPalette.indigo}
+                      />
+                    )}
+                    {layer.iconType === "satellite" && (
+                      <SatelliteIcon
+                        size={18}
+                        color={isActive ? tokens.color.onPrimary : tokens.color.successStrong}
+                      />
+                    )}
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={[
+                        styles.mapLayerOptionText,
+                        isActive && styles.mapLayerOptionTextActive,
+                      ]}
                     >
-                      {layer.iconType === "sun" && (
-                        <SunIcon size={18} color={isActive ? tokens.color.onPrimary : tokens.color.warningStrong} />
-                      )}
-                      {layer.iconType === "moon" && (
-                        <MoonIcon size={18} color={isActive ? tokens.color.onPrimary : tokens.dataPalette.indigo} />
-                      )}
-                      {layer.iconType === "satellite" && (
-                        <SatelliteIcon size={18} color={isActive ? tokens.color.onPrimary : tokens.color.successStrong} />
-                      )}
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
-                        style={[
-                          styles.mapLayerOptionText,
-                          isActive && styles.mapLayerOptionTextActive,
-                        ]}
-                      >
-                        {layer.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                      {layer.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
-        </ModalFrame>
+        </View>
+      </ModalFrame>
       <ScreenTourModal screen="map" />
     </View>
   );

@@ -23,7 +23,6 @@ Görev 7 (AWS canary)            [6 sonrası, yalnızca gözlem]
 - Görev 6, kod değişikliği içeren tüm görevlerden sonra çalışır.
 - Görev 7 en sonda, yalnızca gözlem amaçlı.
 
-
 ```json
 {
   "waves": [
@@ -98,7 +97,6 @@ Görev 7 (AWS canary)            [6 sonrası, yalnızca gözlem]
   - Başarısız canary varsa kök neden analizi yaz (düzeltme ayrı iş olabilir)
   - Hiçbir deploy / terraform apply / tablo değişikliği YAPMA
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
-
 
 ## Notes
 

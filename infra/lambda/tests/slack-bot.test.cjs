@@ -57,28 +57,50 @@ function harness(options = {}) {
   const ecsCommands = {};
   for (const name of ["UpdateServiceCommand", "DescribeServicesCommand"]) {
     ecsCommands[name] = class {
-      constructor(i) { this.name = name; this.input = i; }
+      constructor(i) {
+        this.name = name;
+        this.input = i;
+      }
     };
   }
 
   const lambdaCommands = {};
-  for (const name of ["PublishVersionCommand", "GetFunctionConfigurationCommand", "ListAliasesCommand", "UpdateAliasCommand"]) {
+  for (const name of [
+    "PublishVersionCommand",
+    "GetFunctionConfigurationCommand",
+    "ListAliasesCommand",
+    "UpdateAliasCommand",
+  ]) {
     lambdaCommands[name] = class {
-      constructor(i) { this.name = name; this.input = i; }
+      constructor(i) {
+        this.name = name;
+        this.input = i;
+      }
     };
   }
 
   const cwCommands = {};
   for (const name of ["FilterLogEventsCommand"]) {
     cwCommands[name] = class {
-      constructor(i) { this.name = name; this.input = i; }
+      constructor(i) {
+        this.name = name;
+        this.input = i;
+      }
     };
   }
 
   const external = {
     "@aws-sdk/client-secrets-manager": {
-      SecretsManagerClient: class { async send() { return {}; } },
-      GetSecretValueCommand: class { constructor(i) { this.input = i; } },
+      SecretsManagerClient: class {
+        async send() {
+          return {};
+        }
+      },
+      GetSecretValueCommand: class {
+        constructor(i) {
+          this.input = i;
+        }
+      },
     },
     "@aws-sdk/client-ecs": {
       ...ecsCommands,
@@ -88,11 +110,15 @@ function harness(options = {}) {
           if (options.ecsSend) return options.ecsSend(cmd);
           if (cmd.name === "DescribeServicesCommand") {
             return {
-              services: [{
-                runningCount: 2, desiredCount: 2, status: "ACTIVE",
-                taskDefinition: "arn:aws:ecs:eu-central-1:123:task-definition/web:5",
-                deployments: [{ rolloutState: "COMPLETED" }],
-              }],
+              services: [
+                {
+                  runningCount: 2,
+                  desiredCount: 2,
+                  status: "ACTIVE",
+                  taskDefinition: "arn:aws:ecs:eu-central-1:123:task-definition/web:5",
+                  deployments: [{ rolloutState: "COMPLETED" }],
+                },
+              ],
             };
           }
           return {};
@@ -106,8 +132,10 @@ function harness(options = {}) {
         async send(cmd) {
           calls.lambda.push(cmd);
           if (options.lambdaSend) return options.lambdaSend(cmd);
-          if (cmd.name === "GetFunctionConfigurationCommand") return { State: "Active", LastUpdateStatus: "Successful" };
-          if (cmd.name === "ListAliasesCommand") return { Aliases: [{ Name: "live", FunctionVersion: "5" }] };
+          if (cmd.name === "GetFunctionConfigurationCommand")
+            return { State: "Active", LastUpdateStatus: "Successful" };
+          if (cmd.name === "ListAliasesCommand")
+            return { Aliases: [{ Name: "live", FunctionVersion: "5" }] };
           return {};
         }
         destroy() {}
@@ -149,38 +177,47 @@ function harness(options = {}) {
     const mod = { exports: {} };
     cache.set(filename, mod);
     const src = readFileSync(filename, "utf8");
-    const { code } = transformSync(src, { loader: "ts", format: "cjs", target: "node22", supported: { "dynamic-import": false } });
-    vm.runInNewContext(code, {
-      module: mod,
-      exports: mod.exports,
-      Buffer,
-      URL,
-      URLSearchParams,
-      AbortSignal,
-      FormData,
-      TextEncoder,
-      setTimeout,
-      clearTimeout,
-      setImmediate,
-      process: { env: { ...env } },
-      crypto: require("node:crypto").webcrypto,
-      console: { log() {}, warn() {}, error() {}, info() {} },
-      fetch: async (url, req) => {
-        calls.slackFetch.push({ url, body: req?.body });
-        if (options.fetch) return options.fetch(url, req);
-        if (typeof url === "string" && url.includes("mapsbridge.com")) {
+    const { code } = transformSync(src, {
+      loader: "ts",
+      format: "cjs",
+      target: "node22",
+      supported: { "dynamic-import": false },
+    });
+    vm.runInNewContext(
+      code,
+      {
+        module: mod,
+        exports: mod.exports,
+        Buffer,
+        URL,
+        URLSearchParams,
+        AbortSignal,
+        FormData,
+        TextEncoder,
+        setTimeout,
+        clearTimeout,
+        setImmediate,
+        process: { env: { ...env } },
+        crypto: require("node:crypto").webcrypto,
+        console: { log() {}, warn() {}, error() {}, info() {} },
+        fetch: async (url, req) => {
+          calls.slackFetch.push({ url, body: req?.body });
+          if (options.fetch) return options.fetch(url, req);
+          if (typeof url === "string" && url.includes("mapsbridge.com")) {
+            return { ok: true, status: 200, json: async () => ({}) };
+          }
           return { ok: true, status: 200, json: async () => ({}) };
-        }
-        return { ok: true, status: 200, json: async () => ({}) };
+        },
+        require(specifier) {
+          if (specifier.startsWith(".")) {
+            return load(path.resolve(path.dirname(filename), specifier));
+          }
+          if (external[specifier]) return external[specifier];
+          throw new Error(`Unexpected dep: ${specifier}`);
+        },
       },
-      require(specifier) {
-        if (specifier.startsWith(".")) {
-          return load(path.resolve(path.dirname(filename), specifier));
-        }
-        if (external[specifier]) return external[specifier];
-        throw new Error(`Unexpected dep: ${specifier}`);
-      },
-    }, { filename });
+      { filename },
+    );
     return mod.exports;
   }
 
@@ -192,7 +229,9 @@ function harness(options = {}) {
 test("valid signature passes through to handler (deploy command returns 200)", async () => {
   const h = harness({ env: { SLACK_ADMIN_USER_IDS: ADMIN_USER } });
   const body = formBody({ command: "/deploy", text: "api", user_id: ADMIN_USER, channel_id: "C1" });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(slackEvent("/slack-bot/deploy", body));
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/deploy", body));
   assert.equal(res.statusCode, 200);
   const parsed = JSON.parse(res.body);
   assert.ok(parsed.blocks || parsed.response_type, "should return a Slack payload");
@@ -201,9 +240,9 @@ test("valid signature passes through to handler (deploy command returns 200)", a
 test("invalid signature returns 401", async () => {
   const h = harness();
   const body = formBody({ command: "/health", user_id: ADMIN_USER });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(
-    slackEvent("/slack-bot/health", body, { signature: "v0=badbadbadbad" }),
-  );
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/health", body, { signature: "v0=badbadbadbad" }));
   assert.equal(res.statusCode, 401);
 });
 
@@ -211,9 +250,11 @@ test("old timestamp (>5min) returns 401", async () => {
   const h = harness();
   const oldTs = String(Math.floor(Date.now() / 1000) - 600);
   const body = formBody({ command: "/health", user_id: ADMIN_USER });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(
-    slackEvent("/slack-bot/health", body, { timestamp: oldTs, signature: sign(oldTs, body) }),
-  );
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(
+      slackEvent("/slack-bot/health", body, { timestamp: oldTs, signature: sign(oldTs, body) }),
+    );
   assert.equal(res.statusCode, 401);
 });
 
@@ -228,10 +269,13 @@ test("missing x-slack-signature header returns 401", async () => {
 
 test("url_verification challenge is echoed back", async () => {
   const h = harness();
-  const jsonBody = JSON.stringify({ type: "url_verification", challenge: "3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P" });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(
-    slackEvent("/slack-bot/events", jsonBody),
-  );
+  const jsonBody = JSON.stringify({
+    type: "url_verification",
+    challenge: "3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P",
+  });
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/events", jsonBody));
   assert.equal(res.statusCode, 200);
   const parsed = JSON.parse(res.body);
   assert.equal(parsed.challenge, "3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P");
@@ -240,7 +284,9 @@ test("url_verification challenge is echoed back", async () => {
 test("unauthorized userId (ALLOWED_USERS set, user not in list) returns 200 with forbidden ephemeral", async () => {
   const h = harness({ env: { ALLOWED_USERS: "U_ALLOWED", SLACK_ADMIN_USER_IDS: "" } });
   const body = formBody({ command: "/health", user_id: "U_STRANGER", channel_id: "C1" });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(slackEvent("/slack-bot/health", body));
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/health", body));
   assert.equal(res.statusCode, 200);
   const parsed = JSON.parse(res.body);
   assert.equal(parsed.response_type, "ephemeral");
@@ -250,7 +296,9 @@ test("unauthorized userId (ALLOWED_USERS set, user not in list) returns 200 with
 test("/deploy returns ephemeral Block Kit confirmation with 3 blocks", async () => {
   const h = harness({ env: { SLACK_ADMIN_USER_IDS: ADMIN_USER } });
   const body = formBody({ command: "/deploy", text: "api", user_id: ADMIN_USER, channel_id: "C1" });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(slackEvent("/slack-bot/deploy", body));
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/deploy", body));
   assert.equal(res.statusCode, 200);
   const parsed = JSON.parse(res.body);
   assert.equal(parsed.response_type, "ephemeral");
@@ -266,21 +314,31 @@ test("/deploy returns ephemeral Block Kit confirmation with 3 blocks", async () 
 test("/health returns in_channel response and calls deployer.status", async () => {
   const h = harness();
   const body = formBody({ command: "/health", user_id: ADMIN_USER, channel_id: "C1" });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(slackEvent("/slack-bot/health", body));
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/health", body));
   assert.equal(res.statusCode, 200);
   const parsed = JSON.parse(res.body);
   assert.equal(parsed.response_type, "in_channel");
   assert.ok(parsed.blocks?.length > 0);
   // deployer.status() calls GetFunctionConfigurationCommand for lambda target
-  assert.ok(h.calls.lambda.some((c) => c.name === "GetFunctionConfigurationCommand"), "should call Lambda status");
+  assert.ok(
+    h.calls.lambda.some((c) => c.name === "GetFunctionConfigurationCommand"),
+    "should call Lambda status",
+  );
 });
 
 test("/logs calls deployer.logs (FilterLogEventsCommand)", async () => {
   const h = harness();
   const body = formBody({ command: "/logs", text: "api", user_id: ADMIN_USER, channel_id: "C1" });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(slackEvent("/slack-bot/logs", body));
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/logs", body));
   assert.equal(res.statusCode, 200);
-  assert.ok(h.calls.cw.some((c) => c.name === "FilterLogEventsCommand"), "should call CloudWatch FilterLogEvents");
+  assert.ok(
+    h.calls.cw.some((c) => c.name === "FilterLogEventsCommand"),
+    "should call CloudWatch FilterLogEvents",
+  );
   const parsed = JSON.parse(res.body);
   assert.ok(parsed.text || parsed.response_type, "should return a log response");
 });
@@ -291,19 +349,26 @@ test("interactive deploy_confirm calls deployer.deploy for admin user", async ()
     type: "block_actions",
     user: { id: ADMIN_USER },
     response_url: "https://hooks.slack.com/actions/response",
-    actions: [{
-      action_id: "deploy_confirm",
-      value: JSON.stringify({ action: "deploy", service: "api" }),
-    }],
+    actions: [
+      {
+        action_id: "deploy_confirm",
+        value: JSON.stringify({ action: "deploy", service: "api" }),
+      },
+    ],
   });
   const body = formBody({ payload: interactivePayload, user_id: ADMIN_USER, channel_id: "C1" });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(slackEvent("/slack-bot/interactive", body));
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/interactive", body));
   assert.equal(res.statusCode, 200);
   assert.deepEqual(JSON.parse(res.body), { ok: true });
   // Let microtasks run so the void block can progress
   await new Promise((r) => setImmediate(r));
   await new Promise((r) => setImmediate(r));
-  assert.ok(h.calls.lambda.some((c) => c.name === "PublishVersionCommand"), "should call Lambda PublishVersion");
+  assert.ok(
+    h.calls.lambda.some((c) => c.name === "PublishVersionCommand"),
+    "should call Lambda PublishVersion",
+  );
 });
 
 test("interactive deploy_cancel does NOT call deployer.deploy", async () => {
@@ -312,16 +377,24 @@ test("interactive deploy_cancel does NOT call deployer.deploy", async () => {
     type: "block_actions",
     user: { id: ADMIN_USER },
     response_url: "https://hooks.slack.com/actions/response",
-    actions: [{
-      action_id: "deploy_cancel",
-      value: JSON.stringify({ action: "cancel" }),
-    }],
+    actions: [
+      {
+        action_id: "deploy_cancel",
+        value: JSON.stringify({ action: "cancel" }),
+      },
+    ],
   });
   const body = formBody({ payload: interactivePayload, user_id: ADMIN_USER, channel_id: "C1" });
-  const res = await h.load(path.join(sourceRoot, "slack-bot")).handler(slackEvent("/slack-bot/interactive", body));
+  const res = await h
+    .load(path.join(sourceRoot, "slack-bot"))
+    .handler(slackEvent("/slack-bot/interactive", body));
   assert.equal(res.statusCode, 200);
   await new Promise((r) => setImmediate(r));
-  assert.equal(h.calls.lambda.filter((c) => c.name === "PublishVersionCommand").length, 0, "should not deploy on cancel");
+  assert.equal(
+    h.calls.lambda.filter((c) => c.name === "PublishVersionCommand").length,
+    0,
+    "should not deploy on cancel",
+  );
 });
 
 test("interactive deploy_confirm with concurrent lock returns lock message", async () => {
@@ -330,7 +403,8 @@ test("interactive deploy_confirm with concurrent lock returns lock message", asy
     env: { SLACK_ADMIN_USER_IDS: ADMIN_USER },
     lambdaSend: (cmd) => {
       if (cmd.name === "PublishVersionCommand") return new Promise(() => {}); // never resolves
-      if (cmd.name === "GetFunctionConfigurationCommand") return Promise.resolve({ State: "Active", LastUpdateStatus: "Successful" });
+      if (cmd.name === "GetFunctionConfigurationCommand")
+        return Promise.resolve({ State: "Active", LastUpdateStatus: "Successful" });
       return Promise.resolve({});
     },
   });
@@ -340,10 +414,12 @@ test("interactive deploy_confirm with concurrent lock returns lock message", asy
       type: "block_actions",
       user: { id: userId },
       response_url: "https://hooks.slack.com/actions/response",
-      actions: [{
-        action_id: "deploy_confirm",
-        value: JSON.stringify({ action: "deploy", service: "api" }),
-      }],
+      actions: [
+        {
+          action_id: "deploy_confirm",
+          value: JSON.stringify({ action: "deploy", service: "api" }),
+        },
+      ],
     });
     return formBody({ payload: interactivePayload, user_id: userId, channel_id: "C1" });
   };
@@ -366,8 +442,10 @@ test("interactive deploy_confirm with concurrent lock returns lock message", asy
   assert.equal(res2.statusCode, 200);
   // The handler posts to response_url with lock message — check slackFetch calls
   const lockPost = h.calls.slackFetch.find(
-    (c) => c.url === "https://hooks.slack.com/actions/response" &&
-      c.body && JSON.parse(c.body).text?.includes("işleniyor"),
+    (c) =>
+      c.url === "https://hooks.slack.com/actions/response" &&
+      c.body &&
+      JSON.parse(c.body).text?.includes("işleniyor"),
   );
   assert.ok(lockPost, "should post lock warning to response_url");
 });
@@ -376,11 +454,12 @@ test("Events API app_mention dedup: same event_id is processed only once", async
   const h = harness();
   const eventId = "Ev111TESTDEDUP";
 
-  const mkEventsBody = () => JSON.stringify({
-    type: "event_callback",
-    event_id: eventId,
-    event: { type: "app_mention", text: "hello", channel: "C1" },
-  });
+  const mkEventsBody = () =>
+    JSON.stringify({
+      type: "event_callback",
+      event_id: eventId,
+      event: { type: "app_mention", text: "hello", channel: "C1" },
+    });
 
   const mod = h.load(path.join(sourceRoot, "slack-bot"));
 
@@ -402,5 +481,9 @@ test("Events API app_mention dedup: same event_id is processed only once", async
     (c) => c.url === "https://slack.com/api/chat.postMessage",
   ).length;
 
-  assert.equal(slackPostsAfter, slackPostsBefore, "duplicate event should not trigger a second postMessage");
+  assert.equal(
+    slackPostsAfter,
+    slackPostsBefore,
+    "duplicate event should not trigger a second postMessage",
+  );
 });

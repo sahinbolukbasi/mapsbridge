@@ -12,12 +12,7 @@ import {
   Linking,
 } from "react-native";
 import type { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
-import {
-  getOfferings,
-  purchasePackage,
-  restorePurchases,
-  isProSync,
-} from "../services/revenuecat";
+import { getOfferings, purchasePackage, restorePurchases, isProSync } from "../services/revenuecat";
 
 import { ModalFrame } from "../ui";
 import { tokens, withAlpha } from "../theme";
@@ -106,7 +101,13 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
       const result = await purchasePackage(pkg);
       if (result.success) {
         Alert.alert("🎉 Pro aktif!", "MapsBridge Pro özelliklerine erişiminiz açıldı.", [
-          { text: "Harika!", onPress: () => { onProUnlocked?.(); onClose(); } },
+          {
+            text: "Harika!",
+            onPress: () => {
+              onProUnlocked?.();
+              onClose();
+            },
+          },
         ]);
       } else if (result.error !== "cancelled") {
         Alert.alert("Satın Alma Başarısız", result.error || "Lütfen tekrar deneyin.");
@@ -122,25 +123,27 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
       const result = await restorePurchases();
       if (result.isPro) {
         Alert.alert("✅ Geri Yüklendi", "Pro aboneliğiniz yeniden etkinleştirildi.", [
-          { text: "Devam Et", onPress: () => { onProUnlocked?.(); onClose(); } },
+          {
+            text: "Devam Et",
+            onPress: () => {
+              onProUnlocked?.();
+              onClose();
+            },
+          },
         ]);
       } else {
-        Alert.alert(
-          "Abonelik Bulunamadı",
-          "Bu hesaba bağlı aktif bir Pro aboneliği bulunamadı.",
-        );
+        Alert.alert("Abonelik Bulunamadı", "Bu hesaba bağlı aktif bir Pro aboneliği bulunamadı.");
       }
     } finally {
       setRestoring(false);
     }
   };
 
-  const packages =
-    offering?.availablePackages ?? [
-      { identifier: "$rc_monthly" },
-      { identifier: "$rc_annual" },
-      { identifier: "$rc_lifetime" },
-    ];
+  const packages = offering?.availablePackages ?? [
+    { identifier: "$rc_monthly" },
+    { identifier: "$rc_annual" },
+    { identifier: "$rc_lifetime" },
+  ];
 
   return (
     <ModalFrame
@@ -150,118 +153,160 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
       onRequestClose={onClose}
       style={styles.container}
     >
-        {/* Close */}
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.closeBtnText}>✕</Text>
+      {/* Close */}
+      <TouchableOpacity
+        style={styles.closeBtn}
+        onPress={onClose}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+      >
+        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.closeBtnText}>
+          ✕
+        </Text>
+      </TouchableOpacity>
+
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge}>
+            MapsBridge PRO
+          </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headline}>
+            Seyahatin tüm gücü{"\n"}elinin altında
+          </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.subheadline}>
+            Sınırsız rota, AI asistan ve premium özelliklerle{"\n"}seyahat planlamanı bir üst
+            seviyeye taşı.
+          </Text>
+        </View>
+
+        {/* Feature List */}
+        <View style={styles.featureList}>
+          {PRO_FEATURES.map((f, i) => (
+            <View key={i} style={styles.featureRow}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.featureIcon}>
+                {f.icon}
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.featureText}>
+                {f.text}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Plan Cards */}
+        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionLabel}>
+          Plan Seç
+        </Text>
+
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color={tokens.color.accentStrong}
+            style={{ marginVertical: 24 }}
+          />
+        ) : (
+          <View style={styles.planCards}>
+            {(packages as PurchasesPackage[]).map((pkg) => {
+              const id: string = pkg.identifier;
+              const isSelected = selectedPkg === id;
+              const badge = PLAN_BADGE[id];
+              return (
+                <TouchableOpacity
+                  key={id}
+                  style={[styles.planCard, isSelected && styles.planCardSelected]}
+                  onPress={() => setSelectedPkg(id)}
+                  activeOpacity={0.8}
+                >
+                  {badge && (
+                    <View style={styles.planBadge}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                        style={styles.planBadgeText}
+                      >
+                        {badge}
+                      </Text>
+                    </View>
+                  )}
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planIcon}>
+                    {PLAN_ICONS[id] ?? "📦"}
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={[styles.planLabel, isSelected && styles.planLabelSelected]}
+                  >
+                    {PLAN_LABELS[id] ?? id}
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={[styles.planPrice, isSelected && styles.planPriceSelected]}
+                  >
+                    {priceOf(id)}
+                  </Text>
+                  {id === "$rc_annual" && (
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planSave}>
+                      Aylığa göre %50 tasarruf
+                    </Text>
+                  )}
+                  {id === "$rc_lifetime" && (
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planSave}>
+                      Tek seferlik ödeme
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+        {/* CTA */}
+        <TouchableOpacity
+          style={[styles.ctaBtn, (purchasing || loading) && styles.ctaBtnDisabled]}
+          onPress={handlePurchase}
+          disabled={purchasing || loading}
+          activeOpacity={0.85}
+        >
+          {purchasing ? (
+            <ActivityIndicator color={tokens.color.surfaceInverseStrong} />
+          ) : (
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.ctaBtnText}>
+              {selectedPkg === "$rc_lifetime" ? "Pro'ya Geç — Ömür Boyu" : "Pro'ya Geç"}
+            </Text>
+          )}
         </TouchableOpacity>
 
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badge}>MapsBridge PRO</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.headline}>Seyahatin tüm gücü{"\n"}elinin altında</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.subheadline}>
-              Sınırsız rota, AI asistan ve premium özelliklerle{"\n"}seyahat planlamanı bir üst seviyeye taşı.
-            </Text>
-          </View>
-
-          {/* Feature List */}
-          <View style={styles.featureList}>
-            {PRO_FEATURES.map((f, i) => (
-              <View key={i} style={styles.featureRow}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.featureIcon}>{f.icon}</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.featureText}>{f.text}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Plan Cards */}
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sectionLabel}>Plan Seç</Text>
-
-          {loading ? (
-            <ActivityIndicator size="large" color={tokens.color.accentStrong} style={{ marginVertical: 24 }} />
+        {/* Restore */}
+        <TouchableOpacity style={styles.restoreBtn} onPress={handleRestore} disabled={restoring}>
+          {restoring ? (
+            <ActivityIndicator size="small" color={tokens.color.neutral400} />
           ) : (
-            <View style={styles.planCards}>
-              {(packages as PurchasesPackage[]).map((pkg) => {
-                const id: string = pkg.identifier;
-                const isSelected = selectedPkg === id;
-                const badge = PLAN_BADGE[id];
-                return (
-                  <TouchableOpacity
-                    key={id}
-                    style={[styles.planCard, isSelected && styles.planCardSelected]}
-                    onPress={() => setSelectedPkg(id)}
-                    activeOpacity={0.8}
-                  >
-                    {badge && (
-                      <View style={styles.planBadge}>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.planBadgeText}>{badge}</Text>
-                      </View>
-                    )}
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planIcon}>{PLAN_ICONS[id] ?? "📦"}</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.planLabel, isSelected && styles.planLabelSelected]}>
-                      {PLAN_LABELS[id] ?? id}
-                    </Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.planPrice, isSelected && styles.planPriceSelected]}>
-                      {priceOf(id)}
-                    </Text>
-                    {id === "$rc_annual" && (
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planSave}>Aylığa göre %50 tasarruf</Text>
-                    )}
-                    {id === "$rc_lifetime" && (
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.planSave}>Tek seferlik ödeme</Text>
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.restoreBtnText}>
+              Önceki Satın Alımı Geri Yükle
+            </Text>
           )}
+        </TouchableOpacity>
 
-          {/* CTA */}
-          <TouchableOpacity
-            style={[styles.ctaBtn, (purchasing || loading) && styles.ctaBtnDisabled]}
-            onPress={handlePurchase}
-            disabled={purchasing || loading}
-            activeOpacity={0.85}
+        {/* Legal */}
+        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legal}>
+          Abonelik {Platform.OS === "ios" ? "App Store" : "Google Play"} üzerinden yönetilir.
+          Abonelikler, iptal tarihinden 24 saat önce otomatik olarak yenilenir.{" "}
+          <Text
+            maxFontSizeMultiplier={tokens.font.maxScale.body}
+            style={styles.legalLink}
+            onPress={() => Linking.openURL("https://mapsbridge.com/privacy")}
           >
-            {purchasing ? (
-              <ActivityIndicator color={tokens.color.surfaceInverseStrong} />
-            ) : (
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.ctaBtnText}>
-                {selectedPkg === "$rc_lifetime" ? "Pro'ya Geç — Ömür Boyu" : "Pro'ya Geç"}
-              </Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Restore */}
-          <TouchableOpacity style={styles.restoreBtn} onPress={handleRestore} disabled={restoring}>
-            {restoring ? (
-              <ActivityIndicator size="small" color={tokens.color.neutral400} />
-            ) : (
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.restoreBtnText}>Önceki Satın Alımı Geri Yükle</Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Legal */}
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.legal}>
-            Abonelik {Platform.OS === "ios" ? "App Store" : "Google Play"} üzerinden yönetilir.
-            Abonelikler, iptal tarihinden 24 saat önce otomatik olarak yenilenir.{" "}
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
-              style={styles.legalLink}
-              onPress={() => Linking.openURL("https://mapsbridge.com/privacy")}
-            >
-              Gizlilik Politikası
-            </Text>
-            {" · "}
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
-              style={styles.legalLink}
-              onPress={() => Linking.openURL("https://mapsbridge.com/terms")}
-            >
-              Kullanım Koşulları
-            </Text>
+            Gizlilik Politikası
           </Text>
-        </ScrollView>
-      </ModalFrame>
+          {" · "}
+          <Text
+            maxFontSizeMultiplier={tokens.font.maxScale.body}
+            style={styles.legalLink}
+            onPress={() => Linking.openURL("https://mapsbridge.com/terms")}
+          >
+            Kullanım Koşulları
+          </Text>
+        </Text>
+      </ScrollView>
+    </ModalFrame>
   );
 }
 

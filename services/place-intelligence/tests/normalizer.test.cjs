@@ -40,16 +40,9 @@ function loadModule(fullPath, cache) {
   return mod.exports;
 }
 
-const normalizerPath = path.resolve(
-  __dirname,
-  "../src/application/normalizer.ts",
-);
-const {
-  categoryFromOsmTags,
-  inferTiming,
-  deduplicatePlaces,
-  rankPlaces,
-} = loadModule(normalizerPath);
+const normalizerPath = path.resolve(__dirname, "../src/application/normalizer.ts");
+const { categoryFromOsmTags, inferTiming, deduplicatePlaces, rankPlaces } =
+  loadModule(normalizerPath);
 
 // ── categoryFromOsmTags ─────────────────────────────────────────────────────
 
@@ -66,10 +59,7 @@ test("categoryFromOsmTags identifies museum", () => {
 });
 
 test("categoryFromOsmTags identifies mosque by religion", () => {
-  assert.equal(
-    categoryFromOsmTags({ amenity: "place_of_worship", religion: "muslim" }),
-    "mosque",
-  );
+  assert.equal(categoryFromOsmTags({ amenity: "place_of_worship", religion: "muslim" }), "mosque");
 });
 
 test("categoryFromOsmTags returns other for unknown tags", () => {

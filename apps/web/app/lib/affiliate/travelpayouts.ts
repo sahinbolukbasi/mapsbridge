@@ -136,13 +136,35 @@ export function toIataPublic(city: string): string | undefined {
  */
 export function extractDateFromText(text: string): Date | undefined {
   const TR_MONTHS: Record<string, number> = {
-    ocak: 0, şubat: 1, mart: 2, nisan: 3, mayıs: 4, haziran: 5,
-    temmuz: 6, ağustos: 7, eylül: 8, ekim: 9, kasım: 10, aralık: 11,
-    january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
-    july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
+    ocak: 0,
+    şubat: 1,
+    mart: 2,
+    nisan: 3,
+    mayıs: 4,
+    haziran: 5,
+    temmuz: 6,
+    ağustos: 7,
+    eylül: 8,
+    ekim: 9,
+    kasım: 10,
+    aralık: 11,
+    january: 0,
+    february: 1,
+    march: 2,
+    april: 3,
+    may: 4,
+    june: 5,
+    july: 6,
+    august: 7,
+    september: 8,
+    october: 9,
+    november: 10,
+    december: 11,
   };
   // "15 Kasım" or "15 kasım 2027"
-  const dmMatch = text.match(/(\d{1,2})\s+(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık|january|february|march|april|may|june|july|august|september|october|november|december)(?:\s+(\d{4}))?/i);
+  const dmMatch = text.match(
+    /(\d{1,2})\s+(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık|january|february|march|april|may|june|july|august|september|october|november|december)(?:\s+(\d{4}))?/i,
+  );
   if (dmMatch) {
     const d = parseInt(dmMatch[1]);
     const m = TR_MONTHS[dmMatch[2].toLowerCase()];

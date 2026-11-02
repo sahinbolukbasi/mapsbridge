@@ -32,9 +32,7 @@ function loadModule(relativePath) {
   return mod.exports;
 }
 
-const { AgentDispatcher } = loadModule(
-  "../src/application/agent-dispatcher.ts",
-);
+const { AgentDispatcher } = loadModule("../src/application/agent-dispatcher.ts");
 
 // ── Emergency intent detection ──────────────────────────────────────────────
 
@@ -74,10 +72,7 @@ test("detectIntent returns share_location and requires confirmation", () => {
 // ── Lodging intent ──────────────────────────────────────────────────────────
 
 test("detectIntent returns find_lodging for hotel keywords", () => {
-  const result = AgentDispatcher.detectIntent(
-    "Otel arıyorum merkeze yakın",
-    "Antalya",
-  );
+  const result = AgentDispatcher.detectIntent("Otel arıyorum merkeze yakın", "Antalya");
   assert.equal(result.action, "find_lodging");
   assert.equal(result.targetCity, "Antalya");
   assert.ok(result.recommendedSubAgents.includes("lodging-agent"));
@@ -94,10 +89,7 @@ test("detectIntent returns find_food for restaurant/food keywords", () => {
 // ── General chat fallback ───────────────────────────────────────────────────
 
 test("detectIntent falls back to general_chat for unrecognized input", () => {
-  const result = AgentDispatcher.detectIntent(
-    "Bugün hava nasıl olacak?",
-    "Izmir",
-  );
+  const result = AgentDispatcher.detectIntent("Bugün hava nasıl olacak?", "Izmir");
   assert.equal(result.action, "general_chat");
   assert.equal(result.recommendedSubAgents.length, 1);
   assert.equal(result.recommendedSubAgents[0], "context-agent");

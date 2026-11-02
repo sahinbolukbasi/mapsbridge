@@ -86,9 +86,7 @@ test("scoped key includes encoded email", () => {
   userStorage.setItem("prefs", "dark");
 
   const expectedKey =
-    "mapsbridge.account." +
-    encodeURIComponent("user+test@example.com") +
-    ".prefs";
+    "mapsbridge.account." + encodeURIComponent("user+test@example.com") + ".prefs";
   assert.equal(data.getItem(expectedKey), "dark");
   assert.equal(userStorage.getItem("prefs"), "dark");
 });
@@ -101,10 +99,7 @@ test("legacy email fallback reads adreskopru.userEmail", () => {
   const { userStorage } = loadStorage(data);
   userStorage.setItem("notes", "hello");
 
-  const expectedKey =
-    "mapsbridge.account." +
-    encodeURIComponent("legacy@example.com") +
-    ".notes";
+  const expectedKey = "mapsbridge.account." + encodeURIComponent("legacy@example.com") + ".notes";
   assert.equal(data.getItem(expectedKey), "hello");
   assert.equal(userStorage.getItem("notes"), "hello");
 });

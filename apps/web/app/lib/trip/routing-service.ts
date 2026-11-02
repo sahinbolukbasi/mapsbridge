@@ -94,7 +94,11 @@ export class OsrmRoutingProvider implements IRoutingProvider {
       if (response.ok) {
         const data = (await response.json()) as {
           code?: string;
-          routes?: { geometry: { coordinates: [number, number][] }; distance: number; duration: number }[];
+          routes?: {
+            geometry: { coordinates: [number, number][] };
+            distance: number;
+            duration: number;
+          }[];
         };
         if (data.code === "Ok" && data.routes && data.routes.length > 0) {
           const primaryRoute = data.routes[0];

@@ -25,12 +25,7 @@ export type DestinationStage = "exploring" | "narrowing" | "decided";
 export type PlanningStage = "context" | "draft" | "refinement" | "complete";
 
 export type TopicStage =
-  | HotelStage
-  | FlightStage
-  | CarStage
-  | DestinationStage
-  | PlanningStage
-  | "none";
+  HotelStage | FlightStage | CarStage | DestinationStage | PlanningStage | "none";
 
 export interface ConversationFlow {
   activeTopic: FlowTopic;
@@ -86,9 +81,7 @@ const DESTINATION_PATTERN =
 // Slot extraction from user message
 // ---------------------------------------------------------------------------
 
-function extractHotelSlots(
-  text: string,
-): Partial<ConversationFlow["gathered"]> {
+function extractHotelSlots(text: string): Partial<ConversationFlow["gathered"]> {
   const slots: Partial<ConversationFlow["gathered"]> = {};
 
   // Budget
@@ -110,16 +103,21 @@ function extractHotelSlots(
   return slots;
 }
 
-function extractFlightSlots(
-  text: string,
-): Partial<ConversationFlow["gathered"]> {
+function extractFlightSlots(text: string): Partial<ConversationFlow["gathered"]> {
   const slots: Partial<ConversationFlow["gathered"]> = {};
 
   // Origin hints ("İstanbul'dan", "from Istanbul")
-  const fromMatch = text.match(/(?:İstanbul|Istanbul|Ankara|Antalya|İzmir|Izmir)\s*['']?dan|from\s+(Istanbul|Ankara|Antalya)/iu);
+  const fromMatch = text.match(
+    /(?:İstanbul|Istanbul|Ankara|Antalya|İzmir|Izmir)\s*['']?dan|from\s+(Istanbul|Ankara|Antalya)/iu,
+  );
   if (fromMatch) {
     const city = fromMatch[0].replace(/['']?dan|from\s*/iu, "").trim();
-    const iata: Record<string, string> = { istanbul: "IST", ankara: "ESB", antalya: "AYT", izmir: "ADB" };
+    const iata: Record<string, string> = {
+      istanbul: "IST",
+      ankara: "ESB",
+      antalya: "AYT",
+      izmir: "ADB",
+    };
     const key = city.toLowerCase();
     if (iata[key]) slots.flightOrigin = iata[key];
   }
@@ -191,12 +189,18 @@ function detectTopic(text: string): FlowTopic {
 
 function initialStage(topic: FlowTopic): TopicStage {
   switch (topic) {
-    case "hotel": return "discovery";
-    case "flight": return "origin_check";
-    case "car_rental": return "need_check";
-    case "destination": return "exploring";
-    case "planning": return "context";
-    default: return "none";
+    case "hotel":
+      return "discovery";
+    case "flight":
+      return "origin_check";
+    case "car_rental":
+      return "need_check";
+    case "destination":
+      return "exploring";
+    case "planning":
+      return "context";
+    default:
+      return "none";
   }
 }
 
@@ -254,11 +258,17 @@ export function shouldSurfacePricing(flow: ConversationFlow): boolean {
 
   switch (flow.activeTopic) {
     case "hotel":
-      return flow.stage === "pricing" || (flow.stage === "recommendation" && flow.turnsInTopic >= 3);
+      return (
+        flow.stage === "pricing" || (flow.stage === "recommendation" && flow.turnsInTopic >= 3)
+      );
     case "flight":
-      return flow.stage === "pricing" || (flow.stage === "recommendation" && flow.turnsInTopic >= 3);
+      return (
+        flow.stage === "pricing" || (flow.stage === "recommendation" && flow.turnsInTopic >= 3)
+      );
     case "car_rental":
-      return flow.stage === "pricing" || (flow.stage === "recommendation" && flow.turnsInTopic >= 3);
+      return (
+        flow.stage === "pricing" || (flow.stage === "recommendation" && flow.turnsInTopic >= 3)
+      );
     default:
       return false;
   }
@@ -281,10 +291,7 @@ export function markPriced(flow: ConversationFlow, topic: FlowTopic): Conversati
  * past destinations and current flow stage.
  * Used in AdvisorPromptBuilder to enrich every request.
  */
-export function flowToPromptSnippet(
-  flow: ConversationFlow,
-  pastDestinations: string[],
-): string {
+export function flowToPromptSnippet(flow: ConversationFlow, pastDestinations: string[]): string {
   const parts: string[] = [];
 
   // Past trips reference
@@ -351,15 +358,31 @@ export function getFlowQuickReplies(
     case "hotel":
       if (flow.stage === "discovery") {
         return [
-          { label: "Şehir merkezi", message: `${dest} şehir merkezinde otel istiyorum`, topic: "hotel" },
-          { label: "Sahil / plaj", message: `${dest}'da plaja yakın otel arıyorum`, topic: "hotel" },
+          {
+            label: "Şehir merkezi",
+            message: `${dest} şehir merkezinde otel istiyorum`,
+            topic: "hotel",
+          },
+          {
+            label: "Sahil / plaj",
+            message: `${dest}'da plaja yakın otel arıyorum`,
+            topic: "hotel",
+          },
           { label: "Butik otel", message: `${dest} butik otel önerir misin?`, topic: "hotel" },
         ];
       }
       if (flow.stage === "needs" || flow.stage === "recommendation") {
         return [
-          { label: "Bütçe sınırım var", message: `${dest} için ekonomik otel seçenekleri neler?`, topic: "hotel" },
-          { label: "Aile için uygun", message: `Çocukla ${dest}'a gidiyorum, hangi otel uygun?`, topic: "hotel" },
+          {
+            label: "Bütçe sınırım var",
+            message: `${dest} için ekonomik otel seçenekleri neler?`,
+            topic: "hotel",
+          },
+          {
+            label: "Aile için uygun",
+            message: `Çocukla ${dest}'a gidiyorum, hangi otel uygun?`,
+            topic: "hotel",
+          },
           { label: "Fiyatları gör", message: `${dest} otel fiyatlarını göster`, topic: "hotel" },
         ];
       }
@@ -369,31 +392,71 @@ export function getFlowQuickReplies(
       if (flow.stage === "origin_check") {
         return [
           { label: "İstanbul'dan", message: `İstanbul'dan ${dest}'a uçuş`, topic: "flight" },
-          { label: "En ucuz ay", message: `${dest}'a uçmanın en ucuz ayı hangisi?`, topic: "flight" },
+          {
+            label: "En ucuz ay",
+            message: `${dest}'a uçmanın en ucuz ayı hangisi?`,
+            topic: "flight",
+          },
           { label: "Direkt uçuş", message: `${dest}'a direkt uçuş var mı?`, topic: "flight" },
         ];
       }
       if (flow.stage === "date_gather" || flow.stage === "recommendation") {
         return [
-          { label: "Bu hafta sonu", message: `Bu hafta sonu ${dest} uçuş fiyatları nasıl?`, topic: "flight" },
-          { label: "Gelecek ay", message: `Gelecek ay ${dest}'a bilet araştırıyorum`, topic: "flight" },
-          { label: "Fiyatları karşılaştır", message: `${dest} uçuş fiyatlarını göster`, topic: "flight" },
+          {
+            label: "Bu hafta sonu",
+            message: `Bu hafta sonu ${dest} uçuş fiyatları nasıl?`,
+            topic: "flight",
+          },
+          {
+            label: "Gelecek ay",
+            message: `Gelecek ay ${dest}'a bilet araştırıyorum`,
+            topic: "flight",
+          },
+          {
+            label: "Fiyatları karşılaştır",
+            message: `${dest} uçuş fiyatlarını göster`,
+            topic: "flight",
+          },
         ];
       }
       break;
 
     case "car_rental":
       return [
-        { label: "Havalimanından al", message: `${dest} havalimanından araç kiralayacağım`, topic: "car_rental" },
-        { label: "Kaç gün?", message: `${dest}'da 5 günlük araç kiralama ne kadar?`, topic: "car_rental" },
-        { label: "Seçenekleri gör", message: `${dest} araç kiralama seçeneklerini göster`, topic: "car_rental" },
+        {
+          label: "Havalimanından al",
+          message: `${dest} havalimanından araç kiralayacağım`,
+          topic: "car_rental",
+        },
+        {
+          label: "Kaç gün?",
+          message: `${dest}'da 5 günlük araç kiralama ne kadar?`,
+          topic: "car_rental",
+        },
+        {
+          label: "Seçenekleri gör",
+          message: `${dest} araç kiralama seçeneklerini göster`,
+          topic: "car_rental",
+        },
       ];
 
     case "destination":
       return [
-        { label: "Daha sessiz bir yer", message: "Daha az kalabalık alternatif destinasyon önerir misin?", topic: "destination" },
-        { label: "Bütçeme uygun", message: "Bütçeme uygun destinasyon alternatifleri neler?", topic: "destination" },
-        { label: "Bu destinasyonu seç", message: `${dest}'a gitmeye karar verdim, rota yapalım mı?`, topic: "destination" },
+        {
+          label: "Daha sessiz bir yer",
+          message: "Daha az kalabalık alternatif destinasyon önerir misin?",
+          topic: "destination",
+        },
+        {
+          label: "Bütçeme uygun",
+          message: "Bütçeme uygun destinasyon alternatifleri neler?",
+          topic: "destination",
+        },
+        {
+          label: "Bu destinasyonu seç",
+          message: `${dest}'a gitmeye karar verdim, rota yapalım mı?`,
+          topic: "destination",
+        },
       ];
 
     default:

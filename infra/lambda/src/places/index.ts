@@ -12,7 +12,10 @@
  *   POST /places/batch-discover    — Batch discover multiple cities
  */
 
-import type { PlaceCategory, PlaceSource } from "../../../../services/place-intelligence/src/domain/types";
+import type {
+  PlaceCategory,
+  PlaceSource,
+} from "../../../../services/place-intelligence/src/domain/types";
 import { verifiedUserId, getVerifiedUser } from "../shared/auth";
 import type { ApiGatewayEvent } from "../shared/http";
 import {

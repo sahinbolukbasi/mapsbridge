@@ -721,7 +721,11 @@ export default function AIPage() {
         const nonStreamFallback = () =>
           apiFetch<
             MultiAgentResponse & { billing?: { credits: number; cost: number }; cost?: number }
-          >("/ai/route-planner", { method: "POST", timeoutMs: 35000, body: JSON.stringify(request) });
+          >("/ai/route-planner", {
+            method: "POST",
+            timeoutMs: 35000,
+            body: JSON.stringify(request),
+          });
         // İş hatası taşıyan kodlar: bunlarda fallback YAPMA, gerçek durumu göster.
         const businessCodes = [
           "UNAUTHORIZED",

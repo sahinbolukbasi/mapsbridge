@@ -1764,9 +1764,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 }}
               >
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
-                    Süre
-                  </div>
+                  <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>Süre</div>
                   <div style={{ fontWeight: 700, color: "var(--color-text-brand)" }}>
                     {selectedPlanRoute.duration}
                   </div>
@@ -1780,9 +1778,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
-                    Kategori
-                  </div>
+                  <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>Kategori</div>
                   <div style={{ fontWeight: 700, color: "var(--color-text-brand)" }}>
                     {selectedPlanRoute.category}
                   </div>
@@ -1807,7 +1803,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     ROTA PAKETİ ÜCRETİ
                   </span>
                   <span
-                    style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--color-text-brand)" }}
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 800,
+                      color: "var(--color-text-brand)",
+                    }}
                   >
                     {selectedPlanRoute.priceTag}
                   </span>

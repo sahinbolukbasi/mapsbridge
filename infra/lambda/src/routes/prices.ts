@@ -37,10 +37,17 @@ export async function handleGetFlightPrices(event: ApiGatewayEvent) {
       departDate: q.departDate,
       returnDate: q.returnDate,
     });
-    return ok({ origin, destination, prices, currency: q.currency || "usd", source: "travelpayouts_cache" });
+    return ok({
+      origin,
+      destination,
+      prices,
+      currency: q.currency || "usd",
+      source: "travelpayouts_cache",
+    });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    if (msg === "TP_RATE_LIMIT") return jsonResponse(429, { error: "Fiyat servisi meşgul, lütfen tekrar deneyin." });
+    if (msg === "TP_RATE_LIMIT")
+      return jsonResponse(429, { error: "Fiyat servisi meşgul, lütfen tekrar deneyin." });
     console.error("[TP Flights]", msg);
     return serverError("Uçuş fiyatları alınamadı.");
   }
@@ -67,7 +74,14 @@ export async function handleGetHotelPrices(event: ApiGatewayEvent) {
       currency: q.currency || "usd",
       limit: 10,
     });
-    return ok({ location, checkIn, checkOut, hotels, currency: q.currency || "usd", source: "hotellook_cache" });
+    return ok({
+      location,
+      checkIn,
+      checkOut,
+      hotels,
+      currency: q.currency || "usd",
+      source: "hotellook_cache",
+    });
   } catch (err: unknown) {
     console.error("[TP Hotels]", err instanceof Error ? err.message : String(err));
     return serverError("Otel fiyatları alınamadı.");
@@ -88,7 +102,12 @@ export async function handleGetPopularRoutes(event: ApiGatewayEvent) {
       currency: q.currency || "usd",
       limit: 10,
     });
-    return ok({ origin, destinations, currency: q.currency || "usd", source: "travelpayouts_popular" });
+    return ok({
+      origin,
+      destinations,
+      currency: q.currency || "usd",
+      source: "travelpayouts_popular",
+    });
   } catch (err: unknown) {
     console.error("[TP Popular]", err instanceof Error ? err.message : String(err));
     return serverError("Popüler rotalar alınamadı.");

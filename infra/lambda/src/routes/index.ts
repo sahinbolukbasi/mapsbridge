@@ -26,11 +26,7 @@ import {
   parseBody,
 } from "../shared/http";
 import { Router } from "../shared/router";
-import {
-  handleGetFlightPrices,
-  handleGetHotelPrices,
-  handleGetPopularRoutes,
-} from "./prices";
+import { handleGetFlightPrices, handleGetHotelPrices, handleGetPopularRoutes } from "./prices";
 import { handleOsrmRoute } from "./osrm";
 import { handleTelemetry } from "./telemetry";
 import { read, subscription } from "../shared/data";
@@ -151,7 +147,12 @@ async function handleCreateRoute(event: ApiGatewayEvent) {
   const userId = await resolveUserId(event);
   if (!userId) return unauthorized();
 
-  const body = parseBody<{ name?: string; stops?: unknown[]; days?: unknown[]; isPublic?: boolean }>(event);
+  const body = parseBody<{
+    name?: string;
+    stops?: unknown[];
+    days?: unknown[];
+    isPublic?: boolean;
+  }>(event);
   if (!body?.name) return badRequest("Rota adı zorunludur.");
 
   const routeId = crypto.randomUUID();
@@ -243,7 +244,12 @@ async function handleUpdateRoute(event: ApiGatewayEvent) {
   if (current.adminStatus === "suspended")
     return forbidden("Askıdaki rota yönetici onayı olmadan değiştirilemez.");
 
-  const body = parseBody<{ name?: string; stops?: unknown[]; days?: unknown[]; isPublic?: boolean }>(event);
+  const body = parseBody<{
+    name?: string;
+    stops?: unknown[];
+    days?: unknown[];
+    isPublic?: boolean;
+  }>(event);
   if (!body) return badRequest("Güncelleme verisi gerekli.");
 
   const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
@@ -347,7 +353,6 @@ async function handleShareRoute(event: ApiGatewayEvent) {
   return created({ shareCode, expiresAt, url: `/s/${shareCode}` });
 }
 
-
 // ─── AI Route Planner (Bedrock + Token Rate Limit) ────────────────────────
 async function handleAiRoutePlanner(_event: ApiGatewayEvent) {
   // All billable AI work belongs to the canonical handler with atomic credit reservations.
@@ -393,7 +398,6 @@ async function handlePresignUpload(event: ApiGatewayEvent) {
     expiresInSeconds: 300,
   });
 }
-
 
 async function handleGetSavedAddresses(event: ApiGatewayEvent) {
   const token = extractBearerToken(event);
@@ -534,7 +538,7 @@ async function handleGetAiMemory(event: ApiGatewayEvent) {
     }),
   );
 
-  const memory = result.Item ? unmarshall(result.Item).memory ?? {} : {};
+  const memory = result.Item ? (unmarshall(result.Item).memory ?? {}) : {};
   return ok({ memory });
 }
 

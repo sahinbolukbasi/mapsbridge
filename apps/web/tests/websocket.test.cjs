@@ -6,10 +6,7 @@ const vm = require("node:vm");
 const { transformSync } = require("esbuild");
 
 function loadWs(wsEndpoint) {
-  const code = readFileSync(
-    path.resolve(__dirname, "../app/lib/websocket.ts"),
-    "utf8",
-  );
+  const code = readFileSync(path.resolve(__dirname, "../app/lib/websocket.ts"), "utf8");
   const transformed = transformSync(code, {
     loader: "ts",
     format: "cjs",
@@ -66,10 +63,7 @@ test("connect creates WebSocket with token in URL", () => {
     instances[0].url.includes("token=mytoken"),
     `URL should contain the token, got: ${instances[0].url}`,
   );
-  assert.equal(
-    instances[0].url,
-    "wss://test.example.com?token=mytoken",
-  );
+  assert.equal(instances[0].url, "wss://test.example.com?token=mytoken");
 });
 
 test("on() registers handler and returns unsubscribe function", () => {

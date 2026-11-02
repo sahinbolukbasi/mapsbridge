@@ -151,7 +151,9 @@ export function UpgradeModal() {
         setBusyItem(null);
       }
     } catch (err: unknown) {
-      setErrorMessage((err instanceof Error ? err.message : null) || "Ödeme servisine ulaşılamadı.");
+      setErrorMessage(
+        (err instanceof Error ? err.message : null) || "Ödeme servisine ulaşılamadı.",
+      );
       setBusyItem(null);
     }
   };

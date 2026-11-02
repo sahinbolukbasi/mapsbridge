@@ -348,7 +348,9 @@ export default function ForgotPasswordPage() {
                             viewBox="0 0 24 24"
                             width="16"
                             height="16"
-                            style={{ color: rule.valid ? "var(--color-success-strong)" : "#9ca3af" }}
+                            style={{
+                              color: rule.valid ? "var(--color-success-strong)" : "#9ca3af",
+                            }}
                           >
                             <path
                               d="M5 13l4 4L19 7"

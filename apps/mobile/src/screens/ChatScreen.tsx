@@ -14,13 +14,7 @@ import {
 import { tripStore, TripStop } from "../services/tripStore";
 import { authService } from "../services/api";
 import { chatStore, ChatContact, ChatBubbleItem, RouteEmbedData } from "../services/chatStore";
-import {
-  ChatIcon,
-  SearchIcon,
-  MapIcon,
-  BalloonIcon,
-  MountainIcon,
-} from "../components/Icons";
+import { ChatIcon, SearchIcon, MapIcon, BalloonIcon, MountainIcon } from "../components/Icons";
 
 import { Screen } from "../ui";
 import { tokens, withAlpha } from "../theme";
@@ -153,7 +147,12 @@ export function ChatScreen({
         <View
           style={[
             styles.avatarFallbackBase,
-            { width: size, height: size, borderRadius: size / 2, backgroundColor: tokens.color.successStrong },
+            {
+              width: size,
+              height: size,
+              borderRadius: size / 2,
+              backgroundColor: tokens.color.successStrong,
+            },
           ]}
         >
           <BalloonIcon size={size * 0.48} color={tokens.color.onPrimary} />
@@ -166,7 +165,12 @@ export function ChatScreen({
         <View
           style={[
             styles.avatarFallbackBase,
-            { width: size, height: size, borderRadius: size / 2, backgroundColor: tokens.color.brand },
+            {
+              width: size,
+              height: size,
+              borderRadius: size / 2,
+              backgroundColor: tokens.color.brand,
+            },
           ]}
         >
           <MountainIcon size={size * 0.48} color={tokens.color.onPrimary} />
@@ -178,10 +182,18 @@ export function ChatScreen({
       <View
         style={[
           styles.avatarFallbackBase,
-          { width: size, height: size, borderRadius: size / 2, backgroundColor: tokens.color.success },
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            backgroundColor: tokens.color.success,
+          },
         ]}
       >
-        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.avatarFallbackLetter, { fontSize: size * 0.38 }]}>
+        <Text
+          maxFontSizeMultiplier={tokens.font.maxScale.body}
+          style={[styles.avatarFallbackLetter, { fontSize: size * 0.38 }]}
+        >
           {contact.avatarText || contact.name.slice(0, 2).toUpperCase()}
         </Text>
       </View>
@@ -216,17 +228,37 @@ export function ChatScreen({
           <View style={styles.inboxHeaderLeft}>
             {onGoBack && (
               <TouchableOpacity style={styles.inboxBackBtn} onPress={onGoBack} activeOpacity={0.7}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inboxBackBtnIcon}>‹</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inboxBackBtnLabel}>Geri</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.inboxBackBtnIcon}
+                >
+                  ‹
+                </Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.inboxBackBtnLabel}
+                >
+                  Geri
+                </Text>
               </TouchableOpacity>
             )}
 
             <View style={{ marginLeft: onGoBack ? 4 : 0 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.inboxHeaderTitle}>Gezgin Sohbetleri</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                  style={styles.inboxHeaderTitle}
+                >
+                  Gezgin Sohbetleri
+                </Text>
                 <View style={styles.liveNetworkPill}>
                   <View style={styles.livePulseDot} />
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.liveNetworkText}>CANLI</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.liveNetworkText}
+                  >
+                    CANLI
+                  </Text>
                 </View>
               </View>
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inboxHeaderSub}>
@@ -254,7 +286,12 @@ export function ChatScreen({
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 14, color: tokens.color.neutral400, paddingHorizontal: 4 }}>✕</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={{ fontSize: 14, color: tokens.color.neutral400, paddingHorizontal: 4 }}
+                >
+                  ✕
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -267,7 +304,8 @@ export function ChatScreen({
             onPress={() => setActiveFilterTab("all")}
             activeOpacity={0.8}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.compact}
               style={[
                 styles.filterPillText,
                 activeFilterTab === "all" && styles.filterPillTextActive,
@@ -282,7 +320,8 @@ export function ChatScreen({
             onPress={() => setActiveFilterTab("direct")}
             activeOpacity={0.8}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.compact}
               style={[
                 styles.filterPillText,
                 activeFilterTab === "direct" && styles.filterPillTextActive,
@@ -297,7 +336,8 @@ export function ChatScreen({
             onPress={() => setActiveFilterTab("groups")}
             activeOpacity={0.8}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.compact}
               style={[
                 styles.filterPillText,
                 activeFilterTab === "groups" && styles.filterPillTextActive,
@@ -319,14 +359,24 @@ export function ChatScreen({
               <View style={styles.emptyIconCircle}>
                 <ChatIcon size={28} color={tokens.color.successStrong} />
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyInboxTitle}>Henüz mesajınız yok</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emptyInboxTitle}
+              >
+                Henüz mesajınız yok
+              </Text>
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyInboxSub}>
                 Topluluk akışındaki gezginlerin veya rehberlerin profiline girip "Mesaj Gönder"
                 butonuna basarak anında sohbet başlatabilirsiniz!
               </Text>
               {onGoBack && (
                 <TouchableOpacity style={styles.exploreLinkBtn} onPress={onGoBack}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.exploreLinkBtnText}>← Topluluğa Göz At</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.exploreLinkBtnText}
+                  >
+                    ← Topluluğa Göz At
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -347,17 +397,31 @@ export function ChatScreen({
 
                   <View style={styles.cardCenterCol}>
                     <View style={styles.cardTopRow}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardName} numberOfLines={1}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.cardName}
+                        numberOfLines={1}
+                      >
                         {contact.name}
                       </Text>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardTime}>{contact.lastMessageTime}</Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.cardTime}
+                      >
+                        {contact.lastMessageTime}
+                      </Text>
                     </View>
 
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardRole} numberOfLines={1}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.cardRole}
+                      numberOfLines={1}
+                    >
                       {contact.role}
                     </Text>
 
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
                       style={[styles.cardSnippet, hasUnread && styles.cardSnippetUnread]}
                       numberOfLines={1}
                     >
@@ -368,7 +432,12 @@ export function ChatScreen({
                   {hasUnread && (
                     <View style={styles.cardBadgeWrap}>
                       <View style={styles.cardBadge}>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.cardBadgeText}>{contact.unreadCount}</Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                          style={styles.cardBadgeText}
+                        >
+                          {contact.unreadCount}
+                        </Text>
                       </View>
                     </View>
                   )}
@@ -401,7 +470,9 @@ export function ChatScreen({
           }}
           activeOpacity={0.7}
         >
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detailBackIcon}>‹</Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detailBackIcon}>
+            ‹
+          </Text>
         </TouchableOpacity>
 
         {activeContact && (
@@ -409,12 +480,20 @@ export function ChatScreen({
             {renderContactAvatar(activeContact, 38)}
             <View style={{ marginLeft: 10, flex: 1 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detailUserName} numberOfLines={1}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.detailUserName}
+                  numberOfLines={1}
+                >
                   {activeContact.name}
                 </Text>
                 {activeContact.online && <View style={styles.onlinePillDot} />}
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.detailUserSub} numberOfLines={1}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.detailUserSub}
+                numberOfLines={1}
+              >
                 {activeContact.role}
               </Text>
             </View>
@@ -436,8 +515,16 @@ export function ChatScreen({
         >
           {messages.length === 0 ? (
             <View style={styles.emptyMessagesWrap}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyMessagesTitle}>Sohbet Başladı 👋</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyMessagesSub}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emptyMessagesTitle}
+              >
+                Sohbet Başladı 👋
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emptyMessagesSub}
+              >
                 {activeContact?.name} kullanıcısına ilk mesajınızı gönderin ve seyahat rotalarınızı
                 paylaşın!
               </Text>
@@ -471,10 +558,17 @@ export function ChatScreen({
                             <MapIcon size={14} color={tokens.color.successStrong} />
                           </View>
                           <View style={{ flex: 1 }}>
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.embedRouteTitle} numberOfLines={1}>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.embedRouteTitle}
+                              numberOfLines={1}
+                            >
                               {item.routeEmbed.title}
                             </Text>
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.embedRouteSub}>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.embedRouteSub}
+                            >
                               {item.routeEmbed.days} • {item.routeEmbed.stopsCount} Durak
                             </Text>
                           </View>
@@ -485,14 +579,24 @@ export function ChatScreen({
                             style={styles.embedActionBtn}
                             onPress={() => handleCloneRouteToDesk(item.routeEmbed!)}
                           >
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.embedActionBtnText}>Masama Klonla</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.embedActionBtnText}
+                            >
+                              Masama Klonla
+                            </Text>
                           </TouchableOpacity>
 
                           <TouchableOpacity
                             style={[styles.embedActionBtn, styles.embedActionBtnSecondary]}
                             onPress={() => handleInspectRouteOnMap(item.routeEmbed!)}
                           >
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.embedActionBtnTextSecondary}>Haritada Gör →</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.embedActionBtnTextSecondary}
+                            >
+                              Haritada Gör →
+                            </Text>
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -500,7 +604,8 @@ export function ChatScreen({
 
                     {/* Text Message */}
                     {item.text ? (
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={[
                           styles.bubbleText,
                           isMe ? styles.bubbleTextMe : styles.bubbleTextThem,
@@ -512,7 +617,8 @@ export function ChatScreen({
 
                     {/* Message Meta (Time & Read status) */}
                     <View style={styles.bubbleMetaRow}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={[
                           styles.bubbleTime,
                           isMe ? styles.bubbleTimeMe : styles.bubbleTimeThem,
@@ -520,7 +626,14 @@ export function ChatScreen({
                       >
                         {item.time}
                       </Text>
-                      {isMe && <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.readCheck}>✓✓</Text>}
+                      {isMe && (
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.readCheck}
+                        >
+                          ✓✓
+                        </Text>
+                      )}
                     </View>
                   </View>
                 </View>
@@ -547,7 +660,9 @@ export function ChatScreen({
             disabled={!inputText.trim()}
             activeOpacity={0.8}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sendBtnText}>Gönder</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sendBtnText}>
+              Gönder
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

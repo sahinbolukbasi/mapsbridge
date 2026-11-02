@@ -55,7 +55,8 @@ export async function handleTokenUsageAdmin() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   try {
-    const { CloudWatchClient, GetMetricStatisticsCommand } = await import("@aws-sdk/client-cloudwatch");
+    const { CloudWatchClient, GetMetricStatisticsCommand } =
+      await import("@aws-sdk/client-cloudwatch");
     const cw = new CloudWatchClient({ region, maxAttempts: 2 });
 
     const metricDefs = [
@@ -69,17 +70,19 @@ export async function handleTokenUsageAdmin() {
 
     const results = await Promise.all(
       metricDefs.map((m) =>
-        cw.send(
-          new GetMetricStatisticsCommand({
-            Namespace: namespace,
-            MetricName: m.name,
-            Dimensions: [{ Name: "Environment", Value: "prod" }],
-            StartTime: monthStart,
-            EndTime: now,
-            Period: Math.floor((now.getTime() - monthStart.getTime()) / 1000),
-            Statistics: ["Sum"],
-          }),
-        ).catch(() => null),
+        cw
+          .send(
+            new GetMetricStatisticsCommand({
+              Namespace: namespace,
+              MetricName: m.name,
+              Dimensions: [{ Name: "Environment", Value: "prod" }],
+              StartTime: monthStart,
+              EndTime: now,
+              Period: Math.floor((now.getTime() - monthStart.getTime()) / 1000),
+              Statistics: ["Sum"],
+            }),
+          )
+          .catch(() => null),
       ),
     );
 
@@ -99,14 +102,18 @@ export async function handleTokenUsageAdmin() {
         totalRequests,
         inputTokens,
         outputTokens,
-        totalTokens: inputTokens !== null && outputTokens !== null ? inputTokens + outputTokens : null,
+        totalTokens:
+          inputTokens !== null && outputTokens !== null ? inputTokens + outputTokens : null,
         estimatedCostUsd,
         completedPlans,
         failures,
-        successRate: totalRequests && failures !== null
-          ? Math.round(((totalRequests - failures) / totalRequests) * 1000) / 10
-          : null,
-        activeModels: [process.env.BEDROCK_MODEL_ID || "eu.anthropic.claude-haiku-4-5-20251001-v1:0"],
+        successRate:
+          totalRequests && failures !== null
+            ? Math.round(((totalRequests - failures) / totalRequests) * 1000) / 10
+            : null,
+        activeModels: [
+          process.env.BEDROCK_MODEL_ID || "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        ],
         source: "cloudwatch",
         namespace,
       },

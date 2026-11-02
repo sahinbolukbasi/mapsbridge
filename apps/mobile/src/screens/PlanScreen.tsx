@@ -515,11 +515,25 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             activeOpacity={0.8}
           >
             <View style={styles.pulsingEmeraldDot} />
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.tripDropdownTitle} numberOfLines={1}>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.tripDropdownTitle}
+              numberOfLines={1}
+            >
               {activeRoute.name}
             </Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.tripDropdownCount}>({activeRoute.stops.length} Durak)</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 13, color: tokens.color.link }}>▼</Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.compact}
+              style={styles.tripDropdownCount}
+            >
+              ({activeRoute.stops.length} Durak)
+            </Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={{ fontSize: 13, color: tokens.color.link }}
+            >
+              ▼
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -539,7 +553,9 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             onPress={() => setShowNewTripModal(true)}
             activeOpacity={0.8}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.newTripBtnText}>+ Yeni</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.newTripBtnText}>
+              + Yeni
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -547,10 +563,16 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         <View style={styles.metricCard}>
           <View style={styles.metricItem}>
             <View style={styles.metricValueRow}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricValue}>{activeRoute.stops.length}</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricUnit}>Durak</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricValue}>
+                {activeRoute.stops.length}
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricUnit}>
+                Durak
+              </Text>
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>{activeDay}. GÜN PLANI</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>
+              {activeDay}. GÜN PLANI
+            </Text>
           </View>
 
           <View style={styles.metricDivider} />
@@ -560,9 +582,13 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricValue}>
                 {(Math.max(1, activeRoute.stops.length) * 0.9).toFixed(1)}
               </Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricUnit}>km</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricUnit}>
+                km
+              </Text>
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>YÜRÜYÜŞ MESAFESİ</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>
+              YÜRÜYÜŞ MESAFESİ
+            </Text>
           </View>
 
           <View style={styles.metricDivider} />
@@ -574,7 +600,9 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 {(activeRoute.stops.length * 15) % 60}d
               </Text>
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>TOPLAM SÜRE</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metricLabel}>
+              TOPLAM SÜRE
+            </Text>
           </View>
         </View>
 
@@ -585,7 +613,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               <View style={{ marginRight: 6 }}>
                 <MapIcon size={16} color={tokens.color.successStrong} />
               </View>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.mapPreviewTitle}>Canlı Rota Önizlemesi</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.mapPreviewTitle}
+              >
+                Canlı Rota Önizlemesi
+              </Text>
             </View>
 
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -608,7 +641,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 activeOpacity={0.8}
               >
                 <Share2Icon size={13} color={tokens.color.textBrand} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.shareStopsHeaderText}>Pinleri Paylaş</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.shareStopsHeaderText}
+                >
+                  Pinleri Paylaş
+                </Text>
               </TouchableOpacity>
 
               {/* Haritada Gör Button */}
@@ -617,7 +655,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 onPress={() => onOpenMap()}
                 activeOpacity={0.8}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.openFullMapText}>Haritada Gör ➔</Text>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.openFullMapText}
+                >
+                  Haritada Gör ➔
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -667,7 +710,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               }}
             >
               <SparkIcon size={16} color={tokens.color.onPrimary} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.optimizeBtnText}>Rotayı Optimize Et</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.optimizeBtnText}
+              >
+                Rotayı Optimize Et
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -689,7 +737,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               }}
             >
               <PlusIcon size={16} color={tokens.color.successStrong} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addStopActionText}>Durak Ekle</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.addStopActionText}
+              >
+                Durak Ekle
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -700,10 +753,20 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             {/* Showcase Header */}
             <View style={styles.emptyGuideBadge}>
               <SparkIcon size={12} color={tokens.color.successStrong} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.emptyGuideBadgeText}>ROTA OLUŞTURUCU</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.emptyGuideBadgeText}
+              >
+                ROTA OLUŞTURUCU
+              </Text>
             </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyGuideTitle}>İlk Seyahat Rotanı Başlat</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyGuideSubtitle}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyGuideTitle}>
+              İlk Seyahat Rotanı Başlat
+            </Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.emptyGuideSubtitle}
+            >
               Haritadan dilediğin mekanları seçerek adım adım kendi seyahatini oluştur veya tek
               tıkla popüler rota şablonunu yükle.
             </Text>
@@ -718,42 +781,96 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               activeOpacity={0.85}
             >
               <MapIcon size={18} color={tokens.color.onPrimary} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyGuideMainBtnText}>Haritayı Aç ve Durak Seç</Text>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontSize: 16, fontWeight: "800" }}>➔</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emptyGuideMainBtnText}
+              >
+                Haritayı Aç ve Durak Seç
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ color: tokens.color.onPrimary, fontSize: 16, fontWeight: "800" }}
+              >
+                ➔
+              </Text>
             </TouchableOpacity>
 
             {/* 3 Step Guide */}
             <View style={styles.guideStepsBox}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepsTitle}>Nasıl Çalışır?</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.guideStepsTitle}
+              >
+                Nasıl Çalışır?
+              </Text>
               <View style={styles.guideStepRow}>
                 <View style={styles.guideStepNumCircle}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepNumText}>1</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepNumText}
+                  >
+                    1
+                  </Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepHeading}>Haritadan Mekan Seçimi</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepDesc}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepHeading}
+                  >
+                    Haritadan Mekan Seçimi
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepDesc}
+                  >
                     Mekanlara dokunarak veya arama yaparak duraklarını ekle.
                   </Text>
                 </View>
               </View>
               <View style={styles.guideStepRow}>
                 <View style={styles.guideStepNumCircle}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepNumText}>2</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepNumText}
+                  >
+                    2
+                  </Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepHeading}>Akıllı Rota Optimizasyonu</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepDesc}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepHeading}
+                  >
+                    Akıllı Rota Optimizasyonu
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepDesc}
+                  >
                     Yapay zeka ile en verimli yürüme sırasını tek tıkla oluştur.
                   </Text>
                 </View>
               </View>
               <View style={styles.guideStepRow}>
                 <View style={styles.guideStepNumCircle}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepNumText}>3</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepNumText}
+                  >
+                    3
+                  </Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepHeading}>Canlı GPS Navigasyon</Text>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.guideStepDesc}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepHeading}
+                  >
+                    Canlı GPS Navigasyon
+                  </Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.guideStepDesc}
+                  >
                     Adım adım yürüyüş süreleri ve rotanla şehri güvenle gez.
                   </Text>
                 </View>
@@ -762,23 +879,58 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
 
             {/* Popular Starter Templates */}
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.starterTemplatesTitle, { marginBottom: 0, flex: 1 }]}>Hızlı Başlangıç Şablonları</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={[styles.starterTemplatesTitle, { marginBottom: 0, flex: 1 }]}
+              >
+                Hızlı Başlangıç Şablonları
+              </Text>
               {!isProSync() && (
                 <TouchableOpacity
                   onPress={() => setShowPaywall(true)}
-                  style={{ backgroundColor: tokens.color.accentStrong, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}
+                  style={{
+                    backgroundColor: tokens.color.accentStrong,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 10,
+                  }}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 10, fontWeight: "800", color: tokens.color.surfaceInverseStrong }}>PRO</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={{
+                      fontSize: 10,
+                      fontWeight: "800",
+                      color: tokens.color.surfaceInverseStrong,
+                    }}
+                  >
+                    PRO
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
             <View style={styles.starterTemplatesList}>
               {SAMPLE_TEMPLATES.map((tmpl) => (
-                <View key={tmpl.id} style={[styles.templateCard, !isProSync() && { opacity: 0.75 }]}>
+                <View
+                  key={tmpl.id}
+                  style={[styles.templateCard, !isProSync() && { opacity: 0.75 }]}
+                >
                   <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.templateCity}>{tmpl.city}</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.templateName}>{tmpl.name}</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.templateStopsCount}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.templateCity}
+                    >
+                      {tmpl.city}
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.templateName}
+                    >
+                      {tmpl.name}
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.templateStopsCount}
+                    >
                       {tmpl.stops.length} Durak • Hazır Rota
                     </Text>
                   </View>
@@ -787,7 +939,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                     onPress={() => handleApplyTemplate(tmpl)}
                     activeOpacity={0.8}
                   >
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.templateApplyBtnText}>{isProSync() ? "Kullan" : "🔒 Kullan"}</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.templateApplyBtnText}
+                    >
+                      {isProSync() ? "Kullan" : "🔒 Kullan"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               ))}
@@ -811,7 +968,13 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       onPress={() => tripStore.toggleVisited(stop.id)}
                       activeOpacity={0.7}
                     >
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={[styles.stopPinText, isCompleted && { color: tokens.color.onPrimary }]}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={[
+                          styles.stopPinText,
+                          isCompleted && { color: tokens.color.onPrimary },
+                        ]}
+                      >
                         {isCompleted ? "✓" : idx + 1}
                       </Text>
                     </TouchableOpacity>
@@ -820,7 +983,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                     <View style={styles.stopDetailCard}>
                       <View style={styles.stopCardHeader}>
                         <View style={{ flex: 1 }}>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
                             style={[styles.stopCardTitle, isCompleted && styles.completedTitle]}
                             numberOfLines={1}
                           >
@@ -835,7 +999,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                             }}
                           >
                             <MapPinIcon size={12} color={tokens.color.successStrong} />
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopCardAddress} numberOfLines={1}>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.stopCardAddress}
+                              numberOfLines={1}
+                            >
                               {stop.address}
                             </Text>
                           </View>
@@ -849,7 +1017,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                         >
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                             <EditIcon size={12} color={tokens.color.link} />
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.editBtnText}>Düzenle</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.editBtnText}
+                            >
+                              Düzenle
+                            </Text>
                           </View>
                         </TouchableOpacity>
                       </View>
@@ -858,20 +1031,55 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       <View style={styles.stopMetaRow}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
                           <ClockIcon size={12} color={tokens.color.textSubtle} />
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopMetaItem}>{stop.time}</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.stopMetaItem}
+                          >
+                            {stop.time}
+                          </Text>
                         </View>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaDot}>•</Text>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopMetaItem}>{stop.duration}</Text>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaDot}>•</Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.metaDot}
+                        >
+                          •
+                        </Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.stopMetaItem}
+                        >
+                          {stop.duration}
+                        </Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.metaDot}
+                        >
+                          •
+                        </Text>
                         <View style={styles.metaCatBadge}>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaCatText}>{stop.category}</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.metaCatText}
+                          >
+                            {stop.category}
+                          </Text>
                         </View>
                         {stop.budget && (
                           <>
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaDot}>•</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.metaDot}
+                            >
+                              •
+                            </Text>
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
                               <TicketIcon size={12} color={tokens.color.textSubtle} />
-                              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.budgetBadgeText}>{stop.budget}</Text>
+                              <Text
+                                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                                style={styles.budgetBadgeText}
+                              >
+                                {stop.budget}
+                              </Text>
                             </View>
                           </>
                         )}
@@ -894,7 +1102,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                           <View style={{ marginRight: 6, marginTop: 2 }}>
                             <LightbulbIcon size={13} color={tokens.color.warningStrong} />
                           </View>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.stopNotesText}>{stop.notes}</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.stopNotesText}
+                          >
+                            {stop.notes}
+                          </Text>
                         </View>
                       )}
 
@@ -906,7 +1119,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                             style={[styles.reorderBtn, isFirst && styles.reorderBtnDisabled]}
                             onPress={() => tripStore.reorderStops(idx, idx - 1)}
                           >
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.reorderArrowText}>▲</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.reorderArrowText}
+                            >
+                              ▲
+                            </Text>
                           </TouchableOpacity>
 
                           <TouchableOpacity
@@ -914,7 +1132,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                             style={[styles.reorderBtn, isLast && styles.reorderBtnDisabled]}
                             onPress={() => tripStore.reorderStops(idx, idx + 1)}
                           >
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.reorderArrowText}>▼</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.reorderArrowText}
+                            >
+                              ▼
+                            </Text>
                           </TouchableOpacity>
                         </View>
 
@@ -926,7 +1149,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                           >
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                               <DirectionsIcon size={12} color={tokens.color.link} />
-                              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.cardOpenMapText}>Haritada Gör</Text>
+                              <Text
+                                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                                style={styles.cardOpenMapText}
+                              >
+                                Haritada Gör
+                              </Text>
                             </View>
                           </TouchableOpacity>
 
@@ -955,7 +1183,10 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                     <View style={styles.walkingIndicatorRow}>
                       <View style={styles.walkingBadge}>
                         <WalkIcon size={13} color={tokens.color.successStrong} />
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.walkingText}>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.walkingText}
+                        >
                           {stop.walkTimeFromPrev || "~6 dk yürüyüş"} (
                           {stop.distanceFromPrev || "450m"})
                         </Text>
@@ -980,8 +1211,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 <PinIcon size={16} color={tokens.color.successStrong} />
               </View>
               <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolTitle}>Kayıtlı Durak Havuzu</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolSub}>Güne atanmamış {savedPool.length} mekan var</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolTitle}>
+                  Kayıtlı Durak Havuzu
+                </Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolSub}>
+                  Güne atanmamış {savedPool.length} mekan var
+                </Text>
               </View>
             </View>
 
@@ -1005,10 +1240,20 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.clearPoolBtnText}>Temizle</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.clearPoolBtnText}
+                  >
+                    Temizle
+                  </Text>
                 </TouchableOpacity>
               )}
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.color.link }}>{showPool ? "▲" : "▼"}</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ fontSize: 16, color: tokens.color.link }}
+              >
+                {showPool ? "▲" : "▼"}
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -1016,7 +1261,10 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             <View style={styles.poolList}>
               {savedPool.length === 0 ? (
                 <View style={styles.emptyPoolBox}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyPoolText}>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.emptyPoolText}
+                  >
                     Kayıtlı durak havuzunuz temiz. Güne atanmamış duraklar burada listelenir.
                   </Text>
                 </View>
@@ -1024,8 +1272,16 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                 savedPool.map((poolItem) => (
                   <View key={poolItem.id} style={styles.poolItemRow}>
                     <View style={{ flex: 1 }}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolItemTitle}>{poolItem.name}</Text>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.poolItemSub}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.poolItemTitle}
+                      >
+                        {poolItem.name}
+                      </Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.poolItemSub}
+                      >
                         {poolItem.category} • {poolItem.duration}
                       </Text>
                     </View>
@@ -1033,7 +1289,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       style={styles.addToDayBtn}
                       onPress={() => tripStore.addFromPool(poolItem.id)}
                     >
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addToDayBtnText}>+ Rotaya Al</Text>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.addToDayBtnText}
+                      >
+                        + Rotaya Al
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 ))
@@ -1052,7 +1313,12 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
           >
             <MapIcon size={18} color={tokens.color.onPrimary} />
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.exportMapsFullText}>Google Haritalar'a Aktar</Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.exportMapsFullText}
+            >
+              Google Haritalar'a Aktar
+            </Text>
           </View>
         </TouchableOpacity>
       </ScrollView>
@@ -1065,124 +1331,138 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         onRequestClose={() => setShowRoutePickerModal(false)}
         style={styles.modalOverlay}
       >
-          <View style={styles.modalContent}>
-            {/* Header with Close Button */}
-            <View style={styles.modalHeaderWithClose}>
-              <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rotanızı Seçin</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
-                  Kayıtlı ve önerilen rotalar arasında geçiş yapın
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.modalCloseBtn}
-                onPress={() => setShowRoutePickerModal(false)}
-                activeOpacity={0.7}
+        <View style={styles.modalContent}>
+          {/* Header with Close Button */}
+          <View style={styles.modalHeaderWithClose}>
+            <View>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>
+                Rotanızı Seçin
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
+                Kayıtlı ve önerilen rotalar arasında geçiş yapın
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.modalCloseBtn}
+              onPress={() => setShowRoutePickerModal(false)}
+              activeOpacity={0.7}
+            >
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalCloseBtnText}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseBtnText}>✕</Text>
-              </TouchableOpacity>
-            </View>
+                ✕
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-            {/* Search Input */}
-            <View style={styles.modalSearchContainer}>
-              <View style={{ marginRight: 8 }}>
-                <SearchIcon size={14} color={tokens.color.textSubtle} />
-              </View>
-              <TextInput
-                style={styles.modalSearchInput}
-                placeholder="Rota ara..."
-                placeholderTextColor={tokens.color.textSubtle}
-                value={""}
-                onChangeText={(text) => {
-                  // Filter routes based on search text - can be implemented
-                  console.warn("Searching routes:", text);
-                }}
-              />
+          {/* Search Input */}
+          <View style={styles.modalSearchContainer}>
+            <View style={{ marginRight: 8 }}>
+              <SearchIcon size={14} color={tokens.color.textSubtle} />
             </View>
+            <TextInput
+              style={styles.modalSearchInput}
+              placeholder="Rota ara..."
+              placeholderTextColor={tokens.color.textSubtle}
+              value={""}
+              onChangeText={(text) => {
+                // Filter routes based on search text - can be implemented
+                console.warn("Searching routes:", text);
+              }}
+            />
+          </View>
 
-            <ScrollView style={{ maxHeight: 280, marginVertical: 12 }}>
-              {allRoutes.map((r) => {
-                const isActive = r.id === activeRoute.id;
-                return (
+          <ScrollView style={{ maxHeight: 280, marginVertical: 12 }}>
+            {allRoutes.map((r) => {
+              const isActive = r.id === activeRoute.id;
+              return (
+                <View
+                  key={r.id}
+                  style={[styles.routeSelectItem, isActive && styles.routeSelectItemActive]}
+                >
+                  <TouchableOpacity
+                    style={{ flex: 1 }}
+                    onPress={() => {
+                      tripStore.switchActiveRoute(r.id);
+                      setShowRoutePickerModal(false);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={[
+                          styles.routeSelectName,
+                          isActive && { color: tokens.color.textBrand, fontWeight: "800" },
+                        ]}
+                      >
+                        {r.name}
+                      </Text>
+                      {isActive && (
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}
+                        >
+                          ✓ AKTİF
+                        </Text>
+                      )}
+                    </View>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.routeSelectSub}
+                    >
+                      {r.stops.length} Durak • Kayıtlı Plan
+                    </Text>
+                  </TouchableOpacity>
+
                   <View
-                    key={r.id}
-                    style={[styles.routeSelectItem, isActive && styles.routeSelectItemActive]}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 6, marginLeft: 8 }}
                   >
                     <TouchableOpacity
-                      style={{ flex: 1 }}
+                      style={styles.routeItemActionBtn}
                       onPress={() => {
-                        tripStore.switchActiveRoute(r.id);
                         setShowRoutePickerModal(false);
+                        setRenamingRoute(r);
+                        setRenameRouteText(r.name);
                       }}
                       activeOpacity={0.7}
+                      accessibilityLabel="Rotanın İsmini Düzenle"
                     >
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
-                          style={[
-                            styles.routeSelectName,
-                            isActive && { color: tokens.color.textBrand, fontWeight: "800" },
-                          ]}
-                        >
-                          {r.name}
-                        </Text>
-                        {isActive && (
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontWeight: "900", fontSize: 13 }}>
-                            ✓ AKTİF
-                          </Text>
-                        )}
-                      </View>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeSelectSub}>
-                        {r.stops.length} Durak • Kayıtlı Plan
-                      </Text>
+                      <EditIcon size={14} color={tokens.color.successStrong} />
                     </TouchableOpacity>
 
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center", gap: 6, marginLeft: 8 }}
-                    >
+                    {allRoutes.length > 1 && (
                       <TouchableOpacity
                         style={styles.routeItemActionBtn}
                         onPress={() => {
-                          setShowRoutePickerModal(false);
-                          setRenamingRoute(r);
-                          setRenameRouteText(r.name);
+                          Alert.alert(
+                            "Rotayı Sil",
+                            `"${r.name}" rotasını silmek istediğinize emin misiniz?`,
+                            [
+                              { text: "Vazgeç", style: "cancel" },
+                              {
+                                text: "Sil",
+                                style: "destructive",
+                                onPress: () => {
+                                  tripStore.deleteRoute(r.id);
+                                },
+                              },
+                            ],
+                          );
                         }}
                         activeOpacity={0.7}
-                        accessibilityLabel="Rotanın İsmini Düzenle"
                       >
-                        <EditIcon size={14} color={tokens.color.successStrong} />
+                        <TrashIcon size={14} color={tokens.color.danger} />
                       </TouchableOpacity>
-
-                      {allRoutes.length > 1 && (
-                        <TouchableOpacity
-                          style={styles.routeItemActionBtn}
-                          onPress={() => {
-                            Alert.alert(
-                              "Rotayı Sil",
-                              `"${r.name}" rotasını silmek istediğinize emin misiniz?`,
-                              [
-                                { text: "Vazgeç", style: "cancel" },
-                                {
-                                  text: "Sil",
-                                  style: "destructive",
-                                  onPress: () => {
-                                    tripStore.deleteRoute(r.id);
-                                  },
-                                },
-                              ],
-                            );
-                          }}
-                          activeOpacity={0.7}
-                        >
-                          <TrashIcon size={14} color={tokens.color.danger} />
-                        </TouchableOpacity>
-                      )}
-                    </View>
+                    )}
                   </View>
-                );
-              })}
-            </ScrollView>
-          </View>
-        </ModalFrame>
+                </View>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </ModalFrame>
 
       {/* Rename Route Modal */}
       <ModalFrame
@@ -1192,78 +1472,95 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         onRequestClose={() => setRenamingRoute(null)}
         style={styles.modalOverlay}
       >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeaderWithClose}>
-              <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rota İsmini Düzenle</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Rotanız için yeni bir isim belirleyin</Text>
-              </View>
-              <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setRenamingRoute(null)}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseBtnText}>✕</Text>
-              </TouchableOpacity>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeaderWithClose}>
+            <View>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>
+                Rota İsmini Düzenle
+              </Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
+                Rotanız için yeni bir isim belirleyin
+              </Text>
             </View>
-
-            <TextInput
-              style={[
-                styles.modalSearchInput,
-                {
-                  marginVertical: 16,
-                  backgroundColor: tokens.color.bg,
-                  borderWidth: 1,
-                  borderColor: tokens.color.borderStrong,
-                  borderRadius: 12,
-                  paddingHorizontal: 12,
-                  paddingVertical: 10,
-                  fontSize: 14,
-                },
-              ]}
-              value={renameRouteText}
-              onChangeText={setRenameRouteText}
-              placeholder="Örn: Hafta Sonu Boğaz Turu"
-              placeholderTextColor={tokens.color.neutral400}
-              autoFocus
-            />
-
-            <View style={{ flexDirection: "row", gap: 10, marginTop: 8 }}>
-              <TouchableOpacity
-                style={[
-                  styles.modalCloseBtn,
-                  {
-                    flex: 1,
-                    height: 44,
-                    borderRadius: 12,
-                    backgroundColor: tokens.color.surfaceSunken,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  },
-                ]}
-                onPress={() => setRenamingRoute(null)}
+            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setRenamingRoute(null)}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalCloseBtnText}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.textSubtle, fontWeight: "700", fontSize: 13 }}>Vazgeç</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{
-                  flex: 1.5,
+                ✕
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <TextInput
+            style={[
+              styles.modalSearchInput,
+              {
+                marginVertical: 16,
+                backgroundColor: tokens.color.bg,
+                borderWidth: 1,
+                borderColor: tokens.color.borderStrong,
+                borderRadius: 12,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                fontSize: 14,
+              },
+            ]}
+            value={renameRouteText}
+            onChangeText={setRenameRouteText}
+            placeholder="Örn: Hafta Sonu Boğaz Turu"
+            placeholderTextColor={tokens.color.neutral400}
+            autoFocus
+          />
+
+          <View style={{ flexDirection: "row", gap: 10, marginTop: 8 }}>
+            <TouchableOpacity
+              style={[
+                styles.modalCloseBtn,
+                {
+                  flex: 1,
                   height: 44,
                   borderRadius: 12,
-                  backgroundColor: tokens.color.primary,
+                  backgroundColor: tokens.color.surfaceSunken,
                   alignItems: "center",
                   justifyContent: "center",
-                }}
-                onPress={() => {
-                  if (renamingRoute && renameRouteText.trim()) {
-                    tripStore.updateRouteName(renamingRoute.id, renameRouteText.trim());
-                    setRenamingRoute(null);
-                  }
-                }}
+                },
+              ]}
+              onPress={() => setRenamingRoute(null)}
+            >
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ color: tokens.color.textSubtle, fontWeight: "700", fontSize: 13 }}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.onPrimary, fontWeight: "800", fontSize: 13 }}>
-                  İsmi Kaydet
-                </Text>
-              </TouchableOpacity>
-            </View>
+                Vazgeç
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                flex: 1.5,
+                height: 44,
+                borderRadius: 12,
+                backgroundColor: tokens.color.primary,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={() => {
+                if (renamingRoute && renameRouteText.trim()) {
+                  tripStore.updateRouteName(renamingRoute.id, renameRouteText.trim());
+                  setRenamingRoute(null);
+                }
+              }}
+            >
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={{ color: tokens.color.onPrimary, fontWeight: "800", fontSize: 13 }}
+              >
+                İsmi Kaydet
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ModalFrame>
+        </View>
+      </ModalFrame>
 
       {/* Edit Stop Modal */}
       <ModalFrame
@@ -1273,129 +1570,168 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         onRequestClose={() => setEditingStop(null)}
         style={styles.modalOverlay}
       >
-          <View style={styles.modalContent}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Durağı Düzenle</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Durak adı, zamanlama ve notları özelleştirin</Text>
+        <View style={styles.modalContent}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>
+            Durağı Düzenle
+          </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
+            Durak adı, zamanlama ve notları özelleştirin
+          </Text>
 
-            <ScrollView style={{ maxHeight: 320, marginVertical: 8 }}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Durak Adı</Text>
-              <TextInput
-                style={styles.modalInput}
-                value={editName}
-                onChangeText={setEditName}
-                placeholder="Durak Adı"
-              />
+          <ScrollView style={{ maxHeight: 320, marginVertical: 8 }}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Durak Adı
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              value={editName}
+              onChangeText={setEditName}
+              placeholder="Durak Adı"
+            />
 
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Kategori</Text>
-              <View style={styles.catChipsRow}>
-                {CATEGORIES.map((cat) => (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[styles.catChip, editCategory === cat && styles.catChipActive]}
-                    onPress={() => setEditCategory(cat)}
-                  >
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
-                      style={[styles.catChipText, editCategory === cat && styles.catChipTextActive]}
-                    >
-                      {cat}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* DİĞER seçilince özel tag / yeni kategori oluşturma */}
-              {editCategory === "DİĞER" && (
-                <View style={{ marginTop: 8, marginBottom: 4 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Yeni Özel Kategori / Tag Adı</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    value={editCustomCategory}
-                    onChangeText={setEditCustomCategory}
-                    placeholder="Örn: Sanat Galerisi, Botanik Bahçesi..."
-                  />
-                </View>
-              )}
-
-              {/* Fotoğraf Ekleme & Önizleme */}
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Durak Fotoğrafı</Text>
-              <View style={styles.photoPickerContainer}>
-                {editPhotoUrl ? (
-                  <View style={styles.photoPreviewCard}>
-                    <Image
-                      source={{ uri: editPhotoUrl }}
-                      style={styles.photoPreviewImg}
-                      resizeMode="cover"
-                    />
-                    <TouchableOpacity
-                      style={styles.removePhotoBadge}
-                      onPress={() => setEditPhotoUrl("")}
-                    >
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.removePhotoBadgeText}>✕</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : null}
-
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Kategori
+            </Text>
+            <View style={styles.catChipsRow}>
+              {CATEGORIES.map((cat) => (
                 <TouchableOpacity
-                  style={styles.pickPhotoActionBtn}
-                  onPress={handlePickPhoto}
-                  activeOpacity={0.8}
+                  key={cat}
+                  style={[styles.catChip, editCategory === cat && styles.catChipActive]}
+                  onPress={() => setEditCategory(cat)}
                 >
-                  <CameraIcon size={16} color={tokens.color.successStrong} />
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pickPhotoActionText}>
-                    {editPhotoUrl ? "Fotoğrafı Değiştir" : "+ Fotoğraf Seç / Ekle"}
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={[styles.catChipText, editCategory === cat && styles.catChipTextActive]}
+                  >
+                    {cat}
                   </Text>
                 </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* DİĞER seçilince özel tag / yeni kategori oluşturma */}
+            {editCategory === "DİĞER" && (
+              <View style={{ marginTop: 8, marginBottom: 4 }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  Yeni Özel Kategori / Tag Adı
+                </Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editCustomCategory}
+                  onChangeText={setEditCustomCategory}
+                  placeholder="Örn: Sanat Galerisi, Botanik Bahçesi..."
+                />
               </View>
+            )}
 
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Ziyaret Saati</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    value={editTime}
-                    onChangeText={setEditTime}
-                    placeholder="10:30"
+            {/* Fotoğraf Ekleme & Önizleme */}
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Durak Fotoğrafı
+            </Text>
+            <View style={styles.photoPickerContainer}>
+              {editPhotoUrl ? (
+                <View style={styles.photoPreviewCard}>
+                  <Image
+                    source={{ uri: editPhotoUrl }}
+                    style={styles.photoPreviewImg}
+                    resizeMode="cover"
                   />
+                  <TouchableOpacity
+                    style={styles.removePhotoBadge}
+                    onPress={() => setEditPhotoUrl("")}
+                  >
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                      style={styles.removePhotoBadgeText}
+                    >
+                      ✕
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Süre</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    value={editDuration}
-                    onChangeText={setEditDuration}
-                    placeholder="45 dk"
-                  />
-                </View>
-              </View>
+              ) : null}
 
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Bütçe / Giriş Ücreti</Text>
-              <TextInput
-                style={styles.modalInput}
-                value={editBudget}
-                onChangeText={setEditBudget}
-                placeholder="Örn: 350 ₺ veya Ücretsiz"
-              />
-
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Gezgin Notu & İpucu</Text>
-              <TextInput
-                style={[styles.modalInput, { height: 60, textAlignVertical: "top" }]}
-                value={editNotes}
-                onChangeText={setEditNotes}
-                placeholder="Ziyaret için faydalı ipucu..."
-                multiline
-              />
-            </ScrollView>
-
-            <View style={styles.modalActionsRow}>
-              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setEditingStop(null)}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Vazgeç</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleSaveStopEdit}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalConfirmText}>Kaydet</Text>
+              <TouchableOpacity
+                style={styles.pickPhotoActionBtn}
+                onPress={handlePickPhoto}
+                activeOpacity={0.8}
+              >
+                <CameraIcon size={16} color={tokens.color.successStrong} />
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.pickPhotoActionText}
+                >
+                  {editPhotoUrl ? "Fotoğrafı Değiştir" : "+ Fotoğraf Seç / Ekle"}
+                </Text>
               </TouchableOpacity>
             </View>
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  Ziyaret Saati
+                </Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editTime}
+                  onChangeText={setEditTime}
+                  placeholder="10:30"
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  Süre
+                </Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editDuration}
+                  onChangeText={setEditDuration}
+                  placeholder="45 dk"
+                />
+              </View>
+            </View>
+
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Bütçe / Giriş Ücreti
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              value={editBudget}
+              onChangeText={setEditBudget}
+              placeholder="Örn: 350 ₺ veya Ücretsiz"
+            />
+
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Gezgin Notu & İpucu
+            </Text>
+            <TextInput
+              style={[styles.modalInput, { height: 60, textAlignVertical: "top" }]}
+              value={editNotes}
+              onChangeText={setEditNotes}
+              placeholder="Ziyaret için faydalı ipucu..."
+              multiline
+            />
+          </ScrollView>
+
+          <View style={styles.modalActionsRow}>
+            <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setEditingStop(null)}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalCancelText}
+              >
+                Vazgeç
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleSaveStopEdit}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalConfirmText}
+              >
+                Kaydet
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ModalFrame>
+        </View>
+      </ModalFrame>
 
       {/* Add New Stop Modal */}
       <ModalFrame
@@ -1405,90 +1741,115 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         onRequestClose={() => setShowAddStopModal(false)}
         style={styles.modalOverlay}
       >
-          <View style={styles.modalContent}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Rotaya Durak Ekle</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
-              Yeni bir mekan, restoran veya tarihi nokta belirleyin
+        <View style={styles.modalContent}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>
+            Rotaya Durak Ekle
+          </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
+            Yeni bir mekan, restoran veya tarihi nokta belirleyin
+          </Text>
+
+          <ScrollView style={{ maxHeight: 320, marginVertical: 8 }}>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Durak / Mekan Adı
             </Text>
+            <TextInput
+              style={styles.modalInput}
+              value={addName}
+              onChangeText={setAddName}
+              placeholder="Örn: Pierre Loti Tepesi"
+            />
 
-            <ScrollView style={{ maxHeight: 320, marginVertical: 8 }}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Durak / Mekan Adı</Text>
-              <TextInput
-                style={styles.modalInput}
-                value={addName}
-                onChangeText={setAddName}
-                placeholder="Örn: Pierre Loti Tepesi"
-              />
-
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Kategori</Text>
-              <View style={styles.catChipsRow}>
-                {CATEGORIES.map((cat) => (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[styles.catChip, addCategory === cat && styles.catChipActive]}
-                    onPress={() => setAddCategory(cat)}
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Kategori
+            </Text>
+            <View style={styles.catChipsRow}>
+              {CATEGORIES.map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[styles.catChip, addCategory === cat && styles.catChipActive]}
+                  onPress={() => setAddCategory(cat)}
+                >
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                    style={[styles.catChipText, addCategory === cat && styles.catChipTextActive]}
                   >
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.compact}
-                      style={[styles.catChipText, addCategory === cat && styles.catChipTextActive]}
-                    >
-                      {cat}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Adres / Bölge</Text>
-              <TextInput
-                style={styles.modalInput}
-                value={addAddress}
-                onChangeText={setAddAddress}
-                placeholder="Örn: Eyüp, İstanbul"
-              />
-
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Tahmini Süre</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    value={addDuration}
-                    onChangeText={setAddDuration}
-                    placeholder="45 dk"
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Giriş / Bütçe</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    value={addBudget}
-                    onChangeText={setAddBudget}
-                    placeholder="Örn: Ücretsiz"
-                  />
-                </View>
-              </View>
-
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>Gezgin Notu</Text>
-              <TextInput
-                style={[styles.modalInput, { height: 50, textAlignVertical: "top" }]}
-                value={addNotes}
-                onChangeText={setAddNotes}
-                placeholder="Örn: Teleferik ile çıkış tavsiye edilir."
-                multiline
-              />
-            </ScrollView>
-
-            <View style={styles.modalActionsRow}>
-              <TouchableOpacity
-                style={styles.modalCancelBtn}
-                onPress={() => setShowAddStopModal(false)}
-              >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Vazgeç</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleSaveNewStop}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalConfirmText}>Ekle</Text>
-              </TouchableOpacity>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
+
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Adres / Bölge
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              value={addAddress}
+              onChangeText={setAddAddress}
+              placeholder="Örn: Eyüp, İstanbul"
+            />
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  Tahmini Süre
+                </Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={addDuration}
+                  onChangeText={setAddDuration}
+                  placeholder="45 dk"
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+                  Giriş / Bütçe
+                </Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={addBudget}
+                  onChangeText={setAddBudget}
+                  placeholder="Örn: Ücretsiz"
+                />
+              </View>
+            </View>
+
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
+              Gezgin Notu
+            </Text>
+            <TextInput
+              style={[styles.modalInput, { height: 50, textAlignVertical: "top" }]}
+              value={addNotes}
+              onChangeText={setAddNotes}
+              placeholder="Örn: Teleferik ile çıkış tavsiye edilir."
+              multiline
+            />
+          </ScrollView>
+
+          <View style={styles.modalActionsRow}>
+            <TouchableOpacity
+              style={styles.modalCancelBtn}
+              onPress={() => setShowAddStopModal(false)}
+            >
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalCancelText}
+              >
+                Vazgeç
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleSaveNewStop}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalConfirmText}
+              >
+                Ekle
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ModalFrame>
+        </View>
+      </ModalFrame>
 
       {/* New Trip Modal */}
       <ModalFrame
@@ -1498,38 +1859,49 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
         onRequestClose={() => setShowNewTripModal(false)}
         style={styles.modalOverlay}
       >
-          <View style={styles.modalContent}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>Yeni Gezi Planı Oluştur</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>Şehir veya seyahat başlığı belirleyin</Text>
+        <View style={styles.modalContent}>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalTitle}>
+            Yeni Gezi Planı Oluştur
+          </Text>
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalSub}>
+            Şehir veya seyahat başlığı belirleyin
+          </Text>
 
-            <TextInput
-              placeholder="Örn: Roma Rönesans Keşfi"
-              placeholderTextColor={tokens.color.textSubtle}
-              style={styles.modalInput}
-              value={newTripTitle}
-              onChangeText={setNewTripTitle}
-            />
+          <TextInput
+            placeholder="Örn: Roma Rönesans Keşfi"
+            placeholderTextColor={tokens.color.textSubtle}
+            style={styles.modalInput}
+            value={newTripTitle}
+            onChangeText={setNewTripTitle}
+          />
 
-            <View style={styles.modalActionsRow}>
-              <TouchableOpacity
-                style={styles.modalCancelBtn}
-                onPress={() => setShowNewTripModal(false)}
+          <View style={styles.modalActionsRow}>
+            <TouchableOpacity
+              style={styles.modalCancelBtn}
+              onPress={() => setShowNewTripModal(false)}
+            >
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalCancelText}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCancelText}>Vazgeç</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleCreateNewTrip}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalConfirmText}>Oluştur</Text>
-              </TouchableOpacity>
-            </View>
+                Vazgeç
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleCreateNewTrip}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalConfirmText}
+              >
+                Oluştur
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ModalFrame>
+        </View>
+      </ModalFrame>
       <ScreenTourModal screen="plan" />
 
       {/* Paywall Modal — opened by template gate and other Pro features */}
-      <PaywallModal
-        visible={showPaywall}
-        onClose={() => setShowPaywall(false)}
-      />
+      <PaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
     </Screen>
   );
 }

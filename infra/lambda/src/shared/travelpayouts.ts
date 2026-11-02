@@ -14,9 +14,8 @@ async function getApiToken(): Promise<string> {
 
   if (raw.startsWith("secret://")) {
     const secretId = "/" + raw.slice("secret:/".length);
-    const { SecretsManagerClient, GetSecretValueCommand } = await import(
-      "@aws-sdk/client-secrets-manager"
-    );
+    const { SecretsManagerClient, GetSecretValueCommand } =
+      await import("@aws-sdk/client-secrets-manager");
     const sm = new SecretsManagerClient({ region: process.env.AWS_REGION || "eu-central-1" });
     const res = await sm.send(new GetSecretValueCommand({ SecretId: secretId }));
     sm.destroy();
@@ -87,7 +86,10 @@ export async function getCheapestFlights(params: {
     duration: number;
     link: string;
   }
-  const data = (await res.json()) as { success: boolean; data: Record<string, Record<string, RawFlightItem>> };
+  const data = (await res.json()) as {
+    success: boolean;
+    data: Record<string, Record<string, RawFlightItem>>;
+  };
   if (!data.success || !data.data) return [];
 
   return Object.values(data.data)

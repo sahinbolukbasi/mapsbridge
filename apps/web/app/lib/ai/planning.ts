@@ -107,7 +107,7 @@ export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
   const constraints = cleanList(value?.constraints, 180, 8);
   const paceVal = typeof value?.pace === "string" ? value.pace : "";
   const pace = (["relaxed", "moderate", "fast"].includes(paceVal) ? paceVal : undefined) as
-    | "relaxed" | "moderate" | "fast" | undefined;
+    "relaxed" | "moderate" | "fast" | undefined;
   const validLodgings = ["hotel", "hostel", "apartment", "boutique", "resort"];
   const lodging_type = Array.isArray(value?.lodging_type)
     ? ((value.lodging_type as unknown[]).filter(
@@ -124,7 +124,9 @@ export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
             ...(typeof rec(value.dates).start === "string"
               ? { start: (rec(value.dates).start as string).slice(0, 10) }
               : {}),
-            ...(typeof rec(value.dates).end === "string" ? { end: (rec(value.dates).end as string).slice(0, 10) } : {}),
+            ...(typeof rec(value.dates).end === "string"
+              ? { end: (rec(value.dates).end as string).slice(0, 10) }
+              : {}),
             flexible: rec(value.dates).flexible === true,
           },
         }
@@ -132,10 +134,12 @@ export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
     ...(value?.travelers && typeof value.travelers === "object"
       ? {
           travelers: {
-            ...(Number.isInteger(num(rec(value.travelers).adults)) && num(rec(value.travelers).adults) > 0
+            ...(Number.isInteger(num(rec(value.travelers).adults)) &&
+            num(rec(value.travelers).adults) > 0
               ? { adults: Math.min(20, num(rec(value.travelers).adults)) }
               : {}),
-            ...(Number.isInteger(num(rec(value.travelers).children)) && num(rec(value.travelers).children) >= 0
+            ...(Number.isInteger(num(rec(value.travelers).children)) &&
+            num(rec(value.travelers).children) >= 0
               ? { children: Math.min(20, num(rec(value.travelers).children)) }
               : {}),
             pets: rec(value.travelers).pets === true,
@@ -148,7 +152,8 @@ export function cleanTripProfile(value: Record<string, unknown>): TripProfile {
             ...(typeof rec(value.budget).currency === "string"
               ? { currency: (rec(value.budget).currency as string).slice(0, 10) }
               : {}),
-            ...(typeof rec(value.budget).total === "number" && (rec(value.budget).total as number) >= 0
+            ...(typeof rec(value.budget).total === "number" &&
+            (rec(value.budget).total as number) >= 0
               ? { total: rec(value.budget).total as number }
               : {}),
             level: (["budget", "mid", "luxury", "unspecified"].includes(
@@ -504,7 +509,11 @@ export function cleanContext(value: Record<string, unknown>): TripContext {
     planningRequested: value?.planningRequested === true,
   };
 }
-export function mergeContext(previous: TripContext, decision: Record<string, unknown>, userText: string): TripContext {
+export function mergeContext(
+  previous: TripContext,
+  decision: Record<string, unknown>,
+  userText: string,
+): TripContext {
   const next = cleanContext(
     decision.context && typeof decision.context === "object"
       ? (decision.context as Record<string, unknown>)

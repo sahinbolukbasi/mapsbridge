@@ -32,9 +32,7 @@ type EventMaybeVerified = ApiGatewayEvent & {
  *   const userId = await resolveUserId(event);
  *   if (!userId) return unauthorized();
  */
-export async function resolveUserId(
-  event: ApiGatewayEvent,
-): Promise<string | null> {
+export async function resolveUserId(event: ApiGatewayEvent): Promise<string | null> {
   const token = extractBearerToken(event);
   if (!token) return null;
   const cached = (event as EventMaybeVerified).verifiedUser?.sub;

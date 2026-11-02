@@ -94,6 +94,10 @@ export async function restorePurchases(): Promise<{
     const pro = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
     return { success: true, isPro: pro, customerInfo };
   } catch (err: unknown) {
-    return { success: false, isPro: false, error: err instanceof Error ? err.message : "Geri yükleme başarısız." };
+    return {
+      success: false,
+      isPro: false,
+      error: err instanceof Error ? err.message : "Geri yükleme başarısız.",
+    };
   }
 }

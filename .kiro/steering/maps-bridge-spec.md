@@ -22,20 +22,20 @@ gelir için asla feda edilmez.
 Bir değişiklik bunlardan birini bozuyorsa, başka metriği ne kadar iyileştirirse
 iyileştirsin REDDEDİLİR.
 
-| ID | Invariant |
-|----|-----------|
-| **I1** | LLM asla yer, fiyat, açılış saati, adres veya koordinat uydurmaz. Tüm olgusal veri datastore veya API'den gelir. LLM'in tek işi niyet çıkarımı ve anlatımdır. |
-| **I2** | Rota geometrisi ve zamanlama deterministik koddur, LLM çıktısı değil. Clustering, TSP ve temporal fitting algoritmalardır. |
-| **I3** | Konuşma turu başına en fazla 2 soru. Her biri rotayı maddi olarak değiştirmeli. Her biri 2-4 dokunulabilir seçenek sunmalı. |
-| **I4** | Fetch edilebilecek (hava, vize, etkinlik, açılış saati) veya davranıştan çıkarılabilecek şey asla sorulmaz. |
-| **I5** | İlgi alanları demografiden (yaş, cinsiyet, milliyet, aile durumu, grup tipi) ASLA çıkarılmaz. Yalnızca kullanıcının söylediği/yaptığından. |
-| **I6** | Session verisi profile verisini geçersiz kılar ama ASLA mutasyona uğratmaz. Profil yalnızca bir davranış ≥3 session tekrarlayınca değişir. |
-| **I7** | Seyahat-içi yanıtlar ≤2s p95. Bu bütçeyi karşılayamayan iş talep anında değil, önceden hesaplanır. |
-| **I8** | Affiliate linkler sıralamayı asla etkilemez. Para kazanma yüzeyleri ayrı bir sekmede yaşar, asla rota önerileri içinde değil. |
-| **I9** | Rotadaki her gün ≥%20 programsız tampon zaman ayırır. |
-| **I10** | Koşullu UI: bu geziye uygulanmayan kart render edilmez. Vizesiz destinasyona vize kartı yok, metro-şehrine araç kiralama yok. |
-| **I11** | Kullanıcının dili tüm insan-okunur çıktıda eşleştirilir. Varsayılan Türkçe, kullanıcıyı takip et. |
-| **I12** | Rota çevrimdışı kullanılabilir olmalı: rota, duraklar, koordinatlar ve temel yön tarifleri cihazda cache'lenir. |
+| ID      | Invariant                                                                                                                                                     |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **I1**  | LLM asla yer, fiyat, açılış saati, adres veya koordinat uydurmaz. Tüm olgusal veri datastore veya API'den gelir. LLM'in tek işi niyet çıkarımı ve anlatımdır. |
+| **I2**  | Rota geometrisi ve zamanlama deterministik koddur, LLM çıktısı değil. Clustering, TSP ve temporal fitting algoritmalardır.                                    |
+| **I3**  | Konuşma turu başına en fazla 2 soru. Her biri rotayı maddi olarak değiştirmeli. Her biri 2-4 dokunulabilir seçenek sunmalı.                                   |
+| **I4**  | Fetch edilebilecek (hava, vize, etkinlik, açılış saati) veya davranıştan çıkarılabilecek şey asla sorulmaz.                                                   |
+| **I5**  | İlgi alanları demografiden (yaş, cinsiyet, milliyet, aile durumu, grup tipi) ASLA çıkarılmaz. Yalnızca kullanıcının söylediği/yaptığından.                    |
+| **I6**  | Session verisi profile verisini geçersiz kılar ama ASLA mutasyona uğratmaz. Profil yalnızca bir davranış ≥3 session tekrarlayınca değişir.                    |
+| **I7**  | Seyahat-içi yanıtlar ≤2s p95. Bu bütçeyi karşılayamayan iş talep anında değil, önceden hesaplanır.                                                            |
+| **I8**  | Affiliate linkler sıralamayı asla etkilemez. Para kazanma yüzeyleri ayrı bir sekmede yaşar, asla rota önerileri içinde değil.                                 |
+| **I9**  | Rotadaki her gün ≥%20 programsız tampon zaman ayırır.                                                                                                         |
+| **I10** | Koşullu UI: bu geziye uygulanmayan kart render edilmez. Vizesiz destinasyona vize kartı yok, metro-şehrine araç kiralama yok.                                 |
+| **I11** | Kullanıcının dili tüm insan-okunur çıktıda eşleştirilir. Varsayılan Türkçe, kullanıcıyı takip et.                                                             |
+| **I12** | Rota çevrimdışı kullanılabilir olmalı: rota, duraklar, koordinatlar ve temel yön tarifleri cihazda cache'lenir.                                               |
 
 ## Stage mimarisi ve model yönlendirme
 

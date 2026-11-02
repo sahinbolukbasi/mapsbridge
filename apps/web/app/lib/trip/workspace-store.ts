@@ -87,7 +87,9 @@ export function parseWorkspace(raw: string | null): WorkspaceData {
     tripIds.add(t.id);
     if (
       new Set(t.days.map((d: { dayIndex: unknown }) => d.dayIndex)).size !== t.days.length ||
-      t.days.some((d: { dayIndex: unknown }) => !Number.isInteger(d.dayIndex) || (d.dayIndex as number) < 1)
+      t.days.some(
+        (d: { dayIndex: unknown }) => !Number.isInteger(d.dayIndex) || (d.dayIndex as number) < 1,
+      )
     )
       throw new Error("Gezi günleri geçersiz.");
   }

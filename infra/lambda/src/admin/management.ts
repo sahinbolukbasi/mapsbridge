@@ -37,7 +37,13 @@ import {
   AdminUserGlobalSignOutCommand,
   AdminDeleteUserAttributesCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
-import { ok, created, jsonResponse as _jsonResponse, parseBody, type ApiGatewayEvent } from "../shared/http";
+import {
+  ok,
+  created,
+  jsonResponse as _jsonResponse,
+  parseBody,
+  type ApiGatewayEvent,
+} from "../shared/http";
 import type { AuthorizedEvent } from "../shared/types";
 import { permissions, type StaffRole } from "./permissions";
 
@@ -269,7 +275,8 @@ async function account(id: string) {
       groups: await groupsFor(result.Username!),
     };
   } catch (error: unknown) {
-    if ((error as { name?: string }).name === "UserNotFoundException") throw new AdminError(404, "Kullanıcı bulunamadı.");
+    if ((error as { name?: string }).name === "UserNotFoundException")
+      throw new AdminError(404, "Kullanıcı bulunamadı.");
     throw error;
   }
 }

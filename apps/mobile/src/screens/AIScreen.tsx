@@ -134,7 +134,8 @@ function ThinkingBubble({ status }: { status: string }) {
         <Animated.View style={dotStyle(dot2)} />
         <Animated.View style={dotStyle(dot3)} />
       </View>
-      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+      <Text
+        maxFontSizeMultiplier={tokens.font.maxScale.body}
         style={{ color: tokens.color.textSubtle, fontSize: 12, fontStyle: "italic", flex: 1 }}
         numberOfLines={1}
       >
@@ -262,25 +263,43 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
           const activeConvId = latest.latestConversationId || latest.conversationId;
           if (activeConvId) setConversationId(activeConvId);
 
-          const syncedMessages: ChatMessageItem[] = (conv.messages ?? []).map((m: { role: string; content: string }, idx: number) => ({
-            id: `sync-${idx}`,
-            sender: m.role === "user" ? "user" : "bot",
-            text: m.content,
-            time: "Senkronize",
-          }));
+          const syncedMessages: ChatMessageItem[] = (conv.messages ?? []).map(
+            (m: { role: string; content: string }, idx: number) => ({
+              id: `sync-${idx}`,
+              sender: m.role === "user" ? "user" : "bot",
+              text: m.content,
+              time: "Senkronize",
+            }),
+          );
 
           if (conv.route && (conv.route.stops?.length ?? 0) > 0) {
             const r = conv.route;
-            const botStops: TripStop[] = (r.stops ?? []).map((s: { id?: string; name: string; category?: string; day?: number; timeSlot?: string; suggestedDuration?: string; duration?: string; address?: string; lat?: number; lng?: number }, idx: number) => ({
-              id: s.id || `stop-${idx}`,
-              name: s.name,
-              category: s.category || "TARİHİ YER",
-              time: `${s.day || 1}. gün · ${s.timeSlot || "Sıra " + (idx + 1)}`,
-              duration: s.suggestedDuration || s.duration || "Süre belirtilmedi",
-              address: s.address || "",
-              lat: s.lat ?? 0,
-              lng: s.lng ?? 0,
-            }));
+            const botStops: TripStop[] = (r.stops ?? []).map(
+              (
+                s: {
+                  id?: string;
+                  name: string;
+                  category?: string;
+                  day?: number;
+                  timeSlot?: string;
+                  suggestedDuration?: string;
+                  duration?: string;
+                  address?: string;
+                  lat?: number;
+                  lng?: number;
+                },
+                idx: number,
+              ) => ({
+                id: s.id || `stop-${idx}`,
+                name: s.name,
+                category: s.category || "TARİHİ YER",
+                time: `${s.day || 1}. gün · ${s.timeSlot || "Sıra " + (idx + 1)}`,
+                duration: s.suggestedDuration || s.duration || "Süre belirtilmedi",
+                address: s.address || "",
+                lat: s.lat ?? 0,
+                lng: s.lng ?? 0,
+              }),
+            );
 
             const lastBot = syncedMessages.filter((m) => m.sender === "bot").pop();
             if (lastBot) {
@@ -750,15 +769,24 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
             onPress={() => setShowHistoryModal(true)}
             activeOpacity={0.7}
           >
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyDrawerIcon}>☰</Text>
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.historyDrawerIcon}
+            >
+              ☰
+            </Text>
           </TouchableOpacity>
 
           <View style={styles.aiAvatarWrap}>
             <RobotIcon size={20} color={tokens.color.successStrong} />
           </View>
           <View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.aiName}>MapsBridge AI</Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.aiMinimalSub}>Seyahat Asistanı</Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.aiName}>
+              MapsBridge AI
+            </Text>
+            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.aiMinimalSub}>
+              Seyahat Asistanı
+            </Text>
           </View>
         </View>
 
@@ -768,7 +796,12 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
           onPress={handleNewChat}
           activeOpacity={0.7}
         >
-          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.newChatHeaderBtnText}>+ Yeni Sohbet</Text>
+          <Text
+            maxFontSizeMultiplier={tokens.font.maxScale.body}
+            style={styles.newChatHeaderBtnText}
+          >
+            + Yeni Sohbet
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -790,11 +823,23 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               return (
                 <View key={msg.id} style={styles.userMsgWrapper}>
                   <View style={styles.userBubble}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userText}>{msg.text}</Text>
+                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.userText}>
+                      {msg.text}
+                    </Text>
                   </View>
                   <View style={styles.metaTimeRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.metaTimeText}>{msg.time}</Text>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 11, color: tokens.color.accent }}>✓✓</Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.metaTimeText}
+                    >
+                      {msg.time}
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={{ fontSize: 11, color: tokens.color.accent }}
+                    >
+                      ✓✓
+                    </Text>
                   </View>
                 </View>
               );
@@ -807,20 +852,37 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                   <View style={styles.sparkleWrap}>
                     <SparkIcon size={12} color={tokens.color.accent} />
                   </View>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botLabel}>MAPSBRIDGE ATELIER BOT</Text>
+                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botLabel}>
+                    MAPSBRIDGE ATELIER BOT
+                  </Text>
                 </View>
 
                 {/* Bot Content Box */}
                 <View style={styles.botCard}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botIntroText}>{msg.text}</Text>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.botIntroText}
+                  >
+                    {msg.text}
+                  </Text>
 
                   {/* Route Plan Structured Details */}
                   {msg.routePlan && (
                     <View style={styles.routeStructureBox}>
                       <View style={styles.routeStructureHead}>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeStructureTitle}>{msg.routePlan.dayTitle}</Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.routeStructureTitle}
+                        >
+                          {msg.routePlan.dayTitle}
+                        </Text>
                         <View style={styles.zigzagBadge}>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.zigzagBadgeText}>ZİKZAKSIZ</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                            style={styles.zigzagBadgeText}
+                          >
+                            ZİKZAKSIZ
+                          </Text>
                         </View>
                       </View>
 
@@ -831,17 +893,30 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                             <View style={styles.seqItemRow}>
                               <View style={styles.seqBullet} />
                               <View style={{ flex: 1 }}>
-                                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.seqTimeTitle}>
+                                <Text
+                                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                                  style={styles.seqTimeTitle}
+                                >
                                   {st.time} • {st.name}
                                 </Text>
-                                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.seqDesc}>{st.desc}</Text>
+                                <Text
+                                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                                  style={styles.seqDesc}
+                                >
+                                  {st.desc}
+                                </Text>
                               </View>
                             </View>
 
                             {st.walk ? (
                               <View style={styles.seqWalkRow}>
                                 <WalkIcon size={12} color={tokens.color.successStrong} />
-                                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.seqWalkText}>{st.walk}</Text>
+                                <Text
+                                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                                  style={styles.seqWalkText}
+                                >
+                                  {st.walk}
+                                </Text>
                               </View>
                             ) : null}
                           </View>
@@ -850,8 +925,18 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
 
                       {/* Distance & Time summary ribbon */}
                       <View style={styles.statsRibbon}>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.ribbonItem}>Mesafe: {msg.routePlan.totalKm}</Text>
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.ribbonItem}>Yürüme: {msg.routePlan.totalWalkTime}</Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.ribbonItem}
+                        >
+                          Mesafe: {msg.routePlan.totalKm}
+                        </Text>
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
+                          style={styles.ribbonItem}
+                        >
+                          Yürüme: {msg.routePlan.totalWalkTime}
+                        </Text>
                       </View>
                     </View>
                   )}
@@ -866,11 +951,24 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                           resizeMode="cover"
                         />
                         <View style={styles.previewBadge}>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.previewBadgeText}>CANLI ROTA ÖNİZLEMESİ</Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                            style={styles.previewBadgeText}
+                          >
+                            CANLI ROTA ÖNİZLEMESİ
+                          </Text>
                         </View>
                         <View style={styles.previewOverlayText}>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.previewTitle}>{msg.routePlan.title}</Text>
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.previewSub}>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.previewTitle}
+                          >
+                            {msg.routePlan.title}
+                          </Text>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={styles.previewSub}
+                          >
                             {msg.routePlan.stops.length} optimize durak • 0 zikzak
                           </Text>
                         </View>
@@ -881,9 +979,18 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         {msg.routePlan.stopPills.map((pill, pIdx) => (
                           <View key={pIdx} style={styles.previewPill}>
                             <View style={styles.pNumCircle}>
-                              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pNumText}>{pIdx + 1}</Text>
+                              <Text
+                                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                                style={styles.pNumText}
+                              >
+                                {pIdx + 1}
+                              </Text>
                             </View>
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.pText} numberOfLines={1}>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.pText}
+                              numberOfLines={1}
+                            >
                               {pill}
                             </Text>
                           </View>
@@ -906,7 +1013,12 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                             }}
                           >
                             <DirectionsIcon size={14} color={tokens.color.textBrand} />
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.openMapText}>Haritada Aç & Düzenle</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.openMapText}
+                            >
+                              Haritada Aç & Düzenle
+                            </Text>
                           </View>
                         </TouchableOpacity>
 
@@ -924,7 +1036,12 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                             }}
                           >
                             <BookmarkIcon size={14} color={tokens.color.successStrong} />
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.savePlanText}>Seyahat Masama Kaydet</Text>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={styles.savePlanText}
+                            >
+                              Seyahat Masama Kaydet
+                            </Text>
                           </View>
                         </TouchableOpacity>
                       </View>
@@ -954,12 +1071,20 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                             }}
                           >
                             <SparkIcon size={14} color={tokens.color.accent} />
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.neutral200, fontWeight: "700", fontSize: 13 }}>
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
+                              style={{
+                                color: tokens.color.neutral200,
+                                fontWeight: "700",
+                                fontSize: 13,
+                              }}
+                            >
                               {card.title}
                             </Text>
                           </View>
                           {card.bullets.map((b, bIdx) => (
-                            <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            <Text
+                              maxFontSizeMultiplier={tokens.font.maxScale.body}
                               key={bIdx}
                               style={{
                                 color: tokens.color.neutral400,
@@ -988,7 +1113,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         padding: 10,
                       }}
                     >
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={{
                           color: tokens.color.warningIcon,
                           fontSize: 12,
@@ -999,9 +1125,15 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         ⚠ Plan Uyarıları
                       </Text>
                       {msg.feasibilityWarnings.map((w, wIdx) => (
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
                           key={wIdx}
-                          style={{ color: tokens.color.warningBorder, fontSize: 11, lineHeight: 16, marginTop: 2 }}
+                          style={{
+                            color: tokens.color.warningBorder,
+                            fontSize: 11,
+                            lineHeight: 16,
+                            marginTop: 2,
+                          }}
                         >
                           • {w}
                         </Text>
@@ -1021,7 +1153,8 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         padding: 10,
                       }}
                     >
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
                         style={{
                           color: tokens.dataPalette.indigo,
                           fontSize: 11,
@@ -1032,9 +1165,15 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                         ℹ Varsayımlar
                       </Text>
                       {msg.assumptions.map((a, aIdx) => (
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        <Text
+                          maxFontSizeMultiplier={tokens.font.maxScale.body}
                           key={aIdx}
-                          style={{ color: tokens.color.infoBorder, fontSize: 11, lineHeight: 16, marginTop: 2 }}
+                          style={{
+                            color: tokens.color.infoBorder,
+                            fontSize: 11,
+                            lineHeight: 16,
+                            marginTop: 2,
+                          }}
                         >
                           • {a}
                         </Text>
@@ -1059,7 +1198,10 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                           onPress={() => handleSendPrompt(opt.prompt)}
                           activeOpacity={0.7}
                         >
-                          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ color: tokens.color.accent, fontSize: 12, fontWeight: "600" }}>
+                          <Text
+                            maxFontSizeMultiplier={tokens.font.maxScale.body}
+                            style={{ color: tokens.color.accent, fontSize: 12, fontWeight: "600" }}
+                          >
                             {opt.label}
                           </Text>
                         </TouchableOpacity>
@@ -1069,7 +1211,10 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
 
                   {/* Feedback / Meta */}
                   <View style={styles.botFooterRow}>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.engineVersion}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.engineVersion}
+                    >
                       AWS Bedrock & Agent Core • MapsBridge Engine v2.4
                     </Text>
                   </View>
@@ -1084,7 +1229,9 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
                 <View style={styles.sparkleWrap}>
                   <SparkIcon size={12} color={tokens.color.accent} />
                 </View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botLabel}>MAPSBRIDGE ATELIER BOT</Text>
+                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.botLabel}>
+                  MAPSBRIDGE ATELIER BOT
+                </Text>
               </View>
               <View style={[styles.botCard, { paddingVertical: 14 }]}>
                 <ThinkingBubble status={THINKING_STEPS[thinkingStepIndex]} />
@@ -1128,7 +1275,9 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               onPress={() => handleSendPrompt(inputText)}
               activeOpacity={0.8}
             >
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sendBtnText}>➔</Text>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sendBtnText}>
+                ➔
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1142,142 +1291,229 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
         onRequestClose={() => setShowRouteLoaderModal(false)}
         style={styles.routeLoaderBackdrop}
       >
-          <View style={styles.routeLoaderCard}>
-            <View style={styles.routeLoaderHeader}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <DirectionsIcon size={16} color={tokens.color.textBrand} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeLoaderTitle}>Rotamı Düzenle</Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowRouteLoaderModal(false)} activeOpacity={0.7}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeLoaderClose}>✕</Text>
-              </TouchableOpacity>
+        <View style={styles.routeLoaderCard}>
+          <View style={styles.routeLoaderHeader}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <DirectionsIcon size={16} color={tokens.color.textBrand} />
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.routeLoaderTitle}
+              >
+                Rotamı Düzenle
+              </Text>
             </View>
-
-            {loadedRouteDetails && (
-              <ScrollView style={styles.routeLoaderContent}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeLoaderRouteTitle}>{loadedRouteDetails.title}</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.routeLoaderStopCount}>
-                  {loadedRouteDetails.stops.length} durak
-                </Text>
-
-                {/* Add Details Buttons */}
-                <View style={styles.routeDetailButtons}>
-                  <TouchableOpacity
-                    style={styles.routeDetailBtn}
-                    onPress={() => handleAddRouteDetail("flight")}
-                  >
-                    <DirectionsIcon size={18} color={tokens.color.successStrong} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeDetailBtnText}>Uçak</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.routeDetailBtn}
-                    onPress={() => handleAddRouteDetail("transport")}
-                  >
-                    <CarIcon size={18} color={tokens.color.successStrong} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeDetailBtnText}>Ulaşım</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.routeDetailBtn}
-                    onPress={() => handleAddRouteDetail("hotel")}
-                  >
-                    <HotelIcon size={18} color={tokens.color.successStrong} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeDetailBtnText}>Otel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.routeDetailBtn}
-                    onPress={() => handleAddRouteDetail("meals")}
-                  >
-                    <FoodIcon size={18} color={tokens.color.successStrong} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.routeDetailBtnText}>Yemek</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Added Details Display */}
-                {loadedRouteDetails.flight && (
-                  <View style={styles.addedDetailItem}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <DirectionsIcon size={12} color={tokens.color.successStrong} />
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailLabel}>Uçak</Text>
-                    </View>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailValue}>{loadedRouteDetails.flight}</Text>
-                  </View>
-                )}
-                {loadedRouteDetails.transport && (
-                  <View style={styles.addedDetailItem}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <CarIcon size={12} color={tokens.color.successStrong} />
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailLabel}>Ulaşım</Text>
-                    </View>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailValue}>{loadedRouteDetails.transport}</Text>
-                  </View>
-                )}
-                {loadedRouteDetails.hotel && (
-                  <View style={styles.addedDetailItem}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <HotelIcon size={12} color={tokens.color.successStrong} />
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailLabel}>Otel</Text>
-                    </View>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailValue}>{loadedRouteDetails.hotel}</Text>
-                  </View>
-                )}
-                {loadedRouteDetails.meals && loadedRouteDetails.meals.length > 0 && (
-                  <View style={styles.addedDetailItem}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <FoodIcon size={12} color={tokens.color.successStrong} />
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.addedDetailLabel}>Yemekler</Text>
-                    </View>
-                    {loadedRouteDetails.meals.map((meal, idx) => (
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} key={idx} style={styles.addedDetailValue}>
-                        • {meal}
-                      </Text>
-                    ))}
-                  </View>
-                )}
-
-                {/* Optimize Button */}
-                <TouchableOpacity
-                  style={styles.optimizeRouteBtn}
-                  onPress={handleOptimizeLoadedRoute}
-                  activeOpacity={0.8}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <SparkIcon size={16} color={tokens.color.onPrimary} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.optimizeRouteBtnText}>Rotayı Optimize Et</Text>
-                  </View>
-                </TouchableOpacity>
-
-                {/* Open on Map Button */}
-                <TouchableOpacity
-                  style={styles.openMapBtn}
-                  onPress={() => {
-                    setShowRouteLoaderModal(false);
-                    onOpenMap();
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <MapIcon size={16} color={tokens.color.textBrand} />
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.openMapText}>Haritada Gör</Text>
-                  </View>
-                </TouchableOpacity>
-              </ScrollView>
-            )}
+            <TouchableOpacity onPress={() => setShowRouteLoaderModal(false)} activeOpacity={0.7}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.routeLoaderClose}
+              >
+                ✕
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ModalFrame>
+
+          {loadedRouteDetails && (
+            <ScrollView style={styles.routeLoaderContent}>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.routeLoaderRouteTitle}
+              >
+                {loadedRouteDetails.title}
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+                style={styles.routeLoaderStopCount}
+              >
+                {loadedRouteDetails.stops.length} durak
+              </Text>
+
+              {/* Add Details Buttons */}
+              <View style={styles.routeDetailButtons}>
+                <TouchableOpacity
+                  style={styles.routeDetailBtn}
+                  onPress={() => handleAddRouteDetail("flight")}
+                >
+                  <DirectionsIcon size={18} color={tokens.color.successStrong} />
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.routeDetailBtnText}
+                  >
+                    Uçak
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.routeDetailBtn}
+                  onPress={() => handleAddRouteDetail("transport")}
+                >
+                  <CarIcon size={18} color={tokens.color.successStrong} />
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.routeDetailBtnText}
+                  >
+                    Ulaşım
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.routeDetailBtn}
+                  onPress={() => handleAddRouteDetail("hotel")}
+                >
+                  <HotelIcon size={18} color={tokens.color.successStrong} />
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.routeDetailBtnText}
+                  >
+                    Otel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.routeDetailBtn}
+                  onPress={() => handleAddRouteDetail("meals")}
+                >
+                  <FoodIcon size={18} color={tokens.color.successStrong} />
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.routeDetailBtnText}
+                  >
+                    Yemek
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Added Details Display */}
+              {loadedRouteDetails.flight && (
+                <View style={styles.addedDetailItem}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                    <DirectionsIcon size={12} color={tokens.color.successStrong} />
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.addedDetailLabel}
+                    >
+                      Uçak
+                    </Text>
+                  </View>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.addedDetailValue}
+                  >
+                    {loadedRouteDetails.flight}
+                  </Text>
+                </View>
+              )}
+              {loadedRouteDetails.transport && (
+                <View style={styles.addedDetailItem}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                    <CarIcon size={12} color={tokens.color.successStrong} />
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.addedDetailLabel}
+                    >
+                      Ulaşım
+                    </Text>
+                  </View>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.addedDetailValue}
+                  >
+                    {loadedRouteDetails.transport}
+                  </Text>
+                </View>
+              )}
+              {loadedRouteDetails.hotel && (
+                <View style={styles.addedDetailItem}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                    <HotelIcon size={12} color={tokens.color.successStrong} />
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.addedDetailLabel}
+                    >
+                      Otel
+                    </Text>
+                  </View>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.addedDetailValue}
+                  >
+                    {loadedRouteDetails.hotel}
+                  </Text>
+                </View>
+              )}
+              {loadedRouteDetails.meals && loadedRouteDetails.meals.length > 0 && (
+                <View style={styles.addedDetailItem}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                    <FoodIcon size={12} color={tokens.color.successStrong} />
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.addedDetailLabel}
+                    >
+                      Yemekler
+                    </Text>
+                  </View>
+                  {loadedRouteDetails.meals.map((meal, idx) => (
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      key={idx}
+                      style={styles.addedDetailValue}
+                    >
+                      • {meal}
+                    </Text>
+                  ))}
+                </View>
+              )}
+
+              {/* Optimize Button */}
+              <TouchableOpacity
+                style={styles.optimizeRouteBtn}
+                onPress={handleOptimizeLoadedRoute}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                  }}
+                >
+                  <SparkIcon size={16} color={tokens.color.onPrimary} />
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.optimizeRouteBtnText}
+                  >
+                    Rotayı Optimize Et
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* Open on Map Button */}
+              <TouchableOpacity
+                style={styles.openMapBtn}
+                onPress={() => {
+                  setShowRouteLoaderModal(false);
+                  onOpenMap();
+                }}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                  }}
+                >
+                  <MapIcon size={16} color={tokens.color.textBrand} />
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={styles.openMapText}
+                  >
+                    Haritada Gör
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </ScrollView>
+          )}
+        </View>
+      </ModalFrame>
 
       {/* Agents Modal */}
       <ModalFrame
@@ -1287,130 +1523,173 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
         onRequestClose={() => setShowAgentsModal(false)}
         style={styles.agentsBackdrop}
       >
-          <View style={styles.agentsCard}>
-            <View style={styles.agentsHeader}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <RobotIcon size={16} color={tokens.color.textBrand} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsTitle}>Seyahat Agentleri</Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowAgentsModal(false)} activeOpacity={0.7}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsClose}>✕</Text>
-              </TouchableOpacity>
+        <View style={styles.agentsCard}>
+          <View style={styles.agentsHeader}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <RobotIcon size={16} color={tokens.color.textBrand} />
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsTitle}>
+                Seyahat Agentleri
+              </Text>
             </View>
+            <TouchableOpacity onPress={() => setShowAgentsModal(false)} activeOpacity={0.7}>
+              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsClose}>
+                ✕
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-            <ScrollView style={styles.agentsContent}>
-              {/* Active Agents */}
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsSectionTitle}>Aktif Agentler</Text>
-              {agents
-                .filter((a) => a.isActive)
-                .map((agent) => (
-                  <TouchableOpacity
-                    key={agent.id}
-                    style={styles.agentCard}
-                    onPress={() => {
-                      setSelectedAgent(agent);
-                      // Show agent-specific actions
-                      Alert.alert(agent.title, agent.description, [
-                        { text: "Kapat", style: "cancel" },
-                        {
-                          text: "Devre Dışı Bırak",
-                          style: "destructive",
-                          onPress: () => {
-                            agentService.toggleAgent(agent.id);
-                            setAgents(agentService.getAgents());
-                          },
+          <ScrollView style={styles.agentsContent}>
+            {/* Active Agents */}
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.agentsSectionTitle}
+            >
+              Aktif Agentler
+            </Text>
+            {agents
+              .filter((a) => a.isActive)
+              .map((agent) => (
+                <TouchableOpacity
+                  key={agent.id}
+                  style={styles.agentCard}
+                  onPress={() => {
+                    setSelectedAgent(agent);
+                    // Show agent-specific actions
+                    Alert.alert(agent.title, agent.description, [
+                      { text: "Kapat", style: "cancel" },
+                      {
+                        text: "Devre Dışı Bırak",
+                        style: "destructive",
+                        onPress: () => {
+                          agentService.toggleAgent(agent.id);
+                          setAgents(agentService.getAgents());
                         },
-                      ]);
+                      },
+                    ]);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      backgroundColor: withAlpha(tokens.color.successStrong, 0.1),
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
-                    activeOpacity={0.8}
                   >
-                    <View
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 18,
-                        backgroundColor: withAlpha(tokens.color.successStrong, 0.1),
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                    <RobotIcon size={20} color={tokens.color.successStrong} />
+                  </View>
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.agentName}
                     >
-                      <RobotIcon size={20} color={tokens.color.successStrong} />
-                    </View>
-                    <View style={{ flex: 1, marginLeft: 12 }}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentName}>{agent.title}</Text>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentDesc}>{agent.description}</Text>
-                      {agent.reminders.length > 0 && (
-                        <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentReminders}>
-                          {agent.reminders.filter((r) => !r.completed).length} hatırlatma
-                        </Text>
+                      {agent.title}
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.agentDesc}
+                    >
+                      {agent.description}
+                    </Text>
+                    {agent.reminders.length > 0 && (
+                      <Text
+                        maxFontSizeMultiplier={tokens.font.maxScale.body}
+                        style={styles.agentReminders}
+                      >
+                        {agent.reminders.filter((r) => !r.completed).length} hatırlatma
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.agentStatusActive} />
+                </TouchableOpacity>
+              ))}
+
+            {/* Language Phrases Section */}
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 6, marginVertical: 10 }}
+            >
+              <TranslateIcon size={16} color={tokens.color.textBrand} />
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.agentsSectionTitle}
+              >
+                İngilizce Konuşma Yardımcısı
+              </Text>
+            </View>
+            <View style={styles.phrasesContainer}>
+              {["emergency", "transport", "accommodation", "restaurant", "general"].map(
+                (category) => (
+                  <TouchableOpacity
+                    key={category}
+                    style={styles.phraseCategoryBtn}
+                    onPress={() => {
+                      const categoryPhrases = agentService.getPhrasesByCategory(
+                        category as LanguagePhrase["category"],
+                      );
+                      Alert.alert(
+                        category.charAt(0).toUpperCase() + category.slice(1),
+                        categoryPhrases.map((p) => `${p.phrase}\n→ ${p.translation}`).join("\n\n"),
+                        [{ text: "Tamam" }],
+                      );
+                    }}
+                  >
+                    <View style={{ marginBottom: 4 }}>
+                      {category === "emergency" && (
+                        <AlertCircleIcon size={18} color={tokens.color.danger} />
+                      )}
+                      {category === "transport" && (
+                        <CarIcon size={18} color={tokens.color.successStrong} />
+                      )}
+                      {category === "accommodation" && (
+                        <HotelIcon size={18} color={tokens.color.accentSky} />
+                      )}
+                      {category === "restaurant" && (
+                        <FoodIcon size={18} color={tokens.color.warningStrong} />
+                      )}
+                      {category === "general" && (
+                        <TranslateIcon size={18} color={tokens.color.successStrong} />
                       )}
                     </View>
-                    <View style={styles.agentStatusActive} />
-                  </TouchableOpacity>
-                ))}
-
-              {/* Language Phrases Section */}
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 6, marginVertical: 10 }}
-              >
-                <TranslateIcon size={16} color={tokens.color.textBrand} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.agentsSectionTitle}>İngilizce Konuşma Yardımcısı</Text>
-              </View>
-              <View style={styles.phrasesContainer}>
-                {["emergency", "transport", "accommodation", "restaurant", "general"].map(
-                  (category) => (
-                    <TouchableOpacity
-                      key={category}
-                      style={styles.phraseCategoryBtn}
-                      onPress={() => {
-                        const categoryPhrases = agentService.getPhrasesByCategory(
-                          category as LanguagePhrase["category"],
-                        );
-                        Alert.alert(
-                          category.charAt(0).toUpperCase() + category.slice(1),
-                          categoryPhrases
-                            .map((p) => `${p.phrase}\n→ ${p.translation}`)
-                            .join("\n\n"),
-                          [{ text: "Tamam" }],
-                        );
-                      }}
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.phraseCategoryText}
                     >
-                      <View style={{ marginBottom: 4 }}>
-                        {category === "emergency" && <AlertCircleIcon size={18} color={tokens.color.danger} />}
-                        {category === "transport" && <CarIcon size={18} color={tokens.color.successStrong} />}
-                        {category === "accommodation" && <HotelIcon size={18} color={tokens.color.accentSky} />}
-                        {category === "restaurant" && <FoodIcon size={18} color={tokens.color.warningStrong} />}
-                        {category === "general" && <TranslateIcon size={18} color={tokens.color.successStrong} />}
-                      </View>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.phraseCategoryText}>
-                        {category === "emergency" && "Acil Durum"}
-                        {category === "transport" && "Ulaşım"}
-                        {category === "accommodation" && "Konaklama"}
-                        {category === "restaurant" && "Restoran"}
-                        {category === "general" && "Genel"}
-                      </Text>
-                    </TouchableOpacity>
-                  ),
-                )}
-              </View>
+                      {category === "emergency" && "Acil Durum"}
+                      {category === "transport" && "Ulaşım"}
+                      {category === "accommodation" && "Konaklama"}
+                      {category === "restaurant" && "Restoran"}
+                      {category === "general" && "Genel"}
+                    </Text>
+                  </TouchableOpacity>
+                ),
+              )}
+            </View>
 
-              {/* Emergency Contacts Quick Access */}
-              <TouchableOpacity
-                style={styles.emergencyQuickBtn}
-                onPress={() => {
-                  Alert.alert(
-                    "Acil Durum Numaraları",
-                    "Polis: 155\nAmbulans: 112\nİtfaiye: 110\nJandarma: 156",
-                    [{ text: "Tamam" }],
-                  );
-                }}
+            {/* Emergency Contacts Quick Access */}
+            <TouchableOpacity
+              style={styles.emergencyQuickBtn}
+              onPress={() => {
+                Alert.alert(
+                  "Acil Durum Numaraları",
+                  "Polis: 155\nAmbulans: 112\nİtfaiye: 110\nJandarma: 156",
+                  [{ text: "Tamam" }],
+                );
+              }}
+            >
+              <AlertCircleIcon size={18} color={tokens.color.danger} />
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.emergencyQuickText}
               >
-                <AlertCircleIcon size={18} color={tokens.color.danger} />
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emergencyQuickText}>Acil Durum Numaraları</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </ModalFrame>
+                Acil Durum Numaraları
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </ModalFrame>
 
       {/* Past Conversations History Modal (Burger Menü) */}
       <ModalFrame
@@ -1420,65 +1699,100 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
         onRequestClose={() => setShowHistoryModal(false)}
         style={styles.historyModalBackdrop}
       >
-          <View style={styles.historyModalCard}>
-            <View style={styles.historyModalHeader}>
-              <View>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyModalTitle}>Sohbet Geçmişi</Text>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyModalSub}>Önceki seyahat sohbetlerinize geri dönün</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.modalCloseCircle}
-                onPress={() => setShowHistoryModal(false)}
+        <View style={styles.historyModalCard}>
+          <View style={styles.historyModalHeader}>
+            <View>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.historyModalTitle}
               >
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.modalCloseCircleText}>✕</Text>
-              </TouchableOpacity>
+                Sohbet Geçmişi
+              </Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.historyModalSub}
+              >
+                Önceki seyahat sohbetlerinize geri dönün
+              </Text>
             </View>
-
             <TouchableOpacity
-              style={styles.historyNewChatBtn}
-              onPress={() => {
-                setShowHistoryModal(false);
-                handleNewChat();
-              }}
-              activeOpacity={0.8}
+              style={styles.modalCloseCircle}
+              onPress={() => setShowHistoryModal(false)}
             >
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyNewChatBtnText}>+ Sıfırdan Yeni Sohbet Başlat</Text>
+              <Text
+                maxFontSizeMultiplier={tokens.font.maxScale.body}
+                style={styles.modalCloseCircleText}
+              >
+                ✕
+              </Text>
             </TouchableOpacity>
-
-            <ScrollView style={{ maxHeight: 360, marginTop: 12 }}>
-              {pastConversations.length === 0 ? (
-                <View style={styles.emptyHistoryBox}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.emptyHistoryText}>
-                    Henüz kaydedilmiş önceki sohbet bulunmuyor.
-                  </Text>
-                </View>
-              ) : (
-                pastConversations.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={styles.historyItemRow}
-                    onPress={() => {
-                      setConversationId(item.id);
-                      setMessages(item.messages);
-                      setShowHistoryModal(false);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyItemTitle} numberOfLines={1}>
-                        {item.title}
-                      </Text>
-                      <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.historyItemDate}>
-                        {item.date} • {item.messages.length} mesaj
-                      </Text>
-                    </View>
-                    <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={{ fontSize: 16, color: tokens.color.successStrong, fontWeight: "800" }}>›</Text>
-                  </TouchableOpacity>
-                ))
-              )}
-            </ScrollView>
           </View>
-        </ModalFrame>
+
+          <TouchableOpacity
+            style={styles.historyNewChatBtn}
+            onPress={() => {
+              setShowHistoryModal(false);
+              handleNewChat();
+            }}
+            activeOpacity={0.8}
+          >
+            <Text
+              maxFontSizeMultiplier={tokens.font.maxScale.body}
+              style={styles.historyNewChatBtnText}
+            >
+              + Sıfırdan Yeni Sohbet Başlat
+            </Text>
+          </TouchableOpacity>
+
+          <ScrollView style={{ maxHeight: 360, marginTop: 12 }}>
+            {pastConversations.length === 0 ? (
+              <View style={styles.emptyHistoryBox}>
+                <Text
+                  maxFontSizeMultiplier={tokens.font.maxScale.body}
+                  style={styles.emptyHistoryText}
+                >
+                  Henüz kaydedilmiş önceki sohbet bulunmuyor.
+                </Text>
+              </View>
+            ) : (
+              pastConversations.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.historyItemRow}
+                  onPress={() => {
+                    setConversationId(item.id);
+                    setMessages(item.messages);
+                    setShowHistoryModal(false);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.historyItemTitle}
+                      numberOfLines={1}
+                    >
+                      {item.title}
+                    </Text>
+                    <Text
+                      maxFontSizeMultiplier={tokens.font.maxScale.body}
+                      style={styles.historyItemDate}
+                    >
+                      {item.date} • {item.messages.length} mesaj
+                    </Text>
+                  </View>
+                  <Text
+                    maxFontSizeMultiplier={tokens.font.maxScale.body}
+                    style={{ fontSize: 16, color: tokens.color.successStrong, fontWeight: "800" }}
+                  >
+                    ›
+                  </Text>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+        </View>
+      </ModalFrame>
 
       <ScreenTourModal screen="ai" />
     </Screen>

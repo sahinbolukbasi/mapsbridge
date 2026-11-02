@@ -36,3 +36,4 @@ __pycache__/
 # OS
 .DS_Store
 **/.DS_Store
+node_modules

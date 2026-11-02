@@ -26,8 +26,12 @@ function loadModule() {
   const store = {};
   const mockLocalStorage = {
     getItem: (k) => store[k] ?? null,
-    setItem: (k, v) => { store[k] = v; },
-    removeItem: (k) => { delete store[k]; },
+    setItem: (k, v) => {
+      store[k] = v;
+    },
+    removeItem: (k) => {
+      delete store[k];
+    },
     _store: store,
   };
   const mockSessionStorage = {
@@ -36,10 +40,18 @@ function loadModule() {
   };
 
   vm.runInNewContext(transformed, {
-    module: mod, exports: mod.exports,
+    module: mod,
+    exports: mod.exports,
     require,
-    process: { env: { NEXT_PUBLIC_COGNITO_REGION: "eu-central-1", NEXT_PUBLIC_COGNITO_CLIENT_ID: "test-client" } },
-    console, Buffer, JSON,
+    process: {
+      env: {
+        NEXT_PUBLIC_COGNITO_REGION: "eu-central-1",
+        NEXT_PUBLIC_COGNITO_CLIENT_ID: "test-client",
+      },
+    },
+    console,
+    Buffer,
+    JSON,
     window: {}, // truthy so migrateLegacyStorageKeys runs
     localStorage: mockLocalStorage,
     sessionStorage: mockSessionStorage,
@@ -105,14 +117,21 @@ test("migrateLegacyStorageKeys copies old keys to new keys", () => {
   const store = { "adreskopru.accessToken": "old-token-abc" };
   const mockLS = {
     getItem: (k) => store[k] ?? null,
-    setItem: (k, v) => { store[k] = v; },
-    removeItem: (k) => { delete store[k]; },
+    setItem: (k, v) => {
+      store[k] = v;
+    },
+    removeItem: (k) => {
+      delete store[k];
+    },
   };
   vm.runInNewContext(transformed, {
-    module: mod, exports: mod.exports,
+    module: mod,
+    exports: mod.exports,
     require,
     process: { env: {} },
-    console, Buffer, JSON,
+    console,
+    Buffer,
+    JSON,
     window: {},
     localStorage: mockLS,
     sessionStorage: { getItem: () => null, removeItem: () => {} },
@@ -135,14 +154,21 @@ test("migrateLegacyStorageKeys does not overwrite existing new key", () => {
   };
   const mockLS = {
     getItem: (k) => store[k] ?? null,
-    setItem: (k, v) => { store[k] = v; },
-    removeItem: (k) => { delete store[k]; },
+    setItem: (k, v) => {
+      store[k] = v;
+    },
+    removeItem: (k) => {
+      delete store[k];
+    },
   };
   vm.runInNewContext(transformed, {
-    module: mod, exports: mod.exports,
+    module: mod,
+    exports: mod.exports,
     require,
     process: { env: {} },
-    console, Buffer, JSON,
+    console,
+    Buffer,
+    JSON,
     window: {},
     localStorage: mockLS,
     sessionStorage: { getItem: () => null, removeItem: () => {} },

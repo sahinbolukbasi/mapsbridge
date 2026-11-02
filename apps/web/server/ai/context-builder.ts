@@ -31,7 +31,11 @@ export function normalizeRequest(body: RequestBody) {
     conversationHistory: body.conversationHistory || [],
     conversationId: body.conversationId || null,
     routeMode: ((): "calm" | "classic" | "explorer" | undefined => {
-      if (body.routeMode === "calm" || body.routeMode === "classic" || body.routeMode === "explorer")
+      if (
+        body.routeMode === "calm" ||
+        body.routeMode === "classic" ||
+        body.routeMode === "explorer"
+      )
         return body.routeMode;
       return undefined;
     })(),
@@ -51,8 +55,7 @@ export function normalizeRequest(body: RequestBody) {
             activeTopic: body.conversationFlow.activeTopic as string,
             stage: body.conversationFlow.stage as string,
             gathered:
-              body.conversationFlow.gathered &&
-              typeof body.conversationFlow.gathered === "object"
+              body.conversationFlow.gathered && typeof body.conversationFlow.gathered === "object"
                 ? (body.conversationFlow.gathered as Record<string, string>)
                 : undefined,
           }

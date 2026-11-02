@@ -33,7 +33,6 @@ jobs:
       - name: Run AI assistant tests
         run: node --test services/ai-assistant/tests/*.test.cjs
 
-
   test-messaging:
     name: Messaging Tests
     runs-on: ubuntu-latest
@@ -48,7 +47,6 @@ jobs:
         run: node --test services/messaging/tests/*.test.cjs
 
   test-place-intelligence:
-
     name: Place Intelligence Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10

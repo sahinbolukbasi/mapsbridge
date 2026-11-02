@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  StatusBar,
-  Alert,
-  Linking,
-} from "react-native";
+import { StyleSheet, View, StatusBar, Alert, Linking } from "react-native";
 import { MobileTab } from "./src/types";
 import { WelcomeScreen } from "./src/screens/WelcomeScreen";
 import { AuthScreen } from "./src/screens/AuthScreen";

@@ -1,10 +1,7 @@
 import { apiFetch } from "../api-client";
 import { getStoredSession } from "../cognito";
 import { createRevenueCatCheckout } from "./revenuecat-client";
-import {
-  getActionCreditCost,
-  type AICreditAction,
-} from "@mapsbridge/contracts";
+import { getActionCreditCost, type AICreditAction } from "@mapsbridge/contracts";
 // ============================================================
 // MapsBridge Billing & Monetization Service
 // Manages Subscriptions, Credit Packs, Creator Wallet & Payouts

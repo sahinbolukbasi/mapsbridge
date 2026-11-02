@@ -72,7 +72,10 @@ async function processEvent(event: SlackEvent, botToken: string): Promise<void> 
   const channel = event.channel;
   if (!channel || !botToken) return;
 
-  const text: string = (event.text || "").replace(/<[^>]+>/g, "").trim().toLowerCase();
+  const text: string = (event.text || "")
+    .replace(/<[^>]+>/g, "")
+    .trim()
+    .toLowerCase();
 
   let response = "Desteklenen komutlar: `/deploy`, `/rollback`, `/status`, `/health`, `/logs`";
   if (text.includes("health") || text.includes("sağlık")) {

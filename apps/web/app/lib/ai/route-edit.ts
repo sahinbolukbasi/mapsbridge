@@ -6,7 +6,11 @@ export interface RouteEdit {
   stopIds: string[];
 }
 
-export function routeEdit(value: Record<string, unknown>, request: string, route?: UnifiedRoutePlan): RouteEdit {
+export function routeEdit(
+  value: Record<string, unknown>,
+  request: string,
+  route?: UnifiedRoutePlan,
+): RouteEdit {
   const empty: RouteEdit = { operation: "none", stopIds: [] };
   if (
     !route ||

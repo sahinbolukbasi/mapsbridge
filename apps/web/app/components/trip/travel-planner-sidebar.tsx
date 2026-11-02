@@ -314,7 +314,9 @@ export function TravelPlannerSidebar({
       if (answer) {
         setAskPlaceAnswer(answer);
       } else {
-        setAskPlaceAnswer("Bu mekan için şu an yeterli veri bulamadım. Farklı bir soru deneyebilirsiniz.");
+        setAskPlaceAnswer(
+          "Bu mekan için şu an yeterli veri bulamadım. Farklı bir soru deneyebilirsiniz.",
+        );
       }
     } catch {
       setAskPlaceAnswer("⚠ Yapay zekaya ulaşılamadı. Lütfen biraz sonra tekrar deneyin.");
@@ -410,7 +412,9 @@ export function TravelPlannerSidebar({
       }
     } catch (err: unknown) {
       console.warn("AI modify error:", err);
-      showToast(`⚠️ ${err instanceof Error ? err.message : "AI yanıt veremedi. Lütfen tekrar deneyin."}`);
+      showToast(
+        `⚠️ ${err instanceof Error ? err.message : "AI yanıt veremedi. Lütfen tekrar deneyin."}`,
+      );
     } finally {
       setIsAiModifying(false);
     }
@@ -823,7 +827,8 @@ export function TravelPlannerSidebar({
                 <div className="info-section-group">
                   <h4 className="info-section-title">🤖 AI'ya Sor</h4>
                   <p className="ask-ai-hint">
-                    Bu mekan hakkında merak ettiğinizi sorun. Yanıtlar mevcut mekan verisine dayanır.
+                    Bu mekan hakkında merak ettiğinizi sorun. Yanıtlar mevcut mekan verisine
+                    dayanır.
                   </p>
                   <div className="ask-ai-input-row">
                     <input
@@ -1854,7 +1859,14 @@ export function TravelPlannerSidebar({
                       explore_nearby
                     </span>
                   </div>
-                  <h3 style={{ fontSize: "13.5px", fontWeight: 800, color: "var(--color-text)", margin: 0 }}>
+                  <h3
+                    style={{
+                      fontSize: "13.5px",
+                      fontWeight: 800,
+                      color: "var(--color-text)",
+                      margin: 0,
+                    }}
+                  >
                     {pinsWithTime.length === 0
                       ? "Rotanızda Henüz Durak Yok"
                       : "Filtreye Uygun Durak Bulunamadı"}

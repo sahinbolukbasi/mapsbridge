@@ -78,7 +78,9 @@ export function buildAdvisorSystemPrompt(opts: AdvisorPromptOptions): string {
   // Past destinations memory injection ("daha önce X'e gitmiştin" style references)
   if (opts.pastDestinations?.length) {
     const recent = opts.pastDestinations.slice(-3).join(", ");
-    parts.push(`[KULLANICININ GEÇMİŞ SEYAHAT İLGİSİ: ${recent}. Bu bilgiyi doğal referans için kullan — aynı soruyu ikinci kez sorma.]`);
+    parts.push(
+      `[KULLANICININ GEÇMİŞ SEYAHAT İLGİSİ: ${recent}. Bu bilgiyi doğal referans için kullan — aynı soruyu ikinci kez sorma.]`,
+    );
   }
 
   // Conversation flow snippet (stage-aware behavior hints)

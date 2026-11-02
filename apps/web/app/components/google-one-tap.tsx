@@ -3,7 +3,9 @@
 import { useEffect } from "react";
 import { handleGoogleCredentialResponse } from "../lib/cognito";
 
-interface GoogleCredentialResponse { credential: string; }
+interface GoogleCredentialResponse {
+  credential: string;
+}
 export function GoogleOneTap() {
   useEffect(() => {
     if (typeof window === "undefined") return;

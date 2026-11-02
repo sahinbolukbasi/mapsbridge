@@ -56,27 +56,36 @@ function buildHandler(filename, opts = {}) {
             }
           },
           GetItemCommand: class GetItemCommand {
-            constructor(input) { this.input = input; }
+            constructor(input) {
+              this.input = input;
+            }
           },
           PutItemCommand: class PutItemCommand {
-            constructor(input) { this.input = input; }
+            constructor(input) {
+              this.input = input;
+            }
           },
           DeleteItemCommand: class DeleteItemCommand {
-            constructor(input) { this.input = input; }
+            constructor(input) {
+              this.input = input;
+            }
           },
           QueryCommand: class QueryCommand {
-            constructor(input) { this.input = input; }
+            constructor(input) {
+              this.input = input;
+            }
           },
         };
       }
       if (spec === "@aws-sdk/util-dynamodb") {
         return {
-          marshall: (obj) => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, { S: String(v) }])),
+          marshall: (obj) =>
+            Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, { S: String(v) }])),
           unmarshall: (obj) => {
             if (!obj) return obj;
             const result = {};
             for (const [k, v] of Object.entries(obj)) {
-              result[k] = v?.S ?? v?.N ? Number(v.N) : v;
+              result[k] = (v?.S ?? v?.N) ? Number(v.N) : v;
             }
             return result;
           },
@@ -84,8 +93,16 @@ function buildHandler(filename, opts = {}) {
       }
       if (spec === "@aws-sdk/client-apigatewaymanagementapi") {
         return {
-          ApiGatewayManagementApiClient: class { send(cmd) { posted.push(cmd); } },
-          PostToConnectionCommand: class { constructor(input) { this.input = input; } },
+          ApiGatewayManagementApiClient: class {
+            send(cmd) {
+              posted.push(cmd);
+            }
+          },
+          PostToConnectionCommand: class {
+            constructor(input) {
+              this.input = input;
+            }
+          },
         };
       }
       if (spec.startsWith("../shared/")) {
@@ -93,9 +110,15 @@ function buildHandler(filename, opts = {}) {
         const mod = { exports: {} };
         const sharedCode = loadSource(resolved);
         vm.runInNewContext(sharedCode, {
-          module: mod, exports: mod.exports,
+          module: mod,
+          exports: mod.exports,
           require: context.require,
-          process: { env }, console, Buffer, crypto: require("crypto"), URL, fetch,
+          process: { env },
+          console,
+          Buffer,
+          crypto: require("crypto"),
+          URL,
+          fetch,
         });
         return mod.exports;
       }

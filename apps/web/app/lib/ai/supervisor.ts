@@ -562,7 +562,12 @@ export async function runMultiAgentSupervisor(
     const manifesto = payload.tripManifestoMarkdown;
     if (!manifesto) return [];
     const match = manifesto.match(/destinations:\s*([^\n]+)/i);
-    return match?.[1]?.split(",").map((d: string) => d.trim()).filter(Boolean) ?? [];
+    return (
+      match?.[1]
+        ?.split(",")
+        .map((d: string) => d.trim())
+        .filter(Boolean) ?? []
+    );
   })();
 
   const answerSystemPrompt =
@@ -615,7 +620,12 @@ export async function runMultiAgentSupervisor(
       const isFullPlan = mode === "route";
 
       const bundle = isFullPlan
-        ? buildTripAffiliateBundle({ destination: destId, checkIn, checkOut, adults: tripProfile.travelers?.adults })
+        ? buildTripAffiliateBundle({
+            destination: destId,
+            checkIn,
+            checkOut,
+            adults: tripProfile.travelers?.adults,
+          })
         : null;
 
       const selectedCards: AffiliateCard[] = [];
@@ -623,11 +633,31 @@ export async function runMultiAgentSupervisor(
       if (isFullPlan && bundle) {
         selectedCards.push(bundle.flight, bundle.hotel, bundle.carRental, bundle.insurance);
       } else {
-        if (wantsFlight) selectedCards.push(buildFlightCard({ destination: destId, departDate: checkIn, adults: tripProfile.travelers?.adults }));
-        if (wantsHotel) selectedCards.push(buildHotelCard({ destination: destId, checkIn, checkOut, adults: tripProfile.travelers?.adults }));
-        if (wantsCar) selectedCards.push(buildCarRentalCard({ destination: destId, pickupDate: checkIn, dropoffDate: checkOut }));
+        if (wantsFlight)
+          selectedCards.push(
+            buildFlightCard({
+              destination: destId,
+              departDate: checkIn,
+              adults: tripProfile.travelers?.adults,
+            }),
+          );
+        if (wantsHotel)
+          selectedCards.push(
+            buildHotelCard({
+              destination: destId,
+              checkIn,
+              checkOut,
+              adults: tripProfile.travelers?.adults,
+            }),
+          );
+        if (wantsCar)
+          selectedCards.push(
+            buildCarRentalCard({ destination: destId, pickupDate: checkIn, dropoffDate: checkOut }),
+          );
         if ((wantsFlight || wantsHotel) && selectedCards.length > 0) {
-          selectedCards.push(buildInsuranceCard({ destination: destId, departDate: checkIn, returnDate: checkOut }));
+          selectedCards.push(
+            buildInsuranceCard({ destination: destId, departDate: checkIn, returnDate: checkOut }),
+          );
         }
       }
 
@@ -705,7 +735,11 @@ export async function runMultiAgentSupervisor(
         throw Error("Doğrulanmamış fiyat içeren yanıt reddedildi.");
     }
     if (mode === "route") {
-      route = buildResearchedRoute((output.data as Record<string, unknown>).route, context, research!);
+      route = buildResearchedRoute(
+        (output.data as Record<string, unknown>).route,
+        context,
+        research!,
+      );
       validateRouteEdit(route, currentRoute, edit);
     }
   };
@@ -918,7 +952,9 @@ export async function runMultiAgentSupervisor(
     );
   }
 
-  const decisionSummary = safeDecisionSummary((output.data as Record<string, unknown>).decisionSummary);
+  const decisionSummary = safeDecisionSummary(
+    (output.data as Record<string, unknown>).decisionSummary,
+  );
 
   // §12.5 — Parse itinerary tool calls from model output
   const _td = (output.data as Record<string, unknown>).toolCalls;
@@ -928,7 +964,8 @@ export async function runMultiAgentSupervisor(
   const itineraryActions: ItineraryActionPayload[] = parseItineraryToolCalls(rawToolCalls);
 
   // §12.5.3 — Consistency guard: if model claims a mutation but no tool call, block delivery
-  const finalSummary = String((output.data as Record<string, unknown>).orchestratorSummary ?? "").trim() + sourceNote;
+  const finalSummary =
+    String((output.data as Record<string, unknown>).orchestratorSummary ?? "").trim() + sourceNote;
   const mutationError = assertMutationConsistency(finalSummary, itineraryActions.length > 0);
   if (mutationError) {
     // Model claimed to add/remove but no tool call was made — return an error prompt
@@ -1113,11 +1150,7 @@ export function buildResearchedRoute(
       ["morning", "afternoon", "evening", "night"].includes(s.timeSlot as string)
         ? (s.timeSlot as string)
         : place.recommendedSlot || undefined) as
-        | "morning"
-        | "afternoon"
-        | "evening"
-        | "night"
-        | undefined,
+        "morning" | "afternoon" | "evening" | "night" | undefined,
     };
   });
 
@@ -1139,8 +1172,7 @@ export function buildResearchedRoute(
   }));
   // Eksik gün koruması: her güne en az bir durak düşmesi için yeterli POI olmalı.
   // (Bir gün boş kalacaksa rota geçersizdir — çağıran daha fazla POI seçmeli.)
-  if (clusterPins.length < estimatedDays)
-    throw Error("Araştırılmamış veya tekrarlı durak.");
+  if (clusterPins.length < estimatedDays) throw Error("Araştırılmamış veya tekrarlı durak.");
   const split = autoSplitPinsIntoDays(clusterPins, estimatedDays);
   // pinId -> deterministik dayIndex eşlemesi
   const dayByPinId = new Map<string, number>();

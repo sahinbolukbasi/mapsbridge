@@ -37,7 +37,10 @@ export function createInteractionEvent(
     responseMode: result.responseMode,
     destination: input.destination || result.tripContext?.destination || undefined,
     retrievalStatus: result.retrievalStatus || "disabled",
-    citedSources: (result.sources || []).map((s) => s.id).filter(Boolean).slice(0, 10),
+    citedSources: (result.sources || [])
+      .map((s) => s.id)
+      .filter(Boolean)
+      .slice(0, 10),
     affiliateTypes,
     flowTopic: input.conversationFlow?.activeTopic || "none",
     flowStage: input.conversationFlow?.stage || "none",

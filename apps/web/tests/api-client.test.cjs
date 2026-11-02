@@ -10,8 +10,10 @@ test("lost authenticated retry response stays uncertain instead of becoming orig
   const module = { exports: {} };
   let calls = 0;
   vm.runInNewContext(
-    transformSync(readFileSync(path.resolve(WEB_ROOT, "app/lib/api-client.ts"), "utf8"), { loader: "ts", format: "cjs" })
-      .code,
+    transformSync(readFileSync(path.resolve(WEB_ROOT, "app/lib/api-client.ts"), "utf8"), {
+      loader: "ts",
+      format: "cjs",
+    }).code,
     {
       module,
       exports: module.exports,

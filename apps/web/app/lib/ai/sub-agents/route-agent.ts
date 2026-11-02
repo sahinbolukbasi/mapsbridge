@@ -1,4 +1,9 @@
-import { isRoutePlan, UnifiedRoutePlan, RouteStop as _RouteStop, TravelerProfileContext } from "../types";
+import {
+  isRoutePlan,
+  UnifiedRoutePlan,
+  RouteStop as _RouteStop,
+  TravelerProfileContext,
+} from "../types";
 import { invokeBedrockJSON } from "../bedrock-client";
 
 const ROUTE_SYSTEM_PROMPT = `Sen profesyonel bir Rota Planlama Ajanısın (Route Planner Agent).

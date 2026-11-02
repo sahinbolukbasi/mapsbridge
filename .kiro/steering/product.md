@@ -20,13 +20,13 @@ MapsBridge, AWS serverless üzerine kurulu, yapay zeka destekli **seyahat planla
 
 Krediler **yalnızca sunucuda** düşülür; istemci asla doğrudan kredi harcamaz. Maliyet tablosu:
 
-| İşlem | Kredi |
-| --- | --- |
-| Tercih netleştirme | Ücretsiz |
-| AI sohbet (`ai_chat`) | 1 |
-| Rota optimizasyonu (`route_optimize`) | 1 |
-| Konaklama & gastronomi analizi (`ai_stay_dining`) | 2 |
-| Derin çok günlü rota (`ai_deep_trip`) | 5 |
+| İşlem                                             | Kredi    |
+| ------------------------------------------------- | -------- |
+| Tercih netleştirme                                | Ücretsiz |
+| AI sohbet (`ai_chat`)                             | 1        |
+| Rota optimizasyonu (`route_optimize`)             | 1        |
+| Konaklama & gastronomi analizi (`ai_stay_dining`) | 2        |
+| Derin çok günlü rota (`ai_deep_trip`)             | 5        |
 
 Abonelik kademeleri: `free` (Gezgin, 5 hoş geldin kredisi) · `explorer` (Kaşif, aylık 100) · `pro` (Pro Kaşif, aylık 500) · `agency` (Tur Lideri, aylık 2500).
 

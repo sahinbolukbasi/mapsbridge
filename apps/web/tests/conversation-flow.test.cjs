@@ -11,8 +11,13 @@ function loadModule() {
   const transformed = transformSync(code, { loader: "ts", format: "cjs", target: "node22" }).code;
   const mod = { exports: {} };
   vm.runInNewContext(transformed, {
-    module: mod, exports: mod.exports,
-    require, console, Math, Number, JSON,
+    module: mod,
+    exports: mod.exports,
+    require,
+    console,
+    Math,
+    Number,
+    JSON,
   });
   return mod.exports;
 }
@@ -79,13 +84,18 @@ test("destination param is added to sessionDestinations", () => {
 test("duplicate destination is not added twice", () => {
   const withDest = { ...EMPTY_FLOW, sessionDestinations: ["istanbul"] };
   const next = advanceFlow(withDest, "Otel var mı", undefined, "istanbul");
-  assert.equal(next.sessionDestinations.filter(d => d === "istanbul").length, 1);
+  assert.equal(next.sessionDestinations.filter((d) => d === "istanbul").length, 1);
 });
 
 // ─── Topic switching ──────────────────────────────────────────────
 
 test("switching from hotel to flight resets stage and turns", () => {
-  const withHotel = { ...EMPTY_FLOW, activeTopic: "hotel", stage: "recommendation", turnsInTopic: 3 };
+  const withHotel = {
+    ...EMPTY_FLOW,
+    activeTopic: "hotel",
+    stage: "recommendation",
+    turnsInTopic: 3,
+  };
   const next = advanceFlow(withHotel, "Roma'ya bilet fiyati ne kadar?");
   assert.equal(next.activeTopic, "flight");
   assert.equal(next.stage, "origin_check");
@@ -102,8 +112,8 @@ test("hotel: continues in same topic increments turnsInTopic", () => {
 });
 
 test("hotel: after 2 turns moves to recommendation stage", () => {
-  let flow = advanceFlow(EMPTY_FLOW, "otel arıyorum");  // turn 1 → discovery
-  flow = advanceFlow(flow, "ekonomik otel istiyorum");   // turn 2 → needs
+  let flow = advanceFlow(EMPTY_FLOW, "otel arıyorum"); // turn 1 → discovery
+  flow = advanceFlow(flow, "ekonomik otel istiyorum"); // turn 2 → needs
   flow = advanceFlow(flow, "nasıl bir yer tavsiye edersin"); // turn 3 → recommendation
   assert.equal(flow.stage, "recommendation");
 });
@@ -153,7 +163,13 @@ test("pricing surfaced at hotel recommendation with >= 3 turns", () => {
 });
 
 test("pricing NOT surfaced if already priced", () => {
-  const flow = { ...EMPTY_FLOW, activeTopic: "hotel", stage: "pricing", turnsInTopic: 4, pricedTopics: ["hotel"] };
+  const flow = {
+    ...EMPTY_FLOW,
+    activeTopic: "hotel",
+    stage: "pricing",
+    turnsInTopic: 4,
+    pricedTopics: ["hotel"],
+  };
   assert.equal(shouldSurfacePricing(flow), false);
 });
 
@@ -167,7 +183,7 @@ test("markPriced adds topic to pricedTopics", () => {
 test("markPriced does not duplicate", () => {
   const once = markPriced(EMPTY_FLOW, "hotel");
   const twice = markPriced(once, "hotel");
-  assert.equal(twice.pricedTopics.filter(t => t === "hotel").length, 1);
+  assert.equal(twice.pricedTopics.filter((t) => t === "hotel").length, 1);
 });
 
 // ─── flowToPromptSnippet ──────────────────────────────────────────
@@ -199,12 +215,12 @@ test("getFlowQuickReplies returns hotel options at discovery stage", () => {
   const flow = { ...EMPTY_FLOW, activeTopic: "hotel", stage: "discovery", turnsInTopic: 1 };
   const replies = getFlowQuickReplies(flow, "istanbul");
   assert.ok(replies.length > 0);
-  assert.ok(replies.every(r => r.topic === "hotel"));
+  assert.ok(replies.every((r) => r.topic === "hotel"));
 });
 
 test("getFlowQuickReplies returns flight options at origin_check stage", () => {
   const flow = { ...EMPTY_FLOW, activeTopic: "flight", stage: "origin_check", turnsInTopic: 1 };
   const replies = getFlowQuickReplies(flow, "paris");
   assert.ok(replies.length > 0);
-  assert.ok(replies.every(r => r.topic === "flight"));
+  assert.ok(replies.every((r) => r.topic === "flight"));
 });
