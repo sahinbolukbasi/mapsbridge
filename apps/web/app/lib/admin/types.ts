@@ -275,6 +275,21 @@ export interface AdminResponses {
   "plans.update": { status: "updated"; plan: AdminPlan };
   creditPacks: { packs: AdminCreditPack[] };
   "creditPacks.update": { status: "updated"; pack: AdminCreditPack };
+  "promo.list": {
+    codes: Array<{
+      code: string;
+      credits: number;
+      maxRedemptions: number;
+      redeemedCount: number;
+      expiresAt?: string;
+      active: boolean;
+      createdAt: string;
+      createdBy: string;
+      note?: string;
+    }>;
+  };
+  "promo.create": { status: "created"; code: Record<string, unknown> };
+  "promo.deactivate": { status: "deactivated"; code: string };
   stripeConfig: { stripe: AdminStripeConfig };
   "stripeConfig.update": { status: "updated"; stripe: AdminStripeConfig };
   reports: { reports: AdminReport[]; count: number };
