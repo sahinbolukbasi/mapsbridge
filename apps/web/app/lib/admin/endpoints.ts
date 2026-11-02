@@ -84,6 +84,9 @@ export const ADMIN_ENDPOINTS = {
   "plans.update": write("/admin/plans/{id}", "system", "fiyatlandirma", R),
   creditPacks: read("/admin/credit-packs", "system", "fiyatlandirma"),
   "creditPacks.update": write("/admin/credit-packs/{id}", "system", "fiyatlandirma", R),
+  "promo.list": read("/admin/promo", "credits", "fiyatlandirma"),
+  "promo.create": write("/admin/promo", "credits", "fiyatlandirma", R),
+  "promo.deactivate": write("/admin/promo/{code}/deactivate", "credits", "fiyatlandirma", D),
   stripeConfig: read("/admin/stripe-config", "system", "fiyatlandirma"),
   "stripeConfig.update": write("/admin/stripe-config", "system", "fiyatlandirma", D),
 

@@ -67,6 +67,29 @@ export default function CheckoutPage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoBusy, setPromoBusy] = useState(false);
+  const [promoMsg, setPromoMsg] = useState("");
+  async function redeemPromo() {
+    const code = promoCode.trim();
+    if (!code) return;
+    setPromoBusy(true);
+    setPromoMsg("");
+    try {
+      const res = await apiFetch<{ credits: number; balance: number }>("/stripe/promo/redeem", {
+        method: "POST",
+        body: JSON.stringify({ code }),
+      });
+      setPromoMsg(`✓ ${res.credits} kredi hesabınıza eklendi. Yeni bakiye: ${res.balance}`);
+      setPromoCode("");
+      setWallet((w) => ({ ...w, credits: res.balance }));
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      setPromoMsg(err?.message || "Kod kullanılamadı.");
+    } finally {
+      setPromoBusy(false);
+    }
+  }
 
   useEffect(() => {
     let stopped = false;
@@ -213,6 +236,38 @@ export default function CheckoutPage() {
             <b>Ücretsiz</b> Seyahat tercih soruları
           </span>
         </div>
+        {signedIn && (
+          <section className="billing-promo" aria-label="Promosyon kodu">
+            <label className="billing-promo__label" htmlFor="promo-code">
+              Promosyon kodun var mı?
+            </label>
+            <div className="billing-promo__row">
+              <input
+                className="billing-promo__input"
+                id="promo-code"
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                placeholder="KOD"
+                autoComplete="off"
+                maxLength={32}
+                disabled={promoBusy}
+              />
+              <button
+                type="button"
+                onClick={() => void redeemPromo()}
+                disabled={promoBusy || !promoCode.trim()}
+              >
+                {promoBusy ? "Kullanılıyor…" : "Kodu Kullan"}
+              </button>
+            </div>
+            {promoMsg && (
+              <p className="billing-promo-msg" role="status">
+                {promoMsg}
+              </p>
+            )}
+          </section>
+        )}
         <p className="billing-explain">
           Kredi, ücretli üretim başlamadan ayrılır. İşlem başarısız olursa anında ve otomatik iade
           edilir.

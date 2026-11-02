@@ -1,0 +1,34 @@
+{
+  "codes": [
+    {
+      "code": "HOSGELDIN25",
+      "credits": 25,
+      "maxRedemptions": 1000,
+      "redeemedCount": 342,
+      "active": true,
+      "createdAt": "2026-10-01T09:00:00.000Z",
+      "createdBy": "admin",
+      "note": "Yeni kullanıcı karşılama kampanyası"
+    },
+    {
+      "code": "BAHAR50",
+      "credits": 50,
+      "maxRedemptions": 200,
+      "redeemedCount": 200,
+      "expiresAt": "2026-06-30T23:59:59.000Z",
+      "active": false,
+      "createdAt": "2026-03-15T12:00:00.000Z",
+      "createdBy": "admin",
+      "note": "Bahar kampanyası (süresi doldu)"
+    },
+    {
+      "code": "SINIRSIZ10",
+      "credits": 10,
+      "maxRedemptions": 0,
+      "redeemedCount": 1287,
+      "active": true,
+      "createdAt": "2026-09-20T08:30:00.000Z",
+      "createdBy": "admin"
+    }
+  ]
+}

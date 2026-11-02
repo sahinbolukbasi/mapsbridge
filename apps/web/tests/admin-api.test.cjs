@@ -41,12 +41,12 @@ test("AC-25a: her endpoint METHOD+path routes.json'da var", () => {
     assert.ok(ADMIN_KEYS.includes(endpointKey(id)), `${id} → ${endpointKey(id)}`);
 });
 
-test("AC-25b: routes.json'daki 69 /admin anahtarı = endpoints (66) ∪ NOT_EXPOSED (3), kesişim boş", () => {
-  assert.equal(ADMIN_KEYS.length, 69);
+test("AC-25b: routes.json'daki 72 /admin anahtarı = endpoints (69) ∪ NOT_EXPOSED (3), kesişim boş", () => {
+  assert.equal(ADMIN_KEYS.length, 72);
   const exposed = ids.map(endpointKey);
   const hidden = NOT_EXPOSED.map((n) => n.key);
-  assert.equal(exposed.length, 66);
-  assert.equal(new Set(exposed).size, 66, "aynı route iki endpoint id'sinde");
+  assert.equal(exposed.length, 69);
+  assert.equal(new Set(exposed).size, 69, "aynı route iki endpoint id'sinde");
   assert.equal(hidden.length, 3);
   assert.ok(hidden.includes("OPTIONS /admin/{proxy+}"));
   for (const n of NOT_EXPOSED) assert.ok(n.reason.length > 10, `${n.key} gerekçesiz`);
