@@ -44,7 +44,7 @@ jobs:
         run: |
           npm run build || {
             echo "::warning::İlk build denemesi başarısız (muhtemelen transient font/Turbopack) — 1 kez daha deneniyor";
-            sleep 5;
+            sleep 30;
             npm run build;
           }
         env:

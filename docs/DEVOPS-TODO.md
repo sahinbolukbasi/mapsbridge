@@ -1,7 +1,7 @@
 # DevOps / Sistem Yapılacaklar Takip Listesi
 
 > Tek takip kaynağı. Bir iş bitince durumu **✅ Tamamlandı** yapılır, commit/tarih yazılır.
-> Son güncelleme: 2026-11-01 (AI chat dayanıklılık fix eklendi)
+> Son güncelleme: 2026-11-02 (format drift + build retry dayanıklılığı)
 
 ## Durum Özeti
 
@@ -51,7 +51,14 @@
 
 ## Bekleyen işler (detay ve plan)
 
-### ⬜ 15. Prettier format drift (YENİ BULGU — Dependabot bloke edicisi)
+### ⚠️ 5 (güncel). next/font/google CDN transient fail — KÖK NEDEN NETLEŞTİ
+- Build lokalde HEP geçiyor; CI'da Google Fonts (fonts.gstatic.com) fetch'i **ara sıra** başarısız → Turbopack "font not found". Flaky, deterministik değil (son 5 deploy geçti, 1'i fail, re-trigger'da geçti).
+- Retry bekleme 5s→30s yapıldı (CDN kesintisinin geçmesine daha iyi şans).
+- **KALICI ÇÖZÜM (öneri, ayrı iş):** fontları `next/font/local` ile self-host et (font dosyaları repoda) → build-time ağ bağımlılığı tamamen kalkar. Özel Next 16.4.1 sürümü olduğu için önce node_modules/next/dist/docs okunmalı, test edilmeli. Yüksek değerli ama dikkatli.
+
+
+
+### ✅ 15. Prettier format drift — DÜZELTİLDİ
 
 - `npm run format:check` **main'de 112 dosyada fail** (prettier --check). Benim bu oturumdaki commit'lerim değil — çoğu önceden var olan drift: `.kiro/specs/*.md`, `.github/workflows/*.yml`, `services/*/tests/*.cjs` vb.
 - Bu gate Dependabot PR'larının "Lint & Format" job'unu kırıyor → #51 (playwright) dahil hiçbiri merge edilemiyor (diğer tüm check'ler ✓ geçiyordu).
