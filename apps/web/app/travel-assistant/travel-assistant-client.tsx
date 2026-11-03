@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AuthActionModal } from "../components/auth-gate";
+import { openUpgradeModal } from "../components/upgrade-modal";
 import { getStoredSession, refreshSession, isTokenExpired } from "../lib/cognito";
 import { apiFetch } from "../lib/api-client";
 import { userStorage } from "../lib/user-storage";
@@ -874,12 +875,7 @@ export default function AIPage() {
         setError("Kredi hesabınız geçici olarak durduruldu. Detay için destek ekibine ulaşın.");
       } else if (code === "INSUFFICIENT_CREDITS" || err?.status === 402) {
         setError(err?.message || "Bu işlem için yeterli krediniz yok.");
-        if (typeof window !== "undefined")
-          window.dispatchEvent(
-            new CustomEvent("mapsbridge:open_upgrade_modal", {
-              detail: { reason: err?.message || "Krediniz yetersiz." },
-            }),
-          );
+        openUpgradeModal(err?.message || "Krediniz yetersiz.", undefined, "ai_credits_depleted");
       } else if (code === "USER_DAILY_LIMIT") {
         setError(
           "Bugünlük 20 mesaj sınırına ulaştınız. Sayaç her gece saat 03:00'te (Türkiye saati) sıfırlanır.",
@@ -1726,12 +1722,7 @@ export default function AIPage() {
                               type="button"
                               className="ai-error-cta-btn"
                               onClick={() =>
-                                typeof window !== "undefined" &&
-                                window.dispatchEvent(
-                                  new CustomEvent("mapsbridge:open_upgrade_modal", {
-                                    detail: { reason: error },
-                                  }),
-                                )
+                                openUpgradeModal(error, undefined, "ai_credits_depleted")
                               }
                             >
                               Kredi Satın Al
@@ -1909,15 +1900,9 @@ export default function AIPage() {
                     <span>{wallet ? `${wallet.credits} Kredi` : "Ücretsiz Danışmanlık"}</span>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (typeof window !== "undefined") {
-                          window.dispatchEvent(
-                            new CustomEvent("mapsbridge:open_upgrade_modal", {
-                              detail: { reason: "Yapay Zeka Seyahat Asistanı için Kredi Yükleyin" },
-                            }),
-                          );
-                        }
-                      }}
+                      onClick={() =>
+                        openUpgradeModal("Yapay Zeka Seyahat Asistanı için Kredi Yükleyin")
+                      }
                       className="ai-buy-credits-link"
                       style={{
                         background: "none",

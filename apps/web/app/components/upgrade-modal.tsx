@@ -101,7 +101,13 @@ export function UpgradeModal() {
   const [wallet, setWallet] = useState(() => billingService.getWallet());
 
   useEffect(() => {
-    const handleOpen = (e: CustomEvent<{ reason?: string; tab?: "subscriptions" | "packs" }>) => {
+    const handleOpen = (
+      e: CustomEvent<{
+        reason?: string;
+        tab?: "subscriptions" | "packs";
+        placement?: string;
+      }>,
+    ) => {
       setCustomReason(e.detail?.reason || "");
       if (e.detail?.tab) setActiveTab(e.detail.tab);
       setErrorMessage("");
@@ -198,7 +204,7 @@ export function UpgradeModal() {
 
           {errorMessage && (
             <div className="mb-upgrade-alert" role="alert">
-              ⚠️ {errorMessage}
+              ⚠ {errorMessage}
             </div>
           )}
 
@@ -345,11 +351,28 @@ export function UpgradeModal() {
   );
 }
 
-export function openUpgradeModal(reason?: string, tab?: "subscriptions" | "packs") {
+/**
+ * Paywall / yükseltme modalını açar.
+ * @param reason  Kullanıcıya gösterilecek bağlam metni (ör. "Günlük AI kotanız doldu").
+ * @param tab     Açılışta gösterilecek sekme.
+ * @param placement  Dönüşüm ölçümü için yerleşim adı (P1–P5):
+ *   route_limit | ai_credits_depleted | ai_daily_quota | premium_feature | onboarding
+ */
+export function openUpgradeModal(
+  reason?: string,
+  tab?: "subscriptions" | "packs",
+  placement?: string,
+) {
   if (typeof window !== "undefined") {
     window.dispatchEvent(
       new CustomEvent("mapsbridge:open_upgrade_modal", {
-        detail: { reason, tab },
+        detail: { reason, tab, placement },
+      }),
+    );
+    // Dönüşüm ölçümü: her paywall gösterimi kendi placement adıyla raporlanır.
+    window.dispatchEvent(
+      new CustomEvent("mapsbridge:paywall_shown", {
+        detail: { placement: placement || "generic", reason },
       }),
     );
   }
