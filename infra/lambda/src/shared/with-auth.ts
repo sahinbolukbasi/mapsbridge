@@ -39,3 +39,22 @@ export async function resolveUserId(event: ApiGatewayEvent): Promise<string | nu
   if (cached) return cached;
   return await verifiedUserId(token);
 }
+
+/**
+ * Korumalı ("pro" gerektiren) route guard'ı. Mevcut auth→entitlement sırasını
+ * değiştirmez; yalnızca auth'tan SONRA ek bir kontrol ekler (danger-zone #4 notu).
+ * Dönüş:
+ *   { userId }          → yetkili, devam et
+ *   { error: "auth" }   → kimlik yok → çağıran unauthorized() döner
+ *   { error: "upgrade" }→ kimlik var ama pro değil → çağıran 403 + upgrade döner
+ * Yetki kararı YALNIZCA kendi DynamoDB kaydımızdan (hasEntitlement).
+ */
+export async function requireProEntitlement(
+  event: ApiGatewayEvent,
+): Promise<{ userId: string } | { error: "auth" | "upgrade" }> {
+  const userId = await resolveUserId(event);
+  if (!userId) return { error: "auth" };
+  const { hasEntitlement } = await import("../billing/store");
+  if (!(await hasEntitlement(userId, "pro"))) return { error: "upgrade" };
+  return { userId };
+}

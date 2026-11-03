@@ -124,6 +124,8 @@ async function handleWebhook(event: ApiGatewayEvent) {
     expiration_at_ms?: number;
     transaction_id?: string;
     new_product_id?: string;
+    transferred_from?: string[];
+    transferred_to?: string[];
     store?: string;
     environment?: string;
   }
@@ -244,6 +246,36 @@ async function handleWebhook(event: ApiGatewayEvent) {
             UpdateExpression: "SET frozen = :yes, reviewEvent = :event",
             ExpressionAttributeValues: marshall({ ":yes": true, ":event": ev.id }),
           }),
+        );
+        break;
+      }
+      case "TRANSFER": {
+        // Satın alma kullanıcılar arası taşındı. Hak kaybı/çift hak riskine girmemek
+        // için burada entitlement'ı elle değiştirmeyiz; etkilenen kullanıcıları
+        // reconciliation'a işaretleriz — gerçek durum RevenueCat'ten doğrulanır.
+        const affected = new Set<string>([
+          ...(ev.transferred_from || []),
+          ...(ev.transferred_to || []),
+          userId,
+        ]);
+        for (const uid of affected) {
+          if (!uid) continue;
+          try {
+            await getDynamoClient().send(
+              new UpdateItemCommand({
+                TableName: table(),
+                Key: marshall({ PK: `USER#${uid}`, SK: "SUBSCRIPTION" }),
+                UpdateExpression: "SET needsReconcile = :yes, rcEventId = :evId",
+                ConditionExpression: "attribute_exists(PK)",
+                ExpressionAttributeValues: marshall({ ":yes": true, ":evId": ev.id }),
+              }),
+            );
+          } catch (e: unknown) {
+            if ((e as { name?: string })?.name !== "ConditionalCheckFailedException") throw e;
+          }
+        }
+        console.log(
+          JSON.stringify({ msg: "rc_transfer", eventId: ev.id, affected: [...affected] }),
         );
         break;
       }

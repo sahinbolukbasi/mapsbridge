@@ -42,6 +42,18 @@ export async function subscription(userId: string) {
     return { tier: "free", status: "active" };
   return sub;
 }
+/**
+ * Yetki kararı — YALNIZCA kendi DynamoDB kaydımızdan. İstemci entitlement'ına
+ * asla güvenilmez. subscription() zaten currentPeriodEnd > now kontrolü yapar
+ * (expiry okuma anında değerlendirilir). "pro" entitlement'ı: pro veya onu
+ * kapsayan agency kademesi.
+ */
+export async function hasEntitlement(userId: string, entitlement: "pro" = "pro"): Promise<boolean> {
+  if (!userId) return false;
+  const sub = await subscription(userId);
+  if (entitlement === "pro") return sub.tier === "pro" || sub.tier === "agency";
+  return false;
+}
 export async function wallet(userId: string) {
   const value = await read(`USER#${userId}`, "CREDITS");
   return {

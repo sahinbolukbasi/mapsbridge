@@ -417,3 +417,62 @@ test("constant-time secret: yanlış uzunlukta secret de 401 (timingSafeEqual le
   const res = await handler(event);
   assert.equal(res.statusCode, 401);
 });
+
+test("TRANSFER etkilenen kullanıcıları reconcile'a işaretler, 200 döner", async () => {
+  const { load, rows } = harness();
+  const { handler } = load("revenuecat/index.ts");
+  // Önce bir abonelik kaydı oluştur ki attribute_exists(PK) koşulu geçsin
+  await handler(webhookEvent("INITIAL_PURCHASE", { app_user_id: "user-a" }));
+  const res = await handler(
+    webhookEvent("TRANSFER", {
+      id: "evt-transfer-1",
+      app_user_id: "user-a",
+      transferred_to: ["user-a"],
+      transferred_from: ["user-b"],
+    }),
+  );
+  assert.equal(res.statusCode, 200);
+  assert.equal(rows.get("USER#user-a|SUBSCRIPTION")?.needsReconcile, true);
+});
+test("hasEntitlement: pro/agency true, free/explorer false, expired false", async () => {
+  const { load, rows } = harness();
+  const store = load("billing/store.ts");
+  // pro, gelecekte biten → true
+  rows.set("USER#p|SUBSCRIPTION", {
+    PK: "USER#p",
+    SK: "SUBSCRIPTION",
+    tier: "pro",
+    status: "active",
+    currentPeriodEnd: new Date(Date.now() + 864e5).toISOString(),
+  });
+  assert.equal(await store.hasEntitlement("p", "pro"), true);
+  // agency → pro'yu kapsar → true
+  rows.set("USER#ag|SUBSCRIPTION", {
+    PK: "USER#ag",
+    SK: "SUBSCRIPTION",
+    tier: "agency",
+    status: "active",
+    currentPeriodEnd: new Date(Date.now() + 864e5).toISOString(),
+  });
+  assert.equal(await store.hasEntitlement("ag", "pro"), true);
+  // explorer → pro değil → false
+  rows.set("USER#ex|SUBSCRIPTION", {
+    PK: "USER#ex",
+    SK: "SUBSCRIPTION",
+    tier: "explorer",
+    status: "active",
+    currentPeriodEnd: new Date(Date.now() + 864e5).toISOString(),
+  });
+  assert.equal(await store.hasEntitlement("ex", "pro"), false);
+  // süresi geçmiş pro → false (expiry okuma anında)
+  rows.set("USER#old|SUBSCRIPTION", {
+    PK: "USER#old",
+    SK: "SUBSCRIPTION",
+    tier: "pro",
+    status: "active",
+    currentPeriodEnd: new Date(Date.now() - 1000).toISOString(),
+  });
+  assert.equal(await store.hasEntitlement("old", "pro"), false);
+  // kaydı olmayan → false
+  assert.equal(await store.hasEntitlement("nobody", "pro"), false);
+});
