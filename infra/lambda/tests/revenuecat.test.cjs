@@ -19,6 +19,7 @@ function harness(options = {}) {
     "UpdateItemCommand",
     "TransactWriteItemsCommand",
     "QueryCommand",
+    "ScanCommand",
   ];
   const commands = Object.fromEntries(
     names.map((n) => [
@@ -76,6 +77,11 @@ function harness(options = {}) {
           calls.push(clone(command.input));
           const k = key(command.input.Item || command.input.Key);
           const old = rows.get(k);
+          if (command.name === "ScanCommand") {
+            const sk = command.input.ExpressionAttributeValues?.[":sk"]?.S;
+            const items = [...rows.values()].filter((r) => !sk || r.SK === sk).map((r) => clone(r));
+            return Promise.resolve({ Items: items });
+          }
           if (command.name === "GetItemCommand")
             return Promise.resolve({ Item: old ? clone(old) : undefined });
           if (command.name === "TransactWriteItemsCommand") {
@@ -140,7 +146,7 @@ function harness(options = {}) {
             COGNITO_USER_POOL_ID: "eu-central-1_test",
             COGNITO_CLIENT_ID: "test-client",
             DYNAMODB_TABLE: "data",
-            RC_SECRET_API_KEY: "placeholder-skipped",
+            RC_SECRET_API_KEY: "sk_test_reconcile_valid",
             RC_WEBHOOK_AUTH_SECRET: WEBHOOK_SECRET,
             RC_BILLING_CHECKOUT_URL: "https://billing.revenuecat.com/checkout",
             RC_EXPLORER_PRODUCT_ID: "prode1930276ca",
@@ -475,4 +481,39 @@ test("hasEntitlement: pro/agency true, free/explorer false, expired false", asyn
   assert.equal(await store.hasEntitlement("old", "pro"), false);
   // kaydı olmayan → false
   assert.equal(await store.hasEntitlement("nobody", "pro"), false);
+});
+
+test("reconcile: needsReconcile işaretli kullanıcıyı RC'den doğrular ve düzeltir", async () => {
+  const subscriberResponse = {
+    ok: true,
+    json: async () => ({
+      subscriber: {
+        entitlements: {
+          pro: { expires_date: new Date(Date.now() + 30 * 864e5).toISOString() },
+        },
+      },
+    }),
+  };
+  const { load, rows } = harness({ fetch: async () => subscriberResponse });
+  // needsReconcile işaretli, tier free görünüyor ama RC'de pro aktif (drift)
+  rows.set("USER#user-x|SUBSCRIPTION", {
+    PK: "USER#user-x",
+    SK: "SUBSCRIPTION",
+    tier: "free",
+    status: "active",
+    needsReconcile: true,
+  });
+  // reconcile edilmemeli: eski, işaretsiz kullanıcı
+  rows.set("USER#user-old|SUBSCRIPTION", {
+    PK: "USER#user-old",
+    SK: "SUBSCRIPTION",
+    tier: "free",
+    status: "active",
+    eventTime: Math.floor((Date.now() - 10 * 864e5) / 1000),
+  });
+  const { handler } = load("billing/reconcile.ts");
+  const result = await handler({}, { getRemainingTimeInMillis: () => 60000 });
+  // user-x kontrol edildi ve pro'ya düzeltildi
+  assert.ok(result.checked >= 1, "en az bir kullanıcı kontrol edildi");
+  assert.equal(rows.get("USER#user-x|SUBSCRIPTION")?.tier, "pro", "drift pro'ya düzeltildi");
 });

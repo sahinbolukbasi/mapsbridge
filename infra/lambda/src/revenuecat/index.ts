@@ -362,7 +362,7 @@ async function rcSecretKey(): Promise<string> {
   return key;
 }
 
-async function getRcSubscriber(userId: string): Promise<Record<string, unknown> | null> {
+export async function getRcSubscriber(userId: string): Promise<Record<string, unknown> | null> {
   const key = await rcSecretKey();
   const res = await fetch(
     `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`,
@@ -392,7 +392,7 @@ async function createWebCheckoutUrl(
   return url.href;
 }
 
-async function syncFromSubscriber(
+export async function syncFromSubscriber(
   userId: string,
   subscriber: Record<string, unknown>,
   eventTime: number,
