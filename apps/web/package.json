@@ -32,7 +32,7 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.64.1",
     "@types/google.maps": "^3.66.4",
     "@types/node": "^22",
     "@types/react": "^19",
