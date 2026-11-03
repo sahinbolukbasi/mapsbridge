@@ -658,15 +658,32 @@ export default function AIPage() {
         // (401/402/403/409/429 ve AI_DISABLED/REQUEST_IN_PROGRESS) fallback'e düşmez.
         const runStream = async () => {
           const session = getStoredSession();
-          const resp = await fetch(STREAM_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
-            },
-            body: JSON.stringify(request),
-            signal: AbortSignal.timeout(38000),
-          });
+          let resp: Response;
+          try {
+            resp = await fetch(STREAM_URL, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
+              },
+              body: JSON.stringify(request),
+              signal: AbortSignal.timeout(38000),
+            });
+          } catch (fetchErr: unknown) {
+            // fetch'in attığı TypeError genelde CORS/preflight reddi, ağ kesintisi ya
+            // da timeout'tur — HTTP status'u yoktur. Kullanıcıya anlamlı kod ver.
+            const aborted =
+              (fetchErr as { name?: string })?.name === "AbortError" ||
+              (fetchErr as { name?: string })?.name === "TimeoutError";
+            throw Object.assign(
+              new Error(
+                aborted
+                  ? "AI yanıtı zaman aşımına uğradı."
+                  : "AI servisine ulaşılamadı (bağlantı/erişim engellendi).",
+              ),
+              { code: aborted ? "AI_TIMEOUT" : "AI_UNREACHABLE" },
+            );
+          }
           if (!resp.ok || !resp.body)
             throw Object.assign(new Error(`Stream failed (${resp.status})`), {
               status: resp.status,
@@ -882,6 +899,16 @@ export default function AIPage() {
         ((err?.status ?? 0) >= 500 && code !== "AI_RESULT_UNCONFIRMED")
       ) {
         setError("Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.");
+        setRetryAvailable(true);
+        lastPromptRef.current = promptToSend;
+      } else if (code === "AI_UNREACHABLE" || err?.status === 403) {
+        setError(
+          "AI servisine şu anda erişilemiyor (erişim engellendi). Bu geçici bir sunucu/ağ ayarı sorunudur, kredinizle ilgili değildir. Lütfen birazdan tekrar deneyin; sorun sürerse destek ekibine bildirin.",
+        );
+        setRetryAvailable(true);
+        lastPromptRef.current = promptToSend;
+      } else if (code === "AI_TIMEOUT") {
+        setError("AI yanıtı zaman aşımına uğradı. Lütfen tekrar deneyin.");
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;
       } else {
