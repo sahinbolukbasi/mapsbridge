@@ -149,7 +149,7 @@ jobs:
           terraform plan -out=tfplan $TARGET_ARGS $REFRESH_ARG
 
       - name: Upload plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-main-${{ github.run_id }}
           path: infra/terraform/tfplan
@@ -297,7 +297,7 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Upload plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-admin-runtime-${{ github.run_id }}
           path: infra/admin-runtime/tfplan
@@ -390,7 +390,7 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Upload plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-agentcore-gateway-${{ github.run_id }}
           path: infra/agentcore-gateway/tfplan
@@ -479,7 +479,7 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Upload plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-ai-memory-${{ github.run_id }}
           path: infra/ai-memory/tfplan
@@ -563,7 +563,7 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Upload plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-ai-finops-${{ github.run_id }}
           path: infra/ai-finops/tfplan
@@ -637,7 +637,7 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Upload plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-ai-training-${{ github.run_id }}
           path: infra/ai-training/tfplan
@@ -701,7 +701,7 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Upload plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-travel-rag-${{ github.run_id }}
           path: infra/travel-rag/tfplan
