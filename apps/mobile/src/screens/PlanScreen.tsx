@@ -1901,7 +1901,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
       <ScreenTourModal screen="plan" />
 
       {/* Paywall Modal — opened by template gate and other Pro features */}
-      <PaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
+      <PaywallModal
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        placement="plan_screen"
+      />
     </Screen>
   );
 }

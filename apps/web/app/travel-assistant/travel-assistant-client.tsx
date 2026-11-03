@@ -1728,6 +1728,21 @@ export default function AIPage() {
                               Kredi Satın Al
                             </button>
                           )}
+                          {isDailyLimit && (
+                            <button
+                              type="button"
+                              className="ai-error-cta-btn"
+                              onClick={() =>
+                                openUpgradeModal(
+                                  "Günlük mesaj sınırını Pro ile kaldırın; kota her gece sıfırlanır.",
+                                  "subscriptions",
+                                  "ai_daily_quota",
+                                )
+                              }
+                            >
+                              Pro'ya Geç
+                            </button>
+                          )}
                           {(retryAvailable ||
                             (!isAuth &&
                               !isEmailVerify &&

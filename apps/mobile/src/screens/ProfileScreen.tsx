@@ -937,6 +937,7 @@ export function ProfileScreen({
       <PaywallModal
         visible={showPaywall}
         onClose={() => setShowPaywall(false)}
+        placement="profile"
         onProUnlocked={() => {
           setPlanTier("pro");
           setShowPaywall(false);

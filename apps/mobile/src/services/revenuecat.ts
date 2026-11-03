@@ -70,8 +70,15 @@ export function getActiveTier(info: CustomerInfo): PlanTier {
 
 export async function purchasePackage(
   pkg: PurchasesPackage,
+  placement?: string,
 ): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string }> {
   try {
+    // Dönüşüm ölçümü: paywall yerleşimini RevenueCat subscriber attribute'una yaz.
+    // Webhook payload'ında ve dashboard'da yerleşim bazlı dönüşüm görünür olur.
+    if (placement) {
+      // attribute yazımı satın almayı asla engellemez; hatayı yut
+      await Purchases.setAttributes({ paywall_placement: placement }).catch(() => {});
+    }
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     _cachedCustomerInfo = customerInfo;
     return { success: true, customerInfo };

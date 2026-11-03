@@ -21,6 +21,8 @@ interface PaywallModalProps {
   onClose: () => void;
   /** Called after a successful purchase or restore with pro status */
   onProUnlocked?: () => void;
+  /** Dönüşüm ölçümü için paywall yerleşim adı (ör. "plan_screen", "profile"). */
+  placement?: string;
 }
 
 const PLAN_ICONS: Record<string, string> = {
@@ -50,7 +52,7 @@ const PRO_FEATURES = [
   { icon: "🎯", text: "Kişiselleştirilmiş öneriler" },
 ];
 
-export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalProps) {
+export function PaywallModal({ visible, onClose, onProUnlocked, placement }: PaywallModalProps) {
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -98,7 +100,7 @@ export function PaywallModal({ visible, onClose, onProUnlocked }: PaywallModalPr
     }
     setPurchasing(true);
     try {
-      const result = await purchasePackage(pkg);
+      const result = await purchasePackage(pkg, placement);
       if (result.success) {
         Alert.alert("🎉 Pro aktif!", "MapsBridge Pro özelliklerine erişiminiz açıldı.", [
           {
