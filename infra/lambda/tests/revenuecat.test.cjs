@@ -104,6 +104,7 @@ function harness(options = {}) {
       ...commands,
     },
     "@aws-sdk/util-dynamodb": { marshall: (x) => x, unmarshall: (x) => x },
+    "node:crypto": require("node:crypto"),
     jose: {
       createRemoteJWKSet: () => () => ({}),
       jwtVerify: async () => ({ payload: {}, protectedHeader: {} }),
@@ -382,4 +383,37 @@ test("unknown product_id is silently ignored", async () => {
     !rows.get("USER#user-a|SUBSCRIPTION"),
     "no subscription row created for unknown product",
   );
+});
+
+test("idempotency: aynı event 3 kez → kredi tek kez, ikinci+ çağrı duplicate döner", async () => {
+  const { load, rows } = harness();
+  const { handler } = load("revenuecat/index.ts");
+  const ev = webhookEvent("INITIAL_PURCHASE");
+  const r1 = await handler(ev);
+  assert.equal(r1.statusCode, 200);
+  const creditsAfter1 = rows.get("USER#user-a|CREDITS")?.credits;
+  assert.ok(creditsAfter1 > 0, "ilk çağrıda kredi eklenir");
+  // Aynı event.id ile 2. ve 3. kez
+  const r2 = await handler(webhookEvent("INITIAL_PURCHASE"));
+  const r3 = await handler(webhookEvent("INITIAL_PURCHASE"));
+  assert.equal(r2.statusCode, 200);
+  assert.equal(r3.statusCode, 200);
+  assert.equal(JSON.parse(r2.body).duplicate, true, "2. çağrı duplicate");
+  assert.equal(JSON.parse(r3.body).duplicate, true, "3. çağrı duplicate");
+  // Kredi ARTMADI (çift harcama/çift kredi yok)
+  assert.equal(
+    rows.get("USER#user-a|CREDITS")?.credits,
+    creditsAfter1,
+    "tekrar eden event kredi eklemez",
+  );
+  // Tek idempotency guard kaydı
+  assert.ok(rows.get("BILLING#RC_EVENT#evt-test-1|PROCESSED"), "event işlendi olarak kaydedilir");
+});
+test("constant-time secret: yanlış uzunlukta secret de 401 (timingSafeEqual length guard)", async () => {
+  const { load } = harness();
+  const { handler } = load("revenuecat/index.ts");
+  const event = webhookEvent("INITIAL_PURCHASE");
+  event.headers.authorization = "Bearer x";
+  const res = await handler(event);
+  assert.equal(res.statusCode, 401);
 });

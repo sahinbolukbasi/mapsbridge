@@ -4,7 +4,8 @@ import type { ApiGatewayEvent } from "../shared/http";
 import { BillingError, table, wallet, grantCredits, initializeTrial } from "../billing/store";
 import { getDynamoClient } from "../shared/dynamo";
 import { catalog } from "../billing/catalog";
-import { UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { UpdateItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { timingSafeEqual } from "node:crypto";
 import { marshall } from "@aws-sdk/util-dynamodb";
 
 const reply = (statusCode: number, body: unknown) => ({
@@ -13,6 +14,14 @@ const reply = (statusCode: number, body: unknown) => ({
   body: JSON.stringify(body),
 });
 
+/** Sabit-zamanlı secret karşılaştırması (timing attack koruması). */
+function secretMatches(authHeader: string, secret: string): boolean {
+  const expected = `Bearer ${secret}`;
+  const a = Buffer.from(authHeader);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
 function appOrigin() {
   const url = new URL(process.env.APP_ORIGIN || "");
   if (
@@ -103,7 +112,7 @@ async function handleWebhook(event: ApiGatewayEvent) {
   // RevenueCat sends Authorization: Bearer <secret>
   const authHeader = event.headers?.authorization || event.headers?.Authorization || "";
   const secret = await resolveEnvSecret(process.env.RC_WEBHOOK_AUTH_SECRET);
-  if (!secret || `Bearer ${secret}` !== authHeader)
+  if (!secret || !secretMatches(authHeader, secret))
     return reply(401, { error: "Geçersiz webhook kimlik doğrulama." });
 
   interface RCEvent {
@@ -143,6 +152,30 @@ async function handleWebhook(event: ApiGatewayEvent) {
     ? new Date(ev.expiration_at_ms).toISOString()
     : null;
 
+  // Idempotency guard: aynı event.id yalnızca BİR kez işlenir. Conditional put
+  // başarısızsa (attribute_exists) bu event daha önce işlenmiştir → sessizce 200.
+  try {
+    await getDynamoClient().send(
+      new PutItemCommand({
+        TableName: table(),
+        Item: marshall({
+          PK: `BILLING#RC_EVENT#${ev.id}`,
+          SK: "PROCESSED",
+          type: ev.type,
+          userId,
+          processedAt: new Date().toISOString(),
+          ttl: Math.floor(Date.now() / 1000) + 90 * 86400,
+        }),
+        ConditionExpression: "attribute_not_exists(PK)",
+      }),
+    );
+  } catch (err: unknown) {
+    if ((err as { name?: string })?.name === "ConditionalCheckFailedException") {
+      console.log(JSON.stringify({ msg: "rc_webhook_duplicate", eventId: ev.id, type: ev.type }));
+      return reply(200, { received: true, duplicate: true });
+    }
+    throw err;
+  }
   try {
     switch (ev.type as string) {
       case "INITIAL_PURCHASE": {
