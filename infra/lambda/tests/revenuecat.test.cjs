@@ -111,6 +111,18 @@ function harness(options = {}) {
     },
     "@aws-sdk/util-dynamodb": { marshall: (x) => x, unmarshall: (x) => x },
     "node:crypto": require("node:crypto"),
+    "@aws-sdk/client-sns": {
+      SNSClient: class {
+        async send() {
+          return {};
+        }
+      },
+      PublishCommand: class {
+        constructor(i) {
+          this.input = i;
+        }
+      },
+    },
     jose: {
       createRemoteJWKSet: () => () => ({}),
       jwtVerify: async () => ({ payload: {}, protectedHeader: {} }),

@@ -5,6 +5,7 @@ import { BillingError, table, wallet, grantCredits, initializeTrial } from "../b
 import { getDynamoClient } from "../shared/dynamo";
 import { catalog } from "../billing/catalog";
 import { UpdateItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 import { timingSafeEqual } from "node:crypto";
 import { marshall } from "@aws-sdk/util-dynamodb";
 
@@ -290,6 +291,9 @@ async function handleWebhook(event: ApiGatewayEvent) {
     }
   }
 
+  if (ev.type === "INITIAL_PURCHASE" || ev.type === "RENEWAL") {
+    await publishConversion(ev.id, userId, ev.type, productId, ev.store);
+  }
   return reply(200, { received: true });
 }
 
@@ -421,5 +425,29 @@ export async function syncFromSubscriber(
       `rc-verify-${Date.now()}`,
       eventTime,
     );
+  }
+}
+
+// ─── Conversion publish (best-effort, attribution) ──────────────────────────
+let snsClient: SNSClient | null = null;
+async function publishConversion(
+  eventId: string,
+  userId: string,
+  type: string,
+  productId: string,
+  store?: string,
+): Promise<void> {
+  const topic = process.env.BILLING_CONVERSIONS_TOPIC_ARN;
+  if (!topic) return;
+  try {
+    snsClient = snsClient || new SNSClient({});
+    await snsClient.send(
+      new PublishCommand({
+        TopicArn: topic,
+        Message: JSON.stringify({ eventId, userId, type, productId, store }),
+      }),
+    );
+  } catch (err) {
+    console.error("[RevenueCat] conversion publish failed (best-effort):", (err as Error).name);
   }
 }
