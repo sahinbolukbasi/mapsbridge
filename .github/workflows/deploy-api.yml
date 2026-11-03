@@ -106,6 +106,7 @@ jobs:
             ["ws-ondisconnect"]="$LAMBDA_ROOT/src/ws/ondisconnect.ts"
             ["revenuecat"]="$LAMBDA_ROOT/src/revenuecat/index.ts"
             ["billing-reconcile"]="$LAMBDA_ROOT/src/billing/reconcile.ts"
+            ["conversion-forwarder"]="$LAMBDA_ROOT/src/billing/conversion-forwarder.ts"
           )
 
           for name in "${!ENTRIES[@]}"; do
@@ -176,6 +177,7 @@ jobs:
             ["ws-ondisconnect"]="${PREFIX}-ws-ondisconnect"
             ["revenuecat"]="${PREFIX}-revenuecat"
             ["billing-reconcile"]="${PREFIX}-billing-reconcile"
+            ["conversion-forwarder"]="${PREFIX}-conversion-forwarder"
             ["rag-fill"]="${PREFIX}-rag-fill"
           )
 
