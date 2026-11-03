@@ -3,16 +3,22 @@
 # Attribution pipeline'ın backend tarafı (FAZ 2). Hedefler env ile flag'li; API
 # key yoksa no-op (güvenli başlangıç).
 
-# RevenueCat webhook secret (constructEvent/Authorization). Değer elle set edilir.
-resource "aws_secretsmanager_secret" "rc_webhook_secret" {
-  name        = "${var.prefix}/revenuecat/webhook-secret"
-  description = "RevenueCat webhook Authorization shared secret. Değeri elle set edilir."
-}
-resource "aws_secretsmanager_secret_version" "rc_webhook_secret" {
-  secret_id     = aws_secretsmanager_secret.rc_webhook_secret.id
-  secret_string = "placeholder-set-manually"
+# RevenueCat secret'ları — SSM Parameter Store (getSecret() SSM okur, bkz shared/http.ts).
+# Değerler elle set edilir (placeholder). İki parametre: webhook secret + REST API key.
+resource "aws_ssm_parameter" "rc_webhook_secret" {
+  name  = "/${var.prefix}/revenuecat/webhook-secret"
+  type  = "SecureString"
+  value = "placeholder-set-manually"
   lifecycle {
-    ignore_changes = [secret_string]
+    ignore_changes = [value]
+  }
+}
+resource "aws_ssm_parameter" "rc_api_key" {
+  name  = "/${var.prefix}/revenuecat/api-key"
+  type  = "SecureString"
+  value = "placeholder-set-manually"
+  lifecycle {
+    ignore_changes = [value]
   }
 }
 

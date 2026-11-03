@@ -21,7 +21,7 @@ resource "aws_iam_role_policy" "billing_reconcile" {
     Statement = [
       { Effect = "Allow", Action = ["logs:CreateLogStream", "logs:PutLogEvents"], Resource = "${aws_cloudwatch_log_group.billing_reconcile.arn}:*" },
       { Effect = "Allow", Action = ["dynamodb:Scan", "dynamodb:GetItem", "dynamodb:UpdateItem"], Resource = local.table_arn },
-      { Effect = "Allow", Action = ["secretsmanager:GetSecretValue"], Resource = aws_secretsmanager_secret.rc_api_key.arn },
+      { Effect = "Allow", Action = ["ssm:GetParameter"], Resource = "arn:aws:ssm:${var.region}:${var.account_id}:parameter/${var.prefix}/revenuecat/*" },
     ]
   })
 }
@@ -39,25 +39,13 @@ resource "aws_lambda_function" "billing_reconcile" {
   environment {
     variables = {
       DYNAMODB_TABLE    = var.dynamodb_table
-      RC_SECRET_API_KEY = "secret://${aws_secretsmanager_secret.rc_api_key.name}"
+      RC_SECRET_API_KEY = "secret:/${var.prefix}/revenuecat/api-key"
     }
   }
   depends_on = [aws_iam_role_policy.billing_reconcile, aws_cloudwatch_log_group.billing_reconcile]
   tags       = { Environment = "prod", Project = "mapsbridge", Workload = "billing" }
 }
 
-# RC REST API key — değeri Terraform'a yazılmaz, manuel set edilir (placeholder).
-resource "aws_secretsmanager_secret" "rc_api_key" {
-  name        = "${var.prefix}/revenuecat/api-key"
-  description = "RevenueCat REST API v2 secret key (reconciliation). Değeri elle set edilir."
-}
-resource "aws_secretsmanager_secret_version" "rc_api_key" {
-  secret_id     = aws_secretsmanager_secret.rc_api_key.id
-  secret_string = "placeholder-set-manually"
-  lifecycle {
-    ignore_changes = [secret_string] # elle set edilen değer korunur
-  }
-}
 
 # Günlük schedule
 resource "aws_iam_role" "billing_reconcile_scheduler" {
