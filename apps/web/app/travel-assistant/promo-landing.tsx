@@ -153,6 +153,15 @@ export function AIPromoLanding() {
     }
   }
 
+  // Taslak metni kayıt duvarı öncesi sakla; giriş sonrası /travel-assistant/ okuyup geri yükler.
+  function saveDraftMessage(text: string) {
+    if (typeof window === "undefined" || !text) return;
+    try {
+      sessionStorage.setItem("mb:draft-assistant-message", text.slice(0, 2000));
+    } catch {
+      // sessionStorage erişilemezse taslak kaybı kritik değil
+    }
+  }
   function handleStarterClick(text: string) {
     const session = getStoredSession();
     if (session?.token) {
@@ -160,6 +169,7 @@ export function AIPromoLanding() {
       return;
     }
     setPromptText(text);
+    saveDraftMessage(text);
     setAuthModal(true);
   }
 
@@ -171,6 +181,7 @@ export function AIPromoLanding() {
       window.location.assign(`/travel-assistant/${text ? `?q=${encodeURIComponent(text)}` : ""}`);
       return;
     }
+    saveDraftMessage(text);
     setAuthModal(true);
   }
 

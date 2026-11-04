@@ -306,6 +306,7 @@ export default function AIPage() {
   const inFlight = useRef(false);
   const end = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const autoSendRef = useRef<string | null>(null);
   const session = sessions.find((s) => s.id === activeId) || null;
   const route = session?.route && isRoutePlan(session.route) ? session.route : null;
   const { memory, learnFromPrompt, buildContextString, clearMemory } = useUserMemory();
@@ -501,7 +502,20 @@ export default function AIPage() {
     }
     refreshCurrentTrip();
     const query = new URLSearchParams(window.location.search).get("q");
-    if (query) setInput(query.slice(0, 2000));
+    let draft = "";
+    try {
+      draft = sessionStorage.getItem("mb:draft-assistant-message") || "";
+      if (draft) sessionStorage.removeItem("mb:draft-assistant-message");
+    } catch {
+      // sessionStorage erişilemezse taslak yok sayılır
+    }
+    // Öncelik: URL ?q= (paylaşılabilir) > kayıt duvarı öncesi saklanan taslak.
+    const seed = (query || draft).slice(0, 2000);
+    if (seed) {
+      setInput(seed);
+      // ?q= ile gelen giriş yapmış kullanıcı: isteğini otomatik başlat (tekrar Enter gerekmesin).
+      if (query) autoSendRef.current = query.slice(0, 2000);
+    }
     const stored = getStoredSession();
     if (stored?.token) {
       if (isTokenExpired(stored.token)) {
@@ -531,6 +545,14 @@ export default function AIPage() {
       }
     }
   }, [sessions, ready]);
+  useEffect(() => {
+    if (!ready) return;
+    const pending = autoSendRef.current;
+    if (!pending) return;
+    autoSendRef.current = null;
+    // send() kendi auth kontrolünü yapar: giriş yoksa taslağı koruyup modal açar.
+    void send(false, pending);
+  }, [ready]);
   useEffect(() => {
     end.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [session?.messages, busy]);
