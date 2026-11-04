@@ -264,12 +264,10 @@ export default function SignUpPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const errors: Partial<Record<FieldKey, string>> = {};
-    if (!username.trim()) errors.username = "Kullanıcı adı seçin.";
-    if (!fullname.trim()) errors.fullname = "Adınızı ve soyadınızı girin.";
+    // Yalnızca e-posta + şifre zorunlu (KVKK veri minimizasyonu). Ad/kullanıcı adı/telefon opsiyonel.
     if (!email.trim()) errors.email = "E-posta adresinizi girin.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       errors.email = "Geçerli bir e-posta adresi girin (ör. deniz@ornek.com).";
-    if (!phone.trim()) errors.phone = "Telefon numaranızı ülke koduyla girin.";
     if (!password) errors.password = "Bir şifre belirleyin.";
     else if (!isPasswordValid) errors.password = "Şifre güvenlik kriterlerinin tümünü karşılamalı.";
     setFieldErrors(errors);
@@ -283,11 +281,12 @@ export default function SignUpPage() {
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
-    const cleanName = fullname.trim();
     const cleanUser = (username || cleanEmail.split("@")[0])
       .trim()
       .toLowerCase()
       .replace(/[^a-z0-9_]/g, "");
+    // Cognito 'name' attribute'u zorunlu: ad soyad > kullanıcı adı > e-posta öneki.
+    const cleanName = fullname.trim() || cleanUser || cleanEmail.split("@")[0];
 
     // Save profile details locally
     try {
@@ -444,8 +443,7 @@ export default function SignUpPage() {
                 {/* Kullanıcı Adı */}
                 <Field
                   id="username"
-                  label="Kullanıcı Adı"
-                  required
+                  label="Kullanıcı Adı (opsiyonel)"
                   error={fieldErrors.username}
                   className="signup-form-group"
                   hint={
@@ -473,7 +471,6 @@ export default function SignUpPage() {
                         className="signup-input signup-input--at"
                         name="username"
                         placeholder="gezginrotasi"
-                        required
                         type="text"
                         autoComplete="username"
                         value={username}
@@ -489,8 +486,7 @@ export default function SignUpPage() {
                 <div className="signup-name-grid">
                   <Field
                     id="fullname"
-                    label="Ad Soyad"
-                    required
+                    label="Ad Soyad (opsiyonel)"
                     error={fieldErrors.fullname}
                     className="signup-form-group"
                   >
@@ -500,7 +496,6 @@ export default function SignUpPage() {
                         className="signup-input"
                         name="fullname"
                         placeholder="Deniz Yılmaz"
-                        required
                         type="text"
                         autoComplete="name"
                         value={fullname}
@@ -535,8 +530,7 @@ export default function SignUpPage() {
                 {/* Telefon */}
                 <Field
                   id="phone"
-                  label="Telefon"
-                  required
+                  label="Telefon (opsiyonel)"
                   error={fieldErrors.phone}
                   className="signup-form-group"
                   hint={
@@ -547,7 +541,8 @@ export default function SignUpPage() {
                       >
                         info
                       </span>
-                      Başında + ve ülke kodu ile yazmalısın. Örn: +905551234567
+                      İstersen ekle; hesap güvenliği ve önemli bildirimler için kullanılır.
+                      Doğrulama e-posta ile yapılır. Örn: +905551234567
                     </span>
                   }
                 >
@@ -564,7 +559,6 @@ export default function SignUpPage() {
                         className="signup-input signup-input--icon"
                         name="phone"
                         placeholder="+905551234567"
-                        required
                         type="tel"
                         autoComplete="tel"
                         value={phone}
