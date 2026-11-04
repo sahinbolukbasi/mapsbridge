@@ -401,6 +401,28 @@ resource "aws_iam_role_policy" "admin_data_read" {
   })
 }
 
+# marketplace Lambda: guides CRUD + listeleme (Scan). billing-data for_each listesinde
+# marketplace yoktu -> guides listesi dynamodb:Scan AccessDenied (500) veriyordu. Bu düzeltir.
+resource "aws_iam_role_policy" "marketplace_data" {
+  count = contains(keys(var.lambda_domains), "marketplace") ? 1 : 0
+  name  = "marketplace-data"
+  role  = aws_iam_role.lambda["marketplace"].id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+      ]
+      Resource = [var.billing_table_arn, "${var.billing_table_arn}/index/*"]
+    }]
+  })
+}
 resource "aws_iam_role_policy" "account_status_read" {
   for_each = var.lambda_domains
   name     = "account-status-read"
