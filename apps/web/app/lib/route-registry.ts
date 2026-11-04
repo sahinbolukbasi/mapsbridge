@@ -139,7 +139,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     path: "/how-it-works/",
     file: "app/how-it-works/page.tsx",
     layout: "landing",
-    title: t("Nasıl Çalışır? · MapsBridge Akıllı Seyahat Kılavuzu", "How it works"),
+    title: t("Nasıl çalışır", "How it works"),
     description: t(
       "MapsBridge ile seyahat planlama, yapay zeka optimizasyonu, canlı harita masası ve 6 haneli kodla paylaşım nasıl çalışır? Adım adım keşfedin.",
       "How travel planning, AI optimization, the live map desk and 6-digit code sharing work in MapsBridge, step by step.",
