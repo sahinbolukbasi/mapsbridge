@@ -51,6 +51,12 @@
     align-items: start;
     min-height: 0;
   }
+  /* İçerik yokken sidebar gizlenir; tek kolon (tasarım-4). */
+  .community-layout--single {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 720px;
+    margin-inline: auto;
+  }
 
   @media (min-width: 1024px) {
     .community-layout {

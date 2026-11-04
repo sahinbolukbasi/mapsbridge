@@ -387,7 +387,7 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      <div className="community-layout">
+      <div className={`community-layout${posts.length === 0 ? " community-layout--single" : ""}`}>
         {/* ── MAIN FEED ── */}
         <div className="community-feed-col">
           <DiscoverTab
@@ -420,103 +420,107 @@ export default function CommunityPage() {
           />
         </div>
 
-        {/* ── SIDEBAR ── */}
-        <aside className="community-sidebar-col">
-          <div className="community-sidebar-card">
-            <h3 className="community-sidebar-title">
-              <span
-                className="material-symbols-outlined"
-                aria-hidden="true"
-                style={{ fontSize: 18 }}
-              >
-                explore
-              </span>
-              Kategoriler
-            </h3>
-            <div className="community-sidebar-cats">
-              {[
-                { icon: "🏛️", label: "Tarih & Kültür" },
-                { icon: "🍽️", label: "Gastronomi" },
-                { icon: "🌲", label: "Doğa & Vadi" },
-                { icon: "📷", label: "Fotoğrafçılık" },
-                { icon: "🎒", label: "Sırt Çantalı" },
-                { icon: "🏙️", label: "Şehir Keşfi" },
-              ].map((c) => (
-                <span key={c.label} className="community-sidebar-cat-pill">
-                  {c.icon} {c.label}
-                </span>
-              ))}
-            </div>
-          </div>
+        {/* ── SIDEBAR (yalnızca içerik varken) ── */}
+        {posts.length > 0 && (
+          <>
+            <aside className="community-sidebar-col">
+              <div className="community-sidebar-card">
+                <h3 className="community-sidebar-title">
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: 18 }}
+                  >
+                    explore
+                  </span>
+                  Kategoriler
+                </h3>
+                <div className="community-sidebar-cats">
+                  {[
+                    { icon: "🏛️", label: "Tarih & Kültür" },
+                    { icon: "🍽️", label: "Gastronomi" },
+                    { icon: "🌲", label: "Doğa & Vadi" },
+                    { icon: "📷", label: "Fotoğrafçılık" },
+                    { icon: "🎒", label: "Sırt Çantalı" },
+                    { icon: "🏙️", label: "Şehir Keşfi" },
+                  ].map((c) => (
+                    <span key={c.label} className="community-sidebar-cat-pill">
+                      {c.icon} {c.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
-          <div className="community-sidebar-card">
-            <h3 className="community-sidebar-title">
-              <span
-                className="material-symbols-outlined"
-                aria-hidden="true"
-                style={{ fontSize: 18 }}
-              >
-                auto_awesome
-              </span>
-              Hızlı Bağlantılar
-            </h3>
-            <nav className="community-sidebar-links">
-              <a href="/travel-assistant/" className="community-sidebar-link">
-                <span
-                  className="material-symbols-outlined"
-                  aria-hidden="true"
-                  style={{ fontSize: 18 }}
-                >
-                  smart_toy
-                </span>
-                <span>AI Seyahat Asistanı</span>
-              </a>
-              <a href="/maps/" className="community-sidebar-link">
-                <span
-                  className="material-symbols-outlined"
-                  aria-hidden="true"
-                  style={{ fontSize: 18 }}
-                >
-                  map
-                </span>
-                <span>Seyahat Masası</span>
-              </a>
-              <a href="/profile/" className="community-sidebar-link">
-                <span
-                  className="material-symbols-outlined"
-                  aria-hidden="true"
-                  style={{ fontSize: 18 }}
-                >
-                  person
-                </span>
-                <span>Profilim</span>
-              </a>
-            </nav>
-          </div>
+              <div className="community-sidebar-card">
+                <h3 className="community-sidebar-title">
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: 18 }}
+                  >
+                    auto_awesome
+                  </span>
+                  Hızlı Bağlantılar
+                </h3>
+                <nav className="community-sidebar-links">
+                  <a href="/travel-assistant/" className="community-sidebar-link">
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: 18 }}
+                    >
+                      smart_toy
+                    </span>
+                    <span>AI Seyahat Asistanı</span>
+                  </a>
+                  <a href="/maps/" className="community-sidebar-link">
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: 18 }}
+                    >
+                      map
+                    </span>
+                    <span>Seyahat Masası</span>
+                  </a>
+                  <a href="/profile/" className="community-sidebar-link">
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: 18 }}
+                    >
+                      person
+                    </span>
+                    <span>Profilim</span>
+                  </a>
+                </nav>
+              </div>
 
-          <div className="community-sidebar-card community-sidebar-cta">
-            <span
-              className="material-symbols-outlined community-sidebar-cta-icon"
-              aria-hidden="true"
-            >
-              explore
-            </span>
-            <strong>Rotanı Paylaş</strong>
-            <p>Kendi gezi rotalarını toplulukla paylaş, diğer gezginlere ilham ver.</p>
-            <button
-              type="button"
-              className="community-share-btn"
-              style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}
-              onClick={() => {
-                requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
-                  setShowNewPostModal(true);
-                });
-              }}
-            >
-              Paylaşım Yap
-            </button>
-          </div>
-        </aside>
+              <div className="community-sidebar-card community-sidebar-cta">
+                <span
+                  className="material-symbols-outlined community-sidebar-cta-icon"
+                  aria-hidden="true"
+                >
+                  explore
+                </span>
+                <strong>Rotanı Paylaş</strong>
+                <p>Kendi gezi rotalarını toplulukla paylaş, diğer gezginlere ilham ver.</p>
+                <button
+                  type="button"
+                  className="community-share-btn"
+                  style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}
+                  onClick={() => {
+                    requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
+                      setShowNewPostModal(true);
+                    });
+                  }}
+                >
+                  Paylaşım Yap
+                </button>
+              </div>
+            </aside>
+          </>
+        )}
       </div>
 
       {/* ── YENİ PAYLAŞIM MODALI ── */}
