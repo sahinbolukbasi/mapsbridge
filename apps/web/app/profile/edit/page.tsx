@@ -1538,7 +1538,7 @@ export default function EditProfilePage() {
                         </span>
                       </div>
                       <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div className="pe-u-row-center">
                           <span
                             style={{
                               fontSize: "16px",
@@ -2252,7 +2252,7 @@ export default function EditProfilePage() {
                       marginBottom: "16px",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="pe-u-row-center">
                       <span
                         className="material-symbols-outlined"
                         aria-hidden="true"
@@ -2578,7 +2578,7 @@ export default function EditProfilePage() {
                 paddingBottom: "12px",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="pe-u-row-center">
                 <span
                   className="material-symbols-outlined"
                   aria-hidden="true"
@@ -2609,7 +2609,7 @@ export default function EditProfilePage() {
                 marginBottom: "20px",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className="pe-u-row-between">
                 <span
                   style={{ color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)" }}
                 >
@@ -2617,7 +2617,7 @@ export default function EditProfilePage() {
                 </span>
                 <span style={{ fontWeight: 600 }}>{selectedReceiptTx.description}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className="pe-u-row-between">
                 <span
                   style={{ color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)" }}
                 >
@@ -2625,7 +2625,7 @@ export default function EditProfilePage() {
                 </span>
                 <span>{new Date(selectedReceiptTx.date).toLocaleString("tr-TR")}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className="pe-u-row-between">
                 <span
                   style={{ color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)" }}
                 >
@@ -2641,7 +2641,7 @@ export default function EditProfilePage() {
               </div>
               {selectedReceiptTx.creditsDelta !== undefined &&
                 selectedReceiptTx.creditsDelta !== 0 && (
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div className="pe-u-row-between">
                     <span
                       style={{
                         color: "color-mix(in srgb, var(--color-on-primary) 60%, transparent)",

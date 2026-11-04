@@ -1139,4 +1139,14 @@
   :where(.pe-u-shadow-sm) {
     box-shadow: var(--shadow-xs);
   }
+  /* Yerleşim yardımcıları (inline style yerine; G20 uyumu) */
+  .pe-u-row-between {
+    display: flex;
+    justify-content: space-between;
+  }
+  .pe-u-row-center {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
 }
