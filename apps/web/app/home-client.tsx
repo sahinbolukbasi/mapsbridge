@@ -92,6 +92,33 @@ export default function Home() {
               {/* Subheading Description */}
               <p className="hero-sub">{t("home.hero.sub")}</p>
 
+              {/* Smart Search & Prompt Bar */}
+              <form className="hero-search-bar" onSubmit={handleDestinationSubmit}>
+                <div className="hero-search-left">
+                  <span className="material-symbols-outlined hero-search-icon" aria-hidden="true">
+                    auto_awesome
+                  </span>
+                  <input
+                    type="text"
+                    className="hero-search-input"
+                    placeholder={t("home.hero.searchPlaceholder")}
+                    value={destinationQuery}
+                    onChange={(e) => setDestinationQuery(e.target.value)}
+                    aria-label={t("home.hero.searchLabel")}
+                  />
+                </div>
+                <button type="submit" className="hero-search-btn" data-surface="inverse">
+                  <span>{t("home.hero.generateRoute")}</span>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "1.125rem" }}
+                  >
+                    arrow_forward
+                  </span>
+                </button>
+              </form>
+
               {/* Dual Action Buttons */}
               <div className="hero-actions">
                 <a
@@ -119,33 +146,6 @@ export default function Home() {
                   <span>{t("home.hero.howItWorks")}</span>
                 </a>
               </div>
-
-              {/* Smart Search & Prompt Bar */}
-              <form className="hero-search-bar" onSubmit={handleDestinationSubmit}>
-                <div className="hero-search-left">
-                  <span className="material-symbols-outlined hero-search-icon" aria-hidden="true">
-                    auto_awesome
-                  </span>
-                  <input
-                    type="text"
-                    className="hero-search-input"
-                    placeholder={t("home.hero.searchPlaceholder")}
-                    value={destinationQuery}
-                    onChange={(e) => setDestinationQuery(e.target.value)}
-                    aria-label={t("home.hero.searchLabel")}
-                  />
-                </div>
-                <button type="submit" className="hero-search-btn" data-surface="inverse">
-                  <span>{t("home.hero.generateRoute")}</span>
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ fontSize: "1.125rem" }}
-                  >
-                    arrow_forward
-                  </span>
-                </button>
-              </form>
 
               {/* Micro Feature Tags */}
               <div className="hero-trust-tags">
