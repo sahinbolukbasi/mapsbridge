@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, FormEvent } from "react";
 import Link from "next/link";
 import { FullPagePromotion } from "../../components/auth-gate";
 import { getStoredSession, changePasswordDirect } from "../../lib/cognito";
+import { apiFetch } from "../../lib/api-client";
 import { userStorage } from "../../lib/user-storage";
 import { billingService } from "../../lib/billing/billing-service";
 import { WalletData, BillingDetails, BillingTransaction } from "../../lib/billing/billing-types";
@@ -362,6 +363,22 @@ export default function EditProfilePage() {
     setIsSavedAnimation(true);
     showToast("✓ Değişiklikleriniz başarıyla kaydedildi!");
     setTimeout(() => setIsSavedAnimation(false), 2400);
+    // Sunucuya kalıcı yaz (best-effort): başka cihaz/oturumda da görünsün.
+    if (getStoredSession()?.token) {
+      const nameParts = fullName.trim().split(" ");
+      void apiFetch("/profile/publish", {
+        method: "POST",
+        body: JSON.stringify({
+          username: cleanUser,
+          profile: {
+            firstName: nameParts[0] || cleanUser,
+            lastName: nameParts.slice(1).join(" ") || "",
+            bio: bio.trim(),
+            avatar: userAvatar || "",
+          },
+        }),
+      }).catch(() => {});
+    }
   }
 
   // Password Rules Check
