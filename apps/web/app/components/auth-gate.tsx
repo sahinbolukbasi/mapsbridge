@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { PageHeader, PageShell } from "./ui";
+import { Modal, PageHeader, PageShell } from "./ui";
 import { GoogleAuthButton } from "./google-auth-button";
 import "./auth-gate.css";
 
@@ -147,47 +147,46 @@ export function AuthActionModal({
   featureName = "Özel Gezgin Özelliği",
   nextUrl = "/maps/",
 }: AuthActionModalProps) {
-  if (!isOpen) return null;
-
   const signupLink = `/register/?next=${encodeURIComponent(nextUrl)}`;
   const loginLink = `/login/?next=${encodeURIComponent(nextUrl)}`;
 
   return (
-    <div className="auth-modal-overlay" onClick={onClose}>
-      <div
-        className="auth-modal-card"
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button type="button" className="auth-modal-close-btn" onClick={onClose} aria-label="Kapat">
-          ✕
-        </button>
-
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={title}
+      description={subtitle}
+      className="auth-modal-card"
+    >
+      <div className="auth-modal-body">
         <div className="auth-modal-badge">
-          <span>🔒</span>
+          <span aria-hidden="true">🔒</span>
           <span>{featureName}</span>
         </div>
 
-        <h2 className="auth-modal-title">{title}</h2>
-        <p className="auth-modal-subtitle">{subtitle}</p>
-
         <ul className="auth-modal-perks">
           <li className="auth-modal-perk-item">
-            <span className="auth-modal-perk-check">✓</span>
+            <span className="auth-modal-perk-check" aria-hidden="true">
+              ✓
+            </span>
             <span>Süreli, şifreli ve tahmin edilemez konum paylaşımı</span>
           </li>
           <li className="auth-modal-perk-item">
-            <span className="auth-modal-perk-check">✓</span>
+            <span className="auth-modal-perk-check" aria-hidden="true">
+              ✓
+            </span>
             <span>Sınırsız seyahat grubu, durak ve harita notu kaydetme</span>
           </li>
           <li className="auth-modal-perk-item">
-            <span className="auth-modal-perk-check">✓</span>
+            <span className="auth-modal-perk-check" aria-hidden="true">
+              ✓
+            </span>
             <span>Yapay zeka destekli akıllı rota ve gezi planlayıcı</span>
           </li>
           <li className="auth-modal-perk-item">
-            <span className="auth-modal-perk-check">✓</span>
+            <span className="auth-modal-perk-check" aria-hidden="true">
+              ✓
+            </span>
             <span>Tüm cihazlarınızla anında bulut senkronizasyonu</span>
           </li>
         </ul>
@@ -198,7 +197,7 @@ export function AuthActionModal({
 
         <div className="auth-modal-actions">
           <a href={signupLink} className="auth-modal-signup-btn">
-            <span>🚀</span>
+            <span aria-hidden="true">🚀</span>
             <span>Hemen Ücretsiz Kayıt Ol</span>
           </a>
           <a href={loginLink} className="auth-modal-login-btn">
@@ -206,7 +205,7 @@ export function AuthActionModal({
           </a>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
