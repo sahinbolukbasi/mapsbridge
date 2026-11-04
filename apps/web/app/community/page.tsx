@@ -333,7 +333,7 @@ export default function CommunityPage() {
                 Canlı Seyahat Ağı
               </span>
             </div>
-            <span className="hero-active-count">2.400+ Gezgin şu an rotalarda aktif</span>
+            <span className="hero-active-count">Beta’dayız — ilk rotaları sen paylaş</span>
           </div>
 
           {/* Headline + CTA */}

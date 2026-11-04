@@ -620,40 +620,6 @@ export default function LoginPage() {
 
               {/* Alt Kısım: Sayısal Başarı ve Gezgin Yorumu */}
               <div className="login-bottom-showcase">
-                {/* Canlı Metrik Kartı */}
-                <div className="login-metrics-box" data-surface="default">
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "28px",
-                        lineHeight: "36px",
-                        fontWeight: 700,
-                        color: "var(--color-text)",
-                      }}
-                    >
-                      140K+
-                    </div>
-                    <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
-                      Kayıtlı Gezgin
-                    </div>
-                  </div>
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "28px",
-                        lineHeight: "36px",
-                        fontWeight: 700,
-                        color: "var(--color-brand)",
-                      }}
-                    >
-                      500K+
-                    </div>
-                    <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
-                      Canlı Keşif Noktası
-                    </div>
-                  </div>
-                </div>
-
                 {/* Yarı Saydam Gerçek Kullanıcı Deneyimi Kartı */}
                 <div className="login-testimonial-box" data-surface="default">
                   <div
