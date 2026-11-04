@@ -484,6 +484,7 @@ export default function ForgotPasswordPage() {
                   >
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ color: "var(--color-success-strong)", flexShrink: 0 }}
                     >
                       lock_clock

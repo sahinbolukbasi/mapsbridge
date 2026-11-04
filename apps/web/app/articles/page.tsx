@@ -66,7 +66,11 @@ export default function ArticlesPage() {
                 gap: "0.25rem",
               }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "18px" }}
+              >
                 arrow_back
               </span>
               Ana Sayfaya Dön
@@ -144,7 +148,11 @@ export default function ArticlesPage() {
                   marginBottom: "1.5rem",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "18px" }}
+                >
                   arrow_back
                 </span>
                 Tüm yazılara dön
@@ -180,6 +188,7 @@ export default function ArticlesPage() {
             >
               <span
                 className="material-symbols-outlined"
+                aria-hidden="true"
                 style={{ fontSize: "48px", color: "#10b981", marginBottom: "1rem" }}
               >
                 article

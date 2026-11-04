@@ -13,6 +13,7 @@ export default function MapsLoading() {
     >
       <span
         className="material-symbols-outlined"
+        aria-hidden="true"
         style={{ fontSize: 40, color: "#22c55e", animation: "ui-pulse 1.4s ease-in-out infinite" }}
       >
         map

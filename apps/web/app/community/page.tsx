@@ -424,7 +424,11 @@ export default function CommunityPage() {
         <aside className="community-sidebar-col">
           <div className="community-sidebar-card">
             <h3 className="community-sidebar-title">
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: 18 }}
+              >
                 explore
               </span>
               Kategoriler
@@ -447,26 +451,42 @@ export default function CommunityPage() {
 
           <div className="community-sidebar-card">
             <h3 className="community-sidebar-title">
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: 18 }}
+              >
                 auto_awesome
               </span>
               Hızlı Bağlantılar
             </h3>
             <nav className="community-sidebar-links">
               <a href="/travel-assistant/" className="community-sidebar-link">
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: 18 }}
+                >
                   smart_toy
                 </span>
                 <span>AI Seyahat Asistanı</span>
               </a>
               <a href="/maps/" className="community-sidebar-link">
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: 18 }}
+                >
                   map
                 </span>
                 <span>Seyahat Masası</span>
               </a>
               <a href="/profile/" className="community-sidebar-link">
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: 18 }}
+                >
                   person
                 </span>
                 <span>Profilim</span>
@@ -475,7 +495,12 @@ export default function CommunityPage() {
           </div>
 
           <div className="community-sidebar-card community-sidebar-cta">
-            <span className="material-symbols-outlined community-sidebar-cta-icon">explore</span>
+            <span
+              className="material-symbols-outlined community-sidebar-cta-icon"
+              aria-hidden="true"
+            >
+              explore
+            </span>
             <strong>Rotanı Paylaş</strong>
             <p>Kendi gezi rotalarını toplulukla paylaş, diğer gezginlere ilham ver.</p>
             <button

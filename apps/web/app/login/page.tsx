@@ -547,7 +547,9 @@ export default function LoginPage() {
                     }
                   >
                     <span>Ücretsiz üye ol</span>
-                    <span className="material-symbols-outlined">arrow_forward</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      arrow_forward
+                    </span>
                   </Link>
                 </div>
                 <p
@@ -571,6 +573,7 @@ export default function LoginPage() {
                 >
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ color: "var(--color-text-accent)" }}
                   >
                     verified_user
@@ -594,7 +597,11 @@ export default function LoginPage() {
 
               {/* Üst Asılı Hap: Son Ziyaret Edilen Rota */}
               <div className="login-top-pill" data-surface="default">
-                <span className="material-symbols-outlined" style={{ color: "var(--color-brand)" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ color: "var(--color-brand)" }}
+                >
                   explore
                 </span>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--color-text)" }}>
@@ -631,11 +638,21 @@ export default function LoginPage() {
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <span className="material-symbols-outlined">star</span>
-                    <span className="material-symbols-outlined">star</span>
-                    <span className="material-symbols-outlined">star</span>
-                    <span className="material-symbols-outlined">star</span>
-                    <span className="material-symbols-outlined">star</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      star
+                    </span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      star
+                    </span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      star
+                    </span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      star
+                    </span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      star
+                    </span>
                   </div>
                   <blockquote
                     style={{
@@ -671,6 +688,7 @@ export default function LoginPage() {
                     >
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ color: "var(--color-brand)" }}
                       >
                         pin_drop

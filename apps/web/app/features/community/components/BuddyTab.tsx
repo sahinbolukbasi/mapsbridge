@@ -68,6 +68,7 @@ export function BuddyTab({
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
             <span
               className="material-symbols-outlined"
+              aria-hidden="true"
               style={{ color: "var(--color-accent-strong)", fontSize: "22px" }}
             >
               psychology
@@ -365,7 +366,9 @@ export function BuddyTab({
                       gap: "6px",
                     }}
                   >
-                    <span className="material-symbols-outlined">chat</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      chat
+                    </span>
                     <span>Bire Bir Mesaj</span>
                   </button>
 

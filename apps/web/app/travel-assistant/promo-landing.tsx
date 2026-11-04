@@ -233,6 +233,7 @@ export function AIPromoLanding() {
             <span className="ai-promo-stat-pill">
               <span
                 className="material-symbols-outlined"
+                aria-hidden="true"
                 style={{ fontSize: "16px", color: "var(--color-text-accent)" }}
               >
                 bolt
@@ -242,6 +243,7 @@ export function AIPromoLanding() {
             <span className="ai-promo-stat-pill">
               <span
                 className="material-symbols-outlined"
+                aria-hidden="true"
                 style={{ fontSize: "16px", color: "var(--color-link)" }}
               >
                 verified
@@ -251,6 +253,7 @@ export function AIPromoLanding() {
             <span className="ai-promo-stat-pill">
               <span
                 className="material-symbols-outlined"
+                aria-hidden="true"
                 style={{ fontSize: "16px", color: "var(--color-text-brand)" }}
               >
                 sync
@@ -270,7 +273,11 @@ export function AIPromoLanding() {
               <div className="ai-promo-bot-badge-group">
                 <div className="ai-promo-bot-icon-wrap">
                   <div className="ai-promo-bot-icon-box">
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "24px" }}
+                    >
                       smart_toy
                     </span>
                   </div>
@@ -303,7 +310,11 @@ export function AIPromoLanding() {
                   title="Sohbeti Başlat"
                   style={{ padding: "0.45rem 0.85rem" }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "16px" }}
+                  >
                     add
                   </span>
                   <span>Yeni Sohbet</span>
@@ -316,7 +327,11 @@ export function AIPromoLanding() {
               {/* Bot Welcome Bubble */}
               <div className="ai-promo-bubble-row">
                 <div className="ai-promo-avatar-mini">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     neurology
                   </span>
                 </div>
@@ -392,13 +407,21 @@ export function AIPromoLanding() {
                     }}
                   >
                     <span>14:32</span>
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "14px" }}
+                    >
                       done_all
                     </span>
                   </div>
                 </div>
                 <div className="ai-promo-avatar-mini user-avatar">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     person
                   </span>
                 </div>
@@ -407,7 +430,11 @@ export function AIPromoLanding() {
               {/* Bot Response Bubble */}
               <div className="ai-promo-bubble-row">
                 <div className="ai-promo-avatar-mini">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     auto_awesome
                   </span>
                 </div>
@@ -442,6 +469,7 @@ export function AIPromoLanding() {
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "14px", color: "var(--color-link)" }}
                         >
                           calendar_today
@@ -452,6 +480,7 @@ export function AIPromoLanding() {
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "14px", color: "var(--color-link)" }}
                         >
                           location_on
@@ -462,6 +491,7 @@ export function AIPromoLanding() {
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "14px", color: "var(--color-link)" }}
                         >
                           directions_walk
@@ -480,7 +510,11 @@ export function AIPromoLanding() {
                           border: "none",
                         }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "15px" }}
+                        >
                           map
                         </span>
                         Haritada İncele
@@ -490,7 +524,11 @@ export function AIPromoLanding() {
                         onClick={() => setAuthModal(true)}
                         className="ai-promo-sub-btn"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "15px" }}
+                        >
                           tune
                         </span>
                         Kişiselleştir
@@ -510,7 +548,11 @@ export function AIPromoLanding() {
             <div className="ai-promo-chat-dock">
               <div className="ai-promo-filter-row">
                 <div className="ai-promo-filter-pill">
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "14px" }}
+                  >
                     speed
                   </span>
                   <span>Tempo:</span>
@@ -525,7 +567,11 @@ export function AIPromoLanding() {
                   </select>
                 </div>
                 <div className="ai-promo-filter-pill">
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "14px" }}
+                  >
                     payments
                   </span>
                   <span>Bütçe:</span>
@@ -540,7 +586,11 @@ export function AIPromoLanding() {
                   </select>
                 </div>
                 <div className="ai-promo-filter-pill">
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "14px" }}
+                  >
                     directions_walk
                   </span>
                   <span style={{ fontWeight: 600, color: "var(--color-surface-inverse)" }}>
@@ -557,7 +607,11 @@ export function AIPromoLanding() {
                   style={{ border: "none", background: "transparent", padding: "6px" }}
                   title="Fotoğraf Ekle"
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "20px" }}
+                  >
                     add_photo_alternate
                   </span>
                 </button>
@@ -568,7 +622,11 @@ export function AIPromoLanding() {
                   style={{ border: "none", background: "transparent", padding: "6px" }}
                   title="Sesli Komut"
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "20px" }}
+                  >
                     mic
                   </span>
                 </button>
@@ -581,7 +639,11 @@ export function AIPromoLanding() {
                 />
                 <button type="submit" className="ai-promo-send-btn">
                   <span>Gönder</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "16px" }}
+                  >
                     send
                   </span>
                 </button>
@@ -596,6 +658,7 @@ export function AIPromoLanding() {
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ fontSize: "20px", color: "var(--color-link)" }}
                   >
                     map
@@ -623,7 +686,11 @@ export function AIPromoLanding() {
                 className="ai-promo-badge"
                 style={{ padding: "0.25rem 0.65rem", fontSize: "10.5px" }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "13px" }}
+                >
                   auto_awesome
                 </span>
                 AI OPTİMİZE EDİLDİ
@@ -659,7 +726,11 @@ export function AIPromoLanding() {
                 style={{ position: "absolute", top: "10px", right: "12px", padding: "6px" }}
                 title="Harita Masasını Aç"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "18px" }}
+                >
                   open_in_new
                 </span>
               </Link>
@@ -707,7 +778,11 @@ export function AIPromoLanding() {
                     <div className="ai-promo-stop-topline">
                       <span className="ai-promo-stop-time">{stop.time}</span>
                       <span className="ai-promo-stop-slot">
-                        <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "13px" }}
+                        >
                           {stop.icon}
                         </span>
                         {stop.slot}
@@ -724,7 +799,11 @@ export function AIPromoLanding() {
             {/* Bottom Actions Bar */}
             <div className="ai-promo-route-dock">
               <Link href="/maps/?kod=RM-841" className="ai-promo-main-action-btn">
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "20px" }}
+                >
                   explore
                 </span>
                 <span>Harita Panelinde Aç &amp; Düzenle</span>
@@ -733,6 +812,7 @@ export function AIPromoLanding() {
                 <button type="button" className="ai-promo-sub-btn" onClick={handleCopyCode}>
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ fontSize: "16px", color: "var(--color-text-accent)" }}
                   >
                     {copiedCode ? "check" : "content_copy"}
@@ -746,6 +826,7 @@ export function AIPromoLanding() {
                 >
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ fontSize: "16px", color: "var(--color-link)" }}
                   >
                     download
@@ -764,7 +845,11 @@ export function AIPromoLanding() {
           <div className="ai-promo-features-header">
             <div>
               <div className="ai-promo-features-badge">
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   psychology
                 </span>
                 Gelişmiş Harita Algoritmaları
@@ -796,7 +881,11 @@ export function AIPromoLanding() {
             <div className="ai-promo-pillar-card">
               <div>
                 <div className="ai-promo-pillar-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "28px" }}
+                  >
                     alt_route
                   </span>
                 </div>
@@ -808,7 +897,11 @@ export function AIPromoLanding() {
               </div>
               <span className="ai-promo-pillar-tagline">
                 <span>Sıfır Çapraz Geçiş</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   trending_flat
                 </span>
               </span>
@@ -817,7 +910,11 @@ export function AIPromoLanding() {
             <div className="ai-promo-pillar-card">
               <div>
                 <div className="ai-promo-pillar-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "28px" }}
+                  >
                     account_balance_wallet
                   </span>
                 </div>
@@ -829,7 +926,11 @@ export function AIPromoLanding() {
               </div>
               <span className="ai-promo-pillar-tagline">
                 <span>Şeffaf Kalem Listesi</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   trending_flat
                 </span>
               </span>
@@ -838,7 +939,11 @@ export function AIPromoLanding() {
             <div className="ai-promo-pillar-card">
               <div>
                 <div className="ai-promo-pillar-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "28px" }}
+                  >
                     cloud_sync
                   </span>
                 </div>
@@ -850,7 +955,11 @@ export function AIPromoLanding() {
               </div>
               <span className="ai-promo-pillar-tagline">
                 <span>Anında Eşitleme</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   trending_flat
                 </span>
               </span>
@@ -859,7 +968,11 @@ export function AIPromoLanding() {
             <div className="ai-promo-pillar-card">
               <div>
                 <div className="ai-promo-pillar-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "28px" }}
+                  >
                     cloud_sync
                   </span>
                 </div>
@@ -871,7 +984,11 @@ export function AIPromoLanding() {
               </div>
               <span className="ai-promo-pillar-tagline">
                 <span>Dinamik Yeniden Rotalama</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   trending_flat
                 </span>
               </span>
@@ -911,7 +1028,11 @@ export function AIPromoLanding() {
                   gap: "4px",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   touch_app
                 </span>
                 Tıklayarak sohbeti başlatın
@@ -929,7 +1050,11 @@ export function AIPromoLanding() {
               >
                 <div>
                   <div className="ai-promo-template-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "20px" }}
+                    >
                       hiking
                     </span>
                   </div>
@@ -940,7 +1065,11 @@ export function AIPromoLanding() {
                 </div>
                 <span className="ai-promo-template-link">
                   Dene{" "}
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "14px" }}
+                  >
                     arrow_forward
                   </span>
                 </span>
@@ -956,7 +1085,11 @@ export function AIPromoLanding() {
               >
                 <div>
                   <div className="ai-promo-template-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "20px" }}
+                    >
                       family_restroom
                     </span>
                   </div>
@@ -967,7 +1100,11 @@ export function AIPromoLanding() {
                 </div>
                 <span className="ai-promo-template-link">
                   Dene{" "}
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "14px" }}
+                  >
                     arrow_forward
                   </span>
                 </span>
@@ -983,7 +1120,11 @@ export function AIPromoLanding() {
               >
                 <div>
                   <div className="ai-promo-template-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "20px" }}
+                    >
                       favorite
                     </span>
                   </div>
@@ -994,7 +1135,11 @@ export function AIPromoLanding() {
                 </div>
                 <span className="ai-promo-template-link">
                   Dene{" "}
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "14px" }}
+                  >
                     arrow_forward
                   </span>
                 </span>
@@ -1010,7 +1155,11 @@ export function AIPromoLanding() {
               >
                 <div>
                   <div className="ai-promo-template-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "20px" }}
+                    >
                       ramen_dining
                     </span>
                   </div>
@@ -1021,7 +1170,11 @@ export function AIPromoLanding() {
                 </div>
                 <span className="ai-promo-template-link">
                   Dene{" "}
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "14px" }}
+                  >
                     arrow_forward
                   </span>
                 </span>
@@ -1054,13 +1207,21 @@ export function AIPromoLanding() {
           </p>
           <div className="ai-promo-cta-buttons">
             <Link href={signupUrl(promptText)} className="ai-promo-cta-primary-btn">
-              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "20px" }}
+              >
                 rocket_launch
               </span>
               Ücretsiz Hesap Oluştur
             </Link>
             <Link href={loginUrl(promptText)} className="ai-promo-cta-secondary-btn">
-              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "20px" }}
+              >
                 login
               </span>
               Mevcut Hesaba Giriş Yap

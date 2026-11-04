@@ -97,7 +97,9 @@ export default function MobileAppsComingSoonPage() {
 
               {submitted ? (
                 <div className="waitlist-success">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     Harika! Kaydını aldık. Mobil uygulama açıldığında sana haber vereceğiz.
                   </span>
@@ -114,7 +116,11 @@ export default function MobileAppsComingSoonPage() {
                   />
                   <button type="submit" className="waitlist-btn" data-surface="inverse">
                     <span>Haberdar Et</span>
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "18px" }}
+                    >
                       arrow_forward
                     </span>
                   </button>
@@ -136,7 +142,9 @@ export default function MobileAppsComingSoonPage() {
           <div className="mobile-features-grid">
             <div className="mobile-feat-card">
               <div className="feat-icon-box">
-                <span className="material-symbols-outlined">offline_bolt</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  offline_bolt
+                </span>
               </div>
               <h4>Çevrimdışı Harita &amp; GPS</h4>
               <p>
@@ -147,7 +155,9 @@ export default function MobileAppsComingSoonPage() {
 
             <div className="mobile-feat-card">
               <div className="feat-icon-box">
-                <span className="material-symbols-outlined">sync</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  sync
+                </span>
               </div>
               <h4>Sıfır Kablo Eşitleme</h4>
               <p>
@@ -158,7 +168,9 @@ export default function MobileAppsComingSoonPage() {
 
             <div className="mobile-feat-card">
               <div className="feat-icon-box">
-                <span className="material-symbols-outlined">smart_toy</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  smart_toy
+                </span>
               </div>
               <h4>AI Saha Asistanı</h4>
               <p>
@@ -169,7 +181,9 @@ export default function MobileAppsComingSoonPage() {
 
             <div className="mobile-feat-card">
               <div className="feat-icon-box">
-                <span className="material-symbols-outlined">share_location</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  share_location
+                </span>
               </div>
               <h4>Canlı Gezgin Topluluğu</h4>
               <p>
@@ -191,7 +205,9 @@ export default function MobileAppsComingSoonPage() {
             </p>
             <Link href="/maps/" className="desk-cta-btn" data-surface="default">
               <span>Web Harita Masasını Aç</span>
-              <span className="material-symbols-outlined">open_in_new</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                open_in_new
+              </span>
             </Link>
           </div>
         </section>

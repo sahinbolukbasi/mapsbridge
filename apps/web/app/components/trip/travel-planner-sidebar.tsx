@@ -614,7 +614,9 @@ export function TravelPlannerSidebar({
           onClick={() => setPanelCollapsed(false)}
           title="Harita Planını Aç"
         >
-          <span className="material-symbols-outlined">left_panel_open</span>
+          <span className="material-symbols-outlined" aria-hidden="true">
+            left_panel_open
+          </span>
           <span className="rail-label">Aç</span>
         </button>
 
@@ -626,7 +628,9 @@ export function TravelPlannerSidebar({
           onClick={() => setPanelCollapsed(false)}
           title="Harita Planı"
         >
-          <span className="material-symbols-outlined">explore</span>
+          <span className="material-symbols-outlined" aria-hidden="true">
+            explore
+          </span>
           <span className="rail-label">Plan</span>
         </button>
       </div>
@@ -709,7 +713,9 @@ export function TravelPlannerSidebar({
                       onClick={() => handleCopyShare(selectedPin)}
                       title="Konumu Paylaş"
                     >
-                      <span className="material-symbols-outlined">share</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        share
+                      </span>
                       <span>Paylaş</span>
                     </button>
 
@@ -740,7 +746,7 @@ export function TravelPlannerSidebar({
                       }}
                       title="Kayıtlı Adreslerime Ekle"
                     >
-                      <span className="material-symbols-outlined">
+                      <span className="material-symbols-outlined" aria-hidden="true">
                         {generalPins.some(
                           (p) => p.id === selectedPin.id || p.label === selectedPin.label,
                         )
@@ -1099,7 +1105,11 @@ export function TravelPlannerSidebar({
                     title="Rotayı değiştir veya yeni rota ekle"
                   >
                     <div className="stitch-route-selector-icon">
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "18px" }}
+                      >
                         alt_route
                       </span>
                     </div>
@@ -1110,6 +1120,7 @@ export function TravelPlannerSidebar({
                         </h2>
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "16px", color: "#94a3b8" }}
                         >
                           {showRouteMenu ? "expand_less" : "expand_more"}
@@ -1151,7 +1162,11 @@ export function TravelPlannerSidebar({
                           }}
                           className="stitch-dropdown-add-btn"
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "14px" }}
+                          >
                             add_circle
                           </span>
                           Yeni Rota
@@ -1181,6 +1196,7 @@ export function TravelPlannerSidebar({
                               >
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{
                                     fontSize: "17px",
                                     color: isActive ? "#047857" : "#94a3b8",
@@ -1229,6 +1245,7 @@ export function TravelPlannerSidebar({
                                 >
                                   <span
                                     className="material-symbols-outlined"
+                                    aria-hidden="true"
                                     style={{ fontSize: "15px" }}
                                   >
                                     delete
@@ -1252,7 +1269,11 @@ export function TravelPlannerSidebar({
                     onClick={() => setPanelCollapsed(true)}
                     title="Paneli Daralt"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "16px" }}
+                    >
                       left_panel_close
                     </span>
                   </button>
@@ -1264,7 +1285,11 @@ export function TravelPlannerSidebar({
                 <div className="stitch-drawer-card">
                   <div className="stitch-drawer-header">
                     <span className="stitch-drawer-title">
-                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "16px" }}
+                      >
                         add_location_alt
                       </span>
                       Yeni Seyahat Rotası Oluştur
@@ -1360,7 +1385,11 @@ export function TravelPlannerSidebar({
                     showToast("🗓️ Yeni gün eklendi");
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "14px" }}
+                  >
                     add
                   </span>
                   <span>Gün</span>
@@ -1385,7 +1414,12 @@ export function TravelPlannerSidebar({
                       : handleSidebarSearchSubmit
                   }
                 >
-                  <span className="material-symbols-outlined stitch-search-icon-left">search</span>
+                  <span
+                    className="material-symbols-outlined stitch-search-icon-left"
+                    aria-hidden="true"
+                  >
+                    search
+                  </span>
                   <input
                     type="text"
                     className="stitch-search-input-field"
@@ -1495,6 +1529,7 @@ export function TravelPlannerSidebar({
                 >
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ fontSize: "15px", color: "var(--color-warning-icon)" }}
                   >
                     auto_fix_high
@@ -1548,7 +1583,11 @@ export function TravelPlannerSidebar({
                 style={{ flex: 1, justifyContent: "center" }}
                 title="Rota Düzenleme Modu"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "14px" }}
+                >
                   edit_location_alt
                 </span>
                 <span>Düzenle</span>
@@ -1560,7 +1599,11 @@ export function TravelPlannerSidebar({
                 style={{ flex: 1, justifyContent: "center" }}
                 title="Gezi / Navigasyon Modu"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "14px" }}
+                >
                   navigation
                 </span>
                 <span>Gezi Modu</span>
@@ -1592,6 +1635,7 @@ export function TravelPlannerSidebar({
                     >
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ fontSize: "17px", color: "var(--color-success)" }}
                       >
                         navigation
@@ -1672,6 +1716,7 @@ export function TravelPlannerSidebar({
                       >
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "14px", color: "var(--color-accent-strong)" }}
                         >
                           navigation
@@ -1690,6 +1735,7 @@ export function TravelPlannerSidebar({
                       >
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "14px", color: "#38bdf8" }}
                         >
                           article
@@ -1708,6 +1754,7 @@ export function TravelPlannerSidebar({
                       >
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "14px", color: "var(--color-warning-icon)" }}
                         >
                           smart_toy
@@ -1731,7 +1778,11 @@ export function TravelPlannerSidebar({
                         style={{ display: "flex", alignItems: "center", gap: "4px" }}
                         title="Sıradaki durağa haritada odaklan"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "14px" }}
+                        >
                           my_location
                         </span>
                         <span>Sıradaki</span>
@@ -1749,7 +1800,11 @@ export function TravelPlannerSidebar({
               <div className="stitch-map-point-banner">
                 <div className="stitch-map-point-top">
                   <span className="stitch-map-point-badge">
-                    <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "13px" }}
+                    >
                       pin_drop
                     </span>
                     Haritadan Seçildi
@@ -1760,7 +1815,11 @@ export function TravelPlannerSidebar({
                     className="stitch-icon-action-btn"
                     title="Kapat"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "14px" }}
+                    >
                       close
                     </span>
                   </button>
@@ -1818,7 +1877,11 @@ export function TravelPlannerSidebar({
                     }}
                     className="stitch-btn-add-route"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "14px" }}
+                    >
                       add_location
                     </span>
                     <span>+ Rotaya Durak Ekle</span>
@@ -1855,7 +1918,11 @@ export function TravelPlannerSidebar({
               {filteredPins.length === 0 ? (
                 <div className="stitch-empty-notice-card">
                   <div className="stitch-empty-icon-circle">
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "24px" }}
+                    >
                       explore_nearby
                     </span>
                   </div>
@@ -1910,6 +1977,7 @@ export function TravelPlannerSidebar({
                           <div className="transit-icon-pill">
                             <span
                               className="material-symbols-outlined"
+                              aria-hidden="true"
                               style={{ fontSize: "14px" }}
                             >
                               directions_walk
@@ -1927,6 +1995,7 @@ export function TravelPlannerSidebar({
                             <span>Yol Tarifi</span>
                             <span
                               className="material-symbols-outlined"
+                              aria-hidden="true"
                               style={{ fontSize: "12px" }}
                             >
                               open_in_new
@@ -1949,6 +2018,7 @@ export function TravelPlannerSidebar({
                               {pin.visited ? (
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "16px" }}
                                 >
                                   check
@@ -1984,6 +2054,7 @@ export function TravelPlannerSidebar({
                                     >
                                       <span
                                         className="material-symbols-outlined"
+                                        aria-hidden="true"
                                         style={{ fontSize: "13px" }}
                                       >
                                         check_circle
@@ -2011,6 +2082,7 @@ export function TravelPlannerSidebar({
                               >
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "15px" }}
                                 >
                                   arrow_upward
@@ -2025,6 +2097,7 @@ export function TravelPlannerSidebar({
                               >
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "15px" }}
                                 >
                                   arrow_downward
@@ -2042,6 +2115,7 @@ export function TravelPlannerSidebar({
                               >
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "15px" }}
                                 >
                                   edit
@@ -2064,6 +2138,7 @@ export function TravelPlannerSidebar({
                               >
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "15px" }}
                                 >
                                   delete_outline
@@ -2087,6 +2162,7 @@ export function TravelPlannerSidebar({
                             >
                               <span
                                 className="material-symbols-outlined"
+                                aria-hidden="true"
                                 style={{ fontSize: "14px" }}
                               >
                                 {pin.visited ? "check_circle" : "radio_button_unchecked"}
@@ -2114,6 +2190,7 @@ export function TravelPlannerSidebar({
                     <div className="pool-summary-title-row">
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ color: "var(--color-success)", fontSize: "18px" }}
                       >
                         inventory_2
@@ -2124,6 +2201,7 @@ export function TravelPlannerSidebar({
                     </div>
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "20px", color: "var(--color-text-subtle)" }}
                     >
                       expand_more
@@ -2137,6 +2215,7 @@ export function TravelPlannerSidebar({
                           <div className="pool-item-icon-box">
                             <span
                               className="material-symbols-outlined"
+                              aria-hidden="true"
                               style={{ fontSize: "14px" }}
                             >
                               {gPin.category === "kahve"

@@ -100,7 +100,7 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
           return (
             <div key={i} className={`ai-thinking-phase ${isLatest ? "active" : "done"}`}>
               <span
-                className={`material-symbols-outlined ai-thinking-phase-icon ${isLatest ? "ai-phase-spin" : ""}`}
+                className={`material-symbols-outlined ai-thinking-phase-icon ${isLatest ? "ai-phase-spin" : ""} aria-hidden="true"`}
               >
                 {isLatest ? phase.icon : "check_circle"}
               </span>
@@ -114,6 +114,7 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
         <div className="ai-thinking-fact" key={factIndex}>
           <span
             className="material-symbols-outlined"
+            aria-hidden="true"
             style={{ fontSize: "13px", color: "var(--color-text-accent)" }}
           >
             lightbulb

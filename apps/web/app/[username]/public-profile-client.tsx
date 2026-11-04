@@ -561,6 +561,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
               <span className="pub-pulse-dot" />
               <span
                 className="material-symbols-outlined"
+                aria-hidden="true"
                 style={{ fontSize: "18px", color: "var(--color-link-inverse)" }}
               >
                 visibility
@@ -572,7 +573,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
             </div>
             <div>
               <Link href="/profile/edit" className="pub-banner-btn">
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   edit
                 </span>
                 <span>Düzenlemeye Dön</span>
@@ -589,6 +594,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
             <div className="pub-floating-location-chip" data-surface="inverse">
               <span
                 className="material-symbols-outlined"
+                aria-hidden="true"
                 style={{ fontSize: "16px", color: "var(--color-link-inverse)" }}
               >
                 photo_camera
@@ -611,7 +617,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       )}
                     </div>
                     <span className="pub-status-badge" title="Aktif Gezgin">
-                      <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "15px" }}
+                      >
                         check
                       </span>
                     </span>
@@ -623,6 +633,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span className="pub-badge-pill pro">
                         <span
                           className="material-symbols-outlined fill"
+                          aria-hidden="true"
                           style={{ fontSize: "13px", color: "var(--color-text-accent)" }}
                         >
                           workspace_premium
@@ -632,6 +643,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span className="pub-badge-pill verified">
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "13px", color: "var(--color-brand)" }}
                         >
                           verified
@@ -645,6 +657,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span className="pub-meta-item">
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "16px", color: "var(--color-text-accent)" }}
                         >
                           location_on
@@ -652,7 +665,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         {locationText}
                       </span>
                       <span className="pub-meta-item">
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "16px" }}
+                        >
                           calendar_today
                         </span>
                         {joinDate}
@@ -670,7 +687,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       title="Gezgin Portfolyosu"
                       onClick={() => showToastMessage("Gezgin harita portföyü")}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "18px" }}
+                      >
                         travel_explore
                       </span>
                     </button>
@@ -682,7 +703,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                         showToastMessage("Kişisel web sitesi bağlantısı henüz eklenmemiş.")
                       }
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "18px" }}
+                      >
                         language
                       </span>
                     </button>
@@ -695,7 +720,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     onClick={handleBookmarkToggle}
                   >
                     <span
-                      className={`material-symbols-outlined ${isBookmarked ? "fill" : ""}`}
+                      className={`material-symbols-outlined ${isBookmarked ? "fill" : ""} aria-hidden="true"`}
                       style={{ fontSize: "20px", color: isBookmarked ? "#f59e0b" : "inherit" }}
                     >
                       bookmark
@@ -708,7 +733,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     title="Profili Paylaş"
                     onClick={handleShareProfile}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "20px" }}
+                    >
                       share
                     </span>
                   </button>
@@ -721,7 +750,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       setShowMessageModal(true);
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "18px" }}
+                    >
                       chat_bubble_outline
                     </span>
                     <span>Mesaj Gönder</span>
@@ -732,7 +765,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     className={`pub-btn-primary ${isFollowing ? "following" : ""}`}
                     onClick={handleToggleFollow}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "18px" }}
+                    >
                       {isFollowing ? "check" : "person_add"}
                     </span>
                     <span>{isFollowing ? "Takip Ediliyor" : "Takip Et"}</span>
@@ -766,6 +803,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     4.9
                     <span
                       className="material-symbols-outlined fill"
+                      aria-hidden="true"
                       style={{ fontSize: "18px", color: "var(--color-warning-icon)" }}
                     >
                       star
@@ -799,7 +837,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   className={`pub-tab-pill ${activeTab === "rotalar" ? "active" : ""}`}
                   onClick={() => setActiveTab("rotalar")}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     route
                   </span>
                   <span>Yayınlanan Rotalar ({routeCards.length})</span>
@@ -809,7 +851,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   className={`pub-tab-pill ${activeTab === "rehberler" ? "active" : ""}`}
                   onClick={() => setActiveTab("rehberler")}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     menu_book
                   </span>
                   <span>Topluluk Rehberleri & Notlar (8)</span>
@@ -819,7 +865,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   className={`pub-tab-pill ${activeTab === "galeri" ? "active" : ""}`}
                   onClick={() => setActiveTab("galeri")}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     photo_library
                   </span>
                   <span>Fotoğraf Galerisi (124)</span>
@@ -829,7 +879,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   className={`pub-tab-pill ${activeTab === "yorumlar" ? "active" : ""}`}
                   onClick={() => setActiveTab("yorumlar")}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     reviews
                   </span>
                   <span>Gezgin Yorumları (186)</span>
@@ -868,6 +922,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <div className="pub-filter-right">
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ fontSize: "18px", color: "var(--color-border-control)" }}
                       >
                         tune
@@ -928,6 +983,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                               >
                                 <span
                                   className="material-symbols-outlined fill"
+                                  aria-hidden="true"
                                   style={{ fontSize: "13px" }}
                                 >
                                   star
@@ -971,6 +1027,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                               >
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "13px" }}
                                 >
                                   landscape
@@ -983,6 +1040,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                           <div className="pub-route-rating-right">
                             <span
                               className="material-symbols-outlined fill"
+                              aria-hidden="true"
                               style={{ fontSize: "15px", color: "var(--color-warning-icon)" }}
                             >
                               star
@@ -1008,6 +1066,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                               >
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "15px", color: "var(--color-brand)" }}
                                 >
                                   schedule
@@ -1020,6 +1079,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                               >
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "15px", color: "var(--color-brand)" }}
                                 >
                                   pin_drop
@@ -1052,6 +1112,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                   <span>Planı İncele</span>
                                   <span
                                     className="material-symbols-outlined"
+                                    aria-hidden="true"
                                     style={{ fontSize: "16px" }}
                                   >
                                     arrow_forward
@@ -1067,6 +1128,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                 >
                                   <span
                                     className="material-symbols-outlined"
+                                    aria-hidden="true"
                                     style={{
                                       fontSize: "16px",
                                       color: "var(--color-text-accent)",
@@ -1096,7 +1158,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       }
                     >
                       <span>Daha Fazla Rota Yükle (12 Kalan)</span>
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "18px" }}
+                      >
                         expand_more
                       </span>
                     </button>
@@ -1111,6 +1177,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ fontSize: "22px", color: "var(--color-brand)" }}
                       >
                         menu_book
@@ -1163,6 +1230,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ fontSize: "22px", color: "var(--color-brand)" }}
                       >
                         tips_and_updates
@@ -1214,6 +1282,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ fontSize: "22px", color: "var(--color-brand)" }}
                       >
                         backpack
@@ -1389,6 +1458,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                             <span
                               key={s}
                               className="material-symbols-outlined fill"
+                              aria-hidden="true"
                               style={{ fontSize: "16px" }}
                             >
                               star
@@ -1411,6 +1481,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   <h3 className="pub-sidebar-card-title">
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "20px", color: "var(--color-brand)" }}
                     >
                       military_tech
@@ -1432,7 +1503,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 <div className="pub-badges-grid">
                   <div className="pub-badge-item">
                     <div className="pub-badge-icon-box">
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "20px" }}
+                      >
                         public
                       </span>
                     </div>
@@ -1442,7 +1517,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
 
                   <div className="pub-badge-item">
                     <div className="pub-badge-icon-box">
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "20px" }}
+                      >
                         architecture
                       </span>
                     </div>
@@ -1452,7 +1531,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
 
                   <div className="pub-badge-item">
                     <div className="pub-badge-icon-box">
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "20px" }}
+                      >
                         tips_and_updates
                       </span>
                     </div>
@@ -1462,7 +1545,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
 
                   <div className="pub-badge-item">
                     <div className="pub-badge-icon-box">
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "20px" }}
+                      >
                         recommend
                       </span>
                     </div>
@@ -1477,6 +1564,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 <h3 className="pub-sidebar-card-title">
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ fontSize: "20px", color: "var(--color-brand)" }}
                   >
                     loyalty
@@ -1486,25 +1574,41 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
 
                 <div className="pub-styles-chips">
                   <span className="pub-style-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "15px" }}
+                    >
                       museum
                     </span>
                     Tarih & Kültür
                   </span>
                   <span className="pub-style-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "15px" }}
+                    >
                       hiking
                     </span>
                     Doğa Yürüyüşü
                   </span>
                   <span className="pub-style-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "15px" }}
+                    >
                       restaurant
                     </span>
                     Yerel Gastronomi
                   </span>
                   <span className="pub-style-chip">
-                    <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "15px" }}
+                    >
                       nordic_walking
                     </span>
                     Solo Macera
@@ -1529,7 +1633,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     className="pub-collab-btn-highlight"
                     onClick={() => setShowGroupModal(true)}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "18px" }}
+                    >
                       group_add
                     </span>
                     <span>Ortak Gezi Grubu Oluştur</span>
@@ -1543,7 +1651,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       setShowMessageModal(true);
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "16px" }}
+                    >
                       help_outline
                     </span>
                     <span>Rotalar Hakkında Soru Sor</span>
@@ -1571,6 +1683,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span
                         key={i}
                         className="material-symbols-outlined fill"
+                        aria-hidden="true"
                         style={{ fontSize: "15px" }}
                       >
                         star
@@ -1613,6 +1726,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
         <div data-surface="inverse" className="pub-toast" role="status">
           <span
             className="material-symbols-outlined"
+            aria-hidden="true"
             style={{ fontSize: "18px", color: "var(--color-link-inverse)" }}
           >
             check_circle
@@ -1628,7 +1742,9 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
             <div className="pub-modal-header">
               <h3 className="pub-modal-title">{previewRoute.name} — Harita Önizlemesi</h3>
               <button type="button" className="pub-icon-btn" onClick={() => setPreviewRoute(null)}>
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  close
+                </span>
               </button>
             </div>
             <div className="pub-modal-body">
@@ -1713,7 +1829,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 href={`/maps/?route=${encodeURIComponent(previewRoute.name)}`}
                 className="pub-btn-primary"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   edit_location_alt
                 </span>
                 <span>Bu Rotayı Harita Masama Aktar</span>
@@ -1734,7 +1854,9 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 className="pub-icon-btn"
                 onClick={() => setSelectedPlanRoute(null)}
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  close
+                </span>
               </button>
             </div>
             <div className="pub-modal-body">
@@ -1826,7 +1948,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                     setSelectedPlanRoute(null);
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     shopping_bag
                   </span>
                   <span>Rotayı Hemen Al & Haritaya Ekle</span>
@@ -1848,7 +1974,9 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 className="pub-icon-btn"
                 onClick={() => setShowMessageModal(false)}
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  close
+                </span>
               </button>
             </div>
             <form onSubmit={handleSendMessage}>
@@ -1917,7 +2045,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   İptal
                 </button>
                 <button type="submit" className="pub-btn-primary">
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "16px" }}
+                  >
                     send
                   </span>
                   <span>Mesajı İlet</span>
@@ -1939,7 +2071,9 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                 className="pub-icon-btn"
                 onClick={() => setShowGroupModal(false)}
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  close
+                </span>
               </button>
             </div>
             <form onSubmit={handleGroupRequest}>
@@ -1993,7 +2127,11 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                   Vazgeç
                 </button>
                 <button type="submit" className="pub-btn-primary">
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "16px" }}
+                  >
                     check
                   </span>
                   <span>Talebi Gönder</span>

@@ -1443,7 +1443,7 @@ export default function Panel() {
         <div class="stitch-leaflet-pin ${isSelected ? "is-selected" : ""} ${pin.visited ? "is-visited" : ""}">
           ${isSelected ? '<div class="stitch-pin-pulse-beacon"></div>' : ""}
           <div class="stitch-pin-head" style="background-color: ${isSelected ? "#10B981" : pin.visited ? "#286954" : "#013628"};">
-            ${pin.visited ? `<span class="material-symbols-outlined" style="font-size: 15px; color: #34D399;">check</span>` : `<span>${pin.order}</span>`}
+            ${pin.visited ? `<span aria-hidden="true" class="material-symbols-outlined" style="font-size: 15px; color: #34D399;">check</span>` : `<span>${pin.order}</span>`}
           </div>
           <div class="stitch-pin-pill">
             <span class="stitch-pin-pill-title">${pin.order}. ${escapeHtml(pin.label)}</span>
@@ -1460,7 +1460,7 @@ export default function Panel() {
               <div class="popup-title-row">
                 <h4 class="popup-title">${escapeHtml(pin.label)}</h4>
                 <div class="popup-rating">
-                  <span class="material-symbols-outlined" style="font-size: 14px; color: #f59e0b; font-variation-settings: 'FILL' 1;">star</span>
+                  <span aria-hidden="true" class="material-symbols-outlined" style="font-size: 14px; color: #f59e0b; font-variation-settings: 'FILL' 1;">star</span>
                   <span>4.8</span>
                 </div>
               </div>
@@ -2309,7 +2309,7 @@ export default function Panel() {
                 aria-label="Harita Kontrol Menüsünü Aç"
               >
                 <div className="stitch-hub-trigger-icon-box">
-                  <span className="material-symbols-outlined">
+                  <span className="material-symbols-outlined" aria-hidden="true">
                     {currentMapStyle === "uydu"
                       ? "satellite_alt"
                       : currentMapStyle === "koyu"
@@ -2328,7 +2328,10 @@ export default function Panel() {
                         ? "Doğa / Arazi"
                         : "Standart Harita"}
                 </span>
-                <span className="material-symbols-outlined stitch-hub-trigger-chevron">
+                <span
+                  className="material-symbols-outlined stitch-hub-trigger-chevron"
+                  aria-hidden="true"
+                >
                   expand_more
                 </span>
               </button>
@@ -2337,7 +2340,9 @@ export default function Panel() {
                 {/* Header */}
                 <div className="stitch-hub-card-header">
                   <div className="stitch-hub-header-left">
-                    <span className="material-symbols-outlined">tune</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      tune
+                    </span>
                     <span>Harita Kontrolleri</span>
                   </div>
                   <button
@@ -2347,7 +2352,9 @@ export default function Panel() {
                     title="Kapat"
                     aria-label="Harita Kontrol Menüsünü Kapat"
                   >
-                    <span className="material-symbols-outlined">close</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      close
+                    </span>
                   </button>
                 </div>
 
@@ -2373,7 +2380,9 @@ export default function Panel() {
                             localStorage.setItem("mapsbridge.mapStyle", st.id);
                         }}
                       >
-                        <span className="material-symbols-outlined">{st.icon}</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          {st.icon}
+                        </span>
                         <span>{st.label}</span>
                       </button>
                     ))}
@@ -2393,7 +2402,9 @@ export default function Panel() {
                     title="Raylı Sistem & Ulaşım Katmanı"
                   >
                     <div className="stitch-hub-toggle-left">
-                      <span className="material-symbols-outlined mp-1">traffic</span>
+                      <span className="material-symbols-outlined mp-1" aria-hidden="true">
+                        traffic
+                      </span>
                       <span>Raylı Sistem & Ulaşım</span>
                     </div>
                     <div className={`stitch-hub-toggle-pill ${showTransitOverlay ? "active" : ""}`}>
@@ -2415,7 +2426,9 @@ export default function Panel() {
                         if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
                       }}
                     >
-                      <span className="material-symbols-outlined">add</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        add
+                      </span>
                       <span>Büyüt</span>
                     </button>
 
@@ -2428,7 +2441,9 @@ export default function Panel() {
                         if (mapInstanceRef.current) mapInstanceRef.current.zoomOut();
                       }}
                     >
-                      <span className="material-symbols-outlined">remove</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        remove
+                      </span>
                       <span>Küçült</span>
                     </button>
 
@@ -2447,7 +2462,9 @@ export default function Panel() {
                         }
                       }}
                     >
-                      <span className="material-symbols-outlined text-sky-600">explore</span>
+                      <span className="material-symbols-outlined text-sky-600" aria-hidden="true">
+                        explore
+                      </span>
                       <span>Kuzey</span>
                     </button>
 
@@ -2460,7 +2477,7 @@ export default function Panel() {
                       disabled={isLocating}
                     >
                       <span
-                        className={`material-symbols-outlined mp-1 ${isLocating ? "animate-spin" : ""}`}
+                        className={`material-symbols-outlined mp-1 ${isLocating ? "animate-spin" : ""} aria-hidden="true"`}
                       >
                         my_location
                       </span>
@@ -2480,7 +2497,9 @@ export default function Panel() {
                     }}
                     title="Detaylı Harita Özelleştirme"
                   >
-                    <span className="material-symbols-outlined">palette</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      palette
+                    </span>
                     <span>Daha Fazla Özelleştirme...</span>
                   </button>
                 </div>
@@ -2493,7 +2512,9 @@ export default function Panel() {
             <div className="stitch-floating-share-card" id="share-modal-card">
               <div className="share-card-head">
                 <div className="share-card-title-box">
-                  <span className="material-symbols-outlined">share_location</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    share_location
+                  </span>
                   <h3 className="share-card-title">Rotayı Anında Paylaş</h3>
                 </div>
                 <button
@@ -2503,7 +2524,9 @@ export default function Panel() {
                   onClick={() => setShowShareCard(false)}
                   title="Kapat"
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    close
+                  </span>
                 </button>
               </div>
               <p className="share-card-desc">
@@ -2523,7 +2546,7 @@ export default function Panel() {
                   title="Kodu Kopyala"
                   onClick={handleCopyCode}
                 >
-                  <span className="material-symbols-outlined mp-2">
+                  <span className="material-symbols-outlined mp-2" aria-hidden="true">
                     {copiedCode ? "check" : "content_copy"}
                   </span>
                 </button>
@@ -2580,7 +2603,10 @@ export default function Panel() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <span className="material-symbols-outlined">chat</span> WhatsApp
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    chat
+                  </span>{" "}
+                  WhatsApp
                 </a>
                 <a
                   className="share-social-btn telegram"
@@ -2588,10 +2614,15 @@ export default function Panel() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <span className="material-symbols-outlined">send</span> Telegram
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    send
+                  </span>{" "}
+                  Telegram
                 </a>
                 <button type="button" className="share-social-btn link" onClick={handleCopyLink}>
-                  <span className="material-symbols-outlined">{copiedLink ? "check" : "link"}</span>{" "}
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    {copiedLink ? "check" : "link"}
+                  </span>{" "}
                   {copiedLink ? "Kopyalandı" : "Link"}
                 </button>
               </div>
@@ -2684,7 +2715,9 @@ export default function Panel() {
           >
             <div className="layer-card-head mp-3 pb-1">
               <div className="mp-4">
-                <span className="material-symbols-outlined">map</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  map
+                </span>
                 <h3 className="mp-5">Harita Görünümü</h3>
               </div>
               <button
@@ -2694,7 +2727,9 @@ export default function Panel() {
                 onClick={() => setShowMapCustomizeModal(false)}
                 title="Kapat"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  close
+                </span>
               </button>
             </div>
 
@@ -2731,7 +2766,9 @@ export default function Panel() {
             <div className="mp-11 border-slate-200/70">
               <label className="mp-12">
                 <span className="mp-4">
-                  <span className="material-symbols-outlined">subway</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    subway
+                  </span>
                   <span>Metro & Raylı Hatlar</span>
                 </span>
                 <input
@@ -2748,7 +2785,9 @@ export default function Panel() {
 
               <label className="mp-12">
                 <span className="mp-4">
-                  <span className="material-symbols-outlined">apartment</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    apartment
+                  </span>
                   <span>3D Bina Gölgelendirmesi</span>
                 </span>
                 <input
@@ -2797,7 +2836,10 @@ export default function Panel() {
             <div className="mp-18 border-slate-700/80 rounded-2xl max-w-2xl shadow-2xl">
               <div className="mp-3 px-6 py-4 border-b border-slate-800">
                 <div className="mp-19">
-                  <span className="material-symbols-outlined text-sky-400 text-xl">
+                  <span
+                    className="material-symbols-outlined text-sky-400 text-xl"
+                    aria-hidden="true"
+                  >
                     description
                   </span>
                   <h3 className="text-base mp-5 text-slate-100">Seyahat Manifestosu (.md)</h3>
@@ -2808,7 +2850,9 @@ export default function Panel() {
                   className="w-8 h-8 mp-20 mp-u-text-400 hover:text-white hover:bg-slate-800/80"
                   title="Kapat"
                 >
-                  <span className="material-symbols-outlined text-lg">close</span>
+                  <span className="material-symbols-outlined text-lg" aria-hidden="true">
+                    close
+                  </span>
                 </button>
               </div>
 
@@ -2841,7 +2885,9 @@ export default function Panel() {
                   }
                   className="mp-25 text-emerald-400 hover:text-emerald-300"
                 >
-                  <span className="material-symbols-outlined text-base">smart_toy</span>
+                  <span className="material-symbols-outlined text-base" aria-hidden="true">
+                    smart_toy
+                  </span>
                   <span>AI Asistanda Bu Rota ile Konuş</span>
                 </a>
                 <div className="mp-19">
@@ -2854,7 +2900,9 @@ export default function Panel() {
                     }}
                     className="mp-26 bg-slate-800 text-slate-200 hover:bg-slate-700"
                   >
-                    <span className="material-symbols-outlined mp-27">content_copy</span>
+                    <span className="material-symbols-outlined mp-27" aria-hidden="true">
+                      content_copy
+                    </span>
                     <span>Kopyala</span>
                   </button>
                   <button
@@ -2873,7 +2921,9 @@ export default function Panel() {
                     }}
                     className="mp-28 hover:bg-emerald-500 shadow-lg shadow-emerald-950/40"
                   >
-                    <span className="material-symbols-outlined mp-27">download</span>
+                    <span className="material-symbols-outlined mp-27" aria-hidden="true">
+                      download
+                    </span>
                     <span>İndir (.md)</span>
                   </button>
                 </div>
@@ -2899,7 +2949,9 @@ export default function Panel() {
         {/* Panel Bilgilendirme Bildirimi */}
         {panelToast && (
           <div className="mp-30 bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/95 px-4 py-2.5 border-emerald-500/30 shadow-2xl animate-in fade-in slide-in-from-bottom-2">
-            <span className="material-symbols-outlined text-emerald-400">info</span>
+            <span className="material-symbols-outlined text-emerald-400" aria-hidden="true">
+              info
+            </span>
             <span>{panelToast}</span>
           </div>
         )}

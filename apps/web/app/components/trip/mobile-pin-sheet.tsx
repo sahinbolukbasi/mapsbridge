@@ -287,14 +287,18 @@ export function MobilePinSheet({
                     }
                     onClick={add}
                   >
-                    <span className="material-symbols-outlined">add_location</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      add_location
+                    </span>
                     {loading ? "Konum bulunuyor…" : "Rotaya Ekle"}
                   </button>
                 </>
               )}
 
               <button type="button" className="mobile-pin-ai-btn" onClick={handleAskAi}>
-                <span className="material-symbols-outlined">auto_awesome</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  auto_awesome
+                </span>
                 AI'a Sor
               </button>
             </div>
@@ -332,7 +336,9 @@ export function MobilePinSheet({
                 className={activeTab === "info" ? "active" : ""}
                 onClick={() => setActiveTab("info")}
               >
-                <span className="material-symbols-outlined">info</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  info
+                </span>
                 Bilgi
               </button>
               <button
@@ -340,7 +346,9 @@ export function MobilePinSheet({
                 className={activeTab === "reviews" ? "active" : ""}
                 onClick={() => setActiveTab("reviews")}
               >
-                <span className="material-symbols-outlined">reviews</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  reviews
+                </span>
                 Yorumlar
               </button>
             </div>

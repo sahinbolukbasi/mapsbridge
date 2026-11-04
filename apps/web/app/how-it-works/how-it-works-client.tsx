@@ -52,13 +52,18 @@ export function HowItWorksClient() {
           <div className="nasil-hero-actions">
             <a href="/register/" className="nasil-btn-primary">
               <span>Ücretsiz Rotanı Başlat</span>
-              <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "1.125rem" }}
+              >
                 bolt
               </span>
             </a>
             <a href="#adımlar" className="nasil-btn-secondary">
               <span
                 className="material-symbols-outlined"
+                aria-hidden="true"
                 style={{ fontSize: "1.25rem", color: "var(--color-text-accent)" }}
               >
                 play_circle
@@ -94,7 +99,11 @@ export function HowItWorksClient() {
         <div className="nasil-container">
           <div className="nasil-section-head">
             <div className="nasil-section-eyebrow">
-              <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "0.875rem" }}
+              >
                 timeline
               </span>
               <span>Uçtan Uca Seyahat Kurgusu</span>
@@ -118,21 +127,27 @@ export function HowItWorksClient() {
               </p>
               <ul className="nasil-step-features">
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Serbest Doğal Dil:</strong> Karmaşık formlar doldurmadan dilediğiniz
                     dilde hedef belirtin.
                   </span>
                 </li>
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>İlgi Alanı Filtreleri:</strong> Gastronomi, tarih, fotoğrafçılık, doğa
                     veya gece hayatı profilleri.
                   </span>
                 </li>
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Bütçe ve Gün Esnekliği:</strong> Sırt çantalı gezginden lüks butik
                     seyahatlere kişiye özel öneriler.
@@ -155,6 +170,7 @@ export function HowItWorksClient() {
                 <div className="nasil-interactive-input-row">
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ color: "var(--color-text-accent)", fontSize: "1.25rem" }}
                   >
                     auto_awesome
@@ -201,21 +217,27 @@ export function HowItWorksClient() {
               </p>
               <ul className="nasil-step-features">
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Mesafe ve Sıralama Optimizasyonu:</strong> En mantıklı coğrafi sırayla
                     durak dizilimi.
                   </span>
                 </li>
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Açılış Saatleri Koruması:</strong> Kapalı kapılara çarpıp plan
                     değiştirmek zorunda kalmazsınız.
                   </span>
                 </li>
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Dengeli Günlük Süre:</strong> Günlük 5-7 saatlik ideal yorulma temposu
                     hesaplanır.
@@ -289,21 +311,27 @@ export function HowItWorksClient() {
               </p>
               <ul className="nasil-step-features">
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Sürükle &amp; Bırak Sıralama:</strong> Durakların sırasını tek hamleyle
                     güncelleyin.
                   </span>
                 </li>
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Özel Notlar &amp; Bilet Kodları:</strong> Rezervasyon saatleri ve bilet
                     PDF referansları ekleyin.
                   </span>
                 </li>
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Google Maps Senkronu:</strong> Harita üzerinde anlık mesafe ve süre
                     hesaplama.
@@ -326,6 +354,7 @@ export function HowItWorksClient() {
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ color: "#94a3b8", fontSize: "1.125rem" }}
                   >
                     drag_indicator
@@ -343,6 +372,7 @@ export function HowItWorksClient() {
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ color: "#94a3b8", fontSize: "1.125rem" }}
                   >
                     drag_indicator
@@ -388,21 +418,27 @@ export function HowItWorksClient() {
               </p>
               <ul className="nasil-step-features">
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>6 Haneli Rota Kodu:</strong> SMS, WhatsApp veya sözlü olarak anında
                     aktarılabilir.
                   </span>
                 </li>
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Çevrimdışı Senkronizasyon:</strong> Yurt dışında internet paketiniz
                     bitse bile rota cihazınızda çalışır.
                   </span>
                 </li>
                 <li className="nasil-step-feature-item">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   <span>
                     <strong>Canlı Grup Takibi:</strong> Gruptaki herkes aynı durak sırasını ve
                     saatleri görür.
@@ -444,7 +480,11 @@ export function HowItWorksClient() {
                   }}
                   onClick={copySampleCode}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "1rem" }}
+                  >
                     {copiedCode ? "check" : "content_copy"}
                   </span>
                   <span>{copiedCode ? "Kod Kopyalandı!" : "Kodu Kopyala & Dene"}</span>
@@ -460,7 +500,11 @@ export function HowItWorksClient() {
         <div className="nasil-container">
           <div className="nasil-section-head">
             <div className="nasil-section-eyebrow">
-              <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "0.875rem" }}
+              >
                 smart_toy
               </span>
               <span>AI Agentic Otomasyon &amp; Topluluk</span>
@@ -511,7 +555,11 @@ export function HowItWorksClient() {
         <div className="nasil-container">
           <div className="nasil-section-head">
             <div className="nasil-section-eyebrow">
-              <span className="material-symbols-outlined" style={{ fontSize: "0.875rem" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "0.875rem" }}
+              >
                 help
               </span>
               <span>Merak Edilenler</span>
@@ -526,7 +574,9 @@ export function HowItWorksClient() {
             <details className="nasil-faq-item" open>
               <summary className="nasil-faq-question">
                 <span>İnternet bağlantım olmadan rotayı kullanabilir miyim?</span>
-                <span className="material-symbols-outlined">expand_more</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  expand_more
+                </span>
               </summary>
               <p className="nasil-faq-answer">
                 Evet! Rotanızı oluşturduktan sonra tek tıkla 'Çevrimdışı Modu'
@@ -538,7 +588,9 @@ export function HowItWorksClient() {
             <details className="nasil-faq-item">
               <summary className="nasil-faq-question">
                 <span>6 Haneli kod ile arkadaşlarım hesap açmadan görebilir mi?</span>
-                <span className="material-symbols-outlined">expand_more</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  expand_more
+                </span>
               </summary>
               <p className="nasil-faq-answer">
                 Kesinlikle. Arkadaşınız ana sayfadaki '6 Haneli Kod Gir' kutusuna şifreyi yazdığında
@@ -549,7 +601,9 @@ export function HowItWorksClient() {
             <details className="nasil-faq-item">
               <summary className="nasil-faq-question">
                 <span>MapsBridge'i kullanmak ücretli mi?</span>
-                <span className="material-symbols-outlined">expand_more</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  expand_more
+                </span>
               </summary>
               <p className="nasil-faq-answer">
                 Hayır, MapsBridge'in yapay zeka ile rota üretme, harita üzerinde düzenleme ve 6
@@ -561,7 +615,9 @@ export function HowItWorksClient() {
             <details className="nasil-faq-item">
               <summary className="nasil-faq-question">
                 <span>Oluşturduğum rotayı seyahat sırasında değiştirebilir miyim?</span>
-                <span className="material-symbols-outlined">expand_more</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  expand_more
+                </span>
               </summary>
               <p className="nasil-faq-answer">
                 Elbette! Seyahatiniz esnasında hava durumu veya keyfinize göre harita masasında
@@ -586,7 +642,11 @@ export function HowItWorksClient() {
             </p>
             <a href="/register/" className="nasil-cta-btn" data-surface="default">
               <span>Ücretsiz Rotanı Başlat</span>
-              <span className="material-symbols-outlined" style={{ fontSize: "1.25rem" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "1.25rem" }}
+              >
                 arrow_forward
               </span>
             </a>

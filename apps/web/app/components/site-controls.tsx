@@ -19,7 +19,7 @@ export function SiteControls() {
       aria-label={isEnglish ? "Türkçe'ye geç" : "Switch to English"}
       title={isEnglish ? "Türkçe'ye geç" : "Switch to English"}
     >
-      <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+      <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: "1rem" }}>
         translate
       </span>
       <span>{isEnglish ? "TR" : "EN"}</span>

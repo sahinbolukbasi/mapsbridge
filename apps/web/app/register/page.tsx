@@ -623,6 +623,7 @@ export default function SignUpPage() {
                       <li key={r.id} className={`signup-rule-item ${r.valid ? "valid" : ""}`}>
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{
                             color: r.valid ? "var(--color-accent)" : "var(--color-border-control)",
                           }}
@@ -649,7 +650,9 @@ export default function SignUpPage() {
                   disabled={isLoading || (password.length > 0 && !isPasswordValid)}
                 >
                   <span>{isLoading ? "Hesap oluşturuluyor…" : "Doğrulama kodunu gönder"}</span>
-                  <span className="material-symbols-outlined">arrow_forward</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    arrow_forward
+                  </span>
                 </button>
               </form>
 
@@ -691,7 +694,9 @@ export default function SignUpPage() {
                     }
                   >
                     <span>Giriş yap</span>
-                    <span className="material-symbols-outlined">arrow_forward</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      arrow_forward
+                    </span>
                   </a>
                 </div>
                 <p
@@ -730,6 +735,7 @@ export default function SignUpPage() {
                 <div className="signup-city-pill">
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ color: "var(--color-link-inverse)" }}
                   >
                     explore
@@ -762,7 +768,9 @@ export default function SignUpPage() {
                       color: "var(--color-link-inverse)",
                     }}
                   >
-                    <span className="material-symbols-outlined">pin</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      pin
+                    </span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <span
@@ -797,7 +805,9 @@ export default function SignUpPage() {
                       color: "var(--color-surface-brand-soft)",
                     }}
                   >
-                    <span className="material-symbols-outlined">auto_awesome</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      auto_awesome
+                    </span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <span
@@ -832,7 +842,9 @@ export default function SignUpPage() {
                       color: "#6ffbbe",
                     }}
                   >
-                    <span className="material-symbols-outlined">group</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      group
+                    </span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <span
@@ -874,7 +886,9 @@ export default function SignUpPage() {
                     flexShrink: 0,
                   }}
                 >
-                  <span className="material-symbols-outlined">offline_pin</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    offline_pin
+                  </span>
                 </div>
                 <p
                   style={{

@@ -97,7 +97,9 @@ export function NewPostModal({
               {/* Bağlı Rota Rozeti */}
               {selectedRoute && (
                 <div className="x-attached-route-tag">
-                  <span className="material-symbols-outlined">map</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    map
+                  </span>
                   <span>{selectedRoute}</span>
                   <button
                     type="button"

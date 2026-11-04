@@ -538,7 +538,11 @@ export default function MessagesPage() {
                         title="Yeni Mesaj / Gezgin Seç"
                         onClick={() => setShowNewChatModal(true)}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "15px" }}
+                        >
                           person_add
                         </span>
                         <span>+ Mesaj Yaz</span>
@@ -551,6 +555,7 @@ export default function MessagesPage() {
                       >
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "18px", color: "var(--color-text-brand)" }}
                         >
                           group_add
@@ -563,7 +568,7 @@ export default function MessagesPage() {
                   <div className="chat-privacy-box">
                     <div className="chat-privacy-title-row">
                       <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span className="material-symbols-outlined">
+                        <span className="material-symbols-outlined" aria-hidden="true">
                           {messagePrivacy === "friends" ? "lock" : "public"}
                         </span>
                         Mesajlaşma İzni
@@ -590,7 +595,9 @@ export default function MessagesPage() {
                         }}
                         title="Yalnızca arkadaş listenizdeki gezginler size mesaj gönderebilir"
                       >
-                        <span className="material-symbols-outlined">group</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          group
+                        </span>
                         <span>Sadece Arkadaşlarım</span>
                       </button>
                       <button
@@ -604,14 +611,18 @@ export default function MessagesPage() {
                         }}
                         title="Tüm MapsBridge gezginleri size mesaj gönderebilir"
                       >
-                        <span className="material-symbols-outlined">public</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          public
+                        </span>
                         <span>Herkes</span>
                       </button>
                     </div>
                   </div>
 
                   <div className="chat-search-input-wrap">
-                    <span className="material-symbols-outlined search-icon">search</span>
+                    <span className="material-symbols-outlined search-icon" aria-hidden="true">
+                      search
+                    </span>
                     <input
                       type="text"
                       placeholder="Gezgin veya gezi grubu ara..."
@@ -649,7 +660,11 @@ export default function MessagesPage() {
                       onClick={() => setActiveFilter("archive")}
                       title="Arşiv"
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "14px" }}
+                      >
                         archive
                       </span>
                     </button>
@@ -668,6 +683,7 @@ export default function MessagesPage() {
                     >
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ fontSize: "32px", marginBottom: "8px", opacity: 0.6 }}
                       >
                         chat_bubble_outline
@@ -731,6 +747,7 @@ export default function MessagesPage() {
                           <div className="chat-item-avatar-wrap">
                             <span
                               className="material-symbols-outlined"
+                              aria-hidden="true"
                               style={{ fontSize: "22px" }}
                             >
                               {conv.avatarIcon}
@@ -750,6 +767,7 @@ export default function MessagesPage() {
                               <div className="chat-item-route-tag">
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "12px" }}
                                 >
                                   push_pin
@@ -776,6 +794,7 @@ export default function MessagesPage() {
                             {conv.pinned && (
                               <span
                                 className="material-symbols-outlined"
+                                aria-hidden="true"
                                 style={{ fontSize: "14px", color: "var(--color-text-accent)" }}
                               >
                                 push_pin
@@ -823,6 +842,7 @@ export default function MessagesPage() {
                     >
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ fontSize: "32px", color: "var(--color-text-brand)" }}
                       >
                         forum
@@ -856,7 +876,11 @@ export default function MessagesPage() {
                         className="chat-btn-new-group"
                         onClick={() => setShowNewChatModal(true)}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "16px" }}
+                        >
                           chat
                         </span>
                         <span>Yeni Sohbet Başlat</span>
@@ -866,7 +890,11 @@ export default function MessagesPage() {
                         className="chat-btn-map-split"
                         onClick={() => setShowNewGroupModal(true)}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "16px" }}
+                        >
                           group_add
                         </span>
                         <span>Grup Aç</span>
@@ -879,7 +907,11 @@ export default function MessagesPage() {
                     <div className="chat-middle-header">
                       <div className="chat-middle-header-left">
                         <div className="chat-middle-header-icon">
-                          <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "20px" }}
+                          >
                             {activeChat.avatarIcon}
                           </span>
                         </div>
@@ -935,7 +967,11 @@ export default function MessagesPage() {
                           href={`/maps/?route=${encodeURIComponent(activeChat.title)}`}
                           className="chat-btn-live-map"
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "16px" }}
+                          >
                             travel_explore
                           </span>
                           <span>Canlı Harita</span>
@@ -947,7 +983,11 @@ export default function MessagesPage() {
                           title="Grupta Ara"
                           onClick={() => showToastMessage("Mesaj arama alanı açıldı.")}
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "18px" }}
+                          >
                             search
                           </span>
                         </button>
@@ -969,7 +1009,11 @@ export default function MessagesPage() {
                             color: "var(--color-brand)",
                           }}
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "18px" }}
+                          >
                             info
                           </span>
                         </button>
@@ -982,6 +1026,7 @@ export default function MessagesPage() {
                         <div className="chat-pinned-left">
                           <span
                             className="material-symbols-outlined"
+                            aria-hidden="true"
                             style={{ fontSize: "18px", color: "var(--color-text-accent)" }}
                           >
                             push_pin
@@ -1035,6 +1080,7 @@ export default function MessagesPage() {
                               <span className="chat-system-event-pill">
                                 <span
                                   className="material-symbols-outlined"
+                                  aria-hidden="true"
                                   style={{ fontSize: "14px", color: "var(--color-brand)" }}
                                 >
                                   add_location_alt
@@ -1051,6 +1097,7 @@ export default function MessagesPage() {
                             <div className={`chat-msg-avatar ${isOut ? "owner" : ""}`}>
                               <span
                                 className="material-symbols-outlined"
+                                aria-hidden="true"
                                 style={{ fontSize: "18px" }}
                               >
                                 {isOut ? "person" : "hiking"}
@@ -1087,6 +1134,7 @@ export default function MessagesPage() {
                                     <span className="chat-route-embed-badge">
                                       <span
                                         className="material-symbols-outlined"
+                                        aria-hidden="true"
                                         style={{
                                           fontSize: "16px",
                                           color: "var(--color-text-accent)",
@@ -1130,6 +1178,7 @@ export default function MessagesPage() {
                                       >
                                         <span
                                           className="material-symbols-outlined"
+                                          aria-hidden="true"
                                           style={{ fontSize: "12px" }}
                                         >
                                           photo_camera
@@ -1147,6 +1196,7 @@ export default function MessagesPage() {
                                         <span className="chat-route-chip">
                                           <span
                                             className="material-symbols-outlined"
+                                            aria-hidden="true"
                                             style={{ fontSize: "12px" }}
                                           >
                                             schedule
@@ -1156,6 +1206,7 @@ export default function MessagesPage() {
                                         <span className="chat-route-chip">
                                           <span
                                             className="material-symbols-outlined"
+                                            aria-hidden="true"
                                             style={{ fontSize: "12px" }}
                                           >
                                             straighten
@@ -1171,6 +1222,7 @@ export default function MessagesPage() {
                                         >
                                           <span
                                             className="material-symbols-outlined"
+                                            aria-hidden="true"
                                             style={{
                                               fontSize: "12px",
                                               color: "var(--color-text-accent)",
@@ -1222,6 +1274,7 @@ export default function MessagesPage() {
                                     >
                                       <span
                                         className="material-symbols-outlined"
+                                        aria-hidden="true"
                                         style={{ fontSize: "16px" }}
                                       >
                                         bookmark_add
@@ -1242,6 +1295,7 @@ export default function MessagesPage() {
                                     <div className="chat-location-pin-circle">
                                       <span
                                         className="material-symbols-outlined"
+                                        aria-hidden="true"
                                         style={{ fontSize: "18px" }}
                                       >
                                         location_on
@@ -1310,6 +1364,7 @@ export default function MessagesPage() {
                                     >
                                       <span
                                         className="material-symbols-outlined"
+                                        aria-hidden="true"
                                         style={{ fontSize: "15px" }}
                                       >
                                         navigation
@@ -1324,6 +1379,7 @@ export default function MessagesPage() {
                                 <div className="chat-msg-read-status">
                                   <span
                                     className="material-symbols-outlined"
+                                    aria-hidden="true"
                                     style={{ fontSize: "13px" }}
                                   >
                                     done_all
@@ -1347,6 +1403,7 @@ export default function MessagesPage() {
                         >
                           <span
                             className="material-symbols-outlined"
+                            aria-hidden="true"
                             style={{ fontSize: "16px", color: "var(--color-text-accent)" }}
                           >
                             add_location
@@ -1363,6 +1420,7 @@ export default function MessagesPage() {
                         >
                           <span
                             className="material-symbols-outlined"
+                            aria-hidden="true"
                             style={{ fontSize: "16px", color: "var(--color-brand)" }}
                           >
                             polyline
@@ -1379,6 +1437,7 @@ export default function MessagesPage() {
                         >
                           <span
                             className="material-symbols-outlined"
+                            aria-hidden="true"
                             style={{ fontSize: "16px", color: "var(--color-border-control)" }}
                           >
                             photo_camera
@@ -1395,6 +1454,7 @@ export default function MessagesPage() {
                         >
                           <span
                             className="material-symbols-outlined"
+                            aria-hidden="true"
                             style={{ fontSize: "16px", color: "var(--color-border-control)" }}
                           >
                             event
@@ -1410,7 +1470,11 @@ export default function MessagesPage() {
                           title="Emoji Ekle"
                           onClick={() => setInputText((prev) => prev + " 📍")}
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "20px" }}
+                          >
                             sentiment_satisfied
                           </span>
                         </button>
@@ -1429,13 +1493,21 @@ export default function MessagesPage() {
                           title="Sesli Not"
                           onClick={() => showToastMessage("Ses kaydı dinleniyor...")}
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "20px" }}
+                          >
                             mic
                           </span>
                         </button>
 
                         <button type="submit" className="chat-send-btn" title="Gönder">
-                          <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "20px" }}
+                          >
                             send
                           </span>
                         </button>
@@ -1492,6 +1564,7 @@ export default function MessagesPage() {
                                 <span className="chat-friend-badge">
                                   <span
                                     className="material-symbols-outlined"
+                                    aria-hidden="true"
                                     style={{ fontSize: "14px" }}
                                   >
                                     verified
@@ -1511,6 +1584,7 @@ export default function MessagesPage() {
                                 >
                                   <span
                                     className="material-symbols-outlined"
+                                    aria-hidden="true"
                                     style={{ fontSize: "14px" }}
                                   >
                                     public
@@ -1561,7 +1635,7 @@ export default function MessagesPage() {
                                   borderRadius: "8px",
                                 }}
                               >
-                                <span className="material-symbols-outlined">
+                                <span className="material-symbols-outlined" aria-hidden="true">
                                   {messagePrivacy === "friends" ? "lock" : "chat"}
                                 </span>
                                 <span>
@@ -1587,7 +1661,9 @@ export default function MessagesPage() {
                                 className="chat-btn-map-split"
                                 style={{ justifyContent: "center", textDecoration: "none" }}
                               >
-                                <span className="material-symbols-outlined">account_circle</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">
+                                  account_circle
+                                </span>
                                 <span>Gezgin Profilini İncele</span>
                               </Link>
                               <button
@@ -1600,7 +1676,9 @@ export default function MessagesPage() {
                                   )
                                 }
                               >
-                                <span className="material-symbols-outlined">notifications_off</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">
+                                  notifications_off
+                                </span>
                                 <span>Bildirimleri Kapat</span>
                               </button>
                             </div>
@@ -1738,6 +1816,7 @@ export default function MessagesPage() {
                                 >
                                   <span
                                     className="material-symbols-outlined"
+                                    aria-hidden="true"
                                     style={{ fontSize: "16px" }}
                                   >
                                     north_east
@@ -1826,6 +1905,7 @@ export default function MessagesPage() {
                                     {mem.isOwner && (
                                       <span
                                         className="material-symbols-outlined"
+                                        aria-hidden="true"
                                         style={{
                                           fontSize: "16px",
                                           color: "var(--color-text-accent)",
@@ -1882,6 +1962,7 @@ export default function MessagesPage() {
                                       >
                                         <span
                                           className="material-symbols-outlined"
+                                          aria-hidden="true"
                                           style={{ fontSize: "14px" }}
                                         >
                                           chat
@@ -1948,6 +2029,7 @@ export default function MessagesPage() {
                                     </div>
                                     <span
                                       className="material-symbols-outlined"
+                                      aria-hidden="true"
                                       style={{
                                         fontSize: "15px",
                                         color: "var(--color-border-control)",
@@ -1975,7 +2057,9 @@ export default function MessagesPage() {
                                 className="chat-btn-map-split"
                                 style={{ justifyContent: "center", textDecoration: "none" }}
                               >
-                                <span className="material-symbols-outlined">map</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">
+                                  map
+                                </span>
                                 <span>Harita Masasında Aç</span>
                               </Link>
                               <button
@@ -1986,7 +2070,9 @@ export default function MessagesPage() {
                                   showToastMessage("Grup bildirimleri sessize alındı.")
                                 }
                               >
-                                <span className="material-symbols-outlined">notifications_off</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">
+                                  notifications_off
+                                </span>
                                 <span>Grup Bildirimlerini Kapat</span>
                               </button>
                             </div>
@@ -2003,6 +2089,7 @@ export default function MessagesPage() {
           <div data-surface="inverse" className="chat-toast" role="status">
             <span
               className="material-symbols-outlined"
+              aria-hidden="true"
               style={{ fontSize: "18px", color: "var(--color-link-inverse)" }}
             >
               check_circle
@@ -2031,7 +2118,9 @@ export default function MessagesPage() {
                   className="chat-icon-btn"
                   onClick={() => setShowNewGroupModal(false)}
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    close
+                  </span>
                 </button>
               </div>
               <form onSubmit={handleCreateGroup}>
@@ -2113,7 +2202,11 @@ export default function MessagesPage() {
             <div className="chat-modal-window" onClick={(e) => e.stopPropagation()}>
               <div className="chat-modal-header">
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "20px" }}
+                  >
                     person_search
                   </span>
                   <h3
@@ -2132,7 +2225,9 @@ export default function MessagesPage() {
                   className="chat-icon-btn"
                   onClick={() => setShowNewChatModal(false)}
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    close
+                  </span>
                 </button>
               </div>
 
@@ -2150,7 +2245,7 @@ export default function MessagesPage() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span className="material-symbols-outlined">
+                    <span className="material-symbols-outlined" aria-hidden="true">
                       {messagePrivacy === "friends" ? "lock" : "public"}
                     </span>
                     <span style={{ fontSize: "11.5px", fontWeight: 600 }}>
@@ -2186,7 +2281,9 @@ export default function MessagesPage() {
                 {/* Search & Tabs */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   <div className="chat-search-input-wrap" style={{ margin: 0 }}>
-                    <span className="material-symbols-outlined search-icon">search</span>
+                    <span className="material-symbols-outlined search-icon" aria-hidden="true">
+                      search
+                    </span>
                     <input
                       type="text"
                       placeholder="İsim veya kullanıcı adına göre ara..."
@@ -2202,7 +2299,9 @@ export default function MessagesPage() {
                       className={`chat-privacy-btn ${travelerModalTab === "friends" ? "active" : ""}`}
                       onClick={() => setTravelerModalTab("friends")}
                     >
-                      <span className="material-symbols-outlined">group</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        group
+                      </span>
                       <span>
                         Arkadaşlarım ({DEFAULT_TRAVELER_CONTACTS.filter((c) => c.isFriend).length})
                       </span>
@@ -2212,7 +2311,9 @@ export default function MessagesPage() {
                       className={`chat-privacy-btn ${travelerModalTab === "all" ? "active" : ""}`}
                       onClick={() => setTravelerModalTab("all")}
                     >
-                      <span className="material-symbols-outlined">public</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        public
+                      </span>
                       <span>Tüm Gezginler ({DEFAULT_TRAVELER_CONTACTS.length})</span>
                     </button>
                   </div>
@@ -2290,7 +2391,11 @@ export default function MessagesPage() {
                         className="chat-btn-direct-msg"
                         onClick={() => handleSelectTravelerToChat(traveler)}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "14px" }}
+                        >
                           chat
                         </span>
                         <span>Mesaj Yaz</span>
@@ -2359,7 +2464,9 @@ export default function MessagesPage() {
                   className="chat-icon-btn"
                   onClick={() => setShowPinModal(false)}
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    close
+                  </span>
                 </button>
               </div>
               <form onSubmit={handleDropPin}>
@@ -2456,7 +2563,9 @@ export default function MessagesPage() {
                   className="chat-icon-btn"
                   onClick={() => setShowAddMemberModal(false)}
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    close
+                  </span>
                 </button>
               </div>
               <form

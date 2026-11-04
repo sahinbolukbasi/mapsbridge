@@ -186,7 +186,11 @@ export function ContextualFollowups({ message, route, onAction, busy }: Contextu
           onClick={() => onAction(chip.prompt)}
           disabled={busy}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
+          <span
+            className="material-symbols-outlined"
+            aria-hidden="true"
+            style={{ fontSize: "13px" }}
+          >
             {chip.icon}
           </span>
           <span>{chip.label}</span>

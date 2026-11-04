@@ -197,7 +197,9 @@ export function GroupTripModal({
                       {msg.attachedRoute && (
                         <div className="chat-attached-route-card">
                           <div className="attached-route-info">
-                            <span className="material-symbols-outlined">map</span>
+                            <span className="material-symbols-outlined" aria-hidden="true">
+                              map
+                            </span>
                             <div>
                               <strong>{msg.attachedRoute.title}</strong>
                               <p>
@@ -235,7 +237,9 @@ export function GroupTripModal({
 
                 {/* Gezi Rotası Paylaş & Arkadaş Bul Barı */}
                 <div className="chat-route-share-bar">
-                  <span className="material-symbols-outlined">route</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    route
+                  </span>
                   <select
                     className="chat-route-select"
                     value={attachedRouteTitle}

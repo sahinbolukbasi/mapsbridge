@@ -173,6 +173,7 @@ export function SmartActions({ messages, route, currentTrip, onAction, busy }: S
       <div className="ai-smart-actions-header">
         <span
           className="material-symbols-outlined"
+          aria-hidden="true"
           style={{ fontSize: "14px", color: "var(--color-text-accent)" }}
         >
           auto_awesome
@@ -189,7 +190,9 @@ export function SmartActions({ messages, route, currentTrip, onAction, busy }: S
             disabled={busy}
             title={action.prompt}
           >
-            <span className="material-symbols-outlined ai-smart-action-icon">{action.icon}</span>
+            <span className="material-symbols-outlined ai-smart-action-icon" aria-hidden="true">
+              {action.icon}
+            </span>
             <span className="ai-smart-action-label">{action.label}</span>
           </button>
         ))}

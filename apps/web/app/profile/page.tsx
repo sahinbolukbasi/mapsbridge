@@ -505,7 +505,9 @@ export default function ProfilePage() {
 
             <div className="stitch-profile-actions-bar">
               <Link href="/profile/edit/" className="stitch-action-btn-neutral">
-                <span className="material-symbols-outlined">edit</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  edit
+                </span>
                 <span>Profili Düzenle</span>
               </Link>
 
@@ -515,12 +517,16 @@ export default function ProfilePage() {
                 onClick={handleCopyProfileLink}
                 title="Profil bağlantısını kopyala"
               >
-                <span className="material-symbols-outlined">{copiedLink ? "done" : "share"}</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  {copiedLink ? "done" : "share"}
+                </span>
                 <span>{copiedLink ? "Kopyalandı" : "Paylaş"}</span>
               </button>
 
               <Link href="/maps/" className="stitch-action-btn-primary">
-                <span className="material-symbols-outlined">visibility</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  visibility
+                </span>
                 <span>Ön İzleme</span>
               </Link>
             </div>
@@ -537,7 +543,9 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "routes" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("routes")}
               >
-                <span className="material-symbols-outlined">map</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  map
+                </span>
                 <span>Rotalar ({savedTrips.length})</span>
               </button>
 
@@ -546,7 +554,9 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "posts" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("posts")}
               >
-                <span className="material-symbols-outlined">chat_bubble</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  chat_bubble
+                </span>
                 <span>Paylaşımlar ({userPosts.length})</span>
               </button>
 
@@ -555,7 +565,9 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "pool" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("pool")}
               >
-                <span className="material-symbols-outlined">bookmark</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  bookmark
+                </span>
                 <span>Kayıtlı Mekanlar ({savedPins.length})</span>
               </button>
 
@@ -564,7 +576,9 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "analytics" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("analytics")}
               >
-                <span className="material-symbols-outlined">bar_chart</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  bar_chart
+                </span>
                 <span>İstatistik</span>
               </button>
 
@@ -573,7 +587,9 @@ export default function ProfilePage() {
                 className={`stitch-workspace-tab ${activeMainTab === "activity" ? "active" : ""}`}
                 onClick={() => setActiveMainTab("activity")}
               >
-                <span className="material-symbols-outlined">notifications</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  notifications
+                </span>
                 {unreadNotifCount > 0 && (
                   <span className="stitch-tab-badge">{unreadNotifCount}</span>
                 )}
@@ -616,7 +632,9 @@ export default function ProfilePage() {
                   </div>
                   <div className="stitch-filter-actions">
                     <Link href="/maps/" className="stitch-btn-add-quick" data-surface="inverse">
-                      <span className="material-symbols-outlined">flight_takeoff</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        flight_takeoff
+                      </span>
                       <span>Hızlı Rota Ekle</span>
                     </Link>
                   </div>
@@ -625,7 +643,12 @@ export default function ProfilePage() {
                 <div className="stitch-route-cards-list">
                   {filteredTrips.length === 0 ? (
                     <div className="stitch-empty-state-box">
-                      <span className="material-symbols-outlined stitch-empty-icon">explore</span>
+                      <span
+                        className="material-symbols-outlined stitch-empty-icon"
+                        aria-hidden="true"
+                      >
+                        explore
+                      </span>
                       <div>
                         <h4 className="stitch-empty-title">
                           {activeFilter === "published"
@@ -647,7 +670,9 @@ export default function ProfilePage() {
                           data-surface="inverse"
                           style={{ padding: "0.55rem 1.1rem" }}
                         >
-                          <span className="material-symbols-outlined">add</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            add
+                          </span>
                           <span>Seyahat Masasında Rota Oluştur</span>
                         </Link>
                         <Link
@@ -661,7 +686,9 @@ export default function ProfilePage() {
                             color: "var(--color-accent-strong)",
                           }}
                         >
-                          <span className="material-symbols-outlined">smart_toy</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            smart_toy
+                          </span>
                           <span>AI Asistan ile Planla</span>
                         </Link>
                       </div>
@@ -694,13 +721,16 @@ export default function ProfilePage() {
                               >
                                 <span
                                   className="material-symbols-outlined pf-1"
+                                  aria-hidden="true"
                                   style={{ fontSize: "36px", opacity: 0.8 }}
                                 >
                                   map
                                 </span>
                               </div>
                               <div className="stitch-thumb-badge draft">
-                                <span className="material-symbols-outlined">edit_document</span>
+                                <span className="material-symbols-outlined" aria-hidden="true">
+                                  edit_document
+                                </span>
                                 <span>TASLAK</span>
                               </div>
                             </div>
@@ -709,7 +739,9 @@ export default function ProfilePage() {
                               <div className="pf-2">
                                 <div className="stitch-route-meta-top">
                                   <div className="stitch-route-duration-pill">
-                                    <span className="material-symbols-outlined">schedule</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">
+                                      schedule
+                                    </span>
                                     <span>
                                       {dayCount} GÜN · {pinCount} DURAK
                                     </span>
@@ -731,14 +763,18 @@ export default function ProfilePage() {
                                     href={`/maps/?trip=${encodeURIComponent(trip.id || "")}`}
                                     className="stitch-route-btn primary"
                                   >
-                                    <span className="material-symbols-outlined">edit</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">
+                                      edit
+                                    </span>
                                     <span>Düzenle</span>
                                   </Link>
                                   <Link
                                     href={`/maps/?trip=${encodeURIComponent(trip.id || "")}`}
                                     className="stitch-route-btn"
                                   >
-                                    <span className="material-symbols-outlined">map</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">
+                                      map
+                                    </span>
                                     <span>Haritada Aç</span>
                                   </Link>
                                   <button
@@ -748,7 +784,9 @@ export default function ProfilePage() {
                                     title="Rotayı Sil"
                                     style={{ color: "var(--color-danger-icon)" }}
                                   >
-                                    <span className="material-symbols-outlined">delete</span>
+                                    <span className="material-symbols-outlined" aria-hidden="true">
+                                      delete
+                                    </span>
                                   </button>
                                 </div>
                                 <span className="pf-3 text-muted">Kişisel gezi</span>
@@ -1107,7 +1145,9 @@ export default function ProfilePage() {
 
                   <div className="stitch-filter-actions">
                     <Link href="/maps/" className="stitch-btn-add-quick" data-surface="inverse">
-                      <span className="material-symbols-outlined">add_location</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        add_location
+                      </span>
                       <span>Haritada Nokta Ekle</span>
                     </Link>
                   </div>
@@ -1115,7 +1155,12 @@ export default function ProfilePage() {
 
                 {filteredPins.length === 0 ? (
                   <div className="stitch-empty-state-box">
-                    <span className="material-symbols-outlined stitch-empty-icon">pin_drop</span>
+                    <span
+                      className="material-symbols-outlined stitch-empty-icon"
+                      aria-hidden="true"
+                    >
+                      pin_drop
+                    </span>
                     <div>
                       <h4 className="stitch-empty-title">Havuzda Kayıtlı Nokta Yok</h4>
                       <p className="stitch-empty-desc">
@@ -1131,7 +1176,9 @@ export default function ProfilePage() {
                         data-surface="inverse"
                         style={{ padding: "0.55rem 1.1rem" }}
                       >
-                        <span className="material-symbols-outlined">explore</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          explore
+                        </span>
                         <span>Harita Masasında Nokta Keşfet</span>
                       </Link>
                     </div>
@@ -1149,7 +1196,9 @@ export default function ProfilePage() {
                         <div key={pin.id} className="stitch-pool-card">
                           <div className="stitch-pool-card-header">
                             <span className="stitch-pool-category-badge">
-                              <span className="material-symbols-outlined">place</span>
+                              <span className="material-symbols-outlined" aria-hidden="true">
+                                place
+                              </span>
                               <span>{categoryName}</span>
                             </span>
                             <button
@@ -1158,7 +1207,9 @@ export default function ProfilePage() {
                               className="stitch-pool-delete-btn"
                               title="Noktayı Havuzdan Kaldır"
                             >
-                              <span className="material-symbols-outlined">close</span>
+                              <span className="material-symbols-outlined" aria-hidden="true">
+                                close
+                              </span>
                             </button>
                           </div>
 
@@ -1177,7 +1228,9 @@ export default function ProfilePage() {
                               className="stitch-route-btn primary"
                               style={{ width: "100%", justifyContent: "center" }}
                             >
-                              <span className="material-symbols-outlined">near_me</span>
+                              <span className="material-symbols-outlined" aria-hidden="true">
+                                near_me
+                              </span>
                               <span>Haritada Göster</span>
                             </Link>
                           </div>
@@ -1194,7 +1247,9 @@ export default function ProfilePage() {
               <div className="stitch-collections-section">
                 <div className="stitch-filter-bar">
                   <div className="pf-4">
-                    <span className="material-symbols-outlined text-secondary">folder_special</span>
+                    <span className="material-symbols-outlined text-secondary" aria-hidden="true">
+                      folder_special
+                    </span>
                     <span className="pf-5 text-main">
                       Kayıtlı Albümler ve Tematik Listeler ({collections.length})
                     </span>
@@ -1207,7 +1262,9 @@ export default function ProfilePage() {
                       className="stitch-btn-add-quick"
                       data-surface="inverse"
                     >
-                      <span className="material-symbols-outlined">create_new_folder</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        create_new_folder
+                      </span>
                       <span>Yeni Koleksiyon</span>
                     </button>
                   </div>
@@ -1218,7 +1275,9 @@ export default function ProfilePage() {
                     <div key={col.id} className="stitch-collection-card">
                       <div className="stitch-collection-top">
                         <div className="stitch-collection-icon-wrap">
-                          <span className="material-symbols-outlined">{col.icon || "folder"}</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            {col.icon || "folder"}
+                          </span>
                         </div>
                         <button
                           type="button"
@@ -1226,7 +1285,9 @@ export default function ProfilePage() {
                           className="stitch-pool-delete-btn"
                           title="Koleksiyonu Sil"
                         >
-                          <span className="material-symbols-outlined">close</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            close
+                          </span>
                         </button>
                       </div>
 
@@ -1237,14 +1298,18 @@ export default function ProfilePage() {
 
                       <div className="stitch-collection-footer">
                         <span className="stitch-collection-count-pill">
-                          <span className="material-symbols-outlined">pin_drop</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            pin_drop
+                          </span>
                           <span>{col.count} Durak / Rota</span>
                         </span>
                         <Link
                           href={`/maps/?collection=${encodeURIComponent(col.title)}`}
                           className="stitch-route-btn"
                         >
-                          <span className="material-symbols-outlined">folder_open</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            folder_open
+                          </span>
                           <span>Aç</span>
                         </Link>
                       </div>
@@ -1261,7 +1326,9 @@ export default function ProfilePage() {
                 <div className="stitch-analytics-cards-grid">
                   <div className="stitch-analytics-metric-card">
                     <div className="stitch-metric-icon-wrap">
-                      <span className="material-symbols-outlined">explore</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        explore
+                      </span>
                     </div>
                     <div className="stitch-analytics-metric-info">
                       <span className="stitch-analytics-value">0 km</span>
@@ -1271,7 +1338,9 @@ export default function ProfilePage() {
 
                   <div className="stitch-analytics-metric-card">
                     <div className="stitch-metric-icon-wrap">
-                      <span className="material-symbols-outlined">place</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        place
+                      </span>
                     </div>
                     <div className="stitch-analytics-metric-info">
                       <span className="stitch-analytics-value">
@@ -1283,7 +1352,9 @@ export default function ProfilePage() {
 
                   <div className="stitch-analytics-metric-card">
                     <div className="stitch-metric-icon-wrap">
-                      <span className="material-symbols-outlined">visibility</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        visibility
+                      </span>
                     </div>
                     <div className="stitch-analytics-metric-info">
                       <span className="stitch-analytics-value">0</span>
@@ -1293,7 +1364,9 @@ export default function ProfilePage() {
 
                   <div className="stitch-analytics-metric-card">
                     <div className="stitch-metric-icon-wrap">
-                      <span className="material-symbols-outlined">smart_toy</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        smart_toy
+                      </span>
                     </div>
                     <div className="stitch-analytics-metric-info">
                       <span className="stitch-analytics-value">{walletCredits} Kredi</span>
@@ -1307,7 +1380,12 @@ export default function ProfilePage() {
                   <div className="stitch-analytics-card">
                     <div className="stitch-analytics-card-header">
                       <div className="pf-4">
-                        <span className="material-symbols-outlined text-secondary">bar_chart</span>
+                        <span
+                          className="material-symbols-outlined text-secondary"
+                          aria-hidden="true"
+                        >
+                          bar_chart
+                        </span>
                         <h4 className="pf-6 text-main text-base">
                           Haftalık Keşif ve Planlama Aktivitesi
                         </h4>
@@ -1318,6 +1396,7 @@ export default function ProfilePage() {
                     <div style={{ textAlign: "center", padding: "2rem 1rem", color: "#94a3b8" }}>
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{
                           fontSize: "32px",
                           opacity: 0.4,
@@ -1337,7 +1416,10 @@ export default function ProfilePage() {
                   <div className="stitch-analytics-card">
                     <div className="stitch-analytics-card-header">
                       <div className="pf-4">
-                        <span className="material-symbols-outlined text-secondary">
+                        <span
+                          className="material-symbols-outlined text-secondary"
+                          aria-hidden="true"
+                        >
                           military_tech
                         </span>
                         <h4 className="pf-6 text-main text-base">Gezgin Rozetleri & Seviye</h4>
@@ -1351,7 +1433,9 @@ export default function ProfilePage() {
                           className={`stitch-badge-icon ${savedTrips.length > 0 ? "gold" : ""}`}
                           style={savedTrips.length === 0 ? { opacity: 0.4 } : {}}
                         >
-                          <span className="material-symbols-outlined">verified</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            verified
+                          </span>
                         </div>
                         <div className="pf-9">
                           <span className="pf-10 text-main">Doğrulanmış Rota Lideri</span>
@@ -1370,7 +1454,9 @@ export default function ProfilePage() {
                           className={`stitch-badge-icon ${savedPins.length + totalTripPinsCount >= 10 ? "mint" : ""}`}
                           style={savedPins.length + totalTripPinsCount < 10 ? { opacity: 0.4 } : {}}
                         >
-                          <span className="material-symbols-outlined">explore</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            explore
+                          </span>
                         </div>
                         <div className="pf-9">
                           <span className="pf-10 text-main">Pusula Kaşifi</span>
@@ -1384,7 +1470,9 @@ export default function ProfilePage() {
 
                       <div className="stitch-badge-item">
                         <div className="stitch-badge-icon" style={{ opacity: 0.4 }}>
-                          <span className="material-symbols-outlined">smart_toy</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            smart_toy
+                          </span>
                         </div>
                         <div className="pf-9">
                           <span className="pf-10 text-main">AI Destekli Seyyah</span>
@@ -1406,7 +1494,9 @@ export default function ProfilePage() {
                 <div className="stitch-analytics-cards-grid">
                   <div className="stitch-analytics-metric-card">
                     <div className="stitch-metric-icon-wrap">
-                      <span className="material-symbols-outlined">payments</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        payments
+                      </span>
                     </div>
                     <div className="stitch-analytics-metric-info">
                       <span className="stitch-analytics-value">₺0,00</span>
@@ -1416,7 +1506,9 @@ export default function ProfilePage() {
 
                   <div className="stitch-analytics-metric-card">
                     <div className="stitch-metric-icon-wrap">
-                      <span className="material-symbols-outlined">shopping_cart_checkout</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        shopping_cart_checkout
+                      </span>
                     </div>
                     <div className="stitch-analytics-metric-info">
                       <span className="stitch-analytics-value">0 Adet</span>
@@ -1426,7 +1518,9 @@ export default function ProfilePage() {
 
                   <div className="stitch-analytics-metric-card">
                     <div className="stitch-metric-icon-wrap">
-                      <span className="material-symbols-outlined">percent</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        percent
+                      </span>
                     </div>
                     <div className="stitch-analytics-metric-info">
                       <span className="stitch-analytics-value">%10</span>
@@ -1436,7 +1530,9 @@ export default function ProfilePage() {
 
                   <div className="stitch-analytics-metric-card">
                     <div className="stitch-metric-icon-wrap">
-                      <span className="material-symbols-outlined">account_balance_wallet</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        account_balance_wallet
+                      </span>
                     </div>
                     <div className="stitch-analytics-metric-info">
                       <span className="stitch-analytics-value">₺0,00</span>
@@ -1454,6 +1550,7 @@ export default function ProfilePage() {
                 >
                   <span
                     className="material-symbols-outlined stitch-empty-icon"
+                    aria-hidden="true"
                     style={{ color: "var(--color-link-inverse)" }}
                   >
                     storefront
@@ -1473,7 +1570,9 @@ export default function ProfilePage() {
                       data-surface="inverse"
                       style={{ padding: "0.55rem 1.1rem" }}
                     >
-                      <span className="material-symbols-outlined">add_business</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        add_business
+                      </span>
                       <span>Yeni Rotayı Satışa Ekle</span>
                     </Link>
                     <Link
@@ -1487,7 +1586,9 @@ export default function ProfilePage() {
                         color: "var(--color-text)",
                       }}
                     >
-                      <span className="material-symbols-outlined">account_balance</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        account_balance
+                      </span>
                       <span>Ödeme & Banka Bilgileri</span>
                     </Link>
                   </div>
@@ -1500,7 +1601,7 @@ export default function ProfilePage() {
               <div className="stitch-activity-section">
                 <div className="stitch-filter-bar">
                   <div className="pf-4">
-                    <span className="material-symbols-outlined text-secondary">
+                    <span className="material-symbols-outlined text-secondary" aria-hidden="true">
                       notifications_active
                     </span>
                     <span className="pf-5 text-main">
@@ -1515,7 +1616,9 @@ export default function ProfilePage() {
                       className="stitch-btn-add-quick"
                       data-surface="inverse"
                     >
-                      <span className="material-symbols-outlined">done_all</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        done_all
+                      </span>
                       <span>Tümünü Okundu İşaretle</span>
                     </button>
                   )}
@@ -1526,6 +1629,7 @@ export default function ProfilePage() {
                     <div style={{ textAlign: "center", padding: "2.5rem 1rem", color: "#94a3b8" }}>
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{
                           fontSize: "36px",
                           opacity: 0.4,
@@ -1548,7 +1652,9 @@ export default function ProfilePage() {
                             <div
                               className={`stitch-activity-icon-box ${notif.unread ? "gold" : ""}`}
                             >
-                              <span className="material-symbols-outlined">{notif.icon}</span>
+                              <span className="material-symbols-outlined" aria-hidden="true">
+                                {notif.icon}
+                              </span>
                             </div>
                             <div className="pf-9 gap-0.5">
                               <div className="pf-4">
@@ -1584,7 +1690,9 @@ export default function ProfilePage() {
       {/* Floating Toast Notification */}
       {toastMessage && (
         <div className="stitch-toast-notification">
-          <span className="material-symbols-outlined text-mint-glow">info</span>
+          <span className="material-symbols-outlined text-mint-glow" aria-hidden="true">
+            info
+          </span>
           <span>{toastMessage}</span>
         </div>
       )}

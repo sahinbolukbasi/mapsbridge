@@ -474,11 +474,15 @@ export default function EditProfilePage() {
               <Link href="/profile/" className="stitch-breadcrumb-link">
                 Hesabım
               </Link>
-              <span className="material-symbols-outlined">chevron_right</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                chevron_right
+              </span>
               <Link href="/profile/edit/" className="stitch-breadcrumb-link">
                 Profil Ayarları
               </Link>
-              <span className="material-symbols-outlined">chevron_right</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                chevron_right
+              </span>
               <span className="stitch-breadcrumb-current">Profili Düzenle</span>
             </nav>
             <div className="stitch-sticky-title-row">
@@ -499,7 +503,7 @@ export default function EditProfilePage() {
               className={`stitch-btn-save ${isSavedAnimation ? "saved" : ""}`}
               onClick={() => handleSaveAll()}
             >
-              <span className="material-symbols-outlined">
+              <span className="material-symbols-outlined" aria-hidden="true">
                 {isSavedAnimation ? "done_all" : "check"}
               </span>
               <span>{isSavedAnimation ? "Kaydedildi!" : "Değişiklikleri Kaydet"}</span>
@@ -530,6 +534,7 @@ export default function EditProfilePage() {
                   <span className="stitch-explorer-name">{fullName || "Gezgin"}</span>
                   <span
                     className="material-symbols-outlined stitch-verified-badge"
+                    aria-hidden="true"
                     title="Doğrulanmış Rota Küratörü"
                   >
                     verified
@@ -550,10 +555,15 @@ export default function EditProfilePage() {
                 onClick={() => setActiveTab("genel")}
               >
                 <div className="stitch-nav-item-left">
-                  <span className="material-symbols-outlined stitch-nav-item-icon">person</span>
+                  <span
+                    className="material-symbols-outlined stitch-nav-item-icon"
+                    aria-hidden="true"
+                  >
+                    person
+                  </span>
                   <span>Genel Profil Bilgileri</span>
                 </div>
-                <span className="material-symbols-outlined">
+                <span className="material-symbols-outlined" aria-hidden="true">
                   {activeTab === "genel" ? "arrow_right" : "chevron_right"}
                 </span>
               </button>
@@ -564,10 +574,17 @@ export default function EditProfilePage() {
                 onClick={() => setActiveTab("guvenlik")}
               >
                 <div className="stitch-nav-item-left">
-                  <span className="material-symbols-outlined stitch-nav-item-icon">lock</span>
+                  <span
+                    className="material-symbols-outlined stitch-nav-item-icon"
+                    aria-hidden="true"
+                  >
+                    lock
+                  </span>
                   <span>Hesap Güvenliği & Şifre</span>
                 </div>
-                <span className="material-symbols-outlined text-outline">chevron_right</span>
+                <span className="material-symbols-outlined text-outline" aria-hidden="true">
+                  chevron_right
+                </span>
               </button>
 
               <button
@@ -576,7 +593,10 @@ export default function EditProfilePage() {
                 onClick={() => setActiveTab("bildirimler")}
               >
                 <div className="stitch-nav-item-left">
-                  <span className="material-symbols-outlined stitch-nav-item-icon">
+                  <span
+                    className="material-symbols-outlined stitch-nav-item-icon"
+                    aria-hidden="true"
+                  >
                     notifications_active
                   </span>
                   <span>Bildirim & E-posta Tercihleri</span>
@@ -590,10 +610,17 @@ export default function EditProfilePage() {
                 onClick={() => setActiveTab("entegrasyonlar")}
               >
                 <div className="stitch-nav-item-left">
-                  <span className="material-symbols-outlined stitch-nav-item-icon">hub</span>
+                  <span
+                    className="material-symbols-outlined stitch-nav-item-icon"
+                    aria-hidden="true"
+                  >
+                    hub
+                  </span>
                   <span>Sosyal Hesaplar & Entegrasyonlar</span>
                 </div>
-                <span className="material-symbols-outlined text-outline">chevron_right</span>
+                <span className="material-symbols-outlined text-outline" aria-hidden="true">
+                  chevron_right
+                </span>
               </button>
 
               <button
@@ -602,10 +629,17 @@ export default function EditProfilePage() {
                 onClick={() => setActiveTab("odeme")}
               >
                 <div className="stitch-nav-item-left">
-                  <span className="material-symbols-outlined stitch-nav-item-icon">payments</span>
+                  <span
+                    className="material-symbols-outlined stitch-nav-item-icon"
+                    aria-hidden="true"
+                  >
+                    payments
+                  </span>
                   <span>Ödeme & Rota Satış Ayarları</span>
                 </div>
-                <span className="material-symbols-outlined text-outline">chevron_right</span>
+                <span className="material-symbols-outlined text-outline" aria-hidden="true">
+                  chevron_right
+                </span>
               </button>
 
               <div className="stitch-nav-divider" />
@@ -616,10 +650,17 @@ export default function EditProfilePage() {
                 onClick={() => setActiveTab("tehlike")}
               >
                 <div className="stitch-nav-item-left">
-                  <span className="material-symbols-outlined stitch-nav-item-icon">warning</span>
+                  <span
+                    className="material-symbols-outlined stitch-nav-item-icon"
+                    aria-hidden="true"
+                  >
+                    warning
+                  </span>
                   <span>Hesabı Dondur / Sil</span>
                 </div>
-                <span className="material-symbols-outlined">chevron_right</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  chevron_right
+                </span>
               </button>
             </nav>
 
@@ -672,7 +713,9 @@ export default function EditProfilePage() {
                           className="stitch-cover-action-btn primary"
                           onClick={() => coverInputRef.current?.click()}
                         >
-                          <span className="material-symbols-outlined">wallpaper</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            wallpaper
+                          </span>
                           <span>Kapağı Değiştir</span>
                         </button>
                         <button
@@ -680,13 +723,17 @@ export default function EditProfilePage() {
                           className="stitch-cover-action-btn danger"
                           onClick={handleRemoveCover}
                         >
-                          <span className="material-symbols-outlined">delete</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            delete
+                          </span>
                           <span>Kaldır</span>
                         </button>
                       </div>
                     </div>
                     <p className="stitch-helper-text">
-                      <span className="material-symbols-outlined">info</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        info
+                      </span>
                       En iyi sonuç için yatay, yüksek çözünürlüklü manzara fotoğrafları (PNG veya
                       JPG, maks. 5MB) tercih edin.
                     </p>
@@ -699,7 +746,9 @@ export default function EditProfilePage() {
                         <img src={userAvatar} alt={fullName} />
                       </div>
                       <div className="stitch-avatar-badge-icon" title="Profil Fotoğrafı">
-                        <span className="material-symbols-outlined">photo_camera</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          photo_camera
+                        </span>
                       </div>
                     </div>
 
@@ -715,7 +764,9 @@ export default function EditProfilePage() {
                           className="stitch-avatar-btn primary"
                           onClick={() => avatarInputRef.current?.click()}
                         >
-                          <span className="material-symbols-outlined">upload</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            upload
+                          </span>
                           <span>Yeni Fotoğraf Yükle</span>
                         </button>
                         <button
@@ -723,7 +774,9 @@ export default function EditProfilePage() {
                           className="stitch-avatar-btn secondary"
                           onClick={openWebcam}
                         >
-                          <span className="material-symbols-outlined">videocam</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            videocam
+                          </span>
                           <span>Webcam ile Çek</span>
                         </button>
                         <button
@@ -754,7 +807,12 @@ export default function EditProfilePage() {
                         Ad Soyad
                       </label>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon">badge</span>
+                        <span
+                          className="material-symbols-outlined stitch-input-icon"
+                          aria-hidden="true"
+                        >
+                          badge
+                        </span>
                         <input
                           id="fullname"
                           type="text"
@@ -773,12 +831,17 @@ export default function EditProfilePage() {
                           Kullanıcı Adı
                         </label>
                         <span className="stitch-username-status">
-                          <span className="material-symbols-outlined">check_circle</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            check_circle
+                          </span>
                           MÜSAİT
                         </span>
                       </div>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon accent">
+                        <span
+                          className="material-symbols-outlined stitch-input-icon accent"
+                          aria-hidden="true"
+                        >
                           alternate_email
                         </span>
                         <input
@@ -806,7 +869,12 @@ export default function EditProfilePage() {
                         Başlık / Seyahat Ünvanı
                       </label>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon">explore</span>
+                        <span
+                          className="material-symbols-outlined stitch-input-icon"
+                          aria-hidden="true"
+                        >
+                          explore
+                        </span>
                         <input
                           id="title"
                           type="text"
@@ -843,7 +911,10 @@ export default function EditProfilePage() {
                         Mevcut Konum
                       </label>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon">
+                        <span
+                          className="material-symbols-outlined stitch-input-icon"
+                          aria-hidden="true"
+                        >
                           location_on
                         </span>
                         <input
@@ -866,6 +937,7 @@ export default function EditProfilePage() {
                             <span>{lang}</span>
                             <span
                               className="material-symbols-outlined stitch-chip-remove"
+                              aria-hidden="true"
                               onClick={() => removeLanguage(lang)}
                               title="Kaldır"
                             >
@@ -903,7 +975,9 @@ export default function EditProfilePage() {
                             className="stitch-chip-add-btn"
                             onClick={() => setShowAddLanguage(true)}
                           >
-                            <span className="material-symbols-outlined">add</span>
+                            <span className="material-symbols-outlined" aria-hidden="true">
+                              add
+                            </span>
                             <span>Ekle</span>
                           </button>
                         )}
@@ -940,7 +1014,9 @@ export default function EditProfilePage() {
                             className={`stitch-interest-pill ${isSelected ? "active" : "inactive"}`}
                             onClick={() => toggleInterest(item.label)}
                           >
-                            <span className="material-symbols-outlined">{item.icon}</span>
+                            <span className="material-symbols-outlined" aria-hidden="true">
+                              {item.icon}
+                            </span>
                             <span>{item.label}</span>
                           </button>
                         );
@@ -954,6 +1030,7 @@ export default function EditProfilePage() {
                       <div data-surface="inverse" className="stitch-badge-icon-box">
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontVariationSettings: "'FILL' 1" }}
                         >
                           military_tech
@@ -999,7 +1076,10 @@ export default function EditProfilePage() {
                         Instagram Kullanıcı Adı
                       </label>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon">
+                        <span
+                          className="material-symbols-outlined stitch-input-icon"
+                          aria-hidden="true"
+                        >
                           photo_camera_front
                         </span>
                         <input
@@ -1019,7 +1099,10 @@ export default function EditProfilePage() {
                         YouTube / Kişisel Blog URL
                       </label>
                       <div className="stitch-input-wrapper">
-                        <span className="material-symbols-outlined stitch-input-icon">
+                        <span
+                          className="material-symbols-outlined stitch-input-icon"
+                          aria-hidden="true"
+                        >
                           language
                         </span>
                         <input
@@ -1086,7 +1169,9 @@ export default function EditProfilePage() {
                     className="stitch-public-preview-link"
                     target="_blank"
                   >
-                    <span className="material-symbols-outlined">visibility</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      visibility
+                    </span>
                     <span>Kamu Ön İzlemesini Gör (mapsbridge.com/@{username || "gezgin"})</span>
                   </Link>
 
@@ -1099,7 +1184,7 @@ export default function EditProfilePage() {
                       className={`stitch-btn-save ${isSavedAnimation ? "saved" : ""}`}
                       onClick={() => handleSaveAll()}
                     >
-                      <span className="material-symbols-outlined">
+                      <span className="material-symbols-outlined" aria-hidden="true">
                         {isSavedAnimation ? "done_all" : "save"}
                       </span>
                       <span>{isSavedAnimation ? "Kaydedildi!" : "Değişiklikleri Kaydet"}</span>
@@ -1122,13 +1207,17 @@ export default function EditProfilePage() {
                 <form onSubmit={handleChangePassword} className="pe-8 gap-4 max-w-xl">
                   {passwordError && (
                     <div className="pe-10 bg-error-container text-error">
-                      <span className="material-symbols-outlined">error</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        error
+                      </span>
                       <span>{passwordError}</span>
                     </div>
                   )}
                   {passwordStatus && (
                     <div className="pe-11 bg-mint-subtle text-secondary">
-                      <span className="material-symbols-outlined">check_circle</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        check_circle
+                      </span>
                       <span>{passwordStatus}</span>
                     </div>
                   )}
@@ -1138,7 +1227,12 @@ export default function EditProfilePage() {
                       Yeni Şifre
                     </label>
                     <div className="stitch-input-wrapper">
-                      <span className="material-symbols-outlined stitch-input-icon">lock</span>
+                      <span
+                        className="material-symbols-outlined stitch-input-icon"
+                        aria-hidden="true"
+                      >
+                        lock
+                      </span>
                       <input
                         id="new-pass"
                         type={showPassword ? "text" : "password"}
@@ -1152,7 +1246,7 @@ export default function EditProfilePage() {
                         className="pe-12 right-3 text-muted"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        <span className="material-symbols-outlined">
+                        <span className="material-symbols-outlined" aria-hidden="true">
                           {showPassword ? "visibility_off" : "visibility"}
                         </span>
                       </button>
@@ -1164,7 +1258,10 @@ export default function EditProfilePage() {
                       Yeni Şifre (Tekrar)
                     </label>
                     <div className="stitch-input-wrapper">
-                      <span className="material-symbols-outlined stitch-input-icon">
+                      <span
+                        className="material-symbols-outlined stitch-input-icon"
+                        aria-hidden="true"
+                      >
                         lock_reset
                       </span>
                       <input
@@ -1186,7 +1283,7 @@ export default function EditProfilePage() {
                         <span
                           className={`material-symbols-outlined ${
                             isValid ? "text-emerald-accent" : "text-outline"
-                          }`}
+                          } aria-hidden="true"`}
                         >
                           {isValid ? "check_circle" : "radio_button_unchecked"}
                         </span>
@@ -1220,7 +1317,9 @@ export default function EditProfilePage() {
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
                       <div data-surface="inverse" className="stitch-badge-icon-box">
-                        <span className="material-symbols-outlined">calendar_month</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          calendar_month
+                        </span>
                       </div>
                       <div className="pe-8">
                         <span className="stitch-toggle-title">
@@ -1246,7 +1345,9 @@ export default function EditProfilePage() {
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
                       <div data-surface="inverse" className="stitch-badge-icon-box">
-                        <span className="material-symbols-outlined">mail</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          mail
+                        </span>
                       </div>
                       <div className="pe-8">
                         <span className="stitch-toggle-title">Haftalık Rota ve İlham Bülteni</span>
@@ -1271,7 +1372,9 @@ export default function EditProfilePage() {
                   <div className="stitch-toggle-card">
                     <div className="stitch-toggle-card-left">
                       <div data-surface="inverse" className="stitch-badge-icon-box">
-                        <span className="material-symbols-outlined">tips_and_updates</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          tips_and_updates
+                        </span>
                       </div>
                       <div className="pe-8">
                         <span className="stitch-toggle-title">
@@ -1381,7 +1484,11 @@ export default function EditProfilePage() {
                     }}
                   >
                     <span>Ödeme Masasını Aç</span>
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "14px" }}
+                    >
                       open_in_new
                     </span>
                   </a>
@@ -1422,7 +1529,11 @@ export default function EditProfilePage() {
                           fontWeight: 800,
                         }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "22px" }}
+                        >
                           verified
                         </span>
                       </div>
@@ -1596,6 +1707,7 @@ export default function EditProfilePage() {
                   >
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "20px", color: "var(--color-text-accent)" }}
                     >
                       receipt_long
@@ -1882,6 +1994,7 @@ export default function EditProfilePage() {
                   >
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "20px", color: "var(--color-text-accent)" }}
                     >
                       account_balance_wallet
@@ -2142,6 +2255,7 @@ export default function EditProfilePage() {
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <span
                         className="material-symbols-outlined"
+                        aria-hidden="true"
                         style={{ fontSize: "20px", color: "var(--color-text-accent)" }}
                       >
                         history
@@ -2375,7 +2489,9 @@ export default function EditProfilePage() {
             <div className="pe-2">
               <h3 className="pe-27 text-main text-base">Webcam ile Fotoğraf Çek</h3>
               <button type="button" onClick={closeWebcam} className="text-muted hover:text-main">
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  close
+                </span>
               </button>
             </div>
             <video ref={videoRef} className="stitch-webcam-preview" autoPlay playsInline />
@@ -2384,7 +2500,9 @@ export default function EditProfilePage() {
                 İptal
               </button>
               <button type="button" className="stitch-btn-save" onClick={captureWebcamPhoto}>
-                <span className="material-symbols-outlined">camera</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  camera
+                </span>
                 <span>Fotoğrafı Çek</span>
               </button>
             </div>
@@ -2397,7 +2515,9 @@ export default function EditProfilePage() {
         <div className="stitch-modal-overlay">
           <div className="stitch-modal-card">
             <div className="pe-29 text-error">
-              <span className="material-symbols-outlined">warning</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                warning
+              </span>
               <h3 className="pe-27 text-base">Hesabı Silmek İstediğinizden Emin misiniz?</h3>
             </div>
             <p className="pe-30 text-muted">
@@ -2461,6 +2581,7 @@ export default function EditProfilePage() {
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span
                   className="material-symbols-outlined"
+                  aria-hidden="true"
                   style={{ fontSize: "24px", color: "var(--color-text-accent)" }}
                 >
                   receipt
@@ -2599,7 +2720,11 @@ export default function EditProfilePage() {
                   gap: "6px",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "16px" }}
+                >
                   print
                 </span>
                 Yazdır / PDF Kaydet
@@ -2627,7 +2752,9 @@ export default function EditProfilePage() {
       {/* Floating Toast Notification */}
       {toastMessage && (
         <div data-surface="inverse" className="stitch-toast-notification">
-          <span className="material-symbols-outlined text-mint-glow">info</span>
+          <span className="material-symbols-outlined text-mint-glow" aria-hidden="true">
+            info
+          </span>
           <span>{toastMessage}</span>
         </div>
       )}

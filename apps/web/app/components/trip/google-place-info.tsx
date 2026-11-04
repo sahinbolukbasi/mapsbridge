@@ -76,13 +76,17 @@ export function GooglePlaceInfo({
       {/* Header */}
       <div className="gpi-header">
         <div className="gpi-header-badge">
-          <span className="material-symbols-outlined gpi-verified-icon">verified</span>
+          <span className="material-symbols-outlined gpi-verified-icon" aria-hidden="true">
+            verified
+          </span>
           <span>Google Maps Detayları</span>
         </div>
         <div className="gpi-header-links">
           {link && (
             <a href={link} target="_blank" rel="noopener noreferrer" className="gpi-ext-link">
-              <span className="material-symbols-outlined">open_in_new</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                open_in_new
+              </span>
               <span>Google Maps</span>
             </a>
           )}
@@ -113,7 +117,9 @@ export function GooglePlaceInfo({
               }
             }}
           >
-            <span className="material-symbols-outlined">search</span>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              search
+            </span>
             Google'da Bu Mekanı Bul
           </button>
 
@@ -186,7 +192,9 @@ export function GooglePlaceInfo({
               rel="noopener noreferrer"
               className="gpi-action-btn gpi-action-directions"
             >
-              <span className="material-symbols-outlined">directions</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                directions
+              </span>
               <span>Yol Tarifi</span>
             </a>
 
@@ -195,7 +203,9 @@ export function GooglePlaceInfo({
                 href={`tel:${place.nationalPhoneNumber}`}
                 className="gpi-action-btn gpi-action-call"
               >
-                <span className="material-symbols-outlined">call</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  call
+                </span>
                 <span>Ara</span>
               </a>
             )}
@@ -207,7 +217,9 @@ export function GooglePlaceInfo({
                 rel="noopener noreferrer"
                 className="gpi-action-btn gpi-action-web"
               >
-                <span className="material-symbols-outlined">language</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  language
+                </span>
                 <span>Web</span>
               </a>
             )}
@@ -219,7 +231,9 @@ export function GooglePlaceInfo({
                 rel="noopener noreferrer"
                 className="gpi-action-btn gpi-action-share"
               >
-                <span className="material-symbols-outlined">share</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  share
+                </span>
                 <span>Paylaş</span>
               </a>
             )}
@@ -235,11 +249,13 @@ export function GooglePlaceInfo({
                 aria-expanded={showHours}
               >
                 <div className="gpi-section-toggle-left">
-                  <span className="material-symbols-outlined">schedule</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    schedule
+                  </span>
                   <span>Çalışma Saatleri</span>
                 </div>
                 <span
-                  className={`material-symbols-outlined gpi-chevron ${showHours ? "open" : ""}`}
+                  className={`material-symbols-outlined gpi-chevron ${showHours ? "open" : ""} aria-hidden="true"`}
                 >
                   expand_more
                 </span>
@@ -259,7 +275,9 @@ export function GooglePlaceInfo({
           {/* Phone */}
           {place.nationalPhoneNumber && (
             <div className="gpi-info-chip">
-              <span className="material-symbols-outlined">call</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                call
+              </span>
               <a href={`tel:${place.nationalPhoneNumber}`} className="gpi-phone-link">
                 {place.nationalPhoneNumber}
               </a>
@@ -274,7 +292,9 @@ export function GooglePlaceInfo({
           {place.reviews && place.reviews.length > 0 ? (
             <div className="gpi-section-card">
               <div className="gpi-section-toggle-left" style={{ padding: "0.5rem 0" }}>
-                <span className="material-symbols-outlined">reviews</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  reviews
+                </span>
                 <span>Google Yorumları ({place.reviews.length})</span>
               </div>
 

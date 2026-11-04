@@ -330,7 +330,9 @@ export function GooglePlannerMap(props: Props) {
             performSearch(query);
           }}
         >
-          <span className="material-symbols-outlined gmap-search-icon">search</span>
+          <span className="material-symbols-outlined gmap-search-icon" aria-hidden="true">
+            search
+          </span>
           <label className="sr-only" htmlFor="google-place-query">
             Google Maps'te mekan, otel veya kafe ara
           </label>
@@ -350,7 +352,9 @@ export function GooglePlannerMap(props: Props) {
               }}
               title="Aramayı temizle"
             >
-              <span className="material-symbols-outlined">close</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                close
+              </span>
             </button>
           )}
           <button disabled={!ready || busy} type="submit" className="gmap-submit-btn">
@@ -382,7 +386,11 @@ export function GooglePlannerMap(props: Props) {
             <div className="gmap-results-head">
               <span>{results.length ? `${results.length} Mekan Bulundu` : "Arama Sonucu"}</span>
               <button type="button" className="gmap-results-close" onClick={clearResults}>
-                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "14px" }}
+                >
                   close
                 </span>
                 Kapat
@@ -413,7 +421,11 @@ export function GooglePlannerMap(props: Props) {
                           }}
                           title="Haritada göster"
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "15px" }}
+                          >
                             location_on
                           </span>
                           Göster
@@ -447,7 +459,11 @@ export function GooglePlannerMap(props: Props) {
                           }}
                           title="Bu mekanı rotaya ekle"
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "15px" }}
+                          >
                             add_circle
                           </span>
                           Ekle
@@ -472,7 +488,7 @@ export function GooglePlannerMap(props: Props) {
             title="Harita Görünümü"
             onClick={() => setShowMapTypeSelector(!showMapTypeSelector)}
           >
-            <span className="material-symbols-outlined">
+            <span className="material-symbols-outlined" aria-hidden="true">
               {MAP_TYPE_OPTIONS.find((t) => t.id === mapType)?.icon || "layers"}
             </span>
           </button>
@@ -489,7 +505,9 @@ export function GooglePlannerMap(props: Props) {
                     className={`gmap-maptype-option ${mapType === opt.id ? "active" : ""}`}
                     onClick={() => switchMapType(opt.id)}
                   >
-                    <span className="material-symbols-outlined">{opt.icon}</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      {opt.icon}
+                    </span>
                     <span>{opt.label}</span>
                   </button>
                 ))}
@@ -503,7 +521,9 @@ export function GooglePlannerMap(props: Props) {
                 className={`gmap-transit-toggle ${transitLayerOn ? "active" : ""}`}
                 onClick={toggleTransitLayer}
               >
-                <span className="material-symbols-outlined">directions_transit</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  directions_transit
+                </span>
                 <span>Toplu Taşıma</span>
                 <span className={`gmap-toggle-indicator ${transitLayerOn ? "on" : ""}`} />
               </button>
@@ -522,7 +542,9 @@ export function GooglePlannerMap(props: Props) {
               mapRef.current.setZoom((mapRef.current.getZoom() || 14) + 1);
             }}
           >
-            <span className="material-symbols-outlined">add</span>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              add
+            </span>
           </button>
           <button
             type="button"
@@ -533,7 +555,9 @@ export function GooglePlannerMap(props: Props) {
               mapRef.current.setZoom((mapRef.current.getZoom() || 14) - 1);
             }}
           >
-            <span className="material-symbols-outlined">remove</span>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              remove
+            </span>
           </button>
         </div>
 
@@ -544,7 +568,9 @@ export function GooglePlannerMap(props: Props) {
           title="Mevcut Konumum"
           onClick={handleMyLocation}
         >
-          <span className="material-symbols-outlined">my_location</span>
+          <span className="material-symbols-outlined" aria-hidden="true">
+            my_location
+          </span>
         </button>
       </div>
 

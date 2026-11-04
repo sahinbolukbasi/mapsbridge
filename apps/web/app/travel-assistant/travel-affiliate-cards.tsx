@@ -76,6 +76,7 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
       <div className="tp-bundle-header">
         <span
           className="material-symbols-outlined"
+          aria-hidden="true"
           style={{ fontSize: "15px", color: "var(--color-text-accent)" }}
         >
           sell
@@ -101,6 +102,7 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
           >
             <span
               className="material-symbols-outlined tp-card-icon"
+              aria-hidden="true"
               style={{ color: ICON_COLOR[card.type] || "#64748b" }}
             >
               {ICON[card.type] || "open_in_new"}
@@ -247,6 +249,7 @@ export function InlineAffiliateStrip({
       <span className="tp-inline-label">
         <span
           className="material-symbols-outlined"
+          aria-hidden="true"
           style={{ fontSize: "13px", verticalAlign: "middle" }}
         >
           sell
@@ -260,7 +263,7 @@ export function InlineAffiliateStrip({
         className="tp-inline-btn tp-inline-flight"
         onClick={() => track(flight)}
       >
-        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+        <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: "14px" }}>
           flight_takeoff
         </span>
         {livePrice?.flight ? (
@@ -284,7 +287,7 @@ export function InlineAffiliateStrip({
         className="tp-inline-btn tp-inline-hotel"
         onClick={() => track(hotel)}
       >
-        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+        <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: "14px" }}>
           hotel
         </span>
         {livePrice?.hotel ? (

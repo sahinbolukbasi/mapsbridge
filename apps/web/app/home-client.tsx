@@ -100,13 +100,18 @@ export default function Home() {
                   data-surface="inverse"
                 >
                   <span>{isLoggedIn ? t("home.hero.goToDesk") : t("home.hero.startFree")}</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "1.125rem" }}
+                  >
                     {isLoggedIn ? "map" : "bolt"}
                   </span>
                 </a>
                 <a href="#nasil-calisir" className="hero-btn-secondary">
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ fontSize: "1.25rem", color: "var(--color-link)" }}
                   >
                     play_circle
@@ -118,7 +123,9 @@ export default function Home() {
               {/* Smart Search & Prompt Bar */}
               <form className="hero-search-bar" onSubmit={handleDestinationSubmit}>
                 <div className="hero-search-left">
-                  <span className="material-symbols-outlined hero-search-icon">auto_awesome</span>
+                  <span className="material-symbols-outlined hero-search-icon" aria-hidden="true">
+                    auto_awesome
+                  </span>
                   <input
                     type="text"
                     className="hero-search-input"
@@ -130,7 +137,11 @@ export default function Home() {
                 </div>
                 <button type="submit" className="hero-search-btn" data-surface="inverse">
                   <span>{t("home.hero.generateRoute")}</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "1.125rem" }}
+                  >
                     arrow_forward
                   </span>
                 </button>
@@ -139,15 +150,21 @@ export default function Home() {
               {/* Micro Feature Tags */}
               <div className="hero-trust-tags">
                 <span className="hero-trust-tag">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   {t("home.hero.noCreditCard")}
                 </span>
                 <span className="hero-trust-tag">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   {t("home.hero.readyIn60")}
                 </span>
                 <span className="hero-trust-tag">
-                  <span className="material-symbols-outlined">check_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    check_circle
+                  </span>
                   {t("home.hero.offlineSynced")}
                 </span>
               </div>
@@ -170,7 +187,9 @@ export default function Home() {
                     className={`hero-mockup-tab ${activeHeroTab === "ai" ? "active" : ""}`}
                     onClick={() => setActiveHeroTab("ai")}
                   >
-                    <span className="material-symbols-outlined">psychology</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      psychology
+                    </span>
                     <span>{t("home.hero.tabs.ai")}</span>
                   </button>
                   <button
@@ -180,7 +199,9 @@ export default function Home() {
                     className={`hero-mockup-tab ${activeHeroTab === "desk" ? "active" : ""}`}
                     onClick={() => setActiveHeroTab("desk")}
                   >
-                    <span className="material-symbols-outlined">map</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      map
+                    </span>
                     <span>{t("home.hero.tabs.desk")}</span>
                   </button>
                   <button
@@ -190,7 +211,9 @@ export default function Home() {
                     className={`hero-mockup-tab ${activeHeroTab === "share" ? "active" : ""}`}
                     onClick={() => setActiveHeroTab("share")}
                   >
-                    <span className="material-symbols-outlined">qr_code_2</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      qr_code_2
+                    </span>
                     <span>{t("home.hero.tabs.share")}</span>
                   </button>
                 </div>
@@ -207,6 +230,7 @@ export default function Home() {
                         <span className="mockup-ai-badge">
                           <span
                             className="material-symbols-outlined"
+                            aria-hidden="true"
                             style={{ fontSize: "0.875rem" }}
                           >
                             auto_awesome
@@ -224,15 +248,21 @@ export default function Home() {
 
                       <div className="mockup-ai-features-row">
                         <span className="mockup-ai-feature-pill">
-                          <span className="material-symbols-outlined">verified</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            verified
+                          </span>
                           {t("home.mockup.ai.hoursVerified")}
                         </span>
                         <span className="mockup-ai-feature-pill">
-                          <span className="material-symbols-outlined">route</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            route
+                          </span>
                           {t("home.mockup.ai.routeSaved")}
                         </span>
                         <span className="mockup-ai-feature-pill">
-                          <span className="material-symbols-outlined">check</span>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            check
+                          </span>
                           {t("home.mockup.ai.noHallucinations")}
                         </span>
                       </div>
@@ -254,7 +284,11 @@ export default function Home() {
                         className="mockup-action-btn primary"
                         data-surface="inverse"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "1rem" }}
+                        >
                           auto_awesome
                         </span>
                         {t("home.mockup.ai.openInAssistant")}
@@ -264,7 +298,11 @@ export default function Home() {
                         className="mockup-action-btn secondary"
                         onClick={() => setActiveHeroTab("desk")}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "1rem" }}
+                        >
                           map
                         </span>
                         {t("home.mockup.ai.inspectOnMap")}
@@ -334,7 +372,9 @@ export default function Home() {
                         <span>{t("home.mockup.desk.mapLabel")}</span>
                       </div>
                       <div className="mockup-share-badge" data-surface="inverse">
-                        <span className="material-symbols-outlined">share</span>{" "}
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          share
+                        </span>{" "}
                         {t("home.mockup.desk.code")} <strong>RM-841</strong>
                       </div>
 
@@ -419,7 +459,11 @@ export default function Home() {
                           data-surface="inverse"
                           onClick={openCodeModal}
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "1rem" }}
+                          >
                             qr_code
                           </span>
                           {t("home.mockup.desk.shareCode")}
@@ -428,7 +472,11 @@ export default function Home() {
                           href={isLoggedIn ? "/maps/" : "/register/"}
                           className="mockup-action-btn secondary"
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "1rem" }}
+                          >
                             map
                           </span>
                           {t("home.mockup.desk.openMap")}
@@ -445,6 +493,7 @@ export default function Home() {
                       <div className="mockup-share-hero-badge">
                         <span
                           className="material-symbols-outlined"
+                          aria-hidden="true"
                           style={{ fontSize: "0.875rem" }}
                         >
                           bolt
@@ -459,21 +508,27 @@ export default function Home() {
 
                     <div className="mockup-share-benefits">
                       <div className="mockup-share-benefit-item">
-                        <span className="material-symbols-outlined">send</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          send
+                        </span>
                         <span>
                           <strong>{t("home.mockup.share.benefit1Title")}</strong>{" "}
                           {t("home.mockup.share.benefit1Desc")}
                         </span>
                       </div>
                       <div className="mockup-share-benefit-item">
-                        <span className="material-symbols-outlined">shield</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          shield
+                        </span>
                         <span>
                           <strong>{t("home.mockup.share.benefit2Title")}</strong>{" "}
                           {t("home.mockup.share.benefit2Desc")}
                         </span>
                       </div>
                       <div className="mockup-share-benefit-item">
-                        <span className="material-symbols-outlined">wifi_off</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          wifi_off
+                        </span>
                         <span>
                           <strong>{t("home.mockup.share.benefit3Title")}</strong>{" "}
                           {t("home.mockup.share.benefit3Desc")}
@@ -488,13 +543,21 @@ export default function Home() {
                         data-surface="inverse"
                         onClick={openCodeModal}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "1rem" }}
+                        >
                           vpn_key
                         </span>
                         {t("home.mockup.share.tryCode")}
                       </button>
                       <a href="#nasil-calisir" className="mockup-action-btn secondary">
-                        <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "1rem" }}
+                        >
                           help
                         </span>
                         {t("home.mockup.share.howItWorks")}
@@ -545,7 +608,9 @@ export default function Home() {
         <section id="ozellikler" className="section-wrapper">
           <div className="section-header">
             <div className="section-eyebrow">
-              <span className="material-symbols-outlined">widgets</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                widgets
+              </span>
               <span>{t("home.features.eyebrow")}</span>
             </div>
             <h2 className="section-title">{t("home.features.title")}</h2>
@@ -563,7 +628,9 @@ export default function Home() {
               />
               <div>
                 <div className="bento-icon">
-                  <span className="material-symbols-outlined">psychology</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    psychology
+                  </span>
                 </div>
                 <span className="bento-eyebrow">{t("home.feature1.eyebrow")}</span>
                 <h3 className="bento-title">{t("home.feature1.title")}</h3>
@@ -594,7 +661,9 @@ export default function Home() {
               />
               <div>
                 <div className="bento-icon">
-                  <span className="material-symbols-outlined">map</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    map
+                  </span>
                 </div>
                 <span className="bento-eyebrow">{t("home.feature2.eyebrow")}</span>
                 <h3 className="bento-title">{t("home.feature2.title")}</h3>
@@ -603,6 +672,7 @@ export default function Home() {
               <div className="bento-demo-box">
                 <span
                   className="material-symbols-outlined"
+                  aria-hidden="true"
                   style={{ color: "var(--color-text-accent)", fontSize: "1.625rem" }}
                 >
                   route
@@ -624,7 +694,9 @@ export default function Home() {
               />
               <div>
                 <div className="bento-icon">
-                  <span className="material-symbols-outlined">pin</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    pin
+                  </span>
                 </div>
                 <span className="bento-eyebrow">{t("home.feature3.eyebrow")}</span>
                 <h3 className="bento-title">{t("home.feature3.title")}</h3>
@@ -653,7 +725,9 @@ export default function Home() {
               />
               <div>
                 <div className="bento-icon">
-                  <span className="material-symbols-outlined">shield</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    shield
+                  </span>
                 </div>
                 <span className="bento-eyebrow">{t("home.feature4.eyebrow")}</span>
                 <h3 className="bento-title">{t("home.feature4.title")}</h3>
@@ -688,7 +762,9 @@ export default function Home() {
           <div className="section-wrapper" style={{ paddingTop: "0", paddingBottom: "0" }}>
             <div className="section-header">
               <div className="section-eyebrow">
-                <span className="material-symbols-outlined">timeline</span>
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  timeline
+                </span>
                 <span>{t("home.howItWorks.eyebrow")}</span>
               </div>
               <h2 className="section-title">{t("home.howItWorks.title")}</h2>
@@ -702,7 +778,11 @@ export default function Home() {
                   <div className="step-card-head">
                     <div className="step-number">1</div>
                     <div className="step-icon-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "1.5rem" }}
+                      >
                         chat
                       </span>
                     </div>
@@ -712,6 +792,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "1rem", color: "var(--color-text-accent)" }}
                     >
                       auto_awesome
@@ -723,10 +804,14 @@ export default function Home() {
                 </div>
                 <div className="step-check">
                   <span className="step-check-tag">
-                    <span className="material-symbols-outlined">check_circle</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      check_circle
+                    </span>
                     <span>{t("home.step1.check")}</span>
                   </span>
-                  <span className="material-symbols-outlined step-check-arrow">arrow_forward</span>
+                  <span className="material-symbols-outlined step-check-arrow" aria-hidden="true">
+                    arrow_forward
+                  </span>
                 </div>
               </div>
 
@@ -736,7 +821,11 @@ export default function Home() {
                   <div className="step-card-head">
                     <div className="step-number">2</div>
                     <div className="step-icon-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "1.5rem" }}
+                      >
                         psychology
                       </span>
                     </div>
@@ -746,6 +835,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "1rem", color: "var(--color-text-accent)" }}
                     >
                       route
@@ -758,10 +848,14 @@ export default function Home() {
                 </div>
                 <div className="step-check">
                   <span className="step-check-tag">
-                    <span className="material-symbols-outlined">check_circle</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      check_circle
+                    </span>
                     <span>{t("home.step2.check")}</span>
                   </span>
-                  <span className="material-symbols-outlined step-check-arrow">arrow_forward</span>
+                  <span className="material-symbols-outlined step-check-arrow" aria-hidden="true">
+                    arrow_forward
+                  </span>
                 </div>
               </div>
 
@@ -771,7 +865,11 @@ export default function Home() {
                   <div className="step-card-head">
                     <div className="step-number">3</div>
                     <div className="step-icon-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "1.5rem" }}
+                      >
                         drag_indicator
                       </span>
                     </div>
@@ -781,6 +879,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "1rem", color: "var(--color-text-accent)" }}
                     >
                       touch_app
@@ -792,10 +891,14 @@ export default function Home() {
                 </div>
                 <div className="step-check">
                   <span className="step-check-tag">
-                    <span className="material-symbols-outlined">check_circle</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      check_circle
+                    </span>
                     <span>{t("home.step3.check")}</span>
                   </span>
-                  <span className="material-symbols-outlined step-check-arrow">arrow_forward</span>
+                  <span className="material-symbols-outlined step-check-arrow" aria-hidden="true">
+                    arrow_forward
+                  </span>
                 </div>
               </div>
 
@@ -805,7 +908,11 @@ export default function Home() {
                   <div className="step-card-head">
                     <div className="step-number">4</div>
                     <div className="step-icon-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "1.5rem" }}
+                      >
                         qr_code_2
                       </span>
                     </div>
@@ -815,6 +922,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "1rem", color: "var(--color-text-accent)" }}
                     >
                       pin
@@ -827,10 +935,14 @@ export default function Home() {
                 </div>
                 <div className="step-check">
                   <span className="step-check-tag">
-                    <span className="material-symbols-outlined">check_circle</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      check_circle
+                    </span>
                     <span>{t("home.step4.check")}</span>
                   </span>
-                  <span className="material-symbols-outlined step-check-arrow">arrow_forward</span>
+                  <span className="material-symbols-outlined step-check-arrow" aria-hidden="true">
+                    arrow_forward
+                  </span>
                 </div>
               </div>
             </div>
@@ -839,12 +951,17 @@ export default function Home() {
               <a href="/how-it-works/" className="nasil-guide-link-btn">
                 <span
                   className="material-symbols-outlined"
+                  aria-hidden="true"
                   style={{ fontSize: "1.25rem", color: "var(--color-text-accent)" }}
                 >
                   menu_book
                 </span>
                 <span>{t("home.howItWorks.guideLink")}</span>
-                <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+                <span
+                  className="material-symbols-outlined"
+                  aria-hidden="true"
+                  style={{ fontSize: "1.125rem" }}
+                >
                   arrow_forward
                 </span>
               </a>
@@ -858,7 +975,9 @@ export default function Home() {
         <section id="neden-mapsbridge" className="section-wrapper">
           <div className="section-header">
             <div className="section-eyebrow">
-              <span className="material-symbols-outlined">compare_arrows</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                compare_arrows
+              </span>
               <span>{t("home.comparison.eyebrow")}</span>
             </div>
             <h2 className="section-title">{t("home.comparison.title")}</h2>
@@ -877,19 +996,27 @@ export default function Home() {
                   <p className="comparison-desc">{t("home.comparison.traditionalDesc")}</p>
                   <ul className="comparison-list">
                     <li>
-                      <span className="material-symbols-outlined error-icon">cancel</span>
+                      <span className="material-symbols-outlined error-icon" aria-hidden="true">
+                        cancel
+                      </span>
                       <span>{t("home.comparison.traditional1")}</span>
                     </li>
                     <li>
-                      <span className="material-symbols-outlined error-icon">cancel</span>
+                      <span className="material-symbols-outlined error-icon" aria-hidden="true">
+                        cancel
+                      </span>
                       <span>{t("home.comparison.traditional2")}</span>
                     </li>
                     <li>
-                      <span className="material-symbols-outlined error-icon">cancel</span>
+                      <span className="material-symbols-outlined error-icon" aria-hidden="true">
+                        cancel
+                      </span>
                       <span>{t("home.comparison.traditional3")}</span>
                     </li>
                     <li>
-                      <span className="material-symbols-outlined error-icon">cancel</span>
+                      <span className="material-symbols-outlined error-icon" aria-hidden="true">
+                        cancel
+                      </span>
                       <span>{t("home.comparison.traditional4")}</span>
                     </li>
                   </ul>
@@ -910,19 +1037,27 @@ export default function Home() {
                   <p className="comparison-desc">{t("home.comparison.mbDesc")}</p>
                   <ul className="comparison-list">
                     <li>
-                      <span className="material-symbols-outlined success-icon">check_circle</span>
+                      <span className="material-symbols-outlined success-icon" aria-hidden="true">
+                        check_circle
+                      </span>
                       <span>{t("home.comparison.mb1")}</span>
                     </li>
                     <li>
-                      <span className="material-symbols-outlined success-icon">check_circle</span>
+                      <span className="material-symbols-outlined success-icon" aria-hidden="true">
+                        check_circle
+                      </span>
                       <span>{t("home.comparison.mb2")}</span>
                     </li>
                     <li>
-                      <span className="material-symbols-outlined success-icon">check_circle</span>
+                      <span className="material-symbols-outlined success-icon" aria-hidden="true">
+                        check_circle
+                      </span>
                       <span>{t("home.comparison.mb3")}</span>
                     </li>
                     <li>
-                      <span className="material-symbols-outlined success-icon">check_circle</span>
+                      <span className="material-symbols-outlined success-icon" aria-hidden="true">
+                        check_circle
+                      </span>
                       <span>{t("home.comparison.mb4")}</span>
                     </li>
                   </ul>
@@ -955,7 +1090,9 @@ export default function Home() {
                 {/* Story 1: Add Story / Share */}
                 <div className="community-story-item">
                   <div className="community-story-add">
-                    <span className="material-symbols-outlined">add_a_photo</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      add_a_photo
+                    </span>
                   </div>
                   <span className="community-story-name">{t("home.community.shareTrip")}</span>
                   <span className="community-story-tag">{t("home.community.newRoute")}</span>
@@ -1008,7 +1145,10 @@ export default function Home() {
                         <div>
                           <div className="community-post-name-row">
                             <h4 className="community-post-name">{post.name}</h4>
-                            <span className="material-symbols-outlined community-verified">
+                            <span
+                              className="material-symbols-outlined community-verified"
+                              aria-hidden="true"
+                            >
                               verified
                             </span>
                           </div>
@@ -1024,13 +1164,17 @@ export default function Home() {
                         type="button"
                         aria-label={t("home.community.more")}
                       >
-                        <span className="material-symbols-outlined">more_horiz</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          more_horiz
+                        </span>
                       </button>
                     </div>
 
                     {/* Location Tag */}
                     <div className="community-location-tag">
-                      <span className="material-symbols-outlined">location_on</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        location_on
+                      </span>
                       <span>{post.location}</span>
                     </div>
 
@@ -1040,7 +1184,10 @@ export default function Home() {
                     {/* Attached Interactive Route Pill */}
                     <div className="community-route-pill">
                       <div className="community-route-pill-left">
-                        <span className="material-symbols-outlined community-route-icon">
+                        <span
+                          className="material-symbols-outlined community-route-icon"
+                          aria-hidden="true"
+                        >
                           {post.routeIcon}
                         </span>
                         <div className="community-route-text">
@@ -1066,7 +1213,9 @@ export default function Home() {
                         className="community-engagement-btn like"
                         aria-label={`${post.likes} beğeni`}
                       >
-                        <span className="material-symbols-outlined">favorite</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          favorite
+                        </span>
                         <span className="community-engagement-count">{post.likes}</span>
                       </button>
                       <button
@@ -1074,12 +1223,16 @@ export default function Home() {
                         className="community-engagement-btn"
                         aria-label={`${post.comments} yorum`}
                       >
-                        <span className="material-symbols-outlined">chat_bubble</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          chat_bubble
+                        </span>
                         <span>{post.comments}</span>
                       </button>
                     </div>
                     <button type="button" className="community-post-action" onClick={openCodeModal}>
-                      <span className="material-symbols-outlined">{post.actionIcon}</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        {post.actionIcon}
+                      </span>
                       <span>{t("home.community.openRoute")}</span>
                     </button>
                   </div>
@@ -1109,11 +1262,15 @@ export default function Home() {
                   className="community-share-btn"
                   data-surface="inverse"
                 >
-                  <span className="material-symbols-outlined">add_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    add_circle
+                  </span>
                   <span>{t("home.community.shareRoute")}</span>
                 </a>
                 <button type="button" className="community-code-btn" onClick={openCodeModal}>
-                  <span className="material-symbols-outlined">pin</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    pin
+                  </span>
                   <span>{t("home.community.exploreWithCode")}</span>
                 </button>
               </div>
@@ -1127,7 +1284,9 @@ export default function Home() {
         <section id="sss" className="section-wrapper">
           <div className="section-header">
             <div className="section-eyebrow">
-              <span className="material-symbols-outlined">help</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                help
+              </span>
               <span>{t("home.faq.eyebrow")}</span>
             </div>
             <h2 className="section-title">{t("home.faq.title")}</h2>
@@ -1139,7 +1298,9 @@ export default function Home() {
               <details key={idx} className="faq-item" open={idx === 0}>
                 <summary className="faq-question">
                   <span>{item.q}</span>
-                  <span className="material-symbols-outlined">expand_more</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    expand_more
+                  </span>
                 </summary>
                 <p className="faq-answer">{item.a}</p>
               </details>
@@ -1169,7 +1330,11 @@ export default function Home() {
                   className="cta-btn-primary"
                 >
                   <span>{isLoggedIn ? t("home.cta.planWithAi") : t("home.cta.startRoute")}</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.25rem" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "1.25rem" }}
+                  >
                     arrow_forward
                   </span>
                 </a>
@@ -1199,12 +1364,18 @@ export default function Home() {
             type="button"
             aria-label={t("home.codeModal.close")}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+            <span
+              className="material-symbols-outlined"
+              aria-hidden="true"
+              style={{ fontSize: "1.125rem" }}
+            >
               close
             </span>
           </button>
           <div className="code-modal-icon">
-            <span className="material-symbols-outlined">vpn_key</span>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              vpn_key
+            </span>
           </div>
           <h3>{t("home.codeModal.title")}</h3>
           <p>{t("home.codeModal.desc")}</p>
@@ -1240,7 +1411,11 @@ export default function Home() {
               ))}
             </div>
             <button type="submit" className="code-modal-submit" data-surface="inverse">
-              <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>
+              <span
+                className="material-symbols-outlined"
+                aria-hidden="true"
+                style={{ fontSize: "1.125rem" }}
+              >
                 map
               </span>
               <span>{t("home.codeModal.submit")}</span>
