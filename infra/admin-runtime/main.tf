@@ -86,7 +86,7 @@ resource "aws_iam_role_policy" "data" {
   name     = "application-data"
   role     = aws_iam_role.domain[each.key].id
   policy = jsonencode({ Version = "2012-10-17", Statement = concat([
-    { Effect = "Allow", Action = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem", "dynamodb:Query"], Resource = [local.table_arn] }
+    { Effect = "Allow", Action = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem", "dynamodb:Query"], Resource = [local.table_arn, "${local.table_arn}/index/*"] }
     ], each.key == "admin" ? [
     { Effect = "Allow", Action = ["dynamodb:Scan", "dynamodb:DescribeTable"], Resource = [local.table_arn] },
     { Effect = "Allow", Action = ["cognito-idp:AdminListGroupsForUser", "cognito-idp:ListUsers", "cognito-idp:AdminDisableUser", "cognito-idp:AdminEnableUser", "cognito-idp:AdminGetUser", "cognito-idp:AdminAddUserToGroup", "cognito-idp:AdminRemoveUserFromGroup", "cognito-idp:AdminUpdateUserAttributes", "cognito-idp:AdminDeleteUserAttributes", "cognito-idp:AdminUserGlobalSignOut"], Resource = [local.pool_arn] },
