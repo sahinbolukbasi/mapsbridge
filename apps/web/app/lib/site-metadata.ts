@@ -36,8 +36,21 @@ export function publicMetadata(
       locale: locale === "tr" ? "tr_TR" : "en_US",
       alternateLocale: monolingual ? [] : locale === "tr" ? ["en_US"] : ["tr_TR"],
       siteName: "MapsBridge",
+      images: [
+        {
+          url: "/og-default.png",
+          width: 1200,
+          height: 630,
+          alt: "MapsBridge",
+        },
+      ],
     },
-    twitter: { card: "summary", title: fullTitle, description },
+    twitter: {
+      card: "summary_large_image",
+      title: fullTitle,
+      description,
+      images: ["/og-default.png"],
+    },
   };
 }
 /**
