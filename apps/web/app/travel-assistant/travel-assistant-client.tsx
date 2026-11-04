@@ -1076,7 +1076,11 @@ export default function AIPage() {
             <aside className="ai-studio-aside-left" aria-label="Sohbetler">
               <div>
                 <button className="ai-new-plan-btn" onClick={startNew} disabled={busy}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     add
                   </span>
                   Yeni Seyahat Planla
@@ -1106,6 +1110,7 @@ export default function AIPage() {
                         >
                           <span
                             className="material-symbols-outlined"
+                            aria-hidden="true"
                             style={{
                               fontSize: "16px",
                               flexShrink: 0,
@@ -1146,7 +1151,11 @@ export default function AIPage() {
                         title="Sohbeti Sil"
                         aria-label="Sohbeti Sil"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "15px" }}
+                        >
                           delete
                         </span>
                       </button>
@@ -1177,7 +1186,11 @@ export default function AIPage() {
               <div className="ai-chat-header">
                 <div className="ai-chat-header-brand">
                   <div className="ai-chat-brand-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "18px" }}
+                    >
                       neurology
                     </span>
                   </div>
@@ -1205,7 +1218,11 @@ export default function AIPage() {
                     }}
                     title={panelOpen ? "Sohbeti büyüt" : "Rota panelini aç"}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "18px" }}
+                    >
                       {panelOpen ? "close_fullscreen" : "open_in_full"}
                     </span>
                   </button>
@@ -1227,6 +1244,7 @@ export default function AIPage() {
                 <div className="ai-user-memory-strip" aria-label="Kullanıcı hafızası">
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ fontSize: "14px", color: "var(--color-accent)" }}
                   >
                     psychology
@@ -1273,7 +1291,11 @@ export default function AIPage() {
                   <div className="ai-welcome-hub">
                     <div className="ai-welcome-header">
                       <div className="ai-welcome-avatar">
-                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "24px" }}
+                        >
                           waving_hand
                         </span>
                       </div>
@@ -1288,7 +1310,11 @@ export default function AIPage() {
 
                     <div className="ai-welcome-section">
                       <h3 className="ai-welcome-section-title">
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "16px" }}
+                        >
                           flight_takeoff
                         </span>
                         Popüler Destinasyonlar
@@ -1317,7 +1343,11 @@ export default function AIPage() {
 
                     <div className="ai-welcome-section">
                       <h3 className="ai-welcome-section-title">
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "16px" }}
+                        >
                           explore
                         </span>
                         Ne Yapmak İstersin?
@@ -1334,7 +1364,10 @@ export default function AIPage() {
                             }}
                             disabled={busy}
                           >
-                            <span className="material-symbols-outlined ai-activity-icon">
+                            <span
+                              className="material-symbols-outlined ai-activity-icon"
+                              aria-hidden="true"
+                            >
                               {a.icon}
                             </span>
                             <div className="ai-activity-text">
@@ -1348,7 +1381,11 @@ export default function AIPage() {
 
                     <div className="ai-welcome-section">
                       <h3 className="ai-welcome-section-title">
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "16px" }}
+                        >
                           menu_book
                         </span>
                         Hızlı Rehberler
@@ -1401,6 +1438,7 @@ export default function AIPage() {
                           >
                             <span
                               className="material-symbols-outlined"
+                              aria-hidden="true"
                               style={{ fontSize: "13px" }}
                             >
                               {copiedMsgId === m.id ? "check" : "content_copy"}
@@ -1416,6 +1454,7 @@ export default function AIPage() {
                             >
                               <span
                                 className="material-symbols-outlined"
+                                aria-hidden="true"
                                 style={{ fontSize: "13px", color: "var(--color-accent)" }}
                               >
                                 map
@@ -1432,6 +1471,7 @@ export default function AIPage() {
                             >
                               <span
                                 className="material-symbols-outlined"
+                                aria-hidden="true"
                                 style={{ fontSize: "13px", color: "#0ea5e9" }}
                               >
                                 open_in_new
@@ -1714,6 +1754,7 @@ export default function AIPage() {
                         <div className="ai-error-content">
                           <span
                             className="material-symbols-outlined"
+                            aria-hidden="true"
                             style={{ color: iconColor, fontSize: "18px" }}
                           >
                             {iconName}
@@ -1786,6 +1827,7 @@ export default function AIPage() {
                             >
                               <span
                                 className="material-symbols-outlined"
+                                aria-hidden="true"
                                 style={{ fontSize: "14px", verticalAlign: "middle" }}
                               >
                                 refresh
@@ -1870,7 +1912,11 @@ export default function AIPage() {
                     title="Konumumu Ekle"
                     aria-label="Konumumu Ekle"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "18px" }}
+                    >
                       add_location_alt
                     </span>
                   </button>
@@ -1882,7 +1928,11 @@ export default function AIPage() {
                     aria-label={listening ? "Sesli girişi durdur" : "Sesli mesaj yazdır"}
                     title={listening ? "Dinleniyor... Durdurmak için tıklayın" : "Sesli Mesaj"}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "18px" }}
+                    >
                       {listening ? "mic" : "mic"}
                     </span>
                   </button>
@@ -1909,7 +1959,11 @@ export default function AIPage() {
                       title="Metni Temizle"
                       aria-label="Metni Temizle"
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                      <span
+                        className="material-symbols-outlined"
+                        aria-hidden="true"
+                        style={{ fontSize: "16px" }}
+                      >
                         close
                       </span>
                     </button>
@@ -1920,7 +1974,11 @@ export default function AIPage() {
                     type="submit"
                   >
                     <span>{busy ? "Hazırlanıyor…" : "Gönder"}</span>
-                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "16px" }}
+                    >
                       send
                     </span>
                   </button>
@@ -1930,6 +1988,7 @@ export default function AIPage() {
                   <div className="ai-composer-credits-pill">
                     <span
                       className="material-symbols-outlined"
+                      aria-hidden="true"
                       style={{ fontSize: "15px", color: "var(--color-accent)" }}
                     >
                       bolt
@@ -1992,7 +2051,9 @@ export default function AIPage() {
                 </div>
                 {!route ? (
                   <div className="ai-route-empty">
-                    <span className="material-symbols-outlined">map</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      map
+                    </span>
                     <h2>Henüz rota yok</h2>
                     <p>Tercihlerini konuştuktan sonra oluşturduğumuz rota burada görünecek.</p>
                     {prepContext.kind === "strip" && <PrepPanel context={prepContext} />}
@@ -2915,6 +2976,7 @@ export default function AIPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span
                     className="material-symbols-outlined"
+                    aria-hidden="true"
                     style={{ color: "#38bdf8", fontSize: "20px" }}
                   >
                     description
@@ -2939,7 +3001,11 @@ export default function AIPage() {
                   }}
                   title="Kapat"
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    aria-hidden="true"
+                    style={{ fontSize: "18px" }}
+                  >
                     close
                   </span>
                 </button>
@@ -2996,7 +3062,11 @@ export default function AIPage() {
                       gap: "6px",
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "16px" }}
+                    >
                       map
                     </span>
                     <span>Haritada Düzenle</span>
@@ -3015,7 +3085,11 @@ export default function AIPage() {
                     className="ai-small-btn"
                     style={{ display: "flex", alignItems: "center", gap: "4px" }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "14px" }}
+                    >
                       content_copy
                     </span>
                     <span>Kopyala</span>
@@ -3043,7 +3117,11 @@ export default function AIPage() {
                       gap: "4px",
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: "14px" }}
+                    >
                       download
                     </span>
                     <span>İndir (.md)</span>
