@@ -79,14 +79,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        {/* Travelpayouts Drive — affiliate attribution */}
-        <script
-          data-cmp-ab="2"
-          data-no-defer="1"
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var s=document.createElement("script");s.async=1;s.setAttribute("data-cmp-ab","2");s.src="https://emrldco.com/NTg1MDg5.js?t=585089";document.head.appendChild(s);})();`,
-          }}
-        />
       </head>
       <body>
         <AuthProvider>
