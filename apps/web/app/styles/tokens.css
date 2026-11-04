@@ -195,8 +195,8 @@
     --space-12: 3rem;
     --space-16: 4rem;
     --space-20: 5rem;
-    --font-family-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --font-family-display: var(--font-plus-jakarta), var(--font-inter), system-ui, sans-serif;
+    --font-family-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-family-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
     --font-family-mono: ui-monospace, SFMono-Regular, monospace;
     --font-size-2xs: 0.6875rem;
     --font-size-xs: 0.75rem;

@@ -138,8 +138,8 @@ export const space = {
 } as const;
 
 export const fontFamily = {
-  sans: 'var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-  display: "var(--font-plus-jakarta), var(--font-inter), system-ui, sans-serif",
+  sans: '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+  display: '"Plus Jakarta Sans", "Inter", system-ui, sans-serif',
   mono: "ui-monospace, SFMono-Regular, monospace",
 } as const;
 

@@ -11,25 +11,10 @@ import { WSProvider } from "./lib/ws-context";
 import { LocaleProvider } from "./lib/locale-context";
 import { SiteChrome } from "./components/ui/site-chrome";
 import type { Metadata, Viewport } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./styles.css";
 import "./auth.css";
 // Leaflet'e karşı layer'sız muaf kurallar; legacy global'lerden sonra (design §2.6).
 import "./styles/vendor-overrides.css";
-
-const inter = Inter({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-  variable: "--font-plus-jakarta",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -58,11 +43,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="tr"
-      suppressHydrationWarning
-      className={`${inter.variable} ${plusJakartaSans.variable}`}
-    >
+    <html lang="tr" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -75,6 +56,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link
           rel="preload"
           href="/fonts/material-symbols-outlined.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/inter-latin.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/plus-jakarta-sans-latin.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
