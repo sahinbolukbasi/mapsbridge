@@ -73,12 +73,8 @@ function clientCalledPaths() {
 }
 
 // Bilinen mimari istisnalar (drift DEĞİL). Her giriş gerekçeli.
-const ALLOWLIST = new Map([
-  [
-    "/shares/:p",
-    "GET /shares/{code} ayrı public paylaşım mekanizması; üretim tarafı routes/index.ts 'POST /routes/{id}/share'. Backend'e GET /shares/{code} eklenirse bu satırı sil.",
-  ],
-]);
+// Bilinen mimari istisnalar (drift DEĞİL). Şu an hepsi backend'de kayıtlı; liste boş.
+const ALLOWLIST = new Map([]);
 
 test("route-sözleşme: api-client path literalleri çıkarılabiliyor", () => {
   assert.ok(clientCalledPaths().size > 0, "api-client'tan path çıkmadı — regex bozuk.");

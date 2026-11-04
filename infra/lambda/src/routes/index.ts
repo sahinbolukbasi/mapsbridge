@@ -63,6 +63,10 @@ router.add("GET /routes/{id}/osrm/{profile}", handleOsrmRoute);
 router.add("POST /ai/route-planner", handleAiRoutePlanner);
 router.add("GET /media/presign-upload", handlePresignUpload);
 router.add("POST /routes/telemetry", handleTelemetry);
+// Konum paylaşımı (güvenli, süreli, token-korumalı) — /k/ sayfasının tükettiği uçlar
+router.add("POST /shares", handleCreateLocationShare);
+router.add("GET /shares/{code}", handleReadLocationShare);
+router.add("POST /shares/{code}/revoke", handleRevokeLocationShare);
 router.add("GET /user/saved-addresses", handleGetSavedAddresses);
 router.add("PUT /user/saved-addresses", handlePutSavedAddresses);
 router.add("GET /user/ai-memory", handleGetAiMemory);
@@ -351,6 +355,109 @@ async function handleShareRoute(event: ApiGatewayEvent) {
   );
 
   return created({ shareCode, expiresAt, url: `/s/${shareCode}` });
+}
+
+// ─── Konum Paylaşımı (süreli, token-korumalı, KVKK) ───────────────────────
+// Veri modeli:
+//   PK=SHARE#<code> SK=LOCATION  { token, userId, lat, lng, address, expiresAt, createdAt, revoked }
+// code: sahip referansı (revoke için). token: paylaşım sırrı (/k/?kod=<token> ile okunur).
+async function handleCreateLocationShare(event: ApiGatewayEvent) {
+  const userId = await resolveUserId(event);
+  if (!userId) return unauthorized();
+  const body = parseBody<{ lat?: number; lng?: number; address?: string; hours?: number }>(event);
+  const lat = Number(body?.lat);
+  const lng = Number(body?.lng);
+  if (!Number.isFinite(lat) || Math.abs(lat) > 90 || !Number.isFinite(lng) || Math.abs(lng) > 180)
+    return badRequest("Geçerli bir konum (lat/lng) gerekli.");
+  const hours = Math.min(Math.max(Math.floor(Number(body?.hours) || 1), 1), 168); // 1h–7d
+  const address = typeof body?.address === "string" ? body.address.slice(0, 300) : "";
+  const code = crypto.randomUUID().slice(0, 8);
+  const token = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+  const expiresAt = Math.floor(Date.now() / 1000) + hours * 3600;
+  const { PutItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall } = await import("@aws-sdk/util-dynamodb");
+  const ddb = getDynamoClient();
+  await ddb.send(
+    new PutItemCommand({
+      TableName: getTableName(),
+      Item: marshall(
+        {
+          PK: `SHARE#${code}`,
+          SK: "LOCATION",
+          token,
+          userId,
+          lat,
+          lng,
+          address,
+          expiresAt,
+          createdAt: new Date().toISOString(),
+          revoked: false,
+          // GSI1: token ile O(1) okuma (GSI1PK=SHARETOKEN#<token>)
+          GSI1PK: `SHARETOKEN#${token}`,
+          GSI1SK: "LOCATION",
+        },
+        { removeUndefinedValues: true },
+      ),
+      ConditionExpression: "attribute_not_exists(PK)",
+    }),
+  );
+  return created({ code, token, expiresAt });
+}
+
+async function handleReadLocationShare(event: ApiGatewayEvent) {
+  // Path param adı {code} ama değer aslında token (sır). Hem token (GSI1) hem code ile dene.
+  const key = (event.pathParameters?.code || "").trim();
+  if (!key || key.length < 6) return notFound("Paylaşım bulunamadı.");
+  const { QueryCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall, unmarshall } = await import("@aws-sdk/util-dynamodb");
+  const ddb = getDynamoClient();
+  let item: Record<string, unknown> | null = null;
+  // 1) token → GSI1
+  const q = await ddb.send(
+    new QueryCommand({
+      TableName: getTableName(),
+      IndexName: "GSI1",
+      KeyConditionExpression: "GSI1PK = :pk",
+      ExpressionAttributeValues: marshall({ ":pk": `SHARETOKEN#${key}` }),
+      Limit: 1,
+    }),
+  );
+  if (q.Items && q.Items.length > 0) item = unmarshall(q.Items[0]);
+  // 2) fallback: code ile doğrudan
+  if (!item) item = await read(`SHARE#${key}`, "LOCATION");
+  if (!item || item.revoked === true) return notFound("Paylaşım bulunamadı veya iptal edilmiş.");
+  const expiresAt = Number(item.expiresAt);
+  if (!Number.isFinite(expiresAt) || expiresAt * 1000 <= Date.now())
+    return notFound("Paylaşımın süresi dolmuş.");
+  // Yalnızca paylaşım için gerekli alanlar; userId gibi sahip verisi sızdırılmaz.
+  return jsonResponse(200, {
+    lat: item.lat,
+    lng: item.lng,
+    address: item.address || "",
+    expiresAt,
+  });
+}
+
+async function handleRevokeLocationShare(event: ApiGatewayEvent) {
+  const userId = await resolveUserId(event);
+  if (!userId) return unauthorized();
+  const code = (event.pathParameters?.code || "").trim();
+  if (!code) return badRequest("Paylaşım kodu gerekli.");
+  const existing = await read(`SHARE#${code}`, "LOCATION");
+  if (!existing) return notFound("Paylaşım bulunamadı.");
+  if (existing.userId !== userId) return forbidden("Bu paylaşımı iptal etme yetkiniz yok.");
+  const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall } = await import("@aws-sdk/util-dynamodb");
+  const ddb = getDynamoClient();
+  await ddb.send(
+    new UpdateItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: `SHARE#${code}`, SK: "LOCATION" }),
+      UpdateExpression: "SET revoked = :t",
+      ExpressionAttributeValues: marshall({ ":t": true }),
+    }),
+  );
+  return ok({ status: "revoked" });
 }
 
 // ─── AI Route Planner (Bedrock + Token Rate Limit) ────────────────────────

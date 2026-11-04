@@ -407,3 +407,100 @@ test("POST /routes/telemetry rejects anonymous events when no token is provided"
     .handler(event("POST", "/routes/telemetry", null, { events: [{ type: "pageview" }] }));
   assert.equal(result.statusCode, 401);
 });
+
+// ─── Konum Paylaşımı (süreli, token-korumalı) ──────────────────────────────
+test("POST /shares geçersiz konumda 400 döner", async () => {
+  const h = harness();
+  const result = await h
+    .load("routes/index.ts")
+    .handler(event("POST", "/shares", token(), { lat: 999, lng: 0, hours: 2 }));
+  assert.equal(result.statusCode, 400);
+});
+
+test("POST /shares geçerli konumda 201 + code/token/expiresAt döner", async () => {
+  const h = harness();
+  const result = await h
+    .load("routes/index.ts")
+    .handler(
+      event("POST", "/shares", token(), { lat: 41.0, lng: 29.0, address: "İstanbul", hours: 3 }),
+    );
+  assert.equal(result.statusCode, 201);
+  const body = JSON.parse(result.body);
+  assert.ok(
+    body.code && body.token && Number.isFinite(body.expiresAt),
+    "code/token/expiresAt dönmeli",
+  );
+  assert.ok(body.token.length >= 32, "token yeterince uzun (sır) olmalı");
+});
+
+test("POST /shares kimliksiz istekte 401", async () => {
+  const h = harness();
+  const result = await h
+    .load("routes/index.ts")
+    .handler(event("POST", "/shares", undefined, { lat: 41, lng: 29 }));
+  assert.equal(result.statusCode, 401);
+});
+
+test("GET /shares/{token} geçerli paylaşımda 200 + lat/lng (userId sızmaz)", async () => {
+  const future = Math.floor(Date.now() / 1000) + 3600;
+  const h = harness({
+    data: (cmd) => {
+      // GSI1 query → bir item döndür
+      if (cmd.name === "QueryCommand") {
+        return {
+          Items: [
+            {
+              PK: "SHARE#abc12345",
+              SK: "LOCATION",
+              token: "x".repeat(64),
+              userId: "owner-1",
+              lat: 41.0,
+              lng: 29.0,
+              address: "İstanbul",
+              expiresAt: future,
+              revoked: false,
+            },
+          ],
+          Count: 1,
+        };
+      }
+      return { Items: [], Count: 0 };
+    },
+  });
+  const result = await h
+    .load("routes/index.ts")
+    .handler(event("GET", "/shares/" + "x".repeat(64), undefined));
+  assert.equal(result.statusCode, 200);
+  const body = JSON.parse(result.body);
+  assert.equal(body.lat, 41);
+  assert.equal(body.lng, 29);
+  assert.equal(body.userId, undefined, "sahip userId sızdırılmamalı");
+});
+
+test("GET /shares/{token} süresi dolmuş paylaşımda 404", async () => {
+  const past = Math.floor(Date.now() / 1000) - 10;
+  const h = harness({
+    data: (cmd) => {
+      if (cmd.name === "QueryCommand") {
+        return {
+          Items: [
+            {
+              PK: "SHARE#old99999",
+              SK: "LOCATION",
+              lat: 41.0,
+              lng: 29.0,
+              expiresAt: past,
+              revoked: false,
+            },
+          ],
+          Count: 1,
+        };
+      }
+      return { Items: [], Count: 0 };
+    },
+  });
+  const result = await h
+    .load("routes/index.ts")
+    .handler(event("GET", "/shares/" + "o".repeat(64), undefined));
+  assert.equal(result.statusCode, 404);
+});

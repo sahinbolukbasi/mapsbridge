@@ -31,9 +31,5 @@ test("ham material-symbols-outlined span'ları aria-hidden taşır", () => {
       }
     }
   }
-  assert.equal(
-    offenders.length,
-    0,
-    `aria-hidden'sız ikon span bulundu:\n${offenders.join("\n")}`,
-  );
+  assert.equal(offenders.length, 0, `aria-hidden'sız ikon span bulundu:\n${offenders.join("\n")}`);
 });
