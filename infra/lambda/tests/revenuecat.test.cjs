@@ -500,8 +500,15 @@ test("reconcile: needsReconcile işaretli kullanıcıyı RC'den doğrular ve dü
     ok: true,
     json: async () => ({
       subscriber: {
+        // Gerçek dashboard yapısı: tek entitlement "mapsbridge_pro", kademe product_id'den çözülür.
         entitlements: {
-          pro: { expires_date: new Date(Date.now() + 30 * 864e5).toISOString() },
+          mapsbridge_pro: {
+            expires_date: new Date(Date.now() + 30 * 864e5).toISOString(),
+            product_identifier: "prode1930276ca", // catalog() 'pro' ürünü
+          },
+        },
+        subscriptions: {
+          prode1930276ca: { expires_date: new Date(Date.now() + 30 * 864e5).toISOString() },
         },
       },
     }),
@@ -528,4 +535,79 @@ test("reconcile: needsReconcile işaretli kullanıcıyı RC'den doğrular ve dü
   // user-x kontrol edildi ve pro'ya düzeltildi
   assert.ok(result.checked >= 1, "en az bir kullanıcı kontrol edildi");
   assert.equal(rows.get("USER#user-x|SUBSCRIPTION")?.tier, "pro", "drift pro'ya düzeltildi");
+});
+
+test("syncFromSubscriber: mapsbridge_pro + product_identifier 'yearly' -> pro-yearly kademesi", async () => {
+  const { load, rows } = harness();
+  const { syncFromSubscriber } = load("revenuecat/index.ts");
+  const subscriber = {
+    entitlements: {
+      mapsbridge_pro: {
+        expires_date: new Date(Date.now() + 30 * 864e5).toISOString(),
+        product_identifier: "prod99e16b0cb7", // catalog() 'pro-yearly' ürünü
+      },
+    },
+    subscriptions: {
+      prod99e16b0cb7: { expires_date: new Date(Date.now() + 30 * 864e5).toISOString() },
+    },
+  };
+  await syncFromSubscriber("user-sync", subscriber, Math.floor(Date.now() / 1000));
+  assert.equal(
+    rows.get("USER#user-sync|SUBSCRIPTION")?.tier,
+    "pro-yearly",
+    "product_id 'yearly' -> pro-yearly kademesine çözülmeli",
+  );
+});
+
+test("syncFromSubscriber: catalog'da olmayan product_identifier -> warn, exception yok", async () => {
+  const { load, rows } = harness();
+  const { syncFromSubscriber } = load("revenuecat/index.ts");
+  const subscriber = {
+    entitlements: {
+      mapsbridge_pro: {
+        expires_date: new Date(Date.now() + 30 * 864e5).toISOString(),
+        product_identifier: "unknown_product_xyz",
+      },
+    },
+  };
+  const origWarn = console.warn;
+  let warned = null;
+  console.warn = (msg) => {
+    warned = msg;
+  };
+  try {
+    await assert.doesNotReject(
+      syncFromSubscriber("user-unknown", subscriber, Math.floor(Date.now() / 1000)),
+    );
+  } finally {
+    console.warn = origWarn;
+  }
+  assert.ok(
+    warned && String(warned).includes("rc_sync_from_subscriber_unresolved"),
+    "warn loglanmalı",
+  );
+  assert.equal(
+    rows.get("USER#user-unknown|SUBSCRIPTION"),
+    undefined,
+    "çözülemeyen ürün için abonelik kaydı yazılmamalı",
+  );
+});
+
+test("syncFromSubscriber: aktif mapsbridge_pro entitlement yoksa no-op", async () => {
+  const { load, rows } = harness();
+  const { syncFromSubscriber } = load("revenuecat/index.ts");
+  const subscriber = {
+    entitlements: {
+      mapsbridge_pro: {
+        expires_date: new Date(Date.now() - 1000).toISOString(), // süresi geçmiş
+        product_identifier: "prode1930276ca",
+      },
+    },
+  };
+  await syncFromSubscriber("user-expired", subscriber, Math.floor(Date.now() / 1000));
+  assert.equal(
+    rows.get("USER#user-expired|SUBSCRIPTION"),
+    undefined,
+    "süresi geçmiş entitlement için yazım yapılmamalı",
+  );
 });

@@ -9,6 +9,37 @@ import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 import { timingSafeEqual } from "node:crypto";
 import { marshall } from "@aws-sdk/util-dynamodb";
 
+// Tek entitlement kaynağı. Dashboard'daki entitlement lookup_key ile aynı olmalı.
+// Kademe (explorer/pro/agency) entitlement adından DEĞİL, product_id'den çözülür.
+const RC_ENTITLEMENT_ID = process.env.RC_ENTITLEMENT_ID || "mapsbridge_pro";
+
+/**
+ * RevenueCat subscriber payload'ından aktif aboneliğin product_identifier'ını bulur.
+ * Önce entitlement'ın bağlı olduğu ürüne, sonra aktif subscriptions kaydına bakar.
+ * Bulamazsa null döner.
+ */
+function activeProductIdFromSubscriber(subscriber: Record<string, unknown>): string | null {
+  const entitlements =
+    (subscriber.entitlements as Record<
+      string,
+      { expires_date?: string | null; product_identifier?: string }
+    >) || {};
+  const ent = entitlements[RC_ENTITLEMENT_ID];
+  const now = Date.now();
+  // Entitlement aktif mi? (expires_date yoksa lifetime kabul edilir)
+  const entActive = !!ent && (!ent.expires_date || Date.parse(ent.expires_date) > now);
+  if (!entActive) return null;
+  // 1) Entitlement doğrudan product_identifier taşıyorsa onu kullan
+  if (ent.product_identifier) return ent.product_identifier;
+  // 2) Aksi halde aktif subscriptions kayıtlarından süresi geçmemiş ilkini seç
+  const subscriptions =
+    (subscriber.subscriptions as Record<string, { expires_date?: string | null }>) || {};
+  for (const [productId, sub] of Object.entries(subscriptions)) {
+    if (!sub?.expires_date || Date.parse(sub.expires_date) > now) return productId;
+  }
+  return null;
+}
+
 const reply = (statusCode: number, body: unknown) => ({
   statusCode,
   headers: { "content-type": "application/json", "cache-control": "no-store" },
@@ -401,31 +432,34 @@ export async function syncFromSubscriber(
   subscriber: Record<string, unknown>,
   eventTime: number,
 ) {
-  const entitlements = (subscriber.entitlements as Record<string, { expires_date?: string }>) || {};
-  // Find the highest-tier active entitlement
-  const tiers = ["agency", "pro", "explorer"];
-  let activeTier = "free";
-  let periodEnd: string | null = null;
-
-  for (const tier of tiers) {
-    const ent = entitlements[tier];
-    if (ent?.expires_date && Date.parse(ent.expires_date) > Date.now()) {
-      activeTier = tier;
-      periodEnd = ent.expires_date;
-      break;
-    }
-  }
-
-  if (activeTier !== "free") {
-    await syncSubscription(
-      userId,
-      activeTier,
-      "active",
-      periodEnd,
-      `rc-verify-${Date.now()}`,
-      eventTime,
+  // Kademe, webhook ana yoluyla AYNI stratejiden çözülür: product_id -> catalog().
+  // Entitlement adı yalnızca "aktif abonelik var mı" bilgisini verir.
+  const productId = activeProductIdFromSubscriber(subscriber);
+  if (!productId) return; // aktif mapsbridge_pro entitlement'i yok -> yapılacak bir şey yok
+  const product = catalog().find((p) => p.productId === productId);
+  if (!product || product.mode !== "subscription") {
+    // Sessiz fallthrough bu bug'ın fark edilmemesinin sebebiydi: artık logla.
+    console.warn(
+      JSON.stringify({
+        msg: "rc_sync_from_subscriber_unresolved",
+        userId,
+        productId,
+        entitlement: RC_ENTITLEMENT_ID,
+      }),
     );
+    return;
   }
+  const entitlements =
+    (subscriber.entitlements as Record<string, { expires_date?: string | null }>) || {};
+  const periodEnd = entitlements[RC_ENTITLEMENT_ID]?.expires_date ?? null;
+  await syncSubscription(
+    userId,
+    product.id,
+    "active",
+    periodEnd,
+    `rc-verify-${Date.now()}`,
+    eventTime,
+  );
 }
 
 // ─── Conversion publish (best-effort, attribution) ──────────────────────────
