@@ -758,22 +758,34 @@ export default function AIPage() {
           }
           throw new Error("Yanıt tamamlanamadı — stream kapandı.");
         };
-        // NOT: /ai/route-planner emekli (410 Gone). Tek canlı AI yolu stream'dir.
-        // Stream başarısız olursa ölü endpoint'e düşmek rota üretmez; gerçek durumu
-        // kullanıcıya göster. İş hataları zaten catch bloğunda ele alınıyor.
-        result = await runStream();
+        // Buffered fallback: stream (Function URL) erişilemezse API Gateway /ai/chat
+        // üzerinden tek-seferlik (streaming'siz) yanıt al. Org politikası public
+        // Function URL'i engellediğinde chat yine de çalışır. İş hataları fallback'e düşmez.
+        const runBuffered = async () => {
+          return (await apiFetch("/ai/chat", {
+            method: "POST",
+            body: JSON.stringify(request),
+          })) as typeof result;
+        };
+        const isBusinessError = (e: unknown) => {
+          const s = (e as { status?: number })?.status;
+          return s === 401 || s === 402 || s === 403 || s === 409 || s === 429;
+        };
+        try {
+          result = await runStream();
+        } catch (streamErr: unknown) {
+          if (isBusinessError(streamErr)) throw streamErr;
+          // bağlantı/erişim/5xx → buffered API Gateway yoluna düş
+          result = await runBuffered();
+        }
         setStreamText("");
         setStreamPhase(null);
       } else {
-        // Stream URL yapılandırılmamış. /ai/route-planner 410 döndüğü için ona düşmek
-        // anlamsız — net bir yapılandırma hatası fırlat ki sessizce "rota üretmedi"
-        // durumuna düşmesin.
-        throw Object.assign(
-          new Error(
-            "AI servisi şu an yapılandırılmadı (stream URL yok). Lütfen daha sonra tekrar deneyin.",
-          ),
-          { code: "AI_DISABLED", status: 503 },
-        );
+        // Stream URL yok → doğrudan buffered API Gateway /ai/chat.
+        result = (await apiFetch("/ai/chat", {
+          method: "POST",
+          body: JSON.stringify(request),
+        })) as typeof result;
       }
       setTrainingConsent(false);
       if (!result.orchestratorSummary?.trim() || (result.route && !isRoutePlan(result.route)))
