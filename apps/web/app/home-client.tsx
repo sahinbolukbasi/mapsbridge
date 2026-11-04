@@ -93,7 +93,7 @@ export default function Home() {
               <p className="hero-sub">{t("home.hero.sub")}</p>
 
               {/* Smart Search & Prompt Bar */}
-              <form className="hero-search-bar" onSubmit={handleDestinationSubmit}>
+              <form id="hero-search" className="hero-search-bar" onSubmit={handleDestinationSubmit}>
                 <div className="hero-search-left">
                   <span className="material-symbols-outlined hero-search-icon" aria-hidden="true">
                     auto_awesome
@@ -174,6 +174,9 @@ export default function Home() {
             <div className="hero-right">
               <div className="hero-mockup-glow" data-surface="inverse" />
               <div className="hero-mockup">
+                <span className="hero-mockup-sample-badge" data-surface="inverse">
+                  {t("home.hero.sampleBadge")}
+                </span>
                 {/* Interactive Top Tab Switcher */}
                 <div
                   className="hero-mockup-tabs"
@@ -566,6 +569,9 @@ export default function Home() {
                   </div>
                 )}
               </div>
+              <a className="hero-mockup-cta" href="#hero-search">
+                {t("home.hero.sampleCta")}
+              </a>
             </div>
           </div>
         </section>

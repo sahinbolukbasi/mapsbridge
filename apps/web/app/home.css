@@ -313,6 +313,7 @@
   }
 
   .hero-mockup {
+    position: relative;
     background: var(--color-surface);
     border-radius: 1.5rem;
     border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
@@ -323,6 +324,34 @@
 
   .hero-mockup:hover {
     box-shadow: 0 20px 50px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  }
+  /* tasarım-2: mockup'ın örnek olduğunu belirten rozet + gerçek eyleme CTA */
+  .hero-mockup-sample-badge {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 2;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-full, 999px);
+    font-size: var(--font-size-xs, 0.75rem);
+    font-weight: 600;
+    color: var(--color-text-inverse);
+    background: color-mix(in srgb, var(--color-primary) 72%, transparent);
+  }
+  .hero-mockup-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: var(--space-3);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-lg, 0.75rem);
+    font-weight: 600;
+    color: var(--color-text-accent);
+    text-decoration: none;
+  }
+  .hero-mockup-cta:hover {
+    text-decoration: underline;
   }
 
   .mockup-header {
