@@ -867,7 +867,7 @@ export default function SignUpPage() {
                     height: "2.25rem",
                     borderRadius: "9999px",
                     backgroundColor: "var(--color-accent-a20)",
-                    color: "var(--color-accent)",
+                    color: "var(--color-text-accent)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",

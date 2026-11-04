@@ -59,7 +59,7 @@ export function HowItWorksClient() {
             <a href="#adımlar" className="nasil-btn-secondary">
               <span
                 className="material-symbols-outlined"
-                style={{ fontSize: "1.25rem", color: "var(--color-accent)" }}
+                style={{ fontSize: "1.25rem", color: "var(--color-text-accent)" }}
               >
                 play_circle
               </span>
@@ -155,7 +155,7 @@ export function HowItWorksClient() {
                 <div className="nasil-interactive-input-row">
                   <span
                     className="material-symbols-outlined"
-                    style={{ color: "var(--color-accent)", fontSize: "1.25rem" }}
+                    style={{ color: "var(--color-text-accent)", fontSize: "1.25rem" }}
                   >
                     auto_awesome
                   </span>

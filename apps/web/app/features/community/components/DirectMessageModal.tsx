@@ -52,7 +52,7 @@ export function DirectMessageModal({
             />
             <div>
               <h3 style={{ margin: 0, fontSize: "15px" }}>{target.name}</h3>
-              <span style={{ fontSize: "11px", color: "var(--color-accent)" }}>
+              <span style={{ fontSize: "11px", color: "var(--color-text-accent)" }}>
                 @{target.username} · {target.targetDestination || "Gezgin"}
               </span>
             </div>

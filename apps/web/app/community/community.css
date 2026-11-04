@@ -1265,7 +1265,7 @@
   }
 
   .stripe-dot {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
   }
 
   .stripe-status-left strong {

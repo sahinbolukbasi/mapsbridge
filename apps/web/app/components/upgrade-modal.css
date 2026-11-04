@@ -253,7 +253,7 @@
   }
 
   .mb-upgrade-feature-check {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-weight: 800;
     flex-shrink: 0;
   }

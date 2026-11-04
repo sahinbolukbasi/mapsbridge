@@ -218,7 +218,7 @@
   }
 
   .hero-search-icon {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 1.375rem;
     flex-shrink: 0;
   }
@@ -286,7 +286,7 @@
   }
 
   .hero-trust-tag .material-symbols-outlined {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 1rem;
   }
 
@@ -774,7 +774,7 @@
 
   .mockup-ai-feature-pill .material-symbols-outlined {
     font-size: 0.875rem;
-    color: var(--color-accent);
+    color: var(--color-text-accent);
   }
 
   .mockup-ai-plan-card {
@@ -905,7 +905,7 @@
   }
 
   .mockup-share-benefit-item .material-symbols-outlined {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 1rem;
   }
 
@@ -1468,7 +1468,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     transition: all 0.25s ease;
   }
 
@@ -1551,7 +1551,7 @@
 
   .step-card-new:hover .step-check-arrow {
     transform: translateX(3px);
-    color: var(--color-accent);
+    color: var(--color-text-accent);
   }
 
   /* Bottom guide link */
@@ -1702,7 +1702,7 @@
   }
 
   .comparison-list li .material-symbols-outlined.success-icon {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
   }
 
   .comparison-footer {
@@ -1785,7 +1785,7 @@
   }
 
   .community-story-add .material-symbols-outlined {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 1.5rem;
   }
 
@@ -1973,7 +1973,7 @@
   }
 
   .community-verified {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 1rem;
   }
 
@@ -2059,7 +2059,7 @@
   }
 
   .community-route-icon {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 1.25rem;
     flex-shrink: 0;
   }

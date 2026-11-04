@@ -199,7 +199,7 @@ export default function CheckoutPage() {
             <strong>{signedIn ? wallet.credits.toLocaleString("tr-TR") : "—"}</strong>
           </div>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-accent)" }}>
+            <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-text-accent)" }}>
               {wallet.subscriptionTier === "agency"
                 ? "Tur Lideri Planı"
                 : wallet.subscriptionTier === "pro"
@@ -421,7 +421,13 @@ export default function CheckoutPage() {
                     {tab === "subscription" && <small> / ay</small>}
                   </div>
                   {tab === "subscription" && cycle === "yearly" && (
-                    <p style={{ fontSize: "12px", color: "var(--color-accent)", fontWeight: 700 }}>
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--color-text-accent)",
+                        fontWeight: 700,
+                      }}
+                    >
                       Yıllık faturalandırılır (Yıllık {(priceTRY * 12).toLocaleString("tr-TR")} ₺)
                     </p>
                   )}

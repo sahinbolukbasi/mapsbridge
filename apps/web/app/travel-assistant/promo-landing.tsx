@@ -233,7 +233,7 @@ export function AIPromoLanding() {
             <span className="ai-promo-stat-pill">
               <span
                 className="material-symbols-outlined"
-                style={{ fontSize: "16px", color: "var(--color-accent)" }}
+                style={{ fontSize: "16px", color: "var(--color-text-accent)" }}
               >
                 bolt
               </span>
@@ -733,7 +733,7 @@ export function AIPromoLanding() {
                 <button type="button" className="ai-promo-sub-btn" onClick={handleCopyCode}>
                   <span
                     className="material-symbols-outlined"
-                    style={{ fontSize: "16px", color: "var(--color-accent)" }}
+                    style={{ fontSize: "16px", color: "var(--color-text-accent)" }}
                   >
                     {copiedCode ? "check" : "content_copy"}
                   </span>

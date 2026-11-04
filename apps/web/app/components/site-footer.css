@@ -164,7 +164,7 @@
 
   .global-footer-links li a:hover,
   .global-footer-links li button:hover {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
   }
 
   /* Bottom Bar */
@@ -208,7 +208,7 @@
 
   .global-footer-action-btn:hover {
     border-color: var(--color-accent);
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     background: color-mix(in srgb, var(--color-accent) 5%, transparent);
   }
 

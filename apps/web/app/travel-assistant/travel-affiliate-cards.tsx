@@ -76,7 +76,7 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
       <div className="tp-bundle-header">
         <span
           className="material-symbols-outlined"
-          style={{ fontSize: "15px", color: "var(--color-accent)" }}
+          style={{ fontSize: "15px", color: "var(--color-text-accent)" }}
         >
           sell
         </span>

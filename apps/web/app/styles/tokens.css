@@ -37,6 +37,7 @@
     --color-on-accent: #0d281e;
     --color-accent-sky: #0284c7;
     --color-accent-sky-soft: #38bdf8;
+    --color-text-accent: #047857;
     --color-accent-a10: color-mix(in srgb, #10b981 10%, transparent);
     --color-accent-a20: color-mix(in srgb, #10b981 20%, transparent);
     --color-accent-a30: color-mix(in srgb, #10b981 30%, transparent);

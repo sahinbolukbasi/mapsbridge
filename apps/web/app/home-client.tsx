@@ -603,7 +603,7 @@ export default function Home() {
               <div className="bento-demo-box">
                 <span
                   className="material-symbols-outlined"
-                  style={{ color: "var(--color-accent)", fontSize: "1.625rem" }}
+                  style={{ color: "var(--color-text-accent)", fontSize: "1.625rem" }}
                 >
                   route
                 </span>
@@ -712,7 +712,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "1rem", color: "var(--color-accent)" }}
+                      style={{ fontSize: "1rem", color: "var(--color-text-accent)" }}
                     >
                       auto_awesome
                     </span>
@@ -746,7 +746,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "1rem", color: "var(--color-accent)" }}
+                      style={{ fontSize: "1rem", color: "var(--color-text-accent)" }}
                     >
                       route
                     </span>
@@ -781,7 +781,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "1rem", color: "var(--color-accent)" }}
+                      style={{ fontSize: "1rem", color: "var(--color-text-accent)" }}
                     >
                       touch_app
                     </span>
@@ -815,7 +815,7 @@ export default function Home() {
                   <div className="step-preview-chip">
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "1rem", color: "var(--color-accent)" }}
+                      style={{ fontSize: "1rem", color: "var(--color-text-accent)" }}
                     >
                       pin
                     </span>
@@ -839,7 +839,7 @@ export default function Home() {
               <a href="/how-it-works/" className="nasil-guide-link-btn">
                 <span
                   className="material-symbols-outlined"
-                  style={{ fontSize: "1.25rem", color: "var(--color-accent)" }}
+                  style={{ fontSize: "1.25rem", color: "var(--color-text-accent)" }}
                 >
                   menu_book
                 </span>

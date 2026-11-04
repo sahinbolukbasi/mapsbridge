@@ -290,7 +290,7 @@
     height: 48px;
     border-radius: 1rem;
     background: var(--color-surface-brand);
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     display: flex;
     align-items: center;
     justify-content: center;

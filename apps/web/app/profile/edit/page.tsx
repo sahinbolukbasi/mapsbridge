@@ -1447,7 +1447,7 @@ export default function EditProfilePage() {
                             style={{
                               fontSize: "10px",
                               fontWeight: 800,
-                              color: "var(--color-accent)",
+                              color: "var(--color-text-accent)",
                               background:
                                 "color-mix(in srgb, var(--color-accent) 15%, transparent)",
                               padding: "2px 8px",
@@ -1527,7 +1527,11 @@ export default function EditProfilePage() {
                         Kalan AI Kredisi:
                       </span>
                       <div
-                        style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-accent)" }}
+                        style={{
+                          fontSize: "15px",
+                          fontWeight: 800,
+                          color: "var(--color-text-accent)",
+                        }}
                       >
                         ⚡ {wallet.credits} Kredi
                       </div>
@@ -1592,7 +1596,7 @@ export default function EditProfilePage() {
                   >
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "20px", color: "var(--color-accent)" }}
+                      style={{ fontSize: "20px", color: "var(--color-text-accent)" }}
                     >
                       receipt_long
                     </span>
@@ -1878,7 +1882,7 @@ export default function EditProfilePage() {
                   >
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "20px", color: "var(--color-accent)" }}
+                      style={{ fontSize: "20px", color: "var(--color-text-accent)" }}
                     >
                       account_balance_wallet
                     </span>
@@ -1920,7 +1924,11 @@ export default function EditProfilePage() {
                         Çekilebilir Bakiye
                       </span>
                       <div
-                        style={{ fontSize: "18px", fontWeight: 800, color: "var(--color-accent)" }}
+                        style={{
+                          fontSize: "18px",
+                          fontWeight: 800,
+                          color: "var(--color-text-accent)",
+                        }}
                       >
                         ₺{wallet.creatorEarningsTry.toLocaleString("tr-TR")}
                       </div>
@@ -2104,7 +2112,7 @@ export default function EditProfilePage() {
                       borderRadius: "8px",
                       background: "var(--color-accent-a20)",
                       border: "1px solid var(--color-accent)",
-                      color: "var(--color-accent)",
+                      color: "var(--color-text-accent)",
                       fontWeight: 700,
                       fontSize: "12.5px",
                       cursor: "pointer",
@@ -2134,7 +2142,7 @@ export default function EditProfilePage() {
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "20px", color: "var(--color-accent)" }}
+                        style={{ fontSize: "20px", color: "var(--color-text-accent)" }}
                       >
                         history
                       </span>
@@ -2296,7 +2304,7 @@ export default function EditProfilePage() {
                                 style={{
                                   background: "transparent",
                                   border: "none",
-                                  color: "var(--color-accent)",
+                                  color: "var(--color-text-accent)",
                                   cursor: "pointer",
                                   fontSize: "12px",
                                   fontWeight: 600,
@@ -2453,7 +2461,7 @@ export default function EditProfilePage() {
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span
                   className="material-symbols-outlined"
-                  style={{ fontSize: "24px", color: "var(--color-accent)" }}
+                  style={{ fontSize: "24px", color: "var(--color-text-accent)" }}
                 >
                   receipt
                 </span>
@@ -2502,7 +2510,9 @@ export default function EditProfilePage() {
                 >
                   Tutar:
                 </span>
-                <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-accent)" }}>
+                <span
+                  style={{ fontSize: "15px", fontWeight: 800, color: "var(--color-text-accent)" }}
+                >
                   {selectedReceiptTx.amountTry !== undefined
                     ? `₺${Math.abs(selectedReceiptTx.amountTry).toLocaleString("tr-TR")}`
                     : "0 ₺"}

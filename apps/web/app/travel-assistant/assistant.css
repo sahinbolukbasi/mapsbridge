@@ -256,7 +256,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     flex-shrink: 0;
   }
 
@@ -650,7 +650,7 @@
     margin: 0.2rem 0 0.2rem 1.75rem;
     font-size: 11px;
     font-weight: 600;
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     background-color: var(--color-surface-brand);
     border-radius: 0.45rem;
     width: fit-content;
@@ -987,7 +987,7 @@
     margin: 0.35em 0;
   }
   .ai-answer-text a {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     text-decoration: underline;
   }
   .ai-answer-text code {
@@ -1602,7 +1602,7 @@
     color: var(--color-text);
   }
   .ai-buy-credits-link {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-weight: 700;
     text-decoration: none;
     margin-left: 0.35rem;
@@ -1665,7 +1665,7 @@
     color: var(--color-text-subtle);
   }
   .ai-thinking-phase.done .ai-thinking-phase-icon {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 14px;
   }
   .ai-thinking-phase.active {
@@ -1673,7 +1673,7 @@
     font-weight: 600;
   }
   .ai-thinking-phase.active .ai-thinking-phase-icon {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 16px;
   }
   .ai-thinking-phase-label {
@@ -1762,7 +1762,7 @@
     line-height: 1;
   }
   .ai-smart-action-route .ai-smart-action-icon {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
   }
   .ai-smart-action-food .ai-smart-action-icon {
     color: var(--color-warning-icon);
@@ -1928,7 +1928,7 @@
   }
   .ai-activity-icon {
     font-size: 1.5rem;
-    color: var(--color-accent);
+    color: var(--color-text-accent);
   }
   .ai-activity-text {
     display: flex;
@@ -2271,7 +2271,7 @@
   .tp-inline-hotel {
     background: color-mix(in srgb, var(--color-accent) 12%, transparent);
     border: 1px solid var(--color-accent-a30);
-    color: var(--color-accent);
+    color: var(--color-text-accent);
   }
 
   /* ── User Memory Context Strip ─────────────────────────────────────────── */

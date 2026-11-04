@@ -338,7 +338,7 @@
   }
 
   .nasil-step-feature-item .material-symbols-outlined {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-size: 1.125rem;
     flex-shrink: 0;
     margin-top: 0.125rem;

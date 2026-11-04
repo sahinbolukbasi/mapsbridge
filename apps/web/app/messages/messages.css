@@ -723,7 +723,7 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 10px;
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     justify-content: flex-end;
   }
 

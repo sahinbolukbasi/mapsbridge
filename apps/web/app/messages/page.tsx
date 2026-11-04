@@ -776,7 +776,7 @@ export default function MessagesPage() {
                             {conv.pinned && (
                               <span
                                 className="material-symbols-outlined"
-                                style={{ fontSize: "14px", color: "var(--color-accent)" }}
+                                style={{ fontSize: "14px", color: "var(--color-text-accent)" }}
                               >
                                 push_pin
                               </span>
@@ -982,7 +982,7 @@ export default function MessagesPage() {
                         <div className="chat-pinned-left">
                           <span
                             className="material-symbols-outlined"
-                            style={{ fontSize: "18px", color: "var(--color-accent)" }}
+                            style={{ fontSize: "18px", color: "var(--color-text-accent)" }}
                           >
                             push_pin
                           </span>
@@ -1089,7 +1089,7 @@ export default function MessagesPage() {
                                         className="material-symbols-outlined"
                                         style={{
                                           fontSize: "16px",
-                                          color: "var(--color-accent)",
+                                          color: "var(--color-text-accent)",
                                         }}
                                       >
                                         explore
@@ -1173,7 +1173,7 @@ export default function MessagesPage() {
                                             className="material-symbols-outlined"
                                             style={{
                                               fontSize: "12px",
-                                              color: "var(--color-accent)",
+                                              color: "var(--color-text-accent)",
                                             }}
                                           >
                                             altitude
@@ -1347,7 +1347,7 @@ export default function MessagesPage() {
                         >
                           <span
                             className="material-symbols-outlined"
-                            style={{ fontSize: "16px", color: "var(--color-accent)" }}
+                            style={{ fontSize: "16px", color: "var(--color-text-accent)" }}
                           >
                             add_location
                           </span>
@@ -1828,7 +1828,7 @@ export default function MessagesPage() {
                                         className="material-symbols-outlined"
                                         style={{
                                           fontSize: "16px",
-                                          color: "var(--color-accent)",
+                                          color: "var(--color-text-accent)",
                                         }}
                                         title="Rehber Lider"
                                       >
@@ -2164,7 +2164,7 @@ export default function MessagesPage() {
                     style={{
                       background: "transparent",
                       border: "none",
-                      color: "var(--color-accent)",
+                      color: "var(--color-text-accent)",
                       fontSize: "11px",
                       fontWeight: 700,
                       cursor: "pointer",

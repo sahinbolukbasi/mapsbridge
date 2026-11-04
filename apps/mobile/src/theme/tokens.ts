@@ -36,6 +36,7 @@ export const tokens = {
     onAccent: "#0d281e",
     accentSky: "#0284c7",
     accentSkySoft: "#38bdf8",
+    textAccent: "#047857",
     accentA10: "rgba(16, 185, 129, 0.1)",
     accentA20: "rgba(16, 185, 129, 0.2)",
     accentA30: "rgba(16, 185, 129, 0.3)",

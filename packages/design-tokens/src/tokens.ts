@@ -51,6 +51,8 @@ export const color: Record<string, ColorValue> = {
   "color-on-accent": r("forest-950"),
   "color-accent-sky": r("sky-600"),
   "color-accent-sky-soft": r("sky-400"),
+  // Metin/ikon için AA-uyumlu zümrüt (beyaz üstünde 5.48:1). Dolgu/dekor için color-accent kullan.
+  "color-text-accent": r("emerald-700"),
   "color-accent-a10": mix("emerald-500", 10),
   "color-accent-a20": mix("emerald-500", 20),
   "color-accent-a30": mix("emerald-500", 30),

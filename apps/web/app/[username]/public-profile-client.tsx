@@ -623,7 +623,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span className="pub-badge-pill pro">
                         <span
                           className="material-symbols-outlined fill"
-                          style={{ fontSize: "13px", color: "var(--color-accent)" }}
+                          style={{ fontSize: "13px", color: "var(--color-text-accent)" }}
                         >
                           workspace_premium
                         </span>
@@ -645,7 +645,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                       <span className="pub-meta-item">
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "16px", color: "var(--color-accent)" }}
+                          style={{ fontSize: "16px", color: "var(--color-text-accent)" }}
                         >
                           location_on
                         </span>
@@ -1069,7 +1069,7 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
                                     className="material-symbols-outlined"
                                     style={{
                                       fontSize: "16px",
-                                      color: "var(--color-accent)",
+                                      color: "var(--color-text-accent)",
                                     }}
                                   >
                                     map

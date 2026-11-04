@@ -427,7 +427,7 @@
   }
 
   .auth-modal-perk-check {
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     font-weight: 800;
     font-size: 0.95rem;
   }

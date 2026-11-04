@@ -1245,7 +1245,7 @@ export default function AIPage() {
                   <span
                     className="material-symbols-outlined"
                     aria-hidden="true"
-                    style={{ fontSize: "14px", color: "var(--color-accent)" }}
+                    style={{ fontSize: "14px", color: "var(--color-text-accent)" }}
                   >
                     psychology
                   </span>
@@ -1455,7 +1455,7 @@ export default function AIPage() {
                               <span
                                 className="material-symbols-outlined"
                                 aria-hidden="true"
-                                style={{ fontSize: "13px", color: "var(--color-accent)" }}
+                                style={{ fontSize: "13px", color: "var(--color-text-accent)" }}
                               >
                                 map
                               </span>
@@ -1498,7 +1498,7 @@ export default function AIPage() {
                               style={{
                                 fontSize: "11px",
                                 fontWeight: 700,
-                                color: "var(--color-accent)",
+                                color: "var(--color-text-accent)",
                                 marginBottom: "0.25rem",
                               }}
                             >
@@ -1639,7 +1639,7 @@ export default function AIPage() {
                             style={{
                               fontSize: "11px",
                               fontWeight: 700,
-                              color: "var(--color-accent)",
+                              color: "var(--color-text-accent)",
                             }}
                           >
                             📍 Yakındaki Mekanlar:
@@ -1989,7 +1989,7 @@ export default function AIPage() {
                     <span
                       className="material-symbols-outlined"
                       aria-hidden="true"
-                      style={{ fontSize: "15px", color: "var(--color-accent)" }}
+                      style={{ fontSize: "15px", color: "var(--color-text-accent)" }}
                     >
                       bolt
                     </span>
@@ -2166,7 +2166,7 @@ export default function AIPage() {
                                           padding: "2px 6px",
                                           borderRadius: "6px",
                                           backgroundColor: "var(--color-surface-brand)",
-                                          color: "var(--color-accent)",
+                                          color: "var(--color-text-accent)",
                                           fontWeight: 700,
                                         }}
                                       >
@@ -2258,7 +2258,7 @@ export default function AIPage() {
                                       {stay.description}
                                     </p>
                                     {stay.pros?.length > 0 && (
-                                      <small style={{ color: "var(--color-accent)" }}>
+                                      <small style={{ color: "var(--color-text-accent)" }}>
                                         ✓ {stay.pros.join(" · ")}
                                       </small>
                                     )}
@@ -2391,7 +2391,7 @@ export default function AIPage() {
                                     <p style={{ fontSize: "12px", margin: "3px 0" }}>
                                       {gem.description}
                                     </p>
-                                    <small style={{ color: "var(--color-accent)" }}>
+                                    <small style={{ color: "var(--color-text-accent)" }}>
                                       ✨ Özel: {gem.highlight}
                                     </small>
                                     <div style={{ marginTop: "6px" }}>
@@ -2483,7 +2483,7 @@ export default function AIPage() {
                                         style={{
                                           fontSize: "14px",
                                           fontWeight: 700,
-                                          color: "var(--color-accent)",
+                                          color: "var(--color-text-accent)",
                                         }}
                                       >
                                         Uçuş Fiyatları
@@ -2572,7 +2572,7 @@ export default function AIPage() {
                                             >
                                               <strong
                                                 style={{
-                                                  color: "var(--color-accent)",
+                                                  color: "var(--color-text-accent)",
                                                   fontSize: "18px",
                                                   lineHeight: 1,
                                                 }}
@@ -2586,7 +2586,7 @@ export default function AIPage() {
                                                   borderRadius: "6px",
                                                   background:
                                                     "color-mix(in srgb, var(--color-accent) 15%, transparent)",
-                                                  color: "var(--color-accent)",
+                                                  color: "var(--color-text-accent)",
                                                   fontWeight: 600,
                                                 }}
                                               >

@@ -571,7 +571,7 @@ export default function LoginPage() {
                 >
                   <span
                     className="material-symbols-outlined"
-                    style={{ color: "var(--color-accent)" }}
+                    style={{ color: "var(--color-text-accent)" }}
                   >
                     verified_user
                   </span>
@@ -627,7 +627,7 @@ export default function LoginPage() {
                       display: "flex",
                       alignItems: "center",
                       gap: "2px",
-                      color: "var(--color-accent)",
+                      color: "var(--color-text-accent)",
                       marginBottom: "0.5rem",
                     }}
                   >
