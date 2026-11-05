@@ -69,10 +69,12 @@
     color: var(--color-text-muted);
     font-size: var(--font-size-sm);
   }
+  /* Hata kartı kontrol yığınının sütununa girmez (375 px'te "Konumuma git" örtülmesin). */
   .map-canvas__error {
     position: absolute;
     inset-block-start: 50%;
-    inset-inline: var(--space-4);
+    inset-inline-start: var(--space-4);
+    inset-inline-end: calc(var(--space-3) * 2 + var(--touch-target));
     z-index: var(--z-sticky);
     max-inline-size: calc(var(--space-20) * 4.5);
     margin-inline: auto;

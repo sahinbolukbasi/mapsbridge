@@ -331,10 +331,6 @@
     display: grid;
     gap: var(--space-4);
   }
-  .trip-picker__title {
-    margin: 0;
-    font-size: var(--font-size-lg);
-  }
   .trip-picker__subtitle {
     margin: 0;
     font-size: var(--font-size-base);

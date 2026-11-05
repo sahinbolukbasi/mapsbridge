@@ -1,9 +1,8 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const { transformSync } = require("esbuild");
+const { buildSync } = require("esbuild");
 
 function makeBase64url(obj) {
   const json = JSON.stringify(obj);
@@ -16,10 +15,20 @@ function makeJwt(payload) {
   return `${header}.${body}.fakesig`;
 }
 
+// cognito.ts relative import'ları (signOut → planner-store / guest-draft-owner) bundle'lanır.
+function bundleCognito() {
+  return buildSync({
+    entryPoints: [path.resolve(__dirname, "../app/lib/cognito.ts")],
+    bundle: true,
+    write: false,
+    format: "cjs",
+    platform: "node",
+    target: "node22",
+    logLevel: "silent",
+  }).outputFiles[0].text;
+}
 function loadModule() {
-  const file = path.resolve(__dirname, "../app/lib/cognito.ts");
-  const code = readFileSync(file, "utf8");
-  const transformed = transformSync(code, { loader: "ts", format: "cjs", target: "node22" }).code;
+  const transformed = bundleCognito();
   const mod = { exports: {} };
 
   // Create a mock localStorage for migrateLegacyStorageKeys tests
@@ -111,8 +120,7 @@ test("returns null for dot-only string", () => {
 
 test("migrateLegacyStorageKeys copies old keys to new keys", () => {
   // Load a fresh module instance for isolation
-  const code = readFileSync(path.resolve(__dirname, "../app/lib/cognito.ts"), "utf8");
-  const transformed = transformSync(code, { loader: "ts", format: "cjs", target: "node22" }).code;
+  const transformed = bundleCognito();
   const mod = { exports: {} };
   const store = { "adreskopru.accessToken": "old-token-abc" };
   const mockLS = {
@@ -145,8 +153,7 @@ test("migrateLegacyStorageKeys copies old keys to new keys", () => {
 });
 
 test("migrateLegacyStorageKeys does not overwrite existing new key", () => {
-  const code = readFileSync(path.resolve(__dirname, "../app/lib/cognito.ts"), "utf8");
-  const transformed = transformSync(code, { loader: "ts", format: "cjs", target: "node22" }).code;
+  const transformed = bundleCognito();
   const mod = { exports: {} };
   const store = {
     "adreskopru.accessToken": "old-token",

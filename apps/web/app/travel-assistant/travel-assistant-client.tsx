@@ -19,6 +19,7 @@ import {
 import type { TripContext } from "../lib/ai/planning";
 import { planText, shouldRecheckRequest, type ChatMessage } from "../lib/ai/chat";
 import { routeToTrip } from "../lib/trip/workspace-store";
+import { PLANNER_TRIPS_KEY, readPlannerStore, writePlannerStore } from "../lib/trip/planner-store";
 import { tripToMarkdown, saveTripMarkdown } from "../lib/trip/trip-markdown";
 import type { Trip, Pin } from "../lib/trip/models";
 import { interactionTracker } from "../lib/analytics/tracker";
@@ -386,7 +387,7 @@ export default function AIPage() {
   function refreshCurrentTrip() {
     if (typeof window === "undefined") return;
     try {
-      const raw = localStorage.getItem("mapsbridge.travelPlanner.v5");
+      const raw = readPlannerStore(PLANNER_TRIPS_KEY);
       if (raw) {
         const trips = JSON.parse(raw);
         if (Array.isArray(trips) && trips.length > 0) {
@@ -416,7 +417,7 @@ export default function AIPage() {
   }) {
     if (typeof window === "undefined") return;
     try {
-      const raw = localStorage.getItem("mapsbridge.travelPlanner.v5");
+      const raw = readPlannerStore(PLANNER_TRIPS_KEY);
       let trips: Trip[] = raw ? (JSON.parse(raw) as Trip[]) : [];
       if (!Array.isArray(trips)) trips = [];
 
@@ -465,7 +466,8 @@ export default function AIPage() {
       }
       trip!.updatedAt = new Date().toISOString();
 
-      localStorage.setItem("mapsbridge.travelPlanner.v5", JSON.stringify(trips));
+      if (!writePlannerStore(PLANNER_TRIPS_KEY, JSON.stringify(trips)))
+        throw new Error("Değişiklik kaydedilemedi. Depolama alanını kontrol edin.");
       saveTripMarkdown(trip!.id, tripToMarkdown(trip!));
       setCurrentTrip({ ...trip! });
 
@@ -982,7 +984,7 @@ export default function AIPage() {
   // Misafir taslağı yalnızca kullanıcı dokununca sıradan bir kullanıcı mesajı olarak gider; kredi
   // sunucuda bugünkü gibi ayrılır/iade edilir. Taslak yalnızca başarılı yanıttan sonra silinir.
   async function createFromDraft() {
-    if (!resumeDraft || busy) return;
+    if (!resumeDraft || !resumeDraft.q || busy) return;
     const ok = await send(false, buildGuestSummaryMessage(resumeDraft, t));
     if (ok) {
       clearDraft(guestStorage());
@@ -1014,16 +1016,19 @@ export default function AIPage() {
   function openMap() {
     if (!route) return;
     try {
-      const raw = localStorage.getItem("mapsbridge.travelPlanner.v5");
+      const raw = readPlannerStore(PLANNER_TRIPS_KEY);
       const trips = raw ? JSON.parse(raw) : [];
       if (!Array.isArray(trips))
         throw Error("Harita kayıtları okunamadı; mevcut veriler değiştirilmedi.");
       const tripId = `ai-${activeId}`;
       const trip = routeToTrip(route, tripId);
-      localStorage.setItem(
-        "mapsbridge.travelPlanner.v5",
-        JSON.stringify([...trips.filter((t) => t.id !== tripId), trip]),
-      );
+      if (
+        !writePlannerStore(
+          PLANNER_TRIPS_KEY,
+          JSON.stringify([...trips.filter((t) => t.id !== tripId), trip]),
+        )
+      )
+        throw Error("Rota aktarılamadı.");
       window.location.assign(`/maps/?tripId=${encodeURIComponent(tripId)}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Rota aktarılamadı.");
@@ -1353,6 +1358,15 @@ export default function AIPage() {
                       draft={resumeDraft}
                       busy={busy}
                       onCreate={() => void createFromDraft()}
+                      // Misafir kartıyla aynı kural (FEAT-006 review #2): yer yoksa özet gönderilmez.
+                      blockedReason={
+                        resumeDraft.q
+                          ? undefined
+                          : t(
+                              "guest.summary.needPlace",
+                              "Taslak için önce nereye gitmek istediğini yaz.",
+                            )
+                      }
                       secondary={
                         <Button variant="ghost" onClick={discardDraft} disabled={busy}>
                           {t("guest.resume.discard", "Taslağı sil")}

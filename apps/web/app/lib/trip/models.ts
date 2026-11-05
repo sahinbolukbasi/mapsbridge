@@ -160,6 +160,8 @@ export interface TripWorkspace {
 
 export interface Trip {
   id: string;
+  /** Oluşturulduğu an oturum yoksa "guest" (girişte hesaba aktarılabilir; planner-store). */
+  origin?: "guest" | "user";
   title: string;
   destination?: string;
   startDate?: string;

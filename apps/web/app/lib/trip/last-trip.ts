@@ -2,8 +2,8 @@
 // kaydını (use-travel-planner) okur; hiçbir şey yazmaz, ağ isteği atmaz. Durağı olmayan
 // varsayılan gezi "gezi yok" sayılır, kart çizilmez.
 
-/** use-travel-planner'ın gezi listesi anahtarı (tek kaynak). */
-export const PLANNER_TRIPS_KEY = "mapsbridge.travelPlanner.v5";
+/** use-travel-planner'ın gezi listesi anahtarı (tek kaynak: planner-store.ts). */
+export { PLANNER_TRIPS_KEY } from "./planner-store";
 
 export type LastTripSummary = { title: string; stops: number };
 

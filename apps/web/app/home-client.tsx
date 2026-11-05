@@ -20,6 +20,7 @@ import { useReveal } from "./lib/a11y/use-reveal";
 import { getStoredSession } from "./lib/cognito";
 import { useLocale } from "./lib/locale-context";
 import { PLANNER_TRIPS_KEY, summarizeLastTrip, type LastTripSummary } from "./lib/trip/last-trip";
+import { readPlannerStore } from "./lib/trip/planner-store";
 import "./home.css";
 
 const STEPS = [
@@ -76,7 +77,7 @@ export default function Home() {
     if (!getStoredSession()?.token) return;
     setSignedIn(true);
     try {
-      setLastTrip(summarizeLastTrip(localStorage.getItem(PLANNER_TRIPS_KEY)));
+      setLastTrip(summarizeLastTrip(readPlannerStore(PLANNER_TRIPS_KEY)));
     } catch {
       setLastTrip(null);
     }
@@ -208,11 +209,7 @@ export default function Home() {
           <div className="home-credits">
             <CreditCostTable />
             <div className="home-section__more">
-              <Button
-                href="/pricing/"
-                variant="link"
-                iconEnd={<Icon name="arrow" size={16} />}
-              >
+              <Button href="/pricing/" variant="link" iconEnd={<Icon name="arrow" size={16} />}>
                 {t("home.credits.cta")}
               </Button>
             </div>

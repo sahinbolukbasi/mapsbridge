@@ -65,7 +65,8 @@ type WindowWithLeaflet = Window & { L?: LeafletNamespace };
 /**
  * Harita katmanları (design §4.4): bugünkü OSM tabanlı set + Esri uydu. Yeni tile servisi yok.
  * `osm: true` katmanlarda vendor-overrides.css'teki hafif sepya filtresi uygulanır (S12).
- * Atıf her katmanın kendi lisansına göredir.
+ * Atıf her katmanın kendi lisansına göredir; `{osm}` kullanıcının dilinde "OpenStreetMap
+ * katkıcıları" metniyle doldurulur (I11).
  */
 export const MAP_LAYERS = [
   {
@@ -74,8 +75,7 @@ export const MAP_LAYERS = [
     fallback: "Standart",
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     subdomains: "abc",
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap katkıcıları</a>',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">{osm}</a>',
     maxZoom: 19,
     osm: true,
   },
@@ -85,8 +85,7 @@ export const MAP_LAYERS = [
     fallback: "Sade",
     url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
     subdomains: "abc",
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap katkıcıları</a>, HOT',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">{osm}</a>, HOT',
     maxZoom: 19,
     osm: true,
   },
@@ -97,7 +96,7 @@ export const MAP_LAYERS = [
     url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
     subdomains: "abc",
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap katkıcıları</a>, <a href="https://opentopomap.org">OpenTopoMap</a>',
+      '&copy; <a href="https://www.openstreetmap.org/copyright">{osm}</a>, <a href="https://opentopomap.org">OpenTopoMap</a>',
     maxZoom: 17,
     osm: false,
   },
@@ -179,6 +178,8 @@ export function MapCanvas({
   callbacks.current = { onReady, onMapClick, onMapDoubleClick };
   const initialLayer = useRef(layer);
   initialLayer.current = layer;
+  const osmCredit = useRef("");
+  osmCredit.current = t("planner.map.osmContributors", "OpenStreetMap katkıcıları");
 
   // Leaflet yükleme + harita kurulumu (yeniden deneme `attempt` ile).
   useEffect(() => {
@@ -196,7 +197,7 @@ export function MapCanvas({
         );
         map.attributionControl?.setPrefix(false);
         mapRef.current = map;
-        const tile = addBaseLayer(L, map, initialLayer.current);
+        const tile = addBaseLayer(L, map, initialLayer.current, osmCredit.current);
         tileRef.current = tile;
         tileLayerId.current = initialLayer.current;
         let hasTiles = false;
@@ -262,7 +263,7 @@ export function MapCanvas({
     const map = mapRef.current;
     if (!L || !map || !tileRef.current || tileLayerId.current === layer) return;
     map.removeLayer(tileRef.current);
-    tileRef.current = addBaseLayer(L, map, layer);
+    tileRef.current = addBaseLayer(L, map, layer, osmCredit.current);
     tileLayerId.current = layer;
     tileRef.current.bringToBack?.();
   }, [layer, status]);
@@ -383,11 +384,21 @@ export function MapCanvas({
   );
 }
 
-function addBaseLayer(L: LeafletNamespace, map: LeafletMap, id: MapLayerId): LeafletLayer {
+function addBaseLayer(
+  L: LeafletNamespace,
+  map: LeafletMap,
+  id: MapLayerId,
+  osmCredit: string,
+): LeafletLayer {
   const l = MAP_LAYERS.find((x) => x.id === id) ?? MAP_LAYERS[0];
   return L.tileLayer(l.url, {
-    attribution: l.attribution,
+    // Atıf HTML olarak çizilir; çeviri metni kaçışlanır.
+    attribution: l.attribution.replace("{osm}", escapeHtml(osmCredit)),
     maxZoom: l.maxZoom,
     ...("subdomains" in l ? { subdomains: l.subdomains } : {}),
   }).addTo(map);
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }

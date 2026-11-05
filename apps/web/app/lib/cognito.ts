@@ -1,3 +1,6 @@
+import { clearPlannerStore } from "./trip/planner-store";
+import { clearGuestDraftStore } from "./guest/guest-draft-owner";
+
 const region = process.env.NEXT_PUBLIC_COGNITO_REGION || "eu-central-1";
 const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ?? "";
 const endpoint = `https://cognito-idp.${region}.amazonaws.com/`;
@@ -227,6 +230,9 @@ export function signOut() {
     localStorage.removeItem("mapsbridge.userEmail");
     localStorage.removeItem("mapsbridge.loginTime");
     localStorage.removeItem("mapsbridge.userProfileDetails");
+    // Planlayıcının cihaz kaydı hesaba aittir: çıkışta silinir, sonraki misafire/hesaba geçmez.
+    clearPlannerStore();
+    clearGuestDraftStore();
     // Clear CloudFront edge auth cookie
     document.cookie = `mb_session=;path=/;max-age=0;SameSite=Lax`;
   }

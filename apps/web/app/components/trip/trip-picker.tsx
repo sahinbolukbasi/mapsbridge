@@ -3,17 +3,21 @@ import { useState } from "react";
 import { Button, ConfirmDialog, EmptyState, Field, Icon, IconButton, Input, cx } from "../ui";
 import { useLocale } from "../../lib/locale-context";
 import type { useTravelPlanner } from "../../lib/trip/use-travel-planner";
+import type { PlannerMode } from "./travel-planner-sidebar";
 import "./travel-planner.css";
 
 /**
  * "Rotalarım" (`/maps/?view=trips`, design §5.3): cihazdaki/hesaptaki gezilerin listesi.
  * Seçim planı açar; yeni rota oluşturulabilir; silme ConfirmDialog ister (design §12).
+ * Görünümün başlığı (h2 "Rotalarım") planlayıcı araç çubuğundadır; burada tekrarlanmaz.
  */
 export function TripPicker({
   planner,
+  mode,
   onOpen,
 }: {
   planner: ReturnType<typeof useTravelPlanner>;
+  mode: PlannerMode;
   onOpen: () => void;
 }) {
   const { t } = useLocale();
@@ -21,9 +25,10 @@ export function TripPicker({
   const [destination, setDestination] = useState("");
   const [titleError, setTitleError] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
+  // Misafirin ya da henüz sunucuya yazılmamış ("trip-…") gezinin kaydı yalnızca bu cihazdadır.
+  const deviceOnly = mode === "guest" || Boolean(pendingDelete?.id.startsWith("trip-"));
   return (
     <div className="trip-picker">
-      <h2 className="trip-picker__title">{t("planner.trips.title", "Rotalarım")}</h2>
       {planner.trips.length === 0 ? (
         <EmptyState
           icon="route"
@@ -109,9 +114,12 @@ export function TripPicker({
       <ConfirmDialog
         open={pendingDelete !== null}
         title={t("planner.trips.deleteTitle", "Rota silinsin mi?")}
-        consequence={t(
-          "planner.trips.deleteBody",
-          "“{name}” ve tüm durakları bu cihazdan ve hesabından silinir.",
+        consequence={(deviceOnly
+          ? t("planner.trips.deleteBodyDevice", "“{name}” ve tüm durakları bu cihazdan silinir.")
+          : t(
+              "planner.trips.deleteBody",
+              "“{name}” ve tüm durakları bu cihazdan ve hesabından silinir.",
+            )
         ).replace("{name}", pendingDelete?.title ?? "")}
         confirmLabel={t("planner.trips.delete", "Rotayı sil")}
         tone="danger"

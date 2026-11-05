@@ -1,9 +1,11 @@
 "use client";
 // Rota planlayıcı /maps/ (design §4.3 AppSplit, §4.4 harita dili, §6.3 misafir planlayıcı; FEAT-007).
 // Oturumsuz kullanıcı gerçek planlayıcıyı `mode="guest"` ile kullanır: çalışma alanı yalnızca
-// cihazda (use-travel-planner → localStorage). Ücretli/hesap gerektiren eylemler (optimize,
-// paylaş, asistana sor, kaydet) AuthGate sheet açar. Sunucu kredi zorlaması değişmez; istemci
-// kredi hesaplamaz (S1).
+// cihazda (use-travel-planner → planner-store, hesap yalıtımlı). Hesap gerektiren eylemler
+// (paylaş, asistana sor, kaydet) AuthGate sheet açar. "Rotayı optimize et" istemcide ücretsiz,
+// deterministik 2-opt sıralamasıdır (I2): kredi rozeti ve kapı yok; gerçek bir sunucu
+// route_optimize ucu olana kadar böyle kalır (karar S19). Sunucu kredi zorlaması değişmez;
+// istemci kredi hesaplamaz (S1).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getStoredSession } from "../lib/cognito";
@@ -357,8 +359,8 @@ export default function Panel() {
   // ── Eylemler (misafirde AuthGate; design §6.3) ──
   const activeDay = planner.activeDayIndex && planner.activeDayIndex > 0;
   const canOptimize = Boolean(activeDay) && planner.pinsWithTime.length >= 3;
+  // Karar S19: ücretsiz istemci sıralaması; misafir de kullanır, kredi ayrılmaz/gösterilmez.
   const optimize = () => {
-    if (mode === "guest") return setGate("ai");
     const preview = planner.optimizationPreview;
     if (!preview) {
       toast.show({
@@ -400,12 +402,7 @@ export default function Panel() {
   const actions = (
     <div className="planner-actions">
       {canOptimize && (
-        <Button
-          variant="primary"
-          cost={1}
-          iconStart={<Icon name="sparkle" size={20} />}
-          onClick={optimize}
-        >
+        <Button variant="primary" iconStart={<Icon name="sparkle" size={20} />} onClick={optimize}>
           {t("planner.optimize", "Rotayı optimize et")}
         </Button>
       )}
@@ -491,7 +488,7 @@ export default function Panel() {
     <>
       {toolbar}
       {view === "trips" ? (
-        <TripPicker planner={planner} onOpen={() => setView("plan")} />
+        <TripPicker planner={planner} mode={mode} onOpen={() => setView("plan")} />
       ) : (
         <TravelPlannerSidebar
           planner={planner}

@@ -295,3 +295,15 @@ test("buildGuestSummaryMessage: design §6.1 düz kullanıcı mesajı", () => {
     "Roma'da 3 gün. Tempo: Yoğun.",
   );
 });
+test("oturumlu ?resume=1 kartı: yer (q) yoksa özet gönderilmez, misafir kartıyla aynı neden gösterilir", () => {
+  const src = require("node:fs").readFileSync(
+    require("node:path").resolve(__dirname, "../app/travel-assistant/travel-assistant-client.tsx"),
+    "utf8",
+  );
+  assert.match(src, /if \(!resumeDraft \|\| !resumeDraft\.q \|\| busy\) return;/);
+  const card = src.slice(src.indexOf("draft={resumeDraft}"));
+  assert.match(
+    card.slice(0, 800),
+    /blockedReason=\{\s*resumeDraft\.q[\s\S]*guest\.summary\.needPlace/,
+  );
+});

@@ -31,15 +31,19 @@ import {
   type GuestTurn,
 } from "../lib/guest/guest-script";
 import { useLocale } from "../lib/locale-context";
+import { ownedDraftStorage } from "../lib/guest/guest-draft-owner";
 
 type Translate = (key: string, fallback?: string) => string;
 
 export const RESUME_NEXT = "/travel-assistant/?resume=1";
 
-/** localStorage ya da null (gizli mod/SecurityError). Yalnızca olay/effect içinde çağrılır. */
+/**
+ * localStorage (hesap yalıtımlı: başka hesabın sahiplendiği taslak okunmaz) ya da null (gizli
+ * mod/SecurityError). Yalnızca olay/effect içinde çağrılır.
+ */
 export function guestStorage(): DraftStorage | null {
   try {
-    return window.localStorage;
+    return ownedDraftStorage(window.localStorage);
   } catch {
     return null;
   }

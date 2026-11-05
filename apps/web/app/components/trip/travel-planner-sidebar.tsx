@@ -407,7 +407,7 @@ export function TravelPlannerSidebar({
                     pins.reduce((sum, p) => sum + (p.durationMinutes ?? 60), 0)
                   : undefined
               }
-              offline
+              offline={planner.deviceSaved}
             />
           </div>
           {pins.length === 0 ? (

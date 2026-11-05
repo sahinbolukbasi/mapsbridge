@@ -23,10 +23,23 @@ import {
 } from "./routing-service";
 import { routesApi, RouteEntity, RouteStop } from "../api-client";
 import { getStoredSession } from "../cognito";
-import { PLANNER_TRIPS_KEY } from "./last-trip";
+import {
+  GUEST_OWNER,
+  PLANNER_GENERAL_PINS_KEY,
+  PLANNER_TRIPS_KEY,
+  currentPlannerOwner,
+  guestDraftsForTransfer,
+  readPlannerStore,
+  writePlannerStore,
+  type TripOrigin,
+} from "./planner-store";
 import { buildLegMap, canRequestRoute, routeRequestKey } from "./planner-logic";
 
 const STORAGE_KEY = PLANNER_TRIPS_KEY;
+/** Yeni gezinin kökeni: oturumsuzken oluşturulanlar girişte hesaba aktarılabilir (§6.3). */
+function newTripOrigin(): TripOrigin {
+  return currentPlannerOwner() === GUEST_OWNER ? "guest" : "user";
+}
 
 function routeEntityToTrip(entity: RouteEntity): Trip {
   const pins: Pin[] = (entity.stops || []).map((s, idx): Pin => ({
@@ -89,6 +102,7 @@ function createInitialTrips(): Trip[] {
   return [
     {
       id: "trip-1",
+      origin: newTripOrigin(),
       title: "Yeni Seyahat Planım",
       destination: "",
       transportMode: "walking",
@@ -108,13 +122,18 @@ function createInitialTrips(): Trip[] {
   ];
 }
 
-const GENERAL_STORAGE_KEY = "mapsbridge.generalPins.v5";
+const GENERAL_STORAGE_KEY = PLANNER_GENERAL_PINS_KEY;
 
 function createInitialGeneralPins(): Pin[] {
   return [];
 }
 
 export function useTravelPlanner() {
+  // Bu çalışma alanının kimliği (mount anı). Başka sekmede çıkış ya da hesap değişimi olursa
+  // bellekteki geziler ne cihaza (başka sahibin kaydına) ne de sunucuya (başka hesaba) yazılır.
+  const ownerRef = useRef<string | null>(null);
+  if (ownerRef.current === null) ownerRef.current = currentPlannerOwner();
+  const sameOwner = () => currentPlannerOwner() === ownerRef.current;
   const [trips, setTrips] = useState<Trip[]>(() => {
     if (typeof window === "undefined") return createInitialTrips();
     try {
@@ -122,7 +141,8 @@ export function useTravelPlanner() {
       localStorage.removeItem("mapsbridge.travelPlanner");
       localStorage.removeItem("mapsbridge.generalPins");
 
-      const raw = localStorage.getItem(STORAGE_KEY);
+      // Başka bir hesabın kaydı okunmaz (planner-store; ilk yazımda silinir).
+      const raw = readPlannerStore(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -143,7 +163,7 @@ export function useTravelPlanner() {
   const [generalPins, setGeneralPins] = useState<Pin[]>(() => {
     if (typeof window === "undefined") return createInitialGeneralPins();
     try {
-      const raw = localStorage.getItem(GENERAL_STORAGE_KEY);
+      const raw = readPlannerStore(GENERAL_STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -165,11 +185,8 @@ export function useTravelPlanner() {
 
   // Persist generalPins to localStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(GENERAL_STORAGE_KEY, JSON.stringify(generalPins));
-      } catch {}
-    }
+    if (typeof window !== "undefined")
+      writePlannerStore(GENERAL_STORAGE_KEY, JSON.stringify(generalPins), ownerRef.current!);
   }, [generalPins]);
 
   // Active Trip reference
@@ -222,12 +239,12 @@ export function useTravelPlanner() {
     );
   }, []);
 
-  // Persist trips to localStorage
+  // Persist trips to localStorage. "Cihazda kayıtlı" rozeti yalnızca son yazım başarılıysa
+  // gösterilir (kota/SecurityError'da gizlenir).
+  const [deviceSaved, setDeviceSaved] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined" && trips.length > 0) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
-      } catch {}
+      setDeviceSaved(writePlannerStore(STORAGE_KEY, JSON.stringify(trips), ownerRef.current!));
     }
   }, [trips]);
 
@@ -245,12 +262,11 @@ export function useTravelPlanner() {
           restoringRef.current = true;
           undoStack.current = [];
           setCanUndo(false);
-          // Misafir taslağı aktarımı (design §6.3): cihazdaki henüz sunucuya yazılmamış ("trip-"
-          // kimlikli) ve durağı olan geziler korunur, sunucu rotalarının yanına eklenir ve ilki
-          // etkinleşir; etkin gezi eşitlemesi onu hesaba yazar. Önceden bu taslaklar silinirdi.
-          const drafts = prevTripsRef.current.filter(
-            (t) => t.id.startsWith("trip-") && t.pins.length > 0,
-          );
+          // Misafir taslağı aktarımı (design §6.3): yalnızca oturumsuzken oluşturulmuş
+          // (origin "guest"), sunucuya henüz yazılmamış ve durağı olan geziler korunur, sunucu
+          // rotalarının yanına eklenir ve ilki etkinleşir; etkin gezi eşitlemesi onu hesaba
+          // yazar. Başka bir hesabın taslağı asla aktarılmaz (planner-store).
+          const drafts = guestDraftsForTransfer(prevTripsRef.current);
           const loadedTrips = res.routes.map(routeEntityToTrip);
           const next = [...loadedTrips, ...drafts];
           if (next.length > 0) {
@@ -274,12 +290,13 @@ export function useTravelPlanner() {
   useEffect(() => {
     if (typeof window === "undefined" || !activeTrip) return;
     const session = getStoredSession();
-    if (!session?.token) return;
+    if (!session?.token || !sameOwner()) return;
 
     if (serverSyncTimerRef.current) clearTimeout(serverSyncTimerRef.current);
     if (syncedOnce.current) setSaveState("saving");
     syncedOnce.current = true;
     serverSyncTimerRef.current = setTimeout(async () => {
+      if (!sameOwner()) return;
       try {
         const stops = tripToRouteStops(activeTrip);
         if (activeTrip.id.startsWith("trip-")) {
@@ -437,6 +454,7 @@ export function useTravelPlanner() {
     const newTripId = "trip-" + Date.now();
     const newTrip: Trip = {
       id: newTripId,
+      origin: newTripOrigin(),
       title: title.trim() || "Yeni Seyahat",
       destination: destination?.trim(),
       transportMode: "walking",
@@ -481,6 +499,7 @@ export function useTravelPlanner() {
           return [
             {
               id: freshId,
+              origin: newTripOrigin(),
               title: "Yeni Seyahat Planım",
               transportMode: "walking",
               isPublic: false,
@@ -1218,6 +1237,7 @@ export function useTravelPlanner() {
     activeRouteLegs,
     canUndo,
     saveState,
+    deviceSaved,
     aiMessageToast,
     twoPinComparison,
     showVisitedOnMap,
