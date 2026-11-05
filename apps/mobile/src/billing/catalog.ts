@@ -43,6 +43,39 @@ export function parseCatalog(raw: unknown): Catalog {
   return { status: "ok", enabled: raw.enabled, products };
 }
 
+/** Katalog ürününün mağaza (RevenueCat) kimlikleri. */
+export type StoreIds = { packageId?: string; productId?: string };
+
+/**
+ * YALNIZ native (FEAT-012 review #1): /revenuecat/plans her ürünle birlikte mağaza paket/ürün
+ * kimliğini de döndürür (ör. pro → packageId "$rc_monthly", productId "prode1930276ca"). Web
+ * parseCatalog bu alanları taşımaz (parite korunur); Paywall eşlemeyi buradan okur.
+ */
+export function parseStoreIds(raw: unknown): Record<string, StoreIds> {
+  const out: Record<string, StoreIds> = {};
+  if (!isRecord(raw) || !Array.isArray(raw.products)) return out;
+  for (const p of raw.products) {
+    if (!isRecord(p) || typeof p.id !== "string" || p.id.length === 0) continue;
+    const ids: StoreIds = {};
+    if (typeof p.packageId === "string" && p.packageId) ids.packageId = p.packageId;
+    if (typeof p.productId === "string" && p.productId) ids.productId = p.productId;
+    if (ids.packageId || ids.productId) out[p.id] = ids;
+  }
+  return out;
+}
+
+/** Mağaza teklifindeki paket, katalog ürününün paket ya da ürün kimliğiyle eşleşiyor mu. */
+export function matchesStoreIds(
+  pkg: { identifier: string; product: { identifier: string } },
+  ids: StoreIds | undefined,
+): boolean {
+  if (!ids) return false;
+  return (
+    (!!ids.packageId && pkg.identifier === ids.packageId) ||
+    (!!ids.productId && pkg.product.identifier === ids.productId)
+  );
+}
+
 /** Tier'in aylık katalog ürünü (`<tier>`; native yıllık satmaz, S18). */
 export function findMonthlyProduct(
   products: readonly CatalogProduct[],

@@ -67,6 +67,7 @@ export function CommunityScreen({
   const [editing, setEditing] = useState<MobileCommunityPost | null>(null);
   const [commentsFor, setCommentsFor] = useState<MobileCommunityPost | null>(null);
   const [comment, setComment] = useState("");
+  const [commentError, setCommentError] = useState<string | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [content, setContent] = useState("");
   const [locationTag, setLocationTag] = useState("");
@@ -115,7 +116,7 @@ export function CommunityScreen({
       const stops: TripStop[] = r.stops.map((s, i) => ({
         id: s.id || `stop-${i}`,
         name: s.name,
-        category: s.category || "Mekan",
+        category: s.category || tr("native.place.defaultCategory"),
         time: "",
         duration: s.duration || "",
         address: s.address || "",
@@ -143,28 +144,34 @@ export function CommunityScreen({
       return;
     }
     const active = tripStore.getActiveRoute();
-    await socialSyncService.createPost({
-      content: content.trim(),
-      locationTag: locationTag.trim() || undefined,
-      routeAttachment:
-        attachRoute && active.stops.length
-          ? {
-              id: `rt_user_${Date.now()}`,
-              title: active.name,
-              stats: tr("community.post.stops", { n: active.stops.length }),
-              icon: "",
-              stops: active.stops.map((s) => ({
-                id: s.id,
-                name: s.name,
-                category: s.category,
-                lat: s.lat,
-                lng: s.lng,
-                address: s.address,
-                duration: s.duration,
-              })),
-            }
-          : undefined,
-    });
+    try {
+      await socialSyncService.createPost({
+        content: content.trim(),
+        locationTag: locationTag.trim() || undefined,
+        routeAttachment:
+          attachRoute && active.stops.length
+            ? {
+                id: `rt_user_${Date.now()}`,
+                title: active.name,
+                stats: tr("community.post.stops", { n: active.stops.length }),
+                icon: "",
+                stops: active.stops.map((s) => ({
+                  id: s.id,
+                  name: s.name,
+                  category: s.category,
+                  lat: s.lat,
+                  lng: s.lng,
+                  address: s.address,
+                  duration: s.duration,
+                })),
+              }
+            : undefined,
+      });
+    } catch {
+      // Metin korunur; kullanıcı tekrar gönderebilir.
+      setComposeError(tr("native.community.publishFailed"));
+      return;
+    }
     setContent("");
     setLocationTag("");
     setAttachRoute(false);
@@ -392,7 +399,11 @@ export function CommunityScreen({
               <TextField
                 label={tr("community.post.commentLabel")}
                 value={comment}
-                onChangeText={setComment}
+                onChangeText={(t) => {
+                  setComment(t);
+                  if (commentError) setCommentError(null);
+                }}
+                error={commentError ?? undefined}
                 maxLength={500}
               />
               <Button
@@ -400,7 +411,14 @@ export function CommunityScreen({
                 disabled={!comment.trim()}
                 onPress={async () => {
                   if (!commentsFor || !comment.trim()) return;
-                  const added = await socialSyncService.addComment(commentsFor.id, comment.trim());
+                  let added;
+                  try {
+                    added = await socialSyncService.addComment(commentsFor.id, comment.trim());
+                  } catch {
+                    setCommentError(tr("native.community.commentFailed"));
+                    return;
+                  }
+                  setCommentError(null);
                   setCommentsFor({
                     ...commentsFor,
                     comments: [...(commentsFor.comments ?? []), added],

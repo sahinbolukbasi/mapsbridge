@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import { storage } from "./storage";
 import { authService, RouteStop } from "./api";
+import { stripLegacyProfileDefaults } from "../profile/legacy-defaults";
 
 export interface MobileUserProfile {
   fullName: string;
@@ -197,7 +198,10 @@ class SocialSyncService {
       const stored = await storage.getItem(STORAGE_KEY_PROFILE);
       if (stored) {
         const parsed: MobileUserProfile = JSON.parse(stored);
-        return parsed;
+        // Eski sürümün uydurma varsayılanları (birebir eşleşen alanlar) bir kez temizlenir (B1).
+        const cleaned = stripLegacyProfileDefaults(parsed);
+        if (cleaned !== parsed) await storage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(cleaned));
+        return cleaned;
       }
     } catch {}
 

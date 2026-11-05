@@ -38,6 +38,7 @@ import { buildLeafletHtml, legsKeyOf, type MapStopPayload } from "../map/leaflet
 import { lookupPoint, searchPlaces, type PlaceCandidate } from "../map/places";
 import { optimizeStopOrder } from "../trip/optimize";
 import { categoryIcon } from "../trip/category";
+import { spansSeveralDays, stopDay } from "../trip/days";
 import { tr } from "../i18n/ui";
 import { fontFamily, tokens } from "../theme";
 
@@ -49,7 +50,10 @@ import { fontFamily, tokens } from "../theme";
 // - "Rotayı optimize et" ücretsiz istemci sıralaması (S19): kredi rozeti yok, misafir de kullanır.
 // - Misafir: rota yalnız cihazda (tripStore misafir sahibi); "Paylaş", "Asistana sor" ve kayıt
 //   AuthGate sheet açar; misafirde etkileşim telemetrisi yazılmaz.
-// - Çevrimdışı (I12): durak listesi tripStore/AsyncStorage'dan gelir, harita yüklenemese de kalır.
+// - Çevrimdışı (I12): durak listesi tripStore/AsyncStorage'dan gelir, harita yüklenemese de kalır;
+//   Leaflet/karo yüklenemezse WebView MAP_LOAD_FAILED gönderir ve uyarı görünür.
+// - Çok günlü AI rotası (durak `time` öneki "N. gün"): her durak kendi gün rengi ve zaman metniyle
+//   görünür; tek gün başlığı ve günler arası toplam süre/mesafe gösterilmez.
 export interface MapScreenProps {
   focusedStopId?: string | null;
   onClearFocus?: () => void;
@@ -63,13 +67,15 @@ export interface MapScreenProps {
 type Legs = { key: string; legs: Array<{ duration: number; distance: number }> | null };
 
 function stopsPayload(route: ActiveRoute, selectedId: string | null): MapStopPayload[] {
+  const routeDay = route.day || 1;
+  const multiDay = spansSeveralDays(route.stops, routeDay);
   return route.stops.map((s, idx) => ({
     id: s.id,
     name: s.name,
     lat: s.lat,
     lng: s.lng,
     index: idx + 1,
-    color: dayColor(route.day || 1),
+    color: dayColor(multiDay ? stopDay(s, routeDay) : routeDay),
     isSelected: s.id === selectedId,
     visited: !!s.visited,
   }));
@@ -198,6 +204,8 @@ export function MapScreen({
         key: data.key,
         legs: Array.isArray(data.legs) ? (data.legs as Legs["legs"]) : null,
       });
+    } else if (data.type === "MAP_LOAD_FAILED") {
+      setMapError(true);
     } else if (data.type === "MAP_READY") {
       setMapError(false);
       inject(
@@ -226,7 +234,8 @@ export function MapScreen({
       id: `stop-${Date.now()}`,
       name: place.name,
       category: place.category,
-      time: "",
+      // Çok günlü rotada yeni durak son güne eklenir (düğme metniyle aynı gün).
+      time: multiDay ? `${addDay}. gün` : "",
       duration: "",
       address: place.address,
       lat: place.lat,
@@ -238,7 +247,7 @@ export function MapScreen({
     setResults(null);
     setQuery("");
     inject("window.setTempPin && window.setTempPin(null)");
-    setNotice(tr("planner.toast.addedToDay", { name: stop.name, day: route.day || 1 }));
+    setNotice(tr("planner.toast.addedToDay", { name: stop.name, day: addDay }));
   };
 
   const move = (index: number, direction: "up" | "down") => {
@@ -312,14 +321,18 @@ export function MapScreen({
     setNotice(tr("planner.toast.saved"));
   };
 
+  const day = route.day || 1;
+  const multiDay = spansSeveralDays(route.stops, day);
+  const lastStop = route.stops[route.stops.length - 1];
+  const addDay = multiDay && lastStop ? stopDay(lastStop, day) : day;
   const currentLegs = legs.key === legsKeyOf(route.stops) ? legs.legs : null;
-  const legsKnown = currentLegs && currentLegs.length === Math.max(0, route.stops.length - 1);
+  const legsKnown =
+    !multiDay && currentLegs && currentLegs.length === Math.max(0, route.stops.length - 1);
   const totalMeters = legsKnown ? currentLegs.reduce((a, l) => a + l.distance, 0) : undefined;
   const totalMinutes = legsKnown
     ? Math.round(currentLegs.reduce((a, l) => a + l.duration, 0) / 60)
     : undefined;
   const selected = route.stops.find((s) => s.id === selectedId) ?? null;
-  const day = route.day || 1;
 
   return (
     <View style={styles.root}>
@@ -426,7 +439,7 @@ export function MapScreen({
                 </Txt>
                 <View style={styles.actions}>
                   <Button
-                    label={tr("planner.place.addToDayN", { n: day })}
+                    label={tr("planner.place.addToDayN", { n: addDay })}
                     onPress={() => addPlace(candidate)}
                   />
                   <Button
@@ -479,7 +492,7 @@ export function MapScreen({
 
           <DayHeader
             title={route.name || tr("planner.untitled")}
-            eyebrow={tr("planner.days.day", { n: day })}
+            eyebrow={multiDay ? undefined : tr("planner.days.day", { n: day })}
             stops={route.stops.length}
             meters={totalMeters}
             minutes={totalMinutes}
@@ -499,7 +512,8 @@ export function MapScreen({
                 <View key={stop.id}>
                   <StopRow
                     index={i + 1}
-                    day={day}
+                    day={multiDay ? stopDay(stop, day) : day}
+                    time={stop.time || undefined}
                     name={stop.name}
                     category={categoryIcon(stop.category)}
                     categoryLabel={

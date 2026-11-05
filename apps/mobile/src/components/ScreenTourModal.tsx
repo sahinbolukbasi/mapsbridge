@@ -31,7 +31,7 @@ const TOURS: Record<TourScreenType, TourContent> = {
       {
         icon: "route",
         title: tr("planner.optimize"),
-        desc: "Durak sırasını kuş uçuşu mesafeye göre kısaltır. Kredi harcamaz.",
+        desc: tr("native.tour.optimize"),
       },
     ],
   },

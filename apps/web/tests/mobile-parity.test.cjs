@@ -676,3 +676,116 @@ test("rota optimizasyonu web optimizeRouteOrder ile aynı sıra ve kazanç (S19,
     assert.equal(m.savedDurationMinutes, w.savedDurationMinutes);
   }
 });
+
+// ─── FEAT-012 review düzeltmeleri ──────────────────────────────────────────────
+
+test("native Paywall mağaza paketini katalogun packageId/productId alanıyla eşler (review #1)", () => {
+  const mob = loadTs(path.join(MOBILE, "billing/catalog.ts"));
+  // GET /revenuecat/plans yanıtı: lambda billing/catalog.ts ürünleri + available (salt okunur).
+  const lambda = loadTs(path.join(ROOT, "infra/lambda/src/billing/catalog.ts"), {
+    globals: { process: { env: {} } },
+  });
+  const raw = {
+    enabled: true,
+    products: lambda.catalog().map((p) => ({ ...p, available: !!p.productId })),
+    welcomeCredits: 5,
+  };
+  const parsed = mob.parseCatalog(raw);
+  assert.deepEqual(plain(parsed), plain(webCatalog.parseCatalog(raw)), "web paritesi korunur");
+  const ids = mob.parseStoreIds(raw);
+  const pro = mob.findMonthlyProduct(parsed.products, "pro");
+  assert.ok(pro && pro.available, "pro aylık katalogda");
+  const pkg = (identifier, product) => ({ identifier, product: { identifier: product } });
+  assert.ok(mob.matchesStoreIds(pkg("$rc_monthly", "store.pro.monthly"), ids[pro.id]), "paket id");
+  assert.ok(mob.matchesStoreIds(pkg("custom", ids[pro.id].productId), ids[pro.id]), "ürün id");
+  assert.ok(!mob.matchesStoreIds(pkg("$rc_annual", "x"), ids[pro.id]), "yıllık paket eşleşmez");
+  assert.ok(!mob.matchesStoreIds(pkg("pro", "pro"), ids[pro.id]), "katalog id mağaza id değildir");
+  assert.ok(!mob.matchesStoreIds(pkg("$rc_monthly", "x"), undefined), "kimliksiz ürün satılmaz");
+  assert.deepEqual(plain(mob.parseStoreIds(null)), {});
+  assert.deepEqual(plain(mob.parseStoreIds({ products: [{ id: "a", packageId: 3 }] })), {});
+  const paywall = fs.readFileSync(path.join(MOBILE, "components/PaywallModal.tsx"), "utf8");
+  assert.match(paywall, /matchesStoreIds\(p, ids\)/);
+  assert.match(paywall, /native\.paywall\.storePrice/, "mağaza fiyatı notu (karar C2)");
+});
+
+test("native yalnız metinleri web anahtarı ya da değeriyle çakışmaz (review #10)", () => {
+  const mobileHome = loadTs(path.join(MOBILE, "i18n/home.ts"));
+  const webValues = new Set(Object.values(TR));
+  for (const [key, value] of Object.entries(mobileUi.NATIVE_TR)) {
+    assert.ok(key.startsWith("native."), key);
+    assert.ok(!(key in TR), `${key} web tr.json'da var; UI_TR'ye web anahtarıyla taşınmalı`);
+    assert.ok(!webValues.has(value), `${key}: değer web tr.json'da var, web anahtarını kullan`);
+  }
+  for (const key of Object.keys(mobileUi.UI_TR))
+    assert.ok(!(key in mobileUi.NATIVE_TR), `${key} iki kümede`);
+  assert.deepEqual(Object.keys(mobileHome.HOME_NATIVE_EN), Object.keys(mobileHome.HOME_NATIVE_TR));
+  for (const key of Object.keys(mobileHome.HOME_NATIVE_TR)) {
+    assert.ok(key.startsWith("native.home."), key);
+    assert.ok(!(key in TR) && !(key in EN), key);
+  }
+});
+
+test("Keşfet native'in yapamadığını iddia etmez (karar S23)", () => {
+  const mobileHome = loadTs(path.join(MOBILE, "i18n/home.ts"));
+  const explore = fs.readFileSync(path.join(MOBILE, "screens/ExploreScreen.tsx"), "utf8");
+  for (const key of [
+    "home.features.planner.body",
+    "home.features.share.title",
+    "home.features.share.body",
+  ])
+    assert.ok(!explore.includes(`"${key}"`), `${key} native'de çizilmez`);
+  const rendered = Object.values({ ...mobileHome.HOME_TR, ...mobileHome.HOME_NATIVE_TR }).join(" ");
+  for (const claim of [/sürükle/i, /yol ağı/i, /süreli ve onaya/i])
+    assert.doesNotMatch(rendered, claim);
+  // Web ana sayfası da optimize için yol ağı iddia etmez (S19/S23).
+  assert.doesNotMatch(TR["home.features.optimize.body"], /yol ağı/i);
+  assert.doesNotMatch(EN["home.features.optimize.body"], /road network/i);
+});
+
+test("eski uydurma profil varsayılanları yalnız birebir eşleşirse temizlenir (karar B1)", () => {
+  const mob = loadTs(path.join(MOBILE, "profile/legacy-defaults.ts"));
+  const L = mob.LEGACY_PROFILE_DEFAULTS;
+  const legacy = {
+    fullName: "Ada",
+    travelTitle: L.travelTitle,
+    bio: L.bio,
+    location: L.location,
+    avatarUrl: L.avatarUrl,
+  };
+  const cleaned = mob.stripLegacyProfileDefaults(legacy);
+  assert.notEqual(cleaned, legacy);
+  assert.deepEqual(plain(cleaned), { fullName: "Ada", travelTitle: "", bio: "", location: "" });
+  const own = {
+    fullName: "Ada",
+    travelTitle: `${L.travelTitle} `,
+    bio: "Kendi yazdığım",
+    location: "İstanbul",
+    avatarUrl: "file:///me.jpg",
+  };
+  assert.equal(mob.stripLegacyProfileDefaults(own), own, "kullanıcı değeri olduğu gibi kalır");
+  const mixed = mob.stripLegacyProfileDefaults({ ...own, location: L.location });
+  assert.equal(mixed.location, "");
+  assert.equal(mixed.bio, "Kendi yazdığım");
+  assert.equal(mixed.avatarUrl, "file:///me.jpg");
+  const svc = fs.readFileSync(path.join(MOBILE, "services/socialSync.ts"), "utf8");
+  assert.match(svc, /stripLegacyProfileDefaults\(parsed\)/);
+});
+
+test("çok günlü rota: gün durak öneki ile; harita yükleme hatası RN'e iletilir (review #3, #9)", () => {
+  const days = loadTs(path.join(MOBILE, "trip/days.ts"));
+  assert.equal(days.dayFromTime("2. gün · Sabah"), 2);
+  assert.equal(days.dayFromTime("Sabah"), undefined);
+  assert.equal(days.dayFromTime(""), undefined);
+  assert.equal(days.stopDay({ time: "" }, 3), 3);
+  assert.equal(days.spansSeveralDays([{ time: "1. gün" }, { time: "2. gün · Öğle" }], 1), true);
+  assert.equal(days.spansSeveralDays([{ time: "1. gün" }, { time: "" }], 1), false);
+  const map = fs.readFileSync(path.join(MOBILE, "screens/MapScreen.tsx"), "utf8");
+  assert.match(map, /eyebrow=\{multiDay \? undefined/);
+  assert.match(map, /time=\{stop\.time \|\| undefined\}/);
+  assert.match(map, /"MAP_LOAD_FAILED"/);
+  // WebView onError satır içi html'de tetiklenmez: belge yükleme hatasını kendisi bildirir.
+  const html = fs.readFileSync(path.join(MOBILE, "map/leaflet-html.ts"), "utf8");
+  assert.match(html, /type: "MAP_LOAD_FAILED"/);
+  assert.match(html, /MAP_LOAD_TIMEOUT_MS/);
+  assert.match(html, /tileerror/);
+});

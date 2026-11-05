@@ -42,7 +42,11 @@ export function RouteLoadingModal({
           {tr("upgrade.note")}
         </Txt>
         {onRunInBackground ? (
-          <Button label="Arka planda devam et" variant="secondary" onPress={onRunInBackground} />
+          <Button
+            label={tr("native.routeLoading.background")}
+            variant="secondary"
+            onPress={onRunInBackground}
+          />
         ) : null}
       </View>
     </ModalFrame>

@@ -173,8 +173,8 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
       <PaywallModal visible={paywall} onClose={() => setPaywall(false)} placement="profile" />
       <ConfirmDialog
         visible={confirmOut}
-        title="Çıkış yapılsın mı?"
-        body="Bu cihazdaki rotaların ve oturumun kapatılır; hesabındaki rotalar silinmez."
+        title={tr("native.profile.signOutTitle")}
+        body={tr("native.profile.signOutBody")}
         confirmLabel={tr("nav.logout")}
         onCancel={() => setConfirmOut(false)}
         onConfirm={() => {

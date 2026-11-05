@@ -114,7 +114,11 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
               />
             }
             right={
-              <IconButton icon="trash" label="Sohbeti sil" onPress={() => setConfirmDelete(true)} />
+              <IconButton
+                icon="trash"
+                label={tr("native.chat.delete")}
+                onPress={() => setConfirmDelete(true)}
+              />
             }
           />
         }
@@ -150,7 +154,7 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
                             m.routeEmbed!.stopsData.map((s, i) => ({
                               id: s.id || `stop-${i}`,
                               name: s.name,
-                              category: s.category || "Mekan",
+                              category: s.category || tr("native.place.defaultCategory"),
                               time: "",
                               duration: s.duration || "",
                               address: s.address || "",
@@ -185,8 +189,8 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
         </View>
         <ConfirmDialog
           visible={confirmDelete}
-          title="Sohbet silinsin mi?"
-          body="Bu sohbet ve mesajları bu cihazdan silinir."
+          title={tr("native.chat.deleteTitle")}
+          body={tr("native.chat.deleteBody")}
           confirmLabel={tr("community.delete.confirm")}
           onCancel={() => setConfirmDelete(false)}
           onConfirm={async () => {

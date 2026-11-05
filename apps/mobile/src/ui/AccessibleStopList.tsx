@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AccessibilityInfo, ScrollView, StyleSheet, Text, View } from "react-native";
 import { tokens } from "../theme";
+import { tr } from "../i18n/ui";
 import { IconButton } from "./IconButton";
 import { ModalFrame } from "./ModalFrame";
 import { StopRow } from "./StopRow";
@@ -52,7 +53,7 @@ export function AccessibleStopList({ day, stops, onSelectStop }: AccessibleStopL
   return (
     <View style={styles.trigger}>
       <IconButton
-        label="Durak listesini göster"
+        label={tr("native.stopList.show")}
         onPress={() => setOpen(true)}
         icon="route"
         color={tokens.color.onPrimary}
@@ -61,14 +62,14 @@ export function AccessibleStopList({ day, stops, onSelectStop }: AccessibleStopL
       <ModalFrame
         visible={open}
         variant="sheet"
-        title="Duraklar"
+        title={tr("native.stopList.title")}
         onRequestClose={() => setOpen(false)}
       >
         <ScrollView>
           <View accessibilityRole="list">
             {stops.length === 0 ? (
               <Text style={styles.empty} maxFontSizeMultiplier={tokens.font.maxScale.body}>
-                Bu rotada henüz durak yok.
+                {tr("native.stopList.empty")}
               </Text>
             ) : (
               stops.map((stop, i) => (

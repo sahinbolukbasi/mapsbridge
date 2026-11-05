@@ -117,7 +117,7 @@
   "home.features.planner.title": "Day-by-day planner.",
   "home.features.planner.body": "Add stops to days, drag to reorder, see each day's time and distance.",
   "home.features.optimize.title": "Route optimisation.",
-  "home.features.optimize.body": "Reorder your stops over the real road network in one tap.",
+  "home.features.optimize.body": "Reorder your stops automatically in one tap, shortening the order by straight-line distance.",
   "home.features.assistant.title": "AI travel assistant.",
   "home.features.assistant.body": "Build and edit your route by chatting. Place details come from data, never made up.",
   "home.features.share.title": "Secure location sharing.",

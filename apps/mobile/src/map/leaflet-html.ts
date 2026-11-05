@@ -19,6 +19,12 @@ export type MapStopPayload = {
 /** OSRM demo sunucusuna tek istekte gönderilen en fazla nokta (design §6.3). */
 export const OSRM_MAX_POINTS = 25;
 
+/**
+ * Leaflet betiği bu sürede yüklenmezse (çevrimdışı) RN'e MAP_LOAD_FAILED gider; WebView `onError`
+ * satır içi `html` kaynağında tetiklenmez. Betik sonradan yüklenirse MAP_READY uyarıyı kaldırır.
+ */
+export const MAP_LOAD_TIMEOUT_MS = 8000;
+
 /** HTML içine gömülecek JSON (</script> kaçışı). */
 function embed(value: unknown): string {
   return JSON.stringify(value).replace(/</g, "\\u003c");
@@ -55,23 +61,31 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
 </head>
 <body>
 <div id="map"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="window.__leafletFailed = true"></script>
 <script>
   var REDUCED = ${reducedMotion ? "true" : "false"};
   var INIT = ${embed(initialStops)};
   var map, markers, line, temp, userMarker, legsKey = "";
+  var started = Date.now(), failed = false, tileLoaded = false;
   function post(msg) { if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify(msg)); }
+  function fail() { if (!failed) { failed = true; post({ type: "MAP_LOAD_FAILED" }); } }
   function esc(s) { return String(s).replace(/[&<>"']/g, function(ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
   function focus(lat, lng, zoom) {
     if (!map) return;
     if (REDUCED) map.setView([lat, lng], zoom); else map.flyTo([lat, lng], zoom, { duration: 0.6 });
   }
   function init() {
-    if (typeof L === "undefined") { setTimeout(init, 50); return; }
+    if (typeof L === "undefined") {
+      if (window.__leafletFailed || Date.now() - started > ${MAP_LOAD_TIMEOUT_MS}) fail();
+      setTimeout(init, failed ? 1000 : 50);
+      return;
+    }
     map = L.map("map", { zoomControl: false }).setView([41.0082, 28.9784], 13);
     L.tileLayer("https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=tr", {
       maxZoom: 20, subdomains: ["0", "1", "2", "3"]
-    }).addTo(map);
+    }).on("tileload", function() { tileLoaded = true; })
+      .on("tileerror", function() { if (!tileLoaded) fail(); })
+      .addTo(map);
     markers = L.layerGroup().addTo(map);
     map.on("click", function(e) { post({ type: "MAP_CLICK", lat: e.latlng.lat, lng: e.latlng.lng }); });
     window.focusStop = function(lat, lng, zoom) { focus(lat, lng, zoom || 16); };
@@ -135,6 +149,7 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
     };
     window.updateStops(INIT);
     window.fitAll();
+    failed = false;
     post({ type: "MAP_READY" });
   }
   if (document.readyState === "complete" || document.readyState === "interactive") init();

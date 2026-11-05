@@ -42,7 +42,7 @@ export function EditProfileModal({ visible, profile, onClose, onSaved }: EditPro
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        setError("Fotoğraf seçmek için galeri izni gerekir.");
+        setError(tr("native.profile.photoPermission"));
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({

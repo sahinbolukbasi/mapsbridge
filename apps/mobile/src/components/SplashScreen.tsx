@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { SafeArea } from "../ui";
 import { tokens, withAlpha } from "../theme";
+import { tr } from "../i18n/ui";
 
 // Açılış ekranı (design §5.5 J6, F38): yalnızca gerçek yükleme (yazı tipleri + oturum) sürerken
 // görünür; yapay en kısa süre, sahte ilerleme adımı ya da istatistik yoktur (I1). Yazı tipleri
@@ -10,7 +11,7 @@ import { tokens, withAlpha } from "../theme";
 export function SplashScreen() {
   return (
     <SafeArea style={styles.container}>
-      <View style={styles.center} accessible accessibilityLabel="MapsBridge yükleniyor">
+      <View style={styles.center} accessible accessibilityLabel={tr("native.splash.label")}>
         <View style={styles.logo}>
           <Svg width={48} height={48} viewBox="0 0 48 48">
             <Path

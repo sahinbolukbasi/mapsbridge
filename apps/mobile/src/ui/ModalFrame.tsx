@@ -10,6 +10,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { tokens } from "../theme";
+import { tr } from "../i18n/ui";
 import { IconButton } from "./IconButton";
 import { SafeArea } from "./SafeArea";
 import { useReducedMotion } from "./useReducedMotion";
@@ -75,7 +76,7 @@ export function ModalFrame({
       </Text>
       {dismissible && onRequestClose ? (
         <IconButton
-          label="Kapat"
+          label={tr("ui.close")}
           onPress={onRequestClose}
           icon="x"
           color={tokens.color.textMuted}

@@ -28,6 +28,7 @@ import {
   type CardQuestions,
 } from "../ui";
 import { tr } from "../i18n/ui";
+import { stopDay } from "../trip/days";
 import { tokens } from "../theme";
 import { GuestDraftSummary } from "./GuestAssistantView";
 import { categoryIcon } from "../trip/category";
@@ -72,19 +73,16 @@ interface PrepCard {
 const WELCOME: ChatItem = {
   id: "welcome",
   sender: "bot",
-  text: "Nereye gitmek istiyorsun? Seyahatini birlikte planlayabilir ya da aklındaki soruyla başlayabiliriz.",
+  text: tr("native.ai.welcome"),
 };
 
-function dayOf(stop: TripStop): number {
-  const m = /^(\d+)\. gün/.exec(stop.time);
-  return m ? Number(m[1]) : 1;
-}
+const dayOf = (stop: TripStop): number => stopDay(stop, 1);
 
 function toStops(res: AIAskResponse): TripStop[] {
   return (res.stops ?? []).map((s, idx) => ({
     id: s.id || `ai-${Date.now()}-${idx}`,
     name: s.name,
-    category: s.category || "Gezi",
+    category: s.category || tr("native.ai.defaultCategory"),
     time: `${s.day || 1}. gün${s.timeSlot ? ` · ${s.timeSlot}` : ""}`,
     duration: s.duration || "",
     address: s.address || "",
@@ -117,21 +115,26 @@ function toPrep(res: AIAskResponse): PrepCard[] {
     res.stayAndTransit?.transitSummary,
     res.stayAndTransit?.neighborhoodTips,
   );
-  if (stay.length) cards.push({ title: "Konaklama ve ulaşım", lines: stay });
+  if (stay.length) cards.push({ title: tr("native.prep.stay"), lines: stay });
   const disc = lines(
     res.discovery?.foodHighlights,
     res.discovery?.hiddenGems,
     res.discovery?.culturalTips,
   );
-  if (disc.length) cards.push({ title: "Keşif ve lezzetler", lines: disc });
+  if (disc.length) cards.push({ title: tr("native.prep.discover"), lines: disc });
   const safety = lines(res.emergency?.emergencyNumbers, res.emergency?.embassy);
-  if (safety.length) cards.push({ title: "Güvenlik ve konsolosluk", lines: safety });
+  if (safety.length) cards.push({ title: tr("native.prep.safety"), lines: safety });
   if (res.travelAdvisory) {
     const a = res.travelAdvisory;
     cards.push({
-      title: `Seyahat uyarısı · ${a.country}`,
-      lines: lines(`Düzey: ${a.levelLabel}`, a.summary.slice(0, 280), a.changeNote, a.disclaimer),
-      link: a.sourceUrl ? { label: "Kaynağı aç", url: a.sourceUrl } : undefined,
+      title: tr("native.prep.advisory", { country: a.country }),
+      lines: lines(
+        tr("native.prep.level", { level: a.levelLabel }),
+        a.summary.slice(0, 280),
+        a.changeNote,
+        a.disclaimer,
+      ),
+      link: a.sourceUrl ? { label: tr("native.prep.source"), url: a.sourceUrl } : undefined,
     });
   }
   const now = new Date().toISOString();
@@ -147,7 +150,7 @@ function toPrep(res: AIAskResponse): PrepCard[] {
         `${d.origin} → ${d.destination}: ${d.price} ${d.currency}${d.departureMonth ? ` · ${d.departureMonth}` : ""}`,
         res.flightPrices.note,
       ),
-      link: d.affiliateLink ? { label: "Teklifi aç", url: d.affiliateLink } : undefined,
+      link: d.affiliateLink ? { label: tr("native.prep.offer"), url: d.affiliateLink } : undefined,
     });
   }
   return cards;
@@ -202,7 +205,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
             .map((s, idx) => ({
               id: s.id || `stop-${idx}`,
               name: s.name,
-              category: s.category || "Gezi",
+              category: s.category || tr("native.ai.defaultCategory"),
               time: `${s.day || 1}. gün${s.timeSlot ? ` · ${s.timeSlot}` : ""}`,
               duration: s.suggestedDuration || s.duration || "",
               address: s.address || "",
@@ -212,7 +215,8 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           const lastBot = [...synced].reverse().find((m) => m.sender === "bot");
           if (lastBot && stops.length)
             lastBot.route = {
-              title: r.title || `${r.destination ?? ""} rotası`.trim(),
+              title:
+                r.title || tr("native.ai.routeTitle", { destination: r.destination ?? "" }).trim(),
               stops,
               days: [...new Set(stops.map(dayOf))],
             };
@@ -263,7 +267,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           text: res.answer,
           route: stops.length
             ? {
-                title: res.routeTitle || "Rota",
+                title: res.routeTitle || tr("planner.edit.trip"),
                 stops,
                 days: [...new Set(stops.map(dayOf))],
               }
@@ -291,8 +295,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
             text:
               err?.status === 402
                 ? tr("upgrade.description")
-                : err?.message ||
-                  "Yanıt alınamadı. Aynı mesajı tekrar göndererek sonucu kontrol edebilirsin.",
+                : err?.message || tr("native.ai.noReply"),
             upgrade: err?.status === 402,
           },
         ]);
@@ -334,17 +337,17 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
       header={
         <ScreenHeader
           title={tr("nav.ai")}
-          right={<IconButton icon="plus" label="Yeni sohbet" onPress={newChat} />}
+          right={<IconButton icon="plus" label={tr("native.ai.newChat")} onPress={newChat} />}
         />
       }
     >
       {prep.length ? (
         <View style={styles.tabs}>
           <SegmentedControl
-            label="Asistan görünümü"
+            label={tr("native.ai.viewLabel")}
             options={[
               { value: "chat", label: tr("assistant.log.label") },
-              { value: "prep", label: "Hazırlık" },
+              { value: "prep", label: tr("native.ai.prepTab") },
             ]}
             value={tab}
             onChange={setTab}
@@ -396,7 +399,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
                 ) : null}
                 {msg.assumptions?.length ? (
                   <Txt variant="caption" tone="muted">
-                    {`Varsayımlar: ${msg.assumptions.join(" · ")}`}
+                    {tr("native.ai.assumptions", { list: msg.assumptions.join(" · ") })}
                   </Txt>
                 ) : null}
                 {msg.route ? (

@@ -77,6 +77,7 @@ export const UI_TR = {
   "community.compose.content": "Paylaşım metni",
   "community.compose.required": "Paylaşım metni boş olamaz.",
   "community.delete.body": "Bu paylaşım akıştan kaldırılır.",
+  "community.edit.hashtags": "Etiketler",
   "community.delete.confirm": "Sil",
   "community.delete.title": "Paylaşım silinsin mi?",
   "community.description":
@@ -185,6 +186,7 @@ export const UI_TR = {
   "planner.edit.name": "Mekan adı",
   "planner.edit.note": "Not",
   "planner.edit.save": "Kaydet",
+  "planner.edit.trip": "Rota",
   "planner.locate.failed": "Konumun alınamadı.",
   "planner.map.errorBody": "Durak listen çevrimdışı da kullanılabilir.",
   "planner.map.errorTitle": "Harita yüklenemedi.",
@@ -268,11 +270,97 @@ export const UI_TR = {
   "upgrade.note": "Kredi yalnızca sunucuda düşer; işlem başarısız olursa otomatik iade edilir.",
 } as const;
 
-export type UiKey = keyof typeof UI_TR;
+// Yalnız native'de olan metinler (web tr.json'da karşılığı yok). Anahtarlar `native.` ile başlar,
+// web tr.json'da bulunmaz ve hiçbir değer bir web tr.json değeriyle aynı olamaz (aynıysa web
+// anahtarı kullanılır); apps/web/tests/mobile-parity.test.cjs ikisini de denetler.
+export const NATIVE_TR = {
+  "native.ai.welcome":
+    "Nereye gitmek istiyorsun? Seyahatini birlikte planlayabilir ya da aklındaki soruyla başlayabiliriz.",
+  "native.ai.newChat": "Yeni sohbet",
+  "native.ai.viewLabel": "Asistan görünümü",
+  "native.ai.prepTab": "Hazırlık",
+  "native.ai.noReply": "Yanıt alınamadı. Aynı mesajı tekrar göndererek sonucu kontrol edebilirsin.",
+  "native.ai.assumptions": "Varsayımlar: {list}",
+  "native.ai.routeTitle": "{destination} rotası",
+  "native.ai.defaultCategory": "Gezi",
+  "native.prep.stay": "Konaklama ve ulaşım",
+  "native.prep.discover": "Keşif ve lezzetler",
+  "native.prep.safety": "Güvenlik ve konsolosluk",
+  "native.prep.advisory": "Seyahat uyarısı · {country}",
+  "native.prep.level": "Düzey: {level}",
+  "native.prep.source": "Kaynağı aç",
+  "native.prep.offer": "Teklifi aç",
+  "native.place.defaultCategory": "Mekan",
+  "native.chat.delete": "Sohbeti sil",
+  "native.chat.deleteTitle": "Sohbet silinsin mi?",
+  "native.chat.deleteBody": "Bu sohbet ve mesajları bu cihazdan silinir.",
+  "native.profile.signOutTitle": "Çıkış yapılsın mı?",
+  "native.profile.signOutBody":
+    "Bu cihazdaki rotaların ve oturumun kapatılır; hesabındaki rotalar silinmez.",
+  "native.profile.photoPermission": "Fotoğraf seçmek için galeri izni gerekir.",
+  "native.user.fallback": "Kullanıcı",
+  "native.paywall.restore": "Satın alımları geri yükle",
+  "native.paywall.restoreNone": "Geri yüklenecek abonelik bulunamadı",
+  "native.paywall.storePrice": "Kesin fiyat mağaza ödeme ekranında gösterilir.",
+  "native.routeLoading.background": "Arka planda devam et",
+  "native.tour.optimize": "Durak sırasını kuş uçuşu mesafeye göre kısaltır. Kredi harcamaz.",
+  "native.splash.label": "MapsBridge yükleniyor",
+  "native.error.body": "Ekran yüklenirken beklenmeyen bir sorun oluştu. Tekrar deneyebilirsin.",
+  "native.stopList.show": "Durak listesini göster",
+  "native.stopList.title": "Duraklar",
+  "native.stopList.empty": "Bu rotada henüz durak yok.",
+  "native.guest.storageWarn": "Taslağın bu cihazda saklanamıyor; uygulamayı kapatırsan kaybolur.",
+  "native.date.format": "YYYY-AA-GG",
+  "native.community.publishFailed": "Paylaşım gönderilemedi. Bağlantını kontrol edip tekrar dene.",
+  "native.community.commentFailed": "Yorum gönderilemedi. Bağlantını kontrol edip tekrar dene.",
+  "native.auth.mode": "Hesap",
+  "native.auth.login.sub": "Rotalarına ve asistana kaldığın yerden devam et.",
+  "native.auth.register.sub": "Rotalarını hesabında sakla, asistanla taslak rotanı oluştur.",
+  "native.auth.confirm.title": "E-postanı doğrula",
+  "native.auth.confirm.sub": "{email} adresine gönderilen 6 haneli kodu gir.",
+  "native.auth.forgot.title": "Şifremi unuttum",
+  "native.auth.forgot.sub": "E-posta adresine bir sıfırlama kodu göndereceğiz.",
+  "native.auth.reset.title": "Yeni şifre belirle",
+  "native.auth.reset.sub": "E-postana gelen kodla yeni şifreni oluştur.",
+  "native.auth.err.loginFields": "E-posta ve şifreni gir.",
+  "native.auth.info.unconfirmed": "Hesabın henüz doğrulanmadı. E-postana gönderilen kodu gir.",
+  "native.auth.err.registerFields": "Ad, soyad, telefon, e-posta ve şifre zorunlu.",
+  "native.auth.info.codeSent": "Doğrulama kodu {email} adresine gönderildi.",
+  "native.auth.err.code": "Doğrulama kodunu gir.",
+  "native.auth.info.confirmed": "Hesabın doğrulandı. Şimdi giriş yapabilirsin.",
+  "native.auth.err.forgotEmail": "Şifresini sıfırlamak istediğin e-posta adresini gir.",
+  "native.auth.info.resetSent": "Sıfırlama kodu {email} adresine gönderildi.",
+  "native.auth.err.resetFields": "Kodu ve yeni şifreni gir.",
+  "native.auth.info.reset": "Şifren güncellendi. Yeni şifrenle giriş yapabilirsin.",
+  "native.auth.submit.register": "Hesabı oluştur",
+  "native.auth.submit.confirm": "Kodu doğrula",
+  "native.auth.submit.forgot": "Kodu gönder",
+  "native.auth.google.register": "Google ile kayıt ol",
+  "native.auth.google.login": "Google ile giriş yap",
+  "native.auth.or": "veya e-posta ile",
+  "native.auth.firstName": "Ad",
+  "native.auth.lastName": "Soyad",
+  "native.auth.phone": "Telefon",
+  "native.auth.email": "E-posta",
+  "native.auth.password": "Şifre",
+  "native.auth.code": "Doğrulama kodu",
+  "native.auth.google.title": "Google ile Giriş",
+  "native.auth.google.openFailed":
+    "Google giriş sayfası açılamadı. Lütfen e-posta ile giriş yapın.",
+  "native.auth.google.errorTitle": "Google ile Giriş Hatası",
+  "native.auth.google.error": "Google ile giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.",
+  "native.auth.google.errorTitleShort": "Google Giriş Hatası",
+  "native.auth.google.errorGeneric": "Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.",
+  "native.auth.google.noEmail":
+    "Google hesabından e-posta adresi alınamadı. Lütfen tekrar deneyin.",
+} as const;
+
+export type UiKey = keyof typeof UI_TR | keyof typeof NATIVE_TR;
+const TEXT: Record<UiKey, string> = { ...UI_TR, ...NATIVE_TR };
 
 /** Metin; `vars` verilirse "{ad}" yer tutucuları doldurulur. */
 export function tr(key: UiKey, vars?: Record<string, string | number>): string {
-  let text: string = UI_TR[key];
+  let text: string = TEXT[key];
   if (vars) for (const [k, v] of Object.entries(vars)) text = text.split(`{${k}}`).join(String(v));
   return text;
 }

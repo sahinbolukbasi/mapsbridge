@@ -94,8 +94,8 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     layout: "app",
     title: t("Rota planlayıcı", "Route planner"),
     description: t(
-      "Durakları günlere ekle, sürükleyerek sırala ve durak sırasını gerçek yol ağı üzerinden optimize et. Her günün süresini ve mesafesini haritada gör.",
-      "Add stops to days, drag to reorder and optimise the order over the real road network. See each day's time and distance on the map.",
+      "Durakları günlere ekle, sürükleyerek sırala, sırayı tek dokunuşla otomatik düzenle. Her günün süresini ve mesafesini haritada gör.",
+      "Add stops to days, drag to reorder, or tidy the order automatically in one tap. See each day's time and distance on the map.",
     ),
     sitemap: true,
     // Bilinçli değer: bugünkü kod index + sitemap'te; GSC §3.6 noindex öneriyordu (F-16).

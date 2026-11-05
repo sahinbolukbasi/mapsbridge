@@ -34,6 +34,7 @@ import { clearDraft } from "./src/guest/guest-draft";
 
 import { setFontsAvailable, tokens } from "./src/theme";
 import { FONT_SOURCES } from "./src/theme/fonts";
+import { tr } from "./src/i18n/ui";
 const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
 // Session persistence constants
@@ -278,7 +279,7 @@ export function App() {
           setSession({
             token: cachedToken || `mb_fallback_${Date.now()}`,
             email: cachedEmail || "user@mapsbridge.com",
-            name: cachedEmail ? cachedEmail.split("@")[0] : "Kullanıcı",
+            name: cachedEmail ? cachedEmail.split("@")[0] : tr("native.user.fallback"),
           });
         } else {
           setSession(null);
@@ -355,17 +356,11 @@ export function App() {
       if (canOpen) {
         await Linking.openURL(authUrl);
       } else {
-        Alert.alert(
-          "Google ile Giriş",
-          "Google giriş sayfası açılamadı. Lütfen e-posta ile giriş yapın.",
-        );
+        Alert.alert(tr("native.auth.google.title"), tr("native.auth.google.openFailed"));
       }
     } catch (e) {
       console.warn("Google sign-in open error:", e);
-      Alert.alert(
-        "Google ile Giriş Hatası",
-        "Google ile giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.",
-      );
+      Alert.alert(tr("native.auth.google.errorTitle"), tr("native.auth.google.error"));
     }
   };
 
@@ -391,8 +386,8 @@ export function App() {
       if (tokens.error) {
         console.warn("Google OAuth error:", tokens.error, tokens.error_description);
         Alert.alert(
-          "Google Giriş Hatası",
-          tokens.error_description || "Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.",
+          tr("native.auth.google.errorTitleShort"),
+          tokens.error_description || tr("native.auth.google.errorGeneric"),
         );
         return false;
       }
@@ -433,10 +428,7 @@ export function App() {
       }
 
       if (!email) {
-        Alert.alert(
-          "Google Giriş Hatası",
-          "Google hesabından e-posta adresi alınamadı. Lütfen tekrar deneyin.",
-        );
+        Alert.alert(tr("native.auth.google.errorTitleShort"), tr("native.auth.google.noEmail"));
         return false;
       }
 

@@ -4,8 +4,10 @@
 // bölümü, S6) yoktur. Native'de geçerli olmayan öğeler alınmaz (I10): home.faq.q4/a4 ("bu cihazın
 // tarayıcısında saklanır", web'e özgü) ve home.faq.q5/a5 (mobilde dil seçimi yok, arayüz Türkçe),
 // home.how.more (/how-it-works/ bağlantısı), home.hero.resume / home.lastTrip.* (yalnız oturumlu web),
-// home.sample.* (web örnek önizlemesi). Mobil arayüz Türkçedir (I11 varsayılanı); HOME_EN parite
-// için tutulur.
+// home.sample.* (web örnek önizlemesi). Karar S23: web'deki "sürükleyerek sırala" (native'de yalnız
+// Yukarı/Aşağı taşı var) ve "Süreli ve onaya dayalı paylaşım" (native Paylaş süresiz bir Google
+// Haritalar bağlantısı gönderir) native'de doğru değildir; bu iki kart native'de HOME_NATIVE_*
+// metniyle çizilir. Mobil arayüz Türkçedir (I11 varsayılanı); *_EN parite için tutulur.
 export const HOME_TR = {
   "home.hero.eyebrow": "Bağımsız seyahat arkadaşı",
   "home.hero.title": "Gezini anlat. Rotan haritada belirsin.",
@@ -34,16 +36,12 @@ export const HOME_TR = {
     "Üçüncü turda gün gün taslak rota haritada. Sonrasını rota üzerinde birlikte iyileştiririz.",
   "home.features.title": "Planla, paylaş, yolda yanında taşı.",
   "home.features.planner.title": "Gün gün planlayıcı.",
-  "home.features.planner.body":
-    "Durakları günlere ekle, sürükleyerek sırala, her günün süresini ve mesafesini gör.",
   "home.features.optimize.title": "Rota optimizasyonu.",
   "home.features.optimize.body":
-    "Durak sırasını gerçek yol ağı üzerinden tek dokunuşla optimize et.",
+    "Durak sırasını tek dokunuşla otomatik düzenle; sıra kuş uçuşu mesafeye göre kısaltılır.",
   "home.features.assistant.title": "AI seyahat asistanı.",
   "home.features.assistant.body":
     "Rotayı sohbetle oluştur ve düzenle. Mekan bilgileri veriden gelir, uydurulmaz.",
-  "home.features.share.title": "Güvenli konum paylaşımı.",
-  "home.features.share.body": "Süreli ve onaya dayalı paylaşım bağlantıları ve kodları.",
   "home.features.messages.title": "Mesajlaşma.",
   "home.features.messages.body": "Yol arkadaşlarınla gerçek zamanlı sohbet.",
   "home.features.community.title": "Topluluk.",
@@ -112,15 +110,12 @@ export const HOME_EN = {
     "By the third turn your day-by-day draft is on the map. From there we refine it on the route itself.",
   "home.features.title": "Plan it, share it, take it with you.",
   "home.features.planner.title": "Day-by-day planner.",
-  "home.features.planner.body":
-    "Add stops to days, drag to reorder, see each day's time and distance.",
   "home.features.optimize.title": "Route optimisation.",
-  "home.features.optimize.body": "Reorder your stops over the real road network in one tap.",
+  "home.features.optimize.body":
+    "Reorder your stops automatically in one tap, shortening the order by straight-line distance.",
   "home.features.assistant.title": "AI travel assistant.",
   "home.features.assistant.body":
     "Build and edit your route by chatting. Place details come from data, never made up.",
-  "home.features.share.title": "Secure location sharing.",
-  "home.features.share.body": "Time-limited, consent-based share links and codes.",
   "home.features.messages.title": "Messaging.",
   "home.features.messages.body": "Real-time chat with your travel companions.",
   "home.features.community.title": "Community.",
@@ -160,9 +155,27 @@ export const HOME_EN = {
   "home.final.title": "Let your next trip start with one sentence.",
 } as const;
 
-export type HomeKey = keyof typeof HOME_TR;
+// Yalnız native Keşfet metinleri (S23). Anahtarlar `native.home.` ile başlar ve web locale'de yoktur.
+export const HOME_NATIVE_TR = {
+  "native.home.features.planner.body":
+    "Durak ekle, Yukarı taşı / Aşağı taşı düğmeleriyle sırala, rotanın süresini ve mesafesini gör.",
+  "native.home.features.share.title": "Rota paylaşımı.",
+  "native.home.features.share.body":
+    "Rotanı Google Haritalar bağlantısıyla paylaş; bağlantı durakların konumunu içerir ve süresizdir. Sana gönderilen paylaşım kodlarını buradan açabilirsin.",
+} as const;
+
+export const HOME_NATIVE_EN = {
+  "native.home.features.planner.body":
+    "Add stops, reorder them with Move up / Move down, see your route's time and distance.",
+  "native.home.features.share.title": "Route sharing.",
+  "native.home.features.share.body":
+    "Share your route as a Google Maps link; the link contains your stops' locations and does not expire. Open share codes sent to you from here.",
+} as const;
+
+export type HomeKey = keyof typeof HOME_TR | keyof typeof HOME_NATIVE_TR;
+const HOME_TEXT: Record<HomeKey, string> = { ...HOME_TR, ...HOME_NATIVE_TR };
 
 /** Keşfet metni (TR). */
 export function homeText(key: HomeKey): string {
-  return HOME_TR[key];
+  return HOME_TEXT[key];
 }

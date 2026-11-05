@@ -43,7 +43,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {tr("ui.errorPage.title")}
             </Txt>
             <Txt variant="small" tone="muted" align="center">
-              Ekran yüklenirken beklenmeyen bir sorun oluştu. Tekrar deneyebilirsin.
+              {tr("native.error.body")}
             </Txt>
             {this.state.error?.message ? (
               <Txt variant="caption" tone="danger" numberOfLines={3}>

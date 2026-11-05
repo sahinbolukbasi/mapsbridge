@@ -3,7 +3,14 @@ import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import type { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import { getOfferings, purchasePackage, restorePurchases } from "../services/revenuecat";
 import { billingService } from "../services/api";
-import { findMonthlyProduct, parseCatalog, type Catalog } from "../billing/catalog";
+import {
+  findMonthlyProduct,
+  matchesStoreIds,
+  parseCatalog,
+  parseStoreIds,
+  type Catalog,
+  type StoreIds,
+} from "../billing/catalog";
 import { PLAN_CREDITS, PLAN_TIERS, type PlanPriceState, type PlanTier } from "../billing/plans";
 import { Button, CreditCostTable, ModalFrame, Notice, PlanCard, Txt, type PlanCta } from "../ui";
 import { tr } from "../i18n/ui";
@@ -15,8 +22,9 @@ import { tokens } from "../theme";
 // yüklenemedi / satın alma kapalı / ürün yok durumları web §7.3 ile aynı. "EN POPÜLER", deneme ya da
 // "kredi kartı gerekmez" yok. Native yalnız AYLIK abonelik sunar (S18). Satın alma bugünkü
 // services/revenuecat.ts çağrılarıyla (getOfferings → purchasePackage / restorePurchases); kart,
-// mağaza teklifinde katalog ürün kimliğiyle eşleşen paket varsa satın alınabilir, yoksa CTA
-// "Şu an satın alınamıyor" olur. Misafirde (`guest`) RevenueCat çağrılmaz; kartlar bilgi amaçlıdır
+// mağaza teklifinde katalogun döndürdüğü packageId / productId ile eşleşen paket varsa satın
+// alınabilir, yoksa CTA "Şu an satın alınamıyor" olur. Mağaza kendi yerel fiyatını tahsil
+// edebileceğinden fiyatın altında "Kesin fiyat mağaza ödeme ekranında gösterilir" notu durur (C2). Misafirde (`guest`) RevenueCat çağrılmaz; kartlar bilgi amaçlıdır
 // ve kayıt/giriş düğmeleri gösterilir.
 // ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
 // edilmeli.
@@ -38,14 +46,12 @@ const CTA_KEY: Record<Exclude<PlanTier, "free">, Parameters<typeof tr>[0]> = {
   agency: "pricing.cta.agency",
 };
 
-/** Mağaza paketinin ürün kimliği katalog ürün kimliğine eşit mi (eşleme varsayımı, bkz. üst not). */
+/** Katalog ürününün mağaza kimlikleriyle eşleşen teklif paketi. */
 function packageFor(
   offering: PurchasesOffering | null,
-  productId: string,
+  ids: StoreIds | undefined,
 ): PurchasesPackage | undefined {
-  return offering?.availablePackages.find(
-    (p) => p.product.identifier === productId || p.identifier === productId,
-  );
+  return offering?.availablePackages.find((p) => matchesStoreIds(p, ids));
 }
 
 export function PaywallModal({
@@ -57,6 +63,7 @@ export function PaywallModal({
   onRequireAuth,
 }: PaywallModalProps) {
   const [catalog, setCatalog] = useState<Catalog | "loading">("loading");
+  const [storeIds, setStoreIds] = useState<Record<string, StoreIds>>({});
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
   const [purchasing, setPurchasing] = useState<PlanTier | null>(null);
   const [restoring, setRestoring] = useState(false);
@@ -64,8 +71,11 @@ export function PaywallModal({
   const loadCatalog = useCallback(async () => {
     setCatalog("loading");
     try {
-      setCatalog(parseCatalog(await billingService.getPlans()));
+      const raw = await billingService.getPlans();
+      setStoreIds(parseStoreIds(raw));
+      setCatalog(parseCatalog(raw));
     } catch {
+      setStoreIds({});
       setCatalog({ status: "unavailable" });
     }
   }, []);
@@ -102,7 +112,7 @@ export function PaywallModal({
         onProUnlocked?.();
         onClose();
       } else {
-        Alert.alert("Geri yüklenecek abonelik bulunamadı", result.error ?? "");
+        Alert.alert(tr("native.paywall.restoreNone"), result.error ?? "");
       }
     } finally {
       setRestoring(false);
@@ -127,7 +137,7 @@ export function PaywallModal({
       return { label, disabledReason: tr("pricing.unavailable") };
     if (!catalog.enabled) return { label, disabledReason: tr("pricing.alert.disabled") };
     const product = findMonthlyProduct(catalog.products, tier);
-    const pkg = product?.available ? packageFor(offering, product.id) : undefined;
+    const pkg = product?.available ? packageFor(offering, storeIds[product.id]) : undefined;
     if (!pkg) return { label, disabledReason: tr("pricing.unavailable") };
     return {
       label: purchasing === tier ? tr("ui.loading") : label,
@@ -164,6 +174,11 @@ export function PaywallModal({
             cta={ctaOf(tier)}
           />
         ))}
+        {catalog !== "loading" && catalog.status === "ok" ? (
+          <Txt variant="caption" tone="muted">
+            {tr("native.paywall.storePrice")}
+          </Txt>
+        ) : null}
         {guest ? (
           <View style={styles.actions}>
             <Button
@@ -207,7 +222,7 @@ export function PaywallModal({
         </View>
         {!guest ? (
           <Button
-            label="Satın alımları geri yükle"
+            label={tr("native.paywall.restore")}
             variant="ghost"
             loading={restoring}
             onPress={restore}

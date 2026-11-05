@@ -113,7 +113,7 @@ function DateRangeCard({ onSubmit }: { onSubmit: (from: string, to: string) => v
       </Txt>
       <TextField
         label={tr("guest.dates.from")}
-        hint="YYYY-AA-GG"
+        hint={tr("native.date.format")}
         value={from}
         onChangeText={setFrom}
         placeholder={localToday()}
@@ -122,7 +122,7 @@ function DateRangeCard({ onSubmit }: { onSubmit: (from: string, to: string) => v
       />
       <TextField
         label={tr("guest.dates.to")}
-        hint="YYYY-AA-GG"
+        hint={tr("native.date.format")}
         value={to}
         onChangeText={setTo}
         error={error ? tr(DATE_ERRORS[error]) : undefined}
@@ -290,7 +290,7 @@ export function GuestAssistantView({
       {storageWarn ? (
         <View style={styles.alert} accessibilityLiveRegion="polite">
           <Txt variant="small" tone="warning">
-            Taslağın bu cihazda saklanamıyor; uygulamayı kapatırsan kaybolur.
+            {tr("native.guest.storageWarn")}
           </Txt>
         </View>
       ) : null}

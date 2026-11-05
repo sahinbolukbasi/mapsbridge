@@ -39,22 +39,19 @@ const RULES = [
 ] as const;
 
 const TITLES: Record<AuthMode, { title: string; sub: (email: string) => string }> = {
-  login: { title: "Giriş yap", sub: () => "Rotalarına ve asistana kaldığın yerden devam et." },
-  register: {
-    title: "Ücretsiz hesap aç",
-    sub: () => "Rotalarını hesabında sakla, asistanla taslak rotanı oluştur.",
-  },
+  login: { title: tr("gate.login"), sub: () => tr("native.auth.login.sub") },
+  register: { title: tr("gate.register"), sub: () => tr("native.auth.register.sub") },
   confirm_signup: {
-    title: "E-postanı doğrula",
-    sub: (email) => `${email} adresine gönderilen 6 haneli kodu gir.`,
+    title: tr("native.auth.confirm.title"),
+    sub: (email) => tr("native.auth.confirm.sub", { email }),
   },
   forgot_password: {
-    title: "Şifremi unuttum",
-    sub: () => "E-posta adresine bir sıfırlama kodu göndereceğiz.",
+    title: tr("native.auth.forgot.title"),
+    sub: () => tr("native.auth.forgot.sub"),
   },
   reset_password: {
-    title: "Yeni şifre belirle",
-    sub: () => "E-postana gelen kodla yeni şifreni oluştur.",
+    title: tr("native.auth.reset.title"),
+    sub: () => tr("native.auth.reset.sub"),
   },
 };
 
@@ -96,7 +93,7 @@ export function AuthScreen({
 
   const signIn = () => {
     if (!email.trim() || !password) {
-      setError("E-posta ve şifreni gir.");
+      setError(tr("native.auth.err.loginFields"));
       return;
     }
     run(async () => {
@@ -105,7 +102,7 @@ export function AuthScreen({
       } catch (err) {
         const msg = err instanceof Error ? err.message : "";
         if (msg.includes("UserNotConfirmedException") || msg.includes("not confirmed")) {
-          setInfo("Hesabın henüz doğrulanmadı. E-postana gönderilen kodu gir.");
+          setInfo(tr("native.auth.info.unconfirmed"));
           setMode("confirm_signup");
           return;
         }
@@ -126,7 +123,7 @@ export function AuthScreen({
       !password ||
       phone.trim().length < 10
     ) {
-      setError("Ad, soyad, telefon, e-posta ve şifre zorunlu.");
+      setError(tr("native.auth.err.registerFields"));
       return;
     }
     if (!pwValid) {
@@ -140,38 +137,38 @@ export function AuthScreen({
         `${firstName.trim()} ${lastName.trim()}`,
         phone.trim(),
       );
-      setInfo(`Doğrulama kodu ${cleanEmail} adresine gönderildi.`);
+      setInfo(tr("native.auth.info.codeSent", { email: cleanEmail }));
       setMode("confirm_signup");
     });
   };
 
   const confirm = () => {
     if (!code.trim()) {
-      setError("Doğrulama kodunu gir.");
+      setError(tr("native.auth.err.code"));
       return;
     }
     run(async () => {
       await authService.confirmSignUp(email, code);
-      setInfo("Hesabın doğrulandı. Şimdi giriş yapabilirsin.");
+      setInfo(tr("native.auth.info.confirmed"));
       setMode("login");
     });
   };
 
   const forgot = () => {
     if (!email.trim()) {
-      setError("Şifresini sıfırlamak istediğin e-posta adresini gir.");
+      setError(tr("native.auth.err.forgotEmail"));
       return;
     }
     run(async () => {
       await authService.forgotPassword(email);
-      setInfo(`Sıfırlama kodu ${email} adresine gönderildi.`);
+      setInfo(tr("native.auth.info.resetSent", { email }));
       setMode("reset_password");
     });
   };
 
   const reset = () => {
     if (!code.trim() || !newPassword) {
-      setError("Kodu ve yeni şifreni gir.");
+      setError(tr("native.auth.err.resetFields"));
       return;
     }
     if (!pwValid) {
@@ -180,7 +177,7 @@ export function AuthScreen({
     }
     run(async () => {
       await authService.confirmForgotPassword(email, code, newPassword);
-      setInfo("Şifren güncellendi. Yeni şifrenle giriş yapabilirsin.");
+      setInfo(tr("native.auth.info.reset"));
       setMode("login");
     });
   };
@@ -193,10 +190,10 @@ export function AuthScreen({
     reset_password: reset,
   }[mode];
   const submitLabel = {
-    login: "Giriş yap",
-    register: "Hesabı oluştur",
-    confirm_signup: "Kodu doğrula",
-    forgot_password: "Kodu gönder",
+    login: tr("gate.login"),
+    register: tr("native.auth.submit.register"),
+    confirm_signup: tr("native.auth.submit.confirm"),
+    forgot_password: tr("native.auth.submit.forgot"),
     reset_password: tr("edit.pw.submit"),
   }[mode];
 
@@ -223,7 +220,7 @@ export function AuthScreen({
           <View style={styles.form}>
             {mode === "login" || mode === "register" ? (
               <SegmentedControl
-                label="Hesap"
+                label={tr("native.auth.mode")}
                 options={[
                   { value: "login", label: tr("gate.login") },
                   { value: "register", label: tr("nav.signUp") },
@@ -238,14 +235,18 @@ export function AuthScreen({
             {(mode === "login" || mode === "register") && onSelectGoogle ? (
               <>
                 <Button
-                  label={mode === "register" ? "Google ile kayıt ol" : "Google ile giriş yap"}
+                  label={tr(
+                    mode === "register"
+                      ? "native.auth.google.register"
+                      : "native.auth.google.login",
+                  )}
                   variant="secondary"
                   size="lg"
                   icon={<Icon name="globe" size={20} color={tokens.color.buttonSecondaryFg} />}
                   onPress={onSelectGoogle}
                 />
                 <Txt variant="caption" tone="muted" align="center">
-                  veya e-posta ile
+                  {tr("native.auth.or")}
                 </Txt>
               </>
             ) : null}
@@ -253,21 +254,21 @@ export function AuthScreen({
             {mode === "register" ? (
               <>
                 <TextField
-                  label="Ad"
+                  label={tr("native.auth.firstName")}
                   value={firstName}
                   onChangeText={setFirstName}
                   autoComplete="given-name"
                   textContentType="givenName"
                 />
                 <TextField
-                  label="Soyad"
+                  label={tr("native.auth.lastName")}
                   value={lastName}
                   onChangeText={setLastName}
                   autoComplete="family-name"
                   textContentType="familyName"
                 />
                 <TextField
-                  label="Telefon"
+                  label={tr("native.auth.phone")}
                   value={phone}
                   onChangeText={setPhone}
                   keyboardType="phone-pad"
@@ -279,7 +280,7 @@ export function AuthScreen({
 
             {mode !== "confirm_signup" && mode !== "reset_password" ? (
               <TextField
-                label="E-posta"
+                label={tr("native.auth.email")}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -292,7 +293,7 @@ export function AuthScreen({
 
             {mode === "login" || mode === "register" ? (
               <TextField
-                label="Şifre"
+                label={tr("native.auth.password")}
                 value={password}
                 onChangeText={setPassword}
                 secure
@@ -303,7 +304,7 @@ export function AuthScreen({
 
             {mode === "confirm_signup" || mode === "reset_password" ? (
               <TextField
-                label="Doğrulama kodu"
+                label={tr("native.auth.code")}
                 value={code}
                 onChangeText={setCode}
                 keyboardType="number-pad"
@@ -348,7 +349,7 @@ export function AuthScreen({
 
             {mode === "login" ? (
               <Button
-                label="Şifremi unuttum"
+                label={tr("native.auth.forgot.title")}
                 variant="ghost"
                 onPress={() => go("forgot_password")}
               />

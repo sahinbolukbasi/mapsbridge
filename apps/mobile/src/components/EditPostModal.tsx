@@ -86,7 +86,7 @@ export function EditPostModal({ visible, post, onClose, onSaved, onDeleted }: Ed
           maxLength={80}
         />
         <TextField
-          label="Etiketler"
+          label={tr("community.edit.hashtags")}
           hint={`${tr("ui.optional")} · #roma #yemek`}
           value={hashtagsText}
           onChangeText={setHashtagsText}

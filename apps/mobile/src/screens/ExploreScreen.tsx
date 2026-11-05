@@ -23,6 +23,8 @@ import { tokens } from "../theme";
 // sayfasıyla aynı sıra ve aynı metin (i18n/home.ts = web home.*): hero girişi (→ Asistan sekmesi),
 // yalnız alanı dolduran örnek çipler, "Paylaşım kodum var", nasıl çalışır, özellikler, bağımsızlık,
 // kredi tablosu, paylaşım kodu, SSS. Mağaza rozeti, "uygulamayı indir" ya da "yakında" YOK (S6).
+// Planlayıcı gövdesi ve paylaşım kartı native'e özgü metinle çizilir (S23: native'de sürükleme ve
+// süreli/onaylı paylaşım oluşturma yok).
 // LLM çağrısı ya da kredi işlemi yoktur; yalnızca yönlendirir.
 export interface ExploreScreenProps {
   /** Hero metniyle Asistan sekmesini açar (misafir senaryosu, ağ çağrısı yok). */
@@ -47,10 +49,14 @@ const STEPS = [
   { n: 3, title: "home.how.step3.title", body: "home.how.step3.body" },
 ] as const;
 const FEATURES: ReadonlyArray<{ icon: IconName; title: HomeKey; body: HomeKey }> = [
-  { icon: "map", title: "home.features.planner.title", body: "home.features.planner.body" },
+  { icon: "map", title: "home.features.planner.title", body: "native.home.features.planner.body" },
   { icon: "route", title: "home.features.optimize.title", body: "home.features.optimize.body" },
   { icon: "sparkle", title: "home.features.assistant.title", body: "home.features.assistant.body" },
-  { icon: "shield", title: "home.features.share.title", body: "home.features.share.body" },
+  {
+    icon: "share",
+    title: "native.home.features.share.title",
+    body: "native.home.features.share.body",
+  },
   { icon: "message", title: "home.features.messages.title", body: "home.features.messages.body" },
   { icon: "users", title: "home.features.community.title", body: "home.features.community.body" },
 ];
