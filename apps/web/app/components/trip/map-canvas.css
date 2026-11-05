@@ -1,0 +1,86 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* MapCanvas (design §4.2, §4.4): harita yüzeyi + 44 px kontrol yığını + katman menüsü.
+     Yüzey kendi yığın bağlamını kurar (z-base); Leaflet panelleri kontrollerin altında kalır. */
+  .map-canvas {
+    position: relative;
+    min-block-size: 0;
+    overflow: hidden;
+    background: var(--color-surface-sunken);
+  }
+  .map-canvas__surface {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-base);
+  }
+  .map-canvas__controls {
+    position: absolute;
+    inset-block-start: var(--space-3);
+    inset-inline-end: var(--space-3);
+    z-index: var(--z-sticky);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .map-canvas__layers {
+    position: absolute;
+    inset-block-start: var(--space-3);
+    inset-inline-end: calc(var(--space-3) * 2 + var(--touch-target));
+    z-index: var(--z-dropdown);
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: calc(var(--space-20) * 2.5);
+    margin: 0;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--elevation-floating);
+    color: var(--color-text);
+  }
+  .map-canvas__layers-title {
+    padding: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+  }
+  .map-canvas__layer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--touch-target);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+  }
+  .map-canvas__layer--toggle {
+    margin-block-start: var(--space-1);
+    padding-block-start: var(--space-2);
+    border-block-start: 1px solid var(--color-border);
+  }
+  .map-canvas__status {
+    position: absolute;
+    inset-block-start: var(--space-3);
+    inset-inline-start: var(--space-3);
+    z-index: var(--z-sticky);
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .map-canvas__error {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline: var(--space-4);
+    z-index: var(--z-sticky);
+    max-inline-size: calc(var(--space-20) * 4.5);
+    margin-inline: auto;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--elevation-floating);
+    transform: translateY(-50%);
+  }
+}

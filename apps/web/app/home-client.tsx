@@ -43,11 +43,14 @@ const INDEPENDENCE = [
   { title: "home.independence.p3.title", body: "home.independence.p3.body" },
 ] as const;
 
-// q4 (çevrimdışı, I12) bilerek yok: FEAT-007 önbellek kapsamını doğrulayınca eklenir (S11).
+// q4 (çevrimdışı, I12): FEAT-007 önbellek kapsamını doğruladı (S11). Yalnızca
+// use-travel-planner'ın localStorage'a yazdığı alanları iddia eder: duraklar, koordinatlar,
+// gün ve sıra. Yol geometrisi/yön tarifi ve harita karoları saklanmaz; service worker yok.
 const FAQ = [
   { id: "sss-1", q: "home.faq.q1", a: "home.faq.a1" },
   { id: "sss-2", q: "home.faq.q2", a: "home.faq.a2" },
   { id: "sss-3", q: "home.faq.q3", a: "home.faq.a3" },
+  { id: "sss-4", q: "home.faq.q4", a: "home.faq.a4" },
   { id: "sss-5", q: "home.faq.q5", a: "home.faq.a5" },
 ] as const;
 

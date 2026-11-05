@@ -1,60 +1,112 @@
 // ============================================================
-// TravelPlannerSidebar — Unified Modern Travel Planner Desk
-// Stitch Design System: Clean, Non-Repetitive, Map-First UX
+// TravelPlannerSidebar — planlayıcı listesi (design §4.2, §4.3 AppSplit, §6.3; FEAT-007)
+// Günler DayHeader, duraklar StopRow + Connector ile. Süre/mesafe yalnızca OSRM bacaklarından
+// (I1/I2); yoksa "Süre hesaplanamadı". Sürükle-bırakın klavye alternatifi "Yukarı/Aşağı taşı" (R9).
 // ============================================================
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import { Pin, PinCategory, DEFAULT_CATEGORY_META } from "../../lib/trip/models";
-import { useTravelPlanner } from "../../lib/trip/use-travel-planner";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { DEFAULT_CATEGORY_META, type Pin, type PinCategory } from "../../lib/trip/models";
+import type { useTravelPlanner } from "../../lib/trip/use-travel-planner";
 import { googleMapsEnabled } from "../../lib/google/maps-client";
-import { searchPlaces } from "../../lib/trip/geocoding-service";
+import { searchPlaces, type GeocodedPlace } from "../../lib/trip/geocoding-service";
 import { apiFetch } from "../../lib/api-client";
-import { tripToRoute, routeToTrip } from "../../lib/trip/workspace-store";
-import { isRoutePlan, type MultiAgentResponse } from "../../lib/ai/types";
-import { GooglePlaceInfo } from "./google-place-info";
+import type { MultiAgentResponse } from "../../lib/ai/types";
 import { interactionTracker } from "../../lib/analytics/tracker";
-import { exportTripToGoogleMaps, ManualPinModal } from "../../features/trip-planner";
-import "../../maps/maps-layout.css";
+import { exportTripToGoogleMaps } from "../../features/trip-planner/google-maps-exporter";
+import { dayTimeline, legKey } from "../../lib/trip/planner-logic";
+import { useLocale } from "../../lib/locale-context";
+import {
+  Accordion,
+  Alert,
+  Badge,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Field,
+  Icon,
+  IconButton,
+  Input,
+  SegmentedControl,
+  Select,
+  Textarea,
+  cx,
+  useToast,
+  type IconName,
+} from "../ui";
+import { GooglePlaceInfo } from "./google-place-info";
+import { StopRow } from "./stop-row";
+import { Connector, type ConnectorMode } from "./connector";
+import { DayHeader } from "./day-header";
+import { dayColorIndex } from "./trip-format";
+import "./travel-planner.css";
+
+/** Kategori ikonla kodlanır (renk tek bilgi taşıyıcı değil, WCAG 1.4.1; design F45). */
+const CATEGORY_ICON: Record<PinCategory, IconName> = {
+  tarih: "landmark",
+  muze: "landmark",
+  kultur: "landmark",
+  turistik: "landmark",
+  yemek: "food",
+  gastronomi: "food",
+  kahve: "food",
+  alisveris: "bag",
+  manzara: "camera",
+  fotograf: "camera",
+  doga: "compass",
+  gezi: "compass",
+  gezilecek: "compass",
+  aktivite: "sparkle",
+  eglence: "sparkle",
+  spor: "sparkle",
+  konaklama: "home",
+  otel: "home",
+  genel: "map",
+};
+const MODE: Record<string, ConnectorMode> = { walking: "walk", cycling: "walk", driving: "drive" };
+/** Arama: en az 3 karakter, 400 ms bekleme (design §6.3; Nominatim/Photon kullanım politikası). */
+const SEARCH_MIN = 3;
+const SEARCH_DEBOUNCE_MS = 400;
+
+type Planner = ReturnType<typeof useTravelPlanner>;
+type Place = { lat: number; lng: number; address: string; label: string };
+export type PlannerMode = "guest" | "user";
 
 export interface TravelPlannerSidebarProps {
-  planner: ReturnType<typeof useTravelPlanner>;
-  isOpen?: boolean;
-  onToggle?: () => void;
-  isCollapsed?: boolean;
-  onToggleCollapse?: () => void;
+  planner: Planner;
+  mode: PlannerMode;
   onFlyToPin?: (pin: Pin) => void;
   onFlyToCoords?: (lat: number, lng: number, label: string) => void;
   selectedMapPoint?: { lat: number; lng: number; address: string } | null;
   onClearSelectedMapPoint?: () => void;
-  isAddingPinMode?: boolean;
-  onToggleAddPinMode?: () => void;
-  isGuest?: boolean;
-  onRequireAuth?: (featureName: string, actionDesc: string) => void;
-  onRunOptimize?: () => void;
-  userLocation?: { lat: number; lng: number } | null;
+  /** Ağ/hesap gerektiren eylem misafirde AuthGate sheet açar (design §6.3). */
+  onRequireAuth: (reason: "ai" | "save") => void;
+  /** Liste sonundaki eylemler (optimize/paylaş/asistan). */
+  footer?: ReactNode;
 }
-
-type DetailTab = "info" | "edit";
 
 export function TravelPlannerSidebar({
   planner,
-  isCollapsed: controlledCollapsed,
-  onToggleCollapse,
+  mode,
   onFlyToPin,
   onFlyToCoords,
   selectedMapPoint,
   onClearSelectedMapPoint,
-  isAddingPinMode: _isAddingPinMode,
-  onToggleAddPinMode: _onToggleAddPinMode,
-  isGuest = false,
   onRequireAuth,
-  onRunOptimize,
-  userLocation: _userLocation,
+  footer,
 }: TravelPlannerSidebarProps) {
+  const { t } = useLocale();
+  const toast = useToast();
   const {
-    trips,
     generalPins,
     selectedPin,
     activeTrip,
@@ -62,247 +114,714 @@ export function TravelPlannerSidebar({
     activeDayIndex,
     selectedPinId,
     pinsWithTime,
-    daySummary,
-    switchTrip,
+    activeRouteLegs,
+    transportMode,
     setActiveDayIndex,
     setSelectedPinId,
-    createTrip,
-    deleteTrip,
     addPinToGeneral,
     addPinDirectlyToTrip,
     assignPinToTrip,
-    movePinToGeneral,
     updatePinAnywhere,
     deletePinAnywhere,
     togglePinVisitedAnywhere,
-    customGroups: _customGroups,
     addDay,
-    importTrip,
   } = planner;
-
-  // Panel state: expanded vs collapsed rail
-  const [internalCollapsed, setInternalCollapsed] = useState(false);
-  const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
-
-  const setPanelCollapsed = (val: boolean) => {
-    if (onToggleCollapse && val !== isCollapsed) {
-      onToggleCollapse();
-    }
-    setInternalCollapsed(val);
-  };
-
-  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
-
-  // Detail sub-tab when a pin is selected (Info vs Edit)
-  const [detailTab, setDetailTab] = useState<DetailTab>("info");
-  const [showInPanelDetail, setShowInPanelDetail] = useState(false);
-
-  // Filters
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-
-  // Helper to dynamically calculate stop times
-  const calcStopTime = (idx: number) => {
-    let totalMins = 9 * 60 + 30; // Starts at 09:30
-    for (let i = 0; i < idx; i++) {
-      const p = pinsWithTime[i];
-      totalMins += (p?.durationMinutes || 45) + (p?.transitDurationFromPrevious || 10);
-    }
-    const h = Math.floor(totalMins / 60) % 24;
-    const m = totalMins % 60;
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  };
-
-  // Inline edit state for selected pin
-  const [editLabel, setEditLabel] = useState("");
-  const [editCategory, setEditCategory] = useState<PinCategory>("tarih");
-  const [editGroup, setEditGroup] = useState<string>("Genel");
-  const [editNote, setEditNote] = useState("");
-  const [editDuration, setEditDuration] = useState(60);
-  const [editTargetTripId, setEditTargetTripId] = useState<string>("general");
-  const [editTargetDayIndex, setEditTargetDayIndex] = useState<number>(0);
-  const [editPhotoUrl, setEditPhotoUrl] = useState("");
-  const [infoNewPhotoUrl, setInfoNewPhotoUrl] = useState("");
-
-  // New trip inline creation form
-  const [showInlineNewTrip, setShowInlineNewTrip] = useState(false);
-  const [showRouteMenu, setShowRouteMenu] = useState(false);
-  const [newTripTitle, setNewTripTitle] = useState("");
-  const [newTripDest, setNewTripDest] = useState("");
-
-  // Toast notifications
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2500);
-  };
-
-  const guardGuest = (featureName: string, actionDesc: string) => {
-    if (isGuest) {
-      onRequireAuth?.(featureName, actionDesc);
-      return true;
-    }
-    return false;
-  };
-
-  // ── Mode Switcher: "edit" (Rota Düzenleme) vs "travel" (Gezi Modu) ──
   const [workspaceMode, setWorkspaceMode] = useState<"edit" | "travel">("edit");
+  const [showDetail, setShowDetail] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Pin | null>(null);
+  const targetDay = activeDayIndex && activeDayIndex > 0 ? activeDayIndex : 1;
+  const connectorMode = MODE[transportMode] ?? "walk";
 
-  // ── Sidebar Address / Place Search ──
-  const [sidebarSearch, setSidebarSearch] = useState("");
-  const [isSidebarSearching, setIsSidebarSearching] = useState(false);
-  const [foundPlace, setFoundPlace] = useState<{
-    lat: number;
-    lng: number;
-    address: string;
-    label?: string;
-  } | null>(null);
+  // Seçili durak değişince ayrıntı açılır ve etkileşim kaydı düşer (mevcut davranış).
+  useEffect(() => {
+    if (!selectedPin) return;
+    setShowDetail(true);
+    interactionTracker.logPinClick({
+      id: selectedPin.id,
+      label: selectedPin.label,
+      category: selectedPin.category,
+      address: selectedPin.address,
+      lat: selectedPin.lat,
+      lng: selectedPin.lng,
+      tripId: selectedPin.tripId,
+      dayIndex: selectedPin.dayIndex,
+    });
+    interactionTracker.logPlaceView({
+      label: selectedPin.label,
+      placeId: selectedPin.googlePlaceId,
+      category: selectedPin.category,
+      source: "map_pin",
+    });
+  }, [selectedPin?.id]);
 
-  const handleSidebarSearchSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const query = sidebarSearch.trim();
-    if (!query) return;
-    setIsSidebarSearching(true);
-    try {
-      const places = await searchPlaces(query);
-      if (places && places.length > 0) {
-        const top = places[0];
-        const placeData = {
-          lat: top.lat,
-          lng: top.lng,
-          address: top.address,
-          label: top.label || top.address.split(",")[0],
-        };
-        setFoundPlace(placeData);
-        onFlyToCoords?.(top.lat, top.lng, placeData.label);
-        showToast(`✓ "${placeData.label}" haritada bulundu!`);
-      } else {
-        showToast("⚠️ Aradığınız adres veya mekan bulunamadı.");
-      }
-    } catch {
-      showToast("⚠️ Arama servisine ulaşılamadı.");
-    } finally {
-      setIsSidebarSearching(false);
-    }
-  };
+  useEffect(() => {
+    const open = () => setShowDetail(true);
+    window.addEventListener("mapsbridge:show-pin-detail", open);
+    return () => window.removeEventListener("mapsbridge:show-pin-detail", open);
+  }, []);
 
-  const handleAddFoundPlace = (target: "trip" | "general") => {
-    if (!foundPlace) return;
-    const targetDay = activeDayIndex && activeDayIndex > 0 ? activeDayIndex : 1;
-    const pinData = {
-      label: foundPlace.label || foundPlace.address.split(",")[0] || "Yeni Rota Durağı",
-      address: foundPlace.address,
-      lat: foundPlace.lat,
-      lng: foundPlace.lng,
+  const addPlace = (place: Place, target: "trip" | "general") => {
+    const pin = {
+      label: place.label || place.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
+      address: place.address,
+      lat: place.lat,
+      lng: place.lng,
       category: "genel" as PinCategory,
       dayIndex: target === "trip" ? targetDay : 0,
       group: "Genel",
       visited: false,
-      durationMinutes: 45,
+      durationMinutes: 60,
     };
     if (target === "trip") {
-      addPinDirectlyToTrip(activeTripId, pinData, targetDay);
-      showToast(`✓ "${pinData.label}" ${targetDay}. güne eklendi`);
+      addPinDirectlyToTrip(activeTripId, pin, targetDay);
+      toast.show({
+        tone: "success",
+        message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
+          .replace("{name}", pin.label)
+          .replace("{day}", String(targetDay)),
+      });
     } else {
-      addPinToGeneral(pinData);
-      showToast(`📌 "${pinData.label}" havuza kaydedildi`);
+      addPinToGeneral(pin);
+      toast.show({
+        tone: "success",
+        message: t("planner.toast.addedToPool", "“{name}” kayıtlı yerlere eklendi.").replace(
+          "{name}",
+          pin.label,
+        ),
+      });
     }
-    setFoundPlace(null);
-    setSidebarSearch("");
   };
 
-  // ── Quick Manual Pin Entry ──
-  const [showManualAdd, setShowManualAdd] = useState(false);
-
-  const handleCreateManualPin = (pinData: {
-    label: string;
-    category: PinCategory;
-    day: number;
-    duration: number;
-    note: string;
-  }) => {
-    const basePin = (activeTrip?.pins && activeTrip.pins[0]) || generalPins[0];
-    const baseLat = basePin?.lat || 41.0082;
-    const baseLng = basePin?.lng || 28.9784;
-    const offset = ((activeTrip?.pins?.length || 0) + 1) * 0.002;
-
-    const newPin: Omit<Pin, "id"> = {
-      label: pinData.label,
-      address: activeTrip?.destination ? `${activeTrip.destination} civarı` : "Konum",
-      lat: baseLat + offset,
-      lng: baseLng + offset,
-      category: pinData.category,
-      dayIndex: pinData.day,
-      order: (activeTrip?.pins?.length || 0) + 1,
-      group: "Genel",
-      visited: false,
-      durationMinutes: pinData.duration,
-      note: pinData.note || undefined,
-    };
-
-    addPinDirectlyToTrip(activeTripId, newPin, pinData.day);
-    showToast(`✓ "${pinData.label}" ${pinData.day}. güne eklendi`);
+  // Gün içi sıra değişimi (klavye alternatifi, R9).
+  const moveStop = (dayPins: Pin[], pin: Pin, direction: "up" | "down") => {
+    const index = dayPins.findIndex((p) => p.id === pin.id);
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || target < 0 || target >= dayPins.length) return;
+    const other = dayPins[target];
+    updatePinAnywhere(pin.id, { order: other.order || target + 1 });
+    updatePinAnywhere(other.id, { order: pin.order || index + 1 });
+    toast.show({
+      tone: "info",
+      message: (direction === "up"
+        ? t("planner.toast.movedUp", "“{name}” bir üst sıraya taşındı.")
+        : t("planner.toast.movedDown", "“{name}” bir alt sıraya taşındı.")
+      ).replace("{name}", pin.label),
+    });
   };
 
-  // ── Reorder Pins Up / Down in Edit Mode ──
-  const handleMovePinOrder = (pin: Pin, direction: "up" | "down") => {
-    if (!activeTrip || !activeTrip.pins) return;
-    const currentDayPins = [...filteredPins];
-    const currentIndex = currentDayPins.findIndex((p) => p.id === pin.id);
-    if (currentIndex === -1) return;
+  // Gösterilecek günler: tek gün ya da "Tümü" görünümünde her gün kendi başlığıyla.
+  const sections = useMemo(() => {
+    if (!activeTrip) return [];
+    const days =
+      activeDayIndex && activeDayIndex > 0
+        ? activeTrip.days.filter((d) => d.dayIndex === activeDayIndex)
+        : activeTrip.days;
+    return days.map((d) => {
+      const pins =
+        activeDayIndex && activeDayIndex > 0
+          ? pinsWithTime
+          : activeTrip.pins
+              .filter((p) => p.dayIndex === d.dayIndex)
+              .sort((a, b) => a.order - b.order);
+      return { day: d, pins, timeline: dayTimeline(pins, activeRouteLegs, d.startTime) };
+    });
+  }, [activeTrip, activeDayIndex, pinsWithTime, activeRouteLegs]);
 
-    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= currentDayPins.length) return;
+  const visitedCount = pinsWithTime.filter((p) => p.visited).length;
+  const allPins = activeTrip?.pins ?? [];
 
-    const currentOrder = pin.order || currentIndex + 1;
-    const targetPin = currentDayPins[targetIndex];
-    const targetOrder = targetPin.order || targetIndex + 1;
+  if (selectedPin && showDetail) {
+    return (
+      <PinDetail
+        planner={planner}
+        pin={selectedPin}
+        mode={mode}
+        onBack={() => setShowDetail(false)}
+        onRequireAuth={onRequireAuth}
+      />
+    );
+  }
 
-    updatePinAnywhere(pin.id, { order: targetOrder });
-    updatePinAnywhere(targetPin.id, { order: currentOrder });
-    showToast("✓ Durak sırası güncellendi");
-  };
+  return (
+    <div className="planner-list">
+      <div className="planner-days" role="group" aria-label={t("planner.days", "Günler")}>
+        <button
+          type="button"
+          className="planner-days__tab"
+          aria-pressed={!activeDayIndex}
+          onClick={() => setActiveDayIndex(0)}
+        >
+          {t("planner.days.all", "Tümü")}
+          <span className="planner-days__count">{allPins.length}</span>
+        </button>
+        {(activeTrip?.days ?? []).map((d) => (
+          <button
+            key={d.dayIndex}
+            type="button"
+            className="planner-days__tab"
+            aria-pressed={activeDayIndex === d.dayIndex}
+            onClick={() => setActiveDayIndex(d.dayIndex)}
+          >
+            <span
+              className="planner-days__dot trip-day-color"
+              data-day={dayColorIndex(d.dayIndex)}
+              aria-hidden="true"
+            />
+            {t("planner.days.day", "{n}. Gün").replace("{n}", String(d.dayIndex))}
+            <span className="planner-days__count">
+              {allPins.filter((p) => p.dayIndex === d.dayIndex).length}
+            </span>
+          </button>
+        ))}
+        <IconButton
+          icon="plus"
+          size="sm"
+          label={t("planner.days.add", "Gün ekle")}
+          onClick={() => {
+            addDay();
+            toast.show({
+              tone: "success",
+              message: t("planner.toast.dayAdded", "Yeni gün eklendi."),
+            });
+          }}
+        />
+      </div>
 
-  // ── 1-Click Google Maps Integration (Durak Sıralı Aktarım) ──────
-  const handleExportToGoogleMaps = () => {
-    const rawStops =
-      pinsWithTime && pinsWithTime.length > 0 ? pinsWithTime : activeTrip?.pins || [];
-    const res = exportTripToGoogleMaps(rawStops);
-    showToast(res.message);
-  };
+      <SegmentedControl
+        className="planner-list__mode"
+        label={t("planner.mode.label", "Görünüm")}
+        options={[
+          { value: "edit", label: t("planner.mode.edit", "Düzenle") },
+          { value: "travel", label: t("planner.mode.travel", "Gezi modu") },
+        ]}
+        value={workspaceMode}
+        onChange={setWorkspaceMode}
+      />
 
-  // ── AI Route Modifier Agent with Versioning ────────────────
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [_isAiModifying, setIsAiModifying] = useState(false);
-  const [_showAiInput, setShowAiInput] = useState(false);
-  const [routeVersions, setRouteVersions] = useState<
-    { id: string; versionNum: number; label: string; prompt?: string; stops: Pin[] }[]
-  >([]);
-  const [_activeVersionNum, setActiveVersionNum] = useState<number>(1);
+      {workspaceMode === "edit" ? (
+        <PlaceSearch
+          onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}
+          onAdd={addPlace}
+        />
+      ) : (
+        <div className="planner-travel">
+          <p className="planner-travel__progress-label" id="planner-progress">
+            {t("planner.travel.progress", "{done} / {total} durak tamamlandı")
+              .replace("{done}", String(visitedCount))
+              .replace("{total}", String(pinsWithTime.length))}
+          </p>
+          <progress
+            className="planner-travel__progress"
+            aria-labelledby="planner-progress"
+            max={Math.max(1, pinsWithTime.length)}
+            value={visitedCount}
+          />
+          <div className="planner-travel__actions">
+            <Button
+              size="sm"
+              variant="secondary"
+              iconStart={<Icon name="external" size={16} />}
+              onClick={() => {
+                const res = exportTripToGoogleMaps(
+                  pinsWithTime.length > 0 ? pinsWithTime : allPins,
+                );
+                toast.show({
+                  tone: res.success ? "success" : "warning",
+                  message: res.message.replace(/^[^\p{L}\p{N}]+/u, ""),
+                });
+              }}
+            >
+              {t("planner.travel.googleMaps", "Google Haritalar'da aç")}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              iconStart={<Icon name="copy" size={16} />}
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("mapsbridge:open-trip-manifesto"))
+              }
+            >
+              {t("planner.travel.summary", "Seyahat özeti (.md)")}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              iconStart={<Icon name="locate" size={16} />}
+              onClick={() => {
+                const next = pinsWithTime.find((p) => !p.visited);
+                if (next) {
+                  setSelectedPinId(next.id);
+                  onFlyToPin?.(next);
+                } else {
+                  toast.show({
+                    tone: "success",
+                    message: t("planner.toast.allDone", "Tüm duraklar tamamlandı."),
+                  });
+                }
+              }}
+            >
+              {t("planner.travel.next", "Sıradaki durak")}
+            </Button>
+          </div>
+        </div>
+      )}
 
-  // "AI'ya Sor" — seçili mekan hakkında anlık soru-cevap.
-  // I1: LLM olgu uydurmaz; soruyu mekan verisiyle (ad/adres/kategori/koordinat) besliyoruz,
-  // endpoint kendi grounding/retrieval katmanını uygular.
-  const [askPlaceQuestion, setAskPlaceQuestion] = useState("");
-  const [askPlaceAnswer, setAskPlaceAnswer] = useState<string | null>(null);
-  const [askPlaceLoading, setAskPlaceLoading] = useState(false);
-  const handleAskAboutPlace = async (pin: Pin) => {
-    const q = askPlaceQuestion.trim();
-    if (!q) return;
-    if (guardGuest("AI'ya Sor", "Mekan hakkında yapay zekaya soru sormak için")) return;
-    setAskPlaceLoading(true);
-    setAskPlaceAnswer(null);
+      {selectedMapPoint && (
+        <PlaceCard
+          eyebrow={t("planner.point.eyebrow", "Haritadan seçildi")}
+          place={{
+            ...selectedMapPoint,
+            label: selectedMapPoint.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
+          }}
+          day={targetDay}
+          onAdd={(target) => {
+            addPlace(
+              {
+                ...selectedMapPoint,
+                label:
+                  selectedMapPoint.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
+              },
+              target,
+            );
+            onClearSelectedMapPoint?.();
+          }}
+          onClose={() => onClearSelectedMapPoint?.()}
+        />
+      )}
+
+      {sections.map(({ day, pins, timeline }) => (
+        <section
+          key={day.dayIndex}
+          className="planner-day"
+          aria-labelledby={`planner-day-${day.dayIndex}`}
+        >
+          <div id={`planner-day-${day.dayIndex}`}>
+            <DayHeader
+              title={t("planner.days.day", "{n}. Gün").replace("{n}", String(day.dayIndex))}
+              eyebrow={activeTrip?.destination || undefined}
+              stops={pins.length}
+              meters={timeline && pins.length > 1 ? timeline.travelMeters : undefined}
+              minutes={
+                timeline && pins.length > 1
+                  ? timeline.travelMinutes +
+                    pins.reduce((sum, p) => sum + (p.durationMinutes ?? 60), 0)
+                  : undefined
+              }
+              offline
+            />
+          </div>
+          {pins.length === 0 ? (
+            <EmptyState
+              icon="map"
+              level={4}
+              title={t("planner.day.empty", "Bu günde henüz durak yok")}
+              description={t(
+                "planner.day.emptyHint",
+                "Mekan ara ya da haritaya dokunarak durak ekle.",
+              )}
+            />
+          ) : (
+            <ol className="planner-stops">
+              {pins.map((pin, index) => {
+                const prev = index > 0 ? pins[index - 1] : null;
+                const leg = prev ? activeRouteLegs[legKey(prev.id, pin.id)] : undefined;
+                const meta = DEFAULT_CATEGORY_META[pin.category] ?? DEFAULT_CATEGORY_META.genel;
+                return (
+                  <Fragment key={pin.id}>
+                    {prev && (
+                      <li className="planner-stops__connector">
+                        <Connector
+                          mode={connectorMode}
+                          minutes={leg ? Math.round(leg.durationSeconds / 60) : undefined}
+                          meters={leg ? leg.distanceMeters : undefined}
+                        />
+                      </li>
+                    )}
+                    <li
+                      className={cx("planner-stop", pin.visited && "is-visited")}
+                      data-selected={pin.id === selectedPinId || undefined}
+                    >
+                      <StopRow
+                        index={index + 1}
+                        day={day.dayIndex}
+                        time={timeline?.times[index]}
+                        name={pin.label}
+                        category={CATEGORY_ICON[pin.category] ?? "map"}
+                        categoryLabel={meta.label}
+                        duration={pin.durationMinutes ?? 60}
+                        selected={pin.id === selectedPinId}
+                        onMove={
+                          workspaceMode === "edit"
+                            ? (direction) => moveStop(pins, pin, direction)
+                            : undefined
+                        }
+                        isFirst={index === 0}
+                        isLast={index === pins.length - 1}
+                      />
+                      <div className="planner-stop__actions">
+                        {workspaceMode === "travel" ? (
+                          <Button
+                            size="sm"
+                            variant={pin.visited ? "secondary" : "ghost"}
+                            iconStart={<Icon name="check" size={16} />}
+                            aria-pressed={pin.visited}
+                            onClick={() => togglePinVisitedAnywhere(pin.id)}
+                          >
+                            {pin.visited
+                              ? t("planner.stop.done", "Tamamlandı")
+                              : t("planner.stop.markDone", "Tamamla")}
+                          </Button>
+                        ) : null}
+                        <IconButton
+                          icon="info"
+                          size="sm"
+                          label={`${t("planner.stop.details", "Ayrıntılar")}: ${pin.label}`}
+                          onClick={() => {
+                            setSelectedPinId(pin.id);
+                            setShowDetail(true);
+                            onFlyToPin?.(pin);
+                          }}
+                        />
+                        {workspaceMode === "edit" && (
+                          <IconButton
+                            icon="trash"
+                            size="sm"
+                            label={`${t("planner.stop.delete", "Durağı sil")}: ${pin.label}`}
+                            onClick={() => setPendingDelete(pin)}
+                          />
+                        )}
+                      </div>
+                    </li>
+                  </Fragment>
+                );
+              })}
+            </ol>
+          )}
+        </section>
+      ))}
+
+      {workspaceMode === "edit" && generalPins.length > 0 && (
+        <Accordion
+          className="planner-pool"
+          items={[
+            {
+              id: "planner-pool",
+              summary: t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
+                "{n}",
+                String(generalPins.length),
+              ),
+              content: (
+                <ul className="planner-pool__list">
+                  {generalPins.map((p) => (
+                    <li key={p.id} className="planner-pool__item">
+                      <Icon name={CATEGORY_ICON[p.category] ?? "map"} size={20} />
+                      <span className="planner-pool__text">
+                        <span className="planner-pool__name">{p.label}</span>
+                        <span className="planner-pool__address">{p.address}</span>
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          assignPinToTrip(p.id, activeTripId, targetDay);
+                          toast.show({
+                            tone: "success",
+                            message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
+                              .replace("{name}", p.label)
+                              .replace("{day}", String(targetDay)),
+                          });
+                        }}
+                      >
+                        {t("planner.pool.add", "Güne ekle")}
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              ),
+            },
+          ]}
+        />
+      )}
+
+      {footer}
+      <p className="planner-list__note">
+        {t(
+          "planner.note.osrm",
+          "Süre ve mesafeler OSRM yol ağı tahminidir; hesaplanamayan bacaklar boş kalır.",
+        )}
+      </p>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title={t("planner.stop.deleteTitle", "Durak silinsin mi?")}
+        consequence={t("planner.stop.deleteBody", "“{name}” rotadan çıkarılır.").replace(
+          "{name}",
+          pendingDelete?.label ?? "",
+        )}
+        confirmLabel={t("planner.stop.delete", "Durağı sil")}
+        onConfirm={async () => {
+          if (pendingDelete) deletePinAnywhere(pendingDelete.id);
+        }}
+        onClose={() => setPendingDelete(null)}
+      />
+    </div>
+  );
+}
+
+/** Mekan/adres arama: yazarken 400 ms sonra (≥3 karakter) öneri; otomatik yeniden deneme yok. */
+function PlaceSearch({
+  onPick,
+  onAdd,
+}: {
+  onPick: (place: Place) => void;
+  onAdd: (place: Place, target: "trip" | "general") => void;
+}) {
+  const { t } = useLocale();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Place[]>([]);
+  const [state, setState] = useState<"idle" | "loading" | "empty" | "error">("idle");
+  const [picked, setPicked] = useState<Place | null>(null);
+  const request = useRef(0);
+  const run = async (q: string) => {
+    const id = ++request.current;
+    setState("loading");
     try {
-      const requestId = crypto.randomUUID();
-      const conversationId = `ask-${pin.id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 30)}-${Date.now()}`;
-      const placeContext = `Mekan: ${pin.label}${pin.address ? ` (${pin.address})` : ""}; Kategori: ${DEFAULT_CATEGORY_META[pin.category]?.label || "Genel"}; Koordinat: ${pin.lat.toFixed(5)},${pin.lng.toFixed(5)}`;
+      const places: GeocodedPlace[] = await searchPlaces(q);
+      if (id !== request.current) return;
+      const list = places.slice(0, 5).map((p) => ({
+        lat: p.lat,
+        lng: p.lng,
+        address: p.address,
+        label: p.label || p.address.split(",")[0],
+      }));
+      setResults(list);
+      setState(list.length > 0 ? "idle" : "empty");
+    } catch (err) {
+      if (id !== request.current) return;
+      if (process.env.NODE_ENV !== "production") console.warn("Arama başarısız", err);
+      setResults([]);
+      setState("error");
+    }
+  };
+  useEffect(() => {
+    if (googleMapsEnabled) return;
+    const q = query.trim();
+    if (q.length < SEARCH_MIN) {
+      request.current++;
+      setResults([]);
+      setState("idle");
+      return;
+    }
+    const timer = window.setTimeout(() => void run(q), SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    if (googleMapsEnabled) {
+      document.getElementById("google-place-query")?.focus();
+      return;
+    }
+    const q = query.trim();
+    if (q.length >= SEARCH_MIN) void run(q);
+  };
+  const pick = (place: Place) => {
+    setPicked(place);
+    setResults([]);
+    onPick(place);
+  };
+  return (
+    <div className="planner-search">
+      <form className="planner-search__form" role="search" onSubmit={submit} noValidate>
+        <Field
+          className="planner-search__field"
+          label={t("planner.search.label", "Mekan ya da adres ara")}
+          hint={t(
+            "planner.search.hint",
+            "En az 3 harf yaz; haritaya dokunarak da durak ekleyebilirsin.",
+          )}
+        >
+          {(ids) => (
+            <Input
+              {...ids}
+              type="search"
+              value={query}
+              maxLength={120}
+              autoComplete="off"
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          )}
+        </Field>
+        <Button type="submit" variant="secondary" loading={state === "loading"}>
+          {t("planner.search.submit", "Ara")}
+        </Button>
+      </form>
+      <div role="status" className="planner-search__status">
+        {state === "empty" && t("planner.search.empty", "Sonuç bulunamadı.")}
+      </div>
+      {state === "error" && (
+        <Alert tone="warning">
+          <span>{t("planner.search.error", "Arama şu an yanıt vermiyor.")}</span>{" "}
+          <Button size="sm" variant="link" onClick={() => void run(query.trim())}>
+            {t("ui.retry", "Tekrar dene")}
+          </Button>
+        </Alert>
+      )}
+      {results.length > 0 && (
+        <ul
+          className="planner-search__results"
+          aria-label={t("planner.search.results", "Arama sonuçları")}
+        >
+          {results.map((r) => (
+            <li key={`${r.lat},${r.lng},${r.label}`}>
+              <button type="button" className="planner-search__result" onClick={() => pick(r)}>
+                <Icon name="map" size={16} />
+                <span className="planner-search__result-text">
+                  <span className="planner-search__result-name">{r.label}</span>
+                  <span className="planner-search__result-address">{r.address}</span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {picked && (
+        <PlaceCard
+          eyebrow={t("planner.search.found", "Arama sonucu")}
+          place={picked}
+          onAdd={(target) => {
+            onAdd(picked, target);
+            setPicked(null);
+            setQuery("");
+          }}
+          onClose={() => setPicked(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function PlaceCard({
+  eyebrow,
+  place,
+  day,
+  onAdd,
+  onClose,
+}: {
+  eyebrow: string;
+  place: Place;
+  day?: number;
+  onAdd: (target: "trip" | "general") => void;
+  onClose: () => void;
+}) {
+  const { t } = useLocale();
+  return (
+    <div className="planner-place" data-surface="default">
+      <div className="planner-place__head">
+        <p className="planner-place__eyebrow">{eyebrow}</p>
+        <IconButton icon="x" size="sm" label={t("ui.close", "Kapat")} onClick={onClose} />
+      </div>
+      <p className="planner-place__name">{place.label}</p>
+      <p className="planner-place__address">{place.address}</p>
+      <div className="planner-place__actions">
+        <Button
+          size="sm"
+          variant="primary"
+          iconStart={<Icon name="plus" size={16} />}
+          onClick={() => onAdd("trip")}
+        >
+          {day
+            ? t("planner.place.addToDayN", "{n}. güne ekle").replace("{n}", String(day))
+            : t("planner.place.addToDay", "Güne ekle")}
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          iconStart={<Icon name="bookmark" size={16} />}
+          onClick={() => onAdd("general")}
+        >
+          {t("planner.place.addToPool", "Kayıtlı yerlere ekle")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** Seçili durak ayrıntısı + düzenleme (mevcut özellikler; emoji yerine Icon, primitive'ler). */
+function PinDetail({
+  planner,
+  pin,
+  mode,
+  onBack,
+  onRequireAuth,
+}: {
+  planner: Planner;
+  pin: Pin;
+  mode: PlannerMode;
+  onBack: () => void;
+  onRequireAuth: (reason: "ai" | "save") => void;
+}) {
+  const { t } = useLocale();
+  const toast = useToast();
+  const { trips, generalPins, updatePinAnywhere, deletePinAnywhere, togglePinVisitedAnywhere } =
+    planner;
+  const [editing, setEditing] = useState(false);
+  const [label, setLabel] = useState(pin.label);
+  const [category, setCategory] = useState<PinCategory>(pin.category);
+  const [note, setNote] = useState(pin.note ?? "");
+  const [duration, setDuration] = useState(pin.durationMinutes ?? 60);
+  const [tripId, setTripId] = useState(pin.tripId ?? "general");
+  const [dayIndex, setDayIndex] = useState(pin.dayIndex || 0);
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const meta = DEFAULT_CATEGORY_META[pin.category] ?? DEFAULT_CATEGORY_META.genel;
+  const inPool = generalPins.some((p) => p.id === pin.id || p.label === pin.label);
+  const trip = pin.tripId ? trips.find((x) => x.id === pin.tripId) : null;
+  const photos = pin.photos?.length ? pin.photos : pin.photo ? [pin.photo] : [];
+
+  useEffect(() => {
+    setEditing(false);
+    setLabel(pin.label);
+    setCategory(pin.category);
+    setNote(pin.note ?? "");
+    setDuration(pin.durationMinutes ?? 60);
+    setTripId(pin.tripId ?? "general");
+    setDayIndex(pin.dayIndex || 0);
+    setAnswer(null);
+    setQuestion("");
+  }, [pin.id]);
+
+  const addPhoto = (src: string) => {
+    if (!src.trim()) return;
+    const current = [...photos];
+    if (!current.includes(src)) current.push(src);
+    updatePinAnywhere(pin.id, { photo: current[0], photos: current });
+    setPhotoUrl("");
+    toast.show({ tone: "success", message: t("planner.toast.photoAdded", "Fotoğraf eklendi.") });
+  };
+
+  // "AI'ya sor": I1 — soru mekan verisiyle (ad/adres/kategori/koordinat) beslenir; uç kendi
+  // grounding katmanını uygular. Misafirde ağ çağrısı yok, AuthGate (design §6.3).
+  const ask = async () => {
+    const q = question.trim();
+    if (!q) return;
+    if (mode === "guest") {
+      onRequireAuth("ai");
+      return;
+    }
+    setAsking(true);
+    setAnswer(null);
+    try {
+      const context = `Mekan: ${pin.label}${pin.address ? ` (${pin.address})` : ""}; Kategori: ${meta.label}; Koordinat: ${pin.lat.toFixed(5)},${pin.lng.toFixed(5)}`;
       const res = await apiFetch<MultiAgentResponse>("/ai/route-planner", {
         method: "POST",
         timeoutMs: 35000,
         body: JSON.stringify({
-          prompt: `${placeContext}. Soru: ${q}`,
-          requestId,
-          conversationId,
+          prompt: `${context}. Soru: ${q}`,
+          requestId: crypto.randomUUID(),
+          conversationId: `ask-${pin.id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 30)}-${Date.now()}`,
           conversationState: {
             version: 1,
             context: { planningRequested: false },
@@ -310,1961 +829,392 @@ export function TravelPlannerSidebar({
           },
         }),
       });
-      const answer = res?.orchestratorSummary?.trim();
-      if (answer) {
-        setAskPlaceAnswer(answer);
-      } else {
-        setAskPlaceAnswer(
-          "Bu mekan için şu an yeterli veri bulamadım. Farklı bir soru deneyebilirsiniz.",
-        );
-      }
-    } catch {
-      setAskPlaceAnswer("⚠ Yapay zekaya ulaşılamadı. Lütfen biraz sonra tekrar deneyin.");
-    } finally {
-      setAskPlaceLoading(false);
-    }
-  };
-
-  // Seçili pin değişince AI'ya Sor cevabını temizle (cevaplar pinler arası sızmasın).
-  useEffect(() => {
-    setAskPlaceAnswer(null);
-    setAskPlaceQuestion("");
-  }, [selectedPinId]);
-  // Initialize v1 when activeTrip changes
-  useEffect(() => {
-    if (activeTrip && activeTrip.pins) {
-      setRouteVersions([
-        {
-          id: `v1_${activeTrip.id}`,
-          versionNum: 1,
-          label: "v1 (Orijinal)",
-          stops: [...activeTrip.pins],
-        },
-      ]);
-      setActiveVersionNum(1);
-    }
-  }, [activeTrip?.id]);
-
-  const _handleAiModifyRoute = async (customPrompt?: string) => {
-    const promptText = (customPrompt || aiPrompt).trim();
-    if (!promptText) return;
-    if (guardGuest("AI ile Rota Düzenleme", "Yapay zeka ile rotanızı yeniden düzenlemek için"))
-      return;
-    if (!activeTrip) {
-      showToast("⚠️ Lütfen önce aktif bir gezi seçin.");
-      return;
-    }
-
-    setIsAiModifying(true);
-    showToast("🤖 Yapay zeka rotanızı analiz edip düzenliyor...");
-
-    try {
-      const currentRoute = tripToRoute(activeTrip);
-      const requestId = crypto.randomUUID();
-      const conversationId = `map-${activeTrip.id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 30)}-${Date.now()}`;
-
-      const res = await apiFetch<MultiAgentResponse>("/ai/route-planner", {
-        method: "POST",
-        timeoutMs: 35000,
-        body: JSON.stringify({
-          prompt: `${activeTrip.destination || activeTrip.title || "Şehir"}: ${promptText}`,
-          requestId,
-          conversationId,
-          conversationState: {
-            version: routeVersions.length + 1,
-            context: {
-              destination: activeTrip.destination || activeTrip.title,
-              days: activeTrip.days?.length || 1,
-              interests: [],
-              planningRequested: true,
-            },
-            route: currentRoute,
-            messages: [{ role: "user", content: `Mevcut rotamı düzenle: ${promptText}` }],
-          },
-        }),
-      });
-
-      if (res && res.route && isRoutePlan(res.route)) {
-        const updatedTrip = routeToTrip(res.route, activeTrip.id);
-        importTrip(updatedTrip);
-
-        const nextVerNum = routeVersions.length + 1;
-        setRouteVersions((prev) => [
-          ...prev,
-          {
-            id: `v${nextVerNum}_${activeTrip.id}`,
-            versionNum: nextVerNum,
-            label: `v${nextVerNum} (AI Düzenleme)`,
-            prompt: promptText,
-            stops: updatedTrip.pins,
-          },
-        ]);
-        setActiveVersionNum(nextVerNum);
-        showToast(
-          `✨ ${res.orchestratorSummary?.slice(0, 75) || "Rotanız yapay zeka ile güncellendi!"}`,
-        );
-        setAiPrompt("");
-        setShowAiInput(false);
-      } else if (res && res.orchestratorSummary) {
-        showToast(`ℹ️ ${res.orchestratorSummary.slice(0, 90)}`);
-      } else {
-        throw new Error("AI rotayı güncelleyemedi.");
-      }
-    } catch (err: unknown) {
-      console.warn("AI modify error:", err);
-      showToast(
-        `⚠️ ${err instanceof Error ? err.message : "AI yanıt veremedi. Lütfen tekrar deneyin."}`,
+      setAnswer(
+        res?.orchestratorSummary?.trim() ||
+          t("planner.ask.noData", "Bu mekan için şu an yeterli veri bulamadım."),
       );
+    } catch {
+      setAnswer(t("planner.ask.failed", "Asistana ulaşılamadı. Biraz sonra tekrar dene."));
     } finally {
-      setIsAiModifying(false);
+      setAsking(false);
     }
   };
 
-  const _handleSwitchVersion = (verNum: number) => {
-    const target = routeVersions.find((v) => v.versionNum === verNum);
-    if (target && activeTrip) {
-      importTrip({
-        ...activeTrip,
-        pins: target.stops,
-      });
-      setActiveVersionNum(verNum);
-      showToast(`✓ Versiyon ${verNum} aktifleştirildi`);
-    }
-  };
-
-  // Sync edit form state whenever selectedPin changes
-  useEffect(() => {
-    if (selectedPin) {
-      setEditLabel(selectedPin.label);
-      setEditCategory(selectedPin.category);
-      setEditGroup(selectedPin.group || "Genel");
-      setEditNote(selectedPin.note || "");
-      setEditDuration(selectedPin.durationMinutes || 60);
-      setEditTargetTripId(selectedPin.tripId || "general");
-      setEditTargetDayIndex(selectedPin.dayIndex || 0);
-      setEditPhotoUrl("");
-      setDetailTab("info");
-      setPanelCollapsed(false);
-      setIsMobileExpanded(true);
-      setShowInPanelDetail(true);
-
-      interactionTracker.logPinClick({
-        id: selectedPin.id,
-        label: selectedPin.label,
-        category: selectedPin.category,
-        address: selectedPin.address,
-        lat: selectedPin.lat,
-        lng: selectedPin.lng,
-        tripId: selectedPin.tripId,
-        dayIndex: selectedPin.dayIndex,
-      });
-      interactionTracker.logPlaceView({
-        label: selectedPin.label,
-        placeId: selectedPin.googlePlaceId,
-        category: selectedPin.category,
-        source: "map_pin",
-      });
-    }
-  }, [selectedPin?.id]);
-
-  useEffect(() => {
-    const handleShowDetail = () => {
-      setShowInPanelDetail(true);
-      setPanelCollapsed(false);
-      setDetailTab("info");
-      setIsMobileExpanded(true);
-    };
-    window.addEventListener("mapsbridge:show-pin-detail", handleShowDetail);
-    return () => window.removeEventListener("mapsbridge:show-pin-detail", handleShowDetail);
-  }, []);
-
-  // Handle saving pin edits
-  const handleSavePinEdit = (e: React.FormEvent) => {
+  const save = (e: FormEvent) => {
     e.preventDefault();
-    if (guardGuest("Durak Düzenleme", "Durak bilgilerini özelleştirmek için lütfen üye olun."))
-      return;
-    if (!selectedPin) return;
-
-    const photos = [...(selectedPin.photos || [])];
-    if (selectedPin.photo && !photos.includes(selectedPin.photo)) {
-      photos.unshift(selectedPin.photo);
-    }
-    if (editPhotoUrl.trim() && !photos.includes(editPhotoUrl.trim())) {
-      photos.push(editPhotoUrl.trim());
-    }
-
-    updatePinAnywhere(selectedPin.id, {
-      label: editLabel.trim() || selectedPin.label,
-      category: editCategory,
-      group: editGroup || "Genel",
-      note: editNote.trim() || undefined,
-      durationMinutes: Number(editDuration) || 60,
-      photo: photos[0] || undefined,
-      photos: photos.length > 0 ? photos : undefined,
+    updatePinAnywhere(pin.id, {
+      label: label.trim() || pin.label,
+      category,
+      note: note.trim() || undefined,
+      durationMinutes: Number(duration) || 60,
     });
-
-    if (editTargetTripId === "general") {
-      if (selectedPin.tripId) {
-        movePinToGeneral(selectedPin.id);
-      }
+    if (tripId === "general") {
+      if (pin.tripId) planner.movePinToGeneral(pin.id);
     } else {
-      assignPinToTrip(selectedPin.id, editTargetTripId, editTargetDayIndex);
+      planner.assignPinToTrip(pin.id, tripId, dayIndex);
     }
-
-    setDetailTab("info");
-    showToast("✓ Değişiklikler kaydedildi");
+    setEditing(false);
+    toast.show({ tone: "success", message: t("planner.toast.saved", "Değişiklikler kaydedildi.") });
   };
-
-  const handleAddPhotoToPin = (photoSrc: string) => {
-    if (guardGuest("Fotoğraf Ekleme", "Duraklara fotoğraf eklemek için lütfen üye olun.")) return;
-    if (!selectedPin || !photoSrc.trim()) return;
-    const current = [...(selectedPin.photos || [])];
-    if (selectedPin.photo && !current.includes(selectedPin.photo)) {
-      current.unshift(selectedPin.photo);
-    }
-    if (!current.includes(photoSrc)) {
-      current.push(photoSrc);
-    }
-    updatePinAnywhere(selectedPin.id, {
-      photo: current[0],
-      photos: current,
-    });
-    setInfoNewPhotoUrl("");
-    showToast("📷 Fotoğraf eklendi");
-  };
-
-  const handleRemovePhoto = (photoIdx: number) => {
-    if (!selectedPin || !selectedPin.photos) return;
-    const updated = selectedPin.photos.filter((_, idx) => idx !== photoIdx);
-    updatePinAnywhere(selectedPin.id, {
-      photo: updated[0] || undefined,
-      photos: updated.length > 0 ? updated : undefined,
-    });
-    showToast("Fotoğraf kaldırıldı");
-  };
-
-  const handleCopyShare = (pin: Pin) => {
-    const url = `${window.location.origin}/desk/?lat=${pin.lat.toFixed(5)}&lng=${pin.lng.toFixed(5)}&label=${encodeURIComponent(pin.label)}`;
-    if (navigator?.clipboard) {
-      navigator.clipboard.writeText(url);
-    }
-    showToast("📋 Konum bağlantısı kopyalandı");
-  };
-
-  // Filtered stops in active day/route
-  const filteredPins = useMemo(() => {
-    return pinsWithTime.filter((p) => {
-      if (categoryFilter !== "all") {
-        if (categoryFilter === "kahve" && p.category !== "kahve") return false;
-        if (
-          categoryFilter === "gastronomi" &&
-          p.category !== "gastronomi" &&
-          p.category !== "yemek"
-        )
-          return false;
-        if (categoryFilter === "tarih" && p.category !== "tarih" && p.category !== "muze")
-          return false;
-        if (categoryFilter === "alisveris" && p.category !== "alisveris") return false;
-        if (categoryFilter === "spor" && p.category !== "spor" && p.category !== "aktivite")
-          return false;
-        if (
-          categoryFilter === "gezi" &&
-          p.category !== "gezi" &&
-          p.category !== "gezilecek" &&
-          p.category !== "turistik"
-        )
-          return false;
-      }
-      return true;
-    });
-  }, [pinsWithTime, categoryFilter]);
 
   return (
-    <aside
-      className={`travel-planner-panel ${isCollapsed ? "is-collapsed" : "is-expanded"} ${
-        isMobileExpanded ? "mobile-expanded" : "mobile-collapsed"
-      }`}
-      aria-label="Seyahat Haritası"
-    >
-      {/* Mobile Drag Handle */}
-      <button
-        type="button"
-        aria-expanded={isMobileExpanded}
-        className="mobile-sheet-drag-handle"
-        onClick={() => setIsMobileExpanded(!isMobileExpanded)}
-      >
-        <span className="drag-bar" />
-        <span className="mobile-handle-text">
-          {isMobileExpanded ? "Haritayı Göster ▼" : "Harita Planı ▲"}
-        </span>
-      </button>
-
-      {/* Floating Notification Toast */}
-      {toastMessage && (
-        <div className="panel-floating-toast" role="status">
-          {toastMessage}
+    <div className="planner-detail">
+      <div className="planner-detail__nav">
+        <Button
+          size="sm"
+          variant="ghost"
+          iconStart={<Icon name="chevron-left" size={16} />}
+          onClick={onBack}
+        >
+          {t("planner.detail.back", "Listeye dön")}
+        </Button>
+      </div>
+      <div className="planner-detail__head">
+        <p className="planner-detail__category">
+          <Icon name={CATEGORY_ICON[pin.category] ?? "map"} size={16} />
+          {meta.label}
+        </p>
+        <h3 className="planner-detail__name">{pin.label}</h3>
+        {pin.address && <p className="planner-detail__address">{pin.address}</p>}
+        <div className="planner-detail__badges">
+          <Badge>
+            <Icon name="clock" size={16} />
+            {t("planner.detail.duration", "{n} dk planlı").replace(
+              "{n}",
+              String(pin.durationMinutes ?? 60),
+            )}
+          </Badge>
+          <Badge>
+            <Icon name="route" size={16} />
+            {trip
+              ? t("planner.detail.inTrip", "{trip} · {n}. Gün")
+                  .replace("{trip}", trip.title)
+                  .replace("{n}", String(pin.dayIndex))
+              : t("planner.detail.inPool", "Kayıtlı yerler")}
+          </Badge>
+          {pin.isLocked && pin.fixedTime && (
+            <Badge>
+              <Icon name="lock" size={16} />
+              {pin.fixedTime}
+            </Badge>
+          )}
         </div>
-      )}
-
-      {/* ── COLLAPSED RAIL VIEW ── */}
-      <div className="travel-planner-rail" aria-hidden={!isCollapsed}>
-        <button
-          type="button"
-          className="rail-action-btn rail-expand-toggle"
-          onClick={() => setPanelCollapsed(false)}
-          title="Harita Planını Aç"
+      </div>
+      <div className="planner-detail__actions">
+        <Button
+          size="sm"
+          variant={pin.visited ? "secondary" : "ghost"}
+          iconStart={<Icon name="check" size={16} />}
+          aria-pressed={pin.visited}
+          onClick={() => togglePinVisitedAnywhere(pin.id)}
         >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            left_panel_open
-          </span>
-          <span className="rail-label">Aç</span>
-        </button>
-
-        <div className="rail-divider" />
-
-        <button
-          type="button"
-          className="rail-action-btn active"
-          onClick={() => setPanelCollapsed(false)}
-          title="Harita Planı"
+          {pin.visited
+            ? t("planner.stop.done", "Tamamlandı")
+            : t("planner.stop.markDone", "Tamamla")}
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          iconStart={<Icon name="bookmark" size={16} />}
+          disabled={inPool}
+          onClick={() => {
+            planner.addPinToGeneral({
+              label: pin.label,
+              lat: pin.lat,
+              lng: pin.lng,
+              category: pin.category,
+              address: pin.address,
+              note: pin.note,
+              group: "Genel",
+              durationMinutes: pin.durationMinutes,
+              dayIndex: 0,
+              visited: false,
+            });
+            toast.show({
+              tone: "success",
+              message: t("planner.toast.addedToPool", "“{name}” kayıtlı yerlere eklendi.").replace(
+                "{name}",
+                pin.label,
+              ),
+            });
+          }}
         >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            explore
-          </span>
-          <span className="rail-label">Plan</span>
-        </button>
+          {inPool
+            ? t("planner.detail.inPoolDone", "Kayıtlı")
+            : t("planner.place.addToPool", "Kayıtlı yerlere ekle")}
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          iconStart={<Icon name="edit" size={16} />}
+          onClick={() => setEditing((v) => !v)}
+        >
+          {t("planner.detail.edit", "Düzenle")}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          iconStart={<Icon name="trash" size={16} />}
+          onClick={() => setConfirmDelete(true)}
+        >
+          {t("planner.stop.delete", "Durağı sil")}
+        </Button>
       </div>
 
-      {/* ── EXPANDED BODY ── */}
-      <div className="travel-planner-expanded-body" aria-hidden={isCollapsed}>
-        {/* Subview: Selected Pin Details (Takeover Mode) */}
-        {selectedPin && showInPanelDetail ? (
-          <div className="pin-detail-view-container">
-            {/* Header: Back Button + Title + Close */}
-            <div className="pin-detail-nav-bar">
-              <button
-                type="button"
-                className="btn-back-link"
-                onClick={() => setShowInPanelDetail(false)}
-                title="Rotaya Geri Dön"
+      {editing ? (
+        <form className="planner-detail__form" onSubmit={save} noValidate>
+          <Field label={t("planner.edit.name", "Mekan adı")} required>
+            {(ids) => (
+              <Input
+                {...ids}
+                value={label}
+                maxLength={120}
+                onChange={(e) => setLabel(e.target.value)}
+              />
+            )}
+          </Field>
+          <Field label={t("planner.edit.category", "Kategori")}>
+            {(ids) => (
+              <Select
+                {...ids}
+                value={category}
+                onChange={(e) => setCategory(e.target.value as PinCategory)}
               >
-                ← Listeye Dön
-              </button>
-
-              <span className="pin-detail-title-trunc" title={selectedPin.label}>
-                {selectedPin.label}
-              </span>
-
-              <button
-                type="button"
-                className="btn-collapse-toggle"
-                onClick={() => setPanelCollapsed(true)}
-                title="Paneli Kapat"
-              >
-                «
-              </button>
-            </div>
-
-            {/* Sub-tabs: Info vs Edit */}
-            <div className="pin-detail-action-tabs">
-              <button
-                type="button"
-                className={`detail-tab-btn ${detailTab === "info" ? "active" : ""}`}
-                onClick={() => setDetailTab("info")}
-              >
-                ℹ️ Bilgi & Notlar
-              </button>
-              <button
-                type="button"
-                className={`detail-tab-btn ${detailTab === "edit" ? "active" : ""}`}
-                onClick={() => setDetailTab("edit")}
-              >
-                ✏️ Düzenle
-              </button>
-            </div>
-
-            {/* TAB 1: INFO & NOTLAR */}
-            {detailTab === "info" && (
-              <div className="pin-info-content">
-                <div className="info-header-box">
-                  <div className="info-top-badge-row">
-                    <span className="info-category-tag">
-                      {DEFAULT_CATEGORY_META[selectedPin.category]?.emoji || "📍"}{" "}
-                      {DEFAULT_CATEGORY_META[selectedPin.category]?.label || "Genel"}
-                    </span>
-
-                    <button
-                      type="button"
-                      className={`btn-visited-pill ${selectedPin.visited ? "is-visited" : ""}`}
-                      onClick={() => togglePinVisitedAnywhere(selectedPin.id)}
-                    >
-                      {selectedPin.visited ? "✓ Ziyaret Edildi" : "○ Ziyaret Edilmedi"}
-                    </button>
-                  </div>
-
-                  <h3 className="info-place-name">{selectedPin.label}</h3>
-                  <p className="info-address">{selectedPin.address}</p>
-
-                  {/* Sol Alanda Belirgin Paylaş ve Kaydet Butonları */}
-                  <div className="pin-primary-actions-row">
-                    <button
-                      type="button"
-                      className="btn-pin-primary-share"
-                      onClick={() => handleCopyShare(selectedPin)}
-                      title="Konumu Paylaş"
-                    >
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        share
-                      </span>
-                      <span>Paylaş</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`btn-pin-primary-save ${generalPins.some((p) => p.id === selectedPin.id || p.label === selectedPin.label) ? "is-saved" : ""}`}
-                      onClick={() => {
-                        const alreadySaved = generalPins.some(
-                          (p) => p.id === selectedPin.id || p.label === selectedPin.label,
-                        );
-                        if (alreadySaved) {
-                          showToast("📍 Bu durak zaten kayıtlı havuzunuzda mevcut.");
-                        } else {
-                          addPinToGeneral({
-                            label: selectedPin.label,
-                            lat: selectedPin.lat,
-                            lng: selectedPin.lng,
-                            category: selectedPin.category,
-                            address: selectedPin.address,
-                            note: selectedPin.note,
-                            group: "Genel",
-                            durationMinutes: selectedPin.durationMinutes,
-                            dayIndex: 0,
-                            visited: false,
-                          });
-                          showToast("✓ Durak kayıtlı adreslerinize eklendi!");
-                        }
-                      }}
-                      title="Kayıtlı Adreslerime Ekle"
-                    >
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        {generalPins.some(
-                          (p) => p.id === selectedPin.id || p.label === selectedPin.label,
-                        )
-                          ? "bookmark_added"
-                          : "bookmark_add"}
-                      </span>
-                      <span>
-                        {generalPins.some(
-                          (p) => p.id === selectedPin.id || p.label === selectedPin.label,
-                        )
-                          ? "Kaydedildi"
-                          : "Kaydet"}
-                      </span>
-                    </button>
-                  </div>
-
-                  <div className="info-meta-list">
-                    <div className="info-meta-row">
-                      <span className="info-meta-label">Planlanan Süre</span>
-                      <span className="info-meta-value">
-                        ⏱️ {selectedPin.durationMinutes || 60} dakika
-                      </span>
-                    </div>
-                    <div className="info-meta-row">
-                      <span className="info-meta-label">Bağlı Olduğu Gezi</span>
-                      <span className="info-meta-value">
-                        {selectedPin.tripId
-                          ? `🗺️ ${trips.find((t) => t.id === selectedPin.tripId)?.title || "Gezi"} (${selectedPin.dayIndex}. Gün)`
-                          : "📌 Genel Havuz"}
-                      </span>
-                    </div>
-                    {selectedPin.calculatedStartTime && selectedPin.calculatedEndTime && (
-                      <div className="info-meta-row">
-                        <span className="info-meta-label">Planlanan Zaman</span>
-                        <span className="info-meta-value">
-                          🕐 {selectedPin.calculatedStartTime}–{selectedPin.calculatedEndTime}
-                        </span>
-                      </div>
-                    )}
-                    {selectedPin.isLocked && selectedPin.fixedTime && (
-                      <div className="info-meta-row">
-                        <span className="info-meta-label">Sabit Saat</span>
-                        <span className="info-meta-value">🔒 {selectedPin.fixedTime}</span>
-                      </div>
-                    )}
-                    {typeof selectedPin.transitDurationFromPrevious === "number" &&
-                      selectedPin.transitDurationFromPrevious > 0 && (
-                        <div className="info-meta-row">
-                          <span className="info-meta-label">Önceki Duraktan</span>
-                          <span className="info-meta-value">
-                            🚶 ~{selectedPin.transitDurationFromPrevious} dk yol
-                          </span>
-                        </div>
-                      )}
-                    {selectedPin.interestTag && (
-                      <div className="info-meta-row">
-                        <span className="info-meta-label">İlgi Etiketi</span>
-                        <span className="info-meta-value">🏷 {selectedPin.interestTag}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Notlar */}
-                <div className="info-section-group">
-                  <h4 className="info-section-title">📝 Gezgin Notları</h4>
-                  {selectedPin.note ? (
-                    <div className="info-notes-quote">&quot;{selectedPin.note}&quot;</div>
-                  ) : (
-                    <div className="info-empty-note">
-                      <span>Henüz özel not eklenmemiş.</span>
-                      <button
-                        type="button"
-                        className="btn-add-note-inline"
-                        onClick={() => setDetailTab("edit")}
-                      >
-                        + Not Ekle
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* AI'ya Sor — mekan hakkında anlık soru-cevap */}
-                <div className="info-section-group">
-                  <h4 className="info-section-title">🤖 AI'ya Sor</h4>
-                  <p className="ask-ai-hint">
-                    Bu mekan hakkında merak ettiğinizi sorun. Yanıtlar mevcut mekan verisine
-                    dayanır.
-                  </p>
-                  <div className="ask-ai-input-row">
-                    <input
-                      type="text"
-                      className="ask-ai-input"
-                      placeholder="Örn: Ne zaman gitmeliyim? Çevresinde ne var?"
-                      value={askPlaceQuestion}
-                      onChange={(e) => setAskPlaceQuestion(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !askPlaceLoading) {
-                          void handleAskAboutPlace(selectedPin);
-                        }
-                      }}
-                      disabled={askPlaceLoading}
-                    />
-                    <button
-                      type="button"
-                      className="btn-ask-ai"
-                      disabled={askPlaceLoading || !askPlaceQuestion.trim()}
-                      onClick={() => void handleAskAboutPlace(selectedPin)}
-                    >
-                      {askPlaceLoading ? "…" : "Sor"}
-                    </button>
-                  </div>
-                  {askPlaceLoading && (
-                    <div className="ask-ai-loading">🤖 Yapay zeka yanıtını hazırlıyor...</div>
-                  )}
-                  {askPlaceAnswer && !askPlaceLoading && (
-                    <div className="ask-ai-answer">{askPlaceAnswer}</div>
-                  )}
-                </div>
-                {/* Fotoğraflar */}
-                <div className="info-section-group">
-                  <div className="info-photos-header">
-                    <h4 className="info-section-title">📷 Fotoğraflar</h4>
-                    <label className="btn-file-upload-label" title="Cihazdan fotoğraf seç">
-                      📁 Yükle
-                      <input
-                        type="file"
-                        accept="image/*"
-                        style={{ display: "none" }}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const reader = new FileReader();
-                          reader.onload = () => {
-                            if (typeof reader.result === "string") {
-                              handleAddPhotoToPin(reader.result);
-                            }
-                          };
-                          reader.readAsDataURL(file);
-                        }}
-                      />
-                    </label>
-                  </div>
-
-                  <div className="info-photos-grid">
-                    {selectedPin.photos && selectedPin.photos.length > 0 ? (
-                      selectedPin.photos.map((url, i) => (
-                        <div key={i} className="photo-card-item">
-                          <img
-                            src={url}
-                            alt={`${selectedPin.label} - ${i + 1}`}
-                            className="photo-thumbnail-img"
-                          />
-                          <button
-                            type="button"
-                            className="photo-remove-btn"
-                            onClick={() => handleRemovePhoto(i)}
-                            title="Fotoğrafı Kaldır"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))
-                    ) : selectedPin.photo ? (
-                      <div className="photo-card-item">
-                        <img
-                          src={selectedPin.photo}
-                          alt={selectedPin.label}
-                          className="photo-thumbnail-img"
-                        />
-                      </div>
-                    ) : (
-                      <div className="no-photos-box">
-                        <span>Fotoğraf eklenmemiş</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="add-photo-url-row">
-                    <input
-                      type="url"
-                      className="input-sm-photo"
-                      placeholder="Görsel URL yapıştır (https://...)"
-                      value={infoNewPhotoUrl}
-                      onChange={(e) => setInfoNewPhotoUrl(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="btn-sm-photo-add"
-                      disabled={!infoNewPhotoUrl.trim()}
-                      onClick={() => handleAddPhotoToPin(infoNewPhotoUrl)}
-                    >
-                      Ekle
-                    </button>
-                  </div>
-                </div>
-
-                {/* Google Maps Mekan & Yorum Bilgileri (Çok Katmanlı Önbellek) */}
-                <div
-                  className="info-section-group"
-                  style={{
-                    marginTop: "0.75rem",
-                    padding: "0.75rem",
-                    backgroundColor: "color-mix(in srgb, var(--color-surface) 3%, transparent)",
-                    borderRadius: "12px",
-                    border: "1px solid var(--color-white-a08)",
-                  }}
+                {Object.entries(DEFAULT_CATEGORY_META).map(([key, m]) => (
+                  <option key={key} value={key}>
+                    {m.label}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </Field>
+          <Field label={t("planner.edit.duration", "Planlanan süre (dk)")}>
+            {(ids) => (
+              <Input
+                {...ids}
+                type="number"
+                inputMode="numeric"
+                min={5}
+                max={600}
+                step={5}
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+              />
+            )}
+          </Field>
+          <Field label={t("planner.edit.trip", "Rota")}>
+            {(ids) => (
+              <Select {...ids} value={tripId} onChange={(e) => setTripId(e.target.value)}>
+                <option value="general">{t("planner.detail.inPool", "Kayıtlı yerler")}</option>
+                {trips.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.title}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </Field>
+          {tripId !== "general" && (
+            <Field label={t("planner.edit.day", "Gün")}>
+              {(ids) => (
+                <Select
+                  {...ids}
+                  value={dayIndex}
+                  onChange={(e) => setDayIndex(Number(e.target.value))}
                 >
-                  <GooglePlaceInfo
-                    placeId={selectedPin.googlePlaceId}
-                    label={selectedPin.label}
-                    lat={selectedPin.lat}
-                    lng={selectedPin.lng}
-                    onLink={(linkedPlaceId) => {
-                      updatePinAnywhere(selectedPin.id, { googlePlaceId: linkedPlaceId });
-                      showToast("✓ Pin Google mekanıyla eşleştirildi!");
-                    }}
-                  />
-                </div>
-
-                {/* Sil / Düzenle toolbar */}
-                <div className="info-actions-toolbar">
-                  <button
-                    type="button"
-                    className="btn-info-edit-trigger"
-                    onClick={() => setDetailTab("edit")}
-                  >
-                    ✏️ Düzenle
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-sub-action btn-danger"
-                    onClick={() => {
-                      if (
-                        confirm(`"${selectedPin.label}" pinini silmek istediğinize emin misiniz?`)
-                      ) {
-                        deletePinAnywhere(selectedPin.id);
-                        setShowInPanelDetail(false);
-                      }
-                    }}
-                  >
-                    🗑️ Pini Sil
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 2: EDIT FORM */}
-            {detailTab === "edit" && (
-              <form onSubmit={handleSavePinEdit} className="pin-edit-form">
-                <div className="form-group">
-                  <label className="form-label">Mekan İsmi</label>
-                  <input
-                    type="text"
-                    required
-                    className="form-input"
-                    value={editLabel}
-                    onChange={(e) => setEditLabel(e.target.value)}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Kategori</label>
-                  <div className="category-chips-grid">
-                    {Object.entries(DEFAULT_CATEGORY_META).map(([catKey, meta]) => (
-                      <button
-                        key={catKey}
-                        type="button"
-                        className={`cat-chip-btn ${editCategory === catKey ? "active" : ""}`}
-                        onClick={() => setEditCategory(catKey as PinCategory)}
-                      >
-                        <span>{meta.emoji}</span>
-                        <span>{meta.label}</span>
-                      </button>
+                  <option value={0}>{t("planner.edit.noDay", "Günsüz")}</option>
+                  {trips
+                    .find((x) => x.id === tripId)
+                    ?.days.map((d) => (
+                      <option key={d.dayIndex} value={d.dayIndex}>
+                        {t("planner.days.day", "{n}. Gün").replace("{n}", String(d.dayIndex))}
+                      </option>
                     ))}
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Gezi & Gün Ataması</label>
-                  <div className="form-dual-select">
-                    <select
-                      className="form-select"
-                      aria-label="Gezi"
-                      value={editTargetTripId}
-                      onChange={(e) => setEditTargetTripId(e.target.value)}
-                    >
-                      <option value="general">📌 Genel Havuz (Atanmamış)</option>
-                      {trips.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          🗺️ {t.title}
-                        </option>
-                      ))}
-                    </select>
-
-                    {editTargetTripId !== "general" && (
-                      <select
-                        className="form-select"
-                        aria-label="Gün"
-                        value={editTargetDayIndex}
-                        onChange={(e) => setEditTargetDayIndex(Number(e.target.value))}
-                      >
-                        <option value={0}>🌟 Karışık (Günsüz)</option>
-                        {trips
-                          .find((t) => t.id === editTargetTripId)
-                          ?.days.map((d) => (
-                            <option key={d.dayIndex} value={d.dayIndex}>
-                              {d.label}
-                            </option>
-                          ))}
-                      </select>
-                    )}
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Gezgin Notu</label>
-                  <textarea
-                    className="form-input form-textarea"
-                    rows={3}
-                    placeholder="Örn: Gün batımı için rezervasyon şart..."
-                    value={editNote}
-                    onChange={(e) => setEditNote(e.target.value)}
-                  />
-                </div>
-
-                <div className="form-actions-row">
-                  <button
-                    type="button"
-                    className="btn-cancel-inline"
-                    onClick={() => setDetailTab("info")}
-                  >
-                    İptal
-                  </button>
-                  <button type="submit" className="btn-save-inline">
-                    ✓ Kaydet
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        ) : (
-          /* ── MAIN WORKSPACE VIEW (Clean, Unified Stitch Design) ── */
-          <div className="planner-main-container">
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {/* 1. HEADER: TRIP SELECTOR, DUAL MODES & DAY TABS                  */}
-            {/* ════════════════════════════════════════════════════════════════ */}
-            <div className="stitch-desk-header">
-              {/* Row 1: Trip Selector + Mode Switcher + Collapse Button */}
-              <div className="stitch-desk-top-row">
-                {/* Active Trip Selector Button with Dropdown */}
-                <div className="stitch-route-selector-wrapper">
-                  <div
-                    onClick={() => setShowRouteMenu(!showRouteMenu)}
-                    className="stitch-route-selector-box"
-                    title="Rotayı değiştir veya yeni rota ekle"
-                  >
-                    <div className="stitch-route-selector-icon">
-                      <span
-                        className="material-symbols-outlined"
-                        aria-hidden="true"
-                        style={{ fontSize: "18px" }}
-                      >
-                        alt_route
-                      </span>
-                    </div>
-                    <div className="stitch-route-selector-text">
-                      <div className="stitch-route-title-wrap">
-                        <h2 className="stitch-route-title-text">
-                          {activeTrip?.title || "Yeni Seyahat Planım"}
-                        </h2>
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "16px", color: "#94a3b8" }}
-                        >
-                          {showRouteMenu ? "expand_less" : "expand_more"}
-                        </span>
-                      </div>
-                      <div className="stitch-route-sub-meta">
-                        <span className="stitch-route-count-badge">
-                          {(activeTrip?.pins || []).length} Durak
-                        </span>
-                        {activeTrip?.destination && (
-                          <>
-                            <span>•</span>
-                            <span
-                              style={{
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {activeTrip.destination}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Route Switcher Dropdown */}
-                  {showRouteMenu && (
-                    <div className="stitch-route-dropdown-menu">
-                      <div className="stitch-dropdown-head">
-                        <span>Kayıtlı Rotalarınız</span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowRouteMenu(false);
-                            setShowInlineNewTrip(true);
-                          }}
-                          className="stitch-dropdown-add-btn"
-                        >
-                          <span
-                            className="material-symbols-outlined"
-                            aria-hidden="true"
-                            style={{ fontSize: "14px" }}
-                          >
-                            add_circle
-                          </span>
-                          Yeni Rota
-                        </button>
-                      </div>
-
-                      <div className="stitch-route-list-scroll">
-                        {trips.map((t) => {
-                          const isActive = t.id === activeTripId;
-                          return (
-                            <div
-                              key={t.id}
-                              onClick={() => {
-                                switchTrip(t.id);
-                                setActiveDayIndex(0);
-                                setShowRouteMenu(false);
-                              }}
-                              className={`stitch-route-dropdown-item ${isActive ? "active" : ""}`}
-                            >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "8px",
-                                  minWidth: 0,
-                                }}
-                              >
-                                <span
-                                  className="material-symbols-outlined"
-                                  aria-hidden="true"
-                                  style={{
-                                    fontSize: "17px",
-                                    color: isActive ? "#047857" : "#94a3b8",
-                                  }}
-                                >
-                                  {isActive ? "check_circle" : "alt_route"}
-                                </span>
-                                <div
-                                  style={{ display: "flex", flexDirection: "column", minWidth: 0 }}
-                                >
-                                  <span
-                                    style={{
-                                      fontSize: "12px",
-                                      fontWeight: isActive ? 800 : 600,
-                                      color: isActive ? "#065f46" : "#334155",
-                                      whiteSpace: "nowrap",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                    }}
-                                  >
-                                    {t.title}
-                                  </span>
-                                  <span style={{ fontSize: "10px", color: "#94a3b8" }}>
-                                    {t.pins.length} Durak{" "}
-                                    {t.destination ? `• ${t.destination}` : ""}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {trips.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (
-                                      confirm(
-                                        `"${t.title}" rotasını silmek istediğinizden emin misiniz?`,
-                                      )
-                                    ) {
-                                      deleteTrip(t.id);
-                                      showToast("🗑️ Rota silindi.");
-                                    }
-                                  }}
-                                  className="stitch-icon-action-btn btn-delete"
-                                  title="Rotayı Sil"
-                                >
-                                  <span
-                                    className="material-symbols-outlined"
-                                    aria-hidden="true"
-                                    style={{ fontSize: "15px" }}
-                                  >
-                                    delete
-                                  </span>
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Controls: Collapse only */}
-                <div className="stitch-header-right-ctrls">
-                  {/* Panel Collapse Toggle */}
-                  <button
-                    type="button"
-                    className="stitch-collapse-action-btn"
-                    onClick={() => setPanelCollapsed(true)}
-                    title="Paneli Daralt"
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "16px" }}
-                    >
-                      left_panel_close
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Inline New Route Creator Drawer */}
-              {showInlineNewTrip && (
-                <div className="stitch-drawer-card">
-                  <div className="stitch-drawer-header">
-                    <span className="stitch-drawer-title">
-                      <span
-                        className="material-symbols-outlined"
-                        aria-hidden="true"
-                        style={{ fontSize: "16px" }}
-                      >
-                        add_location_alt
-                      </span>
-                      Yeni Seyahat Rotası Oluştur
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowInlineNewTrip(false)}
-                      className="stitch-icon-action-btn"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Rota Başlığı (örn: Kapadokya Keşfi)..."
-                    value={newTripTitle}
-                    onChange={(e) => setNewTripTitle(e.target.value)}
-                    className="stitch-drawer-input"
-                    autoFocus
-                  />
-                  <input
-                    type="text"
-                    placeholder="Hedef Şehir / Bölge (opsiyonel)..."
-                    value={newTripDest}
-                    onChange={(e) => setNewTripDest(e.target.value)}
-                    className="stitch-drawer-input"
-                  />
-                  <div className="stitch-drawer-actions">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowInlineNewTrip(false);
-                        setNewTripTitle("");
-                        setNewTripDest("");
-                      }}
-                      className="stitch-btn-secondary"
-                    >
-                      Vazgeç
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!newTripTitle.trim()) {
-                          showToast("Lütfen rota başlığı girin.");
-                          return;
-                        }
-                        createTrip(newTripTitle.trim(), newTripDest.trim() || undefined);
-                        showToast(`✓ "${newTripTitle.trim()}" oluşturuldu!`);
-                        setShowInlineNewTrip(false);
-                        setNewTripTitle("");
-                        setNewTripDest("");
-                      }}
-                      className="stitch-btn-primary"
-                    >
-                      Oluştur
-                    </button>
-                  </div>
-                </div>
+                </Select>
               )}
-
-              {/* Row 2: Day Tabs Bar */}
-              <div className="stitch-days-scroll-row">
-                <button
-                  type="button"
-                  className={`stitch-day-tab-pill ${activeDayIndex === 0 || activeDayIndex === null ? "active" : ""}`}
-                  data-surface={
-                    activeDayIndex === 0 || activeDayIndex === null ? "inverse" : undefined
-                  }
-                  onClick={() => setActiveDayIndex(0)}
-                  title="Tüm Günleri Göster"
-                >
-                  Tümü ({(activeTrip?.pins || []).length})
-                </button>
-                {(activeTrip?.days || []).map((d) => {
-                  const dayPinsCount = (activeTrip.pins || []).filter(
-                    (p) => p.dayIndex === d.dayIndex,
-                  ).length;
-                  const isActive = activeDayIndex === d.dayIndex;
-                  return (
-                    <button
-                      key={d.dayIndex}
-                      type="button"
-                      className={`stitch-day-tab-pill ${isActive ? "active" : ""}`}
-                      data-surface={isActive ? "inverse" : undefined}
-                      onClick={() => setActiveDayIndex(d.dayIndex)}
-                    >
-                      {d.dayIndex}. Gün ({dayPinsCount})
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  className="stitch-day-add-pill"
-                  title="Yeni Gün Ekle"
-                  onClick={() => {
-                    addDay();
-                    showToast("🗓️ Yeni gün eklendi");
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ fontSize: "14px" }}
-                  >
-                    add
-                  </span>
-                  <span>Gün</span>
-                </button>
-              </div>
-            </div>
-
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {/* 2. SEARCH & QUICK ACTION TOOLBAR (Streamlined, Single Row)       */}
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {workspaceMode === "edit" && (
-              <div className="stitch-toolbar-panel">
-                {/* Address / Place Search Input */}
-                <form
-                  className="stitch-search-input-group"
-                  onSubmit={
-                    googleMapsEnabled
-                      ? (e) => {
-                          e.preventDefault();
-                          document.getElementById("google-place-query")?.focus();
-                        }
-                      : handleSidebarSearchSubmit
-                  }
-                >
-                  <span
-                    className="material-symbols-outlined stitch-search-icon-left"
-                    aria-hidden="true"
-                  >
-                    search
-                  </span>
-                  <input
-                    type="text"
-                    className="stitch-search-input-field"
-                    placeholder="Mekan veya adres ara..."
-                    value={sidebarSearch}
-                    onChange={(e) => setSidebarSearch(e.target.value)}
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSidebarSearching}
-                    className="stitch-search-submit-btn"
-                  >
-                    {isSidebarSearching ? "..." : "Bul"}
-                  </button>
-                </form>
-
-                {/* Search Result Card */}
-                {foundPlace && (
-                  <div className="stitch-search-result-box">
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <h4
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          color: "var(--color-on-surface-brand)",
-                          margin: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        <span>📍</span>
-                        <span
-                          style={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {foundPlace.label}
-                        </span>
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setFoundPlace(null)}
-                        className="stitch-icon-action-btn"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <p
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--color-success)",
-                        margin: 0,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {foundPlace.address}
-                    </p>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        paddingTop: "4px",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleAddFoundPlace("trip")}
-                        className="stitch-btn-primary"
-                        style={{ flex: 1, padding: "5px 10px" }}
-                      >
-                        + Rotaya Ekle
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleAddFoundPlace("general")}
-                        className="stitch-btn-secondary"
-                        style={{ padding: "5px 10px" }}
-                      >
-                        📌 Havuz
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Rotayı Optimize Et */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    onRunOptimize?.();
-                    showToast("⚡ Duraklar coğrafi sıraya göre optimize ediliyor...");
-                  }}
-                  className="stitch-quick-grid-btn"
-                  style={{ width: "100%", justifyContent: "center", gap: "8px" }}
-                  title="Durakları en uygun yol sırasına göre optimize et"
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ fontSize: "15px", color: "var(--color-warning-icon)" }}
-                  >
-                    auto_fix_high
-                  </span>
-                  <span>Rotayı Optimize Et</span>
-                </button>
-
-                {/* Optional Category Filter Chips (Shown when there are stops) */}
-                {pinsWithTime.length > 0 && (
-                  <div className="stitch-chips-category-bar">
-                    {[
-                      { id: "all", label: "Tümü" },
-                      { id: "gastronomi", label: "🍽️ Yemek" },
-                      { id: "tarih", label: "🏛️ Tarih" },
-                      { id: "spor", label: "🏃 Spor" },
-                      { id: "gezi", label: "🧭 Gezi" },
-                      { id: "kahve", label: "☕ Kahve" },
-                      { id: "alisveris", label: "🛍️ Çarşı" },
-                    ].map((chip) => (
-                      <button
-                        key={chip.id}
-                        type="button"
-                        className={`stitch-category-chip-btn ${categoryFilter === chip.id ? "active" : ""}`}
-                        data-surface={categoryFilter === chip.id ? "inverse" : undefined}
-                        onClick={() => setCategoryFilter(chip.id)}
-                      >
-                        {chip.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+            </Field>
+          )}
+          <Field label={t("planner.edit.note", "Not")}>
+            {(ids) => (
+              <Textarea
+                {...ids}
+                rows={3}
+                maxLength={1000}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
             )}
+          </Field>
+          <div className="planner-detail__form-actions">
+            <Button type="button" variant="ghost" onClick={() => setEditing(false)}>
+              {t("ui.cancel", "Vazgeç")}
+            </Button>
+            <Button type="submit" variant="primary">
+              {t("planner.edit.save", "Kaydet")}
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <>
+          <section className="planner-detail__section" aria-labelledby="planner-detail-note">
+            <h4 id="planner-detail-note" className="planner-detail__title">
+              {t("planner.detail.note", "Not")}
+            </h4>
+            {pin.note ? (
+              <p className="planner-detail__text">{pin.note}</p>
+            ) : (
+              <p className="planner-detail__muted">
+                {t("planner.detail.noNote", "Henüz not yok.")}
+              </p>
+            )}
+          </section>
 
-            {/* ── Mode Toggle (always visible, below tools panel) ── */}
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                borderTop: "1px solid color-mix(in srgb, var(--color-border) 60%, transparent)",
-                marginTop: "4px",
-                paddingTop: "8px",
-                paddingLeft: "12px",
-                paddingRight: "12px",
-                paddingBottom: "4px",
+          <section className="planner-detail__section" aria-labelledby="planner-detail-ask">
+            <h4 id="planner-detail-ask" className="planner-detail__title">
+              {t("planner.ask.title", "Bu mekan hakkında sor")}
+            </h4>
+            <form
+              className="planner-detail__ask"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void ask();
               }}
             >
-              <button
-                type="button"
-                onClick={() => setWorkspaceMode("edit")}
-                className={`stitch-mode-segment-btn ${workspaceMode === "edit" ? "active" : ""}`}
-                style={{ flex: 1, justifyContent: "center" }}
-                title="Rota Düzenleme Modu"
+              <Field
+                label={t("planner.ask.label", "Sorun")}
+                hint={t("planner.ask.hint", "Yanıtlar mevcut mekan verisine dayanır.")}
               >
-                <span
-                  className="material-symbols-outlined"
-                  aria-hidden="true"
-                  style={{ fontSize: "14px" }}
-                >
-                  edit_location_alt
-                </span>
-                <span>Düzenle</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setWorkspaceMode("travel")}
-                className={`stitch-mode-segment-btn ${workspaceMode === "travel" ? "active" : ""}`}
-                style={{ flex: 1, justifyContent: "center" }}
-                title="Gezi / Navigasyon Modu"
+                {(ids) => (
+                  <Input
+                    {...ids}
+                    value={question}
+                    maxLength={300}
+                    disabled={asking}
+                    onChange={(e) => setQuestion(e.target.value)}
+                  />
+                )}
+              </Field>
+              <Button
+                type="submit"
+                variant="secondary"
+                loading={asking}
+                disabled={!question.trim()}
               >
-                <span
-                  className="material-symbols-outlined"
-                  aria-hidden="true"
-                  style={{ fontSize: "14px" }}
-                >
-                  navigation
-                </span>
-                <span>Gezi Modu</span>
-              </button>
+                {t("planner.ask.submit", "Sor")}
+              </Button>
+            </form>
+            <div role="status" className="planner-detail__answer">
+              {answer}
             </div>
+          </section>
 
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {/* WORKSPACE MODE 2: GEZİ MODU (Navigation / Progress Mode)        */}
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {workspaceMode === "travel" && (
-              <div className="stitch-toolbar-panel">
-                <div className="stitch-travel-overview-box">
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      fontSize: "12px",
-                      fontWeight: 800,
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        color: "var(--color-text)",
-                      }}
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        aria-hidden="true"
-                        style={{ fontSize: "17px", color: "var(--color-success)" }}
-                      >
-                        navigation
-                      </span>
-                      <span
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {activeTrip?.title || "Aktif Gezi"}
-                      </span>
-                    </span>
-                    <span style={{ color: "var(--color-success)", fontSize: "11px" }}>
-                      {pinsWithTime.filter((p) => p.visited).length} / {pinsWithTime.length} Durak (
-                      {pinsWithTime.length > 0
-                        ? Math.round(
-                            (pinsWithTime.filter((p) => p.visited).length / pinsWithTime.length) *
-                              100,
-                          )
-                        : 0}
-                      %)
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "6px",
-                      borderRadius: "99px",
-                      background: "var(--color-neutral-200)",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        background: "var(--color-accent)",
-                        borderRadius: "99px",
-                        transition: "width 0.3s ease",
-                        width: `${
-                          pinsWithTime.length > 0
-                            ? Math.round(
-                                (pinsWithTime.filter((p) => p.visited).length /
-                                  pinsWithTime.length) *
-                                  100,
-                              )
-                            : 0
-                        }%`,
+          <section className="planner-detail__section" aria-labelledby="planner-detail-photos">
+            <h4 id="planner-detail-photos" className="planner-detail__title">
+              {t("planner.photos.title", "Fotoğraflar")}
+            </h4>
+            {photos.length > 0 ? (
+              <ul className="planner-detail__photos">
+                {photos.map((url, i) => (
+                  <li key={`${i}-${url.slice(0, 24)}`} className="planner-detail__photo">
+                    <img
+                      src={url}
+                      alt={`${pin.label} ${i + 1}`}
+                      className="planner-detail__photo-img"
+                    />
+                    <IconButton
+                      icon="x"
+                      size="sm"
+                      variant="secondary"
+                      label={t("planner.photos.remove", "Fotoğrafı kaldır")}
+                      onClick={() => {
+                        const next = photos.filter((_, idx) => idx !== i);
+                        updatePinAnywhere(pin.id, {
+                          photo: next[0] || undefined,
+                          photos: next.length ? next : undefined,
+                        });
                       }}
                     />
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      paddingTop: "4px",
-                    }}
-                  >
-                    <span style={{ fontSize: "11px", color: "var(--color-text-subtle)" }}>
-                      ⏱️ Toplam:{" "}
-                      {daySummary?.totalDayDurationMinutes
-                        ? (daySummary.totalDayDurationMinutes / 60).toFixed(1)
-                        : "2.5"}{" "}
-                      saat
-                    </span>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <button
-                        type="button"
-                        onClick={handleExportToGoogleMaps}
-                        className="stitch-btn-primary"
-                        style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                        title="Tüm rotayı Google Maps'e aktar"
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "14px", color: "var(--color-accent-strong)" }}
-                        >
-                          navigation
-                        </span>
-                        <span>Google Maps</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          window.dispatchEvent(new CustomEvent("mapsbridge:open-trip-manifesto"));
-                        }}
-                        className="stitch-btn-secondary"
-                        style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                        title="Seyahat Rotası Markdown Manifestosu (.md)"
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "14px", color: "#38bdf8" }}
-                        >
-                          article
-                        </span>
-                        <span>.MD</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          window.dispatchEvent(new CustomEvent("mapsbridge:open-deal-tracker"));
-                        }}
-                        className="stitch-btn-secondary"
-                        style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                        title="Ucuz Bilet ve Otel Fiyat Takip Botu"
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "14px", color: "var(--color-warning-icon)" }}
-                        >
-                          smart_toy
-                        </span>
-                        <span>Fiyat Botu</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nextUnvisited = pinsWithTime.find((p) => !p.visited);
-                          if (nextUnvisited) {
-                            setSelectedPinId(nextUnvisited.id);
-                            onFlyToPin?.(nextUnvisited);
-                            showToast(`📍 Sıradaki durak: ${nextUnvisited.label}`);
-                          } else {
-                            showToast("🎉 Tüm duraklar tamamlandı!");
-                          }
-                        }}
-                        className="stitch-btn-secondary"
-                        style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                        title="Sıradaki durağa haritada odaklan"
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "14px" }}
-                        >
-                          my_location
-                        </span>
-                        <span>Sıradaki</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="planner-detail__muted">
+                {t("planner.photos.empty", "Fotoğraf eklenmemiş.")}
+              </p>
             )}
-
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {/* 3. MAP-CLICKED LOCATION CARD (Sleek Stitch Location Drawer)      */}
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {selectedMapPoint && (
-              <div className="stitch-map-point-banner">
-                <div className="stitch-map-point-top">
-                  <span className="stitch-map-point-badge">
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "13px" }}
-                    >
-                      pin_drop
-                    </span>
-                    Haritadan Seçildi
-                  </span>
-                  <button
-                    type="button"
-                    onClick={onClearSelectedMapPoint}
-                    className="stitch-icon-action-btn"
-                    title="Kapat"
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "14px" }}
-                    >
-                      close
-                    </span>
-                  </button>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <h4
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 800,
-                      color: "var(--color-text)",
-                      margin: 0,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {selectedMapPoint.address.split(",")[0] || "Yeni Durak"}
-                  </h4>
-                  <p
-                    style={{
-                      fontSize: "11px",
-                      color: "var(--color-text-subtle)",
-                      margin: 0,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {selectedMapPoint.address}
-                  </p>
-                </div>
-                <div className="stitch-map-point-actions">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const label = selectedMapPoint.address.split(",")[0] || "Yeni Rota Durağı";
-                      const targetDay = activeDayIndex && activeDayIndex > 0 ? activeDayIndex : 1;
-                      addPinDirectlyToTrip(
-                        activeTripId,
-                        {
-                          label,
-                          address: selectedMapPoint.address,
-                          lat: selectedMapPoint.lat,
-                          lng: selectedMapPoint.lng,
-                          category: "genel",
-                          dayIndex: targetDay,
-                          group: "Genel",
-                          visited: false,
-                          durationMinutes: 60,
-                        },
-                        targetDay,
-                      );
-                      onClearSelectedMapPoint?.();
-                      showToast(`✓ "${label}" ${targetDay}. güne durak olarak eklendi`);
-                    }}
-                    className="stitch-btn-add-route"
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "14px" }}
-                    >
-                      add_location
-                    </span>
-                    <span>+ Rotaya Durak Ekle</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      addPinToGeneral({
-                        label: selectedMapPoint.address.split(",")[0] || "Yeni Havuz Durağı",
-                        address: selectedMapPoint.address,
-                        lat: selectedMapPoint.lat,
-                        lng: selectedMapPoint.lng,
-                        category: "genel",
-                        dayIndex: 0,
-                        group: "Genel",
-                        visited: false,
-                        durationMinutes: 60,
-                      });
-                      onClearSelectedMapPoint?.();
-                      showToast("Nokta havuza kaydedildi.");
-                    }}
-                    className="stitch-btn-add-pool"
-                  >
-                    Havuza Kaydet
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {/* ITINERARY FEED: REDESIGNED STITCH TIMELINE & CARDS               */}
-            {/* ════════════════════════════════════════════════════════════════ */}
-            <div className="stitch-feed-scroller">
-              {filteredPins.length === 0 ? (
-                <div className="stitch-empty-notice-card">
-                  <div className="stitch-empty-icon-circle">
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "24px" }}
-                    >
-                      explore_nearby
-                    </span>
-                  </div>
-                  <h3
-                    style={{
-                      fontSize: "13.5px",
-                      fontWeight: 800,
-                      color: "var(--color-text)",
-                      margin: 0,
-                    }}
-                  >
-                    {pinsWithTime.length === 0
-                      ? "Rotanızda Henüz Durak Yok"
-                      : "Filtreye Uygun Durak Bulunamadı"}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: "11.5px",
-                      color: "var(--color-text-subtle)",
-                      maxWidth: "260px",
-                      lineHeight: "1.4",
-                      margin: 0,
-                    }}
-                  >
-                    {pinsWithTime.length === 0
-                      ? "Yukarıdaki arama çubuğundan mekan arayabilir veya haritaya tıklayarak ilk durağınızı ekleyebilirsiniz."
-                      : "Filtreyi 'Tümü' yaparak diğer durakları görebilirsiniz."}
-                  </p>
-                  {categoryFilter !== "all" && (
-                    <button
-                      type="button"
-                      onClick={() => setCategoryFilter("all")}
-                      className="stitch-btn-primary"
-                      style={{ marginTop: "4px" }}
-                    >
-                      Tüm Durakları Göster
-                    </button>
+            <div className="planner-detail__photo-add">
+              <label className="planner-detail__upload">
+                <Icon name="image" size={16} />
+                <span>{t("planner.photos.upload", "Cihazdan yükle")}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="ui-visually-hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      if (typeof reader.result === "string") addPhoto(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </label>
+              <form
+                className="planner-detail__photo-url"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addPhoto(photoUrl.trim());
+                }}
+              >
+                <Field label={t("planner.photos.url", "Görsel bağlantısı")}>
+                  {(ids) => (
+                    <Input
+                      {...ids}
+                      type="url"
+                      inputMode="url"
+                      value={photoUrl}
+                      placeholder="https://"
+                      onChange={(e) => setPhotoUrl(e.target.value)}
+                    />
                   )}
-                </div>
-              ) : (
-                filteredPins.map((pin, index) => {
-                  const isSelected = pin.id === selectedPinId;
-                  const catMeta =
-                    DEFAULT_CATEGORY_META[pin.category] || DEFAULT_CATEGORY_META.genel;
-                  const prevPin = index > 0 ? filteredPins[index - 1] : null;
-
-                  return (
-                    <React.Fragment key={pin.id}>
-                      {/* ── Transit Connector (Between consecutive stops) ── */}
-                      {index > 0 && prevPin && (
-                        <div className="travel-transit-connector">
-                          <div className="transit-icon-pill">
-                            <span
-                              className="material-symbols-outlined"
-                              aria-hidden="true"
-                              style={{ fontSize: "14px" }}
-                            >
-                              directions_walk
-                            </span>
-                            <span>~{pin.transitDurationFromPrevious || index * 3 + 4} dk</span>
-                          </div>
-                          <a
-                            href={`https://www.google.com/maps/dir/?api=1&origin=${prevPin.lat},${prevPin.lng}&destination=${pin.lat},${pin.lng}&travelmode=walking`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="transit-directions-btn"
-                            title="Google Maps üzerinde yol tarifi al"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span>Yol Tarifi</span>
-                            <span
-                              className="material-symbols-outlined"
-                              aria-hidden="true"
-                              style={{ fontSize: "12px" }}
-                            >
-                              open_in_new
-                            </span>
-                          </a>
-                        </div>
-                      )}
-
-                      {/* ── Stop Card ── */}
-                      <div
-                        className={`stitch-card-stop ${isSelected ? "selected" : ""}`}
-                        onClick={() => {
-                          setSelectedPinId(pin.id);
-                          onFlyToPin?.(pin);
-                        }}
-                      >
-                        <div className="stitch-card-main-row">
-                          <div className="stitch-card-left-wrap">
-                            <div className={`stitch-card-badge ${pin.visited ? "visited" : ""}`}>
-                              {pin.visited ? (
-                                <span
-                                  className="material-symbols-outlined"
-                                  aria-hidden="true"
-                                  style={{ fontSize: "16px" }}
-                                >
-                                  check
-                                </span>
-                              ) : (
-                                pin.order || index + 1
-                              )}
-                            </div>
-
-                            <div className="stitch-card-text-col">
-                              <div className="stitch-card-title-row">
-                                <h4 className="stitch-card-title">{pin.label}</h4>
-                                <span className="stitch-card-time">{calcStopTime(index)}</span>
-                              </div>
-
-                              <div className="stitch-card-meta">
-                                <span style={{ fontWeight: 600 }}>
-                                  {catMeta.emoji} {catMeta.label}
-                                </span>
-                                <span>•</span>
-                                <span>{pin.durationMinutes || 45} dk</span>
-                                {pin.visited && (
-                                  <>
-                                    <span>•</span>
-                                    <span
-                                      style={{
-                                        color: "var(--color-success-strong)",
-                                        fontWeight: 700,
-                                        display: "inline-flex",
-                                        alignItems: "center",
-                                        gap: "2px",
-                                      }}
-                                    >
-                                      <span
-                                        className="material-symbols-outlined"
-                                        aria-hidden="true"
-                                        style={{ fontSize: "13px" }}
-                                      >
-                                        check_circle
-                                      </span>
-                                      Ziyaret Edildi
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Right Controls */}
-                          {workspaceMode === "edit" ? (
-                            <div
-                              className="stitch-card-actions"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <button
-                                type="button"
-                                disabled={index === 0}
-                                onClick={() => handleMovePinOrder(pin, "up")}
-                                className="stitch-card-action-btn"
-                                title="Yukarı Taşı"
-                              >
-                                <span
-                                  className="material-symbols-outlined"
-                                  aria-hidden="true"
-                                  style={{ fontSize: "15px" }}
-                                >
-                                  arrow_upward
-                                </span>
-                              </button>
-                              <button
-                                type="button"
-                                disabled={index === filteredPins.length - 1}
-                                onClick={() => handleMovePinOrder(pin, "down")}
-                                className="stitch-card-action-btn"
-                                title="Aşağı Taşı"
-                              >
-                                <span
-                                  className="material-symbols-outlined"
-                                  aria-hidden="true"
-                                  style={{ fontSize: "15px" }}
-                                >
-                                  arrow_downward
-                                </span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedPinId(pin.id);
-                                  setShowInPanelDetail(true);
-                                  setDetailTab("edit");
-                                }}
-                                className="stitch-card-action-btn"
-                                title="Düzenle"
-                              >
-                                <span
-                                  className="material-symbols-outlined"
-                                  aria-hidden="true"
-                                  style={{ fontSize: "15px" }}
-                                >
-                                  edit
-                                </span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (
-                                    confirm(
-                                      `"${pin.label}" durağını silmek istediğinizden emin misiniz?`,
-                                    )
-                                  ) {
-                                    deletePinAnywhere(pin.id);
-                                    showToast("Durak silindi.");
-                                  }
-                                }}
-                                className="stitch-card-action-btn btn-delete"
-                                title="Sil"
-                              >
-                                <span
-                                  className="material-symbols-outlined"
-                                  aria-hidden="true"
-                                  style={{ fontSize: "15px" }}
-                                >
-                                  delete_outline
-                                </span>
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                togglePinVisitedAnywhere(pin.id);
-                              }}
-                              className={`stitch-btn-secondary ${pin.visited ? "active" : ""}`}
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                padding: "4px 8px",
-                              }}
-                            >
-                              <span
-                                className="material-symbols-outlined"
-                                aria-hidden="true"
-                                style={{ fontSize: "14px" }}
-                              >
-                                {pin.visited ? "check_circle" : "radio_button_unchecked"}
-                              </span>
-                              <span>{pin.visited ? "Tamamlandı" : "Tamamla"}</span>
-                            </button>
-                          )}
-                        </div>
-
-                        {pin.note && <div className="stitch-card-note">💡 {pin.note}</div>}
-                      </div>
-                    </React.Fragment>
-                  );
-                })
-              )}
-
-              {/* General Pool Accordion (Kayıtlı Adresler) - Sadece Rota Düzenleme Modunda */}
-              {workspaceMode === "edit" && generalPins.length > 0 && (
-                <details
-                  className="stitch-pool-accordion"
-                  style={{ marginTop: "8px", marginBottom: "8px" }}
-                  open={false}
-                >
-                  <summary className="stitch-pool-summary">
-                    <div className="pool-summary-title-row">
-                      <span
-                        className="material-symbols-outlined"
-                        aria-hidden="true"
-                        style={{ color: "var(--color-success)", fontSize: "18px" }}
-                      >
-                        inventory_2
-                      </span>
-                      <span className="pool-summary-title">
-                        Kayıtlı Durak Havuzu ({generalPins.length} Yer)
-                      </span>
-                    </div>
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "20px", color: "var(--color-text-subtle)" }}
-                    >
-                      expand_more
-                    </span>
-                  </summary>
-
-                  <div className="pool-items-container">
-                    {generalPins.map((gPin) => (
-                      <div key={gPin.id} className="pool-item-row">
-                        <div className="pool-item-info">
-                          <div className="pool-item-icon-box">
-                            <span
-                              className="material-symbols-outlined"
-                              aria-hidden="true"
-                              style={{ fontSize: "14px" }}
-                            >
-                              {gPin.category === "kahve"
-                                ? "coffee"
-                                : gPin.category === "gastronomi"
-                                  ? "bakery_dining"
-                                  : "tour"}
-                            </span>
-                          </div>
-                          <div style={{ minWidth: 0, overflow: "hidden" }}>
-                            <p className="pool-item-name">{gPin.label}</p>
-                            <p className="pool-item-address">{gPin.address}</p>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          className="btn-pool-assign"
-                          onClick={() => {
-                            assignPinToTrip(gPin.id, activeTripId, activeDayIndex ?? 1);
-                            showToast(`✓ "${gPin.label}" rotaya eklendi`);
-                          }}
-                        >
-                          + Ekle
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              )}
+                </Field>
+                <Button type="submit" size="sm" variant="secondary" disabled={!photoUrl.trim()}>
+                  {t("planner.photos.add", "Ekle")}
+                </Button>
+              </form>
             </div>
-          </div>
-        )}
-      </div>
+          </section>
 
-      {showManualAdd && (
-        <ManualPinModal
-          isOpen={showManualAdd}
-          onClose={() => setShowManualAdd(false)}
-          onSubmit={handleCreateManualPin}
-          tripDaysCount={activeTrip?.days?.length || 1}
-          activeDayIndex={activeDayIndex}
-        />
+          {googleMapsEnabled && (
+            <section className="planner-detail__section">
+              <GooglePlaceInfo
+                placeId={pin.googlePlaceId}
+                label={pin.label}
+                lat={pin.lat}
+                lng={pin.lng}
+                onLink={(linked) => updatePinAnywhere(pin.id, { googlePlaceId: linked })}
+              />
+            </section>
+          )}
+        </>
       )}
-    </aside>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title={t("planner.stop.deleteTitle", "Durak silinsin mi?")}
+        consequence={t("planner.stop.deleteBody", "“{name}” rotadan çıkarılır.").replace(
+          "{name}",
+          pin.label,
+        )}
+        confirmLabel={t("planner.stop.delete", "Durağı sil")}
+        onConfirm={async () => {
+          deletePinAnywhere(pin.id);
+          onBack();
+        }}
+        onClose={() => setConfirmDelete(false)}
+      />
+    </div>
   );
 }

@@ -118,6 +118,13 @@ export interface RouteGeometry {
   distanceMeters: number;
   durationSeconds: number;
   isRealRoad: boolean;
+  /** Ardışık nokta çiftleri için OSRM bacakları (yalnız isRealRoad; yedek rotada yok, I1/I2). */
+  legs?: RouteLeg[];
+}
+
+export interface RouteLeg {
+  distanceMeters: number;
+  durationSeconds: number;
 }
 
 export interface RouteSegment {

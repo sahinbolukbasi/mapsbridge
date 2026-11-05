@@ -10,9 +10,12 @@ const path = require("node:path");
 const { buildState } = require("./helpers/build-meta.cjs");
 
 const ORDER = ["tokens", "base", "legacy", "chrome", "pages", "primitives"];
-// G22: Leaflet'in ürettiği sınıflar (L.divIcon className'leri + .leaflet-*).
+// G22: Leaflet'in ürettiği sınıflar (L.divIcon className'leri + .leaflet-*). FEAT-007: planlayıcı
+// pinleri planner-pin / planner-pool-pin / planner-point-pin (maps/maps-client.tsx divIcon).
 const G22 =
-  /\.(custom-route-pin|custom-map-pin|stitch-leaflet-marker-wrap|leaflet-[\w-]+)(?![\w-])/;
+  /\.(custom-route-pin|custom-map-pin|stitch-leaflet-marker-wrap|planner-(?:pin|pool-pin|point-pin)|leaflet-[\w-]+)(?![\w-])/;
+// Layer dışı @media yalnızca hareket tercihi bloğu olabilir ve içi de G22 kümesidir (design §8.4).
+const MOTION_MEDIA = /^@media\s*\(prefers-reduced-motion:\s*no-preference\)/;
 // next/font'un ürettiği layer'sız çıktı (repo CSS'i değil): @font-face ve .<hash>_className/_variable.
 const NEXT_FONT = /^\.[\w-]+_(className|variable)$/;
 
@@ -117,6 +120,18 @@ test("layer dışı kurallar yalnızca G22 Leaflet kümesini hedefler (vendor-ov
       if (rule.startsWith("@layer") || rule.startsWith("@font-face")) continue;
       const selector = rule.slice(0, rule.indexOf("{")).trim();
       if (NEXT_FONT.test(selector)) continue;
+      if (MOTION_MEDIA.test(rule)) {
+        const inner = topLevel(rule.slice(rule.indexOf("{") + 1, rule.lastIndexOf("}")));
+        const ok = inner.every((r) =>
+          r
+            .slice(0, r.indexOf("{"))
+            .split(",")
+            .every((p) => G22.test(p)),
+        );
+        if (ok) leaflet++;
+        else problems.push(`${file}: layer dışı kural: ${rule.slice(0, 80)}`);
+        continue;
+      }
       const parts = selector.split(",");
       if (rule.startsWith("@") || !parts.every((p) => G22.test(p))) {
         problems.push(`${file}: layer dışı kural: ${rule.slice(0, 80)}`);

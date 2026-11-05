@@ -31,7 +31,6 @@ const registry = () => (registryCache ??= loadTs(REGISTRY_PATH));
 const SHELL_RENDERING_GATES = [
   "components/auth-guard.tsx",
   "components/auth-gate.tsx",
-  "travel-assistant/promo-landing.tsx",
 ];
 const PKG_SRC = path.join(ROOT, "packages/design-tokens/src");
 const ORDER = "@layer tokens, base, legacy, chrome, pages, primitives;";
@@ -137,7 +136,6 @@ const LEGACY = [
   "features/community/community-layout.css",
   "profile/profile-layout.css",
   "profile/edit/edit-layout.css",
-  "maps/maps-layout.css",
   "reset-password/reset-password-layout.css",
   "components/soft-icon-layout.css",
 ];

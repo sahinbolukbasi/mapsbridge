@@ -98,6 +98,7 @@ export class OsrmRoutingProvider implements IRoutingProvider {
             geometry: { coordinates: [number, number][] };
             distance: number;
             duration: number;
+            legs?: { distance: number; duration: number }[];
           }[];
         };
         if (data.code === "Ok" && data.routes && data.routes.length > 0) {
@@ -107,11 +108,24 @@ export class OsrmRoutingProvider implements IRoutingProvider {
             ([lng, lat]: [number, number]) => [lat, lng],
           );
 
+          // OSRM her ardışık nokta çifti için bir bacak döndürür; sayı tutmazsa bacak kullanılmaz.
+          const legs =
+            Array.isArray(primaryRoute.legs) &&
+            primaryRoute.legs.length === validPoints.length - 1 &&
+            primaryRoute.legs.every(
+              (l) => Number.isFinite(l?.duration) && Number.isFinite(l?.distance),
+            )
+              ? primaryRoute.legs.map((l) => ({
+                  distanceMeters: l.distance,
+                  durationSeconds: l.duration,
+                }))
+              : undefined;
           const result: RouteGeometry = {
             coordinates: latLngCoordinates,
             distanceMeters: primaryRoute.distance,
             durationSeconds: primaryRoute.duration,
             isRealRoad: true,
+            ...(legs ? { legs } : {}),
           };
 
           if (points.length === 2) {

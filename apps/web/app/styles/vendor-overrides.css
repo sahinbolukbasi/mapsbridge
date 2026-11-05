@@ -1,18 +1,90 @@
-/* Leaflet'e karşı yazılan kurallar (design §2.6 D16, guard G22).
+/* Leaflet'e karşı yazılan kurallar (design §2.6 D16, §4.4; guard G22).
    Bu dosya BİLEREK layer'sızdır: Leaflet CSS'i runtime'da layer'sız <link> olarak eklenir ve
    aynı özgüllükte kaynak sırasıyla karşılaştırılır. Yalnızca Leaflet'in ürettiği öğeleri
-   (L.divIcon className'leri) hedefleyen kurallar buraya girer. Renkler token'dır. */
-.custom-route-pin {
-  position: relative;
-  transition: transform 0.2s ease;
+   (.leaflet-* ve L.divIcon className'leri) hedefleyen kurallar buraya girer. Renkler token'dır;
+   gün rengi planlayıcının satır içi --pin-color değişkeninden (lib/design-tokens dayPalette). */
+
+/* Planlayıcı pini (maps/maps-client.tsx): gün rengi dolgu, 3 px casing kontur, beyaz numara.
+   Seçili pin 1.25× büyür ve %18 opak halka alır. Kategori pinde değil satırdaki ikonda. */
+.leaflet-marker-icon.planner-pin {
+  border: 0;
+  background: transparent;
 }
-.custom-route-pin.is-visited .route-pin-wrapper {
-  opacity: 0.82;
+.planner-pin .planner-pin__head {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 3px solid var(--color-map-route-casing);
+  border-radius: var(--radius-full);
+  background: var(--pin-color);
+  box-shadow: var(--elevation-raised);
+  color: var(--color-on-day);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-tight);
 }
-.custom-route-pin.is-visited .route-pin-body {
-  background: var(--color-accent) !important;
+.planner-pin.is-selected .planner-pin__head {
+  box-shadow: 0 0 0 var(--space-2) color-mix(in srgb, var(--pin-color) 18%, transparent);
+  transform: scale(1.25);
 }
-.stitch-leaflet-marker-wrap {
-  background: transparent !important;
-  border: none !important;
+.planner-pin.is-visited .planner-pin__head {
+  opacity: 0.6;
+}
+.leaflet-marker-icon.planner-pin:focus-visible {
+  outline: 3px solid var(--color-text);
+  outline-offset: 2px;
+  border-radius: var(--radius-full);
+}
+/* Kayıtlı yer (günsüz) ve haritada seçilen nokta */
+.leaflet-marker-icon.planner-pool-pin,
+.leaflet-marker-icon.planner-point-pin {
+  border: 0;
+  background: transparent;
+}
+.planner-pool-pin .planner-pool-pin__dot,
+.planner-point-pin .planner-point-pin__dot {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 3px solid var(--color-map-route-casing);
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+  box-shadow: var(--elevation-raised);
+}
+.planner-pool-pin.is-selected .planner-pool-pin__dot {
+  background: var(--color-text);
+}
+.planner-point-pin .planner-point-pin__dot {
+  background: var(--color-highlight);
+}
+/* Rota çizgisinin ilk çizimi (design §4.4, §8.2): yalnız hareket tercihinde ve yalnız gün ilk
+   kez çizildiğinde (maps-client planner-route--draw sınıfını bir kez ekler; pathLength="1").
+   Anahtar kare trip-ui.css'teki trip-route-draw'dır. */
+@media (prefers-reduced-motion: no-preference) {
+  .leaflet-overlay-pane .planner-route--draw {
+    stroke-dasharray: 1;
+    animation: trip-route-draw var(--duration-route) var(--easing-enter) both;
+  }
+  .planner-pin.is-selected .planner-pin__head {
+    transition: transform var(--duration-fast) var(--easing-standard);
+  }
+}
+/* OSM karolarına hafif sepya (S12): yalnız OSM tabanlı katmanlarda (MapCanvas data-tiles="osm");
+   Esri uydu ve OpenTopoMap katmanında filtre yok. */
+.map-canvas[data-tiles="osm"] .leaflet-tile-pane {
+  filter: saturate(0.85) sepia(0.12);
+}
+/* Leaflet atfı: kâğıt zemin, token metin; bağlantı rengi token. */
+.map-canvas .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+.map-canvas .leaflet-control-attribution a {
+  color: var(--color-link);
 }

@@ -9,6 +9,7 @@ import {
   Pin,
   TransportMode,
   RouteGeometry,
+  RouteLeg,
   RouteOptimizationPreview,
   DEFAULT_CATEGORY_META,
   DAY_COLORS,
@@ -23,6 +24,7 @@ import {
 import { routesApi, RouteEntity, RouteStop } from "../api-client";
 import { getStoredSession } from "../cognito";
 import { PLANNER_TRIPS_KEY } from "./last-trip";
+import { buildLegMap, canRequestRoute, routeRequestKey } from "./planner-logic";
 
 const STORAGE_KEY = PLANNER_TRIPS_KEY;
 
@@ -182,6 +184,44 @@ export function useTravelPlanner() {
     }
   }, [activeTrip?.id]);
 
+  // ── Geri al (design F46): etkin gezinin durak/gün düzenlemeleri, oturum içi ──────────────
+  // Anlık görüntü yalnız aynı kimlikli gezinin pins/days referansı değişince alınır; sunucu
+  // yüklemesi ya da kimlik değişimi (trip-… → routeId) geçmişe girmez, böylece geri alma bir
+  // sunucu kaydını eski kimlikle yeniden oluşturmaz.
+  const undoStack = useRef<{ tripId: string; pins: Pin[]; days: TripDay[] }[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
+  const prevTripsRef = useRef(trips);
+  const restoringRef = useRef(false);
+  useEffect(() => {
+    const prev = prevTripsRef.current;
+    prevTripsRef.current = trips;
+    if (restoringRef.current) {
+      restoringRef.current = false;
+      return;
+    }
+    for (const before of prev) {
+      const after = trips.find((t) => t.id === before.id);
+      if (!after || (after.pins === before.pins && after.days === before.days)) continue;
+      undoStack.current.push({ tripId: before.id, pins: before.pins, days: before.days });
+      if (undoStack.current.length > 30) undoStack.current.shift();
+    }
+    setCanUndo(undoStack.current.length > 0);
+  }, [trips]);
+  const undo = useCallback(() => {
+    const stack = undoStack.current;
+    const current = prevTripsRef.current;
+    // Kimliği artık olmayan (silinmiş/yeniden adlandırılmış) gezilerin kayıtları atlanır.
+    while (stack.length > 0 && !current.some((t) => t.id === stack[stack.length - 1].tripId))
+      stack.pop();
+    const entry = stack.pop();
+    setCanUndo(stack.length > 0);
+    if (!entry) return;
+    restoringRef.current = true;
+    setTrips((prev) =>
+      prev.map((t) => (t.id === entry.tripId ? { ...t, pins: entry.pins, days: entry.days } : t)),
+    );
+  }, []);
+
   // Persist trips to localStorage
   useEffect(() => {
     if (typeof window !== "undefined" && trips.length > 0) {
@@ -201,10 +241,21 @@ export function useTravelPlanner() {
       .list()
       .then((res) => {
         if (res?.routes && Array.isArray(res.routes)) {
-          if (res.routes.length > 0) {
-            const loadedTrips = res.routes.map(routeEntityToTrip);
-            setTrips(loadedTrips);
-            setActiveTripId(loadedTrips[0]?.id || "trip-1");
+          // Sunucu yüklemesi geri alma geçmişine girmez.
+          restoringRef.current = true;
+          undoStack.current = [];
+          setCanUndo(false);
+          // Misafir taslağı aktarımı (design §6.3): cihazdaki henüz sunucuya yazılmamış ("trip-"
+          // kimlikli) ve durağı olan geziler korunur, sunucu rotalarının yanına eklenir ve ilki
+          // etkinleşir; etkin gezi eşitlemesi onu hesaba yazar. Önceden bu taslaklar silinirdi.
+          const drafts = prevTripsRef.current.filter(
+            (t) => t.id.startsWith("trip-") && t.pins.length > 0,
+          );
+          const loadedTrips = res.routes.map(routeEntityToTrip);
+          const next = [...loadedTrips, ...drafts];
+          if (next.length > 0) {
+            setTrips(next);
+            setActiveTripId(drafts[0]?.id || loadedTrips[0]?.id || "trip-1");
           } else {
             const initial = createInitialTrips();
             setTrips(initial);
@@ -217,12 +268,17 @@ export function useTravelPlanner() {
 
   // Debounced auto-sync of active trip to server
   const serverSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Araç çubuğu durumu (design F46 "Kaydedildi"): yalnızca oturumlu sunucu eşitlemesini yansıtır.
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const syncedOnce = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined" || !activeTrip) return;
     const session = getStoredSession();
     if (!session?.token) return;
 
     if (serverSyncTimerRef.current) clearTimeout(serverSyncTimerRef.current);
+    if (syncedOnce.current) setSaveState("saving");
+    syncedOnce.current = true;
     serverSyncTimerRef.current = setTimeout(async () => {
       try {
         const stops = tripToRouteStops(activeTrip);
@@ -245,8 +301,10 @@ export function useTravelPlanner() {
             isPublic: activeTrip.isPublic,
           });
         }
+        setSaveState("saved");
       } catch (err) {
         console.warn("Server sync error:", err);
+        setSaveState("error");
       }
     }, 1500);
 
@@ -299,68 +357,79 @@ export function useTravelPlanner() {
     };
   }, [activeTrip, activeDayIndex, currentDay, transportMode]);
 
+  // Dinamik Rota Yeniden Oluşturma: Duraklar 'Gidildi' işaretlendikçe aktif rota son ziyaret
+  // edilen duraktan başlayıp kalan tüm gidilmemiş durakları bağlayacak şekilde yeniden çizilir.
+  const activeRoutePins = useMemo(() => {
+    const unvisitedPins = pinsWithTime.filter((p) => !p.visited);
+    const visitedPins = pinsWithTime.filter((p) => p.visited);
+    if (unvisitedPins.length > 0 && visitedPins.length > 0) {
+      return [visitedPins[visitedPins.length - 1], ...unvisitedPins];
+    }
+    return pinsWithTime;
+  }, [pinsWithTime]);
+  // OSRM yalnızca durak listesi (kimlik/koordinat/sıra) ya da ulaşım modu değişince çağrılır;
+  // not/süre düzenlemeleri yeni istek atmaz (design §6.3). Otomatik yeniden deneme yoktur.
+  const routeKey = routeRequestKey(activeRoutePins, transportMode);
+  const optimizeKey = `${activeDayIndex}|${routeRequestKey(pinsWithTime, transportMode)}`;
+  const activeRoutePinsRef = useRef(activeRoutePins);
+  activeRoutePinsRef.current = activeRoutePins;
+  const pinsWithTimeRef = useRef(pinsWithTime);
+  pinsWithTimeRef.current = pinsWithTime;
+  const [activeRouteLegs, setActiveRouteLegs] = useState<Record<string, RouteLeg>>({});
+
+  // Deterministik sıra önerisi (2-opt, istemci; I2). Ağ çağrısı yapmaz.
+  useEffect(() => {
+    const pins = pinsWithTimeRef.current;
+    if (activeDayIndex !== null && activeDayIndex > 0 && pins.length >= 3) {
+      setOptimizationPreview(optimizeRouteOrder(pins, transportMode));
+    } else {
+      setOptimizationPreview(null);
+    }
+  }, [optimizeKey]);
+
   // Debounced real road route calculation
   const routingDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (pinsWithTime.length < 2) {
-      setActiveRoadGeometry(null);
-      setOptimizationPreview(null);
-      return;
-    }
-
+    const routePins = activeRoutePinsRef.current;
     if (routingDebounceRef.current) {
       clearTimeout(routingDebounceRef.current);
     }
+    if (!canRequestRoute(routePins.length)) {
+      // <2 durak ya da OSRM sınırı (25 nokta) aşıldı: istek yok, süre "hesaplanamadı" (I1/I2).
+      setActiveRoadGeometry(null);
+      setActiveRouteLegs({});
+      return;
+    }
 
+    let cancelled = false;
     routingDebounceRef.current = setTimeout(async () => {
       setIsRoutingLoading(true);
-      // Dinamik Rota Yeniden Oluşturma: Duraklar 'Gidildi' işaretlendikçe aktif rota
-      // son ziyaret edilen duraktan başlayıp kalan tüm gidilmemiş durakları bağlayacak şekilde yeniden çizilir
-      const unvisitedPins = pinsWithTime.filter((p) => !p.visited);
-      const visitedPins = pinsWithTime.filter((p) => p.visited);
-      let activeRoutePins: typeof pinsWithTime;
-
-      if (unvisitedPins.length === 0) {
-        // Tüm duraklar tamamlandıysa rotanın tamamını göster
-        activeRoutePins = pinsWithTime;
-      } else if (visitedPins.length > 0 && unvisitedPins.length > 0) {
-        // Son ziyaret edilen duraktan kalan duraklara doğru dinamik rota oluştur
-        const lastVisited = visitedPins[visitedPins.length - 1];
-        activeRoutePins = [lastVisited, ...unvisitedPins];
-      } else {
-        activeRoutePins = pinsWithTime;
-      }
-
-      if (activeRoutePins.length < 2) {
-        setActiveRoadGeometry(null);
-        setIsRoutingLoading(false);
-        return;
-      }
-
-      const points: [number, number][] = activeRoutePins.map((p) => [p.lat, p.lng]);
+      const points: [number, number][] = routePins.map((p) => [p.lat, p.lng]);
       try {
         const geom = await routingService.getRoute(points, transportMode);
+        if (cancelled) return;
         setActiveRoadGeometry(geom);
-
-        // Check if route optimization can offer savings (only in a specific day view)
-        if (activeDayIndex !== null && activeDayIndex > 0 && pinsWithTime.length >= 3) {
-          const opt = optimizeRouteOrder(pinsWithTime, transportMode);
-          setOptimizationPreview(opt);
-        } else {
-          setOptimizationPreview(null);
-        }
+        setActiveRouteLegs(
+          geom.isRealRoad
+            ? buildLegMap(
+                routePins.map((p) => p.id),
+                geom.legs,
+              )
+            : {},
+        );
       } catch (err) {
         console.warn("Route calculation error:", err);
       } finally {
-        setIsRoutingLoading(false);
+        if (!cancelled) setIsRoutingLoading(false);
       }
     }, 280);
 
     return () => {
+      cancelled = true;
       if (routingDebounceRef.current) clearTimeout(routingDebounceRef.current);
     };
-  }, [pinsWithTime, transportMode, activeDayIndex]);
+  }, [routeKey]);
 
   // ── Trip Actions ─────────────────────────────────────────────
 
@@ -1146,6 +1215,9 @@ export function useTravelPlanner() {
     activeRoadGeometry,
     isRoutingLoading,
     optimizationPreview,
+    activeRouteLegs,
+    canUndo,
+    saveState,
     aiMessageToast,
     twoPinComparison,
     showVisitedOnMap,
@@ -1171,6 +1243,7 @@ export function useTravelPlanner() {
     togglePinLock,
     applyOptimization,
     dismissOptimization,
+    undo,
     autoSplitCurrentTrip,
     executeAiCommand,
     comparePins,

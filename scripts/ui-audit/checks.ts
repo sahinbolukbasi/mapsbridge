@@ -4,7 +4,7 @@
  * 20, 31b, 32, 38 — dosyanın sonunda `runChromeCheck`).
  *
  * KURAL (§17.-3 #1c): senaryonun DOM kancasını (.pub-route-footer, .pub-route-cta-btn.secondary,
- * .stitch-pin-active-popup, divIcon className'leri) değiştiren commit, aşağıdaki LEAFLET_SCENARIOS
+ * .planner-pin, divIcon className'leri) değiştiren commit, aşağıdaki LEAFLET_SCENARIOS
  * sabitini ve requirements AC-31c'yi aynı commit'te günceller. Seçiciler YALNIZCA burada yaşar.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -64,37 +64,37 @@ export const LEAFLET_SCENARIOS = {
     seed: true,
     steps: {
       anyMarker: ".leaflet-marker-icon",
-      // iconSize [0,0] olduğu için marker kökü değil, görünür başı tıklanır (olay köke kabarcıklanır).
-      clickMarker: ".leaflet-marker-icon.stitch-leaflet-marker-wrap .stitch-pin-head",
-      activePopup: ".stitch-pin-active-popup",
+      // FEAT-007: planlayıcı pini (maps/maps-client.tsx divIcon "planner-pin"). Görünür baş
+      // tıklanır; seçili pin aynı marker'ın is-selected sınıflı yeniden çizimidir (popup yok:
+      // eski sahte fotoğraf/puanlı popup I1 gereği kaldırıldı, ayrıntı listede açılır).
+      clickMarker: ".leaflet-marker-icon.planner-pin .planner-pin__head",
+      activePopup: ".leaflet-marker-icon.planner-pin.is-selected",
     },
     markerTargets: [
-      // maps/maps-client.tsx renderGroupOnMap planlayıcı açıkken erken döner ve isPlannerOpen bugün
-      // hiç false olmaz; bu yüzden rota durağı pin'i bugün /maps/'te render edilmez.
       {
-        name: "custom-route-pin",
-        selector: ".leaflet-marker-icon.custom-route-pin",
-        depth: 2,
+        name: "planner-point-pin",
+        selector: ".leaflet-marker-icon.planner-point-pin",
+        depth: 1,
         required: false,
       },
       {
-        name: "stitch-leaflet-marker-wrap",
-        selector: ".leaflet-marker-icon.stitch-leaflet-marker-wrap",
-        depth: 2,
+        name: "planner-pin",
+        selector: ".leaflet-marker-icon.planner-pin",
+        depth: 1,
         required: true,
       },
       {
-        name: "custom-map-pin",
-        selector: ".leaflet-marker-icon.custom-map-pin",
-        depth: 2,
-        required: true,
+        name: "planner-pool-pin",
+        selector: ".leaflet-marker-icon.planner-pool-pin",
+        depth: 1,
+        required: false,
       },
     ] satisfies LeafletTarget[],
     popupTargets: [
       {
-        name: "stitch-pin-active-popup",
-        selector: ".stitch-pin-active-popup",
-        depth: "all",
+        name: "planner-pin-selected",
+        selector: ".leaflet-marker-icon.planner-pin.is-selected",
+        depth: 1,
         required: true,
       },
     ] satisfies LeafletTarget[],

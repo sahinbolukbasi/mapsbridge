@@ -7,7 +7,8 @@
 // tek boşluğa indirilmiş ve küçük harfli @media metnidir. C4: u/u.css silindi (63 koşul, 19 dosya).
 // C16: u/admin/admin.css yeniden yazıldı, ai-dashboard.css silindi (6 koşul ve 2 dosya düştü).
 // C12: checkout.css ölü kurallar silindi (480px ve 900px düştü). FEAT-005: checkout.css yeniden
-// yazıldı (600px düştü).
+// yazıldı (600px düştü). FEAT-007: maps/maps.css ve components/trip/travel-planner.css yeniden
+// yazıldı (küme dışı koşulların tümü düştü).
 
 export const BREAKPOINTS = { sm: 640, md: 768, lg: 1024, xl: 1280 } as const;
 
@@ -29,17 +30,6 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
   "community/community.css": [
     { query: "(max-width: 1023px)", count: 1 },
     { query: "(max-width: 767px)", count: 3 },
-  ],
-  "components/trip/travel-planner.css": [
-    { query: "(max-width: 820px)", count: 2 },
-    { query: "(min-width: 769px) and (max-width: 1024px)", count: 1 },
-  ],
-  "maps/maps.css": [
-    { query: "(max-width: 1279px)", count: 1 },
-    { query: "(max-width: 767px)", count: 3 },
-    { query: "(max-width: 820px)", count: 7 },
-    { query: "(max-width: 900px)", count: 1 },
-    { query: "(min-width: 821px)", count: 1 },
   ],
   "how-it-works/how-it-works.css": [{ query: "(min-width: 992px)", count: 1 }],
   "login/login.css": [{ query: "(max-width: 500px)", count: 1 }],

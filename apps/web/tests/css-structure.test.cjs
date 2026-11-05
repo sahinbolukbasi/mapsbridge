@@ -19,7 +19,6 @@ const LEGACY = [
   "features/community/community-layout.css",
   "profile/profile-layout.css",
   "profile/edit/edit-layout.css",
-  "maps/maps-layout.css",
   "reset-password/reset-password-layout.css",
   "components/soft-icon-layout.css",
 ];

@@ -1,7 +1,7 @@
 // Ana sayfa içerik sözleşmesi (design §10, §5.1; kararlar S1, S6, S11; FEAT-004).
 // (a) yasak terimler ana sayfa kaynaklarında ve home.* değerlerinde yok; (b) hoş geldin kredisi
-// sayısı contracts BILLING_COST.WELCOME_CREDITS ile aynı; (c) S6/S11 kapıları: home.faq.q4 ve
-// home.mobile.* render edilmez; (d) kaynakta kullanılan her home.*/trip.* anahtarı iki dilde var.
+// sayısı contracts BILLING_COST.WELCOME_CREDITS ile aynı; (c) S6/S11 kapıları: home.mobile.*
+// render edilmez, home.faq.q4 FEAT-007'de I12 kapsamı doğrulanınca render edilir; (d) kaynakta kullanılan her home.*/trip.* anahtarı iki dilde var.
 // Build-bağımlı alt test (§10 bölüm sırası) REQUIRE_BUILD yokken skip, REQUIRE_BUILD=1 iken fail.
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -95,15 +95,20 @@ test("(b) hero güven satırı hoş geldin kredisini contracts değeriyle göste
   }
 });
 
-test("(c) S6/S11 kapıları: SSS q4 ve mobil bölüm ana sayfada render edilmez", () => {
-  for (const rel of HOME_SOURCES) {
-    const src = source(rel);
-    assert.doesNotMatch(src, /home\.faq\.[qa]4\b/, `${rel} home.faq.q4/a4 kullanıyor (S11)`);
-    assert.doesNotMatch(src, /home\.mobile\./, `${rel} home.mobile.* kullanıyor (S6)`);
-  }
+test("(c) S6 kapısı: mobil bölüm render edilmez; S11: SSS q4 doğrulanmış kapsamla render edilir", () => {
+  for (const rel of HOME_SOURCES)
+    assert.doesNotMatch(source(rel), /home\.mobile\./, `${rel} home.mobile.* kullanıyor (S6)`);
   // Anahtarlar tanımlıdır (kullanıcı teyidiyle açılır), yalnızca render edilmez.
-  for (const key of ["home.faq.q4", "home.faq.a4", "home.mobile.title", "home.mobile.sub"])
+  for (const key of ["home.mobile.title", "home.mobile.sub"])
     assert.ok(tr[key] && en[key], `${key} tanımlı olmalı`);
+  // FEAT-007 I12 denetimi: use-travel-planner yalnızca durakları, koordinatları, gün ve sırayı
+  // cihazda saklar; yol geometrisi/yön tarifi saklanmaz. q4/a4 render edilir ve yön bilgisi
+  // saklandığını iddia etmez (S11).
+  assert.match(source("home-client.tsx"), /"home\.faq\.q4"/, "home-client q4'ü render etmeli");
+  assert.match(source("home-client.tsx"), /"home\.faq\.a4"/, "home-client a4'ü render etmeli");
+  assert.doesNotMatch(tr["home.faq.a4"], /temel yön bilgisi/i, "tr a4 yön bilgisi iddia etmemeli");
+  assert.doesNotMatch(en["home.faq.a4"], /basic directions are stored/i, "en a4 yön iddiası");
+  for (const dict of [tr, en]) assert.ok(dict["home.faq.q4"] && dict["home.faq.a4"]);
 });
 
 test("(d) kaynakta kullanılan her home.*/trip.* anahtarı iki dilde de var", () => {
@@ -130,7 +135,7 @@ function requireBuild(t) {
   return null;
 }
 
-test("§10 bölüm sırası: / ve /en/ (mobil bölüm ve q4 yok)", (t) => {
+test("§10 bölüm sırası: / ve /en/ (mobil bölüm yok, SSS q4 var)", (t) => {
   const s = requireBuild(t);
   if (!s) return;
   const ORDER = [
@@ -156,7 +161,11 @@ test("§10 bölüm sırası: / ve /en/ (mobil bölüm ve q4 yok)", (t) => {
       `${file}: bölüm sırası bozuk`,
     );
     assert.equal(html.includes('id="mobil"'), false, `${file}: mobil bölüm render edilmemeli (S6)`);
-    assert.equal(html.includes('id="sss-4"'), false, `${file}: SSS q4 render edilmemeli (S11)`);
+    assert.equal(
+      html.includes('id="sss-4"'),
+      true,
+      `${file}: SSS q4 render edilmeli (FEAT-007, S11)`,
+    );
     assert.equal((html.match(/<h1[\s>]/g) ?? []).length, 1, `${file}: tek h1`);
   }
   const en = fs.readFileSync(path.join(s.outDir, "en/index.html"), "utf8");

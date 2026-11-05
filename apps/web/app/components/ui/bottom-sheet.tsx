@@ -22,20 +22,35 @@ export function BottomSheet({
   snap,
   initial,
   label,
+  expandLabel,
+  collapseLabel,
+  value,
+  onSnapChange,
   className,
   children,
 }: {
   snap: readonly SheetSnap[];
   initial?: SheetSnap;
   label: string;
+  /** Tutamağın erişilebilir adı (varsayılan "Paneli genişlet"/"Paneli daralt"). */
+  expandLabel?: string;
+  collapseLabel?: string;
+  /** Kontrollü kullanım: verilirse geçerli snap budur; değişiklik onSnapChange ile bildirilir. */
+  value?: SheetSnap;
+  onSnapChange?: (snap: SheetSnap) => void;
   className?: string;
   children: ReactNode;
 }) {
   const { t } = useLocale();
   const order = orderedSnaps(snap);
-  const [current, setCurrent] = useState<SheetSnap>(
+  const [internal, setInternal] = useState<SheetSnap>(
     initial && order.includes(initial) ? initial : (order[0] ?? "peek"),
   );
+  const current = value && order.includes(value) ? value : internal;
+  const setCurrent = (next: SheetSnap) => {
+    setInternal(next);
+    onSnapChange?.(next);
+  };
   const rootRef = useRef<HTMLElement>(null);
   const drag = useRef<{ y: number } | null>(null);
   const suppressClick = useRef(false);
@@ -75,7 +90,9 @@ export function BottomSheet({
         type="button"
         className="ui-bottom-sheet__handle"
         aria-label={
-          atTop ? t("ui.sheet.collapse", "Paneli daralt") : t("ui.sheet.expand", "Paneli genişlet")
+          atTop
+            ? (collapseLabel ?? t("ui.sheet.collapse", "Paneli daralt"))
+            : (expandLabel ?? t("ui.sheet.expand", "Paneli genişlet"))
         }
         aria-controls={bodyId}
         onClick={() => {
