@@ -102,18 +102,18 @@ test("AC-22: her <WebView accessibilityLabel taşır", () => {
       if (!/accessibilityLabel=/.test(t.text)) missing.push(`${rel}:${t.line}`);
     }
   }
-  assert.ok(count >= 2, "harita WebView'leri bulunamadı");
+  // FEAT-012: Planla önizleme haritası kaldırıldı; tek harita WebView'i rota görünümündedir.
+  assert.ok(count >= 1, "harita WebView'i bulunamadı");
   assert.deepEqual(missing, [], `WebView etiketi eksik: ${missing.join(", ")}`);
 });
 
 // Android üst ofset ratchet'i (design §7.3): SafeArea Android'de üst boşluk eklemez; ekranlardaki
 // manuel ofsetler baseline'dır. Sayı artarsa test düşer; azalırsa baseline'ı düşürün.
+// FEAT-012: ekranlar yeniden yazılınca 7 → 1 (yalnız MapScreen'in yüzen arama satırı).
 const OFFSET_BASELINE = {
-  "src/screens/MapScreen.tsx": 5,
-  "src/screens/PublicProfileView.tsx": 1,
-  "src/components/EditProfileModal.tsx": 1,
+  "src/screens/MapScreen.tsx": 1,
 };
-test("Android üst ofset ratchet'i ≤ baseline (7) ve androidTopInset kullanımı 0", () => {
+test("Android üst ofset ratchet'i ≤ baseline (1) ve androidTopInset kullanımı 0", () => {
   const counts = {};
   const insetUsers = [];
   for (const rel of FILES) {
@@ -135,7 +135,7 @@ test("Android üst ofset ratchet'i ≤ baseline (7) ve androidTopInset kullanım
       `${rel}: ${n} ofset (baseline ${OFFSET_BASELINE[rel] ?? 0})`,
     );
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
-  assert.ok(total <= 7, `toplam ofset ${total} > 7`);
+  assert.ok(total <= 1, `toplam ofset ${total} > 1`);
   assert.deepEqual(insetUsers, [], "androidTopInset bu işte hiçbir kökte açılmaz (F-14)");
 });
 
@@ -176,25 +176,10 @@ test("mobil token'lar: font.maxScale (compact 1.4, body 2) ve 44pt dokunma", () 
 
 // R6 (design §15, design-system.md §11): yeni kodda TouchableOpacity yerine primitive/Pressable.
 // Dosya başına `TouchableOpacity` geçiş sayısı ratchet'i: 2026-11-06'da (FEAT-011 başı) 438 ölçüldü;
-// FEAT-011 src/ui ve BottomTabBar'ı Pressable'a taşıyınca 423'e indi. Sayı yalnızca düşer; listede
-// olmayan (yeni) dosyada 0'dır. Bir dosyada sayı düşünce baseline'ı da düşürün.
-const TOUCHABLE_BASELINE = {
-  "src/components/EditPostModal.tsx": 7,
-  "src/components/EditProfileModal.tsx": 15,
-  "src/components/ErrorBoundary.tsx": 3,
-  "src/components/PaywallModal.tsx": 9,
-  "src/components/RouteLoadingModal.tsx": 5,
-  "src/components/ScreenTourModal.tsx": 7,
-  "src/screens/AIScreen.tsx": 45,
-  "src/screens/AuthScreen.tsx": 23,
-  "src/screens/ChatScreen.tsx": 23,
-  "src/screens/CommunityScreen.tsx": 39,
-  "src/screens/MapScreen.tsx": 71,
-  "src/screens/PlanScreen.tsx": 75,
-  "src/screens/ProfileScreen.tsx": 49,
-  "src/screens/PublicProfileView.tsx": 43,
-  "src/screens/WelcomeScreen.tsx": 9,
-};
+// FEAT-011 src/ui ve BottomTabBar'ı Pressable'a taşıyınca 423'e, FEAT-012 ekranları, Paywall ve
+// modalları primitive'lerle yeniden kurunca 0'a indi. Sayı yalnızca düşer; listede olmayan (yeni)
+// dosyada 0'dır. Liste boş: artık hiçbir dosyada TouchableOpacity yok.
+const TOUCHABLE_BASELINE = {};
 test("R6: TouchableOpacity ratchet'i — dosya başına sayı yalnızca düşer, yeni dosyada 0", () => {
   const problems = [];
   let total = 0;
@@ -343,10 +328,14 @@ test("App: misafir göz atma açık, Splash yapay süre taşımaz, BackHandler +
   assert.match(app, /resetRevenueCat\(\)/);
   assert.doesNotMatch(app, /tripStore\s*\.syncWithServer\(/, "eşitleme yalnız setOwner üzerinden");
   assert.match(app, /<PlanScreen[\s\S]*?guest=\{!signedIn\}/);
-  const plan = read("src/screens/PlanScreen.tsx");
-  assert.match(plan, /const isPro = !guest && isProSync\(\)/);
-  assert.match(plan, /guest \? \(\s*<AuthGate\s+variant="sheet"\s+reason="save"/);
-  assert.equal((plan.match(/isProSync\(\)/g) || []).length, 1, "Pro durumu yalnız isPro'dan");
+  assert.match(app, /<MapScreen[\s\S]*?guest=\{!signedIn\}/);
+  // FEAT-012: Pro şablonları kaldırıldı; Planla ve rota görünümü RevenueCat'e dokunmaz, misafir
+  // kaydetme/paylaşma AuthGate sheet açar (FEAT-011 review #1 notu çözüldü).
+  for (const rel of ["src/screens/PlanScreen.tsx", "src/screens/MapScreen.tsx"]) {
+    const src = read(rel);
+    assert.doesNotMatch(src, /PaywallModal|getOfferings|isProSync|revenuecat/, rel);
+    assert.match(src, /<AuthGate\s+variant="sheet"/, `${rel} misafir kapısı`);
+  }
   const splash = read("src/components/SplashScreen.tsx");
   assert.doesNotMatch(splash, /minDurationMs|setInterval|setTimeout/);
   for (const banned of ["CANLI KÖPRÜ", "Eco-Path", "ROUTE OS", "V2.4", "4.8K"])
@@ -363,4 +352,111 @@ test("Yazı tipleri (karar S13): TTF + OFL lisansı ve expo-font tam sürüm", (
     const text = fs.readFileSync(path.join(mobile, "assets/fonts", lic), "utf8");
     assert.match(text, /SIL Open Font License, Version 1\.1/);
   }
+});
+
+// ── FEAT-012: ekranlar web ile pariteye (design §9, §6.4, J6; kararlar S2/S6/S7/S10/S21/S22) ──
+/** Tam satır yorumları ve blok yorumları atılmış kaynak (yasaklı ifadeler yorumda anlatılabilir). */
+const code = (rel) =>
+  read(rel)
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split("\n")
+    .filter((line) => !/^\s*\/\//.test(line))
+    .join("\n");
+
+test("FEAT-012: eski karşılama, ikon seti ve uydurma kaynaklar kaldırıldı", () => {
+  for (const rel of ["src/screens/WelcomeScreen.tsx", "src/components/Icons.tsx"])
+    assert.ok(!fs.existsSync(path.join(mobile, rel)), `${rel} silinmeli`);
+  for (const rel of FILES)
+    assert.doesNotMatch(read(rel), /components\/Icons|from "\.\/Icons"/, rel);
+});
+
+test("FEAT-012 (S6, S1, §7.1): mağaza/indir/yakında, EN POPÜLER, deneme ve kredi kartı vaadi yok", () => {
+  const banned =
+    /yakında|uygulamayı indir|app store|google play|en popüler|ücretsiz deneme|kredi kartı gerekmez|botanical atelier/i;
+  const offenders = FILES.filter((rel) => banned.test(code(rel)));
+  assert.deepEqual(offenders, [], offenders.join(", "));
+});
+
+test("FEAT-012: Keşfet metni yalnız i18n/home.ts'ten, girişi Asistan'a gider; Apple 'yakında' yok", () => {
+  const explore = read("src/screens/ExploreScreen.tsx");
+  assert.match(explore, /from "\.\.\/i18n\/home"/);
+  assert.match(explore, /readShareCode/);
+  assert.doesNotMatch(explore, /home\.mobile\./);
+  const app = read("App.tsx");
+  assert.match(app, /<ExploreScreen/);
+  assert.doesNotMatch(app, /WelcomeScreen|handleAppleSignIn|onSelectApple/);
+  assert.match(app, /setAssistantPrompt\(\{ text, nonce: Date\.now\(\) \}\);\s*selectTab\("ai"\)/);
+  assert.doesNotMatch(code("src/screens/AuthScreen.tsx"), /Apple/);
+});
+
+test("FEAT-012 (§6.1): misafir asistan ağ çağrısı yapmaz; üye asistan rozetsiz gönder + not (S22)", () => {
+  const guest = code("src/screens/GuestAssistantView.tsx");
+  assert.doesNotMatch(guest, /services\/api|aiService|fetch\(/);
+  assert.match(guest, /<AuthGate\s+variant="sheet"\s+reason="ai"\s+draft/);
+  assert.match(guest, /cost=\{5\}/);
+  const app = read("App.tsx");
+  assert.match(app, /signedIn \? \(\s*<AIScreen[\s\S]*?\) : \(\s*<GuestAssistantView/);
+  const ai = code("src/screens/AIScreen.tsx");
+  assert.match(ai, /note=\{tr\("assistant\.composer\.costNote"\)\}/);
+  assert.doesNotMatch(ai, /<ComposerBar[^>]*\bcost=/, "gönder düğmesi kredi rozeti taşımaz (S22)");
+  assert.match(ai, /announcement=\{announcement\}/, "iOS duyurusu (FEAT-011 review #3)");
+  // Taslak: otomatik ücretli çağrı yok; kullanıcı dokununca gider.
+  assert.match(
+    ai,
+    /onCreate=\{\(\) => send\(buildGuestSummaryMessage\(guestDraft\), \{ fromDraft: true \}\)\}/,
+  );
+  assert.doesNotMatch(ai, /useEffect\([^)]*send\(/);
+  // I8: affiliate yalnız Hazırlık sekmesinde.
+  assert.match(ai, /tab === "prep"/);
+});
+
+test("FEAT-012 (S10/S21): Mesajlar sekmesi MessageLog + ComposerBar, grup/süzgeç yok", () => {
+  const chat = code("src/screens/ChatScreen.tsx");
+  assert.match(chat, /<MessageLog/);
+  assert.match(chat, /<ComposerBar/);
+  assert.match(chat, /announcement=/);
+  assert.doesNotMatch(chat, /isGroup|Gruplar|NewGroup|"groups"/);
+  assert.match(read("App.tsx"), /case "messages":\s*return <ChatScreen/);
+});
+
+test("FEAT-012 (§6.4): Topluluk yazma eylemleri misafirde AuthGate", () => {
+  const c = code("src/screens/CommunityScreen.tsx");
+  for (const call of ["toggleLike", "toggleBookmark"])
+    assert.match(
+      c,
+      new RegExp(`requireMember\\("save", \\(\\) => socialSyncService\\.${call}`),
+      call,
+    );
+  assert.match(c, /requireMember\("save", \(\) => setComposeOpen\(true\)\)/);
+  assert.match(c, /requireMember\("messages"/);
+  assert.doesNotMatch(c, /retweet|Bildir|Sessize|@canberk/);
+});
+
+test("FEAT-012 (S2/S18): Paywall 4 plan, fiyat yalnız katalogdan, satın alma revenuecat ile", () => {
+  const pw = code("src/components/PaywallModal.tsx");
+  assert.match(pw, /PLAN_TIERS\.map/);
+  assert.match(pw, /billingService\.getPlans\(\)/);
+  assert.match(
+    pw,
+    /import \{ getOfferings, purchasePackage, restorePurchases \} from "\.\.\/services\/revenuecat"/,
+  );
+  assert.match(pw, /findMonthlyProduct/);
+  assert.doesNotMatch(pw, /priceString|\$rc_annual|\$rc_lifetime|yearly/);
+  // Misafirde RevenueCat çağrılmaz.
+  assert.match(pw, /loadCatalog\(\);\s*if \(guest\) return;\s*getOfferings\(\)/);
+});
+
+test("FEAT-012 (I1/I2): rota görünümü bağlantı değerlerini yalnız OSRM'den alır", () => {
+  const map = code("src/screens/MapScreen.tsx");
+  assert.doesNotMatch(map, /walkTimeFromPrev|distanceFromPrev|rating: 4\.8|optimizeRoute\(\)/);
+  assert.match(map, /<Connector/);
+  assert.match(map, /optimizeStopOrder\(route\.stops\)/);
+  assert.doesNotMatch(
+    map,
+    /<Button[^>]*label=\{tr\("planner\.optimize"\)\}[^>]*cost=/,
+    "S19: rozet yok",
+  );
+  const html = read("src/map/leaflet-html.ts");
+  assert.match(html, /type: "ROUTE_LEGS"/);
+  assert.match(html, /OSRM_MAX_POINTS/);
 });

@@ -491,3 +491,188 @@ test("aktarım yüklemesi başarısızsa taslak beklemede kalır, eşitleme onu 
   assert.equal(routes[0].pendingUpload, true);
   assert.ok(api.calls.some((c) => c.name === "listRoutes"));
 });
+
+// ── FEAT-012: Keşfet metni, paylaşım kodu, misafir taslağı, katalog ve optimize paritesi ──
+const EN = JSON.parse(fs.readFileSync(path.join(WEB, "locales/en.json"), "utf8"));
+const mobileHome = loadTs(path.join(MOBILE, "i18n/home.ts"));
+
+test("Keşfet metni (i18n/home.ts) web home.* değerleriyle birebir; home.mobile.* yok (S6)", () => {
+  const trEntries = Object.entries(mobileHome.HOME_TR);
+  assert.ok(trEntries.length >= 50, "beklenen Keşfet metin kümesi");
+  for (const [key, value] of trEntries) {
+    assert.ok(key.startsWith("home."), key);
+    assert.ok(!key.startsWith("home.mobile."), `${key}: mobil/mağaza bölümü render edilmez (S6)`);
+    assert.equal(value, TR[key], `TR ${key}`);
+  }
+  assert.deepEqual(Object.keys(mobileHome.HOME_EN), Object.keys(mobileHome.HOME_TR));
+  for (const [key, value] of Object.entries(mobileHome.HOME_EN))
+    assert.equal(value, EN[key], `EN ${key}`);
+  // Keşfet'te kullanılan her home.* anahtarı home.ts'te ve web ana sayfasının render ettiği kümede.
+  const explore = fs.readFileSync(path.join(MOBILE, "screens/ExploreScreen.tsx"), "utf8");
+  const webHome =
+    fs.readFileSync(path.join(WEB, "home-client.tsx"), "utf8") +
+    fs.readFileSync(path.join(WEB, "home-prompt.tsx"), "utf8");
+  for (const m of explore.matchAll(/"(home\.[A-Za-z0-9_.]+)"/g)) {
+    assert.ok(m[1] in mobileHome.HOME_TR, `${m[1]} home.ts'te yok`);
+    assert.ok(webHome.includes(`"${m[1]}"`), `${m[1]} web ana sayfasında render edilmiyor`);
+  }
+});
+
+test("paylaşım kodu kuralı web share-code ile aynı (S16)", () => {
+  const web = loadTs(path.join(WEB, "lib/share/share-code.ts"));
+  const mob = loadTs(path.join(MOBILE, "share/share-code.ts"));
+  for (const raw of [
+    "",
+    " ab ",
+    "abcd",
+    "AbC-12",
+    " a b c d ",
+    "x".repeat(64),
+    "x".repeat(65),
+    "ab_c",
+    null,
+  ])
+    assert.equal(mob.readShareCode(raw), web.readShareCode(raw), String(raw));
+  assert.equal(mob.SHARE_CODE_PATTERN.source, web.SHARE_CODE_PATTERN.source);
+  assert.equal(mob.shareCodeUrl("Ab-12"), "https://mapsbridge.com/k/?code=Ab-12");
+});
+
+test("misafir taslağı: aynı anahtar/şema/TTL, aynı özet mesajı, hesap yalıtımı", async () => {
+  const webDraft = loadTs(path.join(WEB, "lib/guest/guest-draft.ts"), { globals: webGlobals });
+  const webOwner = loadTs(path.join(WEB, "lib/guest/guest-draft-owner.ts"), {
+    stubs,
+    globals: webGlobals,
+  });
+  const mob = loadTs(path.join(MOBILE, "guest/guest-draft.ts"));
+  assert.equal(mob.GUEST_DRAFT_KEY, webDraft.GUEST_DRAFT_KEY);
+  assert.equal(mob.GUEST_DRAFT_OWNER_KEY, webOwner.GUEST_DRAFT_OWNER_KEY);
+  assert.equal(mob.GUEST_DRAFT_TTL_MS, webDraft.GUEST_DRAFT_TTL_MS);
+  assert.equal(mob.GUEST_PROMPT_MAX, webDraft.GUEST_PROMPT_MAX);
+  for (const text of ["  Roma'da\n3 gün ", "a\u0007b", "x".repeat(600), 42, ""])
+    assert.equal(mob.sanitizePrompt(text), webDraft.sanitizePrompt(text));
+  const now = Date.parse("2030-01-01T00:00:00Z");
+  assert.deepEqual(plain(mob.createDraft("Roma", now)), plain(webDraft.createDraft("Roma", now)));
+  const t = (k, f) => TR[k] ?? f;
+  const draft = {
+    ...webDraft.createDraft("Roma'da 3 gün", now),
+    answers: {
+      duration: "3d",
+      character: "history-culture",
+      pace: "balanced",
+      interests: ["local-food", "viewpoints"],
+    },
+    turn: 3,
+  };
+  assert.equal(mob.buildGuestSummaryMessage(draft), webDraft.buildGuestSummaryMessage(draft, t));
+  const ranged = {
+    ...draft,
+    answers: { ...draft.answers, duration: { from: "2030-02-01", to: "2030-02-03" } },
+  };
+  assert.equal(mob.buildGuestSummaryMessage(ranged), webDraft.buildGuestSummaryMessage(ranged, t));
+  for (const owner of ["guest", "a@x.com"])
+    for (const stored of [null, "guest", "a@x.com", "b@x.com"])
+      assert.equal(mob.canUseGuestDraft(stored, owner), webOwner.canUseGuestDraft(stored, owner));
+
+  // AsyncStorage benzeri bellek deposu.
+  const mem = {};
+  const store = {
+    async getItem(k) {
+      return k in mem ? mem[k] : null;
+    },
+    async setItem(k, v) {
+      mem[k] = v;
+    },
+    async removeItem(k) {
+      delete mem[k];
+    },
+  };
+  assert.equal(await mob.saveDraft(store, draft, "guest"), true);
+  assert.equal(mem[mob.GUEST_DRAFT_OWNER_KEY], "guest");
+  // Web localStorage okuması (eşzamanlı depo) aynı taslağı döndürür.
+  const snapshot = { ...mem };
+  const webStore = {
+    getItem: (k) => (k in snapshot ? snapshot[k] : null),
+    setItem: (k, v) => (snapshot[k] = v),
+    removeItem: (k) => delete snapshot[k],
+  };
+  const expected = webDraft.loadDraft(webStore, now);
+  assert.ok(expected, "web taslağı okur");
+  assert.deepEqual(plain(await mob.loadDraft(store, "a@x.com", now)), plain(expected));
+  assert.equal(mem[mob.GUEST_DRAFT_OWNER_KEY], "a@x.com", "ilk açan hesap sahiplenir");
+  assert.equal(await mob.loadDraft(store, "b@x.com", now), null, "başka hesap göremez");
+  assert.equal(await mob.loadDraft(store, "guest", now), null, "sonraki misafir göremez");
+  assert.equal(
+    await mob.loadDraft(store, "a@x.com", now + mob.GUEST_DRAFT_TTL_MS + 1),
+    null,
+    "TTL",
+  );
+  assert.equal(mem[mob.GUEST_DRAFT_KEY], undefined, "süresi dolan taslak silinir");
+  mem[mob.GUEST_DRAFT_KEY] = "{bozuk";
+  assert.equal(await mob.loadDraft(store, "guest", now), null);
+  assert.equal(mem[mob.GUEST_DRAFT_KEY], undefined, "bozuk taslak silinir");
+});
+
+test("katalog doğrulaması web parseCatalog ile aynı; native yalnız aylık ürün (S18)", () => {
+  const mob = loadTs(path.join(MOBILE, "billing/catalog.ts"));
+  const products = [
+    { id: "explorer", mode: "subscription", credits: 100, amount: 19900, available: true },
+    { id: "pro", mode: "subscription", credits: 500, amount: 49900, available: false },
+    { id: "pro-yearly", mode: "subscription", credits: 5500, amount: 499900, available: true },
+    { id: "pack-50", mode: "credit_pack", credits: 50, amount: 9900, available: true },
+    { id: "", mode: "subscription", credits: 1, amount: 1, available: true },
+    { id: "x", mode: "gift", credits: 1, amount: 1, available: true },
+  ];
+  for (const raw of [
+    { enabled: true, products },
+    { enabled: false, products: products.slice(0, 2) },
+    { enabled: true, products: [{ id: "bad" }] },
+    { enabled: true, products: [] },
+    null,
+    { products },
+  ])
+    assert.deepEqual(plain(mob.parseCatalog(raw)), plain(webCatalog.parseCatalog(raw)));
+  const parsed = webCatalog.parseCatalog({ enabled: true, products }).products;
+  for (const tier of ["free", "explorer", "pro", "agency"])
+    assert.deepEqual(
+      plain(mob.findMonthlyProduct(parsed, tier) ?? null),
+      plain(webCatalog.findPlanProduct(parsed, tier, "monthly") ?? null),
+      tier,
+    );
+});
+
+test("rota optimizasyonu web optimizeRouteOrder ile aynı sıra ve kazanç (S19, I2)", () => {
+  const web = loadTs(path.join(WEB, "lib/trip/routing-service.ts"), { globals: webGlobals });
+  const mob = loadTs(path.join(MOBILE, "trip/optimize.ts"));
+  const sets = [
+    [
+      [41.8902, 12.4922],
+      [41.9009, 12.4833],
+      [41.8925, 12.4853],
+      [41.8986, 12.4769],
+      [41.9029, 12.4534],
+    ],
+    [
+      [41.0086, 28.9802],
+      [41.0256, 28.9741],
+      [41.0054, 28.9768],
+      [41.0108, 28.968],
+    ],
+    [
+      [1, 1],
+      [1.0001, 1],
+    ],
+  ];
+  for (const coords of sets) {
+    const stops = coords.map(([lat, lng], i) => ({ id: `s${i}`, lat, lng }));
+    const pins = stops.map((s) => ({ ...s, dayIndex: 0, name: s.id }));
+    const w = web.optimizeRouteOrder(pins, "walking");
+    const m = mob.optimizeStopOrder(stops, "walking");
+    if (!w) {
+      assert.equal(m, null);
+      continue;
+    }
+    assert.deepEqual(plain(m.optimizedStopIds), plain(w.optimizedPinIds));
+    assert.equal(m.savedDistanceKm, w.savedDistanceKm);
+    assert.equal(m.savedDurationMinutes, w.savedDurationMinutes);
+  }
+});

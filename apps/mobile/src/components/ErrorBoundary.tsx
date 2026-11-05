@@ -1,8 +1,12 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { SafeArea } from "../ui";
-import { tokens, withAlpha } from "../theme";
+import { Button, SafeArea, Txt } from "../ui";
+import { tr } from "../i18n/ui";
+import { tokens } from "../theme";
+
+// Beklenmeyen ekran hatası (web error.tsx karşılığı: "Bir şeyler ters gitti"). FEAT-012:
+// primitive'lerle; "verileriniz koruma altında" gibi doğrulanmamış güvence metni kaldırıldı.
 interface Props {
   children: ReactNode;
 }
@@ -34,32 +38,19 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <SafeArea style={styles.container}>
-          <View style={styles.card}>
-            <View style={styles.badge}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.badgeText}>
-                SİSTEM KURTARMA
-              </Text>
-            </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.title}>
-              Uygulama Güvenle Kurtarıldı
-            </Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.message}>
-              Beklenmedik bir ekran yükleme sorunu oluştu. Verileriniz koruma altında tutulmaktadır.
-            </Text>
-            {this.state.error?.message && (
-              <Text
-                maxFontSizeMultiplier={tokens.font.maxScale.body}
-                style={styles.detail}
-                numberOfLines={3}
-              >
+          <View style={styles.card} accessibilityRole="alert">
+            <Txt variant="title" header align="center">
+              {tr("ui.errorPage.title")}
+            </Txt>
+            <Txt variant="small" tone="muted" align="center">
+              Ekran yüklenirken beklenmeyen bir sorun oluştu. Tekrar deneyebilirsin.
+            </Txt>
+            {this.state.error?.message ? (
+              <Txt variant="caption" tone="danger" numberOfLines={3}>
                 {this.state.error.message}
-              </Text>
-            )}
-            <TouchableOpacity style={styles.button} onPress={this.handleReset} activeOpacity={0.85}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.buttonText}>
-                Yeniden Başlat
-              </Text>
-            </TouchableOpacity>
+              </Txt>
+            ) : null}
+            <Button label={tr("ui.retry")} size="lg" onPress={this.handleReset} />
           </View>
         </SafeArea>
       );
@@ -72,71 +63,19 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: tokens.color.surfaceInverseStrong,
+    backgroundColor: tokens.color.bg,
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
+    padding: tokens.space["6"],
   },
   card: {
-    backgroundColor: tokens.color.surfaceInverse,
-    borderRadius: 20,
-    padding: 24,
     width: "100%",
     maxWidth: 400,
+    gap: tokens.space["4"],
+    padding: tokens.space["6"],
+    borderRadius: tokens.radius.lg,
     borderWidth: 1,
-    borderColor: tokens.color.brandHover,
-    alignItems: "center",
-  },
-  badge: {
-    backgroundColor: withAlpha(tokens.color.accentStrong, 0.15),
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: tokens.color.accentStrong,
-    marginBottom: 16,
-  },
-  badgeText: {
-    color: tokens.color.accentStrong,
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 0.8,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: tokens.color.onPrimary,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  message: {
-    fontSize: 13,
-    color: tokens.color.neutral400,
-    textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  detail: {
-    fontSize: 11,
-    fontFamily: "monospace",
-    color: tokens.color.dangerIcon,
-    backgroundColor: withAlpha(tokens.color.black, 0.3),
-    padding: 10,
-    borderRadius: 8,
-    width: "100%",
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: tokens.color.accent,
-    paddingVertical: 13,
-    paddingHorizontal: 28,
-    borderRadius: 999,
-    width: "100%",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: tokens.color.onPrimary,
-    fontSize: 14,
-    fontWeight: "800",
+    borderColor: tokens.color.cardBorder,
+    backgroundColor: tokens.color.cardBg,
   },
 });

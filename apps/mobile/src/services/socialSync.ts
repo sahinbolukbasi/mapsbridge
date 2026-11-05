@@ -109,8 +109,9 @@ interface RawServerPost {
   createdAtMs?: number;
 }
 
-const DEFAULT_AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCQdOMegHKRlkwubsFEMHDlXU8mVoZKUlXw7A0Quos1oSmZCSZEg30fAB4aMRnCI9q8UEUkdzonH9DUfJ3dTRjIPGpEsvmdB7q2Hrn_b98XcVBeB1CNFBlpaQM33IpQEZ9Bj2TQCR_rWOyCdeIsnX_hZXhb7z1nrWj53EXbHiVov_Hx5WO-_ikQRe6lEE_jnkFjZlEF1WXEue5BMqYbUXVJqoHBc--0mvHvT89fTCsu0mllchVOc6h24A";
+// FEAT-012 (FEAT-009 kuralı): stok avatar, varsayılan "onaylı" rozeti, uydurma unvan/tanıtım/konum
+// ve takipçi sayıları kullanılmaz. Görsel yoksa arayüz ad baş harflerini çizer; konum yoksa yazılmaz.
+const DEFAULT_AVATAR = "";
 
 // Base URL for sync backend
 const COMMUNITY_API_BASE =
@@ -137,7 +138,7 @@ function mapServerPostToMobile(post: RawServerPost): MobileCommunityPost {
       : `@${post.authorUsername}`,
     authorAvatar: post.authorAvatar || DEFAULT_AVATAR,
     authorEmail: post.authorEmail,
-    verified: post.verified ?? true,
+    verified: post.verified ?? false,
     timeAgo: post.createdAt || "Az önce",
     content: post.content || "",
     hashtags: post.hashtags || post.tags || [],
@@ -209,15 +210,15 @@ class SocialSyncService {
       fullName: name,
       username: emailPrefix.toLowerCase().replace(/[^a-z0-9_]/g, ""),
       email,
-      travelTitle: "Doğa & Rota Kaşifi",
-      bio: "Sırt çantalı gezgin. Kültürel duraklar, gizli patikalar ve çevre dostu seyahatler tasarlar.",
-      location: "İstanbul, Türkiye",
-      avatarUrl: DEFAULT_AVATAR,
-      followersCount: 1420,
-      followingCount: 284,
-      routesCount: 12,
-      stopsCount: 38,
-      verified: true,
+      travelTitle: "",
+      bio: "",
+      location: "",
+      avatarUrl: undefined,
+      followersCount: 0,
+      followingCount: 0,
+      routesCount: 0,
+      stopsCount: 0,
+      verified: false,
     };
 
     await storage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(defaultProfile));
@@ -318,10 +319,10 @@ class SocialSyncService {
     const posts = await this.getPosts();
 
     const cleanContent = sanitizeText(data.content);
-    const cleanLocation = sanitizeText(data.locationTag) || profile.location;
-    const cleanHashtags = (
-      data.hashtags && data.hashtags.length > 0 ? data.hashtags : ["#MapsBridge", "#Keşif"]
-    ).map((h) => sanitizeText(h));
+    const cleanLocation = sanitizeText(data.locationTag) || undefined;
+    const cleanHashtags = (data.hashtags && data.hashtags.length > 0 ? data.hashtags : []).map(
+      (h) => sanitizeText(h),
+    );
 
     const newPost: MobileCommunityPost = {
       id: `post-${Date.now()}`,

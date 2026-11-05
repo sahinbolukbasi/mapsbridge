@@ -1,35 +1,67 @@
 import React, { useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { authService, type UserSession } from "../services/api";
 import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { authService, UserSession } from "../services/api";
-import { AppleLogo, GoogleLogo, ArrowRightIcon, ExploreIcon } from "../components/Icons";
-
-import { Screen } from "../ui";
+  Button,
+  Card,
+  Icon,
+  IconButton,
+  Notice,
+  Screen,
+  ScreenHeader,
+  SegmentedControl,
+  TextField,
+  Txt,
+} from "../ui";
+import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
+
+// Kimlik ekranı (design §6.4, §9 "Kimlik (AuthCard)"; kararlar S7, S20): web AuthCard adımlarıyla
+// aynı sıra: Giriş / Kayıt → e-posta doğrulama kodu; Şifremi unuttum → kod + yeni şifre. Kapılardan
+// ve Giriş sekmesinden açılır. Cognito çağrıları (authService) DEĞİŞMEDİ. Google bugünkü OAuth
+// akışıyla; Apple ile giriş henüz entegre değil (yalnız "yakında" uyarısı veriyordu), bu yüzden web
+// gibi düğme çizilmez (I10, S20). İşlevsiz "Beni hatırla" kutusu kaldırıldı (S20).
 type AuthMode = "login" | "register" | "confirm_signup" | "forgot_password" | "reset_password";
 
 interface AuthScreenProps {
   onSuccess: (session: UserSession) => void;
   onCancel?: () => void;
   onSelectGoogle?: () => void;
-  onSelectApple?: () => void;
   initialMode?: AuthMode;
 }
+
+const RULES = [
+  { key: "edit.pw.rule.length", test: (p: string) => p.length >= 12 },
+  { key: "edit.pw.rule.lower", test: (p: string) => /[a-zğüşıöç]/.test(p) },
+  { key: "edit.pw.rule.upper", test: (p: string) => /[A-ZĞÜŞİÖÇ]/.test(p) },
+  { key: "edit.pw.rule.digit", test: (p: string) => /[0-9]/.test(p) },
+  { key: "edit.pw.rule.symbol", test: (p: string) => /[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ]/.test(p) },
+] as const;
+
+const TITLES: Record<AuthMode, { title: string; sub: (email: string) => string }> = {
+  login: { title: "Giriş yap", sub: () => "Rotalarına ve asistana kaldığın yerden devam et." },
+  register: {
+    title: "Ücretsiz hesap aç",
+    sub: () => "Rotalarını hesabında sakla, asistanla taslak rotanı oluştur.",
+  },
+  confirm_signup: {
+    title: "E-postanı doğrula",
+    sub: (email) => `${email} adresine gönderilen 6 haneli kodu gir.`,
+  },
+  forgot_password: {
+    title: "Şifremi unuttum",
+    sub: () => "E-posta adresine bir sıfırlama kodu göndereceğiz.",
+  },
+  reset_password: {
+    title: "Yeni şifre belirle",
+    sub: () => "E-postana gelen kodla yeni şifreni oluştur.",
+  },
+};
 
 export function AuthScreen({
   onSuccess,
   onCancel,
   onSelectGoogle,
-  onSelectApple,
   initialMode = "login",
 }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -38,962 +70,304 @@ export function AuthScreen({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("+90");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [infoMessage, setInfoMessage] = useState("");
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
-  // Password rules
-  const rules = [
-    { id: "rule-length", label: "En az 12 karakter", valid: password.length >= 12 },
-    { id: "rule-lower", label: "En az bir küçük harf", valid: /[a-zğüşıöç]/.test(password) },
-    { id: "rule-upper", label: "En az bir büyük harf", valid: /[A-ZĞÜŞİÖÇ]/.test(password) },
-    { id: "rule-number", label: "En az bir rakam", valid: /[0-9]/.test(password) },
-    {
-      id: "rule-symbol",
-      label: "En az bir sembol (ör. !, ?, #)",
-      valid: /[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ]/.test(password),
-    },
-  ];
-  const isPasswordValid = rules.every((r) => r.valid);
-
-  const clearMessages = () => {
-    setErrorMessage("");
-    setInfoMessage("");
+  const go = (next: AuthMode) => {
+    setError("");
+    setMode(next);
   };
 
-  const handleSignIn = async () => {
+  const run = async (fn: () => Promise<void>) => {
+    setLoading(true);
+    setError("");
+    setInfo("");
+    try {
+      await fn();
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : tr("ui.unexpectedError"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signIn = () => {
     if (!email.trim() || !password) {
-      setErrorMessage("Lütfen e-posta ve şifrenizi girin.");
+      setError("E-posta ve şifreni gir.");
       return;
     }
-    setLoading(true);
-    clearMessages();
-    try {
-      const session = await authService.signIn(email, password);
-      onSuccess(session);
-    } catch (err: unknown) {
-      const e = err instanceof Error ? err : null;
-      if (
-        e?.message?.includes("UserNotConfirmedException") ||
-        e?.message?.includes("not confirmed")
-      ) {
-        setInfoMessage(
-          "Hesabınız henüz onaylanmamış. E-postanıza gönderilen doğrulama kodunu girin.",
-        );
-        setMode("confirm_signup");
-      } else {
-        setErrorMessage(e?.message || "E-posta veya şifre hatalı.");
+    run(async () => {
+      try {
+        onSuccess(await authService.signIn(email, password));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "";
+        if (msg.includes("UserNotConfirmedException") || msg.includes("not confirmed")) {
+          setInfo("Hesabın henüz doğrulanmadı. E-postana gönderilen kodu gir.");
+          setMode("confirm_signup");
+          return;
+        }
+        throw err;
       }
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
-  const handleSignUp = async () => {
+  const pwFor = mode === "reset_password" ? newPassword : password;
+  const pwValid = RULES.every((r) => r.test(pwFor));
+
+  const signUp = () => {
     const cleanEmail = email.trim().toLowerCase();
-    const cleanFirst = firstName.trim();
-    const cleanLast = lastName.trim();
-    const cleanPhone = phone.trim();
-    if (!cleanFirst || !cleanLast || !cleanEmail || !password || cleanPhone.length < 10) {
-      setErrorMessage(
-        "Lütfen tüm zorunlu alanları (Ad, Soyad, Telefon, E-posta, Şifre) eksiksiz doldurun.",
+    if (
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !cleanEmail ||
+      !password ||
+      phone.trim().length < 10
+    ) {
+      setError("Ad, soyad, telefon, e-posta ve şifre zorunlu.");
+      return;
+    }
+    if (!pwValid) {
+      setError(tr("edit.pw.invalid"));
+      return;
+    }
+    run(async () => {
+      await authService.signUp(
+        cleanEmail,
+        password,
+        `${firstName.trim()} ${lastName.trim()}`,
+        phone.trim(),
       );
-      return;
-    }
-    if (!isPasswordValid) {
-      setErrorMessage("Lütfen tüm şifre güvenlik kriterlerini sağlayın.");
-      return;
-    }
-
-    setLoading(true);
-    clearMessages();
-    try {
-      await authService.signUp(cleanEmail, password, `${cleanFirst} ${cleanLast}`, cleanPhone);
-      setInfoMessage(`Doğrulama kodu ${cleanEmail} adresine iletildi.`);
+      setInfo(`Doğrulama kodu ${cleanEmail} adresine gönderildi.`);
       setMode("confirm_signup");
-    } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Kayıt işlemi tamamlanamadı.");
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
-  const handleConfirmSignUp = async () => {
+  const confirm = () => {
     if (!code.trim()) {
-      setErrorMessage("Lütfen doğrulama kodunu girin.");
+      setError("Doğrulama kodunu gir.");
       return;
     }
-    setLoading(true);
-    clearMessages();
-    try {
+    run(async () => {
       await authService.confirmSignUp(email, code);
-      setInfoMessage("Hesabınız başarıyla doğrulandı! Şimdi giriş yapabilirsiniz.");
+      setInfo("Hesabın doğrulandı. Şimdi giriş yapabilirsin.");
       setMode("login");
-    } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Doğrulama kodu hatalı.");
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
-  const handleForgotPassword = async () => {
+  const forgot = () => {
     if (!email.trim()) {
-      setErrorMessage("Lütfen şifresini sıfırlamak istediğiniz e-posta adresini girin.");
+      setError("Şifresini sıfırlamak istediğin e-posta adresini gir.");
       return;
     }
-    setLoading(true);
-    clearMessages();
-    try {
+    run(async () => {
       await authService.forgotPassword(email);
-      setInfoMessage(`Şifre sıfırlama kodu ${email} adresine gönderildi.`);
+      setInfo(`Sıfırlama kodu ${email} adresine gönderildi.`);
       setMode("reset_password");
-    } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Şifre sıfırlama talebi gönderilemedi.");
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
-  const handleResetPassword = async () => {
+  const reset = () => {
     if (!code.trim() || !newPassword) {
-      setErrorMessage("Lütfen kod ve yeni şifreyi girin.");
+      setError("Kodu ve yeni şifreni gir.");
       return;
     }
-    setLoading(true);
-    clearMessages();
-    try {
-      await authService.confirmForgotPassword(email, code, newPassword);
-      setInfoMessage("Şifreniz başarıyla güncellendi! Yeni şifrenizle giriş yapabilirsiniz.");
-      setMode("login");
-    } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Şifre sıfırlanamadı.");
-    } finally {
-      setLoading(false);
+    if (!pwValid) {
+      setError(tr("edit.pw.invalid"));
+      return;
     }
+    run(async () => {
+      await authService.confirmForgotPassword(email, code, newPassword);
+      setInfo("Şifren güncellendi. Yeni şifrenle giriş yapabilirsin.");
+      setMode("login");
+    });
   };
+
+  const submit = {
+    login: signIn,
+    register: signUp,
+    confirm_signup: confirm,
+    forgot_password: forgot,
+    reset_password: reset,
+  }[mode];
+  const submitLabel = {
+    login: "Giriş yap",
+    register: "Hesabı oluştur",
+    confirm_signup: "Kodu doğrula",
+    forgot_password: "Kodu gönder",
+    reset_password: tr("edit.pw.submit"),
+  }[mode];
+
+  const head = TITLES[mode];
+  const showPwRules = (mode === "register" || mode === "reset_password") && pwFor.length > 0;
 
   return (
-    <Screen style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Top Navigation & Brand Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onCancel} style={styles.backBtn} activeOpacity={0.8}>
-              <Text
-                maxFontSizeMultiplier={tokens.font.maxScale.body}
-                style={{ fontSize: 16, color: tokens.color.textBrand }}
-              >
-                ←
-              </Text>
-            </TouchableOpacity>
+    <Screen
+      keyboardAvoiding
+      header={
+        <ScreenHeader
+          title={head.title}
+          left={
+            onCancel ? (
+              <IconButton icon="chevron-left" label={tr("nav.back")} onPress={onCancel} />
+            ) : undefined
+          }
+        />
+      }
+    >
+      <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
+        <Txt tone="muted">{head.sub(email.trim())}</Txt>
+        <Card variant="bordered" padding="5">
+          <View style={styles.form}>
+            {mode === "login" || mode === "register" ? (
+              <SegmentedControl
+                label="Hesap"
+                options={[
+                  { value: "login", label: tr("gate.login") },
+                  { value: "register", label: tr("nav.signUp") },
+                ]}
+                value={mode}
+                onChange={(v) => go(v)}
+              />
+            ) : null}
+            {info ? <Notice tone="success">{info}</Notice> : null}
+            {error ? <Notice tone="danger">{error}</Notice> : null}
 
-            <View style={styles.headerCenter}>
-              <View style={styles.headerLogoBadge}>
-                <ExploreIcon size={16} color={tokens.color.onPrimary} />
-              </View>
-              <Text
-                maxFontSizeMultiplier={tokens.font.maxScale.body}
-                style={styles.headerBrandText}
-              >
-                MapsBridge
-              </Text>
-            </View>
-
-            <View style={{ width: 40 }} />
-          </View>
-
-          {/* Heading & Subtitle */}
-          <View style={styles.titleSection}>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.screenHeading}>
-              {mode === "login" && "Tekrar Hoş Geldiniz"}
-              {mode === "register" && "Hesap Oluştur"}
-              {mode === "confirm_signup" && "Kodu Doğrula"}
-              {mode === "forgot_password" && "Şifremi Unuttum"}
-              {mode === "reset_password" && "Yeni Şifre Belirle"}
-            </Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.screenSubheading}>
-              {mode === "login" && "MapsBridge hesabınıza giriş yaparak rotalarınıza devam edin."}
-              {mode === "register" &&
-                "Kendi rotalarını çiz, gizli patikaları keşfet ve dünya ile paylaş."}
-              {mode === "confirm_signup" && `${email} adresine iletilen 6 haneli kodu girin.`}
-              {mode === "forgot_password" && "E-posta adresinize sıfırlama kodu göndereceğiz."}
-              {mode === "reset_password" && "E-postanıza gelen kodla yeni şifrenizi oluşturun."}
-            </Text>
-          </View>
-
-          {/* Info & Error Alerts */}
-          {errorMessage ? (
-            <View style={styles.errorAlert}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.errorAlertText}>
-                ⚠️ {errorMessage}
-              </Text>
-            </View>
-          ) : null}
-
-          {infoMessage ? (
-            <View style={styles.infoAlert}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.infoAlertText}>
-                ℹ️ {infoMessage}
-              </Text>
-            </View>
-          ) : null}
-
-          {/* Main Card Container */}
-          <View style={styles.mainCard}>
-            {/* Segmented Tab Switcher (Login / Register) */}
-            {(mode === "login" || mode === "register") && (
-              <View style={styles.segmentContainer}>
-                <TouchableOpacity
-                  style={[styles.segmentBtn, mode === "login" && styles.segmentBtnActive]}
-                  onPress={() => {
-                    setMode("login");
-                    clearMessages();
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={[styles.segmentText, mode === "login" && styles.segmentTextActive]}
-                  >
-                    Giriş Yap
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.segmentBtn, mode === "register" && styles.segmentBtnActive]}
-                  onPress={() => {
-                    setMode("register");
-                    clearMessages();
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={[styles.segmentText, mode === "register" && styles.segmentTextActive]}
-                  >
-                    Kayıt Ol
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* Social Auth Buttons (Apple & Google) */}
-            {(mode === "login" || mode === "register") && (
+            {(mode === "login" || mode === "register") && onSelectGoogle ? (
               <>
-                <View style={styles.socialButtonsGroup}>
-                  {/* Apple Button */}
-                  <TouchableOpacity
-                    style={styles.appleBtn}
-                    onPress={() => {
-                      if (onSelectApple) {
-                        onSelectApple();
-                      } else {
-                        const appleSession: UserSession = {
-                          token: `mb_apple_${Date.now()}`,
-                          email: "apple.user@icloud.com",
-                          name: "Apple Gezgini",
-                        };
-                        onSuccess(appleSession);
-                      }
-                    }}
-                    activeOpacity={0.85}
-                  >
-                    <AppleLogo size={18} color={tokens.color.onPrimary} />
-                    <Text
-                      maxFontSizeMultiplier={tokens.font.maxScale.body}
-                      style={styles.appleBtnText}
-                    >
-                      {mode === "register" ? "Apple ile Kayıt Ol" : "Apple ile Giriş Yap"}
-                    </Text>
-                  </TouchableOpacity>
-
-                  {/* Google Button */}
-                  <TouchableOpacity
-                    style={styles.googleBtn}
-                    onPress={onSelectGoogle}
-                    activeOpacity={0.85}
-                  >
-                    <GoogleLogo size={18} />
-                    <Text
-                      maxFontSizeMultiplier={tokens.font.maxScale.body}
-                      style={styles.googleBtnText}
-                    >
-                      {mode === "register" ? "Google ile Kayıt Ol" : "Google ile Giriş Yap"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Minimal Separator */}
-                <View style={styles.separatorContainer}>
-                  <View style={styles.separatorLine} />
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={styles.separatorText}
-                  >
-                    veya e-posta ile
-                  </Text>
-                </View>
+                <Button
+                  label={mode === "register" ? "Google ile kayıt ol" : "Google ile giriş yap"}
+                  variant="secondary"
+                  size="lg"
+                  icon={<Icon name="globe" size={20} color={tokens.color.buttonSecondaryFg} />}
+                  onPress={onSelectGoogle}
+                />
+                <Txt variant="caption" tone="muted" align="center">
+                  veya e-posta ile
+                </Txt>
               </>
-            )}
+            ) : null}
 
-            {/* Form Fields */}
-            {mode === "register" && (
+            {mode === "register" ? (
               <>
-                <View style={styles.fieldGroup}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
-                    Adınız
-                  </Text>
-                  <View style={styles.inputWrap}>
-                    <Text
-                      maxFontSizeMultiplier={tokens.font.maxScale.body}
-                      style={styles.inputIcon}
-                    >
-                      👤
-                    </Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Doğan"
-                      placeholderTextColor={tokens.color.textSubtle}
-                      value={firstName}
-                      onChangeText={setFirstName}
-                      autoCapitalize="words"
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
-                    Soyadınız
-                  </Text>
-                  <View style={styles.inputWrap}>
-                    <Text
-                      maxFontSizeMultiplier={tokens.font.maxScale.body}
-                      style={styles.inputIcon}
-                    >
-                      👤
-                    </Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Demir"
-                      placeholderTextColor={tokens.color.textSubtle}
-                      value={lastName}
-                      onChangeText={setLastName}
-                      autoCapitalize="words"
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
-                    Telefon Numarası
-                  </Text>
-                  <View style={styles.inputWrap}>
-                    <Text
-                      maxFontSizeMultiplier={tokens.font.maxScale.body}
-                      style={styles.inputIcon}
-                    >
-                      📱
-                    </Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="+905550000000"
-                      placeholderTextColor={tokens.color.textSubtle}
-                      value={phone}
-                      onChangeText={setPhone}
-                      keyboardType="phone-pad"
-                      autoCapitalize="none"
-                    />
-                  </View>
-                </View>
+                <TextField
+                  label="Ad"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  autoComplete="given-name"
+                  textContentType="givenName"
+                />
+                <TextField
+                  label="Soyad"
+                  value={lastName}
+                  onChangeText={setLastName}
+                  autoComplete="family-name"
+                  textContentType="familyName"
+                />
+                <TextField
+                  label="Telefon"
+                  value={phone}
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                  autoComplete="tel"
+                  textContentType="telephoneNumber"
+                />
               </>
-            )}
+            ) : null}
 
-            {(mode === "login" || mode === "register" || mode === "forgot_password") && (
-              <View style={styles.fieldGroup}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
-                  E-posta Adresi
-                </Text>
-                <View style={styles.inputWrap}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>
-                    ✉️
-                  </Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="adiniz@ornek.com"
-                    placeholderTextColor={tokens.color.textSubtle}
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                  />
-                </View>
+            {mode !== "confirm_signup" && mode !== "reset_password" ? (
+              <TextField
+                label="E-posta"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
+              />
+            ) : null}
+
+            {mode === "login" || mode === "register" ? (
+              <TextField
+                label="Şifre"
+                value={password}
+                onChangeText={setPassword}
+                secure
+                autoComplete={mode === "register" ? "new-password" : "password"}
+                textContentType={mode === "register" ? "newPassword" : "password"}
+              />
+            ) : null}
+
+            {mode === "confirm_signup" || mode === "reset_password" ? (
+              <TextField
+                label="Doğrulama kodu"
+                value={code}
+                onChangeText={setCode}
+                keyboardType="number-pad"
+                maxLength={6}
+                autoComplete="one-time-code"
+                textContentType="oneTimeCode"
+              />
+            ) : null}
+
+            {mode === "reset_password" ? (
+              <TextField
+                label={tr("edit.pw.new")}
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secure
+                autoComplete="new-password"
+                textContentType="newPassword"
+              />
+            ) : null}
+
+            {showPwRules ? (
+              <View style={styles.rules} accessibilityLabel={tr("edit.pw.rules")}>
+                {RULES.map((r) => {
+                  const ok = r.test(pwFor);
+                  return (
+                    <View key={r.key} style={styles.rule}>
+                      <Icon
+                        name={ok ? "check" : "x"}
+                        size={16}
+                        color={ok ? tokens.color.success : tokens.color.textMuted}
+                      />
+                      <Txt variant="caption" tone={ok ? "success" : "muted"}>
+                        {`${tr(r.key)} · ${ok ? tr("edit.pw.ok") : tr("edit.pw.missing")}`}
+                      </Txt>
+                    </View>
+                  );
+                })}
               </View>
-            )}
+            ) : null}
 
-            {(mode === "login" || mode === "register") && (
-              <View style={styles.fieldGroup}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
-                  Şifre
-                </Text>
-                <View style={styles.inputWrap}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>
-                    🔒
-                  </Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="••••••••••••"
-                    placeholderTextColor={tokens.color.textSubtle}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeBtn}
-                    onPress={() => setShowPassword(!showPassword)}
-                  >
-                    <Text
-                      maxFontSizeMultiplier={tokens.font.maxScale.body}
-                      style={{ fontSize: 16 }}
-                    >
-                      {showPassword ? "👁️" : "🙈"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
+            <Button label={submitLabel} size="lg" loading={loading} onPress={submit} />
 
-            {/* Register Password Criteria */}
-            {mode === "register" && password.length > 0 && (
-              <View style={styles.rulesContainer}>
-                {rules.map((r) => (
-                  <View key={r.id} style={styles.ruleRow}>
-                    <Text
-                      maxFontSizeMultiplier={tokens.font.maxScale.body}
-                      style={{
-                        fontSize: 11,
-                        color: r.valid ? tokens.color.accent : tokens.color.neutral400,
-                      }}
-                    >
-                      {r.valid ? "✓" : "○"}
-                    </Text>
-                    <Text
-                      maxFontSizeMultiplier={tokens.font.maxScale.body}
-                      style={[
-                        styles.ruleText,
-                        r.valid
-                          ? { color: tokens.color.accent }
-                          : { color: tokens.color.textSubtle },
-                      ]}
-                    >
-                      {r.label}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* Remember Me & Forgot Password (Login Mode) */}
-            {mode === "login" && (
-              <View style={styles.auxRow}>
-                <TouchableOpacity
-                  style={styles.rememberWrap}
-                  onPress={() => setRememberMe(!rememberMe)}
-                  activeOpacity={0.8}
-                >
-                  <View style={[styles.checkbox, rememberMe && styles.checkboxActive]}>
-                    {rememberMe && (
-                      <Text
-                        maxFontSizeMultiplier={tokens.font.maxScale.body}
-                        style={{ color: tokens.color.onPrimary, fontSize: 10 }}
-                      >
-                        ✓
-                      </Text>
-                    )}
-                  </View>
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={styles.rememberText}
-                  >
-                    Beni hatırla
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => {
-                    setMode("forgot_password");
-                    clearMessages();
-                  }}
-                >
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={styles.forgotPassText}
-                  >
-                    Şifremi Unuttum?
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* Verification Code Fields */}
-            {(mode === "confirm_signup" || mode === "reset_password") && (
-              <View style={styles.fieldGroup}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
-                  Doğrulama Kodu
-                </Text>
-                <View style={styles.inputWrap}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>
-                    🔢
-                  </Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="123456"
-                    placeholderTextColor={tokens.color.textSubtle}
-                    value={code}
-                    onChangeText={setCode}
-                    keyboardType="number-pad"
-                  />
-                </View>
-              </View>
-            )}
-
-            {mode === "reset_password" && (
-              <View style={styles.fieldGroup}>
-                <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.fieldLabel}>
-                  Yeni Şifre
-                </Text>
-                <View style={styles.inputWrap}>
-                  <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.inputIcon}>
-                    🔒
-                  </Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="••••••••••••"
-                    placeholderTextColor={tokens.color.textSubtle}
-                    value={newPassword}
-                    onChangeText={setNewPassword}
-                    secureTextEntry
-                  />
-                </View>
-              </View>
-            )}
-
-            {/* Primary Action Button */}
-            <TouchableOpacity
-              style={styles.primaryAuthBtn}
-              onPress={() => {
-                if (mode === "login") handleSignIn();
-                else if (mode === "register") handleSignUp();
-                else if (mode === "confirm_signup") handleConfirmSignUp();
-                else if (mode === "forgot_password") handleForgotPassword();
-                else if (mode === "reset_password") handleResetPassword();
-              }}
-              disabled={loading}
-              activeOpacity={0.88}
-            >
-              {loading ? (
-                <ActivityIndicator color={tokens.color.onPrimary} />
-              ) : (
-                <View style={styles.primaryBtnInner}>
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={styles.primaryAuthBtnText}
-                  >
-                    {mode === "login" && "Giriş Yap"}
-                    {mode === "register" && "Hesap Oluştur"}
-                    {mode === "confirm_signup" && "Kodu Doğrula"}
-                    {mode === "forgot_password" && "Kod Gönder"}
-                    {mode === "reset_password" && "Şifreyi Değiştir"}
-                  </Text>
-                  <ArrowRightIcon size={16} color={tokens.color.onPrimary} />
-                </View>
-              )}
-            </TouchableOpacity>
-
-            {/* Bottom Switcher */}
-            <View style={styles.bottomSwitcherRow}>
-              {mode === "login" ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    setMode("register");
-                    clearMessages();
-                  }}
-                  style={styles.switchTouch}
-                >
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={styles.switchMuted}
-                  >
-                    Hesabın yok mu?{" "}
-                  </Text>
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={styles.switchActive}
-                  >
-                    Hemen Kaydol ➔
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => {
-                    setMode("login");
-                    clearMessages();
-                  }}
-                  style={styles.switchTouch}
-                >
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={styles.switchMuted}
-                  >
-                    Zaten üye misin?{" "}
-                  </Text>
-                  <Text
-                    maxFontSizeMultiplier={tokens.font.maxScale.body}
-                    style={styles.switchActive}
-                  >
-                    Giriş Yap ➔
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
+            {mode === "login" ? (
+              <Button
+                label="Şifremi unuttum"
+                variant="ghost"
+                onPress={() => go("forgot_password")}
+              />
+            ) : null}
+            {mode === "confirm_signup" ||
+            mode === "forgot_password" ||
+            mode === "reset_password" ? (
+              <Button label={tr("gate.login")} variant="ghost" onPress={() => go("login")} />
+            ) : null}
           </View>
-
-          {/* Trust Badges Footer */}
-          <View style={styles.trustFooter}>
-            <Text
-              maxFontSizeMultiplier={tokens.font.maxScale.body}
-              style={{ fontSize: 13, marginRight: 5 }}
-            >
-              🔒
-            </Text>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.trustFooterText}>
-              256-Bit SSL uçtan uca güvenli şifreleme
-            </Text>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </Card>
+      </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: tokens.color.bg,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 30,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: tokens.color.surfaceTint,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerCenter: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  headerLogoBadge: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: tokens.color.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerBrandText: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: tokens.color.textBrand,
-    letterSpacing: -0.2,
-  },
-  titleSection: {
-    marginVertical: 14,
-  },
-  screenHeading: {
-    fontSize: 26,
-    fontWeight: "800",
-    color: tokens.color.text,
-    letterSpacing: -0.5,
-    marginBottom: 4,
-  },
-  screenSubheading: {
-    fontSize: 13,
-    color: tokens.color.textMuted,
-    lineHeight: 19,
-  },
-  errorAlert: {
-    backgroundColor: tokens.color.dangerBorder,
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  errorAlertText: {
-    color: tokens.color.danger,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  infoAlert: {
-    backgroundColor: tokens.color.surfaceBrand,
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  infoAlertText: {
-    color: tokens.color.textBrand,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  mainCard: {
-    backgroundColor: tokens.color.surface,
-    borderRadius: 20,
-    padding: 18,
-    shadowColor: tokens.color.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  segmentContainer: {
-    flexDirection: "row",
-    backgroundColor: tokens.color.surfaceSunken,
-    borderRadius: 12,
-    padding: 3,
-    marginBottom: 16,
-  },
-  segmentBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  segmentBtnActive: {
-    backgroundColor: tokens.color.surface,
-    shadowColor: tokens.color.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  segmentText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: tokens.color.textSubtle,
-  },
-  segmentTextActive: {
-    color: tokens.color.textBrand,
-    fontWeight: "800",
-  },
-  socialButtonsGroup: {
-    gap: 10,
-    marginBottom: 14,
-  },
-  appleBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    backgroundColor: tokens.color.black,
-    paddingVertical: 13,
-    borderRadius: 14,
-    shadowColor: tokens.color.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  appleBtnText: {
-    color: tokens.color.onPrimary,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  googleBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    backgroundColor: tokens.color.bg,
-    paddingVertical: 13,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: tokens.color.surfaceTint,
-  },
-  googleBtnText: {
-    color: tokens.color.text,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  separatorContainer: {
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 12,
-  },
-  separatorLine: {
-    width: "100%",
-    height: 1,
-    backgroundColor: tokens.color.surfaceTint,
-  },
-  separatorText: {
-    position: "absolute",
-    backgroundColor: tokens.color.surface,
-    paddingHorizontal: 10,
-    fontSize: 12,
-    color: tokens.color.textSubtle,
-    fontWeight: "500",
-  },
-  fieldGroup: {
-    marginBottom: 12,
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: tokens.color.text,
-    marginBottom: 6,
-  },
-  inputWrap: {
-    position: "relative",
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: tokens.color.surfaceSunken,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-  },
-  inputIcon: {
-    fontSize: 14,
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    height: 46,
-    fontSize: 14,
-    color: tokens.color.text,
-  },
-  eyeBtn: {
-    padding: 6,
-  },
-  rulesContainer: {
-    gap: 3,
-    marginBottom: 10,
-    paddingHorizontal: 4,
-  },
-  ruleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  ruleText: {
-    fontSize: 11,
-    fontWeight: "500",
-  },
-  auxRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginVertical: 8,
-  },
-  rememberWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: tokens.color.borderStrong,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: tokens.color.surface,
-  },
-  checkboxActive: {
-    backgroundColor: tokens.color.primary,
-    borderColor: tokens.color.primary,
-  },
-  rememberText: {
-    fontSize: 12,
-    color: tokens.color.textMuted,
-    fontWeight: "500",
-  },
-  forgotPassText: {
-    fontSize: 12,
-    color: tokens.color.link,
-    fontWeight: "700",
-  },
-  primaryAuthBtn: {
-    backgroundColor: tokens.color.primary,
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-    shadowColor: tokens.color.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  primaryBtnInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  primaryAuthBtnText: {
-    color: tokens.color.onPrimary,
-    fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 0.1,
-  },
-  bottomSwitcherRow: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 14,
-  },
-  switchTouch: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  switchMuted: {
-    fontSize: 13,
-    color: tokens.color.textSubtle,
-  },
-  switchActive: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: tokens.color.link,
-  },
-  trustFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 20,
-  },
-  trustFooterText: {
-    fontSize: 12,
-    color: tokens.color.textSubtle,
-    fontWeight: "500",
-  },
+  page: { padding: tokens.space["5"], gap: tokens.space["4"], paddingBottom: tokens.space["12"] },
+  form: { gap: tokens.space["4"] },
+  rules: { gap: tokens.space["1"] },
+  rule: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },
 });

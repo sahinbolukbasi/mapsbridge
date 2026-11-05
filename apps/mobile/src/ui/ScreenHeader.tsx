@@ -1,10 +1,10 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { tokens, withAlpha } from "../theme";
-import { CompassIcon } from "../components/Icons";
+import { Icon } from "./Icon";
 
 // Ekran başlığı (design §7.3/§7.4). `brand` varyantı eski AppHeader görünümünü birebir korur
-// (logo, "MapsBridge", "BOTANICAL ATELIER"); tek fark sabit `height` yerine `minHeight` (§7.5).
+// (logo, "MapsBridge"); FEAT-012: uydurma "BOTANICAL ATELIER" alt başlığı kaldırıldı, logo Icon.
 // Başlık metni accessibilityRole="header" taşır.
 export interface ScreenHeaderProps {
   title?: string;
@@ -29,7 +29,7 @@ export function ScreenHeader({
         <View style={styles.brandRow}>
           {left ?? (
             <View style={styles.brandIconWrap}>
-              <CompassIcon size={20} color={tokens.color.onPrimary} />
+              <Icon name="compass" size={20} color={tokens.color.onPrimary} />
             </View>
           )}
           <View style={styles.brandTextWrap}>
@@ -40,9 +40,11 @@ export function ScreenHeader({
             >
               {title ?? "MapsBridge"}
             </Text>
-            <Text style={styles.brandSubtitle} maxFontSizeMultiplier={compact}>
-              {subtitle ?? "BOTANICAL ATELIER"}
-            </Text>
+            {subtitle ? (
+              <Text style={styles.brandSubtitle} maxFontSizeMultiplier={compact}>
+                {subtitle}
+              </Text>
+            ) : null}
           </View>
         </View>
         {right ? <View style={styles.actionRow}>{right}</View> : null}

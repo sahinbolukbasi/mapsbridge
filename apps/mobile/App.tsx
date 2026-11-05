@@ -10,9 +10,10 @@ import {
   type TabNavAction,
   type TabNavState,
 } from "./src/navigation/tab-stack";
-import { AuthGate, ScreenFocusContext, motion } from "./src/ui";
+import { ScreenFocusContext, motion } from "./src/ui";
 import { ChatScreen } from "./src/screens/ChatScreen";
-import { WelcomeScreen } from "./src/screens/WelcomeScreen";
+import { ExploreScreen } from "./src/screens/ExploreScreen";
+import { GuestAssistantView } from "./src/screens/GuestAssistantView";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { MapScreen } from "./src/screens/MapScreen";
 import { PlanScreen } from "./src/screens/PlanScreen";
@@ -20,6 +21,7 @@ import { AIScreen } from "./src/screens/AIScreen";
 import { CommunityScreen } from "./src/screens/CommunityScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
 import { BottomTabBar } from "./src/components/BottomTabBar";
+import { PaywallModal } from "./src/components/PaywallModal";
 import { SplashScreen } from "./src/components/SplashScreen";
 import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { authService, UserSession } from "./src/services/api";
@@ -27,6 +29,8 @@ import { storage } from "./src/services/storage";
 import { tripStore } from "./src/services/tripStore";
 import { ownerFromEmail } from "./src/services/trip-owner";
 import { initRevenueCat, resetRevenueCat } from "./src/services/revenuecat";
+import type { ChatContact } from "./src/services/chatStore";
+import { clearDraft } from "./src/guest/guest-draft";
 
 import { setFontsAvailable, tokens } from "./src/theme";
 import { FONT_SOURCES } from "./src/theme/fonts";
@@ -116,6 +120,12 @@ export function App() {
   const [loadingSession, setLoadingSession] = useState<boolean>(true);
   const [authInitialMode, setAuthInitialMode] = useState<"login" | "register">("login");
   const [focusedStopId, setFocusedStopId] = useState<string | null>(null);
+  // Keşfet hero metni → Asistan (misafir senaryosu); Topluluk "Mesaj gönder" → Mesajlar.
+  const [assistantPrompt, setAssistantPrompt] = useState<{ text: string; nonce: number }>();
+  const [chatOpen, setChatOpen] = useState<{ contact: ChatContact; nonce: number }>();
+  const [plansOpen, setPlansOpen] = useState(false);
+  // Kapıdan girişte dönülecek sekme (web `next` karşılığı; ör. misafir asistan → Asistan).
+  const authReturnTab = useRef<MobileTab | null>(null);
   // Yazı tipleri (karar S13): yüklenemezse sistem yazı tipiyle devam edilir.
   const [fontsLoaded, fontError] = useFonts(FONT_SOURCES);
   const fontsSettled = fontsLoaded || !!fontError;
@@ -140,7 +150,8 @@ export function App() {
     if (stopId) setFocusedStopId(stopId);
     dispatch({ type: "push", tab: "plan", screen: "map" });
   };
-  const openAuth = (mode: "login" | "register") => {
+  const openAuth = (mode: "login" | "register", returnTo?: MobileTab) => {
+    authReturnTab.current = returnTo ?? null;
     setAuthInitialMode(mode);
     dispatch({ type: "select", tab: "login" });
   };
@@ -149,7 +160,14 @@ export function App() {
   // Layout effect: boyamadan önce çalışır, eski sekme setiyle boş bir kare görünmez.
   useLayoutEffect(() => {
     if (loadingSession) return;
-    setNav(initialNav<MobileTab, MobileStackScreen>(signedIn ? "plan" : "explore"));
+    const back = authReturnTab.current;
+    authReturnTab.current = null;
+    const home: MobileTab = signedIn
+      ? back && MEMBER_TABS.includes(back)
+        ? back
+        : "plan"
+      : "explore";
+    setNav(initialNav<MobileTab, MobileStackScreen>(home));
   }, [loadingSession, signedIn]);
 
   // Android geri tuşu (design §9, §12.1): yığın → önceki sekme → Planla → sistem (çıkış).
@@ -351,14 +369,6 @@ export function App() {
     }
   };
 
-  // Apple Sign-In: Not yet implemented
-  const handleAppleSignIn = async () => {
-    Alert.alert(
-      "Apple ile Giriş",
-      "Apple ile giriş yakında kullanıma sunulacaktır. Lütfen e-posta ile giriş yapın.",
-    );
-  };
-
   // Intercept Google OAuth redirect with improved error handling
   const handleGoogleIntercept = (url: string): boolean => {
     if (!url) return true;
@@ -453,6 +463,7 @@ export function App() {
     await authService.signOut();
     // Çıkışta hesabın gezileri ve satın alma kimliği cihazdan bırakılır (design §6.3).
     await tripStore.clearForSignOut();
+    await clearDraft(storage);
     await resetRevenueCat();
     setSession(null);
   };
@@ -467,17 +478,18 @@ export function App() {
     );
   }
 
+  const selectTab = (tab: MobileTab) => dispatch({ type: "select", tab });
+
   const renderTab = (tab: MobileTab): React.ReactNode => {
     switch (tab) {
       case "explore":
-        // FEAT-012 Keşfet ekranını kurana dek misafir ana sayfası bugünkü karşılama içeriğidir.
         return (
-          <WelcomeScreen
-            onSelectAuth={(mode) => {
-              if (mode === "google") handleGoogleSignIn();
-              else if (mode === "apple") handleAppleSignIn();
-              else openAuth(mode);
+          <ExploreScreen
+            onStartAssistant={(text) => {
+              setAssistantPrompt({ text, nonce: Date.now() });
+              selectTab("ai");
             }}
+            onOpenPlans={() => setPlansOpen(true)}
           />
         );
       case "plan":
@@ -485,33 +497,45 @@ export function App() {
           <PlanScreen
             onOpenMap={openMap}
             guest={!signedIn}
-            onRequireAuth={(mode) => openAuth(mode)}
+            onRequireAuth={(mode) => openAuth(mode, "plan")}
           />
         );
       case "ai":
-        // Misafir hiçbir zaman LLM'e ulaşmaz (design §6): misafir senaryosu (FEAT-012) gelene dek
-        // asistan sekmesi kimlik kapısıdır; ağ çağrısı yapılmaz.
+        // Misafir hiçbir zaman LLM'e ulaşmaz (design §6): istemci senaryosu, ağ çağrısı yok.
         return signedIn ? (
-          <AIScreen onOpenMap={() => openMap()} />
+          <AIScreen
+            owner={tripOwner}
+            onOpenMap={() => openMap()}
+            onOpenPlans={() => setPlansOpen(true)}
+          />
         ) : (
-          <AuthGate
-            variant="page"
-            reason="ai"
-            onRegister={() => openAuth("register")}
-            onLogin={() => openAuth("login")}
+          <GuestAssistantView
+            prompt={assistantPrompt}
+            onRegister={() => openAuth("register", "ai")}
+            onLogin={() => openAuth("login", "ai")}
+            onOpenPlanner={() => selectTab("plan")}
           />
         );
       case "community":
-        return <CommunityScreen onOpenMap={() => openMap()} />;
+        return (
+          <CommunityScreen
+            onOpenMap={() => openMap()}
+            guest={!signedIn}
+            onRequireAuth={(mode) => openAuth(mode, "community")}
+            onOpenChat={(contact) => {
+              setChatOpen({ contact, nonce: Date.now() });
+              selectTab("messages");
+            }}
+          />
+        );
       case "messages":
-        return <ChatScreen onOpenMap={() => openMap()} />;
+        return <ChatScreen onOpenMap={() => openMap()} openContact={chatOpen} />;
       case "profile":
         return (
           <ProfileScreen
-            onShowWelcome={handleSignOut}
-            onOpenMap={() => openMap()}
-            onOpenPlan={() => dispatch({ type: "select", tab: "plan" })}
-            onOpenMessages={() => dispatch({ type: "select", tab: "messages" })}
+            onSignOut={handleSignOut}
+            onOpenPlan={() => selectTab("plan")}
+            onOpenCommunity={() => selectTab("community")}
           />
         );
       case "login":
@@ -522,7 +546,6 @@ export function App() {
             onSuccess={handleAuthSuccess}
             onCancel={goBack}
             onSelectGoogle={handleGoogleSignIn}
-            onSelectApple={handleAppleSignIn}
           />
         );
     }
@@ -536,7 +559,9 @@ export function App() {
             focusedStopId={focusedStopId}
             onClearFocus={() => setFocusedStopId(null)}
             onOpenPlan={() => dispatch({ type: "pop" })}
-            onOpenAi={() => dispatch({ type: "select", tab: "ai" })}
+            onOpenAi={() => selectTab("ai")}
+            guest={!signedIn}
+            onRequireAuth={(mode) => openAuth(mode, "plan")}
           />
         );
     }
@@ -583,10 +608,15 @@ export function App() {
           })}
       </View>
 
-      <BottomTabBar
-        tabs={tabs}
-        activeTab={nav.tab}
-        onSelectTab={(tab) => dispatch({ type: "select", tab })}
+      <BottomTabBar tabs={tabs} activeTab={nav.tab} onSelectTab={selectTab} />
+
+      {/* Planlar (design §7.2 madde 8): misafirde bilgi + kayıt, üyede RevenueCat satın alma. */}
+      <PaywallModal
+        visible={plansOpen}
+        guest={!signedIn}
+        placement="assistant"
+        onClose={() => setPlansOpen(false)}
+        onRequireAuth={(mode) => openAuth(mode)}
       />
     </View>
   );
@@ -613,49 +643,4 @@ const styles = StyleSheet.create({
   },
   tabScreen: { flex: 1 },
   hidden: { display: "none" },
-  googleModalHeader: {
-    backgroundColor: tokens.color.surfaceInverse,
-    borderBottomWidth: 1,
-    borderBottomColor: tokens.color.brandHover,
-  },
-  googleNavRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  googleCloseBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: tokens.color.whiteA08,
-  },
-  googleCloseText: {
-    color: tokens.color.neutral200,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  googleTitleBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  googleLockIcon: {
-    fontSize: 12,
-  },
-  googleHostname: {
-    color: tokens.color.accentStrong,
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-  googleLoadingBox: {
-    width: 60,
-    alignItems: "flex-end",
-  },
-  googleWebViewContainer: {
-    flex: 1,
-    backgroundColor: tokens.color.surface,
-  },
 });

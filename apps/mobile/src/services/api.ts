@@ -710,6 +710,24 @@ export const chatService = {
   },
 };
 
+// ─── Plan kataloğu (design §7.1, karar S2) ───────────────────────────────────
+// Web /pricing/ ile aynı uç: GET /revenuecat/plans (oturumsuz). Ham gövde döner; doğrulama
+// src/billing/catalog.ts parseCatalog'dadır. Fiyat yalnızca buradan gösterilir.
+export const CATALOG_TIMEOUT_MS = 8000;
+export const billingService = {
+  async getPlans(): Promise<unknown> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), CATALOG_TIMEOUT_MS);
+    try {
+      const res = await fetch(`${API_BASE}/revenuecat/plans`, { signal: controller.signal });
+      if (!res.ok) throw new Error(`Katalog yüklenemedi (${res.status})`);
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  },
+};
+
 // ─── AI Training & Point Interaction Telemetry ──────────────────────────────
 export interface MapInteractionEvent {
   id: string;
