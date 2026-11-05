@@ -84,6 +84,7 @@
   .as-composer__input::placeholder {
     color: var(--field-placeholder);
   }
+  .as-composer__note,
   .as-composer__reason {
     margin: 0;
     color: var(--color-text-muted);

@@ -14,8 +14,7 @@ const LEGACY = [
   "styles.css",
   // tw-utils.css'ten üretilmiş yerleşim sınıfları (codemod --mode tw, design §2.7 8b): legacy
   // katmanında kalır, böylece utility'lerin sayfa CSS'ine karşı kaskadı birebir korunur.
-  // tw-utils.css C18'de silindi.
-  "components/soft-icon-layout.css",
+  // tw-utils.css C18'de, soft-icon-layout.css FEAT-010'da silindi.
 ];
 const CHROME = ["components/header-nav.css", "components/site-footer.css"];
 

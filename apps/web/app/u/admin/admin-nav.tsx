@@ -2,7 +2,7 @@
 // Gruplu kenar menüsü (design §8.3): grup başlığı nav içi <p> + aria-labelledby (h2 değil),
 // etkin alan aria-current="page", altta rol etiketi ve uygulamaya dönüş (/maps/, M8).
 import { useEffect, useId, useRef, type MouseEvent } from "react";
-import { Button } from "../../components/ui";
+import { Button, Icon } from "../../components/ui";
 import type { AdminAreaId } from "../../lib/admin/endpoints";
 import { ROLE_LABELS } from "./format";
 
@@ -84,7 +84,7 @@ export function AdminNav({
           Rol: <strong>{ROLE_LABELS[role] ?? role}</strong>
         </p>
         <p className="admin-nav__note">Veriler 60 saniyede bir yenilenir.</p>
-        <Button variant="link" size="sm" href="/maps/">
+        <Button variant="link" size="sm" href="/maps/" iconStart={<Icon name="map" size={16} />}>
           Uygulamaya dön
         </Button>
       </div>

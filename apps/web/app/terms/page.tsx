@@ -1,3 +1,4 @@
+import { LegalRelated } from "../components/legal-related";
 import { PageHeader, PageShell, Section } from "../components/ui";
 import "../styles/legal.css";
 export default function Terms() {
@@ -6,8 +7,7 @@ export default function Terms() {
       className="legal"
       header={
         <PageHeader
-          title="Kullanım Koşulları"
-          breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Kullanım Koşulları" }]}
+          breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Kullanım koşulları" }]}
         />
       }
     >
@@ -35,6 +35,7 @@ export default function Terms() {
           kesinlikle yasaktır.
         </p>
       </Section>
+      <LegalRelated current="/terms/" />
     </PageShell>
   );
 }

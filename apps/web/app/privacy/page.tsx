@@ -1,3 +1,4 @@
+import { LegalRelated } from "../components/legal-related";
 import { PageHeader, PageShell, Section } from "../components/ui";
 import "../styles/legal.css";
 export default function Privacy() {
@@ -6,12 +7,11 @@ export default function Privacy() {
       className="legal"
       header={
         <PageHeader
-          title="Gizlilik Politikası"
-          breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Gizlilik Politikası" }]}
+          breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Gizlilik politikası" }]}
         />
       }
     >
-      <p>Son güncelleme: 24 Eylül 2026</p>
+      <p className="legal-meta">Son güncelleme: 24 Eylül 2026</p>
       <Section title="Hangi verileri işleriz?">
         <p>
           MapsBridge hesabı için ad-soyad, e-posta ve telefon numarası; haritada işaretleyip
@@ -35,6 +35,7 @@ export default function Privacy() {
           adreslerini liste üzerinden silebilirsin.
         </p>
       </Section>
+      <LegalRelated current="/privacy/" />
     </PageShell>
   );
 }

@@ -60,7 +60,7 @@ export default function Page() {
 
 - Her sayfa tek `PageShell` (tek `<main>`), tek `PageHeader` (tek h1; `<h1>` doğrudan yazılmaz), `Section`'lar (G4, G10).
 - İstemci ağırlıklı sayfada `page.tsx` server kalır, kök `<slug>-client.tsx` PageShell'i render eder.
-- Kimlik kapıları (AuthGuard, AuthGate page) sayfanın yerine kendi PageShell'ini çizer.
+- Kimlik kapıları (AuthGate page) sayfanın yerine kendi PageShell'ini çizer.
 - R7: Kimlik kapıları yalnız `AuthGate` (`components/auth-gate.tsx`) ile: `variant="page"` sayfanın yerine kendi PageShell + PageHeader'ını çizer, `variant="sheet"` Modal primitive'idir (Escape = "Şimdilik devam et"). `reason` (`save`/`ai`/`messages`/`profile`) başlığı seçer; dönüş `?next=` safe-next ile doğrulanır. Yeni kapı tasarımı yazılmaz; eski `FullPagePromotion`/`AuthActionModal`/`PanelGuestBanner` sarmalayıcıları kaldırıldı (G4 kapsamı).
 
 ## 7. Chrome

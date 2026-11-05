@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useLocale } from "../lib/locale-context";
+import { findRoute, routeLabel, type RoutePath } from "../lib/route-registry";
 import {
   Button,
   Card,
   EmptyState,
   ErrorState,
+  Icon,
   PageHeader,
   PageShell,
   Section,
@@ -20,16 +22,20 @@ interface NotFoundViewProps {
   onRetry?: () => void;
 }
 
-/** 404 ve render hatası sayfası (design §4.4 ek: PageShell + EmptyState / ErrorState + kanonik linkler). */
-const POPULAR = [
+/**
+ * 404 ve render hatası sayfası (design §4.4 ek: PageShell + EmptyState / ErrorState). Bağlantı
+ * etiketleri registry'den (routeLabel: Planla, Asistan, Topluluk, Yardım ve destek), açıklamalar
+ * i18n'den gelir; URL'ler kanoniktir.
+ */
+const POPULAR: ReadonlyArray<{ href: RoutePath; key: string }> = [
   { href: "/maps/", key: "maps" },
   { href: "/travel-assistant/", key: "assistant" },
   { href: "/community/", key: "community" },
   { href: "/support/", key: "support" },
-] as const;
+];
 
 export function NotFoundView({ isError = false, errorMessage, onRetry }: NotFoundViewProps) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [attemptedPath, setAttemptedPath] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,6 +43,10 @@ export function NotFoundView({ isError = false, errorMessage, onRetry }: NotFoun
     if (path && path !== "/" && path !== "/404") setAttemptedPath(path);
   }, []);
 
+  const labelOf = (href: RoutePath) => {
+    const route = findRoute(href);
+    return route ? routeLabel(route, locale) : href;
+  };
   const uiError: UiError = {
     kind: "unknown",
     title: t("ui.errorPage.title", "Bir şeyler ters gitti"),
@@ -78,7 +88,7 @@ export function NotFoundView({ isError = false, errorMessage, onRetry }: NotFoun
             </>
           }
           action={
-            <Button href="/" prefetch={false} iconStart={<span aria-hidden="true">⌂</span>}>
+            <Button href="/" prefetch={false} iconStart={<Icon name="home" size={16} />}>
               {t("ui.notFound.home", "Ana sayfaya dön")}
             </Button>
           }
@@ -92,7 +102,7 @@ export function NotFoundView({ isError = false, errorMessage, onRetry }: NotFoun
               key={item.href}
               variant="interactive"
               href={item.href}
-              linkLabel={t(`ui.notFound.link.${item.key}`)}
+              linkLabel={labelOf(item.href)}
             >
               <p className="not-found-links__desc">{t(`ui.notFound.link.${item.key}.desc`)}</p>
             </Card>

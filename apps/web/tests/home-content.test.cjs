@@ -127,6 +127,85 @@ test("(d) home-client şablon anahtar kullanmaz (statik kontrol edilebilir kalı
     assert.doesNotMatch(source(rel), /t\(`home\./, `${rel} şablon home.* anahtarı kullanıyor`);
 });
 
+// FEAT-010 (F6, F7, S6): mobil uygulamalar, nasıl çalışır ve footer da aynı sözleşmeye tabi.
+const CONTENT_SOURCES = [
+  "mobile-apps/mobile-apps-client.tsx",
+  "mobile-apps/page.tsx",
+  "how-it-works/how-it-works-client.tsx",
+  "how-it-works/page.tsx",
+  "components/site-footer.tsx",
+];
+const CONTENT_PREFIXES = ["how.", "mobileApps.", "footer."];
+// Mağaza varlığı iddiaları (S6): rozet, indirme, sürüm, "yakında". Kelime SONU sınırıyla da
+// aranır ki "Yakındaki" gibi sözcükler yakalanmasın.
+const STORE_CLAIMS = [
+  /app\s*store/i,
+  /google\s*play/i,
+  /play\.google\.com/i,
+  /apps\.apple\.com/i,
+  /uygulamay[ıi]\s+indir/iu,
+  /download\s+the\s+app/i,
+  /(^|[^\p{L}])(pek\s+|çok\s+)?yakında(?![\p{L}])/iu,
+  /coming\s+soon/i,
+  /\bv\d+\.\d+\b/i,
+];
+test("(e) mobil uygulamalar / nasıl çalışır / footer: yasak terim ve mağaza iddiası yok", () => {
+  const hits = [];
+  for (const rel of CONTENT_SOURCES) {
+    const src = source(rel);
+    for (const term of FORBIDDEN) if (forbiddenRe(term).test(src)) hits.push(`${rel}: ${term}`);
+    for (const re of STORE_CLAIMS) if (re.test(src)) hits.push(`${rel}: ${re}`);
+  }
+  for (const [lang, dict] of [
+    ["tr", tr],
+    ["en", en],
+  ])
+    for (const [key, value] of Object.entries(dict)) {
+      if (!CONTENT_PREFIXES.some((p) => key.startsWith(p))) continue;
+      for (const term of FORBIDDEN)
+        if (forbiddenRe(term).test(value)) hits.push(`${lang}.${key}: ${term}`);
+      for (const re of STORE_CLAIMS) if (re.test(value)) hits.push(`${lang}.${key}: ${re}`);
+    }
+  assert.deepEqual(hits, [], `yasak terim / mağaza iddiası: ${hits.join("; ")}`);
+});
+test("(e) S6: mağaza durumu tek değerden okunur ve 'unknown'", () => {
+  const { MOBILE_APP_STATUS, showStoreClaims } = loadTs(path.join(APP, "lib/mobile-app-status.ts"));
+  assert.equal(MOBILE_APP_STATUS, "unknown");
+  assert.equal(showStoreClaims(), false);
+  assert.equal(showStoreClaims("available"), true);
+  assert.match(source("mobile-apps/mobile-apps-client.tsx"), /lib\/mobile-app-status/);
+  // Kaynakta kullanılan how.* / mobileApps.* anahtarları iki dilde var.
+  const missing = [];
+  for (const rel of CONTENT_SOURCES)
+    for (const m of source(rel).matchAll(/["'`]((?:how|mobileApps)\.[A-Za-z0-9_.]+)["'`]/g))
+      for (const [lang, dict] of [
+        ["tr", tr],
+        ["en", en],
+      ])
+        if (!(m[1] in dict)) missing.push(`${lang} ${m[1]} (${rel})`);
+  assert.deepEqual(missing, [], `eksik anahtar: ${missing.join(", ")}`);
+});
+test("(e) F6: nasıl çalışır SSS soruları ana sayfa SSS'inden farklı", () => {
+  const src = source("how-it-works/how-it-works-client.tsx");
+  const keys = [...src.matchAll(/"(how\.faq\.q\d+)"/g)].map((m) => m[1]);
+  assert.ok(keys.length >= 3, "how-it-works en az 3 SSS sorusu render etmeli");
+  for (const [lang, dict] of [
+    ["tr", tr],
+    ["en", en],
+  ]) {
+    const home = new Set(
+      Object.entries(dict)
+        .filter(([k]) => /^home\.faq\.q\d+$/.test(k))
+        .map(([, v]) => v.trim().toLowerCase()),
+    );
+    for (const k of keys)
+      assert.equal(
+        home.has(dict[k].trim().toLowerCase()),
+        false,
+        `${lang} ${k} ana sayfada da var`,
+      );
+  }
+});
 function requireBuild(t) {
   const s = buildState();
   if (s.ok) return s;
@@ -171,4 +250,39 @@ test("§10 bölüm sırası: / ve /en/ (mobil bölüm yok, SSS q4 var)", (t) => 
   const en = fs.readFileSync(path.join(s.outDir, "en/index.html"), "utf8");
   assert.ok(en.includes("Describe your trip. Watch it land on the map."), "/en/ hero İngilizce");
   assert.equal(en.includes("English version is in beta"), false, "/en/ beta notu kaldırıldı");
+});
+test("(e) S6: hiçbir web rotasının HTML'inde mağaza rozeti, indirme, sürüm ya da 'yakında' yok", (t) => {
+  const s = requireBuild(t);
+  if (!s) return;
+  const files = [];
+  const walk = (dir) => {
+    for (const name of fs.readdirSync(dir)) {
+      const abs = path.join(dir, name);
+      if (fs.statSync(abs).isDirectory()) {
+        if (name !== "_next") walk(abs);
+      } else if (name.endsWith(".html")) files.push(abs);
+      // public/ altından kopyalanan statik dosyalar (ör. geliştirici sayfası expo-qr.html, Expo Go
+      // talimatı) web rotası değildir; yalnız Next'in ürettiği sayfalar taranır.
+    }
+  };
+  walk(s.outDir);
+  const PUBLIC = path.join(WEB, "public");
+  const routeFiles = files.filter(
+    (abs) => !fs.existsSync(path.join(PUBLIC, path.relative(s.outDir, abs))),
+  );
+  files.length = 0;
+  files.push(...routeFiles);
+  assert.ok(files.length > 10, "out/ içinde HTML bulunamadı");
+  const hits = [];
+  for (const abs of files) {
+    // Yalnız görünür metin: script/style ve etiketler atılır.
+    const text = fs
+      .readFileSync(abs, "utf8")
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ");
+    for (const re of STORE_CLAIMS)
+      if (re.test(text)) hits.push(`${path.relative(s.outDir, abs)}: ${re}`);
+  }
+  assert.deepEqual(hits, [], `mağaza iddiası: ${hits.join("; ")}`);
 });

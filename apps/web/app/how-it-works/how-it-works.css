@@ -1,698 +1,75 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
-  /* ========================================================= */
-  /* MapsBridge - Nasıl Çalışır (How It Works) Dedicated Styles */
-  /* ========================================================= */
-
-  .nasil-page {
-    min-height: 100vh;
-    background-color: var(--color-bg);
+  /* /how-it-works/ (design §10 #2, F6; Yön B · Kartograf). Kartlar Card primitive'i; burada
+     yalnızca yerleşim ve tipografi token'ları. */
+  .hiw {
+    padding-block-end: var(--space-12);
+  }
+  .hiw-card__title {
+    margin: 0 0 var(--space-1);
     color: var(--color-text);
-    font-family:
-      "Plus Jakarta Sans",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    overflow-x: hidden;
-    transition:
-      background-color 0.3s ease,
-      color 0.3s ease;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-heading);
   }
-
-  /* Ambient glow backgrounds */
-  .nasil-ambient-glow-1 {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(100%, 1200px);
-    height: 500px;
-    background: radial-gradient(
-      circle at 50% 10%,
-      color-mix(in srgb, var(--color-accent) 12%, transparent) 0%,
-      color-mix(in srgb, var(--color-accent-strong) 4%, transparent) 45%,
-      transparent 70%
-    );
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .nasil-container {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── Hero Section ── */
-  .nasil-hero {
-    padding: 5rem 0 3.5rem;
-    text-align: center;
-    position: relative;
-  }
-
-  .nasil-hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.375rem 1rem;
-    border-radius: 9999px;
-    background: var(--color-accent-a10);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
-    color: var(--color-success);
-    font-family: Inter, sans-serif;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent) 8%, transparent);
-  }
-
-  .nasil-hero-badge-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    box-shadow: 0 0 10px var(--color-accent);
-  }
-
-  /* Hero başlığı PageHeader'da (h1 tipografisi primitive'den); blok ortalanır. */
-  .nasil-hero-heading {
-    display: flex;
-    justify-content: center;
-    max-width: 840px;
-    margin: 0 auto 1.5rem;
-  }
-
-  .nasil-hero-highlight {
-    background: linear-gradient(
-      135deg,
-      var(--color-success-strong) 0%,
-      var(--color-accent) 50%,
-      var(--color-accent-strong) 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: inline-block;
-  }
-
-  .nasil-hero-desc {
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    line-height: 1.6;
-    color: #475569;
-    max-width: 680px;
-    margin: 0 auto 2.5rem;
-  }
-
-  .nasil-hero-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .nasil-btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.75rem;
-    border-radius: 9999px;
-    background: linear-gradient(135deg, var(--color-success-strong) 0%, var(--color-accent) 100%);
-    color: var(--color-on-primary);
-    font-weight: 700;
-    font-size: 0.9375rem;
-    text-decoration: none;
-    box-shadow: 0 4px 16px var(--color-accent-a30);
-    transition: all 0.25s ease;
-    border: none;
-    cursor: pointer;
-  }
-
-  .nasil-btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-accent) 40%, transparent);
-  }
-
-  .nasil-btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.75rem;
-    border-radius: 9999px;
-    background: var(--color-surface);
-    color: var(--color-text);
-    border: 1px solid color-mix(in srgb, var(--color-border-strong) 90%, transparent);
-    font-weight: 700;
-    font-size: 0.9375rem;
-    text-decoration: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: all 0.25s ease;
-    cursor: pointer;
-  }
-
-  .nasil-btn-secondary:hover {
-    background: var(--color-bg);
-    border-color: var(--color-border-strong);
-    transform: translateY(-2px);
-  }
-
-  /* ── Metrics Strip ── */
-  .nasil-metrics-strip {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-    margin: 3.5rem auto 4.5rem;
-    max-width: 900px;
-  }
-
-  @media (min-width: 768px) {
-    .nasil-metrics-strip {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .nasil-metric-box {
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-    border-radius: 1.25rem;
-    padding: 1.25rem 1rem;
-    text-align: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-    transition: all 0.2s ease;
-  }
-
-  .nasil-metric-box:hover {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
-    box-shadow: 0 8px 20px color-mix(in srgb, var(--color-accent) 8%, transparent);
-  }
-
-  .nasil-metric-val {
-    font-size: 1.875rem;
-    font-weight: 800;
-    color: var(--color-success-strong);
-    line-height: 1.1;
-    margin-bottom: 0.25rem;
-  }
-
-  .nasil-metric-lbl {
-    font-size: 0.78125rem;
-    font-weight: 600;
-    color: var(--color-text-subtle);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* ── Section Header ── */
-  .nasil-section-head {
-    text-align: center;
-    max-width: 640px;
-    margin: 0 auto 3rem;
-  }
-
-  .nasil-section-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    background: var(--color-accent-a10);
-    color: var(--color-success);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 0.75rem;
-  }
-
-  .nasil-section-title {
-    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--color-text);
-    margin: 0 0 0.75rem;
-  }
-
-  .nasil-section-desc {
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    color: #475569;
+  .hiw-card__body {
     margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
   }
 
-  /* ── Detailed 4-Step Walkthrough Flow ── */
-  .nasil-steps-section {
-    padding: 2.5rem 0 5rem;
-  }
-
-  .nasil-step-row {
+  /* Konuşma turları: numaralı kartlar; ≥768 iki sütun. */
+  .hiw-turns,
+  .hiw-points {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    align-items: center;
-    margin-bottom: 4.5rem;
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-    border-radius: 2rem;
-    padding: 2.5rem;
-    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  @media (min-width: 992px) {
-    .nasil-step-row {
-      grid-template-columns: 1fr 1fr;
-      gap: 3.5rem;
-      padding: 3rem;
-    }
-
-    .nasil-step-row.reverse {
-      direction: rtl;
-    }
-
-    .nasil-step-row.reverse > * {
-      direction: ltr;
-    }
-  }
-
-  .nasil-step-row:hover {
-    box-shadow: 0 20px 40px -8px color-mix(in srgb, var(--color-accent) 12%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
-    transform: translateY(-4px);
-  }
-
-  .nasil-step-badge-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 1.25rem;
-    background: linear-gradient(
-      135deg,
-      var(--color-surface-brand) 0%,
-      var(--color-surface-brand-strong) 100%
-    );
-    color: var(--color-on-surface-brand);
-    font-weight: 800;
-    font-size: 1.5rem;
-    border: 1px solid var(--color-accent-a30);
-    box-shadow: 0 2px 10px color-mix(in srgb, var(--color-accent) 15%, transparent);
-    margin-bottom: 1.5rem;
-  }
-
-  .nasil-step-h3 {
-    font-size: 1.625rem;
-    font-weight: 800;
-    color: var(--color-text);
-    margin: 0 0 1rem;
-    line-height: 1.25;
-  }
-
-  .nasil-step-desc {
-    font-size: 0.9375rem;
-    line-height: 1.65;
-    color: #475569;
-    margin-bottom: 1.5rem;
-  }
-
-  .nasil-step-features {
-    list-style: none;
+    gap: var(--space-3);
+    margin: 0;
     padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    list-style: none;
   }
-
-  .nasil-step-feature-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.625rem;
-    font-size: 0.875rem;
-    color: var(--color-neutral-700);
-    line-height: 1.5;
-  }
-
-  .nasil-step-feature-item .material-symbols-outlined {
-    color: var(--color-text-accent);
-    font-size: 1.125rem;
-    flex-shrink: 0;
-    margin-top: 0.125rem;
-  }
-
-  /* Interactive Mockup Container */
-  .nasil-step-visual {
-    background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-surface-sunken) 100%);
-    border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-    border-radius: 1.5rem;
-    padding: 1.75rem;
-    position: relative;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-  }
-
-  /* Mockup elements */
-  .nasil-mockup-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-  }
-
-  .nasil-mockup-dots {
-    display: flex;
-    gap: 0.375rem;
-  }
-
-  .nasil-mockup-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-neutral-300);
-  }
-
-  .nasil-mockup-tag {
-    font-size: 0.6875rem;
-    font-weight: 700;
-    padding: 0.2rem 0.5rem;
-    border-radius: 6px;
-    background: var(--color-accent-a10);
-    color: var(--color-success-strong);
-  }
-
-  /* Step 1 Interactive Prompt Box */
-  .nasil-interactive-prompt-box {
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-border-strong) 80%, transparent);
-    border-radius: 1rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  }
-
-  .nasil-interactive-input-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--color-text);
-  }
-
-  .nasil-prompt-chips-row {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 0.75rem;
-  }
-
-  .nasil-prompt-chip {
-    padding: 0.25rem 0.625rem;
-    border-radius: 9999px;
-    background: var(--color-surface-sunken);
-    border: 1px solid var(--color-border);
-    font-size: 0.75rem;
-    color: #475569;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .nasil-prompt-chip:hover {
-    background: var(--color-surface-brand);
-    border-color: var(--color-accent);
-    color: var(--color-success);
-  }
-
-  /* Step 2 AI Route Visualization */
-  .nasil-route-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .nasil-timeline-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--color-surface);
-    padding: 0.75rem 1rem;
-    border-radius: 0.875rem;
-    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    font-size: 0.8125rem;
-  }
-
-  .nasil-timeline-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .nasil-timeline-badge {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    background: var(--color-surface-brand);
-    color: var(--color-success-strong);
-    font-weight: 800;
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .nasil-timeline-time {
-    font-size: 0.75rem;
-    color: var(--color-text-subtle);
-    font-family: monospace;
-  }
-
-  /* Step 3 Map Pin Reorder Widget */
-  .nasil-pin-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1rem;
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    border-radius: 0.75rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.8125rem;
-    cursor: grab;
-    transition: all 0.2s ease;
-  }
-
-  .nasil-pin-card:hover {
-    border-color: var(--color-accent);
-    box-shadow: 0 4px 12px var(--color-accent-a10);
-  }
-
-  /* Step 4 6-Digit Code Preview Box */
-  .nasil-code-demo-box {
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-    border-radius: 1.25rem;
-    padding: 1.5rem;
-    text-align: center;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-  }
-
-  .nasil-code-display {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    margin: 1.25rem 0;
-  }
-
-  .nasil-code-digit-box {
-    width: 2.5rem;
-    height: 3rem;
-    border-radius: 0.625rem;
-    background: var(--color-bg);
-    border: 2px solid var(--color-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--color-on-surface-brand);
-    box-shadow: 0 2px 6px color-mix(in srgb, var(--color-accent) 12%, transparent);
-  }
-
-  /* ── Creator Marketplace 3 Steps ── */
-  .nasil-creator-section {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-surface-brand) 70%, transparent) 0%,
-      color-mix(in srgb, var(--color-surface-brand) 70%, transparent) 100%
-    );
-    border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    padding: 5rem 0;
-    margin: 3rem 0;
-  }
-
-  .nasil-creator-grid {
+  .hiw-turns__inner,
+  .hiw-points__inner {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.75rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+  }
+  /* Ana sayfa adım numarasıyla aynı dil (home.css .home-steps__num). */
+  .hiw-turns__num {
+    min-inline-size: var(--space-8);
+    color: var(--color-highlight-text);
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-extrabold);
+    line-height: var(--line-height-tight);
+    font-variant-numeric: tabular-nums;
+  }
+  .hiw-points__icon {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--touch-target);
+    block-size: var(--touch-target);
+    border-radius: var(--radius-md);
+    background: var(--color-highlight-bg);
+    color: var(--color-highlight-text);
+  }
+
+  .hiw-credits {
+    display: grid;
+    gap: var(--space-3);
+    max-inline-size: var(--content-reading);
+  }
+  .hiw-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
   }
 
   @media (min-width: 768px) {
-    .nasil-creator-grid {
-      grid-template-columns: repeat(3, 1fr);
+    .hiw-turns,
+    .hiw-points {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-  }
-
-  .nasil-creator-card {
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .nasil-creator-card:hover {
-    transform: translateY(-5px);
-    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
-    box-shadow: 0 16px 30px var(--color-accent-a10);
-  }
-
-  .nasil-creator-icon {
-    font-size: 2.25rem;
-    margin-bottom: 1rem;
-    display: inline-block;
-  }
-
-  .nasil-creator-card h4 {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--color-text);
-    margin: 0 0 0.5rem;
-  }
-
-  .nasil-creator-card p {
-    font-size: 0.875rem;
-    line-height: 1.6;
-    color: #475569;
-    margin: 0;
-  }
-
-  /* ── FAQ Section ── */
-  .nasil-faq-section {
-    padding: 4rem 0 5rem;
-  }
-
-  .nasil-faq-list {
-    max-width: 800px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .nasil-faq-item {
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-    border-radius: 1.25rem;
-    padding: 1.25rem 1.5rem;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-
-  .nasil-faq-item:hover {
-    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 6%, transparent);
-  }
-
-  .nasil-faq-item[open] {
-    border-color: var(--color-accent);
-    box-shadow: 0 4px 16px var(--color-accent-a10);
-  }
-
-  .nasil-faq-question {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-weight: 700;
-    font-size: 1.0625rem;
-    color: var(--color-text);
-    list-style: none;
-  }
-
-  .nasil-faq-question::-webkit-details-marker {
-    display: none;
-  }
-
-  .nasil-faq-answer {
-    margin-top: 0.875rem;
-    font-size: 0.875rem;
-    line-height: 1.65;
-    color: #475569;
-  }
-
-  /* ── CTA Banner ── */
-  .nasil-cta-section {
-    padding: 0 0 6rem;
-  }
-
-  .nasil-cta-card {
-    background: linear-gradient(
-      135deg,
-      var(--color-primary) 0%,
-      #065f46 50%,
-      var(--color-success) 100%
-    );
-    border-radius: 2.25rem;
-    padding: 4rem 2rem;
-    text-align: center;
-    color: var(--color-text-inverse);
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 20px 40px -8px color-mix(in srgb, var(--color-primary) 35%, transparent);
-  }
-
-  .nasil-cta-title {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 800;
-    margin: 0 auto 1rem;
-    max-width: 680px;
-    line-height: 1.2;
-  }
-
-  .nasil-cta-sub {
-    font-size: 1.0625rem;
-    color: #a7f3d0;
-    max-width: 540px;
-    margin: 0 auto 2.25rem;
-    line-height: 1.6;
-  }
-
-  .nasil-cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 2.25rem;
-    border-radius: 9999px;
-    background: var(--color-surface);
-    color: var(--color-text-brand);
-    font-weight: 800;
-    font-size: 1rem;
-    text-decoration: none;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    transition: all 0.25s ease;
-  }
-
-  .nasil-cta-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-neutral-0) 20%, transparent);
-    background: var(--color-surface-brand);
   }
 }

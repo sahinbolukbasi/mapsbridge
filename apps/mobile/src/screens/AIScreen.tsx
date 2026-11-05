@@ -1274,12 +1274,20 @@ export function AIScreen({ onOpenMap }: AIScreenProps) {
               style={styles.sendBtn}
               onPress={() => handleSendPrompt(inputText)}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Gönder"
+              accessibilityHint="Tercih soruları ücretsiz · Sohbet 1 kredi · Rota oluşturma / düzenleme 5 kredi"
             >
               <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.sendBtnText}>
                 ➔
               </Text>
             </TouchableOpacity>
           </View>
+          {/* S22 (web ile parite): mesaj başı maliyet sunucuda belirlenir, gönder düğmesinde sabit
+              kredi rozeti yok; işlem başı maliyetler not olarak gösterilir. */}
+          <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.costNote}>
+            Tercih soruları ücretsiz · Sohbet 1 kredi · Rota oluşturma / düzenleme 5 kredi
+          </Text>
         </View>
       </KeyboardAvoidingView>
 
@@ -2194,6 +2202,12 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.color.bg,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: tokens.color.surfaceTint,
+  },
+  costNote: {
+    marginTop: 6,
+    color: tokens.color.textMuted,
+    fontSize: tokens.font.size.xs,
+    textAlign: "center",
   },
   inputPillBox: {
     height: 48,

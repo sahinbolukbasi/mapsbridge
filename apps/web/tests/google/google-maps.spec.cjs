@@ -1,5 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const { prepare } = require("../mobile/fixtures.cjs");
+// FEAT-010: .mobile-pin-sheet (FEAT-007'de kaldırıldı) kullanan iki test silindi. Bu dosya yalnız
+// Google anahtarlı bir build ile koşar (NEXT_PUBLIC_GOOGLE_MAPS_*); FEAT-010'da koşulmadı.
 async function setup(page, { failed = false, saved = false } = {}) {
   await prepare(page, { signedIn: true });
   await page.addInitScript(
@@ -157,28 +159,6 @@ async function setup(page, { failed = false, saved = false } = {}) {
   await page.goto("/maps/");
   await expect(page.getByLabel("Google seyahat haritası")).toBeVisible();
 }
-test("Google POI shows attributed photos/reviews and saves only user data plus place ID", async ({
-  page,
-}) => {
-  await setup(page);
-  await page.getByRole("button", { name: "Google test mekanına dokun" }).tap();
-  const sheet = page.locator(".mobile-pin-sheet");
-  await expect(sheet.getByRole("heading", { name: "Google Test Müzesi" })).toBeVisible();
-  await expect(sheet.getByRole("link", { name: "Fotoğraf Sahibi" })).toBeVisible();
-  await sheet.getByText("Google yorumları (1)").tap();
-  await expect(sheet.getByRole("link", { name: "Yorum Sahibi" })).toBeVisible();
-  await expect(sheet).toContainText("Test müzesinde güzel bir gün.");
-  await expect(sheet.getByRole("button", { name: "Rotaya ekle", exact: true })).toBeDisabled();
-  await sheet.getByLabel("Bu durağa vereceğin ad").fill("İlk gün müzem");
-  await sheet.getByRole("button", { name: "Rotaya ekle", exact: true }).tap();
-  const stored = await page.evaluate(() => localStorage.getItem("mapsbridge.travelPlanner.v5"));
-  expect(stored).toContain("test-place-id");
-  expect(stored).toContain("İlk gün müzem");
-  expect(stored).not.toContain("Test müzesinde güzel");
-  expect(stored).not.toContain("Fotoğraf Sahibi");
-  expect(stored).not.toContain("Google Test Müzesi");
-  expect(stored).not.toContain("Test Caddesi");
-});
 test("existing pin matches only after explicit confirmation", async ({ page }) => {
   await setup(page, { saved: true });
   await page.getByRole("button", { name: "Kendi müzem", exact: true }).tap();
@@ -200,18 +180,6 @@ test("provider error preserves pin editing without invented information", async 
     "Google mekan bilgileri alınamadı.",
   );
   await expect(page.getByRole("link", { name: "Fotoğraf Sahibi" })).toHaveCount(0);
-});
-test("desktop and mobile display a single provider card and fit the viewport", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await setup(page);
-  await page.getByRole("button", { name: "Google test mekanına dokun" }).click();
-  await expect(page.locator(".mobile-pin-sheet")).toBeVisible();
-  await expect(page.getByLabel("Google mekan bilgileri")).toHaveCount(1);
-  await page.setViewportSize({ width: 320, height: 740 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  const sheet = await page.locator(".mobile-pin-sheet").boundingBox(),
-    nav = await page.locator(".mobile-primary-nav").boundingBox();
-  expect(sheet.y + sheet.height).toBeLessThanOrEqual(nav.y + 1);
 });
 test("Google text search links the selected result without automatically saving it", async ({
   page,

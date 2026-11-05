@@ -56,6 +56,9 @@ import {
 } from "../lib/ai/conversation-flow";
 
 const STORAGE_KEY = "mapsbridge.ai.sessions.v5";
+/** İşlem başı kredi notu (S22): kenar kartı ve sohbet girişi aynı metni gösterir. */
+const CREDIT_NOTE_TR =
+  "Tercih soruları ücretsiz · Sohbet 1 kredi · Rota oluşturma / düzenleme 5 kredi";
 interface Session {
   id: string;
   title: string;
@@ -1214,9 +1217,7 @@ export default function AIPage() {
               </div>
               <div className="ai-quota-card">
                 <strong>{wallet ? `${wallet.credits} kredi` : "Seyahat danışmanın"}</strong>
-                <p>
-                  Tercih soruları ücretsiz · Sohbet 1 kredi · Rota oluşturma / düzenleme 5 kredi
-                </p>
+                <p>{t("assistant.composer.costNote", CREDIT_NOTE_TR)}</p>
                 {wallet?.usage && (
                   <p>
                     Bugün {wallet.usage.requestsToday} / {wallet.usage.dailyLimit} mesaj denemesi.
@@ -1927,7 +1928,9 @@ export default function AIPage() {
                   onChange={setInput}
                   inputRef={textareaRef}
                   maxLength={2000}
-                  cost={1}
+                  // S22: mesaj başı maliyet sunucuda belirlenir (netleştirme 0, sohbet 1, rota 5) ve
+                  // istemcide önceden bilinmez; sabit rozet yok, işlem başı maliyetler notta.
+                  note={t("assistant.composer.costNote", CREDIT_NOTE_TR)}
                   busy={busy}
                   label={t("assistant.composer.label", "Asistana mesaj")}
                   placeholder={t(

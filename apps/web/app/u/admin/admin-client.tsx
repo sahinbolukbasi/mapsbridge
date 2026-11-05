@@ -5,6 +5,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "react";
 import {
   Button,
+  Card,
+  EmptyState,
   ErrorState,
   LoadingState,
   PageHeader,
@@ -92,10 +94,14 @@ export default function AdminClient() {
       />
       {access.state === "checking" && <LoadingState label="Yönetici oturumu doğrulanıyor…" />}
       {access.state === "anonymous" && (
-        <div className="admin-gate">
-          <p>Devam etmek için personel hesabınızla giriş yapın.</p>
-          <Button href={LOGIN_HREF}>Giriş yap</Button>
-        </div>
+        <Card className="admin-gate">
+          <EmptyState
+            icon="lock"
+            title="Personel girişi"
+            description="Devam etmek için personel hesabınızla giriş yapın."
+            action={<Button href={LOGIN_HREF}>Giriş yap</Button>}
+          />
+        </Card>
       )}
       {access.state === "error" && (
         <ErrorState

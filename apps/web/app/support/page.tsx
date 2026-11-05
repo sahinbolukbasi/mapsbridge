@@ -122,12 +122,32 @@ export default function SupportPage() {
       {loggedIn === null ? (
         <LoadingState label="Oturum kontrol ediliyor…" />
       ) : !loggedIn ? (
-        <Card className="support-panel">
-          <p>Destek talebi oluşturmak ve yanıtları görmek için giriş yapın.</p>
-          <Button href="/login/" variant="primary">
-            Giriş yap
-          </Button>
-        </Card>
+        <div className="support-guest">
+          <Card className="support-panel">
+            <EmptyState
+              icon="lock"
+              title="Destek talepleri hesabına bağlıdır"
+              description="Talep oluşturmak ve yanıtları görmek için giriş yap."
+              action={
+                <Button href="/login/?next=/support/" variant="primary">
+                  Giriş yap
+                </Button>
+              }
+            />
+          </Card>
+          <Card className="support-panel">
+            <EmptyState
+              icon="inbox"
+              title="Hesabına giremiyor musun?"
+              description={
+                <>
+                  <a href="mailto:destek@mapsbridge.com">destek@mapsbridge.com</a> adresine yaz ya
+                  da <a href="/how-it-works/">nasıl çalışır</a> sayfasına göz at.
+                </>
+              }
+            />
+          </Card>
+        </div>
       ) : (
         <div className="support-layout">
           <Card className="support-panel">

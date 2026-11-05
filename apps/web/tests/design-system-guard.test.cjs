@@ -29,7 +29,6 @@ let registryCache = null;
 const registry = () => (registryCache ??= loadTs(REGISTRY_PATH));
 // Kimlik kapıları da kendi PageShell'ini çizer (design §4.3, §4.5).
 const SHELL_RENDERING_GATES = [
-  "components/auth-guard.tsx",
   "components/auth-gate.tsx",
 ];
 const PKG_SRC = path.join(ROOT, "packages/design-tokens/src");
@@ -131,8 +130,7 @@ const LEGACY = [
   "styles.css",
   // tw-utils.css'ten üretilmiş yerleşim sınıfları (codemod --mode tw, design §2.7 8b): legacy
   // katmanında kalır, böylece utility'lerin sayfa CSS'ine karşı kaskadı birebir korunur.
-  // tw-utils.css C18'de silindi.
-  "components/soft-icon-layout.css",
+  // tw-utils.css C18'de, soft-icon-layout.css FEAT-010'da silindi.
 ];
 const CHROME = ["components/header-nav.css", "components/site-footer.css"];
 function layerOf(abs) {

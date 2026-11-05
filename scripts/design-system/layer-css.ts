@@ -15,9 +15,8 @@ export const LEGACY = [
   "styles.css",
   // tw-utils.css'ten üretilmiş yerleşim sınıfları (codemod --mode tw, design §2.7 8b): legacy
   // katmanında kalır, böylece utility'lerin sayfa CSS'ine karşı kaskadı birebir korunur.
-  // tw-utils.css C18'de silindi.
+  // tw-utils.css C18'de, soft-icon-layout.css FEAT-010'da silindi.
   "maps/maps-layout.css",
-  "components/soft-icon-layout.css",
 ];
 export const CHROME = ["components/header-nav.css", "components/site-footer.css"];
 // Layer'sız kalan tek muaf dosyalar.

@@ -1,0 +1,62 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* /articles/: yazı listesi ve okuma görünümü. Kartlar Card primitive'i; burada yerleşim. */
+  .articles {
+    padding-block-end: var(--space-12);
+  }
+  .articles-list {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .articles-list__item {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .articles-list__title,
+  .articles-reader__title {
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--font-family-display);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-heading);
+  }
+  .articles-list__title {
+    font-size: var(--font-size-lg);
+  }
+  .articles-reader__title {
+    font-size: var(--font-size-2xl);
+  }
+  .articles-meta {
+    margin: 0;
+    color: var(--color-text-subtle);
+    font-size: var(--font-size-sm);
+  }
+  .articles-list__excerpt {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+  .articles-reader {
+    display: grid;
+    gap: var(--space-3);
+    max-inline-size: var(--content-reading);
+  }
+  .articles-reader__body {
+    color: var(--color-text);
+    line-height: var(--line-height-body);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .articles-back-icon {
+    transform: rotate(180deg);
+  }
+  @media (min-width: 1024px) {
+    .articles-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}

@@ -1,8 +1,6 @@
 {
   "G1": {
-    "app/how-it-works/how-it-works.css": 16,
     "app/maps/maps.css": 35,
-    "app/mobile-apps/mobile-apps.css": 8,
     "app/operations.css": 9,
     "app/styles.css": 6,
     "app/travel-assistant/assistant.css": 32
@@ -15,17 +13,10 @@
   "G5": {},
   "G6": {},
   "G7": {
-    "app/articles/page.tsx": 15,
-    "app/components/auth-guard.tsx": 19,
-    "app/components/soft-icon.tsx": 20,
     "app/components/tracker/deal-tracker-panel.tsx": 62,
     "app/components/travel-globe.tsx": 27,
     "app/components/trip/google-planner-map.tsx": 10,
-    "app/components/trip/trip-side-drawer.tsx": 19,
-    "app/features/trip-planner/ai-route-modifier.tsx": 24,
-    "app/features/trip-planner/manual-pin-modal.tsx": 30,
     "app/features/trip-planner/map-styles.ts": 19,
-    "app/how-it-works/how-it-works-client.tsx": 2,
     "app/lib/billing/billing-service.ts": 4,
     "app/lib/test-reset.ts": 1,
     "app/lib/trip/models.ts": 27,
@@ -40,7 +31,6 @@
   "G10": {},
   "G11": {
     "app/maps/maps.css": 1,
-    "app/mobile-apps/mobile-apps.css": 1,
     "app/styles.css": 1,
     "app/travel-assistant/assistant.css": 1
   },
@@ -58,9 +48,7 @@
     "app/travel-assistant/assistant.css": 4
   },
   "G16d": {
-    "app/how-it-works/how-it-works.css": 2,
     "app/maps/maps.css": 1,
-    "app/mobile-apps/mobile-apps.css": 7,
     "app/operations.css": 2,
     "app/styles.css": 3,
     "app/travel-assistant/assistant.css": 18
@@ -74,27 +62,20 @@
   "G23": {},
   "G24": {
     "app/auth/callback/callback.css": 1,
-    "app/components/soft-icon-layout.css": 1,
     "app/components/ui/ui.css": 1,
-    "app/how-it-works/how-it-works.css": 10,
     "app/maps/maps.css": 23,
-    "app/mobile-apps/mobile-apps.css": 4,
     "app/styles.css": 12,
     "app/styles/base.css": 3,
     "app/travel-assistant/assistant.css": 33
   },
   "G25": {
-    "app/how-it-works/how-it-works.css": 4,
     "app/operations.css": 2,
     "app/styles/base.css": 1,
     "app/travel-assistant/assistant.css": 1
   },
   "G26": {
-    "app/components/soft-icon-layout.css": 2,
     "app/components/ui/ui.css": 3,
-    "app/how-it-works/how-it-works.css": 72,
     "app/maps/maps.css": 89,
-    "app/mobile-apps/mobile-apps.css": 36,
     "app/operations.css": 15,
     "app/styles.css": 42,
     "app/styles/base.css": 2,
@@ -109,16 +90,11 @@
     "app/components/travel-globe.tsx": 7,
     "app/components/trip/google-place-info.tsx": 3,
     "app/components/trip/google-planner-map.tsx": 8,
-    "app/components/trip/trip-side-drawer.tsx": 28,
-    "app/features/trip-planner/ai-route-modifier.tsx": 8,
-    "app/features/trip-planner/manual-pin-modal.tsx": 2,
-    "app/how-it-works/how-it-works-client.tsx": 5,
     "app/travel-assistant/prep-panel.tsx": 1,
     "app/travel-assistant/travel-assistant-client.tsx": 50
   },
   "G29": {
     "app/maps/maps.css": 3,
-    "app/mobile-apps/mobile-apps.css": 1,
     "app/styles.css": 1,
     "app/travel-assistant/assistant.css": 7
   }

@@ -138,7 +138,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/mobile-apps/",
     file: "app/mobile-apps/page.tsx",
-    layout: "landing",
+    layout: "content",
     title: t("Mobil uygulamalar", "Mobile apps"),
     description: t(
       "MapsBridge'i telefonunda kullan: gün gün planlayıcı, gezi asistanı ve paylaşım kodları küçük ekranda da aynı hesapla çalışır.",
@@ -175,7 +175,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/how-it-works/",
     file: "app/how-it-works/page.tsx",
-    layout: "landing",
+    layout: "content",
     title: t("Nasıl çalışır", "How it works"),
     description: t(
       "Üç turda taslak rota: gezini anlat, iki soruyu yanıtla, rotan haritada. Sonrasını rota üzerinde birlikte iyileştir.",
