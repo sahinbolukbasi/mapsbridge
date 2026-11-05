@@ -81,7 +81,7 @@ const SITEMAP_13 = [
   "/terms/",
   "/cookies/",
 ];
-// AC-34 bekleyen sayfalar: MobileStart ikinci <main>/<h1>'i çiziyor (ana sayfa iskeleti C10).
+// AC-34 bekleyen sayfalar (MobileStart'ın ikinci <main>/<h1>'i FEAT-004'te silindi; liste boş).
 // Liste yalnızca küçülür: sayfa düzelince bu test listeden çıkarılmasını ister.
 const AC34_PENDING = {};
 

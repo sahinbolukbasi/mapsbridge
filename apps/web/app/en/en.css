@@ -1,8 +1,0 @@
-@layer tokens, base, legacy, chrome, pages, primitives;
-@layer pages {
-  .en-notice-bar {
-    max-width: 1200px;
-    margin: var(--space-4) auto 0;
-    padding: 0 var(--space-4);
-  }
-}

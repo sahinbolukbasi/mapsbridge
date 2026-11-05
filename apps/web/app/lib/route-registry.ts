@@ -59,10 +59,13 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     path: "/",
     file: "app/page.tsx",
     layout: "landing",
-    title: t("Seyahatini planla, birlikte keşfet", "Plan your journey, discover together"),
+    title: t(
+      "Gezini anlat, rotan haritada belirsin",
+      "Describe your trip, see your route on the map",
+    ),
     description: t(
-      "AI seyahat asistanı, kişisel haritalar ve gezgin rehberleriyle yolculuğunu planla. Duraklarını kaydet ve deneyimlerini paylaş.",
-      "Plan a trip with your AI travel assistant, save places on your map and discover guides from fellow travelers.",
+      "Bağımsız seyahat arkadaşı: gezini anlat, birkaç soruyla netleştir, rotanı gün gün haritada gör. Önerilerimiz komisyona göre sıralanmaz.",
+      "An independent travel companion: describe your trip, settle the details in a few taps and see your route day by day on the map. Our suggestions are never ranked by commission.",
     ),
     // D15: "/" self-canonical; sitemap yalnızca "/en/" içerir (GSC DECISION HIGH-1).
     sitemap: false,
@@ -73,10 +76,13 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     path: "/en/",
     file: "app/en/page.tsx",
     layout: "landing",
-    title: t("Seyahatini planla, birlikte keşfet", "Plan your journey, discover together"),
+    title: t(
+      "Gezini anlat, rotan haritada belirsin",
+      "Describe your trip, see your route on the map",
+    ),
     description: t(
-      "AI seyahat asistanı, kişisel haritalar ve gezgin rehberleriyle yolculuğunu planla. Duraklarını kaydet ve deneyimlerini paylaş.",
-      "Plan a trip with your AI travel assistant, save places on your map and discover guides from fellow travelers.",
+      "Bağımsız seyahat arkadaşı: gezini anlat, birkaç soruyla netleştir, rotanı gün gün haritada gör. Önerilerimiz komisyona göre sıralanmaz.",
+      "An independent travel companion: describe your trip, settle the details in a few taps and see your route day by day on the map. Our suggestions are never ranked by commission.",
     ),
     sitemap: true,
     robots: "index",

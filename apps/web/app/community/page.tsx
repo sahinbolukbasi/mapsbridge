@@ -508,6 +508,7 @@ export default function CommunityPage() {
                 <button
                   type="button"
                   className="community-share-btn"
+                  data-surface="inverse"
                   style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}
                   onClick={() => {
                     requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {

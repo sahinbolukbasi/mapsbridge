@@ -1355,6 +1355,9 @@ export function TravelPlannerSidebar({
                 <button
                   type="button"
                   className={`stitch-day-tab-pill ${activeDayIndex === 0 || activeDayIndex === null ? "active" : ""}`}
+                  data-surface={
+                    activeDayIndex === 0 || activeDayIndex === null ? "inverse" : undefined
+                  }
                   onClick={() => setActiveDayIndex(0)}
                   title="Tüm Günleri Göster"
                 >
@@ -1370,6 +1373,7 @@ export function TravelPlannerSidebar({
                       key={d.dayIndex}
                       type="button"
                       className={`stitch-day-tab-pill ${isActive ? "active" : ""}`}
+                      data-surface={isActive ? "inverse" : undefined}
                       onClick={() => setActiveDayIndex(d.dayIndex)}
                     >
                       {d.dayIndex}. Gün ({dayPinsCount})
@@ -1553,6 +1557,7 @@ export function TravelPlannerSidebar({
                         key={chip.id}
                         type="button"
                         className={`stitch-category-chip-btn ${categoryFilter === chip.id ? "active" : ""}`}
+                        data-surface={categoryFilter === chip.id ? "inverse" : undefined}
                         onClick={() => setCategoryFilter(chip.id)}
                       >
                         {chip.label}

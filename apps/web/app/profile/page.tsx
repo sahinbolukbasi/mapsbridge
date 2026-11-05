@@ -541,6 +541,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className={`stitch-workspace-tab ${activeMainTab === "routes" ? "active" : ""}`}
+                data-surface={activeMainTab === "routes" ? "inverse" : undefined}
                 onClick={() => setActiveMainTab("routes")}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
@@ -552,6 +553,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className={`stitch-workspace-tab ${activeMainTab === "posts" ? "active" : ""}`}
+                data-surface={activeMainTab === "posts" ? "inverse" : undefined}
                 onClick={() => setActiveMainTab("posts")}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
@@ -563,6 +565,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className={`stitch-workspace-tab ${activeMainTab === "pool" ? "active" : ""}`}
+                data-surface={activeMainTab === "pool" ? "inverse" : undefined}
                 onClick={() => setActiveMainTab("pool")}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
@@ -574,6 +577,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className={`stitch-workspace-tab ${activeMainTab === "analytics" ? "active" : ""}`}
+                data-surface={activeMainTab === "analytics" ? "inverse" : undefined}
                 onClick={() => setActiveMainTab("analytics")}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
@@ -585,6 +589,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className={`stitch-workspace-tab ${activeMainTab === "activity" ? "active" : ""}`}
+                data-surface={activeMainTab === "activity" ? "inverse" : undefined}
                 onClick={() => setActiveMainTab("activity")}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
@@ -604,6 +609,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       className={`stitch-filter-chip ${activeFilter === "all" ? "active" : ""}`}
+                      data-surface={activeFilter === "all" ? "inverse" : undefined}
                       onClick={() => setActiveFilter("all")}
                     >
                       Tümü ({savedTrips.length})
@@ -611,6 +617,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       className={`stitch-filter-chip ${activeFilter === "published" ? "active" : ""}`}
+                      data-surface={activeFilter === "published" ? "inverse" : undefined}
                       onClick={() => setActiveFilter("published")}
                     >
                       Yayınlananlar
@@ -618,6 +625,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       className={`stitch-filter-chip ${activeFilter === "drafts" ? "active" : ""}`}
+                      data-surface={activeFilter === "drafts" ? "inverse" : undefined}
                       onClick={() => setActiveFilter("drafts")}
                     >
                       Taslaklar ({savedTrips.length})
@@ -625,6 +633,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       className={`stitch-filter-chip ${activeFilter === "onsale" ? "active" : ""}`}
+                      data-surface={activeFilter === "onsale" ? "inverse" : undefined}
                       onClick={() => setActiveFilter("onsale")}
                     >
                       Satışta
@@ -1117,6 +1126,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       className={`stitch-filter-chip ${poolCategoryFilter === "all" ? "active" : ""}`}
+                      data-surface={poolCategoryFilter === "all" ? "inverse" : undefined}
                       onClick={() => setPoolCategoryFilter("all")}
                     >
                       Tümü ({savedPins.length})
@@ -1128,6 +1138,11 @@ export default function ProfilePage() {
                         className={`stitch-filter-chip ${
                           poolCategoryFilter.toLowerCase() === cat.toLowerCase() ? "active" : ""
                         }`}
+                        data-surface={
+                          poolCategoryFilter.toLowerCase() === cat.toLowerCase()
+                            ? "inverse"
+                            : undefined
+                        }
                         onClick={() => setPoolCategoryFilter(cat)}
                       >
                         {cat} (

@@ -30,7 +30,6 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
     { query: "(max-width: 1023px)", count: 1 },
     { query: "(max-width: 767px)", count: 3 },
   ],
-  "components/mobile-start.css": [{ query: "(max-width: 767px)", count: 1 }],
   "components/trip/travel-planner.css": [
     { query: "(max-width: 820px)", count: 2 },
     { query: "(min-width: 769px) and (max-width: 1024px)", count: 1 },

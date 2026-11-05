@@ -22,8 +22,9 @@ import {
 } from "./routing-service";
 import { routesApi, RouteEntity, RouteStop } from "../api-client";
 import { getStoredSession } from "../cognito";
+import { PLANNER_TRIPS_KEY } from "./last-trip";
 
-const STORAGE_KEY = "mapsbridge.travelPlanner.v5";
+const STORAGE_KEY = PLANNER_TRIPS_KEY;
 
 function routeEntityToTrip(entity: RouteEntity): Trip {
   const pins: Pin[] = (entity.stops || []).map((s, idx): Pin => ({

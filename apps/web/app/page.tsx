@@ -15,7 +15,8 @@ export default function HomePage() {
               "@type": "WebSite",
               name: "MapsBridge",
               url: siteOrigin,
-              description: "Seyahat planlama, harita ve gezgin topluluğu",
+              description:
+                "Bağımsız seyahat arkadaşı: gezini anlat, birkaç soruyla netleştir, rotanı gün gün haritada gör. Önerilerimiz komisyona göre sıralanmaz.",
               inLanguage: "tr",
             }).replace(/</g, "\\u003c"),
           }}

@@ -8,7 +8,9 @@ const APP = path.resolve(__dirname, "../app");
 const { safeNext, readNext, NEXT_MAX_LENGTH, DEFAULT_NEXT } = loadTs(
   path.join(APP, "lib/navigation/safe-next.ts"),
 );
-const { normalizeShareCode, isValidShareCode } = loadTs(path.join(APP, "lib/share/share-code.ts"));
+const { normalizeShareCode, isValidShareCode, readShareCode } = loadTs(
+  path.join(APP, "lib/share/share-code.ts"),
+);
 const ORIGIN = "https://mapsbridge.com";
 
 test("safeNext: kanonik, staticParams ve LEGACY yolları kabul edilir, search korunur", () => {
@@ -59,16 +61,20 @@ test("readNext: next, redirect'ten önce gelir; redirect geriye uyumlu okunur", 
   );
 });
 
-test("share-code: boşluklar silinir, büyük harfe çevrilir; biçim ve uzunluk sınırları", () => {
-  assert.equal(normalizeShareCode("  ab 12-cd \n"), "AB12-CD");
+// FEAT-004 kullanıcı kararı A: harf büyüklüğü korunur, 4–64 karakter (backend kodu 8, token 64
+// karakter küçük harf hex; GET /shares/{code} büyük/küçük harfe duyarlı).
+test("share-code: boşluklar silinir, harf büyüklüğü korunur; biçim ve uzunluk sınırları", () => {
+  assert.equal(normalizeShareCode("  ab 12-cd \n"), "ab12-cd");
   assert.equal(normalizeShareCode(null), "");
   assert.equal(isValidShareCode("AB12"), true);
-  assert.equal(isValidShareCode("A".repeat(32)), true);
+  assert.equal(isValidShareCode("ab12"), true, "küçük harf geçerli");
+  assert.equal(isValidShareCode("a".repeat(64)), true, "64 karakterlik token");
   assert.equal(isValidShareCode("ABC"), false, "en az 4");
-  assert.equal(isValidShareCode("A".repeat(33)), false, "en çok 32");
-  assert.equal(isValidShareCode("ab12"), false, "normalize edilmemiş küçük harf");
+  assert.equal(isValidShareCode("a".repeat(65)), false, "en çok 64");
   assert.equal(isValidShareCode("AB_12"), false);
-  assert.equal(isValidShareCode(normalizeShareCode("mb-8492")), true);
+  assert.equal(readShareCode(" 3f9a 0c1d "), "3f9a0c1d", "8 karakter hex kod olduğu gibi kalır");
+  assert.equal(readShareCode("ab"), null);
+  assert.equal(readShareCode("kod/../x"), null);
 });
 
 test("footer bağlantıları registry'den (F29): sabit href yok, kırık çapalar hiçbir yerde yok", () => {
