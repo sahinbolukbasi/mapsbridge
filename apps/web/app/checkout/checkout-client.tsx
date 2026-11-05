@@ -31,6 +31,7 @@ import {
   fetchCatalog,
   findPlanProduct,
   formatPrice,
+  isWebSellable,
   type Catalog,
   type CatalogProduct,
   type PlanPeriod,
@@ -148,6 +149,8 @@ export default function CheckoutClient() {
   }, []);
 
   async function buy(product: CatalogProduct) {
+    // S18: web yalnızca aylık abonelik ve kredi paketi satar (yıllık listelenmez; burada da reddedilir).
+    if (!isWebSellable(product)) return;
     if (!getStoredSession()) {
       location.href = "/login/?next=" + encodeURIComponent(location.pathname + location.search);
       return;
@@ -170,8 +173,9 @@ export default function CheckoutClient() {
   const ok = catalog !== "loading" && catalog.status === "ok" ? catalog : null;
   const subscriptions = ok
     ? PAID_TIERS.flatMap((tier) => {
+        // S18: yıllık ürünler web'de satılmaz → Yıllık modda "satın alınabilir abonelik yok".
         const product = findPlanProduct(ok.products, tier, period);
-        return product ? [{ tier, product }] : [];
+        return product && isWebSellable(product) ? [{ tier, product }] : [];
       })
     : [];
   const packs = ok ? creditPacks(ok.products) : [];

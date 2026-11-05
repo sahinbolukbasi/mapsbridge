@@ -167,11 +167,12 @@ test("planOffer: §7.3 durumları (yükleniyor, başarısız, kapalı, ürün yo
     price: { amount: 49900, period: "monthly", credits: 500 },
     purchase: "ok",
   });
-  // Yıllık: kredi satırı katalogdaki yıllık üründen (5.500 / yıl), indirim kredi başına (%9).
+  // Yıllık: kredi satırı katalogdaki yıllık üründen (5.500 / yıl), indirim kredi başına (%9);
+  // S18: yıllık ürün web'de satılmaz → CTA "unavailable" (gösterim var, satın alma yok).
   assert.deepEqual(offer("pro", "yearly", ok(), null), {
     price: { amount: 499900, period: "yearly", credits: 5500 },
     discount: 9,
-    purchase: "ok",
+    purchase: "unavailable",
     credits: { n: 5500, kind: "yearly" },
   });
   // Aylık dönemde ve yıllık ürün yokken kredi satırı statik kalır (credits verilmez).
@@ -192,11 +193,29 @@ test("planOffer: §7.3 durumları (yükleniyor, başarısız, kapalı, ürün yo
   assert.equal(offer("pro", "monthly", ok(), "pro").purchase, "current");
   assert.equal(offer("free", "monthly", ok(), "free").purchase, "current");
   // "Mevcut planın" dönemle birlikte eşleşir; free dönemsizdir.
-  assert.equal(offer("pro", "yearly", ok(), "pro").purchase, "ok");
-  assert.equal(offer("pro", "yearly", ok(), "pro", "monthly").purchase, "ok");
+  assert.equal(offer("pro", "yearly", ok(), "pro").purchase, "unavailable");
+  assert.equal(offer("pro", "yearly", ok(), "pro", "monthly").purchase, "unavailable");
   assert.equal(offer("pro", "yearly", ok(), "pro", "yearly").purchase, "current");
   assert.equal(offer("pro", "monthly", ok(), "pro", "yearly").purchase, "ok");
   assert.equal(offer("free", "yearly", ok(), "free").purchase, "current");
+});
+
+test("isWebSellable (S18): yalnızca aylık abonelik ve kredi paketi web'de satılır", () => {
+  assert.equal(catalog.isWebSellable(product()), true);
+  assert.equal(catalog.isWebSellable(product({ id: "explorer" })), true);
+  assert.equal(catalog.isWebSellable(product({ id: "pro-yearly" })), false);
+  assert.equal(catalog.isWebSellable(product({ id: "agency-yearly" })), false);
+  assert.equal(
+    catalog.isWebSellable(product({ id: "pack-50", mode: "credit_pack", credits: 50 })),
+    true,
+  );
+  // Kapalı katalogda yıllık yine "closed" (uyarı önceliği), aylık da "closed".
+  const closed = {
+    status: "ok",
+    enabled: false,
+    products: [product(), product({ id: "pro-yearly", amount: 499900, credits: 5500 })],
+  };
+  assert.equal(catalog.planOffer("pro", "yearly", closed, null).purchase, "closed");
 });
 
 test("fetchCatalog: skipAuth + 8 sn; hata/iptal unavailable döner, fırlatmaz", async () => {

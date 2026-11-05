@@ -132,6 +132,16 @@ export function findPlanProduct(
   return products.find((p) => p.mode === "subscription" && p.id === id);
 }
 
+/**
+ * Web'de satılabilir mi (karar S18): yalnızca aylık abonelik (`<tier>`) ve kredi paketleri.
+ * `*-yearly` ürünler yalnızca GÖSTERİLİR (fiyat + yıllık kredi), CTA "Şu an satın alınamıyor".
+ * Gerekçe: sunucu `pro-yearly` alımında tier'ı "pro-yearly" yazıyor, wallet bunu "free" sayıyor;
+ * kullanıcı ödeyip Pro yetkisi alamaz. Backend *-yearly → tier eşlemesini yapana kadar geçerli.
+ */
+export function isWebSellable(product: CatalogProduct): boolean {
+  return product.mode === "credit_pack" || !product.id.endsWith("-yearly");
+}
+
 /** Kredi paketleri yalnızca katalogdan (design §7.2 madde 5). */
 export function creditPacks(products: readonly CatalogProduct[]): CatalogProduct[] {
   return products.filter((p) => p.mode === "credit_pack");
@@ -154,7 +164,10 @@ export type CatalogPrice = { amount: number; period: PlanPeriod; credits: number
  * none: katalog yüklendi ama bu tier/dönem için ürün yok (fiyat satırı çizilmez, I10).
  */
 export type PlanPriceState = CatalogPrice | "loading" | "unavailable" | "free" | "none";
-/** ok: CTA etkin · closed: enabled:false · unavailable: ürün yok/available:false · current. */
+/**
+ * ok: CTA etkin · closed: enabled:false · unavailable: ürün yok / available:false / web'de
+ * satılmaz (yıllık, S18) · current.
+ */
 export type PlanPurchase = "ok" | "closed" | "unavailable" | "current";
 /**
  * `credits` yalnızca yıllık dönemde katalogda yıllık ürün varsa verilir: kartın birincil kredi
@@ -201,7 +214,7 @@ export function planOffer(
     ? "current"
     : !catalog.enabled
       ? "closed"
-      : !product || !product.available
+      : !product || !product.available || !isWebSellable(product)
         ? "unavailable"
         : "ok";
   const offer: PlanOffer = { price, purchase };
