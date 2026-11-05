@@ -301,6 +301,13 @@ test("R6: primitive erişilebilirlik durumları (selected / checked / expanded /
   const sheet = read("src/ui/BottomSheet.tsx");
   assert.match(sheet, /PanResponder\.create/);
   assert.match(sheet, /spring\(translate, .*"sheet"/);
+  // FEAT-011 review #3/#4: iOS'ta canlı bölge yok → announceForAccessibility; sheet adlı eylemler.
+  assert.match(read("src/ui/useAnnounce.ts"), /AccessibilityInfo\.announceForAccessibility/);
+  for (const file of ["MessageLog", "Stepper", "ComposerBar"])
+    assert.match(read(`src/ui/${file}.tsx`), /useAnnounce\(/, `${file} iOS duyurusu yok`);
+  assert.match(sheet, /name: "expand"/);
+  assert.match(sheet, /name: "collapse"/);
+  assert.doesNotMatch(sheet, /"increment"|"decrement"/);
   const icon = read("src/ui/Icon.tsx");
   assert.match(icon, /accessibilityElementsHidden: true/, "etiketsiz ikon gizlenir");
   assert.match(icon, /from "\.\.\/theme\/icon-paths"/, "path'ler üretilmiş icon-paths'ten");
@@ -329,6 +336,17 @@ test("App: misafir göz atma açık, Splash yapay süre taşımaz, BackHandler +
   assert.match(app, /useFonts\(FONT_SOURCES\)/);
   assert.match(app, /BackHandler\.addEventListener\("hardwareBackPress"/);
   assert.match(app, /GUEST_TABS/);
+  // Misafir modu (design §6.3/§6.4; FEAT-011 review #1/#2): gezi kaydı sahibe bağlı, çıkışta
+  // geziler ve satın alma kimliği bırakılır; misafirin Pro tetikleyicisi paywall değil kapı açar.
+  assert.match(app, /tripStore\.setOwner\(tripOwner\)/);
+  assert.match(app, /tripStore\.clearForSignOut\(\)/);
+  assert.match(app, /resetRevenueCat\(\)/);
+  assert.doesNotMatch(app, /tripStore\s*\.syncWithServer\(/, "eşitleme yalnız setOwner üzerinden");
+  assert.match(app, /<PlanScreen[\s\S]*?guest=\{!signedIn\}/);
+  const plan = read("src/screens/PlanScreen.tsx");
+  assert.match(plan, /const isPro = !guest && isProSync\(\)/);
+  assert.match(plan, /guest \? \(\s*<AuthGate\s+variant="sheet"\s+reason="save"/);
+  assert.equal((plan.match(/isProSync\(\)/g) || []).length, 1, "Pro durumu yalnız isPro'dan");
   const splash = read("src/components/SplashScreen.tsx");
   assert.doesNotMatch(splash, /minDurationMs|setInterval|setTimeout/);
   for (const banned of ["CANLI KÖPRÜ", "Eco-Path", "ROUTE OS", "V2.4", "4.8K"])

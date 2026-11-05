@@ -5,6 +5,7 @@ import type { CreditCost } from "../billing/credit-costs";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
 import { tr } from "../i18n/ui";
+import { useAnnounce } from "./useAnnounce";
 
 // Sohbet girişi (design §4.2, karar S22): web ComposerBar ile aynı prop sözlüğü. Alanın
 // erişilebilir adı `label` (yoksa placeholder). `cost` verilirse gönder düğmesinde CostBadge
@@ -50,6 +51,8 @@ export function ComposerBar({
     onChange?.(next);
   };
   const hint = [disabled ? disabledReason : undefined, note].filter(Boolean).join(" ") || undefined;
+  // iOS: devre dışı kalma nedeni değişince okunur (Android canlı bölgesinin eşleniği).
+  useAnnounce(disabled ? disabledReason : undefined);
   const canSend = !disabled && !busy && value.trim().length > 0;
   const submit = () => {
     if (!canSend) return;

@@ -35,11 +35,15 @@ import { ScreenTourModal } from "../components/ScreenTourModal";
 import { PaywallModal } from "../components/PaywallModal";
 import { getOfferings, isProSync } from "../services/revenuecat";
 
-import { AccessibleStopList, mapLabel, ModalFrame, Screen, ScreenHeader } from "../ui";
+import { AccessibleStopList, AuthGate, mapLabel, ModalFrame, Screen, ScreenHeader } from "../ui";
 import { tokens, withAlpha } from "../theme";
 interface PlanScreenProps {
   onOpenMap: (stopId?: string) => void;
   onOpenProfile?: () => void;
+  /** Oturumsuz (design §6.3/§6.4): Pro/satın alma tetikleyicileri kimlik kapısını açar. */
+  guest?: boolean;
+  /** Kimlik kapısından kayıt/giriş seçildi. */
+  onRequireAuth?: (mode: "register" | "login") => void;
 }
 
 const CATEGORIES = ["TARİHİ YER", "MÜZE", "KAHVE & MOLA", "YEME-İÇME", "MANZARA", "DİĞER"];
@@ -213,7 +217,7 @@ export const SAMPLE_TEMPLATES = [
   },
 ];
 
-export function PlanScreen({ onOpenMap }: PlanScreenProps) {
+export function PlanScreen({ onOpenMap, guest = false, onRequireAuth }: PlanScreenProps) {
   const [activeRoute, setActiveRoute] = useState<ActiveRoute>(tripStore.getActiveRoute());
   const [allRoutes, setAllRoutes] = useState<ActiveRoute[]>(tripStore.getAllRoutes());
   const [savedPool, setSavedPool] = useState<TripStop[]>(tripStore.getSavedPool());
@@ -221,6 +225,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
   const [showPool, setShowPool] = useState<boolean>(false);
   const [_offerings, setOfferings] = useState<unknown>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showAuthGate, setShowAuthGate] = useState(false);
+  // Misafirde satın alma kimliği yoktur (FEAT-011 review #2): Pro tetikleyicileri paywall yerine
+  // kimlik kapısını açar; misafir önceki hesabın yetkisini kullanamaz ve onun adına satın alamaz.
+  const isPro = !guest && isProSync();
+  const openUpgrade = () => (guest ? setShowAuthGate(true) : setShowPaywall(true));
 
   // Modals
   const [showRoutePickerModal, setShowRoutePickerModal] = useState<boolean>(false);
@@ -262,10 +271,11 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
 
   // Load RevenueCat offerings
   useEffect(() => {
+    if (guest) return;
     getOfferings()
       .then((off) => setOfferings(off))
       .catch((err) => console.warn("Failed to load offerings:", err));
-  }, []);
+  }, [guest]);
 
   // Sync stops with embedded map preview
   useEffect(() => {
@@ -401,8 +411,8 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
 
   const handleApplyTemplate = (tmpl: (typeof SAMPLE_TEMPLATES)[0]) => {
     // Gate: templates are a Pro feature
-    if (!isProSync()) {
-      setShowPaywall(true);
+    if (!isPro) {
+      openUpgrade();
       return;
     }
     tripStore.setActiveRoute({
@@ -885,9 +895,9 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
               >
                 Hızlı Başlangıç Şablonları
               </Text>
-              {!isProSync() && (
+              {!isPro && (
                 <TouchableOpacity
-                  onPress={() => setShowPaywall(true)}
+                  onPress={openUpgrade}
                   style={{
                     backgroundColor: tokens.color.accentStrong,
                     paddingHorizontal: 10,
@@ -910,10 +920,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
             </View>
             <View style={styles.starterTemplatesList}>
               {SAMPLE_TEMPLATES.map((tmpl) => (
-                <View
-                  key={tmpl.id}
-                  style={[styles.templateCard, !isProSync() && { opacity: 0.75 }]}
-                >
+                <View key={tmpl.id} style={[styles.templateCard, !isPro && { opacity: 0.75 }]}>
                   <View style={{ flex: 1, marginRight: 8 }}>
                     <Text
                       maxFontSizeMultiplier={tokens.font.maxScale.body}
@@ -943,7 +950,7 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
                       maxFontSizeMultiplier={tokens.font.maxScale.body}
                       style={styles.templateApplyBtnText}
                     >
-                      {isProSync() ? "Kullan" : "🔒 Kullan"}
+                      {isPro ? "Kullan" : "🔒 Kullan"}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1901,11 +1908,28 @@ export function PlanScreen({ onOpenMap }: PlanScreenProps) {
       <ScreenTourModal screen="plan" />
 
       {/* Paywall Modal — opened by template gate and other Pro features */}
-      <PaywallModal
-        visible={showPaywall}
-        onClose={() => setShowPaywall(false)}
-        placement="plan_screen"
-      />
+      {guest ? (
+        <AuthGate
+          variant="sheet"
+          reason="save"
+          visible={showAuthGate}
+          onClose={() => setShowAuthGate(false)}
+          onRegister={() => {
+            setShowAuthGate(false);
+            onRequireAuth?.("register");
+          }}
+          onLogin={() => {
+            setShowAuthGate(false);
+            onRequireAuth?.("login");
+          }}
+        />
+      ) : (
+        <PaywallModal
+          visible={showPaywall}
+          onClose={() => setShowPaywall(false)}
+          placement="plan_screen"
+        />
+      )}
     </Screen>
   );
 }

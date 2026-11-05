@@ -25,7 +25,8 @@ import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { authService, UserSession } from "./src/services/api";
 import { storage } from "./src/services/storage";
 import { tripStore } from "./src/services/tripStore";
-import { initRevenueCat } from "./src/services/revenuecat";
+import { ownerFromEmail } from "./src/services/trip-owner";
+import { initRevenueCat, resetRevenueCat } from "./src/services/revenuecat";
 
 import { setFontsAvailable, tokens } from "./src/theme";
 import { FONT_SOURCES } from "./src/theme/fonts";
@@ -174,6 +175,15 @@ export function App() {
     mountedTabs.current = { key: signedIn, tabs: new Set() };
   mountedTabs.current.tabs.add(nav.tab);
 
+  // Cihazdaki gezi kaydının sahibi (design §6.3/§6.4, KVKK): başka hesabın gezileri misafire ya da
+  // sonraki hesaba gösterilmez; misafirden girişte yalnızca misafir taslakları hesaba aktarılır.
+  // Üye sahibinde tripStore sunucuyla eşitlenir (eski doğrudan syncWithServer çağrılarının yerine).
+  const tripOwner = ownerFromEmail(session?.email);
+  useEffect(() => {
+    if (loadingSession) return;
+    tripStore.setOwner(tripOwner).catch((err: unknown) => console.warn("Route sync error:", err));
+  }, [loadingSession, tripOwner]);
+
   // Session refresh interval ref
   const sessionRefreshIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -202,6 +212,7 @@ export function App() {
           const idleDays = idleMs / (1000 * 60 * 60 * 24);
           if (idleDays > SESSION_MAX_IDLE_DAYS) {
             await authService.signOut();
+            await tripStore.clearForSignOut();
             setSession(null);
             setLoadingSession(false);
             return;
@@ -223,10 +234,6 @@ export function App() {
           initRevenueCat(effectiveEmail).catch((err: unknown) =>
             console.warn("[RevenueCat] Init failed:", err),
           );
-
-          tripStore
-            .syncWithServer()
-            .catch((err: unknown) => console.warn("Initial route sync error:", err));
 
           // Silently refresh token in background if refresh token exists
           if (refreshToken) {
@@ -316,7 +323,10 @@ export function App() {
       console.warn("Session save failed:", e);
     }
     setSession(newSession);
-    tripStore.syncWithServer().catch((err: unknown) => console.warn("Route sync error:", err));
+    // Satın alma kimliği yeni hesaba geçer (çıkışta resetRevenueCat ile bırakıldı).
+    initRevenueCat(newSession.email).catch((err: unknown) =>
+      console.warn("[RevenueCat] Init failed:", err),
+    );
   };
 
   // Google Sign-In: Open the real Google OAuth flow
@@ -441,6 +451,9 @@ export function App() {
       sessionRefreshIntervalRef.current = null;
     }
     await authService.signOut();
+    // Çıkışta hesabın gezileri ve satın alma kimliği cihazdan bırakılır (design §6.3).
+    await tripStore.clearForSignOut();
+    await resetRevenueCat();
     setSession(null);
   };
 
@@ -468,7 +481,13 @@ export function App() {
           />
         );
       case "plan":
-        return <PlanScreen onOpenMap={openMap} />;
+        return (
+          <PlanScreen
+            onOpenMap={openMap}
+            guest={!signedIn}
+            onRequireAuth={(mode) => openAuth(mode)}
+          />
+        );
       case "ai":
         // Misafir hiçbir zaman LLM'e ulaşmaz (design §6): misafir senaryosu (FEAT-012) gelene dek
         // asistan sekmesi kimlik kapısıdır; ağ çağrısı yapılmaz.

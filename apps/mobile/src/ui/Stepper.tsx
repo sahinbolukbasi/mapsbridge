@@ -4,6 +4,7 @@ import { fontFamily, tokens } from "../theme";
 import { IconButton } from "./IconButton";
 import { clampStep } from "./logic/choice";
 import { tr } from "../i18n/ui";
+import { useAnnounce } from "./useAnnounce";
 
 // Sayı seçici (design §4.2): gün/gece sayısı. Web Stepper ile aynı prop sözlüğü; iki IconButton
 // ("Azalt: …" / "Artır: …") ve canlı bölge değer. Değer [min, max]'ta kalır (logic/choice.ts).
@@ -18,6 +19,8 @@ export interface StepperProps {
 export function Stepper({ label, value, min, max, onChange }: StepperProps) {
   const atMin = clampStep(value, -1, min, max) === value;
   const atMax = clampStep(value, 1, min, max) === value;
+  // iOS: değer değişince okunur (Android canlı bölgesinin eşleniği).
+  useAnnounce(`${label}: ${value}`);
   const step = (delta: number) => {
     const next = clampStep(value, delta, min, max);
     if (next !== value) onChange(next);

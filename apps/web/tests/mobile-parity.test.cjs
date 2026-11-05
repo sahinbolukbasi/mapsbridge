@@ -309,3 +309,185 @@ test("Android geri sırası (design §12.1): yığın → önceki sekme → Plan
   const r2 = nav.onBack(g, HOME, ["plan", "ai", "community", "messages", "profile"]);
   assert.equal(r2.state.tab, "plan");
 });
+test("misafir Keşfet'te geri: design §12.1 birebir (Planla, sonra çıkış)", () => {
+  // FEAT-011 review #5: tablo "kök sekme Planla değil → Planla" der; misafir setinde de Planla
+  // vardır. Bu davranış onaylı tasarımın gereğidir; değişirse önce design.md §12.1 güncellenir.
+  const guestTabs = ["explore", "plan", "ai", "community", "login"];
+  const r = nav.onBack(nav.initialNav("explore"), "plan", guestTabs);
+  assert.equal(r.handled, true);
+  assert.equal(r.state.tab, "plan");
+  assert.equal(nav.onBack(r.state, "plan", guestTabs).handled, false);
+});
+
+// ── Native gezi kaydı hesap yalıtımı (design §6.3/§6.4, KVKK; FEAT-011 review #1) ──
+const webPlanner = loadTs(path.join(WEB, "lib/trip/planner-store.ts"));
+const tripOwner = loadTs(path.join(MOBILE, "services/trip-owner.ts"));
+const tripStubs = {
+  [path.join(MOBILE, "services/storage.ts")]: path.join(__dirname, "stubs/mobile-storage.stub.cjs"),
+  [path.join(MOBILE, "services/api.ts")]: path.join(__dirname, "stubs/mobile-route-api.stub.cjs"),
+};
+const STOP = {
+  id: "s1",
+  name: "Kolezyum",
+  category: "MEKAN",
+  time: "10:00",
+  duration: "60 dk",
+  address: "",
+  lat: 41.89,
+  lng: 12.49,
+};
+/** Her senaryo kendi tripStore tekilini alır (yeni bundle + yeni bağlam). */
+function freshTripStore(initialStorage = {}, server = {}) {
+  const mem = { ...initialStorage };
+  const remote = [];
+  const api = {
+    calls: [],
+    async listRoutes() {
+      return remote.map((r) => ({ ...r }));
+    },
+    async createRoute(name, stops) {
+      if (server.createFails) throw new Error("çevrimdışı");
+      const routeId = `srv-${remote.length + 1}`;
+      remote.push({ routeId, name, stops });
+      return { routeId, name, stops };
+    },
+    async updateRoute() {
+      return { status: "ok" };
+    },
+    async deleteRoute() {
+      return { status: "ok" };
+    },
+  };
+  for (const r of server.routes ?? []) remote.push(r);
+  const mod = loadTs(path.join(MOBILE, "services/tripStore.ts"), {
+    stubs: tripStubs,
+    globals: { __mbStorage: mem, __mbRouteApi: api, console: quiet },
+  });
+  return { store: mod.tripStore, mem, api, remote };
+}
+const flush = () => new Promise((r) => setTimeout(r, 0));
+const memberRoute = { id: "srv-a1", name: "A'nın gezisi", day: 1, stops: [STOP] };
+
+test("gezi sahibi kuralı web planner-store ile aynı (canUse / aktarım filtresi)", () => {
+  assert.equal(tripOwner.GUEST_OWNER, webPlanner.GUEST_OWNER);
+  const owners = [null, "guest", "a@x.com", "b@x.com"];
+  for (const stored of owners)
+    for (const current of ["guest", "a@x.com"])
+      assert.equal(
+        tripOwner.canUseTripStore(stored, current),
+        webPlanner.canUsePlannerStore(stored, current),
+        `${stored} → ${current}`,
+      );
+  assert.equal(tripOwner.ownerFromEmail("  A@X.com "), "a@x.com");
+  assert.equal(tripOwner.ownerFromEmail(undefined), "guest");
+  const out = tripOwner.guestRoutesForTransfer([
+    { id: "route-1", origin: "guest", stops: [STOP] },
+    { id: "route-2", origin: "guest", stops: [] },
+    { id: "srv-3", origin: "guest", stops: [STOP] },
+    { id: "route-4", stops: [STOP] },
+  ]);
+  assert.deepEqual(plain(out), [
+    { id: "route-1", origin: "user", stops: plain([STOP]), pendingUpload: true },
+  ]);
+});
+
+test("misafir önceki hesabın (ya da işaretsiz eski kaydın) gezilerini görmez", async () => {
+  for (const owner of ["a@x.com", undefined]) {
+    const initial = {
+      mb_all_routes: JSON.stringify([memberRoute]),
+      mb_active_route_id: memberRoute.id,
+      mb_saved_pool: JSON.stringify([STOP]),
+      cached_routes: JSON.stringify([{ routeId: "srv-a1", name: "A", stops: [] }]),
+    };
+    if (owner) initial.mb_routes_owner = owner;
+    const { store, mem, api } = freshTripStore(initial);
+    assert.deepEqual(plain(store.getAllRoutes()), [], "sahip bildirilmeden gezi yok");
+    await store.setOwner("guest");
+    await flush();
+    assert.deepEqual(plain(store.getAllRoutes()), [], `sahip=${owner}`);
+    assert.deepEqual(plain(store.getSavedPool()), []);
+    assert.equal(mem.mb_routes_owner, "guest");
+    assert.equal(mem.mb_all_routes, "[]");
+    assert.equal(mem.cached_routes, undefined, "hesabın sunucu önbelleği silinir");
+    assert.deepEqual(api.calls, [], "misafirde sunucu isteği yok");
+  }
+});
+
+test("üye çıkışında geziler, havuz ve önbellek silinir; başka hesap öncekini görmez", async () => {
+  const { store, mem } = freshTripStore(
+    {
+      mb_all_routes: JSON.stringify([memberRoute]),
+      mb_routes_owner: "a@x.com",
+      mb_saved_pool: JSON.stringify([STOP]),
+    },
+    { routes: [{ routeId: "srv-a1", name: "A'nın gezisi", stops: [] }] },
+  );
+  await store.setOwner("a@x.com");
+  assert.deepEqual(
+    plain(store.getAllRoutes().map((r) => r.id)),
+    ["srv-a1"],
+    "aynı hesap kendi kaydını görür",
+  );
+  await store.clearForSignOut();
+  await flush();
+  assert.deepEqual(plain(store.getAllRoutes()), []);
+  assert.deepEqual(plain(store.getSavedPool()), []);
+  assert.equal(mem.mb_routes_owner, "guest");
+  assert.equal(mem.mb_saved_pool, "[]");
+
+  const other = freshTripStore({
+    mb_all_routes: JSON.stringify([memberRoute]),
+    mb_routes_owner: "a@x.com",
+  });
+  await other.store.setOwner("b@x.com");
+  await flush();
+  assert.ok(
+    !other.store.getAllRoutes().some((r) => r.id === memberRoute.id),
+    "A'nın gezisi B'ye gösterilmez",
+  );
+  assert.equal(other.mem.mb_routes_owner, "b@x.com");
+});
+
+test("misafir taslağı yalnız cihazda kalır, girişte hesaba aktarılır (silinmez)", async () => {
+  const { store, mem, api, remote } = freshTripStore(
+    {},
+    { routes: [{ routeId: "srv-9", name: "Sunucudaki", stops: [] }] },
+  );
+  await store.setOwner("guest");
+  store.createRoute("Roma", [STOP]);
+  store.createRoute("Boş taslak");
+  await flush();
+  assert.deepEqual(api.calls, [], "misafir sunucuya yazmaz");
+  assert.equal(mem.mb_routes_owner, "guest");
+  assert.deepEqual(
+    plain(store.getAllRoutes().map((r) => r.origin)),
+    ["guest", "guest"],
+    "misafir gezisi origin: guest",
+  );
+
+  await store.setOwner("b@x.com");
+  await flush();
+  assert.deepEqual(
+    plain(api.calls.map((c) => c.name)),
+    ["createRoute", "listRoutes"],
+    "yalnız duraklı taslak yüklenir, sonra eşitlenir",
+  );
+  assert.equal(remote.length, 2);
+  const names = store.getAllRoutes().map((r) => r.name);
+  assert.deepEqual(plain(names.sort()), ["Roma", "Sunucudaki"], "taslak korunur, kopya yok");
+  assert.ok(store.getAllRoutes().every((r) => !r.pendingUpload && r.origin === "user"));
+  assert.equal(mem.mb_routes_owner, "b@x.com");
+});
+
+test("aktarım yüklemesi başarısızsa taslak beklemede kalır, eşitleme onu silmez", async () => {
+  const { store, api } = freshTripStore({}, { createFails: true });
+  await store.setOwner("guest");
+  store.createRoute("Roma", [STOP]);
+  await store.setOwner("b@x.com");
+  await flush();
+  const routes = plain(store.getAllRoutes());
+  assert.equal(routes.length, 1);
+  assert.equal(routes[0].name, "Roma");
+  assert.equal(routes[0].pendingUpload, true);
+  assert.ok(api.calls.some((c) => c.name === "listRoutes"));
+});

@@ -6,9 +6,11 @@ import { Icon } from "./Icon";
 import { animate, loop, sequence } from "./motion";
 import { useReducedMotion } from "./useReducedMotion";
 import { tr } from "../i18n/ui";
+import { useAnnounce } from "./useAnnounce";
 
 // Sohbet (design §4.2, §8.2, §8.3): web MessageBubble / MessageLog ile aynı prop sözlüğü.
-// MessageLog canlı bölgedir (accessibilityLiveRegion="polite"); içerik büyüdüğünde kullanıcı
+// MessageLog canlı bölgedir (Android accessibilityLiveRegion="polite"; iOS'ta `announcement`
+// değişince VoiceOver'a okutulur, çünkü canlı bölge iOS'ta çalışmaz); içerik büyüdüğünde kullanıcı
 // alttaysa otomatik kaydırılır, değilse "Yeni mesaj" hapı çıkar. Yeni balon opacity + 4pt kayma
 // ile girer; yazıyor göstergesi döngüsü reduce-motion'da durur ve statik metin kalır.
 
@@ -99,14 +101,17 @@ export interface MessageLogProps {
   /** true → TypingIndicator, düğüm → o düğüm (ör. akış metni), asistan balonunda. */
   typing?: boolean | React.ReactNode;
   children: React.ReactNode;
+  /** iOS duyurusu: son eklenen mesajın düz metni (değişince okunur). Android canlı bölgeyi okur. */
+  announcement?: string;
 }
-
 export function MessageLog({
   label = tr("assistant.log.label"),
   busy = false,
   typing,
   children,
+  announcement,
 }: MessageLogProps) {
+  useAnnounce(announcement);
   const ref = useRef<ScrollView>(null);
   const atBottom = useRef(true);
   const lastHeight = useRef(0);

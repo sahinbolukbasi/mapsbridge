@@ -20,12 +20,31 @@ export async function initRevenueCat(userId: string): Promise<void> {
   const apiKey = Platform.OS === "ios" ? RC_API_KEY_IOS : RC_API_KEY_ANDROID;
   if (!apiKey) return;
   if (__DEV__) Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-  await Purchases.configure({ apiKey, appUserID: userId });
+  _cachedCustomerInfo = null;
+  // Aynı çalıştırmada çıkıp yeniden girişte SDK zaten yapılandırılmıştır: kimlik logIn ile değişir.
+  if (await Purchases.isConfigured().catch(() => false)) {
+    await Purchases.logIn(userId);
+  } else {
+    await Purchases.configure({ apiKey, appUserID: userId });
+  }
   // Warm up cache
   try {
     _cachedCustomerInfo = await Purchases.getCustomerInfo();
   } catch {
     // Non-fatal
+  }
+}
+
+/**
+ * Çıkışta çağrılır (FEAT-011 review #2): önbellekteki yetki silinir ve SDK kimliği bırakılır;
+ * misafir önceki hesabın Pro durumunu görmez, satın alma o hesaba yazılmaz.
+ */
+export async function resetRevenueCat(): Promise<void> {
+  _cachedCustomerInfo = null;
+  try {
+    if (await Purchases.isConfigured()) await Purchases.logOut();
+  } catch {
+    // Anonim kullanıcıda logOut hata verir; önbellek yine de temizlendi.
   }
 }
 

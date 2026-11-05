@@ -117,12 +117,15 @@ export function BottomSheet({
               accessibilityRole="button"
               accessibilityLabel={atTop ? collapseLabel : expandLabel}
               accessibilityState={{ expanded: current !== order[0] }}
+              // Adlı özel eylemler (FEAT-011 review #4): iOS increment/decrement'ı yalnızca
+              // "adjustable" öğede eşler; özel adlar VoiceOver rotor "Eylemler" ve TalkBack eylem
+              // menüsünde görünür. Çift dokunma (activate → onPress) sırayla snap'ler arasında döner.
               accessibilityActions={[
-                { name: "increment", label: expandLabel },
-                { name: "decrement", label: collapseLabel },
+                { name: "expand", label: expandLabel },
+                { name: "collapse", label: collapseLabel },
               ]}
               onAccessibilityAction={(e) =>
-                step(e.nativeEvent.actionName === "increment" ? "up" : "down")
+                step(e.nativeEvent.actionName === "expand" ? "up" : "down")
               }
               onPress={() => step("Enter")}
               style={styles.handle}
