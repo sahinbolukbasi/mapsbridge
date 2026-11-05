@@ -45,11 +45,7 @@ function replaceControlChars(text: string): string {
 /** Hero/composer metni ve URL `q`: kontrol karakterleri atılır, boşluk tekleşir, 500'de kesilir. */
 export function sanitizePrompt(text: unknown): string {
   if (typeof text !== "string") return "";
-  return replaceControlChars(text)
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, GUEST_PROMPT_MAX)
-    .trim();
+  return replaceControlChars(text).replace(/\s+/g, " ").trim().slice(0, GUEST_PROMPT_MAX).trim();
 }
 export function createDraft(q: string, now: number): GuestDraft {
   return {

@@ -28,9 +28,7 @@ const REGISTRY_PATH = path.join(APP, "lib/route-registry.ts");
 let registryCache = null;
 const registry = () => (registryCache ??= loadTs(REGISTRY_PATH));
 // Kimlik kapıları da kendi PageShell'ini çizer (design §4.3, §4.5).
-const SHELL_RENDERING_GATES = [
-  "components/auth-gate.tsx",
-];
+const SHELL_RENDERING_GATES = ["components/auth-gate.tsx"];
 const PKG_SRC = path.join(ROOT, "packages/design-tokens/src");
 const ORDER = "@layer tokens, base, legacy, chrome, pages, primitives;";
 
