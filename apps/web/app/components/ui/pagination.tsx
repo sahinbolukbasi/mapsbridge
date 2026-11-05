@@ -1,7 +1,7 @@
 "use client";
 import { useLocale } from "../../lib/locale-context";
 import { cx } from "./cx";
-import { Icon } from "./material-icon";
+import { Icon } from "./svg-icon";
 import "./ui.css";
 
 /** Gösterilecek sayfa numaraları (1 tabanlı); aralar null ("…"). */
@@ -39,7 +39,7 @@ export function Pagination({
             aria-disabled={page <= 1 || undefined}
             onClick={() => page > 1 && onChange(page - 1)}
           >
-            <Icon name="chevron_left" />
+            <Icon name="chevron-left" />
           </button>
         </li>
         {pageWindow(page, pageCount).map((p, k) =>
@@ -72,7 +72,7 @@ export function Pagination({
             aria-disabled={page >= pageCount || undefined}
             onClick={() => page < pageCount && onChange(page + 1)}
           >
-            <Icon name="chevron_right" />
+            <Icon name="chevron-right" />
           </button>
         </li>
       </ul>

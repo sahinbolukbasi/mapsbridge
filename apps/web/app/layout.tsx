@@ -1,5 +1,6 @@
 import "./styles/tokens.css";
 import "./styles/base.css";
+import "./styles/motion.css";
 import "./operations.css";
 import { siteOrigin } from "./lib/site-metadata";
 import { IconFontReady } from "./components/icon-font-ready";

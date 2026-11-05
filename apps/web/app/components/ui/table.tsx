@@ -2,7 +2,7 @@
 import { useId, type ReactNode } from "react";
 import { useLocale } from "../../lib/locale-context";
 import { cx } from "./cx";
-import { Icon } from "./material-icon";
+import { Icon } from "./svg-icon";
 import { LoadingState } from "./loading-state";
 import "./ui.css";
 
@@ -106,11 +106,11 @@ export function Table<R>({
                         name={
                           active
                             ? sort?.direction === "ascending"
-                              ? "arrow_upward"
-                              : "arrow_downward"
-                            : "unfold_more"
+                              ? "chevron-up"
+                              : "chevron"
+                            : "sort"
                         }
-                        size="sm"
+                        size={16}
                       />
                     </button>
                   ) : (

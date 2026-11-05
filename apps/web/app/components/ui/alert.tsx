@@ -2,14 +2,14 @@
 import type { ReactNode } from "react";
 import { useLocale } from "../../lib/locale-context";
 import { cx } from "./cx";
-import { Icon } from "./material-icon";
+import { Icon, type IconName } from "./svg-icon";
 import "./ui.css";
 
 export type AlertTone = "info" | "success" | "warning" | "danger";
-const ICON: Record<AlertTone, string> = {
+const ICON: Record<AlertTone, IconName> = {
   info: "info",
-  success: "check_circle",
-  warning: "warning",
+  success: "check",
+  warning: "alert",
   danger: "error",
 };
 

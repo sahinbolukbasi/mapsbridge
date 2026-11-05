@@ -27,12 +27,14 @@ Web (`apps/web`, Next.js statik export, vanilla CSS) ve mobil (`apps/mobile`, Ex
 - Sayfa CSS'inde `button/input/select/textarea/a/dialog` tip seçicisi, `!important` ve ikinci `:root` yasaktır; `[data-theme]` yoktur (G2, G3, G15, G16).
 - Leaflet'e ait seçiciler yalnızca `styles/vendor-overrides.css`'te (layer'sız tek muaf dosya, G22).
 - TSX'te `<style>` yazılmaz (G20). CSS-in-JS ve Tailwind yok.
+- R2: `styles/motion.css` (`base` katmanı, `layout.tsx`'te `base.css`'ten hemen sonra) `@view-transition`, `::view-transition-*` ve global `scroll-behavior`/`scroll-padding` kurallarının tek yeridir; sayfa CSS'inde `@view-transition` yasak (G27).
 
 ## 4. Boşluk ve tipografi
 
 - Ölçekler: `--space-*`, `--font-size-*`, `--font-weight-*`, `--radius-*`, `--shadow-*`, `--z-*`, `--motion-*`.
 - Yeni `@media` yalnızca 640/768/1024/1280 ve `max-width` için `.98` eşlenikleri (G13).
 - Mevcut küme dışı koşullar `packages/design-tokens/src/breakpoints.ts` `legacyBreakpoints` listesinde donmuştur; liste yalnızca küçülür.
+- R1: `transition`/`animation` süreleri yalnız `var(--duration-*)` (gerekirse `calc(var(--duration-*) * n)`), easing yalnız `var(--easing-*)` (G24). `font-family` yalnız `var(--font-family-*)` (`@font-face` ve `inherit` hariç, G25). `font-size`, `border-radius`, `box-shadow`, `z-index` literal'i yeni dosyada 0 (G26). Mevcut dosyalar ratchet'e sayılır, yalnız düşer.
 
 ## 5. Primitive'ler
 
@@ -40,6 +42,7 @@ Web (`apps/web`, Next.js statik export, vanilla CSS) ve mobil (`apps/mobile`, Ex
 - Seçim: eylem → `Button`, gezinme → bağlantı (`Button variant="link"` ya da `<Link>`); katman → `Modal`/`ConfirmDialog`, uzun içerik → ayrı sayfa; kalıcı uyarı → `Alert`, geçici bildirim → `Toast`; tablo verisi → `Table`, kart listesi → `Card`; boş/yükleniyor/hata → `EmptyState`/`LoadingState`/`ErrorState`.
 - Primitive görünümü yalnızca prop ile değişir; `.ui-*` sınıfları sayfa CSS'inde ezilmez (G8). Primitive dış margin/width/position tanımlamaz; yerleşim sayfaya aittir.
 - Tailwind-benzeri sınıf (`flex`, `text-slate-400`, `bg-[#…]`) yazılmaz (G6); yerleşim sınıfı yazın.
+- R3: İkon yalnız `Icon` primitive'iyle (`components/ui/svg-icon.tsx`, path'ler `packages/design-tokens/src/icons.ts`); emoji ikon/etiket olarak kullanılmaz, içerik metni hariç (G28). Seçenek → `Chip`/`ChipGroup`; 2–4 karşılıklı dışlayan seçenek → `SegmentedControl`; mobil kalıcı panel → `BottomSheet`; sayı seçimi → `Stepper`; SSS → `Accordion`; kredi bilgisi → `CostBadge` / `CreditCostTable` (veri `lib/billing/credit-costs.ts`) ya da `Button cost`; oranlı görsel → `Media`.
 
 ## 6. Sayfa şablonu
 
@@ -80,6 +83,7 @@ export default function Page() {
 - Dinamik durum `aria-live`/`role="status"`; dokunma hedefi ≥ 44px; `prefers-reduced-motion` gözetilir.
 - Kontrast AA (metin ≥ 4,5:1). `outline: none` yazılmaz; odak halkası `base.css` `:focus-visible` kuralından gelir (G11).
 - `<img>` `alt` taşır (G12). Değişikliği klavyeyle deneyin; `npm run ui:audit -- --axe-width 375,1280` serious/critical 0.
+- R9: Animasyonlar `@media (prefers-reduced-motion: no-preference)` bloğunda tanımlanır, statik son durum varsayılandır (G29); JS'te `lib/a11y/use-reduced-motion.ts`. Sürükle-bırak her zaman klavye alternatifine sahiptir.
 
 ## 10. Formlar
 
@@ -114,18 +118,18 @@ Doğrulama sırası (worktree kökünden):
 
 Kural → bölüm eşlemesi:
 
-| Bölüm                | Kurallar                   |
-| -------------------- | -------------------------- |
-| §Renk                | G1, G7, G14, G17, G18, G23 |
-| §Kaskad              | G2, G3, G15, G16, G20, G22 |
-| §Boşluk ve tipografi | G13                        |
-| §Primitive'ler       | G6, G8                     |
-| §Sayfa şablonu       | G4, G10                    |
-| §Chrome              | G5, G19                    |
-| §URL ve SEO          | G9, G21                    |
-| §Erişilebilirlik     | G11, G12                   |
+| Bölüm                | Kurallar                        |
+| -------------------- | ------------------------------- |
+| §Renk                | G1, G7, G14, G17, G18, G23      |
+| §Kaskad              | G2, G3, G15, G16, G20, G22, G27 |
+| §Boşluk ve tipografi | G13, G24, G25, G26              |
+| §Primitive'ler       | G6, G8, G28                     |
+| §Sayfa şablonu       | G4, G10                         |
+| §Chrome              | G5, G19                         |
+| §URL ve SEO          | G9, G21                         |
+| §Erişilebilirlik     | G11, G12, G29                   |
 
-Ratchet: `apps/web/tests/design-system-baseline.json` kalan eski ihlalleri dosya bazında sayar ve yalnızca aşağı yazılır (`node apps/web/tests/design-system-guard.test.cjs --write-baseline`). Yeni dosyada ihlal 0'dır; mevcut dosyada sayı artamaz.
+Ratchet: `apps/web/tests/design-system-baseline.json` kalan eski ihlalleri dosya bazında sayar ve yalnızca aşağı yazılır (`node apps/web/tests/design-system-guard.test.cjs --write-baseline`). Yeni dosyada ihlal 0'dır; mevcut dosyada sayı artamaz. Yeni bir kural baseline'a yalnızca bir kez, bugünkü sayılarıyla `--write-baseline --seed <G..>` ile girer (baseline'da olan kural seed edilemez).
 
 ## 14. Yeni sayfa ekleme
 

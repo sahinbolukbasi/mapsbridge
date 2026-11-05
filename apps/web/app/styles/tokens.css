@@ -190,7 +190,7 @@
     --segment-selected-bg: var(--color-surface);
     --segment-selected-fg: var(--color-text);
     --sheet-bg: var(--color-surface);
-    --sheet-handle: var(--color-border-strong);
+    --sheet-handle: var(--color-border-control);
     --stop-bg: var(--color-surface);
     --stop-border: var(--color-border);
     --stop-selected-border: var(--color-primary);

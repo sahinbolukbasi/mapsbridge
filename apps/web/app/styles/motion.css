@@ -1,0 +1,24 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer base {
+  /*
+   * Hareket sistemi (design §8.2/§8.3, R2/G27): belgeler arası view transition ve global
+   * kaydırma davranışının tek yeri. Varsayılan statiktir; yumuşak kaydırma ve geçişler yalnızca
+   * prefers-reduced-motion: no-preference altında açılır (progressive enhancement).
+   */
+  html {
+    scroll-padding-top: calc(var(--app-header-height) + var(--space-4));
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+    @view-transition {
+      navigation: auto;
+    }
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: var(--duration-base);
+      animation-timing-function: var(--easing-standard);
+    }
+  }
+}

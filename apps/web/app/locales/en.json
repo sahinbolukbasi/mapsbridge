@@ -263,8 +263,23 @@
   "ui.notFound.link.support": "Help and support",
   "ui.notFound.link.support.desc": "Open a support request and follow the replies.",
   "ui.errorPage.title": "Something went wrong",
+  "ui.sheet.expand": "Expand panel",
+  "ui.sheet.collapse": "Collapse panel",
+  "ui.stepper.decrease": "Decrease",
+  "ui.stepper.increase": "Increase",
 
   "ai.prepTab": "✈ Trip prep",
   "ai.prepAffiliateTitle": "Booking options",
-  "ai.prepLink": "See flight and stay options in the Trip prep tab"
+  "ai.prepLink": "See flight and stay options in the Trip prep tab",
+  "credits.free": "Free",
+  "credits.one": "{n} credit",
+  "credits.other": "{n} credits",
+  "credits.table.caption": "Credit costs",
+  "credits.table.action": "Action",
+  "credits.table.cost": "Credits",
+  "credits.row.clarify": "Preference clarification",
+  "credits.row.aiChat": "AI chat",
+  "credits.row.routeOptimize": "Route optimisation",
+  "credits.row.stayDining": "Stay & dining analysis",
+  "credits.row.deepTrip": "Deep multi-day route"
 }

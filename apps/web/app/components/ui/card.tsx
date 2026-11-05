@@ -3,15 +3,18 @@ import type { ReactNode } from "react";
 import { cx } from "./cx";
 import "./ui.css";
 
+export type CardVariant = "bordered" | "raised" | "inverse" | "interactive";
 export type CardProps = {
   as?: "div" | "article" | "li";
   padding?: "sm" | "md" | "lg";
-  /** href ile birlikte: kartın tamamı tek link (başlık bağlantısı ::after ile yayılır). */
-  interactive?: boolean;
+  /**
+   * bordered (varsayılan, gölgesiz kağıt kenarlığı) · raised · inverse (koyu zemin) ·
+   * interactive (href ile kartın tamamı tek link; hover yükselir, odakta halka).
+   */
+  variant?: CardVariant;
   href?: string;
   /** Link metni (interactive + href); verilmezse çocuklar link içine alınmaz. */
   linkLabel?: ReactNode;
-  surface?: "default" | "inverse";
   className?: string;
   children: ReactNode;
 };
@@ -19,24 +22,17 @@ export type CardProps = {
 export function Card({
   as: Tag = "div",
   padding = "md",
-  interactive = false,
+  variant = "bordered",
   href,
   linkLabel,
-  surface = "default",
   className,
   children,
 }: CardProps) {
-  const linked = interactive && href;
+  const linked = variant === "interactive" && href;
   return (
     <Tag
-      className={cx(
-        "ui-card",
-        `ui-card--${padding}`,
-        surface === "inverse" && "ui-card--inverse",
-        linked && "ui-card--interactive",
-        className,
-      )}
-      data-surface={surface === "inverse" ? "inverse" : "default"}
+      className={cx("ui-card", `ui-card--${padding}`, `ui-card--${variant}`, className)}
+      data-surface={variant === "inverse" ? "inverse" : "default"}
     >
       {linked && linkLabel !== undefined && (
         <Link href={href} className="ui-card__link">

@@ -470,7 +470,7 @@ export default function LoginPage() {
                           className="login-password-toggle"
                           variant="ghost"
                           size="sm"
-                          icon={showPassword ? "visibility_off" : "visibility"}
+                          icon={showPassword ? "eye-off" : "eye"}
                           label="Şifreyi göster"
                           pressed={showPassword}
                           onClick={() => setShowPassword(!showPassword)}

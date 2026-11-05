@@ -2,15 +2,15 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { buttonClassName, type ButtonSize, type ButtonVariant } from "./button";
 import { cx } from "./cx";
-import { Icon } from "./material-icon";
+import { Icon, type IconName } from "./svg-icon";
 import "./ui.css";
 
 export type IconButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   "aria-label" | "aria-pressed" | "aria-expanded" | "aria-controls" | "children"
 > & {
-  /** Material Symbols adı ya da hazır ikon düğümü. */
-  icon: string | ReactNode;
+  /** İkon adı (lib/icon-paths.ts) ya da hazır ikon düğümü; serbest metin değil. */
+  icon: IconName | Exclude<ReactNode, string>;
   /** Zorunlu erişilebilir ad (görünür metin yok). */
   label: string;
   variant?: Exclude<ButtonVariant, "link">;
@@ -44,7 +44,7 @@ export function IconButton({
       aria-expanded={expanded}
       aria-controls={expanded !== undefined ? controls : undefined}
     >
-      {typeof icon === "string" ? <Icon name={icon} /> : icon}
+      {typeof icon === "string" ? <Icon name={icon as IconName} /> : icon}
     </button>
   );
 }

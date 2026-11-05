@@ -17,6 +17,8 @@ const { toUiError, APIFETCH_MESSAGES } = load("http-error");
 const { normalizeBreadcrumb } = load("breadcrumb");
 const { parseParam, buildSearch } = load("url-state");
 const { resolvePageTitle } = load("page-title");
+const { nextSnap, snapFromDrag, orderedSnaps, SHEET_DRAG_THRESHOLD } = load("sheet-snap");
+const { chipLocked, toggleChoice, clampStep } = load("choice");
 
 test("tabs: ok tuşları sarar, disabled atlanır, Home/End ilk/son etkin", () => {
   const d = [false, true, false, false];
@@ -31,6 +33,53 @@ test("tabs: ok tuşları sarar, disabled atlanır, Home/End ilk/son etkin", () =
   assert.equal(nextTabIndex(0, "ArrowDown", d, "vertical"), 2);
   assert.equal(nextTabIndex(0, "ArrowRight", [true, true]), null, "hepsi disabled");
   assert.equal(firstEnabledIndex([true, false]), 1);
+});
+
+test("sheet-snap: Enter/Space döngüsü, ↑/↓ sınırda kalır, sıra peek→half→full", () => {
+  const all = ["full", "peek", "half"];
+  assert.deepEqual(plain(orderedSnaps(all)), ["peek", "half", "full"]);
+  assert.equal(nextSnap("peek", "Enter", all), "half");
+  assert.equal(nextSnap("half", " ", all), "full");
+  assert.equal(nextSnap("full", "Enter", all), "peek", "sondan başa sarar");
+  assert.equal(nextSnap("half", "ArrowUp", all), "full");
+  assert.equal(nextSnap("full", "ArrowUp", all), "full", "üst sınırda kalır");
+  assert.equal(nextSnap("half", "ArrowDown", all), "peek");
+  assert.equal(nextSnap("peek", "ArrowDown", all), "peek", "alt sınırda kalır");
+  assert.equal(nextSnap("peek", "Tab", all), null, "desen dışı tuş");
+  assert.equal(nextSnap("peek", "Enter", ["peek", "full"]), "full", "yalnız verilen snap'ler");
+  assert.equal(nextSnap("half", "ArrowUp", ["peek", "full"]), "peek", "listede yoksa ilk snap");
+  assert.equal(nextSnap("peek", "Enter", []), null);
+});
+
+test("sheet-snap: sürükleme eşiği ve yönü", () => {
+  const all = ["peek", "half", "full"];
+  const t = SHEET_DRAG_THRESHOLD;
+  assert.equal(snapFromDrag(-(t - 1), "peek", all), "peek", "eşik altı yerinde kalır");
+  assert.equal(snapFromDrag(-t, "peek", all), "half", "yukarı (dy<0) bir adım büyür");
+  assert.equal(snapFromDrag(t, "half", all), "peek", "aşağı bir adım küçülür");
+  assert.equal(snapFromDrag(-500, "full", all), "full", "üst sınır");
+  assert.equal(snapFromDrag(500, "peek", all), "peek", "alt sınır");
+  assert.equal(snapFromDrag(Number.NaN, "half", all), "half");
+  assert.equal(snapFromDrag(-20, "peek", all, 10), "half", "özel eşik");
+});
+
+test("ChipGroup max ve Stepper sıkıştırma yardımcıları", () => {
+  assert.equal(chipLocked(false, 4, "multi", 4), true, "max dolunca seçili olmayan kilitli");
+  assert.equal(chipLocked(true, 4, "multi", 4), false, "seçili olan bırakılabilir");
+  assert.equal(chipLocked(false, 3, "multi", 4), false);
+  assert.equal(chipLocked(false, 9, "multi"), false, "max yoksa sınır yok");
+  assert.equal(chipLocked(false, 1, "single", 1), false, "single değiştirilir, kilitlenmez");
+  assert.deepEqual(plain(toggleChoice(["a", "b"], "c", "multi", 2)), ["a", "b"], "max aşılmaz");
+  assert.deepEqual(plain(toggleChoice(["a"], "b", "multi", 2)), ["a", "b"]);
+  assert.deepEqual(plain(toggleChoice(["a", "b"], "a", "multi", 2)), ["b"], "seçili çıkar");
+  assert.deepEqual(plain(toggleChoice(["a"], "b", "single")), ["b"], "single tek değer");
+  assert.deepEqual(plain(toggleChoice(["a"], "a", "single")), [], "single seçimi kaldırılabilir");
+  assert.equal(clampStep(3, 1, 1, 14), 4);
+  assert.equal(clampStep(14, 1, 1, 14), 14, "üst sınır");
+  assert.equal(clampStep(1, -1, 1, 14), 1, "alt sınır");
+  assert.equal(clampStep(20, -1, 1, 14), 14, "aralık dışı değer sıkıştırılır");
+  assert.equal(clampStep(Number.NaN, 1, 1, 14), 2, "geçersiz değer min'den başlar");
+  assert.equal(clampStep(5, 1, 7, 2), 6, "ters verilen min/max normalize");
 });
 
 test("focus-trap: Tab/Shift+Tab döngüsü ve sınırda araya girme", () => {

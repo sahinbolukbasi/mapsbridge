@@ -62,7 +62,7 @@ export function NotFoundView({ isError = false, errorMessage, onRetry }: NotFoun
         <ErrorState error={uiError} onRetry={onRetry} />
       ) : (
         <EmptyState
-          icon="explore_off"
+          icon="compass"
           title={t("ui.notFound.heading", "Aradığınız durak haritada bulunamadı")}
           description={
             <>
@@ -90,7 +90,7 @@ export function NotFoundView({ isError = false, errorMessage, onRetry }: NotFoun
             <Card
               as="li"
               key={item.href}
-              interactive
+              variant="interactive"
               href={item.href}
               linkLabel={t(`ui.notFound.link.${item.key}`)}
             >

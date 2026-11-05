@@ -263,8 +263,23 @@
   "ui.notFound.link.support": "Yardım ve destek",
   "ui.notFound.link.support.desc": "Destek talebi oluşturun, yanıtları takip edin.",
   "ui.errorPage.title": "Bir şeyler ters gitti",
+  "ui.sheet.expand": "Paneli genişlet",
+  "ui.sheet.collapse": "Paneli daralt",
+  "ui.stepper.decrease": "Azalt",
+  "ui.stepper.increase": "Artır",
 
   "ai.prepTab": "✈ Hazırlık",
   "ai.prepAffiliateTitle": "Rezervasyon seçenekleri",
-  "ai.prepLink": "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün"
+  "ai.prepLink": "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün",
+  "credits.free": "Ücretsiz",
+  "credits.one": "{n} kredi",
+  "credits.other": "{n} kredi",
+  "credits.table.caption": "Kredi maliyetleri",
+  "credits.table.action": "İşlem",
+  "credits.table.cost": "Kredi",
+  "credits.row.clarify": "Tercih netleştirme",
+  "credits.row.aiChat": "AI sohbet",
+  "credits.row.routeOptimize": "Rota optimizasyonu",
+  "credits.row.stayDining": "Konaklama ve gastronomi analizi",
+  "credits.row.deepTrip": "Derin çok günlü rota"
 }

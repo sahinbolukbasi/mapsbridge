@@ -57,7 +57,11 @@ export const iconPaths = {
   drive: "M5 17h14v-5l-2-5H7l-2 5Z M5 12h14 M7 17v2 M17 17v2 M8 14.5h.01 M16 14.5h.01",
   transit: "M6 4h12a1 1 0 0 1 1 1v11H5V5a1 1 0 0 1 1-1Z M5 11h14 M8 16l-2 4 M16 16l2 4 M9 13.5h.01 M15 13.5h.01",
   image: "M4 5h16v14H4Z M4 16l5-5 4 4 2-2 5 5 M15.5 9.5h.01",
-  qr: "M4 4h6v6H4Z M14 4h6v6h-6Z M4 14h6v6H4Z M14 14h2v2h-2Z M18 18h2v2h-2Z M14 18h2 M18 14h2"
+  qr: "M4 4h6v6H4Z M14 4h6v6h-6Z M4 14h6v6H4Z M14 14h2v2h-2Z M18 18h2v2h-2Z M14 18h2 M18 14h2",
+  eye: "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+  "eye-off": "M3 3l18 18 M10.6 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2 M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6 M9.9 9.9a3 3 0 0 0 4.2 4.2",
+  inbox: "M3 13h5l1.5 3h5l1.5-3h5 M5.5 5h13L21 13v6H3v-6Z",
+  sort: "M8 9l4-4 4 4 M8 15l4 4 4-4"
 } as const;
 
 export type IconName = keyof typeof iconPaths;

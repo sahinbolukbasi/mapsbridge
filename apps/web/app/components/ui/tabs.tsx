@@ -19,6 +19,8 @@ type TabsProps = {
   value?: string;
   onChange?: (id: string) => void;
   activation?: "automatic" | "manual";
+  /** underline: gün sekmeleri gibi yalın alt çizgi göstergesi (design §4.1). */
+  variant?: "default" | "underline";
   className?: string;
 };
 
@@ -28,6 +30,7 @@ function TabsView({
   selected,
   select,
   activation = "automatic",
+  variant = "default",
   className,
 }: Omit<TabsProps, "value" | "onChange"> & { selected: string; select: (id: string) => void }) {
   const base = useId();
@@ -55,7 +58,7 @@ function TabsView({
   }
 
   return (
-    <div className={cx("ui-tabs", className)}>
+    <div className={cx("ui-tabs", variant === "underline" && "ui-tabs--underline", className)}>
       <div className="ui-tabs__list" role="tablist" aria-label={label} data-surface="default">
         {items.map((item, k) => (
           <button

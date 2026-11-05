@@ -1,0 +1,77 @@
+"use client";
+import { useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { cx } from "./cx";
+import { nextTabIndex } from "./logic/tabs-keyboard";
+import "./ui.css";
+export type SegmentOption<V extends string> = { value: V; label: ReactNode };
+type Options<V extends string> =
+  | readonly [SegmentOption<V>, SegmentOption<V>]
+  | readonly [SegmentOption<V>, SegmentOption<V>, SegmentOption<V>]
+  | readonly [SegmentOption<V>, SegmentOption<V>, SegmentOption<V>, SegmentOption<V>];
+// Radyo grubunda dikey oklar da komşu seçeneğe gider (APG radio group).
+const KEY_ALIAS: Record<string, string> = { ArrowDown: "ArrowRight", ArrowUp: "ArrowLeft" };
+/**
+ * 2–4 karşılıklı dışlayan seçenek (design §4.2, R3): role="radiogroup", roving tabindex, ok
+ * tuşları/Home/End seçer (logic/tabs-keyboard.ts). Seçili zemin hareket tercihinde kayar.
+ */
+export function SegmentedControl<V extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  className,
+}: {
+  label: string;
+  options: Options<V>;
+  value: V;
+  onChange: (value: V) => void;
+  className?: string;
+}) {
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const index = Math.max(
+    0,
+    options.findIndex((o) => o.value === value),
+  );
+  function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, k: number) {
+    const next = nextTabIndex(
+      k,
+      KEY_ALIAS[e.key] ?? e.key,
+      options.map(() => false),
+    );
+    if (next === null) return;
+    e.preventDefault();
+    refs.current[next]?.focus();
+    if (next !== index) onChange(options[next].value);
+  }
+  const style = { "--segment-count": options.length, "--segment-index": index } as CSSProperties;
+  return (
+    <div
+      className={cx("ui-segmented", className)}
+      role="radiogroup"
+      aria-label={label}
+      data-surface="default"
+      style={style}
+    >
+      <span className="ui-segmented__indicator" aria-hidden="true" />
+      {options.map((option, k) => (
+        <button
+          key={option.value}
+          ref={(el) => {
+            refs.current[k] = el;
+          }}
+          type="button"
+          role="radio"
+          className="ui-segmented__option"
+          aria-checked={k === index}
+          tabIndex={k === index ? 0 : -1}
+          onClick={() => {
+            if (k !== index) onChange(option.value);
+          }}
+          onKeyDown={(e) => onKeyDown(e, k)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}

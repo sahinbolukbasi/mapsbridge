@@ -1,7 +1,7 @@
 import { cx } from "./cx";
 import "./ui.css";
 
-/** Dekoratif yer tutucu (aria-hidden); shimmer reduced-motion'da kapalı (base.css). */
+/** Dekoratif yer tutucu (aria-hidden); shimmer yalnızca prefers-reduced-motion: no-preference'ta. */
 export function Skeleton({
   shape = "text",
   lines = 1,

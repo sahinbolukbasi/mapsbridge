@@ -23,7 +23,7 @@ export type PageHeaderProps = {
   children?: ReactNode;
 };
 
-/** Sayfanın tek <h1>'i (G10). Kök <div>; <header> değil (G5). */
+/** Sayfanın tek <h1>'i (G10). Kök <div>; <header> değil (G5). eyebrow başlık değil <p> (heading-order). */
 export function PageHeader({
   title,
   titleText,

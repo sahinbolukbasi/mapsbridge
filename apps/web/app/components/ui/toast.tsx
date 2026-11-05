@@ -79,7 +79,7 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
         </button>
       )}
       <IconButton
-        icon="close"
+        icon="x"
         label={t("ui.close", "Kapat")}
         size="sm"
         onClick={() => onDismiss(item.id)}

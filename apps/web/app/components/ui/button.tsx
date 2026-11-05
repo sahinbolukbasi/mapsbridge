@@ -2,6 +2,8 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode, Ref } from "react";
 import { useLocale } from "../../lib/locale-context";
+import type { CreditCost } from "../../lib/billing/credit-costs";
+import { CostBadge } from "./cost-badge";
 import { cx } from "./cx";
 import "./ui.css";
 
@@ -16,6 +18,8 @@ type Common = {
   iconStart?: ReactNode;
   iconEnd?: ReactNode;
   fullWidth?: boolean;
+  /** Kredi maliyeti: sağda CostBadge; erişilebilir ad "Rotayı optimize et, 1 kredi" olur. */
+  cost?: CreditCost;
   className?: string;
   children: ReactNode;
 };
@@ -62,15 +66,26 @@ export function Button(props: ButtonProps) {
     iconStart,
     iconEnd,
     fullWidth,
+    cost,
     className,
     children,
   } = props;
   const inert = loading || disabled;
+  // Yüklenirken içerik yerinde kalır (genişlik sabit, opacity 0); spinner üstüne biner.
   const content = (
     <>
-      {loading ? <span className="ui-button__spinner" aria-hidden="true" /> : iconStart}
+      {iconStart}
       <span className="ui-button__label">{children}</span>
-      {!loading && iconEnd}
+      {cost !== undefined && (
+        <>
+          <span className="ui-visually-hidden">, </span>
+          <span className="ui-button__cost" data-surface="default">
+            <CostBadge cost={cost} />
+          </span>
+        </>
+      )}
+      {iconEnd}
+      {loading && <span className="ui-button__spinner" aria-hidden="true" />}
       {loading && <span className="ui-visually-hidden">{t("ui.loading", "Yükleniyor…")}</span>}
     </>
   );
@@ -112,6 +127,7 @@ export function Button(props: ButtonProps) {
     iconStart: _is,
     iconEnd: _ie,
     fullWidth: _f,
+    cost: _cost,
     className: _c,
     children: _ch,
     href: _h,

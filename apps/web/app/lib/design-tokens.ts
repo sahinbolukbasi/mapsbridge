@@ -189,7 +189,7 @@ export const color = {
   segmentSelectedBg: "#fffdf8",
   segmentSelectedFg: "#1b2420",
   sheetBg: "#fffdf8",
-  sheetHandle: "#cfc4ad",
+  sheetHandle: "#5f6762",
   stopBg: "#fffdf8",
   stopBorder: "#e4dccb",
   stopSelectedBorder: "#013628",
