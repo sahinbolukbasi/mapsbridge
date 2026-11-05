@@ -273,18 +273,6 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     footer: "legal",
   },
   {
-    path: "/welcome/",
-    file: "app/welcome/page.tsx",
-    layout: "landing",
-    title: t("Hoş geldiniz", "Welcome"),
-    description: t(
-      "Devam etmek için hesabınıza giriş yapın veya yeni bir hesap oluşturun.",
-      "Sign in to your account or create a new one to continue.",
-    ),
-    sitemap: true,
-    robots: "index",
-  },
-  {
     path: "/messages/",
     file: "app/messages/page.tsx",
     layout: "app",
@@ -404,6 +392,8 @@ export const LEGACY_REDIRECTS: Readonly<Record<RoutePath, RoutePath>> = {
   "/haritalar/": "/maps/",
   "/mobil-uygulamalar/": "/mobile-apps/",
   "/planlar/": "/pricing/",
+  // Üçüncü giriş kapısı kaldırıldı (design §5.2, F13, karar S8): /welcome/ → /register/.
+  "/welcome/": "/register/",
   "/forgot-password/": "/reset-password/",
   "/sifre-sifirla/": "/reset-password/",
   "/u/": "/checkout/",

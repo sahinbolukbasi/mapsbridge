@@ -14,7 +14,7 @@ export function GoogleOneTap() {
     try {
       const pathname = window.location.pathname;
       if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
-        return; // Bu sayfalarda GoogleAuthButton butonu ve prompt'u doğrudan yönetir
+        return; // Bu sayfalarda Google düğmesi ve prompt'u sayfanın kendisi yönetir
       }
       const activeToken =
         localStorage.getItem("mapsbridge.idToken") || localStorage.getItem("mapsbridge.idToken");

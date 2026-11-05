@@ -2,8 +2,8 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { confirmSignUp, resendConfirmationCode } from "../lib/cognito";
-import { Alert, Button, Card, Field, Input, PageHeader, PageShell } from "../components/ui";
-import "./verify.css";
+import { Alert, Button, Field, Input, PageShell } from "../components/ui";
+import { AuthCard } from "../components/auth/auth-card";
 import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 
 export default function VerifyPage() {
@@ -57,14 +57,15 @@ export default function VerifyPage() {
   }
 
   return (
-    <PageShell
-      className="verify-page"
-      header={<PageHeader eyebrow="HESAP DOĞRULAMA" description="Doğrulama kodunu gir." />}
-    >
-      <Card padding="lg" className="verify-card">
-        <div className="sms-icon" aria-hidden="true">
-          ✉
-        </div>
+    <PageShell layout="form" className="auth-card-shell">
+      <AuthCard
+        description="E-postana gönderilen 6 haneli kodu gir."
+        footer={
+          <p className="auth-card__footer-line">
+            Kod gelmediyse e-postanın gereksiz (spam) kutusunu kontrol et.
+          </p>
+        }
+      >
         {!email && !phone ? (
           <Alert
             tone="danger"
@@ -78,18 +79,23 @@ export default function VerifyPage() {
             Lütfen kayıt ekranına dönerek tekrar deneyin.
           </Alert>
         ) : (
-          <div className="phone-card">
-            <span>Doğrulama kodu şu adrese gönderildi:</span>
-            <strong>{email || phone}</strong>
-            <small>Adres yanlışsa kayıt ekranına dön.</small>
+          <div className="auth-card__recipient">
+            <span>
+              Kod gönderilen adres:{" "}
+              <span className="auth-card__recipient-email">{email || phone}</span>
+            </span>
+            <Button href="/register/" variant="link" size="sm">
+              Adres yanlış mı?
+            </Button>
           </div>
         )}
-        <form className="verify-form" onSubmit={submit} noValidate>
+        <form className="auth-card__form" onSubmit={submit} noValidate>
           <Field label="Doğrulama kodu" required error={codeError}>
             {(ids) => (
               <Input
                 {...ids}
                 ref={codeRef}
+                size="lg"
                 name="code"
                 inputMode="numeric"
                 autoComplete="one-time-code"
@@ -100,7 +106,7 @@ export default function VerifyPage() {
               />
             )}
           </Field>
-          <Button type="submit" fullWidth>
+          <Button type="submit" size="lg" fullWidth>
             Doğrula ve giriş yap
           </Button>
         </form>
@@ -110,7 +116,6 @@ export default function VerifyPage() {
           </Alert>
         )}
         <Button variant="secondary" fullWidth onClick={resend} disabled={seconds > 0}>
-          <span aria-hidden="true">↻</span>{" "}
           {seconds > 0
             ? `Yeni kod için ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")} bekle`
             : "Doğrulama kodunu yeniden gönder"}
@@ -120,10 +125,7 @@ export default function VerifyPage() {
             {resendMessage}
           </Alert>
         )}
-        <p className="fineprint">
-          Kod gelmediyse e-postanın gereksiz (spam/junk) kutusunu kontrol etmeyi unutma.
-        </p>
-      </Card>
+      </AuthCard>
     </PageShell>
   );
 }

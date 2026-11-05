@@ -129,14 +129,12 @@ const TS_FILES = walk(APP, (n) => /\.tsx?$/.test(n) && !n.endsWith(".d.ts"));
 const LEGACY = [
   "operations.css",
   "styles.css",
-  "auth.css",
   // tw-utils.css'ten üretilmiş yerleşim sınıfları (codemod --mode tw, design §2.7 8b): legacy
   // katmanında kalır, böylece utility'lerin sayfa CSS'ine karşı kaskadı birebir korunur.
   // tw-utils.css C18'de silindi.
   "features/community/community-layout.css",
   "profile/profile-layout.css",
   "profile/edit/edit-layout.css",
-  "reset-password/reset-password-layout.css",
   "components/soft-icon-layout.css",
 ];
 const CHROME = ["components/header-nav.css", "components/site-footer.css"];

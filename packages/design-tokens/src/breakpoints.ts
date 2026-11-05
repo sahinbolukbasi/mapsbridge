@@ -32,7 +32,6 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
     { query: "(max-width: 767px)", count: 3 },
   ],
   "how-it-works/how-it-works.css": [{ query: "(min-width: 992px)", count: 1 }],
-  "login/login.css": [{ query: "(max-width: 500px)", count: 1 }],
   "messages/messages.css": [
     { query: "(max-width: 1023px)", count: 1 },
     { query: "(min-width: 1024px) and (max-width: 1439px)", count: 1 },
@@ -41,7 +40,6 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
   ],
   "operations.css": [{ query: "(max-width: 700px)", count: 1 }],
   "profile/profile.css": [{ query: "(max-width: 767px)", count: 2 }],
-  "register/register.css": [{ query: "(max-width: 500px)", count: 1 }],
   "styles/tokens.css": [{ query: "(max-width: 767px)", count: 1 }],
   "styles.css": [
     { query: "(max-width: 1279px)", count: 1 },

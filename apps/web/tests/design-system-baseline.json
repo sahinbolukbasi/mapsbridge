@@ -1,11 +1,9 @@
 {
   "G1": {
     "app/[username]/public-profile.css": 7,
-    "app/auth.css": 4,
     "app/community/community.css": 35,
     "app/how-it-works/how-it-works.css": 16,
     "app/k/k.css": 6,
-    "app/login/login.css": 14,
     "app/maps/maps.css": 35,
     "app/messages/messages.css": 4,
     "app/mobile-apps/mobile-apps.css": 8,
@@ -13,11 +11,8 @@
     "app/profile/edit/edit.css": 13,
     "app/profile/photo/photo.css": 6,
     "app/profile/profile.css": 7,
-    "app/register/register.css": 10,
-    "app/reset-password/reset-password.css": 24,
     "app/styles.css": 6,
-    "app/travel-assistant/assistant.css": 32,
-    "app/welcome/welcome.css": 6
+    "app/travel-assistant/assistant.css": 32
   },
   "G2": {},
   "G3": {},
@@ -50,13 +45,10 @@
     "app/lib/test-reset.ts": 1,
     "app/lib/trip/models.ts": 27,
     "app/lib/trip/use-trip-workspace.ts": 15,
-    "app/login/page.tsx": 1,
     "app/messages/page.tsx": 1,
     "app/profile/edit/page.tsx": 11,
     "app/profile/page.tsx": 12,
     "app/profile/photo/page.tsx": 14,
-    "app/register/page.tsx": 1,
-    "app/reset-password/page.tsx": 9,
     "app/travel-assistant/loading.tsx": 1,
     "app/travel-assistant/travel-affiliate-cards.tsx": 15,
     "app/travel-assistant/travel-assistant-client.tsx": 29
@@ -67,13 +59,10 @@
   "G10": {},
   "G11": {
     "app/community/community.css": 7,
-    "app/login/login.css": 1,
     "app/maps/maps.css": 1,
     "app/messages/messages.css": 2,
     "app/mobile-apps/mobile-apps.css": 1,
     "app/profile/edit/edit.css": 2,
-    "app/register/register.css": 1,
-    "app/reset-password/reset-password.css": 2,
     "app/styles.css": 1,
     "app/travel-assistant/assistant.css": 1
   },
@@ -86,18 +75,15 @@
   },
   "G16": {},
   "G16c": {
-    "app/auth.css": 10,
     "app/maps/maps.css": 2,
     "app/messages/messages.css": 3,
     "app/operations.css": 8,
     "app/profile/edit/edit.css": 4,
-    "app/reset-password/reset-password.css": 1,
     "app/styles.css": 4,
     "app/travel-assistant/assistant.css": 4
   },
   "G16d": {
     "app/[username]/public-profile.css": 4,
-    "app/auth.css": 2,
     "app/community/community.css": 10,
     "app/how-it-works/how-it-works.css": 2,
     "app/maps/maps.css": 1,
@@ -120,7 +106,6 @@
   "G23": {},
   "G24": {
     "app/[username]/public-profile.css": 21,
-    "app/auth.css": 4,
     "app/auth/callback/callback.css": 1,
     "app/community/community.css": 20,
     "app/components/soft-icon-layout.css": 1,
@@ -128,46 +113,36 @@
     "app/features/community/community-layout.css": 5,
     "app/how-it-works/how-it-works.css": 10,
     "app/k/k.css": 3,
-    "app/login/login.css": 5,
     "app/maps/maps.css": 23,
     "app/messages/messages.css": 15,
     "app/mobile-apps/mobile-apps.css": 4,
     "app/profile/edit/edit.css": 19,
     "app/profile/photo/photo.css": 7,
     "app/profile/profile.css": 10,
-    "app/register/register.css": 7,
-    "app/reset-password/reset-password.css": 10,
     "app/styles.css": 12,
     "app/styles/base.css": 3,
-    "app/travel-assistant/assistant.css": 33,
-    "app/welcome/welcome.css": 1
+    "app/travel-assistant/assistant.css": 33
   },
   "G25": {
     "app/[username]/public-profile.css": 17,
     "app/community/community.css": 1,
     "app/how-it-works/how-it-works.css": 4,
     "app/k/k.css": 1,
-    "app/login/login.css": 6,
     "app/messages/messages.css": 17,
     "app/operations.css": 2,
     "app/profile/edit/edit.css": 9,
     "app/profile/profile.css": 6,
-    "app/register/register.css": 10,
-    "app/reset-password/reset-password.css": 1,
     "app/styles/base.css": 1,
-    "app/travel-assistant/assistant.css": 1,
-    "app/welcome/welcome.css": 2
+    "app/travel-assistant/assistant.css": 1
   },
   "G26": {
     "app/[username]/public-profile.css": 90,
-    "app/auth.css": 15,
     "app/community/community.css": 150,
     "app/components/soft-icon-layout.css": 2,
     "app/components/ui/ui.css": 3,
     "app/features/community/community-layout.css": 12,
     "app/how-it-works/how-it-works.css": 72,
     "app/k/k.css": 18,
-    "app/login/login.css": 40,
     "app/maps/maps.css": 89,
     "app/messages/messages.css": 110,
     "app/mobile-apps/mobile-apps.css": 36,
@@ -177,12 +152,9 @@
     "app/profile/photo/photo.css": 35,
     "app/profile/profile-layout.css": 2,
     "app/profile/profile.css": 89,
-    "app/register/register.css": 45,
-    "app/reset-password/reset-password.css": 41,
     "app/styles.css": 42,
     "app/styles/base.css": 2,
-    "app/travel-assistant/assistant.css": 180,
-    "app/welcome/welcome.css": 12
+    "app/travel-assistant/assistant.css": 180
   },
   "G27": {
     "app/styles/base.css": 1
@@ -217,23 +189,18 @@
     "app/profile/page.tsx": 8,
     "app/profile/photo/page.tsx": 20,
     "app/travel-assistant/prep-panel.tsx": 1,
-    "app/travel-assistant/travel-assistant-client.tsx": 50,
-    "app/verify/page.tsx": 1,
-    "app/welcome/page.tsx": 1
+    "app/travel-assistant/travel-assistant-client.tsx": 50
   },
   "G29": {
     "app/[username]/public-profile.css": 4,
-    "app/auth/callback/callback.css": 1,
     "app/community/community.css": 3,
     "app/features/community/community-layout.css": 1,
     "app/k/k.css": 1,
-    "app/login/login.css": 1,
     "app/maps/maps.css": 3,
     "app/messages/messages.css": 1,
     "app/mobile-apps/mobile-apps.css": 1,
     "app/profile/edit/edit.css": 1,
     "app/profile/photo/photo.css": 2,
-    "app/reset-password/reset-password.css": 1,
     "app/styles.css": 1,
     "app/travel-assistant/assistant.css": 7
   }

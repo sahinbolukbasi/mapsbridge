@@ -13,7 +13,6 @@ import { LocaleProvider } from "./lib/locale-context";
 import { SiteChrome } from "./components/ui/site-chrome";
 import type { Metadata, Viewport } from "next";
 import "./styles.css";
-import "./auth.css";
 // Leaflet'e karşı layer'sız muaf kurallar; legacy global'lerden sonra (design §2.6).
 import "./styles/vendor-overrides.css";
 

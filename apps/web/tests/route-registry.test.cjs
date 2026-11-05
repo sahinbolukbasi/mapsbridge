@@ -66,7 +66,8 @@ const BASELINE_42 = [
   "/welcome/",
 ];
 // Sitemap URL'leri (design §5.1; AC-13): başlangıçtaki 13 URL + /pricing/ (design §7.1, karar S4
-// artım 5: yeni kanonik, indekslenen fiyat sayfası).
+// artım 5: yeni kanonik, indekslenen fiyat sayfası). /welcome/ karar S8 ile LEGACY → /register/
+// oldu (design §5.2, F13) ve sitemap'ten çıktı.
 const SITEMAP_URLS = [
   "/en/",
   "/maps/",
@@ -75,7 +76,6 @@ const SITEMAP_URLS = [
   "/pricing/",
   "/community/",
   "/how-it-works/",
-  "/welcome/",
   "/support/",
   "/about/",
   "/contact/",
