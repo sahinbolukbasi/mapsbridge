@@ -1,19 +1,35 @@
 "use client";
 
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { CopyRouteButton } from "../components/copy-route-button";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Field,
+  Icon,
+  Input,
+  Modal,
+  PageHeader,
+  PageShell,
+} from "../components/ui";
 import { readShare } from "../lib/api";
-
-import { useEffect, useRef, useState } from "react";
-import "./k.css";
-import { Alert, Button, Field, Input, Modal, PageHeader, PageShell } from "../components/ui";
 import { ensureLeafletCss, ensureLeafletScript } from "../lib/leaflet-loader";
+import { useLocale } from "../lib/locale-context";
+import { normalizeShareCode, readShareCode } from "../lib/share/share-code";
+import { toCopyStops } from "../lib/trip/copy-stops";
+import "./k.css";
 
 interface LeafletMap {
   remove(): void;
+  setView(latlng: [number, number], zoom: number): void;
   flyTo(latlng: [number, number], zoom: number, opts?: Record<string, unknown>): void;
 }
 
 interface LeafletMarker {
   remove(): void;
+  addTo(map: LeafletMap): LeafletMarker;
 }
 
 interface LeafletLib {
@@ -32,246 +48,298 @@ interface ShareData {
   expiresAt: number;
 }
 
-export default function FindByCodePage() {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const codeInputRef = useRef<HTMLInputElement>(null);
-  const mapInstanceRef = useRef<LeafletMap | null>(null);
-  const markerRef = useRef<LeafletMarker | null>(null);
-  const latestShare = useRef<ShareData | null>(null);
-  const requestSequence = useRef(0);
+function leaflet(): LeafletLib | undefined {
+  return (window as Window & { L?: LeafletLib }).L;
+}
 
-  const [inputCode, setInputCode] = useState("");
+function reducedMotion(): boolean {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
+/**
+ * Paylaşılan konum (design §5.1, §5.5 J5, §6.4, §12): hesapsız açık. Kod tek kuraldan
+ * (lib/share/share-code.ts, karar S16) geçer; geçersizse alan hatası verilir ve istek atılmaz.
+ * URL'de geçerli `code` (ya da eski `kod`) varsa pencere açılmadan doğrudan sorgulanır. Sunucu
+ * hata mesajları (bulunamadı/süresi dolmuş/çok deneme) olduğu gibi `Alert danger` ile gösterilir.
+ */
+export default function SharedLocationPage() {
+  const { t } = useLocale();
+  const mapRef = useRef<HTMLDivElement>(null);
+  const codeRef = useRef<HTMLInputElement>(null);
+  const mapInstance = useRef<LeafletMap | null>(null);
+  const marker = useRef<LeafletMarker | null>(null);
+  const latest = useRef<ShareData | null>(null);
+  const sequence = useRef(0);
+
+  const [code, setCode] = useState("");
+  const [fieldError, setFieldError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [shareData, setShareData] = useState<ShareData | null>(null);
-  const [showLookupModal, setShowLookupModal] = useState(true);
+  const [mapError, setMapError] = useState(false);
+  const [share, setShare] = useState<ShareData | null>(null);
+  const [lookupOpen, setLookupOpen] = useState(false);
 
-  // Initialize Map
+  function renderShare(data: ShareData) {
+    const L = leaflet();
+    const map = mapInstance.current;
+    if (!map || !L) return;
+    marker.current?.remove();
+    const icon = L.divIcon({
+      className: "planner-point-pin",
+      html: `<span class="planner-point-pin__dot"></span>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+    marker.current = L.marker([data.lat, data.lng], { icon, keyboard: false }).addTo(map);
+    if (reducedMotion()) map.setView([data.lat, data.lng], 16);
+    else map.flyTo([data.lat, data.lng], 16, { animate: true, duration: 1.2 });
+  }
+
+  async function lookup(valid: string) {
+    const seq = ++sequence.current;
+    setLoading(true);
+    setError("");
+    setShare(null);
+    latest.current = null;
+    marker.current?.remove();
+    marker.current = null;
+    try {
+      const data: ShareData = await readShare(valid);
+      if (seq !== sequence.current) return;
+      latest.current = data;
+      setShare(data);
+      setLookupOpen(false);
+      renderShare(data);
+    } catch (err: unknown) {
+      if (seq !== sequence.current) return;
+      setError(
+        (err instanceof Error ? err.message : "") ||
+          t("share.error.generic", "Konum sorgulanamadı."),
+      );
+      setLookupOpen(true);
+    } finally {
+      if (seq === sequence.current) setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    let isMounted = true;
-
+    let mounted = true;
     function initMap() {
-      const L = (window as Window & { L?: LeafletLib }).L;
-      if (!L || !mapContainerRef.current || mapInstanceRef.current) return;
-
-      const map = L.map(mapContainerRef.current, {
-        zoomControl: false,
-      }) as any;
+      const L = leaflet();
+      if (!L || !mapRef.current || mapInstance.current) return;
+      const map = L.map(mapRef.current, { zoomControl: false });
       map.setView([41.0082, 28.9784], 12);
-
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        attribution: `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`,
         maxZoom: 19,
       }).addTo(map);
-
-      mapInstanceRef.current = map;
-      if (latestShare.current) renderShare(latestShare.current);
+      mapInstance.current = map;
+      if (latest.current) renderShare(latest.current);
     }
 
-    // Read the address independently of the map SDK.
+    // Kanonik `code`; eski bağlantılar için `kod` da okunur (design §5.4).
     const params = new URLSearchParams(window.location.search);
-    // Kanonik parametre `code`; eski bağlantılar için `kod` da okunur (design §5.4).
-    const queryCode = params.get("code") || params.get("kod");
-    if (queryCode && isMounted) {
-      setInputCode(queryCode);
-      fetchLocationByCode(queryCode);
+    const raw = params.get("code") ?? params.get("kod");
+    const valid = readShareCode(raw);
+    if (valid) {
+      setCode(valid);
+      void lookup(valid);
+    } else {
+      // Kod yoksa ya da URL'deki kod geçersizse pencere boş açılır (design §12.2).
+      setLookupOpen(true);
     }
 
-    if (!(window as Window & { L?: LeafletLib }).L) {
+    if (!leaflet()) {
       ensureLeafletCss();
       ensureLeafletScript({
-        onError: () =>
-          setError("Harita yüklenemedi. Kodla adres sorgulamasını yine kullanabilirsiniz."),
+        onError: () => {
+          if (mounted) setMapError(true);
+        },
         onLoad: () => {
-          if (isMounted) initMap();
+          if (mounted) initMap();
         },
       });
     } else {
       initMap();
     }
-
     return () => {
-      isMounted = false;
-      requestSequence.current += 1;
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
+      mounted = false;
+      sequence.current += 1;
+      mapInstance.current?.remove();
+      mapInstance.current = null;
     };
+    // Yalnızca ilk yüklemede (URL okuma + harita kurulumu).
   }, []);
 
-  async function fetchLocationByCode(rawCode: string) {
-    const cleanCode = rawCode.trim().replace(/\s+/g, "");
-    if (!cleanCode) return;
-
-    const sequence = ++requestSequence.current;
-    setLoading(true);
-    setError("");
-    setShareData(null);
-    latestShare.current = null;
-    markerRef.current?.remove();
-    markerRef.current = null;
-
-    try {
-      const data: ShareData = await readShare(cleanCode);
-
-      if (sequence !== requestSequence.current) return;
-      latestShare.current = data;
-      setShareData(data);
-      setShowLookupModal(false);
-
-      renderShare(data);
-    } catch (err: unknown) {
-      if (sequence === requestSequence.current)
-        setError((err instanceof Error ? err.message : null) || "Konum sorgulanamadı.");
-    } finally {
-      if (sequence === requestSequence.current) setLoading(false);
-    }
-  }
-
-  function renderShare(data: ShareData) {
-    // Render marker and fly on map
-    const L = (window as Window & { L?: LeafletLib }).L;
-    if (mapInstanceRef.current && L) {
-      const customPin = L.divIcon({
-        className: "custom-map-pin",
-        html: `<div class="pin-pulse"></div><div class="pin-marker"><svg width="32" height="42" viewBox="0 0 28 36" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 22 14 22s14-11.5 14-22c0-7.732-6.268-14-14-14z" fill="#ef6b5b"/><circle cx="14" cy="14" r="6" fill="#ffffff"/></svg></div>`,
-        iconSize: [32, 42],
-        iconAnchor: [16, 42],
-      });
-
-      if (markerRef.current) {
-        markerRef.current.remove();
-      }
-
-      const marker = (L.marker([data.lat, data.lng], { icon: customPin }) as any).addTo(
-        mapInstanceRef.current,
-      );
-      markerRef.current = marker;
-
-      mapInstanceRef.current.flyTo([data.lat, data.lng], 16, { animate: true, duration: 1.5 });
-    }
-  }
-
+  // Paylaşım süresi dolunca konum kaldırılır.
   useEffect(() => {
-    if (!shareData) return;
+    if (!share) return;
     const timer = setTimeout(
       () => {
-        latestShare.current = null;
-        setShareData(null);
-        markerRef.current?.remove();
-        markerRef.current = null;
-        setError("Paylaşımın süresi doldu. Yeni bir kod isteyin.");
-        setShowLookupModal(true);
+        latest.current = null;
+        setShare(null);
+        marker.current?.remove();
+        marker.current = null;
+        setError(t("share.expired", "Paylaşımın süresi doldu. Yeni bir kod iste."));
+        setLookupOpen(true);
       },
-      Math.max(0, shareData.expiresAt * 1000 - Date.now()),
+      Math.max(0, share.expiresAt * 1000 - Date.now()),
     );
     return () => clearTimeout(timer);
-  }, [shareData]);
+  }, [share, t]);
 
-  function handleSubmit(e: React.FormEvent) {
+  function submit(e: FormEvent) {
     e.preventDefault();
-    fetchLocationByCode(inputCode);
+    const valid = readShareCode(code);
+    if (!valid) {
+      setFieldError(t("home.share.error", "Kod 4–64 harf, rakam veya tireden oluşur"));
+      codeRef.current?.focus();
+      return;
+    }
+    setFieldError(null);
+    setCode(valid);
+    void lookup(valid);
   }
 
-  return (
-    <PageShell layout="app" className="lookup-page">
-      {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
-      <PageHeader variant="hidden" />
-      {/* Full Screen Map */}
-      <div ref={mapContainerRef} className="lookup-map" role="region" aria-label="Harita" />
+  const dest = share ? `${share.lat},${share.lng}` : "";
+  const stops = share
+    ? toCopyStops([
+        { label: share.address, address: share.address, lat: share.lat, lng: share.lng },
+      ])
+    : [];
 
-      {/* Harita üstü eylem çubuğu (site header'ı SiteChrome'da; marka rozeti C6'da kaldırıldı) */}
-      <div className="lookup-header">
-        <span aria-hidden="true" />
-        <button className="open-lookup-btn" onClick={() => setShowLookupModal(true)}>
-          🔍 Yeni Kod Gir
-        </button>
+  return (
+    <PageShell layout="app" className="share-page">
+      <PageHeader
+        variant="hidden"
+        title={t("share.title", "Paylaşılan konum")}
+        titleText={t("share.title", "Paylaşılan konum")}
+      />
+      <div ref={mapRef} className="share-map" role="region" aria-label={t("share.map", "Harita")} />
+
+      <div className="share-toolbar">
+        <Button
+          variant="secondary"
+          onClick={() => setLookupOpen(true)}
+          iconStart={<Icon name="search" size={16} />}
+        >
+          {t("share.newCode", "Yeni kod gir")}
+        </Button>
       </div>
 
-      {/* Kod sorgulama penceresi (design §3 Modal; yerel <dialog>, odak kod alanında) */}
-      <Modal
-        open={showLookupModal}
-        onClose={() => setShowLookupModal(false)}
-        title="Kodla Konum Bul"
-        description="Sizinle paylaşılan 6 haneli konum doğrulama kodunu girerek adresi ve haritadaki yerini anında görüntüleyin."
-        size="sm"
-        initialFocus={codeInputRef}
-        className="lookup-dialog"
-      >
-        <div className="icon-wrap" aria-hidden="true">
-          🔑
+      {mapError && (
+        <div className="share-map-error">
+          <Alert tone="warning">
+            {t(
+              "share.mapError",
+              "Harita yüklenemedi. Kodla adres sorgulamasını yine kullanabilirsin.",
+            )}
+          </Alert>
         </div>
-        <form onSubmit={handleSubmit} className="code-form">
-          <Field label="Paylaşım kodu">
+      )}
+
+      <Modal
+        open={lookupOpen}
+        onClose={() => setLookupOpen(false)}
+        title={t("share.lookup.title", "Paylaşım kodu")}
+        description={t(
+          "share.lookup.body",
+          "Sana gönderilen kodu gir; süresi dolmamış ve onaylanmışsa konum haritada açılır. Görüntülemek için hesap gerekmez.",
+        )}
+        size="sm"
+        initialFocus={codeRef}
+      >
+        <form onSubmit={submit} className="share-form" noValidate>
+          <Field label={t("share.lookup.label", "Paylaşım kodu")} error={fieldError} required>
             {(ids) => (
               <Input
                 {...ids}
-                ref={codeInputRef}
+                ref={codeRef}
                 type="text"
-                placeholder="Örn: 849201"
-                maxLength={32}
-                value={inputCode}
-                onChange={(e) => setInputCode(e.target.value)}
+                inputMode="text"
+                autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                maxLength={80}
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  if (fieldError && readShareCode(normalizeShareCode(e.target.value)))
+                    setFieldError(null);
+                }}
               />
             )}
           </Field>
-          <Button type="submit" fullWidth size="lg" loading={loading} disabled={!inputCode.trim()}>
-            {loading ? "Konum Aranıyor…" : "Konumu Haritada Göster →"}
+          <Button type="submit" fullWidth size="lg" loading={loading} disabled={!code.trim()}>
+            {loading
+              ? t("share.lookup.loading", "Konum aranıyor…")
+              : t("share.lookup.submit", "Konumu göster")}
           </Button>
         </form>
-
         {error && (
           <Alert tone="danger" live="assertive">
             {error}
           </Alert>
         )}
-
-        <Button variant="link" fullWidth onClick={() => setShowLookupModal(false)}>
-          ← Haritayı İncele / Vazgeç
-        </Button>
       </Modal>
 
-      {/* Floating Bottom Card When Location Found */}
-      {shareData && !showLookupModal && (
-        <section className="found-sheet">
-          <div className="found-header">
-            <span className="badge">✓ DOĞRULANMIŞ PAYLAŞIM</span>
-            <span className="code-pill">Kod: {shareData.code}</span>
-          </div>
+      {loading && !lookupOpen && (
+        <p className="share-status" role="status" data-surface="default">
+          {t("share.lookup.loading", "Konum aranıyor…")}
+        </p>
+      )}
 
-          <strong className="found-address">{shareData.address}</strong>
-          <small className="found-coords">
-            {shareData.lat.toFixed(5)}, {shareData.lng.toFixed(5)}
-          </small>
-
-          <div className="nav-actions">
-            <a
-              className="nav-btn google"
-              href={`https://www.google.com/maps/dir/?api=1&destination=${shareData.lat},${shareData.lng}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              🗺️ Google Haritalar
-            </a>
-            <a
-              className="nav-btn apple"
-              href={`https://maps.apple.com/?daddr=${shareData.lat},${shareData.lng}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              🧭 Apple Haritalar
-            </a>
-            <a
-              className="nav-btn yandex"
-              href={`https://yandex.com.tr/harita/?rtext=~${shareData.lat},${shareData.lng}&rtt=auto`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              🚗 Yandex Navigasyon
-            </a>
+      {share && !lookupOpen && (
+        <Card className="share-found" padding="lg">
+          <div className="share-found__head">
+            <Badge tone="success">{t("share.found.badge", "Paylaşılan konum")}</Badge>
+            <span className="share-found__code">
+              {t("share.found.code", "Kod")}: {share.code}
+            </span>
           </div>
-        </section>
+          <p className="share-found__address">{share.address}</p>
+          <p className="share-found__coords">
+            {share.lat.toFixed(5)}, {share.lng.toFixed(5)}
+          </p>
+          <div className="share-found__nav">
+            <Button
+              href={`https://www.google.com/maps/dir/?api=1&destination=${dest}`}
+              target="_blank"
+              rel="noreferrer"
+              variant="secondary"
+              iconEnd={<Icon name="external" size={16} />}
+            >
+              {t("share.nav.google", "Google Haritalar")}
+            </Button>
+            <Button
+              href={`https://maps.apple.com/?daddr=${dest}`}
+              target="_blank"
+              rel="noreferrer"
+              variant="secondary"
+              iconEnd={<Icon name="external" size={16} />}
+            >
+              {t("share.nav.apple", "Apple Haritalar")}
+            </Button>
+            <Button
+              href={`https://yandex.com.tr/harita/?rtext=~${dest}&rtt=auto`}
+              target="_blank"
+              rel="noreferrer"
+              variant="secondary"
+              iconEnd={<Icon name="external" size={16} />}
+            >
+              {t("share.nav.yandex", "Yandex Navigasyon")}
+            </Button>
+          </div>
+          <div className="share-found__copy">
+            <CopyRouteButton
+              title={share.address}
+              stops={stops}
+              next={`/k/?code=${encodeURIComponent(share.code)}`}
+              variant="primary"
+              fullWidth
+            />
+          </div>
+        </Card>
       )}
     </PageShell>
   );

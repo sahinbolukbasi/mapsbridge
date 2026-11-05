@@ -1,575 +1,252 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
-import { AuthActionModal } from "../components/auth-gate";
-import { getStoredSession } from "../lib/cognito";
-import { getFollowedUsers } from "../lib/follow-system";
+import { useEffect, useMemo, useState } from "react";
+import { AuthGate } from "../components/auth-gate";
+import {
+  Button,
+  Chip,
+  ChipGroup,
+  ConfirmDialog,
+  EmptyState,
+  Icon,
+  PageHeader,
+  PageShell,
+  SegmentedControl,
+  useToast,
+  useUrlParam,
+} from "../components/ui";
+import { EditPostModalWeb, NewPostModal, PostCard, type NewPostInput } from "../features/community";
+import type { CommunityPost } from "../features/community/types";
 import { trackEvent } from "../lib/analytics";
+import { getStoredSession } from "../lib/cognito";
+import {
+  CATEGORY_LABEL_KEY,
+  FEED_CATEGORIES,
+  FEED_MODES,
+  filterFeed,
+  sameUser,
+  type FeedCategory,
+  type FeedMode,
+} from "../lib/community/feed";
+import { getFollowedUsers, toggleFollowUser } from "../lib/follow-system";
+import { useLocale } from "../lib/locale-context";
 import { webSocialSync } from "../lib/social-sync";
 import "./community.css";
 
-import type { CommunityPost } from "../features/community/types";
-import { DiscoverTab, NewPostModal } from "../features/community";
-import { PageHeader, PageShell } from "../components/ui";
-
 export type { CommunityPost };
 
+const NEXT = "/community/";
+
+/**
+ * Topluluk (design F17, §6.4): okuma herkese açık; paylaşım, beğeni, yorum, kaydetme ve takip
+ * misafirde AuthGate sheet (reason="save") açar. Akış modları yalnızca kodda gerçekten çalışan
+ * sıralama/süzmeler (lib/community/feed.ts).
+ */
 export default function CommunityPage() {
-  const [activeUsername, setActiveUsername] = useState("gezgin");
+  const { t } = useLocale();
+  const toast = useToast();
+  const [signedIn, setSignedIn] = useState(false);
+  const [myUsername, setMyUsername] = useState("");
   const [posts, setPosts] = useState<CommunityPost[]>([]);
-  const [userSavedRoutes, setUserSavedRoutes] = useState<string[]>([]);
-  const [followedTravelerUsernames, setFollowedTravelerUsernames] = useState<string[]>([]);
+  const [followed, setFollowed] = useState<string[]>([]);
+  const [mode, setMode] = useUrlParam<FeedMode>("akis", {
+    allowed: FEED_MODES,
+    fallback: "latest",
+  });
+  const [category, setCategory] = useState<FeedCategory>("all");
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [editing, setEditing] = useState<CommunityPost | null>(null);
+  const [deleting, setDeleting] = useState<CommunityPost | null>(null);
+  const [gateOpen, setGateOpen] = useState(false);
 
-  // Modals & Panels
-  const [showNewPostModal, setShowNewPostModal] = useState(false);
-
-  // Feed tabs
-  const [activeTab, setActiveTab] = useState("güncel");
-
-  // Toast & Auth gate
-  const [toast, setToast] = useState<string | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authConfig, setAuthConfig] = useState({ title: "", subtitle: "", featureName: "" });
-
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3500);
-  }
-
-  const toggleFollowUser = (username: string) => {
-    setFollowedTravelerUsernames((prev) => {
-      const cleanUsername = username.replace("@", "");
-      const isFollowing = prev.includes(cleanUsername);
-      showToast(isFollowing ? "Takipten çıkarıldı" : "✓ Gezgin takibe alındı");
-      return isFollowing ? prev.filter((u) => u !== cleanUsername) : [...prev, cleanUsername];
-    });
-  };
-
-  const requireAuth = (featureName: string, actionDesc: string, callback?: () => void) => {
-    const session = getStoredSession();
-    if (!session?.email) {
-      setAuthConfig({
-        title: `${featureName} İçin Giriş Yapın`,
-        subtitle: `${actionDesc} için MapsBridge oturumu açmanız gerekmektedir.`,
-        featureName,
-      });
-      setShowAuthModal(true);
-      return false;
-    }
-    if (callback) callback();
-    return true;
-  };
-
-  // Load Initial Storage & Subscribe to Changes
   useEffect(() => {
     const session = getStoredSession();
-    if (session?.email) {
-      const uname = session.email
-        .split("@")[0]
-        .toLowerCase()
-        .replace(/[^a-z0-9_]/g, "");
-      setActiveUsername(uname || "gezgin");
-    }
-
+    const authed = Boolean(session?.token && session?.email);
+    setSignedIn(authed);
+    if (authed) setMyUsername(webSocialSync.getProfile().username);
     setPosts(webSocialSync.getPosts());
-    const unsubPosts = webSocialSync.subscribePosts((latest) => {
-      setPosts(latest);
-    });
-
-    try {
-      const rawPlanner = localStorage.getItem("mapsbridge.travelPlanner");
-      if (rawPlanner) {
-        const trips = JSON.parse(rawPlanner);
-        if (Array.isArray(trips)) {
-          setUserSavedRoutes(
-            trips.map((t: { title?: string }) => t.title).filter((x): x is string => Boolean(x)),
-          );
-        }
-      }
-    } catch {
-      // ignore
-    }
-
-    setFollowedTravelerUsernames(getFollowedUsers());
-    const followHandler = () => setFollowedTravelerUsernames(getFollowedUsers());
-    window.addEventListener("mapsbridge:follow-change", followHandler);
-
+    const unsubPosts = webSocialSync.subscribePosts(setPosts);
+    setFollowed(getFollowedUsers());
+    const onFollow = () => setFollowed(getFollowedUsers());
+    window.addEventListener("mapsbridge:follow-change", onFollow);
     return () => {
       unsubPosts();
-      window.removeEventListener("mapsbridge:follow-change", followHandler);
+      window.removeEventListener("mapsbridge:follow-change", onFollow);
     };
   }, []);
 
-  // ── Central Action: Add to My Trip (Clone Route from Feed) ────
-  const handleAddToMyTrip = (route: {
-    title: string;
-    destination?: string;
-    stops?: Array<{
-      label?: string;
-      name?: string;
-      address?: string;
-      lat?: number;
-      lng?: number;
-      category?: string;
-    }>;
-  }) => {
-    if (!requireAuth("Seyahate Ekle", "Bu rotayı seyahat planınıza kopyalamak için")) return;
+  const visible = useMemo(
+    () => filterFeed(posts, { mode, category, followed }),
+    [posts, mode, category, followed],
+  );
 
-    try {
-      const STORAGE_KEY = "mapsbridge.travelPlanner";
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const trips = raw ? JSON.parse(raw) : [];
-
-      const newTripId = "clone-" + Date.now();
-      const stopsData =
-        route.stops && route.stops.length > 0
-          ? route.stops
-          : [
-              { label: "1. Durak - Keşif Noktası", lat: 41.8902, lng: 12.4922, category: "tarih" },
-              {
-                label: "2. Durak - Manzara Seyir",
-                lat: 41.8986,
-                lng: 12.4769,
-                category: "manzara",
-              },
-            ];
-
-      const clonedPins = stopsData.map(
-        (
-          s: {
-            label?: string;
-            name?: string;
-            address?: string;
-            lat?: number;
-            lng?: number;
-            category?: string;
-          },
-          idx: number,
-        ) => ({
-          id: "pin-" + Date.now() + "-" + idx,
-          tripId: newTripId,
-          label: s.label || s.name || `Durak ${idx + 1}`,
-          address: s.address || s.label || route.destination || "Keşif Noktası",
-          lat: s.lat || 41.0,
-          lng: s.lng || 29.0,
-          category: s.category || "tarih",
-          dayIndex: 1,
-          order: idx + 1,
-          group: route.title,
-          visited: false,
-          durationMinutes: 60,
-        }),
-      );
-
-      const newTrip = {
-        id: newTripId,
-        title: `${route.title} (Klonlandı)`,
-        destination: route.destination || "Seyahat Rotası",
-        transportMode: "walking",
-        isPublic: false,
-        days: [
-          {
-            dayIndex: 1,
-            label: "1. Gün",
-            color: "#059669",
-            subtitle: "Topluluk Rotası",
-            pins: clonedPins,
-          },
-        ],
-        groups: [
-          {
-            id: "genel",
-            name: "Genel",
-            color: "#059669",
-            emoji: "📍",
-            pinCount: clonedPins.length,
-          },
-        ],
-        pins: clonedPins,
-      };
-
-      trips.unshift(newTrip);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
-      trackEvent("route_add_to_trip", { targetTitle: route.title });
-
-      showToast(
-        `🗺️ "${route.title}" seyahat planınıza aktarıldı! Harita sekmesinden inceleyebilirsiniz.`,
-      );
-    } catch {
-      showToast("Rota seyahat planına eklenemedi.");
+  /** Yazma eylemi: misafirde kapı, oturumluda eylem. */
+  function guarded(action: () => void) {
+    if (!signedIn) {
+      setGateOpen(true);
+      return;
     }
-  };
+    action();
+  }
 
-  // ── Post Handlers (Synchronized via webSocialSync) ──────────────
-  const handleCreatePost = (data: {
-    content: string;
-    photo: string | null;
-    category: string;
-    linkedRoute?: string;
-  }) => {
-    if (!requireAuth("Paylaşım", "Topluluk akışında seyahat deneyiminizi paylaşmak için")) return;
-
-    let linkedRouteObj = undefined;
-    if (data.linkedRoute) {
-      linkedRouteObj = {
-        title: data.linkedRoute,
-        destination: data.linkedRoute,
-        stopCount: 4,
-        stops: [
-          { label: "1. Durak", lat: 41.0082, lng: 28.9784, category: "tarih" },
-          { label: "2. Durak", lat: 41.0125, lng: 28.9812, category: "muze" },
-        ],
-      };
-    }
-
-    const newPost = webSocialSync.createPost({
+  function createPost(data: NewPostInput) {
+    const post = webSocialSync.createPost({
       content: data.content,
-      photo: data.photo,
-      category: data.category,
-      linkedRoute: linkedRouteObj,
-    });
-
-    trackEvent("post_view", {
-      targetId: newPost.id,
-      targetTitle: newPost.content.substring(0, 30),
-    });
-    setShowNewPostModal(false);
-    showToast("✓ Seyahat deneyiminiz topluluk akışında yayınlandı!");
-  };
-
-  const handleFastTweet = (data: {
-    content: string;
-    photo: string | null;
-    category: string;
-    locationTag?: string;
-    hashtags?: string[];
-    linkedRoute?: string;
-  }) => {
-    if (!requireAuth("Paylaşım", "Seyahat deneyiminizi veya rotanızı paylaşmak için")) return;
-
-    let linkedRouteObj = undefined;
-    if (data.linkedRoute) {
-      linkedRouteObj = {
-        title: data.linkedRoute,
-        destination: data.linkedRoute,
-        stopCount: 4,
-        stops: [
-          { label: "1. Durak", lat: 41.0082, lng: 28.9784, category: "tarih" },
-          { label: "2. Durak", lat: 41.0125, lng: 28.9812, category: "muze" },
-        ],
-      };
-    }
-
-    webSocialSync.createPost({
-      content: data.content,
-      photo: data.photo,
       category: data.category,
       locationTag: data.locationTag,
       hashtags: data.hashtags,
-      linkedRoute: linkedRouteObj,
+      linkedRoute: data.linkedRoute,
     });
+    trackEvent("post_view", { targetId: post.id, targetTitle: post.content.slice(0, 30) });
+    setComposerOpen(false);
+    toast.show({ tone: "success", message: t("community.toast.posted", "Paylaşımın yayınlandı.") });
+  }
 
-    showToast("✓ Seyahat paylaşımınız başarıyla yayınlandı!");
-  };
-
-  const handleEditPost = (
-    postId: string,
-    updates: {
-      content?: string;
-      category?: string;
-      locationTag?: string;
-      hashtags?: string[];
-    },
-  ) => {
-    if (!requireAuth("Düzenleme", "Paylaşımınızı düzenlemek için")) return;
-    const res = webSocialSync.editPost(postId, updates);
-    if (res) {
-      showToast("✓ Paylaşımınız güncellendi!");
+  async function sharePost(post: CommunityPost) {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post.authorDisplayName,
+          text: post.content.slice(0, 100),
+          url,
+        });
+      } catch {}
+      return;
     }
-  };
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.show({
+        tone: "success",
+        message: t("community.toast.linkCopied", "Bağlantı kopyalandı."),
+      });
+    } catch {
+      toast.show({
+        tone: "danger",
+        message: t("community.toast.copyFailed", "Bağlantı kopyalanamadı."),
+      });
+    }
+  }
 
-  const handleDeletePost = (postId: string) => {
-    if (!requireAuth("Silme", "Paylaşımınızı silmek için")) return;
-    webSocialSync.deletePost(postId);
-    showToast("✓ Paylaşımınız silindi.");
-  };
-
-  const handleAddComment = (postId: string, text: string) => {
-    if (!requireAuth("Yorum", "Paylaşıma yanıt vermek için")) return;
-    webSocialSync.addComment(postId, text);
-    showToast("✓ Yorumunuz paylaşıldı!");
-  };
-
-  const handleToggleLike = (postId: string) => {
-    if (!requireAuth("Beğeni", "Paylaşımları beğenmek için")) return;
-    webSocialSync.toggleLike(postId);
-  };
-
-  const handleToggleBookmark = (postId: string) => {
-    if (!requireAuth("Kaydet", "Paylaşımları kaydetmek için")) return;
-    webSocialSync.toggleBookmark(postId);
-  };
-
-  const handleRetweet = (postId: string) => {
-    if (!requireAuth("Yeniden Paylaş", "Gönderiyi yeniden paylaşmak için")) return;
-    webSocialSync.retweet(postId);
-  };
+  const openComposer = () => guarded(() => setComposerOpen(true));
 
   return (
-    <PageShell layout="landing" className="community-page-root">
-      {/* Tek h1 (AC-34): görsel başlık sayfa içinde <p> olarak kalır; kabuk başlığı ekran okuyucuya. */}
-      <PageHeader variant="hidden" title="Keşfet, Rota Paylaş & Gezi Arkadaşı Bul" />
+    <PageShell layout="content" className="community-page">
+      <PageHeader
+        title={t("community.title", "Topluluk")}
+        titleText={t("community.title", "Topluluk")}
+        description={t(
+          "community.description",
+          "Gezginlerin paylaştığı deneyimleri ve rotaları oku; beğendiğin rotayı kendi planına kopyala.",
+        )}
+        actions={
+          <Button onClick={openComposer} iconStart={<Icon name="plus" size={16} />}>
+            {t("community.newPost", "Paylaşım yap")}
+          </Button>
+        }
+      />
 
-      {/* ── HERO BANNER ── */}
-      <section className="community-hero">
-        <div className="community-hero-inner">
-          {/* Top badge row */}
-          <div className="hero-top-row">
-            <div className="hero-badge">
-              <span className="hero-badge-text">MapsBridge Gezginler Topluluğu</span>
-              <span className="hero-badge-sep" />
-              <span className="hero-badge-live">
-                <span className="hero-live-ping" />
-                Canlı Seyahat Ağı
-              </span>
-            </div>
-            <span className="hero-active-count">Beta’dayız — ilk rotaları sen paylaş</span>
-          </div>
+      <div className="community-filters">
+        <SegmentedControl<FeedMode>
+          label={t("community.mode.label", "Akış")}
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: "latest", label: t("community.mode.latest", "Güncel") },
+            { value: "popular", label: t("community.mode.popular", "Popüler") },
+            { value: "following", label: t("community.mode.following", "Takip ettiklerin") },
+          ]}
+        />
+        <ChipGroup label={t("community.filter.label", "Kategori")} mode="single">
+          {FEED_CATEGORIES.map((c) => (
+            <Chip key={c} pressed={category === c} onPress={() => setCategory(c)}>
+              {t(CATEGORY_LABEL_KEY[c], c === "all" ? "Tümü" : c)}
+            </Chip>
+          ))}
+        </ChipGroup>
+      </div>
 
-          {/* Headline + CTA */}
-          <div className="hero-headline-row">
-            <div className="hero-headline-text">
-              <p className="hero-title">Keşfet, Rota Paylaş &amp; Gezi Arkadaşı Bul</p>
-              <p className="hero-subtitle">
-                Gezgin deneyimlerini keşfedin, onaylı seyahat rotalarını paylaşın, grup seyahatleri
-                organize edin ve seyahat arkadaşı bulun.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="hero-share-btn"
-              onClick={() => {
-                requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
-                  setShowNewPostModal(true);
-                });
-              }}
-            >
-              ✍️ Seyahat Deneyimi Paylaş
-            </button>
-          </div>
-
-          {/* Filter tabs */}
-          <div className="hero-tabs-bar">
-            {[
-              { key: "güncel", label: "Güncel", badge: "Canlı", live: true },
-              { key: "popüler", label: "Popüler", badge: "Trend", live: false },
-              { key: "yakınımda", label: "Yakınımda", badge: null, live: false },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                className={`hero-tab${activeTab === tab.key ? " active" : ""}`}
-                aria-pressed={activeTab === tab.key}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.label}
-                {tab.badge && (
-                  <span
-                    className={`hero-tab-badge${tab.live ? " live" : ""}`}
-                    data-surface={activeTab === tab.key ? "inverse" : undefined}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className={`community-layout${posts.length === 0 ? " community-layout--single" : ""}`}>
-        {/* ── MAIN FEED ── */}
-        <div className="community-feed-col">
-          <DiscoverTab
-            posts={posts}
-            filter="all"
-            activeUsername={activeUsername}
-            userSavedRoutes={userSavedRoutes}
-            followedUsernames={followedTravelerUsernames}
-            onToggleLike={handleToggleLike}
-            onToggleBookmark={handleToggleBookmark}
-            onRetweet={handleRetweet}
-            onAddToMyTrip={
-              handleAddToMyTrip as (route: {
-                title: string;
-                destination?: string;
-                stops?: unknown[];
-              }) => void
+      <div className="community-feed" aria-live="polite">
+        {visible.length === 0 ? (
+          <EmptyState
+            icon="users"
+            title={t("community.empty.title", "Henüz paylaşım yok")}
+            description={
+              mode === "following"
+                ? t(
+                    "community.empty.following",
+                    "Takip ettiğin gezginlerin paylaşımları burada görünür.",
+                  )
+                : t("community.empty.body", "İlk seyahat deneyimini paylaşarak akışı başlat.")
             }
-            onOpenNewPost={() => {
-              requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
-                setShowNewPostModal(true);
-              });
-            }}
-            onToggleFollow={toggleFollowUser}
-            onAddComment={handleAddComment}
-            onFastTweet={handleFastTweet}
-            onEditPost={handleEditPost}
-            onDeletePost={handleDeletePost}
-            showToast={showToast}
+            action={
+              <Button variant="secondary" onClick={openComposer}>
+                {t("community.empty.cta", "İlk paylaşımı yap")}
+              </Button>
+            }
           />
-        </div>
-
-        {/* ── SIDEBAR (yalnızca içerik varken) ── */}
-        {posts.length > 0 && (
-          <>
-            <aside className="community-sidebar-col">
-              <div className="community-sidebar-card">
-                <h3 className="community-sidebar-title">
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ fontSize: 18 }}
-                  >
-                    explore
-                  </span>
-                  Kategoriler
-                </h3>
-                <div className="community-sidebar-cats">
-                  {[
-                    { icon: "🏛️", label: "Tarih & Kültür" },
-                    { icon: "🍽️", label: "Gastronomi" },
-                    { icon: "🌲", label: "Doğa & Vadi" },
-                    { icon: "📷", label: "Fotoğrafçılık" },
-                    { icon: "🎒", label: "Sırt Çantalı" },
-                    { icon: "🏙️", label: "Şehir Keşfi" },
-                  ].map((c) => (
-                    <span key={c.label} className="community-sidebar-cat-pill">
-                      {c.icon} {c.label}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="community-sidebar-card">
-                <h3 className="community-sidebar-title">
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ fontSize: 18 }}
-                  >
-                    auto_awesome
-                  </span>
-                  Hızlı Bağlantılar
-                </h3>
-                <nav className="community-sidebar-links">
-                  <a href="/travel-assistant/" className="community-sidebar-link">
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: 18 }}
-                    >
-                      smart_toy
-                    </span>
-                    <span>AI Seyahat Asistanı</span>
-                  </a>
-                  <a href="/maps/" className="community-sidebar-link">
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: 18 }}
-                    >
-                      map
-                    </span>
-                    <span>Seyahat Masası</span>
-                  </a>
-                  <a href="/profile/" className="community-sidebar-link">
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: 18 }}
-                    >
-                      person
-                    </span>
-                    <span>Profilim</span>
-                  </a>
-                </nav>
-              </div>
-
-              <div className="community-sidebar-card community-sidebar-cta">
-                <span
-                  className="material-symbols-outlined community-sidebar-cta-icon"
-                  aria-hidden="true"
-                >
-                  explore
-                </span>
-                <strong>Rotanı Paylaş</strong>
-                <p>Kendi gezi rotalarını toplulukla paylaş, diğer gezginlere ilham ver.</p>
-                <button
-                  type="button"
-                  className="community-share-btn"
-                  data-surface="inverse"
-                  style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}
-                  onClick={() => {
-                    requireAuth("Paylaşım", "Seyahat deneyiminizi paylaşmak için", () => {
-                      setShowNewPostModal(true);
-                    });
-                  }}
-                >
-                  Paylaşım Yap
-                </button>
-              </div>
-            </aside>
-          </>
+        ) : (
+          visible.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              isMine={signedIn && sameUser(post.authorUsername, myUsername)}
+              isFollowing={followed.some((u) => sameUser(u, post.authorUsername))}
+              next={NEXT}
+              actions={{
+                onToggleLike: (id) => guarded(() => webSocialSync.toggleLike(id)),
+                onToggleBookmark: (id) => guarded(() => webSocialSync.toggleBookmark(id)),
+                onAddComment: (id, text) => guarded(() => webSocialSync.addComment(id, text)),
+                onToggleFollow: (username) =>
+                  guarded(() => toggleFollowUser(username.replace(/^@/, ""))),
+                onEdit: (p) => setEditing(p),
+                onDelete: (p) => setDeleting(p),
+                onShare: (p) => void sharePost(p),
+              }}
+            />
+          ))
         )}
       </div>
 
-      {/* ── YENİ PAYLAŞIM MODALI ── */}
       <NewPostModal
-        isOpen={showNewPostModal}
-        onClose={() => setShowNewPostModal(false)}
-        activeUsername={activeUsername}
-        userSavedRoutes={userSavedRoutes}
-        onSubmit={handleCreatePost}
+        open={composerOpen}
+        onClose={() => setComposerOpen(false)}
+        onSubmit={createPost}
       />
 
-      {/* ── TOAST BİLDİRİMİ ── */}
-      {toast && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 24,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 50,
-            background: "color-mix(in srgb, var(--color-neutral-900) 92%, transparent)",
-            backdropFilter: "blur(8px)",
-            color: "var(--color-on-primary)",
-            padding: "0.6rem 1.25rem",
-            borderRadius: "9999px",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
+      {editing && (
+        <EditPostModalWeb
+          post={editing}
+          onClose={() => setEditing(null)}
+          onSave={(id, updates) => {
+            if (webSocialSync.editPost(id, updates))
+              toast.show({
+                tone: "success",
+                message: t("community.toast.updated", "Paylaşımın güncellendi."),
+              });
           }}
-        >
-          <span>{toast}</span>
-        </div>
-      )}
-
-      {/* ── AUTH MODAL ── */}
-      {showAuthModal && (
-        <AuthActionModal
-          isOpen={showAuthModal}
-          title={authConfig.title}
-          subtitle={authConfig.subtitle}
-          featureName={authConfig.featureName}
-          nextUrl="/community/"
-          onClose={() => setShowAuthModal(false)}
         />
       )}
+
+      <ConfirmDialog
+        open={deleting !== null}
+        title={t("community.delete.title", "Paylaşım silinsin mi?")}
+        consequence={t("community.delete.body", "Bu paylaşım akıştan kaldırılır.")}
+        confirmLabel={t("community.delete.confirm", "Sil")}
+        tone="danger"
+        successMessage={t("community.toast.deleted", "Paylaşımın silindi.")}
+        onConfirm={async () => {
+          if (deleting) webSocialSync.deletePost(deleting.id);
+        }}
+        onClose={() => setDeleting(null)}
+      />
+
+      <AuthGate
+        variant="sheet"
+        reason="save"
+        next={NEXT}
+        open={gateOpen}
+        onClose={() => setGateOpen(false)}
+      />
     </PageShell>
   );
 }

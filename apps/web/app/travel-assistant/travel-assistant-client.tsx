@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AuthActionModal } from "../components/auth-gate";
+import { AuthGate } from "../components/auth-gate";
 import { openUpgradeModal } from "../components/upgrade-modal";
 import { getStoredSession, refreshSession, isTokenExpired } from "../lib/cognito";
 import { apiFetch } from "../lib/api-client";
@@ -3179,13 +3179,12 @@ export default function AIPage() {
             Rota {route ? `· ${route.stops.length} durak` : ""}
           </button>
         </div>
-        <AuthActionModal
-          isOpen={authModal}
+        <AuthGate
+          variant="sheet"
+          reason="ai"
+          next="/travel-assistant/"
+          open={authModal}
           onClose={() => setAuthModal(false)}
-          title="Seyahatini birlikte planlayalım"
-          subtitle="Sohbet için giriş yap ve e-postanı doğrula."
-          featureName="AI seyahat asistanı"
-          nextUrl="/travel-assistant/"
         />
       </div>
     </PageShell>

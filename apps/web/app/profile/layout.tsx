@@ -1,8 +1,5 @@
-import type { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Seyahat kimliğim",
-  robots: { index: false, follow: false },
-};
+import { routeMetadata } from "../lib/site-metadata";
+export const metadata = routeMetadata("/profile/");
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;
 }

@@ -1,211 +1,176 @@
 "use client";
+import { useEffect, useState, type FormEvent } from "react";
+import { Button, Field, Input, Modal, Select, Textarea } from "../../../components/ui";
+import { CATEGORY_LABEL_KEY, FEED_CATEGORIES, extractHashtags } from "../../../lib/community/feed";
+import { useLocale } from "../../../lib/locale-context";
+import type { Trip } from "../../../lib/trip/models";
+import { PLANNER_TRIPS_KEY, readPlannerStore } from "../../../lib/trip/planner-store";
+import type { CommunityPost } from "../types";
 
-import React, { useState } from "react";
-import { PRESET_TRAVEL_PHOTOS } from "../initial-data";
-import "../community-layout.css";
-import { Modal } from "../../../components/ui";
+export type NewPostInput = {
+  content: string;
+  category: string;
+  locationTag?: string;
+  hashtags: string[];
+  linkedRoute?: CommunityPost["linkedRoute"];
+};
 
-interface NewPostModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  activeUsername: string;
-  userSavedRoutes: string[];
-  onSubmit: (data: {
-    content: string;
-    photo: string | null;
-    category: string;
-    linkedRoute?: string;
-  }) => void;
+/** Planlayıcıdaki (bu hesaba ait) duraklı geziler; iliştirilen rota yalnızca gerçek duraklardan. */
+function readPlannerTrips(): Trip[] {
+  try {
+    const raw = readPlannerStore(PLANNER_TRIPS_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? (parsed as Trip[]).filter((t) => t && Array.isArray(t.pins) && t.pins.length > 0)
+      : [];
+  } catch {
+    return [];
+  }
 }
 
-export function NewPostModal({
-  isOpen,
-  onClose,
-  activeUsername,
-  userSavedRoutes,
-  onSubmit,
-}: NewPostModalProps) {
-  const [content, setContent] = useState("");
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [category, setCategory] = useState("Tarih & Kültür");
-  const [selectedRoute, setSelectedRoute] = useState("");
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
-
-    onSubmit({
-      content: content.trim(),
-      photo,
-      category,
-      linkedRoute: selectedRoute || undefined,
-    });
-
-    setContent("");
-    setPhoto(null);
-    setSelectedRoute("");
+function toLinkedRoute(trip: Trip): NonNullable<CommunityPost["linkedRoute"]> {
+  return {
+    id: trip.id,
+    title: trip.title,
+    destination: trip.destination || "",
+    stopCount: trip.pins.length,
+    stops: trip.pins.map((p) => ({
+      label: p.label,
+      address: p.address,
+      lat: p.lat,
+      lng: p.lng,
+      category: p.category,
+    })),
   };
+}
+
+/** Yeni paylaşım (Modal + Field). Yalnızca oturumlu kullanıcıya açılır; misafir kapıya düşer. */
+export function NewPostModal({
+  open,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: NewPostInput) => void;
+}) {
+  const { t } = useLocale();
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState<string>(FEED_CATEGORIES[1]);
+  const [locationTag, setLocationTag] = useState("");
+  const [tripId, setTripId] = useState("");
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) setTrips(readPlannerTrips());
+  }, [open]);
+
+  function reset() {
+    setContent("");
+    setLocationTag("");
+    setTripId("");
+    setError(null);
+  }
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    const text = content.trim();
+    if (!text) {
+      setError(t("community.compose.required", "Paylaşım metni boş olamaz."));
+      return;
+    }
+    const trip = trips.find((x) => x.id === tripId);
+    onSubmit({
+      content: text,
+      category,
+      locationTag: locationTag.trim() || undefined,
+      hashtags: extractHashtags(text),
+      linkedRoute: trip ? toLinkedRoute(trip) : undefined,
+    });
+    reset();
+  }
 
   return (
-    <Modal open onClose={onClose} title="Yeni paylaşım" size="md" className="new-post-dialog">
-      <div className="x-tweet-modal">
-        {/* Gizlilik bilgisi (eski üst çubuk; kapat düğmesi Modal'da) */}
-        <div className="x-tweet-header">
-          <div className="x-tweet-privacy-pill">
-            <span className="material-symbols-outlined" aria-hidden="true">
-              public
-            </span>
-            <span>Topluluk &amp; Keşfet Akışı</span>
-          </div>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="x-tweet-body">
-            {/* Sol Avatar */}
-            <div className="x-tweet-avatar-wrap">
-              <div className="x-tweet-avatar">{activeUsername.charAt(0).toUpperCase()}</div>
-            </div>
-
-            {/* Sağ Yazım Alanı */}
-            <div className="x-tweet-content-col">
-              <textarea
-                required
-                rows={3}
-                placeholder="Neler keşfettiniz? Seyahat fikrinizi veya rotanızı paylaşın..."
-                className="x-tweet-textarea"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                autoFocus
-              />
-
-              {/* Seçili Görsel Önizlemesi */}
-              {photo && (
-                <div className="x-attached-photo-card">
-                  <img src={photo} alt="Seyahat görseli" className="x-attached-photo-img" />
-                  <button
-                    type="button"
-                    className="x-photo-remove-btn"
-                    onClick={() => setPhoto(null)}
-                    title="Fotoğrafı Kaldır"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-
-              {/* Bağlı Rota Rozeti */}
-              {selectedRoute && (
-                <div className="x-attached-route-tag">
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    map
-                  </span>
-                  <span>{selectedRoute}</span>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRoute("")}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "var(--color-text-subtle)",
-                      marginLeft: "4px",
-                    }}
-                    title="Rotayı Kaldır"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-
-              {/* Örnek Seyahat Fotoğrafları Seçici */}
-              <div className="x-preset-photo-section">
-                <span className="x-preset-title">📸 Örnek Seyahat Fotoğrafı Seçin:</span>
-                <div className="x-preset-scroll no-scrollbar">
-                  {PRESET_TRAVEL_PHOTOS.map((p, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      className={`x-preset-item-btn ${photo === p.url ? "selected" : ""}`}
-                      onClick={() => setPhoto(p.url)}
-                    >
-                      <img src={p.url} alt={p.label} className="x-preset-thumb" />
-                      <span>{p.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Alt X Medya & Gönderim Araç Çubuğu */}
-          <div className="x-tweet-media-bar">
-            <div className="x-tweet-icons-row">
-              {/* Kategori Seç */}
-              <select
-                className="dialog-select"
-                style={{
-                  fontSize: "11.5px",
-                  padding: "0.25rem 0.5rem",
-                  borderRadius: "9999px",
-                  background: "transparent",
-                  border: "1px solid var(--color-border-strong)",
-                }}
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                title="Gönderi Kategorisi"
-              >
-                <option value="Tarih & Kültür">🏛️ Tarih &amp; Kültür</option>
-                <option value="Gastronomi">🍽️ Gastronomi &amp; Lezzet</option>
-                <option value="Doğa & Yürüyüş">🌲 Doğa &amp; Yürüyüş</option>
-                <option value="Fotoğrafçılık">📷 Fotoğrafçılık</option>
-                <option value="Şehir Rehberi">🌆 Şehir Rehberi</option>
-              </select>
-
-              {/* Rota Seç Dropdown */}
-              <select
-                className="dialog-select"
-                style={{
-                  fontSize: "11.5px",
-                  padding: "0.25rem 0.5rem",
-                  borderRadius: "9999px",
-                  background: "transparent",
-                  border: "1px solid var(--color-border-strong)",
-                  maxWidth: "160px",
-                }}
-                value={selectedRoute}
-                onChange={(e) => setSelectedRoute(e.target.value)}
-                title="Bağlı Gezi Rotası Ekle"
-              >
-                <option value="">📍 Rota Ekle...</option>
-                {userSavedRoutes.map((title, idx) => (
-                  <option key={idx} value={title}>
-                    {title}
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={t("community.compose.title", "Seyahat deneyimini paylaş")}
+      size="md"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            {t("ui.cancel", "Vazgeç")}
+          </Button>
+          <Button type="submit" form="cm-new-post-form">
+            {t("community.compose.submit", "Paylaş")}
+          </Button>
+        </>
+      }
+    >
+      <form id="cm-new-post-form" className="cm-form" onSubmit={submit} noValidate>
+        <Field
+          label={t("community.compose.content", "Paylaşım metni")}
+          hint={t("community.compose.contentHint", "#etiket yazarsan gönderiye eklenir.")}
+          error={error}
+          required
+        >
+          {(ids) => (
+            <Textarea
+              {...ids}
+              rows={5}
+              maxLength={1000}
+              value={content}
+              placeholder={t("community.compose.placeholder", "Nereyi keşfettin?")}
+              onChange={(e) => {
+                setContent(e.target.value);
+                if (error) setError(null);
+              }}
+            />
+          )}
+        </Field>
+        <Field label={t("community.compose.category", "Kategori")}>
+          {(ids) => (
+            <Select {...ids} value={category} onChange={(e) => setCategory(e.target.value)}>
+              {FEED_CATEGORIES.filter((c) => c !== "all").map((c) => (
+                <option key={c} value={c}>
+                  {t(CATEGORY_LABEL_KEY[c], c)}
+                </option>
+              ))}
+            </Select>
+          )}
+        </Field>
+        <Field
+          label={t("community.compose.location", "Konum")}
+          optionalLabel={t("ui.optional", "isteğe bağlı")}
+        >
+          {(ids) => (
+            <Input
+              {...ids}
+              maxLength={120}
+              value={locationTag}
+              onChange={(e) => setLocationTag(e.target.value)}
+            />
+          )}
+        </Field>
+        {trips.length > 0 && (
+          <Field
+            label={t("community.compose.route", "Rota iliştir")}
+            optionalLabel={t("ui.optional", "isteğe bağlı")}
+          >
+            {(ids) => (
+              <Select {...ids} value={tripId} onChange={(e) => setTripId(e.target.value)}>
+                <option value="">{t("community.compose.noRoute", "Rota yok")}</option>
+                {trips.map((trip) => (
+                  <option key={trip.id} value={trip.id}>
+                    {trip.title}
                   </option>
                 ))}
-                <option value="İstanbul Tarihi Yarımada">İstanbul Tarihi Yarımada</option>
-                <option value="Roma Antik Miras">Roma Antik Miras</option>
-                <option value="Kapadokya Vadileri">Kapadokya Vadileri</option>
-              </select>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  color: content.length > 250 ? "#ef4444" : "#94a3b8",
-                }}
-              >
-                {280 - content.length}
-              </span>
-              <button type="submit" className="x-tweet-submit-btn">
-                Yayınla
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+              </Select>
+            )}
+          </Field>
+        )}
+      </form>
     </Modal>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { WELCOME_CREDITS_DISPLAY } from "../lib/billing/credit-costs";
 import { useLocale } from "../lib/locale-context";
 import { DEFAULT_NEXT, safeNext } from "../lib/navigation/safe-next";
@@ -155,90 +154,5 @@ export function AuthGate({ variant, reason, draft, next, open = false, onClose }
     >
       <GateContent reason={reason} draft={draft} next={next} onContinue={close} />
     </Modal>
-  );
-}
-
-// ── Geriye uyumlu sarmalayıcılar (FEAT-009'da silinir) ─────────────────────────────────────
-// Eski çağıranlar derlenmeye devam etsin diye imzalar korunur; görünüm tamamen AuthGate'tir.
-
-function decodeSafe(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
-/** @deprecated AuthGate variant="page" kullanın. Görsel alanlar (features, samples…) yok sayılır. */
-export interface FullPagePromotionProps {
-  nextUrl: string;
-  badgeText?: string;
-  badgeIcon?: string;
-  heroTitle?: string;
-  heroSubtitle?: string;
-  features?: unknown[];
-  samplesTitle?: string;
-  samples?: unknown[];
-  primaryButtonText?: string;
-  secondaryButtonText?: string;
-  titleText?: string;
-}
-
-/** @deprecated AuthGate variant="page" kullanın. */
-export function FullPagePromotion({ nextUrl }: FullPagePromotionProps) {
-  const reason: AuthGateReason = nextUrl.startsWith("/messages")
-    ? "messages"
-    : nextUrl.startsWith("/profile")
-      ? "profile"
-      : "save";
-  return <AuthGate variant="page" reason={reason} next={nextUrl} />;
-}
-
-/** @deprecated AuthGate variant="sheet" kullanın. title/subtitle/featureName yok sayılır. */
-export interface AuthActionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  subtitle?: string;
-  featureName?: string;
-  nextUrl?: string;
-}
-
-/** @deprecated AuthGate variant="sheet" kullanın. */
-export function AuthActionModal({ isOpen, onClose, nextUrl }: AuthActionModalProps) {
-  const reason: AuthGateReason = decodeSafe(nextUrl ?? "").includes("/travel-assistant")
-    ? "ai"
-    : "save";
-  return (
-    <AuthGate variant="sheet" reason={reason} next={nextUrl} open={isOpen} onClose={onClose} />
-  );
-}
-
-/** @deprecated Planlayıcı misafir rozeti FEAT-007'de yeniden yazılır. */
-export interface PanelGuestBannerProps {
-  onRegisterClick?: () => void;
-  nextUrl?: string;
-}
-
-/** @deprecated Kısa misafir notu + AuthGate sheet (reason="save"). */
-export function PanelGuestBanner({ nextUrl = "/maps/" }: PanelGuestBannerProps) {
-  const { t } = useLocale();
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="auth-gate-banner" data-surface="default">
-      <p className="auth-gate-banner__text">
-        {t("gate.banner", "Cihazında taslak · Kaydetmek için hesap aç")}
-      </p>
-      <Button size="sm" variant="primary" onClick={() => setOpen(true)}>
-        {t("gate.register", "Ücretsiz hesap aç")}
-      </Button>
-      <AuthGate
-        variant="sheet"
-        reason="save"
-        next={nextUrl}
-        open={open}
-        onClose={() => setOpen(false)}
-      />
-    </div>
   );
 }

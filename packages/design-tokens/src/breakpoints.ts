@@ -8,7 +8,8 @@
 // C16: u/admin/admin.css yeniden yazıldı, ai-dashboard.css silindi (6 koşul ve 2 dosya düştü).
 // C12: checkout.css ölü kurallar silindi (480px ve 900px düştü). FEAT-005: checkout.css yeniden
 // yazıldı (600px düştü). FEAT-007: maps/maps.css ve components/trip/travel-planner.css yeniden
-// yazıldı (küme dışı koşulların tümü düştü).
+// yazıldı (küme dışı koşulların tümü düştü). FEAT-009: community.css, messages.css ve
+// profile/profile.css yeniden yazıldı (küme dışı koşulların tümü düştü).
 
 export const BREAKPOINTS = { sm: 640, md: 768, lg: 1024, xl: 1280 } as const;
 
@@ -27,19 +28,8 @@ export const legacyBreakpoints: Record<string, ReadonlyArray<LegacyBreakpoint>> 
     { query: "(min-width: 1025px)", count: 1 },
     { query: "(min-width: 641px) and (max-width: 1024px)", count: 1 },
   ],
-  "community/community.css": [
-    { query: "(max-width: 1023px)", count: 1 },
-    { query: "(max-width: 767px)", count: 3 },
-  ],
   "how-it-works/how-it-works.css": [{ query: "(min-width: 992px)", count: 1 }],
-  "messages/messages.css": [
-    { query: "(max-width: 1023px)", count: 1 },
-    { query: "(min-width: 1024px) and (max-width: 1439px)", count: 1 },
-    { query: "(min-width: 1440px)", count: 1 },
-    { query: "(min-width: 1920px)", count: 1 },
-  ],
   "operations.css": [{ query: "(max-width: 700px)", count: 1 }],
-  "profile/profile.css": [{ query: "(max-width: 767px)", count: 2 }],
   "styles/tokens.css": [{ query: "(max-width: 767px)", count: 1 }],
   "styles.css": [
     { query: "(max-width: 1279px)", count: 1 },

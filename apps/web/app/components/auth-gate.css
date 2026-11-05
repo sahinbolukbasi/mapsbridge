@@ -60,40 +60,4 @@
     gap: var(--space-2);
     margin-block-start: var(--space-2);
   }
-
-  /* PanelGuestBanner (eski sarmalayıcı, FEAT-007'de planlayıcı rozeti olur): harita üstünde
-     kısa not + "Ücretsiz hesap aç" (AuthGate sheet açar). */
-  .auth-gate-banner {
-    position: absolute;
-    inset-block-start: 84px;
-    inset-inline-start: 50%;
-    z-index: var(--z-overlay);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
-    box-sizing: border-box;
-    max-inline-size: 90%;
-    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
-    background: var(--color-surface);
-    color: var(--color-text);
-    box-shadow: var(--elevation-raised);
-    transform: translateX(-50%);
-  }
-  .auth-gate-banner__text {
-    margin: 0;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-  }
-  @media (max-width: 767.98px) {
-    .auth-gate-banner {
-      inset-block-start: 60px;
-      border-radius: var(--radius-lg);
-      padding: var(--space-3);
-      text-align: center;
-    }
-  }
 }
