@@ -3,7 +3,6 @@
     "app/[username]/public-profile.css": 7,
     "app/auth.css": 4,
     "app/community/community.css": 35,
-    "app/components/auth-gate.css": 9,
     "app/components/trip/travel-planner.css": 68,
     "app/how-it-works/how-it-works.css": 16,
     "app/k/k.css": 6,
@@ -18,7 +17,7 @@
     "app/register/register.css": 10,
     "app/reset-password/reset-password.css": 24,
     "app/styles.css": 6,
-    "app/travel-assistant/assistant.css": 33,
+    "app/travel-assistant/assistant.css": 32,
     "app/travel-assistant/promo-landing.css": 7,
     "app/welcome/welcome.css": 6
   },
@@ -65,7 +64,7 @@
     "app/reset-password/page.tsx": 9,
     "app/travel-assistant/loading.tsx": 1,
     "app/travel-assistant/travel-affiliate-cards.tsx": 15,
-    "app/travel-assistant/travel-assistant-client.tsx": 32
+    "app/travel-assistant/travel-assistant-client.tsx": 29
   },
   "G8": {
     "app/styles.css": 3
@@ -82,7 +81,7 @@
     "app/register/register.css": 1,
     "app/reset-password/reset-password.css": 2,
     "app/styles.css": 1,
-    "app/travel-assistant/assistant.css": 2,
+    "app/travel-assistant/assistant.css": 1,
     "app/travel-assistant/promo-landing.css": 2
   },
   "G12": {},
@@ -102,13 +101,12 @@
     "app/profile/edit/edit.css": 4,
     "app/reset-password/reset-password.css": 1,
     "app/styles.css": 4,
-    "app/travel-assistant/assistant.css": 7
+    "app/travel-assistant/assistant.css": 4
   },
   "G16d": {
     "app/[username]/public-profile.css": 4,
     "app/auth.css": 2,
     "app/community/community.css": 10,
-    "app/components/auth-gate.css": 2,
     "app/how-it-works/how-it-works.css": 2,
     "app/maps/maps.css": 10,
     "app/mobile-apps/mobile-apps.css": 7,
@@ -134,7 +132,6 @@
     "app/auth.css": 4,
     "app/auth/callback/callback.css": 1,
     "app/community/community.css": 20,
-    "app/components/auth-gate.css": 10,
     "app/components/soft-icon-layout.css": 1,
     "app/components/trip/travel-planner.css": 44,
     "app/components/ui/ui.css": 1,
@@ -154,7 +151,7 @@
     "app/styles.css": 12,
     "app/styles/base.css": 3,
     "app/styles/vendor-overrides.css": 1,
-    "app/travel-assistant/assistant.css": 35,
+    "app/travel-assistant/assistant.css": 33,
     "app/travel-assistant/promo-landing.css": 12,
     "app/welcome/welcome.css": 1
   },
@@ -181,7 +178,6 @@
     "app/[username]/public-profile.css": 90,
     "app/auth.css": 15,
     "app/community/community.css": 150,
-    "app/components/auth-gate.css": 50,
     "app/components/soft-icon-layout.css": 2,
     "app/components/trip/travel-planner.css": 239,
     "app/components/ui/ui.css": 3,
@@ -203,7 +199,7 @@
     "app/reset-password/reset-password.css": 41,
     "app/styles.css": 42,
     "app/styles/base.css": 2,
-    "app/travel-assistant/assistant.css": 194,
+    "app/travel-assistant/assistant.css": 180,
     "app/travel-assistant/promo-landing.css": 90,
     "app/welcome/welcome.css": 12
   },
@@ -213,7 +209,6 @@
   "G28": {
     "app/[username]/public-profile-client.tsx": 7,
     "app/community/page.tsx": 15,
-    "app/components/auth-gate.tsx": 13,
     "app/components/operations-banner.tsx": 1,
     "app/components/tracker/deal-tracker-panel.tsx": 19,
     "app/components/travel-globe.tsx": 7,
@@ -244,7 +239,7 @@
     "app/profile/photo/page.tsx": 20,
     "app/travel-assistant/prep-panel.tsx": 1,
     "app/travel-assistant/promo-landing.tsx": 27,
-    "app/travel-assistant/travel-assistant-client.tsx": 52,
+    "app/travel-assistant/travel-assistant-client.tsx": 50,
     "app/verify/page.tsx": 1,
     "app/welcome/page.tsx": 1
   },
@@ -252,7 +247,6 @@
     "app/[username]/public-profile.css": 4,
     "app/auth/callback/callback.css": 1,
     "app/community/community.css": 3,
-    "app/components/auth-gate.css": 3,
     "app/components/trip/travel-planner.css": 8,
     "app/features/community/community-layout.css": 1,
     "app/k/k.css": 1,

@@ -453,6 +453,45 @@ export const PRIMITIVE_SURFACES: PrimitiveSurface[] = [
     ownSurface: true,
     inverse: "light",
   }),
+  // FEAT-006 asistan alan bileşenleri (plan D2, design §4.2). Kart ve composer kendi kağıt
+  // zeminini çizer; kullanıcı balonu birincil zeminde (data-surface="inverse", G18) beyaz metin.
+  row({
+    primitive: "QuestionCard",
+    variant: "default",
+    file: "../assistant/question-card.tsx",
+    bg: "card-bg",
+    text: ["card-fg", "color-text-muted"],
+    ownSurface: true,
+    inverse: "light",
+  }),
+  row({
+    primitive: "ComposerBar",
+    variant: "default",
+    file: "../assistant/composer-bar.tsx",
+    bg: "composer-bg",
+    text: ["color-text", "field-placeholder"],
+    ui: ["composer-border"],
+    ownSurface: true,
+    inverse: "light",
+  }),
+  row({
+    primitive: "MessageBubble",
+    variant: "assistant",
+    file: "../assistant/message-log.tsx",
+    bg: "color-surface",
+    text: ["color-text", "color-text-muted"],
+    ownSurface: true,
+    inverse: "light",
+  }),
+  row({
+    primitive: "MessageBubble",
+    variant: "user",
+    file: "../assistant/message-log.tsx",
+    bg: "color-primary",
+    text: ["color-on-primary"],
+    ownSurface: false,
+    inverse: "same",
+  }),
 ];
 
 /** AC-4f kap zeminleri: açık ve koyu (inverse) kapların her biri için üç zemin. */

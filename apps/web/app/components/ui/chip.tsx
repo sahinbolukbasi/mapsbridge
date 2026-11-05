@@ -45,20 +45,24 @@ export function Chip({
     </button>
   );
 }
-/** role="group" + görünür etiket (aria-labelledby). Seçim durumu çocuk Chip'lerin `pressed`'inden. */
+/**
+ * role="group" + görünür etiket (aria-labelledby). Seçim durumu çocuk Chip'lerin `pressed`'inden.
+ * `labelledBy` verilirse etiket grubun dışındaki bir öğedir (ör. QuestionCard soru başlığı) ve
+ * iç etiket çizilmez.
+ */
 export function ChipGroup({
   label,
+  labelledBy,
   mode,
   max,
   className,
   children,
 }: {
-  label: ReactNode;
   mode: ChoiceMode;
   max?: number;
   className?: string;
   children: ReactNode;
-}) {
+} & ({ label: ReactNode; labelledBy?: undefined } | { label?: undefined; labelledBy: string })) {
   const id = useId();
   const selectedCount = Children.toArray(children).filter(
     (child) => isValidElement<{ pressed?: boolean }>(child) && child.props.pressed,
@@ -67,12 +71,14 @@ export function ChipGroup({
     <div
       className={cx("ui-chip-group", className)}
       role="group"
-      aria-labelledby={`${id}-label`}
+      aria-labelledby={labelledBy ?? `${id}-label`}
       data-mode={mode}
     >
-      <span id={`${id}-label`} className="ui-chip-group__label">
-        {label}
-      </span>
+      {labelledBy === undefined && (
+        <span id={`${id}-label`} className="ui-chip-group__label">
+          {label}
+        </span>
+      )}
       <div className="ui-chip-group__items">
         <ChipGroupContext.Provider value={{ mode, max, selectedCount }}>
           {children}

@@ -1,0 +1,215 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* Asistan alan bileşenleri (plan D2, design §4.2, mock b-assistant.html): QuestionCard,
+     ComposerBar, MessageBubble, MessageLog. Yalnızca token; .ui-* sınıfları ezilmez; dış
+     yerleşim (genişlik, konum) kullanan sayfaya aittir. */
+
+  /* QuestionCard */
+  .as-qcard {
+    display: grid;
+    gap: var(--space-4);
+    box-sizing: border-box;
+    padding: var(--space-4);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    background: var(--card-bg);
+    color: var(--card-fg);
+  }
+  .as-qcard__q {
+    display: grid;
+    gap: var(--space-2);
+    min-inline-size: 0;
+    border: 0;
+  }
+  .as-qcard__text {
+    margin: 0;
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-normal);
+  }
+  .as-qcard__hint,
+  .as-qcard__note {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+  }
+  .as-qcard__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  /* ComposerBar */
+  .as-composer-wrap {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .as-composer {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    border: 1px solid var(--composer-border);
+    border-radius: var(--radius-lg);
+    background: var(--composer-bg);
+    color: var(--color-text);
+    box-shadow: var(--shadow-xs);
+  }
+  .as-composer__leading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .as-composer__input {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    min-block-size: 44px;
+    max-block-size: 160px;
+    box-sizing: border-box;
+    padding-block: var(--space-3);
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+    resize: none;
+    field-sizing: content;
+  }
+  .as-composer__input::placeholder {
+    color: var(--field-placeholder);
+  }
+  .as-composer__reason {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+  }
+
+  /* MessageBubble */
+  .as-msg {
+    display: flex;
+    min-inline-size: 0;
+  }
+  .as-msg--user {
+    justify-content: flex-end;
+  }
+  .as-bubble {
+    box-sizing: border-box;
+    max-inline-size: 86%;
+    min-inline-size: 0;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+    overflow-wrap: anywhere;
+  }
+  .as-bubble--user {
+    border-end-end-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    white-space: pre-wrap;
+  }
+  .as-bubble--assistant {
+    border: 1px solid var(--color-border);
+    border-end-start-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  /* MessageLog */
+  .as-log-wrap {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-block-size: 0;
+  }
+  .as-log {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .as-log__list {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+  }
+  .as-log__new {
+    position: absolute;
+    inset-block-end: var(--space-3);
+    inset-inline-start: 50%;
+    z-index: var(--z-raised);
+    transform: translateX(-50%);
+  }
+
+  /* TypingIndicator: statik metin varsayılandır; noktalar yalnızca hareket tercihinde. */
+  .as-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .as-typing__dots {
+    display: none;
+    gap: var(--space-1);
+  }
+  .as-typing__dot {
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes as-msg-enter {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    @keyframes as-typing-dot {
+      0%,
+      100% {
+        opacity: 0.25;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+    .as-msg {
+      animation: as-msg-enter var(--duration-base) var(--easing-enter);
+    }
+    .as-typing__dots {
+      display: inline-flex;
+    }
+    .as-typing__dot {
+      animation: as-typing-dot calc(var(--duration-deliberate) * 2.5) var(--easing-standard)
+        infinite;
+    }
+    .as-typing__dot:nth-child(2) {
+      animation-delay: var(--duration-base);
+    }
+    .as-typing__dot:nth-child(3) {
+      animation-delay: calc(var(--duration-base) * 2);
+    }
+    .as-typing__text {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+}

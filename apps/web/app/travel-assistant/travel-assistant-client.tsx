@@ -22,10 +22,20 @@ import { routeToTrip } from "../lib/trip/workspace-store";
 import { tripToMarkdown, saveTripMarkdown } from "../lib/trip/trip-markdown";
 import type { Trip, Pin } from "../lib/trip/models";
 import { interactionTracker } from "../lib/analytics/tracker";
-import { AIPromoLanding } from "./promo-landing";
 import { Button, PageHeader, PageShell } from "../components/ui";
 import { useLocale } from "../lib/locale-context";
 import { DealTrackerPanel } from "../components/tracker/deal-tracker-panel";
+import { ComposerBar } from "../components/assistant/composer-bar";
+import { MessageBubble, MessageLog } from "../components/assistant/message-log";
+import { QuestionCard } from "../components/assistant/question-card";
+import { clampQuestions } from "../components/assistant/logic/question-limits";
+import {
+  clearDraft,
+  buildGuestSummaryMessage,
+  loadDraft,
+  type GuestDraft,
+} from "../lib/guest/guest-draft";
+import { GuestAssistant, GuestDraftSummary, guestStorage } from "./guest-assistant";
 import "./assistant.css";
 import { AssistantMessage } from "./assistant-message";
 import { ThinkingSteps, sseStatusToLivePhase } from "./thinking-steps";
@@ -301,10 +311,11 @@ export default function AIPage() {
   const [streamText, setStreamText] = useState("");
   const [streamPhase, setStreamPhase] = useState<{ icon: string; label: string } | null>(null);
   const [retryAvailable, setRetryAvailable] = useState(false);
+  // ?resume=1 (J1 adım 6): kayıt öncesi misafir taslağı. Otomatik ücretli istek YOK.
+  const [resumeDraft, setResumeDraft] = useState<GuestDraft | null>(null);
   const lastPromptRef = useRef<string>("");
   const pending = useRef<Pending | null>(null);
   const inFlight = useRef(false);
-  const end = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const autoSendRef = useRef<string | null>(null);
   const session = sessions.find((s) => s.id === activeId) || null;
@@ -501,6 +512,11 @@ export default function AIPage() {
       setError("Sohbet geçmişi okunamadı. Yeni bir sohbet başlatabilirsin.");
     }
     refreshCurrentTrip();
+    if (new URLSearchParams(window.location.search).get("resume") === "1") {
+      const guestDraft = loadDraft(guestStorage(), Date.now());
+      if (guestDraft && (guestDraft.q || Object.keys(guestDraft.answers).length > 0))
+        setResumeDraft(guestDraft);
+    }
     const query = new URLSearchParams(window.location.search).get("q");
     let draft = "";
     try {
@@ -553,9 +569,6 @@ export default function AIPage() {
     // send() kendi auth kontrolünü yapar: giriş yoksa taslağı koruyup modal açar.
     void send(false, pending);
   }, [ready]);
-  useEffect(() => {
-    end.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [session?.messages, busy]);
   function startNew() {
     if (inFlight.current) return;
     const next = newSession();
@@ -583,10 +596,11 @@ export default function AIPage() {
     pending.current = sessions.find((s) => s.id === id)?.pendingRequest || null;
     if (pending.current) setError("Bu sohbette sonuç bekleyen bir istek var.");
   }
-  async function send(retry = false, customPrompt?: string) {
-    if (inFlight.current) return;
+  /** true: sunucu yanıtı başarıyla işlendi (resume taslağı ancak o zaman silinir). */
+  async function send(retry = false, customPrompt?: string): Promise<boolean> {
+    if (inFlight.current) return false;
     const promptToSend = (customPrompt !== undefined ? customPrompt : input).trim();
-    if (!retry && !promptToSend) return;
+    if (!retry && !promptToSend) return false;
 
     let stored = getStoredSession();
     if (!stored?.token || isTokenExpired(stored.token)) {
@@ -600,12 +614,12 @@ export default function AIPage() {
       if (promptToSend && !input) setInput(promptToSend);
       setNotice("Sohbete devam etmek için lütfen giriş yapın. Sorunuz hazır bekliyor.");
       setAuthModal(true);
-      return;
+      return false;
     }
-    if (retry && !pending.current) return;
+    if (retry && !pending.current) return false;
     if (!retry && pending.current) {
       setError("Önce bekleyen isteği tekrar kontrol et.");
-      return;
+      return false;
     }
     let target = session;
     if (!target) {
@@ -883,6 +897,7 @@ export default function AIPage() {
       if (result.billing) setWallet((w) => ({ ...w, credits: result.billing!.credits }));
       pending.current = null;
       void refreshWallet();
+      return true;
     } catch (e: unknown) {
       const err = e as { code?: string; status?: number; message?: string };
       const code: string = err?.code || "";
@@ -962,6 +977,21 @@ export default function AIPage() {
       inFlight.current = false;
       setBusy(false);
     }
+    return false;
+  }
+  // Misafir taslağı yalnızca kullanıcı dokununca sıradan bir kullanıcı mesajı olarak gider; kredi
+  // sunucuda bugünkü gibi ayrılır/iade edilir. Taslak yalnızca başarılı yanıttan sonra silinir.
+  async function createFromDraft() {
+    if (!resumeDraft || busy) return;
+    const ok = await send(false, buildGuestSummaryMessage(resumeDraft, t));
+    if (ok) {
+      clearDraft(guestStorage());
+      setResumeDraft(null);
+    }
+  }
+  function discardDraft() {
+    clearDraft(guestStorage());
+    setResumeDraft(null);
   }
   function showRoute(value: UnifiedRoutePlan, message: ChatMessage) {
     setSessions((s) =>
@@ -1075,7 +1105,8 @@ export default function AIPage() {
   }
 
   if (!isAuthenticated) {
-    return <AIPromoLanding />;
+    // Misafir asistan (design §6.1): ağ çağrısı yok, kredi durumu yok; tur 3'te AuthGate.
+    return <GuestAssistant />;
   }
 
   return (
@@ -1293,13 +1324,44 @@ export default function AIPage() {
                   </button>
                 </div>
               )}
-              <div
+              <MessageLog
                 className="ai-chat-feed ai-custom-scrollbar"
-                role="log"
-                aria-live="polite"
-                aria-busy={busy}
+                label={t("assistant.log.label", "Sohbet")}
+                busy={busy}
+                typing={
+                  busy &&
+                  (streamText ? (
+                    <div className="ai-stream-text" role="status">
+                      {streamText}
+                      <span className="ai-stream-cursor" aria-hidden="true">
+                        ▋
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="ai-thinking-bubble" role="status">
+                      <ThinkingSteps
+                        isRoute={input.length > 20 || (session?.messages.length || 0) >= 2}
+                        livePhase={streamPhase}
+                      />
+                    </div>
+                  ))
+                }
               >
-                {!session?.messages.length && (
+                {resumeDraft && (
+                  <div className="as-resume">
+                    <GuestDraftSummary
+                      draft={resumeDraft}
+                      busy={busy}
+                      onCreate={() => void createFromDraft()}
+                      secondary={
+                        <Button variant="ghost" onClick={discardDraft} disabled={busy}>
+                          {t("guest.resume.discard", "Taslağı sil")}
+                        </Button>
+                      }
+                    />
+                  </div>
+                )}
+                {!session?.messages.length && !resumeDraft && (
                   <div className="ai-welcome-hub">
                     <div className="ai-welcome-header">
                       <div className="ai-welcome-avatar">
@@ -1426,306 +1488,254 @@ export default function AIPage() {
                   </div>
                 )}
                 {session?.messages.map((m) => (
-                  <div
-                    key={m.id}
-                    className={m.role === "user" ? "ai-msg-user-container" : "ai-msg-bot-container"}
-                  >
-                    <div className={m.role === "user" ? "ai-msg-user-bubble" : "ai-msg-bot-bubble"}>
-                      {m.role === "assistant" ? (
-                        <AssistantMessage text={m.text} />
-                      ) : (
-                        <p style={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
-                          {m.text}
-                        </p>
-                      )}
+                  <MessageBubble key={m.id} role={m.role === "user" ? "user" : "assistant"}>
+                    {m.role === "assistant" ? <AssistantMessage text={m.text} /> : m.text}
 
-                      {/* Bot Mesaj İşlem Araçları (Kopyala, Rotayı Aç) */}
-                      {m.role === "assistant" && (
-                        <div className="ai-msg-actions-row">
+                    {/* Bot Mesaj İşlem Araçları (Kopyala, Rotayı Aç) */}
+                    {m.role === "assistant" && (
+                      <div className="ai-msg-actions-row">
+                        <button
+                          type="button"
+                          className="ai-msg-action-btn"
+                          onClick={() => copyMessageText(m.id, m.text)}
+                          title="Mesajı Kopyala"
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            aria-hidden="true"
+                            style={{ fontSize: "13px" }}
+                          >
+                            {copiedMsgId === m.id ? "check" : "content_copy"}
+                          </span>
+                          <span>{copiedMsgId === m.id ? "Kopyalandı" : "Kopyala"}</span>
+                        </button>
+                        {m.route && isRoutePlan(m.route) && (
                           <button
                             type="button"
                             className="ai-msg-action-btn"
-                            onClick={() => copyMessageText(m.id, m.text)}
-                            title="Mesajı Kopyala"
+                            onClick={() => showRoute(m.route!, m)}
+                            title="Rotayı Panoda Aç"
                           >
                             <span
                               className="material-symbols-outlined"
                               aria-hidden="true"
-                              style={{ fontSize: "13px" }}
+                              style={{ fontSize: "13px", color: "var(--color-text-accent)" }}
                             >
-                              {copiedMsgId === m.id ? "check" : "content_copy"}
+                              map
                             </span>
-                            <span>{copiedMsgId === m.id ? "Kopyalandı" : "Kopyala"}</span>
+                            <span>Rotayı İncele ({m.route.stops.length} Durak)</span>
                           </button>
-                          {m.route && isRoutePlan(m.route) && (
-                            <button
-                              type="button"
-                              className="ai-msg-action-btn"
-                              onClick={() => showRoute(m.route!, m)}
-                              title="Rotayı Panoda Aç"
+                        )}
+                        {currentTrip && (
+                          <a
+                            href={`/maps/?tripId=${currentTrip.id}`}
+                            className="ai-msg-action-btn"
+                            title="Haritada İncele"
+                            style={{ textDecoration: "none" }}
+                          >
+                            <span
+                              className="material-symbols-outlined"
+                              aria-hidden="true"
+                              style={{ fontSize: "13px", color: "#0ea5e9" }}
                             >
-                              <span
-                                className="material-symbols-outlined"
-                                aria-hidden="true"
-                                style={{ fontSize: "13px", color: "var(--color-text-accent)" }}
-                              >
-                                map
-                              </span>
-                              <span>Rotayı İncele ({m.route.stops.length} Durak)</span>
-                            </button>
-                          )}
-                          {currentTrip && (
-                            <a
-                              href={`/maps/?tripId=${currentTrip.id}`}
-                              className="ai-msg-action-btn"
-                              title="Haritada İncele"
-                              style={{ textDecoration: "none" }}
-                            >
-                              <span
-                                className="material-symbols-outlined"
-                                aria-hidden="true"
-                                style={{ fontSize: "13px", color: "#0ea5e9" }}
-                              >
-                                open_in_new
-                              </span>
-                              <span>Haritada Aç</span>
-                            </a>
-                          )}
+                              open_in_new
+                            </span>
+                            <span>Haritada Aç</span>
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {m.role === "assistant" &&
+                      m.decisionSummary &&
+                      m.decisionSummary.length > 0 && (
+                        <div
+                          style={{
+                            marginTop: "0.55rem",
+                            padding: "0.55rem 0.7rem",
+                            borderRadius: "10px",
+                            background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+                            border: "1px solid var(--color-accent-a20)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              color: "var(--color-text-accent)",
+                              marginBottom: "0.25rem",
+                            }}
+                          >
+                            🧭 Bu seçimi neden yaptım?
+                          </div>
+                          <ul
+                            style={{
+                              margin: 0,
+                              paddingLeft: "1.1rem",
+                              fontSize: "12px",
+                              lineHeight: 1.45,
+                            }}
+                          >
+                            {m.decisionSummary.map((item, index) => (
+                              <li key={index}>{item}</li>
+                            ))}
+                          </ul>
                         </div>
                       )}
 
-                      {m.role === "assistant" &&
-                        m.decisionSummary &&
-                        m.decisionSummary.length > 0 && (
-                          <div
-                            style={{
-                              marginTop: "0.55rem",
-                              padding: "0.55rem 0.7rem",
-                              borderRadius: "10px",
-                              background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
-                              border: "1px solid var(--color-accent-a20)",
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                color: "var(--color-text-accent)",
-                                marginBottom: "0.25rem",
-                              }}
-                            >
-                              🧭 Bu seçimi neden yaptım?
-                            </div>
-                            <ul
-                              style={{
-                                margin: 0,
-                                paddingLeft: "1.1rem",
-                                fontSize: "12px",
-                                lineHeight: 1.45,
-                              }}
-                            >
-                              {m.decisionSummary.map((item, index) => (
-                                <li key={index}>{item}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                    {m.role === "assistant" && m.route && isRoutePlan(m.route) && (
+                      <>
+                        <div className="ai-route-sync-card">
+                          <span>
+                            {m.route.title} · {m.route.stops.length} durak
+                          </span>
+                          <button className="ai-small-btn" onClick={() => showRoute(m.route!, m)}>
+                            Rotayı göster
+                          </button>
+                        </div>
+                        <Button variant="link" onClick={openPrep}>
+                          {t(
+                            "ai.prepLink",
+                            "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün",
+                          )}
+                        </Button>
+                      </>
+                    )}
 
-                      {m.role === "assistant" && m.route && isRoutePlan(m.route) && (
-                        <>
-                          <div className="ai-route-sync-card">
-                            <span>
-                              {m.route.title} · {m.route.stops.length} durak
-                            </span>
-                            <button className="ai-small-btn" onClick={() => showRoute(m.route!, m)}>
-                              Rotayı göster
-                            </button>
-                          </div>
+                    {m.role === "assistant" &&
+                      !m.route &&
+                      shouldSurfacePricing(conversationFlow) &&
+                      (() => {
+                        const dest = extractDestinationFromText(m.text);
+                        return dest ? (
                           <Button variant="link" onClick={openPrep}>
                             {t(
                               "ai.prepLink",
                               "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün",
                             )}
                           </Button>
-                        </>
-                      )}
+                        ) : null;
+                      })()}
 
-                      {m.role === "assistant" &&
-                        !m.route &&
-                        shouldSurfacePricing(conversationFlow) &&
-                        (() => {
-                          const dest = extractDestinationFromText(m.text);
-                          return dest ? (
-                            <Button variant="link" onClick={openPrep}>
-                              {t(
-                                "ai.prepLink",
-                                "Hazırlık sekmesinde uçuş ve konaklama seçeneklerini görün",
-                              )}
-                            </Button>
-                          ) : null;
-                        })()}
-
-                      {m.role === "assistant" && m.quickReplies && m.quickReplies.length > 0 && (
-                        <div
-                          style={{
-                            marginTop: "0.5rem",
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: "6px",
-                          }}
-                        >
-                          {m.quickReplies.map((qr, qidx) => {
-                            const label = typeof qr === "string" ? qr : qr.label;
-                            const prompt = typeof qr === "string" ? qr : qr.prompt;
-                            return (
-                              <button
-                                key={qidx}
-                                type="button"
-                                className="ai-small-btn"
-                                style={{
-                                  fontSize: "11.5px",
-                                  padding: "3px 9px",
-                                  borderRadius: "12px",
-                                  background:
-                                    "color-mix(in srgb, var(--color-accent-sky-soft) 10%, transparent)",
-                                  border: "1px solid rgba(56,189,248,0.3)",
-                                  color: "#38bdf8",
-                                }}
+                    {/* I3/I10: yalnız son asistan turundaki yapılandırılmış hızlı yanıtlar
+                          (sunucu clarification.quickOptions ya da akış yanıtları) QuestionCard
+                          olur; 2–4 seçenek yoksa kart render edilmez. */}
+                    {m.role === "assistant" &&
+                      !busy &&
+                      m === session?.messages[session.messages.length - 1] &&
+                      (() => {
+                        const replies = m.quickReplies ?? [];
+                        const qs = clampQuestions([
+                          {
+                            id: `qr-${m.id}`,
+                            text: t("assistant.question.pick", "Bir seçenek seç"),
+                            mode: "single",
+                            options: replies.map((qr, i) => ({
+                              id: String(i),
+                              label: typeof qr === "string" ? qr : qr.label,
+                            })),
+                          },
+                        ]).questions;
+                        if (qs.length === 0) return null;
+                        return (
+                          <QuestionCard
+                            questions={qs}
+                            onSubmit={(answers) => {
+                              const picked = replies[Number(answers[`qr-${m.id}`]?.[0])];
+                              if (picked === undefined) return;
+                              const prompt = typeof picked === "string" ? picked : picked.prompt;
+                              setInput(prompt);
+                              void send(false, prompt);
+                            }}
+                            note={
+                              <Button
+                                variant="link"
+                                size="sm"
                                 onClick={() => {
-                                  setInput(prompt);
-                                  void send(false, prompt);
+                                  setTimeout(() => textareaRef.current?.focus(), 50);
                                 }}
-                                title="Bu yanıtı seç"
                               >
-                                💡 {label}
-                              </button>
-                            );
-                          })}
-                          <button
-                            type="button"
-                            className="ai-small-btn"
-                            style={{
-                              fontSize: "11.5px",
-                              padding: "3px 9px",
-                              borderRadius: "12px",
-                              background:
-                                "color-mix(in srgb, var(--color-neutral-400) 8%, transparent)",
-                              border:
-                                "1px solid color-mix(in srgb, var(--color-neutral-400) 25%, transparent)",
-                              color: "#94a3b8",
-                            }}
-                            onClick={() => {
-                              setTimeout(() => textareaRef.current?.focus(), 50);
-                            }}
-                            title="Kendi cevabını yaz"
-                          >
-                            ✏️ Diğer
-                          </button>
-                        </div>
+                                {t("assistant.question.other", "Kendi cevabını yaz")}
+                              </Button>
+                            }
+                          />
+                        );
+                      })()}
+
+                    {/* Contextual follow-ups from AI response */}
+                    {m.role === "assistant" &&
+                      m === session?.messages[session.messages.length - 1] && (
+                        <ContextualFollowups
+                          message={m}
+                          route={route}
+                          onAction={(p) => {
+                            setInput(p);
+                            void send(false, p);
+                          }}
+                          busy={busy}
+                        />
                       )}
 
-                      {/* Contextual follow-ups from AI response */}
-                      {m.role === "assistant" &&
-                        m === session?.messages[session.messages.length - 1] && (
-                          <ContextualFollowups
-                            message={m}
-                            route={route}
-                            onAction={(p) => {
-                              setInput(p);
-                              void send(false, p);
-                            }}
-                            busy={busy}
-                          />
-                        )}
-
-                      {m.role === "assistant" && m.nearbyPins && m.nearbyPins.length > 0 && (
-                        <div
+                    {m.role === "assistant" && m.nearbyPins && m.nearbyPins.length > 0 && (
+                      <div
+                        style={{
+                          marginTop: "0.5rem",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "4px",
+                        }}
+                      >
+                        <span
                           style={{
-                            marginTop: "0.5rem",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "4px",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            color: "var(--color-text-accent)",
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              color: "var(--color-text-accent)",
-                            }}
-                          >
-                            📍 Yakındaki Mekanlar:
-                          </span>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                            {m.nearbyPins.map((pin) => (
-                              <div
-                                key={pin.id}
-                                style={{ display: "inline-flex", gap: "3px", alignItems: "center" }}
+                          📍 Yakındaki Mekanlar:
+                        </span>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                          {m.nearbyPins.map((pin) => (
+                            <div
+                              key={pin.id}
+                              style={{ display: "inline-flex", gap: "3px", alignItems: "center" }}
+                            >
+                              <button
+                                className="ai-small-btn"
+                                style={{ fontSize: "11px", padding: "3px 7px" }}
+                                onClick={() => {
+                                  const q = `Rotaya ${pin.name} durağını ekle`;
+                                  setInput(q);
+                                  void send(false, q);
+                                }}
+                                title={pin.description}
                               >
-                                <button
-                                  className="ai-small-btn"
-                                  style={{ fontSize: "11px", padding: "3px 7px" }}
-                                  onClick={() => {
-                                    const q = `Rotaya ${pin.name} durağını ekle`;
-                                    setInput(q);
-                                    void send(false, q);
-                                  }}
-                                  title={pin.description}
-                                >
-                                  💬 {pin.name} ({pin.suggestedDuration})
-                                </button>
-                                <button
-                                  className="ai-action-chip"
-                                  style={{ fontSize: "10.5px", padding: "2px 6px" }}
-                                  onClick={() =>
-                                    addPlaceToActiveTrip({
-                                      label: pin.name,
-                                      address: pin.description,
-                                      lat: pin.lat,
-                                      lng: pin.lng,
-                                      note: pin.description,
-                                    })
-                                  }
-                                  title="Bu durağı doğrudan seyahat planına ekle"
-                                >
-                                  ➕ Rotaya Ekle
-                                </button>
-                              </div>
-                            ))}
-                          </div>
+                                💬 {pin.name} ({pin.suggestedDuration})
+                              </button>
+                              <button
+                                className="ai-action-chip"
+                                style={{ fontSize: "10.5px", padding: "2px 6px" }}
+                                onClick={() =>
+                                  addPlaceToActiveTrip({
+                                    label: pin.name,
+                                    address: pin.description,
+                                    lat: pin.lat,
+                                    lng: pin.lng,
+                                    note: pin.description,
+                                  })
+                                }
+                                title="Bu durağı doğrudan seyahat planına ekle"
+                              >
+                                ➕ Rotaya Ekle
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {busy && streamText ? (
-                  <div className="ai-msg-bot-container">
-                    <div
-                      className="ai-msg-bot-bubble"
-                      role="status"
-                      style={{ whiteSpace: "pre-wrap", opacity: 0.92 }}
-                    >
-                      {streamText}
-                      <span className="ai-stream-cursor" aria-hidden="true">
-                        ▋
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  busy && (
-                    <div className="ai-msg-bot-container">
-                      <div className="ai-msg-bot-bubble ai-thinking-bubble" role="status">
-                        <ThinkingSteps
-                          isRoute={input.length > 20 || (session?.messages.length || 0) >= 2}
-                          livePhase={streamPhase}
-                        />
                       </div>
-                    </div>
-                  )
-                )}
-                <div ref={end} />
-              </div>
+                    )}
+                  </MessageBubble>
+                ))}
+              </MessageLog>
               <div className="ai-chat-composer-area">
                 {error &&
                   (() => {
@@ -1898,103 +1908,67 @@ export default function AIPage() {
                   Rota tarzı seçimi yalnızca bu isteği etkiler; kalıcı tercihlerini değiştirmez.
                 </p>
 
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    void send();
-                  }}
-                  className="ai-input-wrapper ai-input-stitch"
-                >
-                  <button
-                    type="button"
-                    className="ai-input-icon-btn"
-                    onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                          (pos) => {
-                            setInput(
-                              (prev) =>
-                                `${prev} (Konumum: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`,
-                            );
-                          },
-                          () => setNotice("Konum izni alınamadı."),
-                        );
-                      }
-                    }}
-                    title="Konumumu Ekle"
-                    aria-label="Konumumu Ekle"
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "18px" }}
-                    >
-                      add_location_alt
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`ai-input-icon-btn ${listening ? "ai-mic-pulsing" : ""}`}
-                    onClick={dictate}
-                    disabled={busy}
-                    aria-label={listening ? "Sesli girişi durdur" : "Sesli mesaj yazdır"}
-                    title={listening ? "Dinleniyor... Durdurmak için tıklayın" : "Sesli Mesaj"}
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "18px" }}
-                    >
-                      {listening ? "mic" : "mic"}
-                    </span>
-                  </button>
-                  <textarea
-                    ref={textareaRef}
-                    aria-label="Asistana mesaj"
-                    value={input}
-                    maxLength={2000}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-                        e.preventDefault();
-                        void send();
-                      }
-                    }}
-                    placeholder="Bir durak ekle, rotayı değiştir veya soru sor..."
-                    rows={1}
-                  />
-                  {input.length > 0 && (
-                    <button
-                      type="button"
-                      className="ai-input-clear-btn"
-                      onClick={() => setInput("")}
-                      title="Metni Temizle"
-                      aria-label="Metni Temizle"
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        aria-hidden="true"
-                        style={{ fontSize: "16px" }}
-                      >
-                        close
-                      </span>
-                    </button>
+                <ComposerBar
+                  value={input}
+                  onChange={setInput}
+                  inputRef={textareaRef}
+                  maxLength={2000}
+                  cost={1}
+                  busy={busy}
+                  label={t("assistant.composer.label", "Asistana mesaj")}
+                  placeholder={t(
+                    "assistant.composer.placeholder",
+                    "Bir durak ekle, rotayı değiştir veya soru sor...",
                   )}
-                  <button
-                    className="ai-send-btn-stitch"
-                    disabled={busy || !input.trim()}
-                    type="submit"
-                  >
-                    <span>{busy ? "Hazırlanıyor…" : "Gönder"}</span>
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "16px" }}
-                    >
-                      send
-                    </span>
-                  </button>
-                </form>
+                  onSubmit={(text) => void send(false, text)}
+                  leading={
+                    <>
+                      <button
+                        type="button"
+                        className="ai-input-icon-btn"
+                        onClick={() => {
+                          if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                              (pos) => {
+                                setInput(
+                                  (prev) =>
+                                    `${prev} (Konumum: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`,
+                                );
+                              },
+                              () => setNotice("Konum izni alınamadı."),
+                            );
+                          }
+                        }}
+                        title="Konumumu Ekle"
+                        aria-label="Konumumu Ekle"
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "18px" }}
+                        >
+                          add_location_alt
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`ai-input-icon-btn ${listening ? "ai-mic-pulsing" : ""}`}
+                        onClick={dictate}
+                        disabled={busy}
+                        aria-label={listening ? "Sesli girişi durdur" : "Sesli mesaj yazdır"}
+                        title={listening ? "Dinleniyor... Durdurmak için tıklayın" : "Sesli Mesaj"}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          aria-hidden="true"
+                          style={{ fontSize: "18px" }}
+                        >
+                          {listening ? "mic" : "mic"}
+                        </span>
+                      </button>
+                    </>
+                  }
+                />
 
                 <div className="ai-composer-footer-bar">
                   <div className="ai-composer-credits-pill">
