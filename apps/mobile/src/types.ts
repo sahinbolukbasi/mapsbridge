@@ -1,4 +1,12 @@
-export type MobileTab = "map" | "plan" | "ai" | "community" | "profile";
+// Tek IA (design §5.3, karar S10): web mobil alt menüsüyle aynı 5 öğe, aynı sıra ve etiket.
+export type MobileTab = "explore" | "plan" | "ai" | "community" | "messages" | "profile" | "login";
+
+/** Oturumsuz: Keşfet · Planla · Asistan · Topluluk · Giriş. */
+export const GUEST_TABS: readonly MobileTab[] = ["explore", "plan", "ai", "community", "login"];
+/** Oturumlu: Planla · Asistan · Topluluk · Mesajlar · Profil. */
+export const MEMBER_TABS: readonly MobileTab[] = ["plan", "ai", "community", "messages", "profile"];
+/** Sekmelerin üstüne itilen ekranlar (navigation/tab-stack.ts). */
+export type MobileStackScreen = "map";
 
 export type PlatformMode = "ios" | "android";
 

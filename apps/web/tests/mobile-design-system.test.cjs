@@ -173,3 +173,176 @@ test("mobil token'lar: font.maxScale (compact 1.4, body 2) ve 44pt dokunma", () 
   assert.match(src, /maxScale: \{\s*compact: 1\.4,\s*body: 2\s*\}/);
   assert.match(src, /touch: \{\s*min: 44\s*\}/);
 });
+
+// R6 (design §15, design-system.md §11): yeni kodda TouchableOpacity yerine primitive/Pressable.
+// Dosya başına `TouchableOpacity` geçiş sayısı ratchet'i: 2026-11-06'da (FEAT-011 başı) 438 ölçüldü;
+// FEAT-011 src/ui ve BottomTabBar'ı Pressable'a taşıyınca 423'e indi. Sayı yalnızca düşer; listede
+// olmayan (yeni) dosyada 0'dır. Bir dosyada sayı düşünce baseline'ı da düşürün.
+const TOUCHABLE_BASELINE = {
+  "src/components/EditPostModal.tsx": 7,
+  "src/components/EditProfileModal.tsx": 15,
+  "src/components/ErrorBoundary.tsx": 3,
+  "src/components/PaywallModal.tsx": 9,
+  "src/components/RouteLoadingModal.tsx": 5,
+  "src/components/ScreenTourModal.tsx": 7,
+  "src/screens/AIScreen.tsx": 45,
+  "src/screens/AuthScreen.tsx": 23,
+  "src/screens/ChatScreen.tsx": 23,
+  "src/screens/CommunityScreen.tsx": 39,
+  "src/screens/MapScreen.tsx": 71,
+  "src/screens/PlanScreen.tsx": 75,
+  "src/screens/ProfileScreen.tsx": 49,
+  "src/screens/PublicProfileView.tsx": 43,
+  "src/screens/WelcomeScreen.tsx": 9,
+};
+test("R6: TouchableOpacity ratchet'i — dosya başına sayı yalnızca düşer, yeni dosyada 0", () => {
+  const problems = [];
+  let total = 0;
+  for (const rel of FILES) {
+    const n = (read(rel).match(/\bTouchableOpacity\b/g) ?? []).length;
+    total += n;
+    const max = TOUCHABLE_BASELINE[rel] ?? 0;
+    if (n > max)
+      problems.push(
+        `${rel}: ${n} TouchableOpacity (baseline ${max}); Pressable ya da primitive kullanın`,
+      );
+  }
+  const budget = Object.values(TOUCHABLE_BASELINE).reduce((a, b) => a + b, 0);
+  assert.deepEqual(problems, [], problems.join("\n"));
+  assert.ok(total <= budget, `toplam ${total} > ${budget}`);
+});
+
+test("R6: Animated.timing/spring/loop yalnız src/ui/motion.ts'te (reduce-motion tek yerden)", () => {
+  const offenders = [];
+  for (const rel of FILES) {
+    if (rel === "src/ui/motion.ts") continue;
+    const src = read(rel);
+    for (const m of src.matchAll(/\bAnimated\.(timing|spring|loop|decay)\s*\(/g))
+      offenders.push(`${rel}:${lineOf(src, m.index)} Animated.${m[1]}`);
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    `motion.animate / spring / loop kullanın:\n${offenders.join("\n")}`,
+  );
+  const motion = read("src/ui/motion.ts");
+  for (const name of ["animate", "spring", "easing", "loop", "layoutNext"])
+    assert.match(
+      motion,
+      new RegExp(`export function ${name}\\(`),
+      `motion.ts ${name}() dışa aktarmalı`,
+    );
+  assert.match(motion, /tokens\.motion\.spring\[preset\]/, "spring değerleri token'dan");
+  assert.match(motion, /isReducedMotion\(\)/, "reduce-motion gözetilir");
+});
+
+// FEAT-011 ile eklenen RN primitive'leri (design §4.2): web ile aynı ad; dokunulabilir öğeler
+// Pressable, accessibilityRole taşır ve metinler maxFontSizeMultiplier ile ölçeklenir.
+const PRIMITIVES = [
+  "Icon",
+  "Chip",
+  "SegmentedControl",
+  "BottomSheet",
+  "Stepper",
+  "Accordion",
+  "CostBadge",
+  "CreditCostTable",
+  "PlanCard",
+  "QuestionCard",
+  "ComposerBar",
+  "MessageLog",
+  "StopRow",
+  "AuthGate",
+  "Media",
+  "Button",
+  "IconButton",
+  "Card",
+];
+test("R6: src/ui primitive'leri Pressable kullanır (TouchableOpacity yok), index'ten dışa aktarılır", () => {
+  const index = read("src/ui/index.ts");
+  const problems = [];
+  for (const name of PRIMITIVES) {
+    const rel = `src/ui/${name}.tsx`;
+    if (!fs.existsSync(path.join(mobile, rel))) {
+      problems.push(`${rel} yok`);
+      continue;
+    }
+    const src = read(rel);
+    if (/\bTouchableOpacity\b/.test(src)) problems.push(`${rel}: TouchableOpacity`);
+    if (/<Text\b/.test(src)) {
+      const texts = openingTags(src, "Text");
+      for (const t of texts)
+        if (!/maxFontSizeMultiplier=/.test(t.text))
+          problems.push(`${rel}:${t.line} <Text> maxFontSizeMultiplier yok`);
+    }
+    if (!new RegExp(`\\b${name}\\b`).test(index))
+      problems.push(`src/ui/index.ts ${name} dışa aktarmıyor`);
+  }
+  for (const name of [
+    "Chip",
+    "SegmentedControl",
+    "BottomSheet",
+    "Accordion",
+    "Button",
+    "IconButton",
+  ])
+    if (!/<Pressable\b/.test(read(`src/ui/${name}.tsx`)))
+      problems.push(`src/ui/${name}.tsx Pressable değil`);
+  assert.deepEqual(problems, [], problems.join("\n"));
+});
+
+test("R6: primitive erişilebilirlik durumları (selected / checked / expanded / canlı bölge)", () => {
+  assert.match(read("src/ui/Chip.tsx"), /accessibilityState=\{\{ selected: pressed/);
+  const seg = read("src/ui/SegmentedControl.tsx");
+  assert.match(seg, /accessibilityRole="radiogroup"/);
+  assert.match(seg, /accessibilityRole="radio"/);
+  assert.match(read("src/ui/Accordion.tsx"), /accessibilityState=\{\{ expanded: open \}\}/);
+  assert.match(read("src/ui/MessageLog.tsx"), /accessibilityLiveRegion="polite"/);
+  const sheet = read("src/ui/BottomSheet.tsx");
+  assert.match(sheet, /PanResponder\.create/);
+  assert.match(sheet, /spring\(translate, .*"sheet"/);
+  const icon = read("src/ui/Icon.tsx");
+  assert.match(icon, /accessibilityElementsHidden: true/, "etiketsiz ikon gizlenir");
+  assert.match(icon, /from "\.\.\/theme\/icon-paths"/, "path'ler üretilmiş icon-paths'ten");
+});
+
+test("Tek IA (design §5.3): misafir/üye sekme setleri ve BottomTabBar Icon + Pressable", () => {
+  const types = read("src/types.ts");
+  assert.match(
+    types,
+    /GUEST_TABS: readonly MobileTab\[\] = \["explore", "plan", "ai", "community", "login"\]/,
+  );
+  assert.match(
+    types,
+    /MEMBER_TABS: readonly MobileTab\[\] = \["plan", "ai", "community", "messages", "profile"\]/,
+  );
+  const bar = read("src/components/BottomTabBar.tsx");
+  assert.match(bar, /<Pressable\b/);
+  assert.match(bar, /<Icon\b/);
+  assert.doesNotMatch(bar, /TouchableOpacity|from "\.\/Icons"/);
+});
+
+test("App: misafir göz atma açık, Splash yapay süre taşımaz, BackHandler + yazı tipleri bağlı", () => {
+  const app = read("App.tsx");
+  assert.doesNotMatch(app, /No guest exploration bypass/);
+  assert.doesNotMatch(app, /minDurationMs/);
+  assert.match(app, /useFonts\(FONT_SOURCES\)/);
+  assert.match(app, /BackHandler\.addEventListener\("hardwareBackPress"/);
+  assert.match(app, /GUEST_TABS/);
+  const splash = read("src/components/SplashScreen.tsx");
+  assert.doesNotMatch(splash, /minDurationMs|setInterval|setTimeout/);
+  for (const banned of ["CANLI KÖPRÜ", "Eco-Path", "ROUTE OS", "V2.4", "4.8K"])
+    assert.ok(!splash.includes(banned), `SplashScreen "${banned}" içeriyor`);
+});
+
+test("Yazı tipleri (karar S13): TTF + OFL lisansı ve expo-font tam sürüm", () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(mobile, "package.json"), "utf8"));
+  assert.equal(pkg.dependencies["expo-font"], "57.0.4");
+  const fonts = read("src/theme/fonts.ts");
+  for (const m of fonts.matchAll(/require\("\.\.\/\.\.\/(assets\/fonts\/[^"]+\.ttf)"\)/g))
+    assert.ok(fs.existsSync(path.join(mobile, m[1])), `${m[1]} yok`);
+  for (const lic of ["Inter-OFL.txt", "PlusJakartaSans-OFL.txt"]) {
+    const text = fs.readFileSync(path.join(mobile, "assets/fonts", lic), "utf8");
+    assert.match(text, /SIL Open Font License, Version 1\.1/);
+  }
+});

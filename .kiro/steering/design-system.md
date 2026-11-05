@@ -100,6 +100,7 @@ export default function Page() {
 - `SafeAreaView` ve `Modal` doğrudan kullanılmaz; `SafeArea`'nın `edges` prop'u yoktur, Android üst ofseti yalnızca `androidTopInset`.
 - `accessibilityRole/Label/State`; modallarda `accessibilityViewIsModal` + `onRequestClose`; 44pt; `maxFontSizeMultiplier`; `useReducedMotion`.
 - Hex/rgba literal yazılmaz; `tokens.*` kullanılır (`mobile-design-system.test.cjs`).
+- R6: Yeni kodda `TouchableOpacity` yerine primitive (`Button`, `IconButton`, `Chip`, …) ya da `Pressable`; dosya başına `TouchableOpacity` sayısı `TOUCHABLE_BASELINE` ratchet'inde yalnızca düşer, yeni dosyada 0. `Animated.timing/spring/loop` yalnız `src/ui/motion.ts` içinde (`animate`, `spring`, `easing`, `loop`); sekme ve ekran geçişleri `motion.ts` üzerinden. Web ile aynı adlı primitive'ler (`Icon`, `Chip`/`ChipGroup`, `SegmentedControl`, `BottomSheet`, `Stepper`, `Accordion`, `CostBadge`, `CreditCostTable`, `PlanCard`, `QuestionCard`, `ComposerBar`, `MessageLog`, `StopRow`/`Connector`/`DayHeader`, `AuthGate`, `Media`) `src/ui`'dan gelir; kopya veri/mantık (`src/billing`, `src/guest`, `src/i18n/ui.ts`, `src/ui/logic`) `mobile-parity.test.cjs` ile web'e eşit tutulur.
 
 ## 12. Admin
 

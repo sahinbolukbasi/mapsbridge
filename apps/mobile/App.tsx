@@ -1,6 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, StatusBar, Alert, Linking } from "react-native";
-import { MobileTab } from "./src/types";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { Animated, BackHandler, StyleSheet, View, StatusBar, Alert, Linking } from "react-native";
+import { useFonts } from "expo-font";
+import { GUEST_TABS, MEMBER_TABS, type MobileStackScreen, type MobileTab } from "./src/types";
+import {
+  initialNav,
+  navReducer,
+  onBack,
+  topScreen,
+  type TabNavAction,
+  type TabNavState,
+} from "./src/navigation/tab-stack";
+import { AuthGate, ScreenFocusContext, motion } from "./src/ui";
+import { ChatScreen } from "./src/screens/ChatScreen";
 import { WelcomeScreen } from "./src/screens/WelcomeScreen";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { MapScreen } from "./src/screens/MapScreen";
@@ -16,7 +27,8 @@ import { storage } from "./src/services/storage";
 import { tripStore } from "./src/services/tripStore";
 import { initRevenueCat } from "./src/services/revenuecat";
 
-import { tokens } from "./src/theme";
+import { setFontsAvailable, tokens } from "./src/theme";
+import { FONT_SOURCES } from "./src/theme/fonts";
 const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
 // Session persistence constants
@@ -93,14 +105,74 @@ function decodeJwtPayload(
   return null;
 }
 
+type Nav = TabNavState<MobileTab, MobileStackScreen>;
+
+/** Android geri tuşunda son çare sekmesi (design §12.1: … → Planla → çıkış). */
+const BACK_HOME: MobileTab = "plan";
+
 export function App() {
   const [session, setSession] = useState<UserSession | null>(null);
   const [loadingSession, setLoadingSession] = useState<boolean>(true);
-  const [showAuthScreen, setShowAuthScreen] = useState<boolean>(false);
   const [authInitialMode, setAuthInitialMode] = useState<"login" | "register">("login");
-  const [activeTab, setActiveTab] = useState<MobileTab>("map");
   const [focusedStopId, setFocusedStopId] = useState<string | null>(null);
-  const [showSplash, setShowSplash] = useState<boolean>(true);
+  // Yazı tipleri (karar S13): yüklenemezse sistem yazı tipiyle devam edilir.
+  const [fontsLoaded, fontError] = useFonts(FONT_SOURCES);
+  const fontsSettled = fontsLoaded || !!fontError;
+  if (fontsSettled) setFontsAvailable(fontsLoaded && !fontError);
+
+  // Tek IA (design §5.3, S7/S10): misafir ve üye sekme setleri; sekme başına ekran yığını.
+  const signedIn = !!session;
+  const tabs = signedIn ? MEMBER_TABS : GUEST_TABS;
+  const [nav, setNav] = useState<Nav>(() => initialNav<MobileTab, MobileStackScreen>("explore"));
+  const navRef = useRef(nav);
+  navRef.current = nav;
+  const tabsRef = useRef(tabs);
+  tabsRef.current = tabs;
+  const dispatch = (action: TabNavAction<MobileTab, MobileStackScreen>) =>
+    setNav((prev) => navReducer(prev, action));
+  const goBack = () => {
+    const r = onBack(navRef.current, BACK_HOME, tabsRef.current);
+    if (r.handled) setNav(r.state);
+    return r.handled;
+  };
+  const openMap = (stopId?: string) => {
+    if (stopId) setFocusedStopId(stopId);
+    dispatch({ type: "push", tab: "plan", screen: "map" });
+  };
+  const openAuth = (mode: "login" | "register") => {
+    setAuthInitialMode(mode);
+    dispatch({ type: "select", tab: "login" });
+  };
+
+  // Oturum açılınca/kapanınca sekme seti değişir: misafir Keşfet'te, üye Planla'da başlar (J6).
+  // Layout effect: boyamadan önce çalışır, eski sekme setiyle boş bir kare görünmez.
+  useLayoutEffect(() => {
+    if (loadingSession) return;
+    setNav(initialNav<MobileTab, MobileStackScreen>(signedIn ? "plan" : "explore"));
+  }, [loadingSession, signedIn]);
+
+  // Android geri tuşu (design §9, §12.1): yığın → önceki sekme → Planla → sistem (çıkış).
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", goBack);
+    return () => sub.remove();
+    // goBack yalnızca ref'leri okur.
+  }, []);
+
+  // Sekme geçişi (design §8.2): crossfade + 4pt kayma, `base` / `enter` (reduce: anında).
+  const tabEnter = useRef(new Animated.Value(1)).current;
+  const lastTab = useRef(nav.tab);
+  useEffect(() => {
+    if (lastTab.current === nav.tab) return;
+    lastTab.current = nav.tab;
+    tabEnter.setValue(0);
+    motion.animate(tabEnter, 1, { useNativeDriver: true, easing: "enter" }).start();
+  }, [nav.tab, tabEnter]);
+
+  // Ziyaret edilen sekmeler açık kalır (kaydırma konumu korunur, design §8.3); set değişince sıfırlanır.
+  const mountedTabs = useRef({ key: signedIn, tabs: new Set<MobileTab>() });
+  if (mountedTabs.current.key !== signedIn)
+    mountedTabs.current = { key: signedIn, tabs: new Set() };
+  mountedTabs.current.tabs.add(nav.tab);
 
   // Session refresh interval ref
   const sessionRefreshIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
@@ -244,8 +316,6 @@ export function App() {
       console.warn("Session save failed:", e);
     }
     setSession(newSession);
-    setShowAuthScreen(false);
-    setActiveTab("map");
     tripStore.syncWithServer().catch((err: unknown) => console.warn("Route sync error:", err));
   };
 
@@ -372,88 +442,133 @@ export function App() {
     }
     await authService.signOut();
     setSession(null);
-    setShowAuthScreen(false);
-    setActiveTab("map");
   };
 
-  // Wait until both session loading AND minimum splash animation have settled
-  if (loadingSession || showSplash) {
+  // Açılış ekranı yalnızca gerçek yükleme sürerken (yazı tipleri + oturum; F38, J6).
+  if (loadingSession || !fontsSettled) {
     return (
       <View style={styles.appShell}>
         <StatusBar barStyle="dark-content" backgroundColor={tokens.color.bg} />
-        <SplashScreen minDurationMs={1200} onFinish={() => setShowSplash(false)} />
+        <SplashScreen />
       </View>
     );
   }
 
-  // Not logged in -> Show WelcomeScreen or AuthScreen (No guest exploration bypass)
-  if (!session) {
-    return (
-      <View style={styles.appShell}>
-        {showAuthScreen ? (
+  const renderTab = (tab: MobileTab): React.ReactNode => {
+    switch (tab) {
+      case "explore":
+        // FEAT-012 Keşfet ekranını kurana dek misafir ana sayfası bugünkü karşılama içeriğidir.
+        return (
+          <WelcomeScreen
+            onSelectAuth={(mode) => {
+              if (mode === "google") handleGoogleSignIn();
+              else if (mode === "apple") handleAppleSignIn();
+              else openAuth(mode);
+            }}
+          />
+        );
+      case "plan":
+        return <PlanScreen onOpenMap={openMap} />;
+      case "ai":
+        // Misafir hiçbir zaman LLM'e ulaşmaz (design §6): misafir senaryosu (FEAT-012) gelene dek
+        // asistan sekmesi kimlik kapısıdır; ağ çağrısı yapılmaz.
+        return signedIn ? (
+          <AIScreen onOpenMap={() => openMap()} />
+        ) : (
+          <AuthGate
+            variant="page"
+            reason="ai"
+            onRegister={() => openAuth("register")}
+            onLogin={() => openAuth("login")}
+          />
+        );
+      case "community":
+        return <CommunityScreen onOpenMap={() => openMap()} />;
+      case "messages":
+        return <ChatScreen onOpenMap={() => openMap()} />;
+      case "profile":
+        return (
+          <ProfileScreen
+            onShowWelcome={handleSignOut}
+            onOpenMap={() => openMap()}
+            onOpenPlan={() => dispatch({ type: "select", tab: "plan" })}
+            onOpenMessages={() => dispatch({ type: "select", tab: "messages" })}
+          />
+        );
+      case "login":
+        return (
           <AuthScreen
+            key={authInitialMode}
             initialMode={authInitialMode}
             onSuccess={handleAuthSuccess}
-            onCancel={() => setShowAuthScreen(false)}
+            onCancel={goBack}
             onSelectGoogle={handleGoogleSignIn}
             onSelectApple={handleAppleSignIn}
           />
-        ) : (
-          <WelcomeScreen
-            onSelectAuth={(mode) => {
-              if (mode === "google") {
-                handleGoogleSignIn();
-              } else if (mode === "apple") {
-                handleAppleSignIn();
-              } else if (mode === "register") {
-                setAuthInitialMode("register");
-                setShowAuthScreen(true);
-              } else {
-                setAuthInitialMode("login");
-                setShowAuthScreen(true);
-              }
-            }}
+        );
+    }
+  };
+
+  const renderStackScreen = (screen: MobileStackScreen): React.ReactNode => {
+    switch (screen) {
+      case "map":
+        return (
+          <MapScreen
+            focusedStopId={focusedStopId}
+            onClearFocus={() => setFocusedStopId(null)}
+            onOpenPlan={() => dispatch({ type: "pop" })}
+            onOpenAi={() => dispatch({ type: "select", tab: "ai" })}
           />
-        )}
-      </View>
-    );
-  }
+        );
+    }
+  };
+
+  const translateY = tabEnter.interpolate({
+    inputRange: [0, 1],
+    outputRange: [tokens.motion.distance.sm, 0],
+  });
 
   return (
     <View style={styles.appShell}>
       <StatusBar barStyle="light-content" backgroundColor={tokens.color.surfaceInverseStrong} />
 
-      {/* Screen Routing */}
-      <View style={styles.screenContainer}>
-        {activeTab === "map" && (
-          <MapScreen
-            focusedStopId={focusedStopId}
-            onClearFocus={() => setFocusedStopId(null)}
-            onOpenPlan={() => setActiveTab("plan")}
-            onOpenAi={() => setActiveTab("ai")}
-          />
-        )}
-        {activeTab === "plan" && (
-          <PlanScreen
-            onOpenMap={(stopId) => {
-              if (stopId) setFocusedStopId(stopId);
-              setActiveTab("map");
-            }}
-          />
-        )}
-        {activeTab === "ai" && <AIScreen onOpenMap={() => setActiveTab("map")} />}
-        {activeTab === "community" && <CommunityScreen onOpenMap={() => setActiveTab("map")} />}
-        {activeTab === "profile" && (
-          <ProfileScreen
-            onShowWelcome={handleSignOut}
-            onOpenMap={() => setActiveTab("map")}
-            onOpenPlan={() => setActiveTab("plan")}
-          />
-        )}
+      {/* Sekme ekranları unmount edilmez (display none); yığındaki ekran kökün yerine çizilir. */}
+      <View style={styles.screenContainer} key={signedIn ? "member" : "guest"}>
+        {tabs
+          .filter((tab) => mountedTabs.current.tabs.has(tab))
+          .map((tab) => {
+            const active = tab === nav.tab;
+            const top = topScreen(nav, tab);
+            return (
+              <Animated.View
+                key={tab}
+                style={[
+                  styles.tabScreen,
+                  active ? { opacity: tabEnter, transform: [{ translateY }] } : styles.hidden,
+                ]}
+                accessibilityElementsHidden={!active}
+                importantForAccessibility={active ? "auto" : "no-hide-descendants"}
+              >
+                <ScreenFocusContext.Provider value={active && !top}>
+                  <View style={[styles.tabScreen, top ? styles.hidden : null]}>
+                    {renderTab(tab)}
+                  </View>
+                </ScreenFocusContext.Provider>
+                {top ? (
+                  <ScreenFocusContext.Provider value={active}>
+                    <View style={styles.tabScreen}>{renderStackScreen(top)}</View>
+                  </ScreenFocusContext.Provider>
+                ) : null}
+              </Animated.View>
+            );
+          })}
       </View>
 
-      {/* 5 Core Tabs: Harita, Rotalarım, AI Asistan, Topluluk, Profil */}
-      <BottomTabBar activeTab={activeTab} onSelectTab={setActiveTab} />
+      <BottomTabBar
+        tabs={tabs}
+        activeTab={nav.tab}
+        onSelectTab={(tab) => dispatch({ type: "select", tab })}
+      />
     </View>
   );
 }
@@ -477,6 +592,8 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: "hidden",
   },
+  tabScreen: { flex: 1 },
+  hidden: { display: "none" },
   googleModalHeader: {
     backgroundColor: tokens.color.surfaceInverse,
     borderBottomWidth: 1,

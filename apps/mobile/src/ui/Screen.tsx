@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { relativeLuminance, tokens, type ColorToken } from "../theme";
 import { SafeArea } from "./SafeArea";
+import { ScreenFocusContext } from "./screen-focus";
 
 // Ekran kökü (design §7.3): SafeArea + ekran başına tek StatusBar + isteğe bağlı header,
 // kaydırma ve klavye kaçınma. `statusBar` verilmezse zeminin göreli parlaklığından seçilir
@@ -35,6 +36,7 @@ export function Screen({
   style,
   children,
 }: ScreenProps) {
+  const focused = useContext(ScreenFocusContext);
   const bg = tokens.color[background];
   const bar = statusBar ?? (relativeLuminance(bg) < 0.2 ? "light" : "dark");
   let body: React.ReactNode = children;
@@ -57,10 +59,12 @@ export function Screen({
   }
   return (
     <SafeArea style={[styles.fill, { backgroundColor: bg }, style]}>
-      <StatusBar
-        barStyle={bar === "light" ? "light-content" : "dark-content"}
-        backgroundColor={bg}
-      />
+      {focused ? (
+        <StatusBar
+          barStyle={bar === "light" ? "light-content" : "dark-content"}
+          backgroundColor={bg}
+        />
+      ) : null}
       {header}
       {body}
     </SafeArea>

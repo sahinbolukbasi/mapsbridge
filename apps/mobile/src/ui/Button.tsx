@@ -1,17 +1,23 @@
 import React from "react";
 import {
   ActivityIndicator,
+  Animated,
+  Pressable,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { tokens } from "../theme";
+import { fontFamily, tokens } from "../theme";
+import { formatCreditCost, type CreditCost } from "../billing/credit-costs";
+import { CostBadge } from "./CostBadge";
 import { hitSlopFor } from "./IconButton";
+import { usePressScale } from "./usePressScale";
 
-// Metinli düğme (design §7.3). minHeight tokens.touch.min; `sm` (36) için hitSlop ile 44pt.
+// Metinli düğme (design §4.1, §7.3). Pressable + basma yayı (spring.press, scale .98).
+// minHeight tokens.touch.min; `sm` (36) için hitSlop ile 44pt. `cost` verilirse sağda CostBadge
+// çizilir ve erişilebilir ad "Etiket, 1 kredi" olur (web Button `cost` ile aynı; yalnızca gösterim).
 export type ButtonVariant = "primary" | "brand" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
@@ -23,6 +29,9 @@ export interface ButtonProps {
   loading?: boolean;
   disabled?: boolean;
   icon?: React.ReactNode;
+  cost?: CreditCost;
+  /** Ek açıklama (ör. devre dışı nedeni); ekran okuyucu ipucu. */
+  hint?: string;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -48,45 +57,58 @@ export function Button({
   loading = false,
   disabled = false,
   icon,
+  cost,
+  hint,
   style,
 }: ButtonProps) {
   const v = VARIANTS[variant];
   const height = HEIGHTS[size];
   const inactive = disabled || loading;
+  const press = usePressScale();
+  const name = cost === undefined ? label : `${label}, ${formatCreditCost(cost)}`;
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
       disabled={inactive}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={name}
+      accessibilityHint={hint}
       accessibilityState={{ disabled: inactive, busy: loading }}
       hitSlop={size === "sm" ? hitSlopFor(height) : undefined}
-      activeOpacity={0.8}
-      style={[
-        styles.base,
-        {
-          minHeight: size === "sm" ? height : Math.max(height, tokens.touch.min),
-          backgroundColor: v.bg,
-          borderColor: v.border ?? "transparent",
-          opacity: disabled ? 0.5 : 1,
-        },
-        style,
-      ]}
+      style={style}
     >
-      {loading ? (
-        <ActivityIndicator size="small" color={v.fg} />
-      ) : (
-        <View style={styles.row}>
-          {icon}
-          <Text
-            style={[styles.label, { color: v.fg }]}
-            maxFontSizeMultiplier={tokens.font.maxScale.compact}
-          >
-            {label}
-          </Text>
-        </View>
+      {({ pressed }) => (
+        <Animated.View
+          style={[
+            styles.base,
+            {
+              minHeight: size === "sm" ? height : Math.max(height, tokens.touch.min),
+              backgroundColor: v.bg,
+              borderColor: v.border ?? "transparent",
+              opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+              transform: [{ scale: press.scale }],
+            },
+          ]}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color={v.fg} />
+          ) : (
+            <View style={styles.row}>
+              {icon}
+              <Text
+                style={[styles.label, { color: v.fg, fontFamily: fontFamily("bold") }]}
+                maxFontSizeMultiplier={tokens.font.maxScale.compact}
+              >
+                {label}
+              </Text>
+              {cost !== undefined ? <CostBadge cost={cost} /> : null}
+            </View>
+          )}
+        </Animated.View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 

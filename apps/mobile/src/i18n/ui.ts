@@ -1,0 +1,78 @@
+// Mobil arayüz metinleri (TR). Mobilde locale JSON yok (I11: varsayılan Türkçe); anahtarlar web
+// apps/web/app/locales/tr.json anahtarlarıdır ve her değer oradaki değere birebir eşittir
+// (apps/web/tests/mobile-parity.test.cjs). Yeni primitive metni buraya, web anahtarıyla eklenir.
+export const UI_TR = {
+  "credits.free": "Ücretsiz",
+  "credits.one": "{n} kredi",
+  "credits.other": "{n} kredi",
+  "credits.table.caption": "Kredi maliyetleri",
+  "trip.stop.label": "{n}. durak",
+  "trip.stop.moveUp": "Yukarı taşı",
+  "trip.stop.moveDown": "Aşağı taşı",
+  "trip.connector.walk": "{value} yürüyüş",
+  "trip.connector.drive": "{value} sürüş",
+  "trip.connector.transit": "{value} toplu taşıma",
+  "trip.connector.unknown": "Süre hesaplanamadı",
+  "trip.day.stops": "{n} durak",
+  "trip.day.buffer": "Tampon %{n}",
+  "trip.day.bufferLow": "Tampon %{n} · önerilen en az %20",
+  "trip.day.offline": "Cihazda kayıtlı",
+  "trip.unit.hour": "sa",
+  "trip.unit.minute": "dk",
+  "trip.unit.km": "km",
+  "trip.unit.m": "m",
+  "trip.unit.approx": "≈ {value}",
+  "assistant.log.label": "Sohbet",
+  "assistant.log.new": "Yeni mesaj",
+  "assistant.typing": "Yanıt hazırlanıyor…",
+  "assistant.composer.send": "Gönder",
+  "assistant.question.submit": "Devam",
+  "assistant.question.multi": "En fazla {n} seçebilirsin",
+  "assistant.question.needAll": "Devam etmek için her sorudan seçim yap.",
+  "assistant.question.needOne": "Devam etmek için bir seçenek seç.",
+  "ui.sheet.expand": "Paneli genişlet",
+  "ui.sheet.collapse": "Paneli daralt",
+  "ui.stepper.decrease": "Azalt",
+  "ui.stepper.increase": "Artır",
+  "pricing.tier.free": "Gezgin",
+  "pricing.tier.explorer": "Kaşif",
+  "pricing.tier.pro": "Pro Kaşif",
+  "pricing.tier.agency": "Tur Lideri",
+  "pricing.credits.welcome": "{n} hoş geldin kredisi",
+  "pricing.credits.monthly": "{n} kredi / ay",
+  "pricing.credits.yearly": "{n} kredi / yıl",
+  "pricing.equivalents": "≈ {trips} derin rota ya da {chats} sohbet mesajı",
+  "pricing.equivalents.oneTrip": "≈ {trips} derin rota ya da {chats} sohbet mesajı",
+  "pricing.price.free": "Ücretsiz",
+  "pricing.price.monthly": "{price} / ay",
+  "pricing.price.yearly": "{price} / yıl",
+  "pricing.price.loading": "Fiyat yükleniyor",
+  "pricing.price.atCheckout": "Fiyat ödeme adımında gösterilir",
+  "pricing.current": "Mevcut planın",
+  "pricing.period.discount": "Kredi başına %{n} daha uygun",
+  "gate.eyebrow": "Bir adım kaldı",
+  "gate.title.ai": "Rotanı oluşturmak için ücretsiz hesap aç",
+  "gate.title.save": "Kaydetmek ve paylaşmak için ücretsiz hesap aç",
+  "gate.title.messages": "Mesajlaşmak için ücretsiz hesap aç",
+  "gate.title.profile": "Profilini yönetmek için ücretsiz hesap aç",
+  "gate.body.ai": "Asistan rotanı hesabınla oluşturur ve kaydeder.",
+  "gate.body.save": "Rotaların hesabında saklanır; süreli bağlantıyla paylaşabilirsin.",
+  "gate.body.messages": "Gezginlerle gerçek zamanlı mesajlaşmak için hesabınla gir.",
+  "gate.body.profile": "Profilini, rotalarını ve tercihlerini hesabından yönetirsin.",
+  "gate.draftNote": "Yanıtların bu cihazda saklandı. Hesap açınca kaldığın yerden devam edersin.",
+  "gate.welcome": "{n} hoş geldin kredisi",
+  "gate.serverCredits": "Kredi yalnızca sunucuda, işlem başlarken ayrılır",
+  "gate.costs.caption": "Bu adımın kredi maliyeti",
+  "gate.register": "Ücretsiz hesap aç",
+  "gate.login": "Giriş yap",
+  "gate.continue": "Şimdilik devam et",
+} as const;
+
+export type UiKey = keyof typeof UI_TR;
+
+/** Metin; `vars` verilirse "{ad}" yer tutucuları doldurulur. */
+export function tr(key: UiKey, vars?: Record<string, string | number>): string {
+  let text: string = UI_TR[key];
+  if (vars) for (const [k, v] of Object.entries(vars)) text = text.split(`{${k}}`).join(String(v));
+  return text;
+}

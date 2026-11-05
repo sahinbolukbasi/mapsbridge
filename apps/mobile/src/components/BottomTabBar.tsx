@@ -1,77 +1,54 @@
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Platform } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { MobileTab } from "../types";
-import { MapIcon, CalendarIcon, SparkIcon, ExploreIcon, ProfileIcon } from "./Icons";
+import { TAB_ITEMS } from "../navigation/tab-items";
+import { Icon } from "../ui";
+import { fontFamily, tokens } from "../theme";
 
-import { tokens } from "../theme";
+// Alt sekme çubuğu (design §5.3 tek IA, §9 "Ana gezinme"): web mobil alt menüsüyle aynı 5 öğe,
+// aynı sıra, etiket ve ikon (navigation/tab-items.ts). Oturumsuz: Keşfet · Planla · Asistan ·
+// Topluluk · Giriş; oturumlu: Planla · Asistan · Topluluk · Mesajlar · Profil.
 interface BottomTabBarProps {
+  tabs: readonly MobileTab[];
   activeTab: MobileTab;
   onSelectTab: (tab: MobileTab) => void;
 }
 
-export function BottomTabBar({ activeTab, onSelectTab }: BottomTabBarProps) {
+export function BottomTabBar({ tabs, activeTab, onSelectTab }: BottomTabBarProps) {
   const isIOS = Platform.OS === "ios";
-
-  const TABS: { id: MobileTab; label: string; icon: (color: string) => React.ReactNode }[] = [
-    {
-      id: "map",
-      label: "Harita",
-      icon: (color) => <MapIcon size={22} color={color} />,
-    },
-    {
-      id: "plan",
-      label: "Rotalarım",
-      icon: (color) => <CalendarIcon size={22} color={color} />,
-    },
-    {
-      id: "ai",
-      label: "AI Asistan",
-      icon: (color) => <SparkIcon size={22} color={color} />,
-    },
-    {
-      id: "community",
-      label: "Topluluk",
-      icon: (color) => <ExploreIcon size={22} color={color} />,
-    },
-    {
-      id: "profile",
-      label: "Profil",
-      icon: (color) => <ProfileIcon size={22} color={color} />,
-    },
-  ];
-
   return (
     <View
       style={[styles.container, isIOS ? styles.iosContainer : styles.androidContainer]}
       accessibilityRole="tabbar"
     >
       <View style={styles.barTrack}>
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
-          const activeColor = tokens.color.textBrand;
-          const inactiveColor = tokens.color.textSubtle;
-
+        {tabs.map((id) => {
+          const tab = TAB_ITEMS[id];
+          const isActive = activeTab === id;
+          const color = isActive ? tokens.color.tabsFgSelected : tokens.color.tabsFg;
           return (
-            <TouchableOpacity
-              key={tab.id}
-              style={styles.tabItem}
-              onPress={() => onSelectTab(tab.id)}
-              activeOpacity={0.7}
+            <Pressable
+              key={id}
+              style={({ pressed }) => [styles.tabItem, pressed ? styles.pressed : null]}
+              onPress={() => onSelectTab(id)}
               accessibilityRole="tab"
               accessibilityLabel={tab.label}
               accessibilityState={{ selected: isActive }}
             >
               <View style={[styles.iconWrap, isActive && styles.activeIconWrap]}>
-                {tab.icon(isActive ? activeColor : inactiveColor)}
+                <Icon name={tab.icon} size={24} color={color} />
               </View>
-
               <Text
-                style={[styles.tabLabel, isActive ? styles.activeLabel : styles.inactiveLabel]}
+                style={[
+                  styles.tabLabel,
+                  { color, fontFamily: fontFamily(isActive ? "bold" : "medium") },
+                  isActive ? styles.activeLabel : styles.inactiveLabel,
+                ]}
                 maxFontSizeMultiplier={tokens.font.maxScale.compact}
               >
                 {tab.label}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -84,11 +61,6 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.color.surface,
     borderTopWidth: 1,
     borderTopColor: tokens.color.border,
-    shadowColor: tokens.color.black,
-    shadowOffset: { width: 0, height: -1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 20,
     zIndex: 100,
   },
   iosContainer: {
@@ -103,8 +75,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    height: 52,
-    paddingHorizontal: 8,
+    minHeight: 52,
+    paddingHorizontal: tokens.space["2"],
     width: "100%",
   },
   tabItem: {
@@ -113,27 +85,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flex: 1,
   },
+  pressed: { opacity: 0.7 },
   iconWrap: {
-    width: 38,
+    width: 48,
     height: 28,
     alignItems: "center",
     justifyContent: "center",
   },
   activeIconWrap: {
     backgroundColor: tokens.color.surfaceBrand,
-    borderRadius: 14,
+    borderRadius: tokens.radius.full,
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: tokens.font.size["2xs"],
     marginTop: 2,
-    letterSpacing: -0.1,
   },
-  activeLabel: {
-    color: tokens.color.textBrand,
-    fontWeight: "700",
-  },
-  inactiveLabel: {
-    color: tokens.color.textSubtle,
-    fontWeight: "500",
-  },
+  activeLabel: { fontWeight: tokens.font.weight.bold },
+  inactiveLabel: { fontWeight: tokens.font.weight.medium },
 });

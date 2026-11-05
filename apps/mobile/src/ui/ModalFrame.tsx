@@ -10,7 +10,6 @@ import {
   type ViewStyle,
 } from "react-native";
 import { tokens } from "../theme";
-import { CloseIcon } from "../components/Icons";
 import { IconButton } from "./IconButton";
 import { SafeArea } from "./SafeArea";
 import { useReducedMotion } from "./useReducedMotion";
@@ -78,7 +77,8 @@ export function ModalFrame({
         <IconButton
           label="Kapat"
           onPress={onRequestClose}
-          icon={<CloseIcon size={18} color={tokens.color.textMuted} />}
+          icon="x"
+          color={tokens.color.textMuted}
         />
       ) : null}
     </View>

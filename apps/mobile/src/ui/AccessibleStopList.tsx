@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {
-  AccessibilityInfo,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { AccessibilityInfo, ScrollView, StyleSheet, Text, View } from "react-native";
 import { tokens } from "../theme";
-import { MapPinIcon } from "../components/Icons";
 import { IconButton } from "./IconButton";
 import { ModalFrame } from "./ModalFrame";
+import { StopRow } from "./StopRow";
 
 // Harita WebView'inin ekran okuyucu alternatifi (design §6.1, FR-6.5). Leaflet DOM'u okunmaz;
 // bunun yerine mevcut rota state'inden okunan durak listesi sunulur. Görsel arayüz değişmesin
-// diye düğme yalnızca ekran okuyucu açıkken render edilir.
+// diye düğme yalnızca ekran okuyucu açıkken render edilir. Satırlar StopRow primitive'idir
+// (design §4.2: gün rengi + numara; erişilebilir ad stopLabel() ile aynı kalır).
 export interface StopItem {
   id: string;
   name: string;
@@ -60,7 +54,8 @@ export function AccessibleStopList({ day, stops, onSelectStop }: AccessibleStopL
       <IconButton
         label="Durak listesini göster"
         onPress={() => setOpen(true)}
-        icon={<MapPinIcon size={20} color={tokens.color.onPrimary} />}
+        icon="route"
+        color={tokens.color.onPrimary}
         style={styles.triggerButton}
       />
       <ModalFrame
@@ -77,20 +72,19 @@ export function AccessibleStopList({ day, stops, onSelectStop }: AccessibleStopL
               </Text>
             ) : (
               stops.map((stop, i) => (
-                <TouchableOpacity
-                  key={stop.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={stopLabel(day, i, stop)}
-                  onPress={() => {
-                    setOpen(false);
-                    onSelectStop?.(stop.id, i);
-                  }}
-                  style={styles.row}
-                >
-                  <Text style={styles.rowText} maxFontSizeMultiplier={tokens.font.maxScale.body}>
-                    {stopLabel(day, i, stop)}
-                  </Text>
-                </TouchableOpacity>
+                <View key={stop.id} style={styles.row}>
+                  <StopRow
+                    index={i + 1}
+                    day={day}
+                    name={stop.name}
+                    category="map"
+                    accessibilityLabel={stopLabel(day, i, stop)}
+                    onPress={() => {
+                      setOpen(false);
+                      onSelectStop?.(stop.id, i);
+                    }}
+                  />
+                </View>
               ))
             )}
           </View>
@@ -103,13 +97,6 @@ export function AccessibleStopList({ day, stops, onSelectStop }: AccessibleStopL
 const styles = StyleSheet.create({
   trigger: { position: "absolute", left: tokens.space["4"], bottom: tokens.space["4"], zIndex: 60 },
   triggerButton: { backgroundColor: tokens.color.primary },
-  row: {
-    minHeight: tokens.touch.min,
-    justifyContent: "center",
-    paddingHorizontal: tokens.space["4"],
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: tokens.color.border,
-  },
-  rowText: { fontSize: tokens.font.size.base, color: tokens.color.text },
+  row: { paddingHorizontal: tokens.space["4"], paddingVertical: tokens.space["1"] },
   empty: { padding: tokens.space["4"], color: tokens.color.textMuted },
 });

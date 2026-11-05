@@ -1,540 +1,61 @@
-import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, Text, View, Animated, StatusBar } from "react-native";
-import Svg, { Path, Circle } from "react-native-svg";
-
-import { ExploreIcon, MapIcon, LeafIcon, TreesIcon, SparkIcon, ShieldIcon } from "./Icons";
-
-import { SafeArea, motion } from "../ui";
+import React from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import Svg, { Circle, Path } from "react-native-svg";
+import { SafeArea } from "../ui";
 import { tokens, withAlpha } from "../theme";
-interface SplashScreenProps {
-  onFinish?: () => void;
-  minDurationMs?: number;
-}
 
-const SPLASH_STEPS = [
-  { text: "Gezgin rotaları ve düğümler taranıyor...", percent: 28 },
-  { text: "Harita katmanları ve patikalar yükleniyor...", percent: 62 },
-  { text: "Topluluk rotaları ve GPS optimize ediliyor...", percent: 88 },
-  { text: "Keşif atlası hazır!", percent: 100 },
-];
-
-export function SplashScreen({ onFinish, minDurationMs = 1200 }: SplashScreenProps) {
-  const [currentStepIdx, setCurrentStepIdx] = useState(0);
-  const [percentDisplay, setPercentDisplay] = useState(15);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const progressAnim = useRef(new Animated.Value(0.15)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  // Pulse animation for central badge
-  useEffect(() => {
-    const pulse = motion.loop(
-      motion.sequence([
-        motion.animate(pulseAnim, 1.08, {
-          duration: 900,
-          useNativeDriver: true,
-        }),
-        motion.animate(pulseAnim, 1, {
-          duration: 900,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, []);
-
-  // Progress sequence
-  useEffect(() => {
-    let step = 0;
-    const interval = setInterval(() => {
-      step++;
-      if (step < SPLASH_STEPS.length) {
-        setCurrentStepIdx(step);
-        const targetPercent = SPLASH_STEPS[step].percent;
-        setPercentDisplay(targetPercent);
-        motion
-          .animate(progressAnim, targetPercent / 100, {
-            duration: 350,
-            useNativeDriver: false,
-          })
-          .start();
-      } else {
-        clearInterval(interval);
-        setTimeout(() => {
-          motion
-            .animate(fadeAnim, 0, {
-              duration: 350,
-              useNativeDriver: true,
-            })
-            .start(() => {
-              if (onFinish) onFinish();
-            });
-        }, 200);
-      }
-    }, minDurationMs / 3.5);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const currentStep = SPLASH_STEPS[currentStepIdx] || SPLASH_STEPS[0];
-
+// Açılış ekranı (design §5.5 J6, F38): yalnızca gerçek yükleme (yazı tipleri + oturum) sürerken
+// görünür; yapay en kısa süre, sahte ilerleme adımı ya da istatistik yoktur (I1). Yazı tipleri
+// henüz yüklenmemiş olabilir: sistem yazı tipiyle çizilir.
+export function SplashScreen() {
   return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <StatusBar barStyle="dark-content" backgroundColor={tokens.color.bg} />
-
-      {/* Ambient background glows */}
-      <View style={styles.glowTopRight} />
-      <View style={styles.glowBottomLeft} />
-
-      <SafeArea style={styles.safeArea}>
-        {/* Top Header Pills */}
-        <View style={styles.topBar}>
-          <View style={styles.liveBridgePill}>
-            <View style={styles.pulsingLiveDot} />
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.liveBridgeText}>
-              CANLI KÖPRÜ MODU
-            </Text>
-          </View>
-
-          <View style={styles.ecoPill}>
-            <LeafIcon size={13} color={tokens.color.link} />
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.compact} style={styles.ecoPillText}>
-              Eco-Path Active
-            </Text>
-          </View>
+    <SafeArea style={styles.container}>
+      <View style={styles.center} accessible accessibilityLabel="MapsBridge yükleniyor">
+        <View style={styles.logo}>
+          <Svg width={48} height={48} viewBox="0 0 48 48">
+            <Path
+              d="M10 36C14 26 22 22 28 20C34 18 38 13 40 8"
+              stroke={withAlpha(tokens.color.onPrimary, 0.4)}
+              strokeDasharray="3 3"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              fill="none"
+            />
+            <Path
+              d="M8 38C15 28 25 24 32 22C38 20 40 12 40 12"
+              stroke={tokens.color.accent}
+              strokeWidth={3}
+              strokeLinecap="round"
+              fill="none"
+            />
+            <Circle cx="10" cy="36" r="3.5" fill={tokens.color.accentStrong} />
+            <Circle cx="28" cy="22" r="3" fill={tokens.color.onPrimary} />
+            <Circle cx="39" cy="11" r="3.5" fill={tokens.color.accentStrong} />
+          </Svg>
         </View>
-
-        {/* Center Hero Visual */}
-        <View style={styles.centerHero}>
-          <Animated.View style={[styles.logoWrap, { transform: [{ scale: pulseAnim }] }]}>
-            {/* Outer Ring */}
-            <View style={styles.logoOuterRing}>
-              <View style={styles.logoInnerCircle}>
-                <Svg width={48} height={48} viewBox="0 0 48 48">
-                  <Path
-                    d="M10 36C14 26 22 22 28 20C34 18 38 13 40 8"
-                    stroke={withAlpha(tokens.color.onPrimary, 0.4)}
-                    strokeDasharray="3 3"
-                    strokeWidth={2.5}
-                    strokeLinecap="round"
-                  />
-                  <Path
-                    d="M8 38C15 28 25 24 32 22C38 20 40 12 40 12"
-                    stroke={tokens.color.accent}
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                  />
-                  <Circle cx="10" cy="36" r="3.5" fill={tokens.color.accentStrong} />
-                  <Circle cx="28" cy="22" r="3" fill={tokens.color.onPrimary} />
-                  <Circle cx="39" cy="11" r="3.5" fill={tokens.color.accentStrong} />
-                  <Path
-                    d="M24 10L25.8 15.2L31 17L25.8 18.8L24 24L22.2 18.8L17 17L22.2 15.2L24 10Z"
-                    fill={tokens.color.surfaceBrandSoft}
-                  />
-                </Svg>
-              </View>
-            </View>
-
-            {/* Route OS badge */}
-            <View style={styles.routeOsBadge}>
-              <Text
-                maxFontSizeMultiplier={tokens.font.maxScale.compact}
-                style={styles.routeOsBadgeText}
-              >
-                ROUTE OS
-              </Text>
-            </View>
-          </Animated.View>
-
-          {/* Title & Slogan */}
-          <View style={styles.titleBox}>
-            <View style={styles.appNameRow}>
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.appName}>
-                MapsBridge
-              </Text>
-              <ExploreIcon size={24} color={tokens.color.accent} />
-            </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.appTagline}>
-              Akıllı Seyahat ve Keşif Ağı
-            </Text>
-          </View>
-
-          {/* 3 Quick Stat Badges */}
-          <View style={styles.statsRow}>
-            <View style={styles.statBadge}>
-              <MapIcon size={16} color={tokens.color.onSurfaceBrand} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
-                4.8K+ ROTA
-              </Text>
-            </View>
-            <View style={styles.statBadge}>
-              <TreesIcon size={16} color={tokens.color.onSurfaceBrand} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
-                %100 DOĞAL
-              </Text>
-            </View>
-            <View style={styles.statBadge}>
-              <SparkIcon size={16} color={tokens.color.onSurfaceBrand} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.statLabel}>
-                ÇEVRİMDIŞI
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Bottom Loading Progress Card */}
-        <View style={styles.bottomSection}>
-          <View style={styles.progressCard}>
-            <View style={styles.progressHeaderRow}>
-              <View style={styles.progressStatusLeft}>
-                <View style={styles.miniGreenPulse} />
-                <Text
-                  maxFontSizeMultiplier={tokens.font.maxScale.body}
-                  style={styles.progressStatusText}
-                  numberOfLines={1}
-                >
-                  {currentStep.text}
-                </Text>
-              </View>
-              <Text
-                maxFontSizeMultiplier={tokens.font.maxScale.body}
-                style={styles.progressPercentText}
-              >
-                {percentDisplay}%
-              </Text>
-            </View>
-
-            {/* Track Bar */}
-            <View style={styles.progressTrack}>
-              <Animated.View
-                style={[
-                  styles.progressFill,
-                  {
-                    width: progressAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ["0%", "100%"],
-                    }),
-                  },
-                ]}
-              />
-            </View>
-
-            {/* Bottom info indicators */}
-            <View style={styles.progressInfoRow}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <ExploreIcon size={12} color={tokens.color.link} />
-                <Text
-                  maxFontSizeMultiplier={tokens.font.maxScale.body}
-                  style={styles.progressInfoLeft}
-                >
-                  Topoğrafya Katmanı
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <SparkIcon size={12} color={tokens.color.accent} />
-                <Text
-                  maxFontSizeMultiplier={tokens.font.maxScale.body}
-                  style={styles.progressInfoRight}
-                >
-                  Çevrimdışı Düğümler
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Security & Version Footnote */}
-          <View style={styles.footerNoteBox}>
-            <View style={styles.securityRow}>
-              <ShieldIcon size={14} color={tokens.color.link} />
-              <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.securityText}>
-                MapsBridge Güvenli Bağlantı
-              </Text>
-            </View>
-            <Text maxFontSizeMultiplier={tokens.font.maxScale.body} style={styles.versionText}>
-              V2.4 • KEŞFETMEYE HAZIRLANIYOR
-            </Text>
-          </View>
-        </View>
-      </SafeArea>
-    </Animated.View>
+        <Text style={styles.name} maxFontSizeMultiplier={tokens.font.maxScale.compact}>
+          MapsBridge
+        </Text>
+        <ActivityIndicator size="small" color={tokens.color.textMuted} />
+      </View>
+    </SafeArea>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: tokens.color.bg,
-    zIndex: 9999,
-  },
-  safeArea: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  glowTopRight: {
-    position: "absolute",
-    top: -40,
-    right: -40,
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: withAlpha(tokens.color.accentStrong, 0.18),
-  },
-  glowBottomLeft: {
-    position: "absolute",
-    bottom: -50,
-    left: -50,
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: withAlpha(tokens.color.primary, 0.08),
-  },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 8,
-  },
-  liveBridgePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: withAlpha(tokens.color.surfaceTint, 0.85),
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 999,
-    gap: 6,
-  },
-  pulsingLiveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: tokens.color.accent,
-  },
-  liveBridgeText: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: tokens.color.textMuted,
-    letterSpacing: 0.5,
-  },
-  ecoPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: withAlpha(tokens.color.surfaceBrand, 0.9),
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    gap: 4,
-  },
-  ecoPillLeaf: {
-    fontSize: 12,
-  },
-  ecoPillText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: tokens.color.link,
-  },
-  centerHero: {
+  container: { flex: 1, backgroundColor: tokens.color.bg },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", gap: tokens.space["4"] },
+  logo: {
+    width: 88,
+    height: 88,
+    borderRadius: tokens.radius.xl,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 20,
-  },
-  logoWrap: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  logoOuterRing: {
-    width: 106,
-    height: 106,
-    borderRadius: 53,
     backgroundColor: tokens.color.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: tokens.color.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.28,
-    shadowRadius: 18,
-    elevation: 8,
   },
-  logoInnerCircle: {
-    width: 82,
-    height: 82,
-    borderRadius: 41,
-    backgroundColor: tokens.color.brandHover,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  routeOsBadge: {
-    position: "absolute",
-    bottom: -10,
-    backgroundColor: tokens.color.primary,
-    paddingVertical: 3,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: tokens.color.accentStrong,
-    shadowColor: tokens.color.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-  },
-  routeOsBadgeText: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: tokens.color.surfaceBrandSoft,
-    letterSpacing: 1,
-  },
-  titleBox: {
-    alignItems: "center",
-    marginTop: 10,
-  },
-  appNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  appName: {
-    fontSize: 32,
-    fontWeight: "900",
-    color: tokens.color.textBrand,
-    letterSpacing: -0.5,
-  },
-  appIconCompass: {
-    fontSize: 26,
-  },
-  appTagline: {
-    fontSize: 14,
-    color: tokens.color.textSubtle,
-    marginTop: 4,
-    fontWeight: "500",
-  },
-  statsRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 24,
-    width: "100%",
-    maxWidth: 320,
-    justifyContent: "center",
-  },
-  statBadge: {
-    flex: 1,
-    backgroundColor: tokens.color.surface,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 14,
-    alignItems: "center",
-    shadowColor: tokens.color.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statIcon: {
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: tokens.color.textMuted,
-    letterSpacing: 0.3,
-  },
-  bottomSection: {
-    width: "100%",
-    alignItems: "center",
-    gap: 14,
-    paddingBottom: 10,
-  },
-  progressCard: {
-    width: "100%",
-    maxWidth: 360,
-    backgroundColor: tokens.color.surface,
-    borderRadius: 20,
-    padding: 16,
-    shadowColor: tokens.color.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  progressHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  progressStatusLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-    marginRight: 8,
-  },
-  miniGreenPulse: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: tokens.color.accent,
-  },
-  progressStatusText: {
-    fontSize: 13,
-    fontWeight: "600",
+  name: {
+    fontSize: tokens.font.size["2xl"],
+    fontWeight: tokens.font.weight.extrabold,
     color: tokens.color.text,
-  },
-  progressPercentText: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: tokens.color.link,
-  },
-  progressTrack: {
-    width: "100%",
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: tokens.color.surfaceTint,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 3.5,
-    backgroundColor: tokens.color.accent,
-  },
-  progressInfoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  progressInfoLeft: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: tokens.color.link,
-  },
-  progressInfoRight: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: tokens.color.accent,
-  },
-  footerNoteBox: {
-    alignItems: "center",
-    gap: 4,
-  },
-  securityRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  securityShield: {
-    fontSize: 12,
-  },
-  securityText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: tokens.color.link,
-  },
-  versionText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: tokens.color.textSubtle,
-    letterSpacing: 0.8,
   },
 });
