@@ -15,15 +15,17 @@ import { Toaster } from "./toast";
  */
 export function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/";
+  // Chrome varyantı (G19, R5) route-registry `chrome` alanından: immersive → footer yok;
+  // focus → yalın header, alt menü ve footer yok.
+  const chrome = findRoute(pathname)?.chrome ?? "default";
   return (
     <Toaster>
       <SkipLink />
-      {/* Header varyantı (G19) route-registry `chrome` alanından. */}
-      <HeaderNav variant={findRoute(pathname)?.chrome ?? "default"} />
+      <HeaderNav variant={chrome} />
       <OperationsBanner />
       {children}
-      <SiteFooter />
-      <MobileNav />
+      {chrome !== "immersive" && chrome !== "focus" && <SiteFooter />}
+      {chrome !== "focus" && <MobileNav />}
     </Toaster>
   );
 }

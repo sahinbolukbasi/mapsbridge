@@ -151,7 +151,8 @@
     max-inline-size: none;
     padding-inline: 0;
   }
-  .ui-page-shell--app {
+  .ui-page-shell--app,
+  .ui-page-shell[data-chrome="immersive"] {
     min-block-size: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
   }
   .ui-page-shell__grid {

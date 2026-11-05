@@ -138,10 +138,11 @@ export function AIPromoLanding() {
     };
   }, []);
 
-  const loginUrl = (q?: string) =>
-    `/login/?redirect=/travel-assistant/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
-  const signupUrl = (q?: string) =>
-    `/register/?redirect=/travel-assistant/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
+  // Dönüş parametresi yalnızca `next` (design §5.4, R8).
+  const assistantPath = (q?: string) =>
+    `/travel-assistant/${q ? `?q=${encodeURIComponent(q)}` : ""}`;
+  const loginUrl = (q?: string) => `/login/?next=${encodeURIComponent(assistantPath(q))}`;
+  const signupUrl = (q?: string) => `/register/?next=${encodeURIComponent(assistantPath(q))}`;
 
   function handleCopyCode() {
     try {
@@ -502,7 +503,7 @@ export function AIPromoLanding() {
 
                     <div className="ai-promo-micro-actions">
                       <Link
-                        href="/maps/?kod=RM-841"
+                        href="/maps/?code=RM-841"
                         className="ai-promo-sub-btn"
                         style={{
                           background: "var(--color-brand-hover)",
@@ -721,7 +722,7 @@ export function AIPromoLanding() {
                 </span>
               </div>
               <Link
-                href="/maps/?kod=RM-841"
+                href="/maps/?code=RM-841"
                 className="ai-promo-sub-btn"
                 style={{ position: "absolute", top: "10px", right: "12px", padding: "6px" }}
                 title="Harita Masasını Aç"
@@ -798,7 +799,7 @@ export function AIPromoLanding() {
 
             {/* Bottom Actions Bar */}
             <div className="ai-promo-route-dock">
-              <Link href="/maps/?kod=RM-841" className="ai-promo-main-action-btn">
+              <Link href="/maps/?code=RM-841" className="ai-promo-main-action-btn">
                 <span
                   className="material-symbols-outlined"
                   aria-hidden="true"

@@ -4,8 +4,22 @@
 // Bağımlılıksızdır (ui-audit Node type-stripping ile de yükler); erasable TS sözdizimi kullanılır.
 
 export type PageLayout = "content" | "reading" | "form" | "landing" | "app" | "sidebar";
-/** Header varyantı (G19): sayfa CSS'i chrome'u override etmez. */
-export type ChromeVariant = "default" | "wide" | "wide-compact";
+/**
+ * Chrome varyantı (G19, design §5.2 / R5): sayfa CSS'i chrome'u override etmez.
+ * immersive: footer yok, sayfa header altı ekranı doldurur, mobil alt menü görünür.
+ * focus: yalın header (logo + dil + Geri), alt menü ve footer yok (form sayfaları).
+ */
+export type ChromeVariant = "default" | "wide" | "wide-compact" | "immersive" | "focus";
+export const CHROME_VARIANTS: readonly ChromeVariant[] = [
+  "default",
+  "wide",
+  "wide-compact",
+  "immersive",
+  "focus",
+];
+/** Footer sütunu (design §5.3, F29): footer bağlantıları yalnızca bu alandan üretilir. */
+export type FooterGroup = "product" | "resources" | "legal";
+export const FOOTER_GROUPS: readonly FooterGroup[] = ["product", "resources", "legal"];
 export type RouteLocale = "tr" | "en";
 export type RoutePath = `/${string}`;
 
@@ -29,12 +43,17 @@ export interface CanonicalRoute {
   protected?: boolean;
   /** dinamik segmentli dosyalar: üretilen path'ler (generateStaticParams ile eşit, AC-14) */
   staticParams?: readonly RoutePath[];
-  /** header varyantı (varsayılan "default") */
+  /** chrome varyantı (varsayılan "default") */
   chrome?: ChromeVariant;
+  /** footer sütunu; sütun içi sıra bu dizideki sıradır */
+  footer?: FooterGroup;
+  /** kısa menü etiketi (design §5.1 adlandırma sözlüğü); footer'da title yerine kullanılır */
+  nav?: Readonly<Record<RouteLocale, string>>;
 }
 
 const t = (tr: string, en: string): Readonly<Record<RouteLocale, string>> => ({ tr, en });
 
+// Sıra footer sütunlarının sırasıdır (design §5.3): ürün → kaynaklar → yasal, sonra diğerleri.
 export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/",
@@ -64,64 +83,97 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     alternate: "/",
   },
   {
-    path: "/about/",
-    file: "app/about/page.tsx",
-    layout: "reading",
-    title: t("Hakkımızda", "About us"),
+    path: "/maps/",
+    file: "app/maps/page.tsx",
+    layout: "app",
+    title: t("Rota planlayıcı", "Route planner"),
     description: t(
-      "MapsBridge: yapay zeka destekli seyahat planlama ve güvenli konum paylaşımı platformu. Misyonumuz, seyahatin kendisini kolaylaştırmak.",
-      "MapsBridge: an AI-assisted travel planning and secure location sharing platform. Our mission is to make the journey itself easier.",
+      "Durakları günlere ekle, sürükleyerek sırala ve durak sırasını gerçek yol ağı üzerinden optimize et. Her günün süresini ve mesafesini haritada gör.",
+      "Add stops to days, drag to reorder and optimise the order over the real road network. See each day's time and distance on the map.",
     ),
     sitemap: true,
+    // Bilinçli değer: bugünkü kod index + sitemap'te; GSC §3.6 noindex öneriyordu (F-16).
     robots: "index",
+    protected: true,
+    chrome: "immersive",
+    footer: "product",
+    nav: t("Planla", "Plan"),
   },
   {
-    path: "/contact/",
-    file: "app/contact/page.tsx",
-    layout: "reading",
-    title: t("İletişim", "Contact"),
+    path: "/travel-assistant/",
+    file: "app/travel-assistant/page.tsx",
+    layout: "app",
+    title: t("Gezi asistanı", "Travel assistant"),
     description: t(
-      "MapsBridge ile iletişime geçin. Soru, öneri ve destek talepleriniz için bize ulaşın.",
-      "Get in touch with MapsBridge for questions, suggestions and support requests.",
+      "Gezini kendi cümlelerinle anlat, birkaç soruyla netleştir; asistan rotanı gün gün haritada oluştursun ve düzenlesin. Mekan bilgileri veriden gelir, uydurulmaz.",
+      "Describe your trip in your own words and settle the details in a few taps; the assistant builds and edits your route day by day on the map. Place details come from data, never made up.",
     ),
     sitemap: true,
     robots: "index",
+    chrome: "immersive",
+    footer: "product",
+    nav: t("Asistan", "Assistant"),
   },
   {
-    path: "/cookies/",
-    file: "app/cookies/page.tsx",
-    layout: "reading",
-    title: t("Çerez politikası", "Cookie policy"),
+    path: "/community/",
+    file: "app/community/page.tsx",
+    layout: "sidebar",
+    title: t("Gezgin rehberleri ve seyahat topluluğu", "Traveler guides and community"),
     description: t(
-      "MapsBridge çerez ve depolama tercihleri hakkında bilgi.",
-      "Information about MapsBridge cookie and storage preferences.",
+      "Destinasyonlara göre ücretsiz ve ücretli seyahat rehberlerini keşfet. Gezgin deneyimlerini incele ve grup gezilerine katıl.",
+      "Discover free and paid travel guides by destination, read traveler stories and join group trips.",
     ),
     sitemap: true,
     robots: "index",
+    chrome: "wide-compact",
+    footer: "product",
+    nav: t("Topluluk", "Community"),
   },
   {
-    path: "/privacy/",
-    file: "app/privacy/page.tsx",
-    layout: "reading",
-    title: t("Gizlilik politikası", "Privacy policy"),
+    path: "/mobile-apps/",
+    file: "app/mobile-apps/page.tsx",
+    layout: "landing",
+    title: t("Mobil uygulamalar", "Mobile apps"),
     description: t(
-      "MapsBridge gizlilik politikası ve kişisel verilerin kullanımı.",
-      "MapsBridge privacy policy and how personal data is used.",
+      "MapsBridge'i telefonunda kullan: gün gün planlayıcı, gezi asistanı ve paylaşım kodları küçük ekranda da aynı hesapla çalışır.",
+      "Use MapsBridge on your phone: the day-by-day planner, the travel assistant and share codes work on a small screen with the same account.",
     ),
     sitemap: true,
     robots: "index",
+    footer: "product",
   },
   {
-    path: "/terms/",
-    file: "app/terms/page.tsx",
-    layout: "reading",
-    title: t("Kullanım koşulları", "Terms of use"),
+    path: "/checkout/",
+    file: "app/checkout/page.tsx",
+    layout: "content",
+    title: t("Plan ve kredi", "Plans and credits"),
+    sitemap: false,
+    robots: "noindex",
+    // Geçici "Planlar ve kredi" yuvası: FEAT-005'te /pricing/'e taşınır (plan D6).
+    footer: "product",
+    nav: t("Planlar", "Plans"),
+  },
+  {
+    path: "/how-it-works/",
+    file: "app/how-it-works/page.tsx",
+    layout: "landing",
+    title: t("Nasıl çalışır", "How it works"),
     description: t(
-      "MapsBridge hizmetlerinin kullanım koşulları.",
-      "Terms of use for MapsBridge services.",
+      "Üç turda taslak rota: gezini anlat, iki soruyu yanıtla, rotan haritada. Sonrasını rota üzerinde birlikte iyileştir.",
+      "A draft route in three turns: describe your trip, answer two questions, see your route on the map. Then refine it on the route itself.",
     ),
     sitemap: true,
     robots: "index",
+    footer: "resources",
+  },
+  {
+    path: "/articles/",
+    file: "app/articles/page.tsx",
+    layout: "content",
+    title: t("Yazılar", "Articles"),
+    sitemap: false,
+    robots: "index",
+    footer: "resources",
   },
   {
     path: "/support/",
@@ -134,56 +186,72 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     ),
     sitemap: true,
     robots: "index",
+    footer: "resources",
   },
   {
-    path: "/how-it-works/",
-    file: "app/how-it-works/page.tsx",
-    layout: "landing",
-    title: t("Nasıl çalışır", "How it works"),
+    path: "/contact/",
+    file: "app/contact/page.tsx",
+    layout: "reading",
+    title: t("İletişim", "Contact"),
     description: t(
-      "MapsBridge ile seyahat planlama, yapay zeka optimizasyonu, canlı harita masası ve 6 haneli kodla paylaşım nasıl çalışır? Adım adım keşfedin.",
-      "How travel planning, AI optimization, the live map desk and 6-digit code sharing work in MapsBridge, step by step.",
+      "MapsBridge ile iletişime geçin. Soru, öneri ve destek talepleriniz için bize ulaşın.",
+      "Get in touch with MapsBridge for questions, suggestions and support requests.",
     ),
     sitemap: true,
     robots: "index",
+    footer: "resources",
   },
   {
-    path: "/mobile-apps/",
-    file: "app/mobile-apps/page.tsx",
-    layout: "landing",
-    title: t("Mobil uygulamalar", "Mobile apps"),
+    path: "/about/",
+    file: "app/about/page.tsx",
+    layout: "reading",
+    title: t("Hakkımızda", "About us"),
     description: t(
-      "Web Harita Masasında hazırladığınız rotalar, anında iPhone ve Android cihazınıza senkronize oluyor. Çevrimdışı navigasyon, saha modu ve canlı durak rehberliği ile keşfe hazır olun.",
-      "Routes you prepare on the web map desk sync instantly to your iPhone and Android device, with offline navigation, field mode and live stop guidance.",
+      "MapsBridge: yapay zeka destekli seyahat planlama ve güvenli konum paylaşımı platformu. Misyonumuz, seyahatin kendisini kolaylaştırmak.",
+      "MapsBridge: an AI-assisted travel planning and secure location sharing platform. Our mission is to make the journey itself easier.",
     ),
     sitemap: true,
     robots: "index",
+    footer: "resources",
   },
   {
-    path: "/travel-assistant/",
-    file: "app/travel-assistant/page.tsx",
-    layout: "app",
-    title: t("Seyahat asistanı", "Travel assistant"),
+    path: "/privacy/",
+    file: "app/privacy/page.tsx",
+    layout: "reading",
+    title: t("Gizlilik politikası", "Privacy policy"),
     description: t(
-      "Yapay zeka asistanı bütçenize, ilgi alanlarınıza, tempo tercihinize ve seyahat tarihinize göre saniyeler içinde optimize edilmiş rota, durak saatleri ve canlı rota paylaşım bağlantısını üretir.",
-      "The AI assistant builds an optimized route, stop times and a live route sharing link in seconds, based on your budget, interests, pace and travel dates.",
+      "MapsBridge gizlilik politikası ve kişisel verilerin kullanımı.",
+      "MapsBridge privacy policy and how personal data is used.",
     ),
     sitemap: true,
     robots: "index",
+    footer: "legal",
   },
   {
-    path: "/maps/",
-    file: "app/maps/page.tsx",
-    layout: "app",
-    title: t("Harita masası", "Map desk"),
+    path: "/terms/",
+    file: "app/terms/page.tsx",
+    layout: "reading",
+    title: t("Kullanım koşulları", "Terms of use"),
     description: t(
-      "Büyük ekranda mimari hassasiyetle çoklu gün katmanları, akıllı durak havuzu ve topografik irtifa analizleriyle seyahatinizi planlayın.",
-      "Plan your trip on a large screen with multi-day layers, a smart stop pool and topographic elevation analysis.",
+      "MapsBridge hizmetlerinin kullanım koşulları.",
+      "Terms of use for MapsBridge services.",
     ),
     sitemap: true,
-    // Bilinçli değer: bugünkü kod index + sitemap'te; GSC §3.6 noindex öneriyordu (F-16).
     robots: "index",
-    protected: true,
+    footer: "legal",
+  },
+  {
+    path: "/cookies/",
+    file: "app/cookies/page.tsx",
+    layout: "reading",
+    title: t("Çerez politikası", "Cookie policy"),
+    description: t(
+      "MapsBridge çerez ve depolama tercihleri hakkında bilgi.",
+      "Information about MapsBridge cookie and storage preferences.",
+    ),
+    sitemap: true,
+    robots: "index",
+    footer: "legal",
   },
   {
     path: "/welcome/",
@@ -198,59 +266,24 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     robots: "index",
   },
   {
-    path: "/community/",
-    file: "app/community/page.tsx",
-    layout: "sidebar",
-    title: t("Gezgin rehberleri ve seyahat topluluğu", "Traveler guides and community"),
-    description: t(
-      "Destinasyonlara göre ücretsiz ve ücretli seyahat rehberlerini keşfet. Gezgin deneyimlerini incele ve grup gezilerine katıl.",
-      "Discover free and paid travel guides by destination, read traveler stories and join group trips.",
-    ),
-    sitemap: true,
-    robots: "index",
-    chrome: "wide-compact",
-  },
-  {
-    path: "/articles/",
-    file: "app/articles/page.tsx",
-    layout: "content",
-    title: t("Yazılar", "Articles"),
-    sitemap: false,
-    robots: "index",
-  },
-  {
-    path: "/auth/callback/",
-    file: "app/auth/callback/page.tsx",
-    layout: "form",
-    title: t("Oturum doğrulanıyor", "Verifying session"),
-    sitemap: false,
-    robots: "noindex",
-  },
-  {
     path: "/messages/",
     file: "app/messages/page.tsx",
     layout: "app",
     title: t("Mesajlar", "Messages"),
     sitemap: false,
     robots: "noindex",
-    chrome: "wide-compact",
-  },
-  {
-    path: "/checkout/",
-    file: "app/checkout/page.tsx",
-    layout: "content",
-    title: t("Plan ve kredi", "Plans and credits"),
-    sitemap: false,
-    robots: "noindex",
+    chrome: "immersive",
+    nav: t("Mesajlar", "Messages"),
   },
   {
     path: "/profile/",
     file: "app/profile/page.tsx",
     layout: "sidebar",
-    title: t("Seyahat kimliğim", "My travel identity"),
+    title: t("Profilim", "My profile"),
     sitemap: false,
     robots: "noindex",
     chrome: "wide",
+    nav: t("Profil", "Profile"),
   },
   {
     path: "/profile/edit/",
@@ -279,12 +312,21 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     staticParams: ["/gezgin/", "/traveler/", "/demo/", "/kasif/"],
   },
   {
+    path: "/k/",
+    file: "app/k/page.tsx",
+    layout: "content",
+    title: t("Konum paylaşımı", "Location share"),
+    sitemap: false,
+    robots: "noindex",
+  },
+  {
     path: "/login/",
     file: "app/login/page.tsx",
     layout: "form",
     title: t("Giriş yap", "Sign in"),
     sitemap: false,
     robots: "noindex",
+    chrome: "focus",
   },
   {
     path: "/register/",
@@ -293,6 +335,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     title: t("Hesap oluştur", "Create account"),
     sitemap: false,
     robots: "noindex",
+    chrome: "focus",
   },
   {
     path: "/reset-password/",
@@ -301,6 +344,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     title: t("Şifre sıfırlama", "Reset password"),
     sitemap: false,
     robots: "noindex",
+    chrome: "focus",
   },
   {
     path: "/verify/",
@@ -309,14 +353,16 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     title: t("Hesabını doğrula", "Verify your account"),
     sitemap: false,
     robots: "noindex",
+    chrome: "focus",
   },
   {
-    path: "/k/",
-    file: "app/k/page.tsx",
-    layout: "content",
-    title: t("Konum paylaşımı", "Location share"),
+    path: "/auth/callback/",
+    file: "app/auth/callback/page.tsx",
+    layout: "form",
+    title: t("Oturum doğrulanıyor", "Verifying session"),
     sitemap: false,
     robots: "noindex",
+    chrome: "focus",
   },
   {
     path: "/u/admin/",
@@ -375,4 +421,23 @@ export function resolveAlternate(pathname: string): RoutePath {
   const p = normalizePath(pathname);
   const target = LEGACY_REDIRECTS[p] ?? p;
   return CANONICAL_ROUTES.find((r) => r.path === target)?.alternate ?? target;
+}
+/** Footer sütunu (design §5.3): registry sırasıyla; footer bileşeni bağlantı yazmaz, buradan alır. */
+export function footerRoutes(group: FooterGroup): readonly CanonicalRoute[] {
+  return CANONICAL_ROUTES.filter((r) => r.footer === group);
+}
+/** Menü etiketi: kısa `nav` varsa o, yoksa sayfa başlığı (design §5.1). */
+export function routeLabel(route: CanonicalRoute, locale: RouteLocale): string {
+  return (route.nav ?? route.title)[locale];
+}
+/**
+ * Menü öğesi etkin mi (aria-current): LEGACY önce hedefe çözülür; "/" yalnızca ana sayfada
+ * ("/" ya da "/en/"), diğerleri kendisi ve alt yolları için etkin.
+ */
+export function isNavActive(pathname: string, href: string): boolean {
+  const p = normalizePath(pathname);
+  const current = LEGACY_REDIRECTS[p] ?? p;
+  const target = normalizePath(href);
+  if (target === "/" || target === "/en/") return current === "/" || current === "/en/";
+  return current === target || current.startsWith(target);
 }

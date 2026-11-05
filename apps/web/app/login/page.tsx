@@ -14,6 +14,7 @@ import {
   PageShell,
 } from "../components/ui";
 import "./login.css";
+import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 
 interface GoogleCredentialResponse {
   credential: string;
@@ -41,23 +42,17 @@ export default function LoginPage() {
 
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
-  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-  const nextUrl = params?.get("next") || params?.get("redirect") || "/maps/";
+  // Dönüş yolu yalnızca safe-next ile (design §5.4, R8): `next`, geriye uyumlu `redirect`.
+  const nextUrl =
+    typeof window !== "undefined"
+      ? readNext(window.location.search, window.location.origin)
+      : DEFAULT_NEXT;
 
   // Google OAuth Public Client ID
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   const redirectToNext = useCallback(() => {
-    try {
-      const target = new URL(nextUrl, window.location.origin);
-      const safeNext =
-        target.origin === window.location.origin
-          ? target.pathname + target.search + target.hash
-          : "/maps/";
-      window.location.assign(safeNext);
-    } catch {
-      window.location.assign("/maps/");
-    }
+    window.location.assign(nextUrl);
   }, [nextUrl]);
 
   // Oturum zaten açıksa doğrudan yönlendir
@@ -541,7 +536,7 @@ export default function LoginPage() {
                       gap: "0.25rem",
                     }}
                     href={
-                      nextUrl !== "/maps/"
+                      nextUrl !== DEFAULT_NEXT
                         ? `/register/?next=${encodeURIComponent(nextUrl)}`
                         : "/register/"
                     }

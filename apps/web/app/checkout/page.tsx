@@ -149,7 +149,7 @@ export default function CheckoutPage() {
 
   async function buy(product: Product) {
     if (!getStoredSession()) {
-      location.href = "/login/?redirect=" + encodeURIComponent("/checkout/");
+      location.href = "/login/?next=" + encodeURIComponent("/checkout/");
       return;
     }
     setBusy(true);

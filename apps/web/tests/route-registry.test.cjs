@@ -16,6 +16,7 @@ const read = (rel) => fs.readFileSync(path.join(WEB, rel), "utf8");
 const { CANONICAL_ROUTES, LEGACY_REDIRECTS, expandPaths, resolveAlternate, findRoute } = loadTs(
   path.join(APP, "lib/route-registry.ts"),
 );
+const registryExtras = loadTs(path.join(APP, "lib/route-registry.ts"));
 // vm bağlamındaki diziler başka realm'dendir (deepStrictEqual prototipi karşılaştırır): kopyala.
 const plain = (v) => JSON.parse(JSON.stringify(v));
 
@@ -136,6 +137,74 @@ test("registry tutarlılığı: path biçimi, tekillik, LEGACY zinciri yok, hede
     assert.ok(paths.includes(to), `${from} → ${to}: hedef kanonik değil`);
     assert.ok(!LEGACY_REDIRECTS[to], `${from} → ${to}: zincir`);
   }
+});
+
+test("chrome/footer/nav alanları (design §5.1–5.3, R5): enum, kanonik footer, tr+en etiket", () => {
+  const { CHROME_VARIANTS, FOOTER_GROUPS, footerRoutes } = registryExtras;
+  assert.deepEqual(plain(CHROME_VARIANTS), [
+    "default",
+    "wide",
+    "wide-compact",
+    "immersive",
+    "focus",
+  ]);
+  assert.deepEqual(plain(FOOTER_GROUPS), ["product", "resources", "legal"]);
+  for (const r of CANONICAL_ROUTES) {
+    if (r.chrome !== undefined)
+      assert.ok(CHROME_VARIANTS.includes(r.chrome), `${r.path}: chrome "${r.chrome}" enum dışı`);
+    if (r.footer !== undefined) {
+      assert.ok(FOOTER_GROUPS.includes(r.footer), `${r.path}: footer "${r.footer}" enum dışı`);
+      assert.ok(!r.staticParams && !r.path.includes("["), `${r.path}: footer'da dinamik rota`);
+      assert.ok(!LEGACY_REDIRECTS[r.path], `${r.path}: footer bağlantısı LEGACY`);
+      // Sitemap'teki sayfa indexlenir; noindex sayfa sitemap'e girmez (tutarlılık).
+      if (r.sitemap) assert.equal(r.robots, "index", `${r.path}: sitemap:true ama noindex`);
+    }
+    if (r.nav !== undefined) assert.ok(r.nav.tr && r.nav.en, `${r.path}: nav.tr/nav.en zorunlu`);
+  }
+  for (const r of CANONICAL_ROUTES) if (r.robots === "noindex") assert.equal(r.sitemap, false);
+  const byGroup = Object.fromEntries(
+    FOOTER_GROUPS.map((g) => [g, plain(footerRoutes(g).map((r) => r.path))]),
+  );
+  // design §5.3 sütunları; /checkout/ FEAT-005'te /pricing/ ile değişir (plan D6).
+  assert.deepEqual(byGroup, {
+    product: ["/maps/", "/travel-assistant/", "/community/", "/mobile-apps/", "/checkout/"],
+    resources: ["/how-it-works/", "/articles/", "/support/", "/contact/", "/about/"],
+    legal: ["/privacy/", "/terms/", "/cookies/"],
+  });
+  const chromeOf = (p) => findRoute(p)?.chrome ?? "default";
+  for (const p of ["/maps/", "/travel-assistant/", "/messages/"])
+    assert.equal(chromeOf(p), "immersive", p);
+  for (const p of ["/login/", "/register/", "/reset-password/", "/verify/", "/auth/callback/"])
+    assert.equal(chromeOf(p), "focus", p);
+});
+
+test("adlandırma sözlüğü (design §5.1): başlıklar ve kısa menü etiketleri", () => {
+  const title = (p) => plain(findRoute(p).title);
+  const nav = (p) => plain(findRoute(p).nav);
+  assert.deepEqual(title("/maps/"), { tr: "Rota planlayıcı", en: "Route planner" });
+  assert.deepEqual(title("/travel-assistant/"), { tr: "Gezi asistanı", en: "Travel assistant" });
+  assert.deepEqual(title("/profile/"), { tr: "Profilim", en: "My profile" });
+  assert.deepEqual(nav("/maps/"), { tr: "Planla", en: "Plan" });
+  assert.deepEqual(nav("/travel-assistant/"), { tr: "Asistan", en: "Assistant" });
+  assert.deepEqual(nav("/community/"), { tr: "Topluluk", en: "Community" });
+  assert.deepEqual(nav("/messages/"), { tr: "Mesajlar", en: "Messages" });
+  assert.deepEqual(nav("/profile/"), { tr: "Profil", en: "Profile" });
+  assert.deepEqual(nav("/checkout/"), { tr: "Planlar", en: "Plans" });
+  const banned =
+    /6 haneli|6-digit|topografik|topographic|saniyeler içinde|in seconds|senkronize|sync|çevrimdışı navigasyon|offline navigation|saha modu|field mode/i;
+  for (const r of CANONICAL_ROUTES)
+    for (const v of [r.title.tr, r.title.en, r.description?.tr ?? "", r.description?.en ?? ""])
+      assert.doesNotMatch(v, banned, `${r.path}: doğrulanmamış iddia`);
+});
+
+test("isNavActive: LEGACY hedefe çözülür, ana sayfa yalnızca kökte etkin", () => {
+  const { isNavActive } = registryExtras;
+  assert.equal(isNavActive("/maps/", "/maps/"), true);
+  assert.equal(isNavActive("/harita/", "/maps/"), true);
+  assert.equal(isNavActive("/profile/edit/", "/profile/"), true);
+  assert.equal(isNavActive("/en/", "/"), true);
+  assert.equal(isNavActive("/maps/", "/"), false);
+  assert.equal(isNavActive("/messages/", "/maps/"), false);
 });
 
 function sitemapPaths() {

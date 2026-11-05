@@ -8,6 +8,7 @@ import { MobileStart } from "./components/mobile-start";
 import { PageHeader, PageShell } from "./components/ui";
 import { FAQ_ITEMS, FAQ_ITEMS_EN, COMMUNITY_STORIES, COMMUNITY_POSTS } from "./features/landing";
 import { useLocale } from "./lib/locale-context";
+import { normalizeShareCode } from "./lib/share/share-code";
 
 export default function Home() {
   const { t, isEnglish } = useLocale();
@@ -40,10 +41,10 @@ export default function Home() {
 
   function handleLookup(e: React.FormEvent) {
     e.preventDefault();
-    const clean = code.trim().toUpperCase().replace(/\s+/g, "");
+    const clean = normalizeShareCode(code);
     if (clean) {
       setCodeModalOpen(false);
-      router.push(`/k/?kod=${encodeURIComponent(clean)}`);
+      router.push(`/k/?code=${encodeURIComponent(clean)}`);
     }
   }
 

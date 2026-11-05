@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { handleGoogleCredentialResponse } from "../../lib/cognito";
 import "./callback.css";
+import { readNext } from "../../lib/navigation/safe-next";
 import { Card, PageHeader, PageShell } from "../../components/ui";
 
 export default function AuthCallbackPage() {
@@ -29,8 +30,7 @@ export default function AuthCallbackPage() {
         handleGoogleCredentialResponse(idToken);
         setStatus("Giriş başarılı! Yönlendiriliyorsunuz...");
         setTimeout(() => {
-          const next = new URLSearchParams(window.location.search).get("next") || "/maps/";
-          window.location.assign(next.startsWith("/") ? next : "/maps/");
+          window.location.assign(readNext(window.location.search, window.location.origin));
         }, 300);
         return;
       }
@@ -40,8 +40,7 @@ export default function AuthCallbackPage() {
       if (code) {
         setStatus("Yetkilendirme kodu alındı. Yönlendiriliyorsunuz...");
         setTimeout(() => {
-          const next = new URLSearchParams(window.location.search).get("next") || "/maps/";
-          window.location.assign(next.startsWith("/") ? next : "/maps/");
+          window.location.assign(readNext(window.location.search, window.location.origin));
         }, 500);
         return;
       }

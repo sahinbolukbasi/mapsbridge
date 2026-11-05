@@ -11,7 +11,8 @@ export type PageLayout = "content" | "reading" | "form" | "landing" | "app" | "s
  * Sayfanın tek <main>'i (G4). layout max-width/gutter seçer; yerleşim sayfaya kalır. `layout`
  * verilmezse route-registry kaydının layout'u (yoksa "content"); verilirse registry'yi ezer (§4.2).
  * En az header altı ekran yüksekliği (footer sayfanın altına iner, F24); ui-page-enter giriş
- * animasyonu yalnızca hareket tercihinde (design §8.2).
+ * animasyonu yalnızca hareket tercihinde (design §8.2). data-chrome="immersive" (registry) sayfayı
+ * header ve alt menü arasındaki alana doldurur (design §5.2).
  */
 export function PageShell({
   layout: layoutProp,
@@ -27,13 +28,15 @@ export function PageShell({
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "/";
-  const layout: PageLayout = layoutProp ?? findRoute(pathname)?.layout ?? "content";
+  const route = findRoute(pathname);
+  const layout: PageLayout = layoutProp ?? route?.layout ?? "content";
   return (
     <main
       id="main-content"
       tabIndex={-1}
       className={cx("ui-page-shell", `ui-page-shell--${layout}`, "ui-page-enter", className)}
       data-layout={layout}
+      data-chrome={route?.chrome}
     >
       {layout === "sidebar" ? (
         <>

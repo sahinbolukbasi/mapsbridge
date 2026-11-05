@@ -1,331 +1,131 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer chrome {
-  /* Unified Global Site Footer Styles */
-
+  /* Site footer (design §5.3): koyu zemin (data-surface="inverse"), sütunlar registry'den. */
   .global-site-footer {
-    width: 100%;
-    background: var(--color-surface-tint);
-    border-top: 1px solid var(--color-border-subtle);
-    padding: 3.5rem 1.5rem 2rem;
+    margin-block-start: auto;
+    background: var(--color-surface-inverse);
     color: var(--color-text);
-    font-family:
-      "Plus Jakarta Sans",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    margin-top: auto;
+    font-family: var(--font-family-sans);
   }
-
   .global-footer-inner {
-    max-width: 1280px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-
-  .global-footer-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: var(--space-10);
+    box-sizing: border-box;
+    max-inline-size: var(--container-max);
+    margin-inline: auto;
+    padding: var(--space-12) var(--page-gutter) var(--space-8);
   }
-
-  @media (min-width: 768px) {
-    .global-footer-grid {
-      grid-template-columns: 1.4fr 2fr;
-      gap: 3.5rem;
-    }
+  .global-footer-brand {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
   }
-
-  /* Brand Column */
-  .global-footer-brand-col {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .global-footer-brand-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: var(--space-2);
+    justify-self: start;
+    min-block-size: var(--touch-target);
+    color: var(--color-text);
     text-decoration: none;
-    color: inherit;
   }
-
-  .global-footer-brand-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    background: var(--color-brand-hover);
-    color: var(--color-text-inverse);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  .global-footer-brand-mark {
+    display: grid;
+    place-items: center;
+    inline-size: 32px;
+    block-size: 32px;
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
   }
-
-  .global-footer-brand-title {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--color-text-brand);
-    letter-spacing: -0.02em;
+  .global-footer-brand-name {
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--letter-spacing-snug);
   }
-
-  .global-footer-brand-emerald {
-    color: var(--color-success); /* AC-15 kontrast */
-  }
-
   .global-footer-tagline {
-    font-size: 13.5px;
-    line-height: 1.6;
-    color: var(--color-text-muted);
+    max-inline-size: 36ch;
     margin: 0;
-    max-width: 360px;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
   }
-
-  .global-footer-status {
+  .global-footer-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-8);
+  }
+  .global-footer-group-title {
+    display: block;
+    margin-block-end: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-caps);
+    text-transform: uppercase;
+  }
+  .global-footer-links {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .global-footer-link,
+  .global-footer-locale {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--color-success); /* AC-15 kontrast */
-    background: var(--color-success-bg);
-    padding: 0.3rem 0.75rem;
-    border-radius: 9999px;
-    border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
-    width: fit-content;
-  }
-
-  .global-footer-status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 9999px;
-    background: var(--color-accent);
-    animation: footerDotPulse 2s infinite;
-  }
-
-  @keyframes footerDotPulse {
-    0% {
-      opacity: 0.4;
-      transform: scale(0.9);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.1);
-    }
-    100% {
-      opacity: 0.4;
-      transform: scale(0.9);
-    }
-  }
-
-  /* Links Columns */
-  .global-footer-links-col {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 2rem;
-  }
-
-  .global-footer-group-title {
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    color: var(--color-text-muted); /* AC-15 kontrast */
-    text-transform: uppercase;
-    margin-bottom: 0.85rem;
-    display: block;
-  }
-
-  .global-footer-links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-  }
-
-  .global-footer-links li a,
-  .global-footer-links li button {
-    font-size: 13px;
-    color: var(--color-text-muted);
+    gap: var(--space-2);
+    min-block-size: var(--control-height-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-md);
     text-decoration: none;
-    transition: color 0.15s ease;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    text-align: left;
-    font-family: inherit;
   }
-
-  .global-footer-links li a:hover,
-  .global-footer-links li button:hover {
-    color: var(--color-text-accent);
+  .global-footer-link:hover {
+    text-decoration: underline;
   }
-
-  /* Bottom Bar */
   .global-footer-bottom {
-    border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    padding-top: 1.5rem;
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+    gap: var(--space-3);
+    box-sizing: border-box;
+    max-inline-size: var(--container-max);
+    margin-inline: auto;
+    padding: var(--space-4) var(--page-gutter) var(--space-6);
+    border-block-start: 1px solid var(--color-border);
   }
-
-  @media (min-width: 640px) {
-    .global-footer-bottom {
-      flex-direction: row;
-    }
-  }
-
-  .global-footer-bottom-left {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.85rem;
-  }
-
-  .global-footer-action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: transparent;
-    border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-    padding: 0.35rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .global-footer-action-btn:hover {
-    border-color: var(--color-accent);
-    color: var(--color-text-accent);
-    background: color-mix(in srgb, var(--color-accent) 5%, transparent);
-  }
-
-  .global-footer-security-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--color-link);
-    padding: 0.35rem 0.65rem;
-    border-radius: 9999px;
-    background: var(--color-surface-brand);
-  }
-
   .global-footer-copyright {
-    font-size: 12px;
-    color: var(--color-text-muted); /* AC-15 kontrast */
     margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
   }
-
-  /* Mobil Uygulama İndirme Linkleri */
-  .global-footer-app-links {
-    margin-top: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  .global-footer-locale {
+    padding-inline: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
   }
-
-  .global-footer-app-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--color-text-muted); /* AC-15 kontrast */
-    text-transform: uppercase;
+  .global-footer-locale:hover {
+    background: color-mix(in srgb, var(--color-text) 8%, transparent);
   }
-
-  .global-footer-app-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-
-  .global-footer-app-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    min-width: 140px;
-  }
-
-  .global-footer-app-btn.app-store {
-    background: #000000;
-    color: var(--color-text-inverse);
-    border: 1px solid #333;
-  }
-
-  .global-footer-app-btn.app-store:hover {
-    background: #1a1a1a;
-    transform: translateY(-1px);
-  }
-
-  .global-footer-app-btn.google-play {
-    background: var(--color-surface);
-    color: #000000;
-    border: 1px solid var(--color-neutral-200);
-  }
-
-  .global-footer-app-btn.google-play:hover {
-    background: var(--color-bg);
-    transform: translateY(-1px);
-  }
-
-  .global-footer-app-btn .app-icon {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-  }
-
-  .app-btn-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-  }
-
-  .app-btn-small {
-    font-size: 9px;
-    font-weight: 500;
-    opacity: 0.9;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-  }
-
-  .app-btn-large {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-
-  @media (max-width: 640px) {
-    .global-footer-app-buttons {
-      flex-direction: column;
-    }
-
-    .global-footer-app-btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-  /* AC-17: dokunmatik genişliklerde footer kontrolleri ≥44×44 (design §3 "Dokunma hedefi"). */
+  /* AC-17: dokunmatik genişliklerde footer kontrolleri ≥44×44. */
   @media (max-width: 767.98px) {
-    .global-footer-brand-link,
-    .global-footer-app-btn {
-      min-height: var(--touch-target);
+    .global-footer-link,
+    .global-footer-locale {
+      min-block-size: var(--touch-target);
+      min-inline-size: var(--touch-target);
+    }
+  }
+  @media (min-width: 768px) {
+    .global-footer-inner {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 3fr);
+      gap: var(--space-12);
     }
   }
 }

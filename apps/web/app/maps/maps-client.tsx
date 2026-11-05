@@ -1988,7 +1988,7 @@ export default function Panel() {
       const data = await response.json();
       if (!response.ok || !data.code || !data.token)
         throw new Error(data.error || "Paylaşım kaydedilemedi.");
-      const url = `${window.location.origin}/k/?kod=${encodeURIComponent(data.token)}`;
+      const url = `${window.location.origin}/k/?code=${encodeURIComponent(data.token)}`;
       const updatedShares = [
         ...recentShares.filter((item) => item.expiresAt * 1000 > Date.now()),
         { code: data.code, expiresAt: data.expiresAt, url },
@@ -2000,7 +2000,7 @@ export default function Panel() {
         setShareError("Paylaşım oluşturuldu, ancak bu cihazda geçmişe kaydedilemedi.");
       }
       setShareCode(data.code);
-      setShareUrl(`${window.location.origin}/k/?kod=${encodeURIComponent(data.token)}`);
+      setShareUrl(`${window.location.origin}/k/?code=${encodeURIComponent(data.token)}`);
       setIsCreated(true);
       setShowDurationModal(false);
       setCopiedCode(false);

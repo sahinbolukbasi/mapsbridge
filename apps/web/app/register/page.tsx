@@ -13,6 +13,7 @@ import {
   PageShell,
 } from "../components/ui";
 import "./register.css";
+import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 
 interface GoogleCredentialResponse {
   credential: string;
@@ -48,8 +49,11 @@ export default function SignUpPage() {
 
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
-  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-  const nextUrl = params?.get("next") || "/maps/";
+  // Dönüş yolu yalnızca safe-next ile (design §5.4, R8): `next`, geriye uyumlu `redirect`.
+  const nextUrl =
+    typeof window !== "undefined"
+      ? readNext(window.location.search, window.location.origin)
+      : DEFAULT_NEXT;
 
   // Şifre Güvenlik Kriterleri
   const rules = [
@@ -77,16 +81,7 @@ export default function SignUpPage() {
   const [showGoogleFallbackModal, setShowGoogleFallbackModal] = useState(false);
 
   const redirectToNext = useCallback(() => {
-    try {
-      const target = new URL(nextUrl, window.location.origin);
-      const safeNext =
-        target.origin === window.location.origin
-          ? target.pathname + target.search + target.hash
-          : "/maps/";
-      window.location.assign(safeNext);
-    } catch {
-      window.location.assign("/maps/");
-    }
+    window.location.assign(nextUrl);
   }, [nextUrl]);
 
   // Oturum zaten açıksa doğrudan yönlendir
@@ -308,9 +303,7 @@ export default function SignUpPage() {
 
     try {
       await signUp(cleanEmail, password, cleanName, cleanPhone);
-      const nextParam = params?.get("next")
-        ? `&next=${encodeURIComponent(params.get("next")!)}`
-        : "";
+      const nextParam = nextUrl !== DEFAULT_NEXT ? `&next=${encodeURIComponent(nextUrl)}` : "";
       window.location.assign(
         `/dogrula/?email=${encodeURIComponent(cleanEmail)}&phone=${encodeURIComponent(cleanPhone)}${nextParam}`,
       );
@@ -688,7 +681,7 @@ export default function SignUpPage() {
                     }}
                     data-path="giris"
                     href={
-                      nextUrl !== "/maps/"
+                      nextUrl !== DEFAULT_NEXT
                         ? `/login/?next=${encodeURIComponent(nextUrl)}`
                         : "/login/"
                     }

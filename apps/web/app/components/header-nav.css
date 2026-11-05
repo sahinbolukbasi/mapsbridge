@@ -1,1057 +1,414 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer chrome {
-  /* ========================================================= */
-  /* MAPSBRIDGE — UNIFIED GLOBAL HEADER NAVIGATION STYLES       */
-  /* Clean, robust Vanilla CSS for HeaderNav component         */
-  /* ========================================================= */
+  /* Site header + mobil web alt menüsü (design §5.3, R5). Varyant SiteChrome'dan data-variant
+     ile gelir; sayfa CSS'i bu sınıfları ezmez (G19). */
+
+  /* Yükselti gözcüsü: header'ın hemen önünde 1px; görünümden çıkınca data-elevated. */
+  .global-site-header-sentinel {
+    block-size: 1px;
+    margin-block-end: -1px;
+  }
 
   .global-site-header {
     position: sticky;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 76px;
-    background: rgba(250, 248, 255, 0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--color-border-subtle);
-    z-index: 1000;
+    inset-block-start: 0;
+    z-index: var(--z-header);
     display: flex;
     align-items: center;
-    transition:
-      background-color 0.25s ease,
-      border-color 0.25s ease;
-  }
-
-  .global-site-header-inner {
-    width: 100%;
-    max-width: min(100%, 1840px);
-    margin: 0 auto;
-    padding: 0 clamp(1.25rem, 3vw, 3.5rem);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-  }
-
-  /* Brand Logo */
-  .header-brand-link {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    text-decoration: none;
-    color: inherit;
-    flex-shrink: 0;
-  }
-
-  .header-brand-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    background: var(--color-brand-hover);
-    color: var(--color-text-inverse);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
-    transition: transform 0.2s ease;
-  }
-
-  .header-brand-link:hover .header-brand-icon {
-    transform: scale(1.05);
-  }
-
-  .header-brand-title {
-    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--color-text-brand);
-    letter-spacing: -0.02em;
-    line-height: 1;
-  }
-
-  .header-brand-emerald {
-    color: var(--color-success); /* AC-15: #10b981 beyazda 2,5:1 */
-  }
-
-  /* Nav Link Pills */
-  .header-nav-center {
-    display: none;
-    align-items: center;
-    gap: 0.35rem;
-    background: var(--color-surface-sunken);
-    padding: 0.25rem;
-    border-radius: 9999px;
-  }
-
-  @media (min-width: 1280px) {
-    .header-nav-center {
-      display: flex;
-    }
-  }
-
-  .header-nav-pill {
-    padding: 0.45rem 1rem;
-    border-radius: 9999px;
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-neutral-600);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    position: relative;
-    white-space: nowrap;
-  }
-
-  .header-nav-pill:hover {
-    color: #013628;
-    background: color-mix(in srgb, var(--color-surface) 70%, transparent);
-  }
-
-  .header-nav-pill.active {
-    background: var(--color-brand-hover);
-    color: var(--color-text-inverse) !important;
-    box-shadow: 0 2px 6px color-mix(in srgb, var(--color-primary) 15%, transparent);
-  }
-
-  /* Right Section */
-  .header-right-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  /* 6-Digit Code Search Box */
-  .header-code-search-form {
-    position: relative;
-    display: none;
-    align-items: center;
-  }
-
-  @media (min-width: 768px) {
-    .header-code-search-form {
-      display: flex;
-    }
-  }
-
-  .header-code-search-icon {
-    position: absolute;
-    left: 0.85rem;
-    color: #717974;
-    font-size: 18px;
-    pointer-events: none;
-  }
-
-  .header-code-search-input {
-    width: 200px;
-    padding: 0.5rem 0.85rem 0.5rem 2.4rem;
-    border-radius: 9999px;
-    border: 1px solid transparent;
-    background: var(--color-surface-sunken);
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 12.5px;
-    color: #131b2e;
-    outline: none;
-    transition: all 0.2s ease;
-  }
-
-  .header-code-search-input:focus {
-    width: 240px;
-    background: var(--color-surface);
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
-  }
-
-  /* Auth Buttons */
-  .header-btn-login {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.45rem 0.85rem;
-    border-radius: 9999px;
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .header-btn-login:hover {
-    background: var(--color-surface-sunken);
-    color: var(--color-text-brand);
-  }
-
-  @media (min-width: 640px) {
-    .header-btn-login {
-      padding: 0.5rem 1.15rem;
-    }
-  }
-
-  .header-btn-signup {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.55rem 1.25rem;
-    border-radius: 9999px;
-    background: var(--color-brand-hover);
-    color: var(--color-text-inverse) !important;
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 18%, transparent);
-    transition: all 0.2s ease;
-  }
-
-  .header-btn-signup:hover {
-    background: var(--color-brand);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 25%, transparent);
-  }
-
-  .header-auth-buttons {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .header-nav-lang-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.42rem 0.75rem;
-    border-radius: 9999px;
-    border: 1px solid #dae2fd;
-    background: var(--color-bg);
-    color: #1e4d3e;
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .header-nav-lang-btn:hover {
-    background: var(--color-surface);
-    border-color: var(--color-brand);
-    color: var(--color-text-brand);
-    box-shadow: 0 2px 6px color-mix(in srgb, var(--color-primary) 8%, transparent);
-  }
-
-  .header-locale-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.42rem 0.75rem;
-    border-radius: 9999px;
-    border: 1px solid #dae2fd;
-    background: var(--color-bg);
-    color: #1e4d3e;
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .header-locale-btn:hover {
-    background: var(--color-surface);
-    border-color: var(--color-brand);
-    color: var(--color-text-brand);
-    box-shadow: 0 2px 6px color-mix(in srgb, var(--color-primary) 8%, transparent);
-  }
-
-  .nav-quota-badge-stitch {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.4rem 0.85rem;
-    border-radius: 9999px;
-    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
-    color: var(--color-on-surface-brand);
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .nav-quota-badge-stitch:hover {
-    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-  }
-
-  /* Profile Trigger & Dropdown Menu */
-  /* Profile Trigger & Stitch Dropdown Menu (Screen ID: 1098cc1c43404574a97e25ddc1a201fa) */
-  .header-profile-wrap {
-    position: relative;
-  }
-
-  .header-user-pill-trigger {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.65rem 0.25rem 0.35rem;
-    border-radius: 9999px;
-    background: var(--color-surface-tint);
-    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .header-user-pill-trigger:hover {
-    background: var(--color-surface-tint);
-    transform: translateY(-1px);
-  }
-
-  .header-user-avatar-wrap {
-    position: relative;
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-  }
-
-  .header-user-avatar-circle {
-    width: 100%;
-    height: 100%;
-    border-radius: 9999px;
-    background: var(--color-brand-hover);
-    color: var(--color-text-inverse);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 12px;
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 35%, transparent);
-    overflow: hidden;
-  }
-
-  .header-user-avatar-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .header-user-online-dot {
-    position: absolute;
-    bottom: -1px;
-    right: -1px;
-    width: 9px;
-    height: 9px;
-    border-radius: 9999px;
-    background-color: var(--color-accent);
-    border: 1.5px solid var(--color-neutral-0);
-  }
-
-  .header-user-pill-info {
-    display: none;
-    flex-direction: column;
-    text-align: left;
-  }
-
-  @media (min-width: 640px) {
-    .header-user-pill-info {
-      display: flex;
-    }
-  }
-
-  .header-user-pill-name {
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--color-text);
-    line-height: 1.1;
-  }
-
-  .header-user-pill-role {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--color-link);
-    line-height: 1;
-    margin-top: 2px;
-  }
-
-  .header-user-pill-arrow {
-    font-size: 16px;
-    color: var(--color-link);
-    transition: transform 0.2s ease;
-  }
-
-  .header-user-pill-arrow.open {
-    transform: rotate(180deg);
-  }
-
-  /* ── STITCH POP-UP DROPDOWN (1098cc1c43404574a97e25ddc1a201fa) ── */
-  .header-stitch-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 340px;
-    max-width: calc(100vw - 2rem);
-    background: color-mix(in srgb, var(--color-surface) 98%, transparent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 1.25rem;
-    box-shadow:
-      0 20px 40px -8px rgba(0, 0, 0, 0.18),
-      0 0 0 1px color-mix(in srgb, var(--color-border) 90%, transparent);
-    z-index: 1100;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    animation: dropdownIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  /* 1. Üst Kullanıcı Kartı */
-  .header-stitch-user-card {
-    padding: 1rem;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-surface-brand) 80%, transparent) 0%,
-      color-mix(in srgb, var(--color-surface) 90%, transparent) 60%,
-      color-mix(in srgb, var(--color-surface-sunken) 70%, transparent) 100%
-    );
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-  }
-
-  .header-stitch-avatar-large {
-    width: 44px;
-    height: 44px;
-    border-radius: 9999px;
-    background: var(--color-primary);
-    color: var(--color-text-inverse);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 16px;
-    position: relative;
-    flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-  }
-
-  .header-stitch-avatar-large img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .header-stitch-online-dot-large {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 11px;
-    height: 11px;
-    border-radius: 9999px;
-    background: var(--color-accent);
-    border: 2px solid var(--color-neutral-0);
-  }
-
-  .header-stitch-name-wrap {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .header-stitch-name-row {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .header-stitch-fullname {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--color-text-brand);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .header-stitch-pro-badge {
-    padding: 0.1rem 0.45rem;
-    border-radius: 9999px;
-    background: color-mix(in srgb, var(--color-accent) 18%, transparent);
-    color: var(--color-link);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-  }
-
-  .header-stitch-handle {
-    font-size: 12px;
-    color: #717974;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 1px;
-  }
-
-  .header-stitch-edit-btn {
-    padding: 0.45rem;
-    border-radius: 0.65rem;
-    background: var(--color-surface);
-    color: var(--color-link);
-    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    transition: all 0.15s ease;
-    flex-shrink: 0;
-  }
-
-  .header-stitch-edit-btn:hover {
-    background: var(--color-surface-brand);
-    color: var(--color-text-brand);
-    transform: scale(1.05);
-  }
-
-  /* 2. Mini Grid (Kredi / Kazanç) */
-  .header-stitch-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    padding: 0.6rem 0.85rem;
-    background: color-mix(in srgb, var(--color-surface-sunken) 60%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-  }
-
-  .header-stitch-stat-box {
-    padding: 0.6rem 0.75rem;
-    border-radius: 0.85rem;
-    background: var(--color-surface);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-  }
-
-  .header-stitch-stat-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--color-link);
-  }
-
-  .header-stitch-stat-val {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--color-text-brand);
-  }
-
-  /* Scrollable Nav List */
-  .header-stitch-scroll-area {
-    max-height: 380px;
-    overflow-y: auto;
-    padding: 0.5rem 0.65rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .header-stitch-section-label {
-    padding: 0.4rem 0.5rem 0.2rem;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #717974;
-  }
-
-  .header-stitch-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.55rem 0.65rem;
-    border-radius: 0.75rem;
-    color: #131b2e;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    text-align: left;
-    transition: all 0.15s ease;
     box-sizing: border-box;
+    inline-size: 100%;
+    flex-shrink: 0;
+    block-size: var(--app-header-height);
+    padding-block-start: env(safe-area-inset-top, 0px);
+    background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-block-end: 1px solid var(--color-border);
+    view-transition-name: site-header;
+  }
+  .global-site-header[data-elevated] {
+    box-shadow: var(--elevation-raised);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .global-site-header {
+      transition: box-shadow var(--duration-base) var(--easing-standard);
+    }
   }
 
-  .header-stitch-item:hover {
-    background: var(--color-surface-sunken);
-    color: var(--color-text-brand);
-  }
-
-  .header-stitch-item-left {
+  .global-site-header__inner {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    overflow: hidden;
+    gap: var(--space-4);
+    box-sizing: border-box;
+    inline-size: 100%;
+    max-inline-size: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--page-gutter);
+  }
+  .global-site-header:is(
+      [data-variant="wide"],
+      [data-variant="wide-compact"],
+      [data-variant="immersive"]
+    )
+    .global-site-header__inner {
+    max-inline-size: none;
+  }
+  .global-site-header[data-variant="wide-compact"] .global-site-header__inner {
+    padding-inline: var(--space-4);
   }
 
-  .header-stitch-item-left .material-symbols-outlined {
-    color: var(--color-link);
-    font-size: 18px;
-    flex-shrink: 0;
+  /* Logo */
+  .global-site-header__brand {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--touch-target);
+    color: var(--color-text);
+    text-decoration: none;
   }
-
-  .header-stitch-badge-pill {
-    padding: 0.15rem 0.45rem;
-    border-radius: 9999px;
-    font-size: 10px;
-    font-weight: 700;
-    background: var(--color-surface-sunken);
-    color: var(--color-link);
-    flex-shrink: 0;
-  }
-
-  .header-stitch-badge-green {
-    background: var(--color-accent);
+  .global-site-header__brand-mark {
+    display: grid;
+    place-items: center;
+    inline-size: 34px;
+    block-size: 34px;
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
     color: var(--color-on-primary);
   }
-
-  /* Canlı Gezgin Kodu Kartı */
-  .header-stitch-code-card {
-    margin: 0.35rem 0.2rem;
-    padding: 0.55rem 0.75rem;
-    border-radius: 0.85rem;
-    background: var(--color-surface-brand);
-    border: 1px solid var(--color-accent-a20);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .global-site-header__brand-name {
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--letter-spacing-snug);
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .global-site-header__brand-accent {
+    color: var(--color-success);
   }
 
-  .header-stitch-code-text {
-    font-size: 11px;
-    color: var(--color-text-brand);
-    display: flex;
+  /* Ana menü (≥768) */
+  .global-site-header__nav {
+    display: none;
+  }
+  .global-site-header__link {
+    display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: var(--space-2);
+    min-block-size: var(--touch-target);
+    padding-inline: var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .global-site-header__link:hover,
+  .global-site-header__link[aria-current="page"] {
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+  }
+  .global-site-header__link[aria-current="page"] {
+    font-weight: var(--font-weight-semibold);
+  }
+  .global-site-header__link-icon {
+    display: none;
   }
 
-  .header-stitch-code-btn {
-    padding: 0.3rem;
-    border-radius: 0.4rem;
-    background: var(--color-surface);
-    color: var(--color-link);
-    border: 1px solid var(--color-accent-a30);
-    cursor: pointer;
+  /* Sağ grup */
+  .global-site-header__end {
     display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-inline-start: auto;
+  }
+  .global-site-header__locale,
+  .global-site-header__back,
+  .global-site-header__signin,
+  .global-site-header__credits,
+  .global-site-header__signup,
+  .global-site-header__account-trigger {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s ease;
+    gap: var(--space-1);
+    box-sizing: border-box;
+    min-block-size: var(--touch-target);
+    min-inline-size: var(--touch-target);
+    padding-inline: var(--space-3);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
   }
-
-  .header-stitch-code-btn:hover {
-    background: var(--color-accent);
+  .global-site-header__locale {
+    border-color: var(--color-border);
+    font-size: var(--font-size-sm);
+  }
+  .global-site-header__locale:hover,
+  .global-site-header__back:hover,
+  .global-site-header__signin:hover,
+  .global-site-header__account-trigger:hover {
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+  }
+  .global-site-header__back,
+  .global-site-header__signin {
+    color: var(--color-text);
+  }
+  .global-site-header__signup {
+    padding-inline: var(--space-4);
+    background: var(--color-primary);
     color: var(--color-on-primary);
   }
-
-  /* Theme switch inside pop-up */
-  .header-stitch-theme-pills {
-    display: flex;
-    align-items: center;
-    background: var(--color-neutral-200);
-    border-radius: 0.5rem;
-    padding: 2px;
-    font-size: 10px;
-    font-weight: 700;
+  .global-site-header__signup:hover {
+    background: var(--color-primary-hover);
+  }
+  .global-site-header__credits {
+    border-radius: var(--radius-full);
+    background: var(--color-surface-brand);
+    color: var(--color-on-surface-brand);
+    font-variant-numeric: tabular-nums;
+  }
+  .global-site-header__account-trigger {
+    padding-inline: var(--space-1) var(--space-2);
+    border-radius: var(--radius-full);
   }
 
-  .header-stitch-theme-pill-active {
-    padding: 0.2rem 0.5rem;
-    border-radius: 0.4rem;
-    background: var(--color-surface);
-    color: var(--color-text-brand);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  /* Hesap menüsü (disclosure) */
+  .global-site-header__account {
+    position: relative;
   }
-
-  .header-stitch-theme-pill-inactive {
-    padding: 0.2rem 0.5rem;
-    border-radius: 0.4rem;
-    color: #717974;
-  }
-
-  /* Footer in Stitch pop-up */
-  .header-stitch-footer {
-    padding: 0.5rem 0.65rem;
-    background: color-mix(in srgb, var(--color-surface-sunken) 60%, transparent);
-    border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .header-stitch-logout-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.55rem 0.65rem;
-    border-radius: 0.75rem;
-    color: #dc2626;
-    font-size: 13px;
-    font-weight: 700;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    text-align: left;
-    transition: all 0.15s ease;
-  }
-
-  .header-stitch-logout-btn:hover {
-    background: rgba(220, 38, 38, 0.08);
-  }
-
-  .global-site-header {
-    flex-shrink: 0;
-  }
-  .header-stitch-dropdown {
-    max-height: calc(100dvh - 92px - var(--mobile-nav-height));
+  .global-site-header__menu {
+    position: absolute;
+    inset-block-start: calc(100% + var(--space-2));
+    inset-inline-end: 0;
+    z-index: var(--z-dropdown);
+    box-sizing: border-box;
+    min-inline-size: 260px;
+    max-block-size: calc(100dvh - var(--app-header-height) - var(--space-4));
     overflow-y: auto;
     overscroll-behavior: contain;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--elevation-overlay);
   }
-  @media (max-width: 639px) {
-    .global-site-header .global-site-header-inner {
-      padding-inline: 12px;
-      gap: 8px;
-    }
-    .header-brand-link {
-      gap: 6px;
-    }
-    .header-brand-icon {
-      width: 32px;
-      height: 32px;
-    }
-    .header-brand-title {
-      font-size: 1rem;
-    }
-    .header-right-group,
-    .header-auth-buttons {
-      gap: 4px;
-    }
-    .header-btn-login,
-    .header-btn-signup {
-      padding: 8px;
-      min-height: 44px;
+  .global-site-header__menu-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3) var(--space-3);
+    border-block-end: 1px solid var(--color-border);
+    margin-block-end: var(--space-2);
+  }
+  .global-site-header__menu-id {
+    display: grid;
+    min-inline-size: 0;
+  }
+  .global-site-header__menu-name {
+    overflow: hidden;
+    color: var(--color-text);
+    font-weight: var(--font-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .global-site-header__menu-handle {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .global-site-header__menu-list {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .global-site-header__menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: var(--touch-target);
+    padding-inline: var(--space-3);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--font-size-md);
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .global-site-header__menu-item:hover {
+    background: var(--color-surface-sunken);
+  }
+
+  /* Görsel olarak gizli, erişilebilir adda kalan metin (genişliğe göre) */
+  @media (min-width: 768px) and (max-width: 1023.98px) {
+    .global-site-header__brand-name,
+    .global-site-header__signin-label,
+    .global-site-header__credits-unit {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
       white-space: nowrap;
     }
-    .nav-quota-badge-stitch {
-      padding: 6px;
-      gap: 4px;
-      font-size: 11px;
+  }
+  @media (max-width: 767.98px) {
+    .global-site-header__credits-unit {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
-    .nav-quota-badge-stitch .hidden-sm {
+    .global-site-header__brand-mark {
+      inline-size: 30px;
+      block-size: 30px;
+    }
+    .global-site-header__brand-name {
+      font-size: var(--font-size-lg);
+    }
+    /* <768: header yalnızca logo + dil (+ kredi hapı); giriş ve profil alt menüde (F27). */
+    .global-site-header__signin,
+    .global-site-header__signup,
+    .global-site-header__account {
       display: none;
     }
-    .header-user-pill-trigger {
-      min-height: 44px;
+  }
+  @media (min-width: 768px) {
+    .global-site-header__nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
     }
-    .header-stitch-dropdown {
-      position: fixed;
-      top: 80px;
-      right: 8px;
-      max-width: calc(100vw - 16px);
+  }
+  @media (min-width: 1024px) {
+    .global-site-header__inner {
+      gap: var(--space-6);
+    }
+    .global-site-header__link-icon {
+      display: inline;
+    }
+    .global-site-header__signin-icon {
+      display: none;
+    }
+  }
+  @media (min-width: 1280px) {
+    .global-site-header__link {
+      font-size: var(--font-size-base);
     }
   }
 
-  /* App tab bar: five stable targets, one compact active indicator. */
+  /* Mobil web alt menüsü (<768): native sekmelerle aynı 5 öğe (design §5.3). */
   .mobile-primary-nav {
     display: none;
   }
-  @media (max-width: 1279px) {
-    .mobile-primary-nav {
-      display: flex;
-      justify-content: center;
-      position: fixed;
-      inset: auto 0 0;
-      height: var(--mobile-nav-height);
-      padding: 8px max(12px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom))
-        max(12px, env(safe-area-inset-left));
-      z-index: 1100;
-      pointer-events: none;
-      background: linear-gradient(transparent, var(--color-bg) 90%);
+  @media (max-width: 767.98px) {
+    body:has(.mobile-primary-nav:not([data-keyboard="open"])) {
+      --mobile-nav-height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+      padding-block-end: var(--mobile-nav-height);
     }
-    .mobile-nav-track {
+    body:has(.mobile-primary-nav:not([data-keyboard="open"]))
+      :is(.profile-toast, .public-toast-notification) {
+      bottom: calc(var(--mobile-nav-height) + var(--space-4));
+    }
+    body:has(.mobile-primary-nav:not([data-keyboard="open"])) .operations-support-link {
+      bottom: calc(var(--mobile-nav-height) + var(--space-3));
+    }
+    body:has(.mobile-primary-nav:not([data-keyboard="open"])) .operations-banners {
+      bottom: calc(var(--mobile-nav-height) + 68px);
+    }
+
+    .mobile-primary-nav {
+      position: fixed;
+      inset-inline: 0;
+      inset-block-end: 0;
+      z-index: var(--z-overlay);
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      width: 100%;
-      max-width: 520px;
-      height: 72px;
-      padding: 5px;
-      border: 1px solid color-mix(in srgb, var(--color-neutral-0) 85%, transparent);
-      border-radius: 24px;
-      background: color-mix(in srgb, var(--color-surface) 96%, transparent);
-      box-shadow:
-        0 6px 28px color-mix(in srgb, var(--color-surface-inverse) 12%, transparent),
-        0 1px 4px color-mix(in srgb, var(--color-surface-inverse) 6%, transparent);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      pointer-events: auto;
+      box-sizing: border-box;
+      block-size: var(--mobile-nav-height);
+      padding-block-end: env(safe-area-inset-bottom, 0px);
+      padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+      border-block-start: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+      backdrop-filter: blur(12px);
     }
-    .mobile-nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      min-width: 0;
-      min-height: 48px;
-      border-radius: 19px;
-      color: var(--color-text-muted); /* AC-15 kontrast (#64746c yarı saydam zeminde 3,7:1) */
+    /* Klavye açıkken alanların üstüne binmez (S5). */
+    .mobile-primary-nav[data-keyboard="open"] {
+      display: none;
+    }
+    .mobile-primary-nav__item {
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: var(--space-1);
+      min-inline-size: 0;
+      min-block-size: var(--touch-target);
+      color: var(--color-text-muted);
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-semibold);
+      line-height: 1;
+      text-decoration: none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      transition:
-        color 160ms ease,
-        background-color 160ms ease;
     }
-    .mobile-nav-icon-wrap {
+    .mobile-primary-nav__icon {
       position: relative;
       display: grid;
       place-items: center;
-      width: 42px;
-      height: 32px;
-      border-radius: 12px;
-      transition:
-        background-color 160ms ease,
-        transform 160ms ease;
+      inline-size: 52px;
+      block-size: 30px;
+      border-radius: var(--radius-full);
     }
-    .mobile-nav-icon {
-      width: 23px;
-      height: 23px;
-      flex-shrink: 0;
-    }
-    .mobile-nav-label {
-      font-size: 10px;
-      line-height: 15px;
-      font-weight: 600;
+    .mobile-primary-nav__label {
+      max-inline-size: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
-      letter-spacing: -0.15px;
     }
-    .mobile-nav-item[aria-current="page"] {
-      color: #164e3b;
+    .mobile-primary-nav__item[aria-current="page"] {
+      color: var(--color-text-brand);
     }
-    .mobile-nav-item[aria-current="page"] .mobile-nav-icon-wrap {
-      background: #e4f2e9;
+    .mobile-primary-nav__item[aria-current="page"] .mobile-primary-nav__icon {
+      background: var(--color-surface-brand);
     }
-    .mobile-nav-item[aria-current="page"] .mobile-nav-label {
-      font-weight: 800;
-    }
-    .mobile-nav-assistant .mobile-nav-icon-wrap {
-      color: var(--color-text-inverse);
-      background: var(--color-brand-hover);
-      box-shadow: 0 3px 8px color-mix(in srgb, var(--color-brand-hover) 20%, transparent);
-    }
-    .mobile-nav-assistant[aria-current="page"] .mobile-nav-icon-wrap {
-      background: var(--color-brand-hover);
-      box-shadow: 0 0 0 3px #d7ecdf;
-    }
-    .mobile-nav-item:active .mobile-nav-icon-wrap {
-      transform: scale(0.92);
-    }
-    .mobile-nav-item:focus-visible {
-      outline: 2px solid var(--focus-ring-color);
-      outline-offset: -2px;
-    }
-    .mobile-nav-badge {
+    .mobile-primary-nav__badge {
       position: absolute;
-      top: -2px;
-      right: 0;
-      min-width: 16px;
-      height: 16px;
-      padding-inline: 3px;
+      inset-block-start: -4px;
+      inset-inline-end: 6px;
       display: grid;
       place-items: center;
-      border: 2px solid var(--color-neutral-0);
-      border-radius: 8px;
-      background: #c84436;
+      box-sizing: border-box;
+      min-inline-size: 18px;
+      block-size: 18px;
+      padding-inline: var(--space-1);
+      border: 2px solid var(--color-surface);
+      border-radius: var(--radius-full);
+      background: var(--color-danger-solid);
       color: var(--color-text-inverse);
-      font-size: 9px;
-      font-weight: 700;
-      line-height: 1;
+      font-size: var(--font-size-2xs);
+      font-weight: var(--font-weight-bold);
     }
   }
-  @media (min-width: 375px) and (max-width: 1279px) {
-    .mobile-nav-label {
-      font-size: 11px;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .mobile-nav-item,
-    .mobile-nav-icon-wrap {
-      transition: none;
-    }
-  }
-
-  /* Phone shell: compact app header and edge-attached bottom tabs. */
-  .global-site-header {
-    height: var(--app-header-height);
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-  @media (max-width: 767px) {
-    .global-site-header {
-      background: var(--color-surface);
-      backdrop-filter: none;
-    }
-    .header-stitch-dropdown {
-      top: calc(var(--app-header-height) + 4px);
-      max-height: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height) - 12px);
-    }
-    .mobile-primary-nav {
-      padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom)
-        max(4px, env(safe-area-inset-left));
-      background: var(--color-surface);
-      border-top: 1px solid var(--color-border);
-    }
-    .mobile-nav-track {
-      max-width: 560px;
-      height: 71px;
-      padding: 4px 2px;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-      backdrop-filter: none;
-    }
-    .mobile-nav-assistant .mobile-nav-icon-wrap {
-      box-shadow: none;
-    }
-    .header-brand-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 10px;
-    }
-  }
-
-  /* ========================================================= */
-  /* PLATFORM-SPECIFIC MOBILE NAV (iOS Cupertino vs Android M3) */
-  /* ========================================================= */
-
-  /* iOS Cupertino Floating Translucent Capsule */
-  @media (max-width: 767px) {
-    [data-platform="ios"] .mobile-primary-nav {
-      padding: 0 16px max(12px, env(safe-area-inset-bottom)) 16px;
-      background: transparent;
-      border-top: none;
-      pointer-events: none;
-    }
-    [data-platform="ios"] .mobile-nav-track {
-      max-width: 480px;
-      height: 66px;
-      padding: 4px 6px;
-      border-radius: 33px;
-      background: color-mix(in srgb, var(--color-surface) 85%, transparent);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid color-mix(in srgb, var(--color-neutral-0) 55%, transparent);
-      box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.12),
-        0 2px 6px rgba(0, 0, 0, 0.04);
-      pointer-events: auto;
-    }
-    [data-platform="ios"] .mobile-nav-item {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-    }
-    [data-platform="ios"] .mobile-nav-item[aria-current="page"] {
-      color: var(--color-success); /* AC-15 kontrast */
-    }
-    [data-platform="ios"] .mobile-nav-item[aria-current="page"] .mobile-nav-icon-wrap {
-      background: color-mix(in srgb, var(--color-accent) 15%, transparent);
-      border-radius: 14px;
-    }
-
-    /* Android Material 3 Tonal Navigation Bar */
-    [data-platform="android"] .mobile-primary-nav {
-      padding: 0 0 env(safe-area-inset-bottom) 0;
-      background: var(--color-surface);
-      border-top: 1px solid var(--color-border);
-    }
-    [data-platform="android"] .mobile-nav-track {
-      max-width: 100%;
-      height: 70px;
-      padding: 2px 0;
-      border-radius: 0;
-      background: transparent;
-      border: none;
-      box-shadow: none;
-    }
-    [data-platform="android"] .mobile-nav-item {
-      font-family: "Plus Jakarta Sans", Roboto, sans-serif;
-    }
-    [data-platform="android"] .mobile-nav-item[aria-current="page"] {
-      color: var(--color-brand);
-    }
-    [data-platform="android"] .mobile-nav-item[aria-current="page"] .mobile-nav-icon-wrap {
-      width: 56px;
-      height: 32px;
-      border-radius: 16px;
-      background: var(--color-surface-brand);
-      color: var(--color-brand);
-    }
-  }
-
-  /* AC-17: dokunmatik genişliklerde header kontrolleri ≥44×44 (design §3 "Dokunma hedefi"). */
-  @media (max-width: 767.98px) {
-    .header-brand-link,
-    .header-locale-btn {
-      min-height: var(--touch-target);
-      min-width: var(--touch-target);
-    }
-  }
-  /* Chrome varyantları (G19): eski sayfa override'larının (messages/community/profile CSS)
-     birebir karşılığı; varyant SiteChrome'dan data-variant ile gelir. */
-  .global-site-header[data-variant] {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    width: 100%;
-  }
-  .global-site-header[data-variant] .global-site-header-inner {
-    max-width: 100%;
-  }
-  .global-site-header[data-variant="wide-compact"] .global-site-header-inner {
-    padding: 0 1rem;
-  }
-  /* Mobil alt nav'a bağlı gövde kuralları (C6: styles.css legacy'den chrome'a taşındı; sıra korunur).
-     Eski 1279/767 koşulları kümedeki .98 eşleniğiyle yazıldı (D18: <1px fark, yeni değer yok). */
-  @media (max-width: 640px) {
-    body:has(.mobile-primary-nav) :is(.profile-toast, .public-toast-notification) {
-      bottom: calc(80px + env(safe-area-inset-bottom));
-    }
-  }
-  @media (max-width: 1279.98px) {
-    body:has(.mobile-primary-nav) :is(.profile-toast, .public-toast-notification) {
-      bottom: calc(var(--mobile-nav-height) + 16px);
-    }
-  }
-  @media (max-width: 1279.98px) {
-    body:has(.mobile-primary-nav) {
-      --mobile-nav-height: calc(92px + env(safe-area-inset-bottom));
-      padding-bottom: var(--mobile-nav-height);
-    }
-    body:has(.mobile-primary-nav) .operations-support-link {
-      bottom: calc(var(--mobile-nav-height) + 12px);
-    }
-    body:has(.mobile-primary-nav) .operations-banners {
-      bottom: calc(var(--mobile-nav-height) + 68px);
-    }
-  }
-  @media (max-width: 767.98px) {
-    body:has(.mobile-primary-nav) {
-      --mobile-nav-height: calc(72px + env(safe-area-inset-bottom));
+  @media (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
+    .mobile-primary-nav__icon {
+      transition: background-color var(--duration-base) var(--easing-standard);
     }
   }
 }

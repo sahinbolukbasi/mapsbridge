@@ -70,7 +70,8 @@ export default function FindByCodePage() {
 
     // Read the address independently of the map SDK.
     const params = new URLSearchParams(window.location.search);
-    const queryCode = params.get("kod") || params.get("code");
+    // Kanonik parametre `code`; eski bağlantılar için `kod` da okunur (design §5.4).
+    const queryCode = params.get("code") || params.get("kod");
     if (queryCode && isMounted) {
       setInputCode(queryCode);
       fetchLocationByCode(queryCode);

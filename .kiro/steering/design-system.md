@@ -67,6 +67,7 @@ export default function Page() {
 - Header, footer, mobil alt nav ve sistem duyurusu root layout'taki `SiteChrome`'dadır.
 - Sayfa `<header>`/`<footer>` çizmez, `HeaderNav`/`SiteFooter` import etmez (G5, ESLint).
 - Sayfa CSS'i chrome sınıflarını (`.global-site-header`, `.global-footer-*`, `.mobile-nav-*`) ezmez (G19); varyant registry'deki `chrome` alanıyla seçilir.
+- R5: `chrome` varyantları `default | wide | wide-compact | immersive | focus`. `immersive` (planlayıcı, asistan, mesajlar) footer çizmez, sayfa header ile alt menü arasını doldurur; `focus` (kimlik formları) yalnız logo + dil + Geri gösterir, alt menü ve footer çizilmez. Mobil web alt menüsü (<768) klavye açıkken gizlenir (`data-keyboard="open"`). Footer bağlantıları yalnızca registry `footer` (+ `nav`) alanından üretilir; footer'a elle href yazılmaz (G5/G19).
 
 ## 8. URL ve SEO
 
@@ -75,6 +76,7 @@ export default function Page() {
 - İç linkler kanonik URL'e gider. Sayfa durumu (`?tab=`, `?alan=`) `useUrlParam` ile tutulur.
 - `useSearchParams` yalnızca `*-listener.tsx` içinde, tüketicide `<Suspense fallback={null}>` ile; sayfa kökü Suspense'e sarılmaz (G21).
 - Metadata `routeMetadata("/<slug>/")` ile registry'den gelir (G9).
+- R8: Dönüş parametresi yalnızca `next` (üreticiler `?next=` yazar, `?redirect=` yazılmaz). Okuyucular `lib/navigation/safe-next.ts` (`readNext`/`safeNext`) kullanır; `redirect` yalnız geriye uyumluluk için okunur. Paylaşım bağlantısı `/k/?code=` (`?kod=` yalnız okunur). Koruyan test: `apps/web/tests/navigation.test.cjs`.
 
 ## 9. Erişilebilirlik
 

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { confirmSignUp, resendConfirmationCode } from "../lib/cognito";
 import { Alert, Button, Card, Field, Input, PageHeader, PageShell } from "../components/ui";
 import "./verify.css";
+import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 
 export default function VerifyPage() {
   const [message, setMessage] = useState("");
@@ -34,10 +35,10 @@ export default function VerifyPage() {
     setCodeError(null);
     try {
       await confirmSignUp(email, code);
-      const params =
-        typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-      const nextTarget = params?.get("next");
-      const nextParam = nextTarget ? `?next=${encodeURIComponent(nextTarget)}` : "";
+      // Dönüş yolu safe-next ile doğrulanır (design §5.4, R8).
+      const nextTarget = readNext(window.location.search, window.location.origin);
+      const nextParam =
+        nextTarget !== DEFAULT_NEXT ? `?next=${encodeURIComponent(nextTarget)}` : "";
       window.location.assign(`/login/${nextParam}`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kod doğrulanamadı.");

@@ -424,8 +424,16 @@ export interface ChromeCheckOptions {
   axeWidths: number[];
   systemStatusFixture: string;
 }
-/** AC-9 beklenen header yüksekliği (safe-area 0): 1280 → 76px, 375 → 64px. */
-export const EXPECTED_HEADER_HEIGHT: Record<number, number> = { 1280: 76, 375: 64 };
+/** AC-9 beklenen header yüksekliği (safe-area 0; token --app-header-height, design §3.3): 1280 → 72px, 375 → 56px. */
+export const EXPECTED_HEADER_HEIGHT: Record<number, number> = { 1280: 72, 375: 56 };
+/** AC-9 chrome varyantı (design §5.2, R5; header data-variant = registry `chrome`): immersive/focus
+ * footer çizmez, focus alt menü çizmez. */
+export function expectedChrome(variant: string | null): { footer: number; mobileNav: boolean } {
+  return {
+    footer: variant === "immersive" || variant === "focus" ? 0 : 1,
+    mobileNav: variant !== "focus",
+  };
+}
 /** AC-38 senaryo rotaları (design §4.1). */
 export const AC38_ROUTES = ["/", "/support/"] as const;
 const SYSTEM_NOTICE = "Sistem duyurusu";
@@ -449,6 +457,10 @@ async function landmarkCounts(page: Page) {
     return {
       header: document.querySelectorAll("header.global-site-header").length,
       footer: document.querySelectorAll("footer.global-site-footer").length,
+      variant: header?.getAttribute("data-variant") ?? null,
+      mobileNavVisible: [...document.querySelectorAll(".mobile-primary-nav")].some(
+        (n) => getComputedStyle(n).display !== "none",
+      ),
       main: document.querySelectorAll("main#main-content").length,
       anyMain: document.querySelectorAll("main").length,
       h1: document.querySelectorAll("h1").length,
@@ -737,7 +749,15 @@ async function checkRoute(
       const c = await landmarkCounts(page);
       result.headerHeight[String(w)] = c.headerHeight;
       if (c.header !== 1) nine.push(`${w}px: header.global-site-header ${c.header}`);
-      if (c.footer !== 1) nine.push(`${w}px: footer.global-site-footer ${c.footer}`);
+      const want = expectedChrome(c.variant);
+      if (c.footer !== want.footer)
+        nine.push(`${w}px: footer.global-site-footer ${c.footer} (beklenen ${want.footer})`);
+      // Alt menü yalnızca <768'de görünür; focus chrome'da hiç çizilmez.
+      const navWanted = w < 768 && want.mobileNav;
+      if (c.mobileNavVisible !== navWanted)
+        nine.push(
+          `${w}px: .mobile-primary-nav görünür=${c.mobileNavVisible} (beklenen ${navWanted})`,
+        );
       if (c.main !== 1) nine.push(`${w}px: main#main-content ${c.main} (main ${c.anyMain})`);
       if (c.h1 !== 1) nine.push(`${w}px: h1 ${c.h1}`);
       const expected = EXPECTED_HEADER_HEIGHT[w];
