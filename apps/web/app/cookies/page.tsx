@@ -7,7 +7,12 @@ import "../styles/legal.css";
 // Başlık registry'den ("Çerez politikası"). Her satır koddaki gerçek bir anahtara karşılık gelir:
 // mb_session (lib/auth-context.tsx), locale (lib/auto-locale.ts), oturum anahtarları ve çıkışta
 // silinenler (lib/cognito.ts signOut), planlayıcı (lib/trip/planner-store.ts) ve misafir taslağı
-// mapsbridge.guestDraft.v1 (lib/guest/guest-draft.ts, 7 gün; design §6.2).
+// mapsbridge.guestDraft.v1 (lib/guest/guest-draft.ts, 7 gün; design §6.2), hesaba bağlı kayıtlar
+// (lib/user-storage.ts: AI sohbet geçmişi, profil ayrıntıları), doğrudan mesajlar
+// (features/messaging/conversations.ts), kullanım olayları (lib/analytics.ts), harita önbelleği
+// (lib/google/places-cache.ts). lib/billing/billing-service.ts saveBillingDetails çağrılmadığı için
+// mapsbridge.billing_details yazılmaz ve listelenmez.
+// Liste tam envanter iddiası taşımaz; KVKK metni yayından önce sahibince onaylanmalıdır.
 type StorageRow = { name: string; keys: string; kind: string; purpose: string; lifetime: string };
 
 const ROWS: readonly StorageRow[] = [
@@ -28,9 +33,10 @@ const ROWS: readonly StorageRow[] = [
   },
   {
     name: "Oturum anahtarları",
-    keys: "mapsbridge.accessToken, mapsbridge.idToken, mapsbridge.refreshToken",
+    keys: "mapsbridge.accessToken, mapsbridge.idToken, mapsbridge.refreshToken, mapsbridge.userEmail, mapsbridge.loginTime",
     kind: "Yerel depolama · zorunlu",
-    purpose: "Hesabına giriş yapılmış halde kalmanı sağlar.",
+    purpose:
+      "Hesabına giriş yapılmış halde kalmanı sağlar. E-posta adresin ve giriş zamanın da bu cihazda tutulur.",
     lifetime: "Çıkış yapana kadar",
   },
   {
@@ -50,6 +56,35 @@ const ROWS: readonly StorageRow[] = [
     lifetime:
       "En fazla 7 gün; taslağı sildiğinde, taslaktan yapılan istek başarılı olduğunda ya da çıkış yaptığında daha erken silinir",
   },
+  {
+    name: "Hesaba bağlı kayıtlar",
+    keys: "mapsbridge.account.<e-posta>.*",
+    kind: "Yerel depolama · işlev",
+    purpose:
+      "Giriş yaptığında asistan sohbet geçmişin (en fazla 15 sohbet) ve profil ayrıntıların bu cihazda hesabına ayrılmış olarak tutulur.",
+    lifetime: "Sohbeti silene ya da tarayıcı verisi silinene kadar",
+  },
+  {
+    name: "Doğrudan mesajlar",
+    keys: "mapsbridge.directMessages",
+    kind: "Yerel depolama · işlev",
+    purpose: "Mesajlar sayfasındaki sohbet listesini ve okunmamış sayısını gösterir.",
+    lifetime: "Tarayıcı verisi silinene kadar",
+  },
+  {
+    name: "Kullanım olayları",
+    keys: "mapsbridge.analyticsEvents",
+    kind: "Yerel depolama · ölçüm",
+    purpose: "Topluluk gönderisi görüntüleme olaylarının son 1000 kaydı bu cihazda tutulur.",
+    lifetime: "Tarayıcı verisi silinene kadar",
+  },
+  {
+    name: "Harita önbelleği",
+    keys: "mapsbridge.cache.*",
+    kind: "Yerel depolama · işlev",
+    purpose: "Yer ayrıntısı, yer araması ve adres sonuçlarını tekrar sorgulamamak için saklar.",
+    lifetime: "Aramalar 24 saat, yer ayrıntıları 7 gün, adresler 30 gün",
+  },
 ];
 
 export default function Cookies() {
@@ -64,8 +99,8 @@ export default function Cookies() {
       }
     >
       <p>
-        MapsBridge yalnızca oturum güvenliği, dil tercihin ve planlama işlevleri için çerez ve yerel
-        depolama (localStorage) kullanır. Aşağıdaki liste bunların tamamını açıklar.
+        MapsBridge oturum güvenliği, dil tercihin, planlama ve hesap işlevleri için çerez ve yerel
+        depolama (localStorage) kullanır. Başlıca kayıtlar aşağıda listelenir.
       </p>
       <Section title="Saklananlar">
         <ul className="legal-storage">

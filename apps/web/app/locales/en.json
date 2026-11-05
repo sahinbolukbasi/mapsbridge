@@ -748,7 +748,7 @@
   "how.faq.a3": "Anyone with the link or code, until the time you chose runs out. No account is needed to view it; once it expires it no longer opens.",
   "how.faq.q4": "Where does place information come from?",
   "how.faq.a4": "Addresses, opening hours and coordinates come from data sources; the assistant never makes them up. Its job is to understand your intent and explain the route.",
-  "how.faq.q5": "Does “Optimise the route” use credits?",
+  "how.faq.q5": "Does “Optimise route” use credits?",
   "how.faq.a5": "No. The planner's optimisation recalculates the selected day's stop order on your device and costs no credits.",
   "how.final.title": "You don't need an account to try it",
   "how.final.sub": "Describe your trip or start adding stops on the map; your draft waits on your device.",

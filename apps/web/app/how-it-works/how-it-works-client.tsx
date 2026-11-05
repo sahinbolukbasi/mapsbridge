@@ -122,7 +122,7 @@ export function HowItWorksClient() {
 
       <Section id="krediler" title={t("how.credits.title")} description={t("how.credits.sub")}>
         <div className="hiw-credits">
-          <CreditCostTable />
+          <CreditCostTable actions={["clarify", "ai_chat", "ai_stay_dining", "ai_deep_trip"]} />
           <div>
             <Button href="/pricing/" variant="link" iconEnd={<Icon name="arrow" size={16} />}>
               {t("how.credits.cta")}
