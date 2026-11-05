@@ -30,8 +30,8 @@
   },
   "G7": {
     "app/[username]/public-profile-client.tsx": 12,
-    "app/articles/page.tsx": 19,
-    "app/checkout/page.tsx": 9,
+    "app/articles/page.tsx": 15,
+    "app/checkout/page.tsx": 7,
     "app/community/page.tsx": 3,
     "app/components/auth-guard.tsx": 19,
     "app/components/header-nav.tsx": 17,

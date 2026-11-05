@@ -1,15 +1,17 @@
-// Üç çıktıyı yazar; --check modunda yalnızca karşılaştırır (fark varsa exit 1).
+// Çıktıları yazar; --check modunda yalnızca karşılaştırır (fark varsa exit 1).
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkInverseScope, checkPairs, checkPrimitiveSurfaces } from "../src/contrast.ts";
-import { toCss, toNative, toWebTs } from "../src/emit.ts";
+import { toCss, toNative, toNativeIcons, toWebIcons, toWebTs } from "../src/emit.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const outputs: Array<[string, () => string]> = [
   ["apps/web/app/styles/tokens.css", toCss],
   ["apps/web/app/lib/design-tokens.ts", toWebTs],
   ["apps/mobile/src/theme/tokens.ts", toNative],
+  ["apps/web/app/lib/icon-paths.ts", toWebIcons],
+  ["apps/mobile/src/theme/icon-paths.ts", toNativeIcons],
 ];
 
 const failures = [...checkPairs(), ...checkInverseScope()];

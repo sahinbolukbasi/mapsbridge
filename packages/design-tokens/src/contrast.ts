@@ -74,6 +74,27 @@ export const REQUIRED_PAIRS: Pair[] = [
   { fg: "color-danger", bg: "color-surface", min: TEXT, note: "hata metni" },
   { fg: "color-success", bg: "color-surface", min: TEXT, note: "başarı metni" },
   { fg: "color-on-primary", bg: "color-primary", min: TEXT, note: "on-primary" },
+  // Kil vurgu ve gün renkleri (Yön B, design §3.4)
+  ...["color-bg", "color-surface", "color-highlight-bg", "color-highlight-bg-strong"].map((bg) => ({
+    fg: "color-highlight-text",
+    bg,
+    min: TEXT,
+    note: "vurgu metni / eyebrow",
+  })),
+  ...[1, 2, 3, 4, 5, 6, 7].map((d) => ({
+    fg: "color-on-day",
+    bg: `color-day-${d}`,
+    min: TEXT,
+    note: "gün pin numarası",
+  })),
+  {
+    fg: "color-text-inverse-highlight",
+    bg: "color-surface-inverse",
+    min: TEXT,
+    note: "ters zeminde eyebrow",
+  },
+  { fg: "color-example-fg", bg: "color-example-bg", min: TEXT, note: "Örnek rozeti" },
+  { fg: "color-highlight", bg: "color-surface", min: UI, note: "vurgu dolgusu / halka" },
   // Ters yüzeyler
   ...["color-surface-inverse", "color-surface-inverse-strong"].flatMap((bg) => [
     { fg: "color-text-inverse", bg, min: TEXT, note: "ters metin" },

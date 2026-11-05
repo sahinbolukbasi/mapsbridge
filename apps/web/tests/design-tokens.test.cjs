@@ -108,7 +108,11 @@ test("AC-4f: primitive varyantları × açık/inverse kap × üç zemin (metin �
       );
 });
 
-test("NFR-7: tokens.css + base.css + ui.css ≤ 40 KB (geçici legacy alias bölümü hariç)", () => {
+// NFR-7 bütçesi 40 960 → 53 248 B (52 KB): Yön B token seti (design §3) ve genel primitive'ler
+// (design §4.2) için plan D1 kararı. Özelliğe özgü bileşimler ui.css dışında, yalnız kendi
+// rotalarında yüklenir.
+const CSS_BUDGET = 53248;
+test("NFR-7: tokens.css + base.css + ui.css ≤ 52 KB (geçici legacy alias bölümü hariç)", () => {
   const tokens = read("apps/web/app/styles/tokens.css");
   // Legacy alias bölümü geçicidir (design §13.1 tokens.css satırı "alias bölümü hariç"); C18'de boşalır.
   const alias = tokens.match(/ {4}\/\* Geçici legacy alias[^\n]*\n(?: {4}--[^\n]*\n)*/);
@@ -117,5 +121,43 @@ test("NFR-7: tokens.css + base.css + ui.css ≤ 40 KB (geçici legacy alias böl
     tokensBytes +
     Buffer.byteLength(read("apps/web/app/styles/base.css")) +
     Buffer.byteLength(read("apps/web/app/components/ui/ui.css"));
-  assert.ok(total <= 40960, `üç CSS toplamı ${total} bayt (> 40960)`);
+  assert.ok(total <= CSS_BUDGET, `üç CSS toplamı ${total} bayt (> ${CSS_BUDGET})`);
+});
+
+test("Yön B anahtarları web CSS, RN teması ve iki ikon çıktısında var (design §3.3, plan D4)", () => {
+  const css = read("apps/web/app/styles/tokens.css");
+  const cssKeys = [
+    "duration-deliberate",
+    "duration-route",
+    "easing-enter",
+    "easing-exit",
+    "motion-distance-md",
+    "letter-spacing-tight",
+    "font-size-6xl",
+    ...[1, 2, 3, 4, 5, 6, 7].map((d) => `color-day-${d}`),
+    "color-highlight-text",
+    "chip-selected-bg",
+    "cost-fg",
+  ];
+  for (const key of cssKeys) assert.match(css, new RegExp(`--${key}:`), `tokens.css: --${key} yok`);
+
+  const native = read("apps/mobile/src/theme/tokens.ts");
+  const motionBlock = native.slice(native.indexOf("  motion: {"));
+  assert.match(motionBlock, /^\s{4}easing: \{/m, "RN tokens.ts: motion.easing yok");
+  assert.match(motionBlock, /spring: \{\s*sheet: \{/, "RN tokens.ts: motion.spring.sheet yok");
+  assert.match(native, /^\s{2}letterSpacing: \{/m, "RN tokens.ts: letterSpacing yok");
+  assert.match(native, /^\s{4}family: \{/m, "RN tokens.ts: font.family yok");
+
+  const script = `
+    import { icons } from "./src/icons.ts";
+    import { iconPaths as web } from "../../apps/web/app/lib/icon-paths.ts";
+    import { iconPaths as native } from "../../apps/mobile/src/theme/icon-paths.ts";
+    console.log(JSON.stringify({ src: Object.keys(icons), web: Object.keys(web), native: Object.keys(native) }));
+  `;
+  const r = runTs(["--input-type=module", "-e", script]);
+  assert.equal(r.status, 0, r.stderr);
+  const keys = JSON.parse(r.stdout);
+  assert.ok(keys.src.length >= 56, `beklenen ≥56 ikon, bulunan ${keys.src.length}`);
+  assert.deepEqual(keys.web, keys.src, "web icon-paths.ts anahtarları icons.ts ile aynı değil");
+  assert.deepEqual(keys.native, keys.src, "RN icon-paths.ts anahtarları icons.ts ile aynı değil");
 });

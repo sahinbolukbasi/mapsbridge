@@ -1,0 +1,74 @@
+// İkon path kaynağı (plan D4): web ve RN aynı path'i çizer. Kendi çizdiğimiz çizgi ikonları,
+// 24×24 viewBox, fill yok, stroke = currentColor, round cap/join. Çıktılar emit.ts →
+// apps/web/app/lib/icon-paths.ts ve apps/mobile/src/theme/icon-paths.ts (elle düzenleme).
+// İlk 33 path design/mocks/_build.mjs ICON setinden alındı; kalanlar primitive'ler için eklendi.
+export const icons = {
+  map: "M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z M9 4v14 M15 6v14",
+  sparkle:
+    "M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16.4l-1.8-4.9L5 9.7l5.2-1.8Z M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z",
+  users:
+    "M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20 M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.35 M15.5 4.2a3.5 3.5 0 0 1 0 6.6",
+  message: "M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z",
+  user: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
+  compass: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M15.5 8.5l-2 5-5 2 2-5Z",
+  search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z M20 20l-4-4",
+  arrow: "M5 12h14 M13 6l6 6-6 6",
+  walk: "M13 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z M10 21l2-6 3 3v3 M7 12l3-4 4 1 2 4 M12 15l-1-5",
+  clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M12 7v5l3 2",
+  plus: "M12 5v14 M5 12h14",
+  minus: "M5 12h14",
+  layers: "M12 3 2 8l10 5 10-5-10-5Z M2 13l10 5 10-5",
+  locate: "M12 2v3 M12 19v3 M2 12h3 M19 12h3 M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z",
+  share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7 M12 3v12 M7 8l5-5 5 5",
+  offline: "M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z M9 12l2 2 4-4",
+  check: "M5 12l5 5 9-10",
+  lock: "M6 11h12v10H6Z M8 11V8a4 4 0 0 1 8 0v3",
+  globe:
+    "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M3 12h18 M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3Z",
+  chevron: "M6 9l6 6 6-6",
+  coin: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M12 6.5v11 M15 9.2c-.6-.8-1.7-1.2-3-1.2-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.3 0-2.4-.4-3-1.2",
+  route:
+    "M6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z M18 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z M8 18h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16",
+  send: "M4 12l16-8-6 16-2-7-8-1Z",
+  x: "M6 6l12 12 M18 6 6 18",
+  rain: "M7 15a5 5 0 1 1 1.6-9.7A6 6 0 0 1 19.5 9 3.5 3.5 0 0 1 18 15Z M9 18l-1 3 M13 18l-1 3 M17 18l-1 3",
+  bag: "M5 8h14l-1 13H6Z M9 8V6a3 3 0 0 1 6 0v2",
+  undo: "M9 14 4 9l5-5 M4 9h10a6 6 0 0 1 0 12h-3",
+  key: "M14.5 13.5a5 5 0 1 0-4-4L3 17v4h4v-2h2v-2h2Z M16.5 7.5h.01",
+  grip: "M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01",
+  shield: "M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6Z M9 12l2 2 4-4",
+  food: "M7 3v8 M5 3v5a2 2 0 0 0 4 0V3 M7 11v10 M17 3c-1.7 0-3 2-3 5s1.3 4 3 4v9",
+  landmark: "M3 21h18 M5 21V10 M19 21V10 M9 21V10 M15 21V10 M2 10l10-6 10 6Z",
+  menu: "M4 7h16 M4 12h16 M4 17h16",
+  // Primitive'ler için eklenenler
+  "chevron-left": "M15 6l-6 6 6 6",
+  "chevron-right": "M9 6l6 6-6 6",
+  "chevron-up": "M6 15l6-6 6 6",
+  info: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M12 11v5 M12 8h.01",
+  alert: "M12 3 2 20h20L12 3Z M12 10v4 M12 17h.01",
+  error: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M15 9l-6 6 M9 9l6 6",
+  external: "M14 4h6v6 M20 4l-9 9 M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5",
+  copy: "M9 9h11v11H9Z M5 15H4V4h11v1",
+  calendar: "M4 6h16v14H4Z M4 10h16 M8 3v4 M16 3v4",
+  home: "M3 11l9-7 9 7 M5 10v10h14V10 M10 20v-6h4v6",
+  logout: "M9 20H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h4 M16 16l4-4-4-4 M20 12H9",
+  settings:
+    "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M12 2v3 M12 19v3 M4.9 4.9 7 7 M17 17l2.1 2.1 M2 12h3 M19 12h3 M4.9 19.1 7 17 M17 7l2.1-2.1",
+  help: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6 M12 17h.01",
+  trash: "M4 7h16 M10 11v6 M14 11v6 M6 7l1 13h10l1-13 M9 7V4h6v3",
+  edit: "M4 20h4L19 9l-4-4L4 16Z M13.5 6.5l4 4",
+  heart: "M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z",
+  bookmark: "M6 3h12v18l-6-4-6 4Z",
+  filter: "M3 5h18l-7 8v6l-4 2v-8Z",
+  camera: "M4 8h3l2-3h6l2 3h3v12H4Z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
+  drive: "M5 17h14v-5l-2-5H7l-2 5Z M5 12h14 M7 17v2 M17 17v2 M8 14.5h.01 M16 14.5h.01",
+  transit:
+    "M6 4h12a1 1 0 0 1 1 1v11H5V5a1 1 0 0 1 1-1Z M5 11h14 M8 16l-2 4 M16 16l2 4 M9 13.5h.01 M15 13.5h.01",
+  image: "M4 5h16v14H4Z M4 16l5-5 4 4 2-2 5 5 M15.5 9.5h.01",
+  qr: "M4 4h6v6H4Z M14 4h6v6h-6Z M4 14h6v6H4Z M14 14h2v2h-2Z M18 18h2v2h-2Z M14 18h2 M18 14h2",
+} as const;
+
+export type IconName = keyof typeof icons;
+
+// Çizgi kalınlığı (viewBox birimi): grip noktaları daha kalın çizilir.
+export const iconStroke = { default: 1.8, grip: 3 } as const;

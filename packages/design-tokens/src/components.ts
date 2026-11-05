@@ -13,6 +13,8 @@ const BADGE_BG = {
   warning: "color-warning-bg-strong",
   danger: "color-danger-bg",
   info: "color-info-bg",
+  example: "color-example-bg",
+  highlight: "color-highlight-bg",
 } as const;
 const BADGE_FG = {
   neutral: "color-text-muted",
@@ -21,6 +23,8 @@ const BADGE_FG = {
   warning: "color-warning",
   danger: "color-danger",
   info: "color-info",
+  example: "color-example-fg",
+  highlight: "color-highlight-text",
 } as const;
 
 // CSS adı → değer. Sıra üretilen dosyada korunur.
@@ -92,6 +96,26 @@ export const componentTokens: Record<string, ColorValue> = {
   "avatar-bg": tok("color-surface-brand-strong"),
   "avatar-fg": tok("color-on-surface-brand"),
   "skeleton-bg": tok("color-surface-sunken"),
+  // Yön B bileşen token'ları (design §3.5)
+  "chip-bg": tok("color-surface"),
+  "chip-fg": tok("color-text"),
+  "chip-border": tok("color-border-control"),
+  "chip-selected-bg": tok("color-primary"),
+  "chip-selected-fg": tok("color-on-primary"),
+  "segment-bg": tok("color-surface-sunken"),
+  "segment-fg": tok("color-text-muted"),
+  "segment-selected-bg": tok("color-surface"),
+  "segment-selected-fg": tok("color-text"),
+  "sheet-bg": tok("color-surface"),
+  "sheet-handle": tok("color-border-strong"),
+  "stop-bg": tok("color-surface"),
+  "stop-border": tok("color-border"),
+  "stop-selected-border": tok("color-primary"),
+  connector: tok("color-border-strong"),
+  "cost-bg": tok("color-highlight-bg"),
+  "cost-fg": tok("color-highlight-text"),
+  "composer-bg": tok("color-surface"),
+  "composer-border": tok("color-border-control"),
 };
 
 // [data-surface="inverse"] kapta yeniden eşlenen bileşen token'ları ("Inverse kapta" sütunu).
@@ -105,6 +129,14 @@ export const componentInverseOverrides: Record<string, string> = {
   "button-link-fg": "color-link-inverse",
   "button-link-fg-hover": "color-link-inverse-hover",
   "skeleton-bg": "color-white-a08",
+  // Ters kapta chip ve kredi rozeti (ink-900 üstünde metin ≥4.5:1)
+  "chip-bg": "color-white-a08",
+  "chip-fg": "color-text-inverse",
+  "chip-border": "color-text-inverse-subtle",
+  "chip-selected-bg": "color-accent-strong",
+  "chip-selected-fg": "color-on-accent",
+  "cost-bg": "color-white-a08",
+  "cost-fg": "color-text-inverse-highlight",
 };
 
 /**

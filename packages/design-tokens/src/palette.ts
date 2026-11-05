@@ -32,8 +32,26 @@ export const palette = {
   "slate-700": "#334155",
   "slate-800": "#1e293b",
   "slate-900": "#0f172a",
-  // Lavanta (Stitch surface-container)
-  "lavender-100": "#eef0ff",
+  // Kartograf (Yön B, design §3.1) — kağıt, mürekkep, kil
+  "paper-0": "#fffdf8",
+  "paper-50": "#faf7f0",
+  "paper-100": "#f2ede2",
+  "paper-200": "#e4dccb",
+  "paper-300": "#cfc4ad",
+  "ink-900": "#1b2420",
+  "ink-700": "#3f4843",
+  "ink-500": "#5f6762",
+  "clay-50": "#fbece4",
+  "clay-100": "#f6d9ca",
+  "clay-300": "#f2b59b",
+  "clay-600": "#b4502b",
+  "clay-700": "#9a3f1e",
+  // Gün paleti (beyaz numara ≥ 5:1)
+  "steel-600": "#2f6f8f",
+  "plum-600": "#7a3e8e",
+  "olive-700": "#5b6b1f",
+  "rose-700": "#a2324f",
+  "ochre-700": "#8a5a00",
   // Gökmavisi
   "sky-400": "#38bdf8",
   "sky-600": "#0284c7",

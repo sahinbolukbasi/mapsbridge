@@ -310,7 +310,7 @@ export default function CheckoutPage() {
               style={{
                 fontSize: "0.95rem",
                 fontWeight: cycle === "monthly" ? 800 : 500,
-                color: cycle === "monthly" ? "#0f172a" : "#64748b",
+                color: cycle === "monthly" ? "#0f172a" : "var(--color-text-subtle)",
                 cursor: "pointer",
               }}
               onClick={() => setCycle("monthly")}
@@ -350,7 +350,7 @@ export default function CheckoutPage() {
               style={{
                 fontSize: "0.95rem",
                 fontWeight: cycle === "yearly" ? 800 : 500,
-                color: cycle === "yearly" ? "#0f172a" : "#64748b",
+                color: cycle === "yearly" ? "#0f172a" : "var(--color-text-subtle)",
                 cursor: "pointer",
               }}
               onClick={() => setCycle("yearly")}

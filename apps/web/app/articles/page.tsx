@@ -89,7 +89,7 @@ export default function ArticlesPage() {
           >
             MapsBridge Gezgin Yazıları &amp; Rehberler
           </p>
-          <p style={{ color: "#64748b", marginBottom: "2rem" }}>
+          <p style={{ color: "var(--color-text-subtle)", marginBottom: "2rem" }}>
             Keşif rotaları, seyahat tüyoları ve topluluk hikayeleri.
           </p>
 
@@ -175,7 +175,7 @@ export default function ArticlesPage() {
               </div>
             </article>
           ) : loading ? (
-            <p style={{ color: "#64748b" }}>Yükleniyor…</p>
+            <p style={{ color: "var(--color-text-subtle)" }}>Yükleniyor…</p>
           ) : !rows.length ? (
             <div
               style={{
@@ -193,7 +193,7 @@ export default function ArticlesPage() {
               >
                 article
               </span>
-              <p style={{ color: "#64748b", fontWeight: 600 }}>
+              <p style={{ color: "var(--color-text-subtle)", fontWeight: 600 }}>
                 Henüz yayımlanmış yazı bulunmuyor.
               </p>
             </div>
@@ -223,7 +223,7 @@ export default function ArticlesPage() {
                   </h2>
                   <p
                     style={{
-                      color: "#64748b",
+                      color: "var(--color-text-subtle)",
                       marginBottom: "1rem",
                       lineHeight: 1.6,
                       fontSize: "14px",

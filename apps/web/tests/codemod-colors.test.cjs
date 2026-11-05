@@ -31,9 +31,11 @@ function run(fn, src, approved = []) {
   return JSON.parse(r.stdout);
 }
 const css = (body) => `${LAYER}@layer pages {\n${body}\n}\n`;
+// Örnek hex'ler güncel semantik değerlerdir (Yön B, design §3.2): color-text/surface-inverse
+// #1b2420 (ink-900), color-surface #fffdf8 (paper-0), color-bg #faf7f0 (paper-50).
 
 test("exact map: açık zeminde metin → semantik token, değer korunur", () => {
-  const { out, report } = run("transformCss", css(".a { color: #0f172a; background: #ffffff; }"));
+  const { out, report } = run("transformCss", css(".a { color: #1b2420; background: #fffdf8; }"));
   assert.match(out, /\.a \{ color: var\(--color-text\); background: var\(--color-surface\); \}/);
   assert.equal(report.applied.length, 2);
   assert.ok(report.applied.every((c) => c.preserved && c.kind === "exact"));
@@ -57,7 +59,7 @@ test("#94a3b8 açık zeminde → manuel-kontrast (uygulanmaz), --apply-manual il
 test("zemin farkındalığı: koyu kap içindeki #94a3b8 → text-inverse-subtle + inverse kap kaydı", () => {
   const { out, report } = run(
     "transformCss",
-    css(".hero { background: #0d281e; }\n.hero .meta { color: #94a3b8; }"),
+    css(".hero { background: #1b2420; }\n.hero .meta { color: #94a3b8; }"),
   );
   assert.match(out, /\.hero \{ background: var\(--color-surface-inverse\); \}/);
   assert.match(out, /\.hero \.meta \{ color: var\(--color-text-inverse-subtle\); \}/);
@@ -71,7 +73,7 @@ test("karışık seçici listesinde yalnız kapsamdan bağımsız birebir token;
   const { out, report } = run(
     "transformCss",
     css(
-      ".dark { background: #0d281e; }\n.dark .x, .light .x { color: #ffffff; }\n.dark .y, .light .y { color: #8dbda9; }",
+      ".dark { background: #1b2420; }\n.dark .x, .light .x { color: #ffffff; }\n.dark .y, .light .y { color: #8dbda9; }",
     ),
   );
   // beyaz: --color-on-primary inverse kapsamında değişmez → uygulanır
@@ -103,7 +105,7 @@ test("gölgedeki siyah alfa gölge token'ı ister: uygulanmaz, not düşer", () 
 test("ΔE ≤ 6 fallback metin dışında uygulanır; karar tablosu satırı kullanılır", () => {
   const { out, report } = run(
     "transformCss",
-    css(".a { background: #faf8ff; border-color: #dc2626; }"),
+    css(".a { background: #fbf7f2; border-color: #dc2626; }"),
   );
   assert.match(out, /background: var\(--color-bg\)/);
   assert.match(out, /border-color: var\(--color-danger\)/);
@@ -153,7 +155,7 @@ test("layer'sız CSS ve ayrıştırılamayan dosya ölümcüldür", () => {
 test("TSX: yalnızca style={{}} içindeki renk çevrilir; SVG ve JS tüketicisi elle", () => {
   const src = [
     'const pin = "#2563eb";',
-    'export const A = () => <div style={{ color: "#0f172a", padding: 4 }}>',
+    'export const A = () => <div style={{ color: "#1b2420", padding: 4 }}>',
     '  <svg><path fill="#ffffff" /></svg></div>;',
   ].join("\n");
   const { out, report } = run("transformTsx", src);
@@ -169,12 +171,12 @@ test("CLI: eşlenmemiş değer exit 1, diğerleri uygulanır; --dry-run yazmaz; 
   try {
     const a = path.join(dir, "a.css");
     const b = path.join(dir, "b.css");
-    fs.writeFileSync(a, css(".a { color: #0f172a; background: #ff00ff; }"));
+    fs.writeFileSync(a, css(".a { color: #1b2420; background: #ff00ff; }"));
     const dry = spawnSync(NODE[0], [...NODE.slice(1), SCRIPT, "--dry-run", a], {
       encoding: "utf8",
     });
     assert.equal(dry.status, 1, dry.stderr);
-    assert.match(fs.readFileSync(a, "utf8"), /color: #0f172a/);
+    assert.match(fs.readFileSync(a, "utf8"), /color: #1b2420/);
     const report = path.join(dir, "r.json");
     const real = spawnSync(NODE[0], [...NODE.slice(1), SCRIPT, "--report", report, a], {
       encoding: "utf8",
@@ -182,11 +184,11 @@ test("CLI: eşlenmemiş değer exit 1, diğerleri uygulanır; --dry-run yazmaz; 
     assert.equal(real.status, 1);
     assert.match(fs.readFileSync(a, "utf8"), /color: var\(--color-text\); background: #ff00ff;/);
     assert.equal(JSON.parse(fs.readFileSync(report, "utf8")).unmapped.length, 1);
-    fs.writeFileSync(a, css(".a { color: #0f172a; }"));
-    fs.writeFileSync(b, css(".b { color: #0f172a;"));
+    fs.writeFileSync(a, css(".a { color: #1b2420; }"));
+    fs.writeFileSync(b, css(".b { color: #1b2420;"));
     const broken = spawnSync(NODE[0], [...NODE.slice(1), SCRIPT, a, b], { encoding: "utf8" });
     assert.equal(broken.status, 2);
-    assert.match(fs.readFileSync(a, "utf8"), /color: #0f172a/);
+    assert.match(fs.readFileSync(a, "utf8"), /color: #1b2420/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -196,7 +198,7 @@ test("koyu kap içindeki açık zeminli kural kapsamdan bağımsız token alır"
   const { out, report } = run(
     "transformCss",
     css(
-      ".band { background: #0d281e; }\n.band .btn { background: #ffffff; color: #0f172a; border-color: #e2e8f0; }",
+      ".band { background: #1b2420; }\n.band .btn { background: #fffdf8; color: #0f172a; border-color: #e2e8f0; }",
     ),
   );
   // color-text / color-border inverse kapsamında değişir → seçilmez.
@@ -238,8 +240,8 @@ test("tw modu: tw-utils.css C18'de silindi → araç Türkçe hatayla durur (yen
 test("RN modu: string → tokens ifadesi, şablon → ${…}, alfa → hazır token / withAlpha, siyah → black, import eklenir", () => {
   const src = [
     'import { View } from "react-native";',
-    'const s = { a: { color: "#0f172a", backgroundColor: "#ffffff", shadowColor: "#000" } };',
-    'const b = { borderColor: "rgba(16, 185, 129, 0.2)", backgroundColor: "rgba(255,255,255,0.5)" };',
+    'const s = { a: { color: "#1b2420", backgroundColor: "#fffdf8", shadowColor: "#000" } };',
+    'const b = { borderColor: "rgba(16, 185, 129, 0.2)", backgroundColor: "rgba(255,253,248,0.5)" };',
     "const h = `body { background: #013628; }`;",
     'export const X = () => <Icon color="#ffffff" />;',
   ].join("\n");

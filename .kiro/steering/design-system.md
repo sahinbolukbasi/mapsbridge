@@ -18,6 +18,7 @@ Web (`apps/web`, Next.js statik export, vanilla CSS) ve mobil (`apps/mobile`, Ex
 - Google renkleri yalnızca `GoogleLogo` bileşenindedir. Veri/marka/illüstrasyon renkleri kendi gruplarında kalır.
 - Yeni renk gerekirse önce mevcut semantik token aranır; yoksa `palette.ts` + `tokens.ts`'e eklenir ve `npm run tokens:build` çalıştırılır.
 - `legacy-aliases.ts` boş objedir (`{}`); eski sayfa token adları (`--mb-*`, `--stitch-*`, `--chat-*`) yazılmaz (G14).
+- Harita gün renkleri yalnız `--color-day-*` (JS'te `dayPalette`) ile ve yalnız harita dosyalarında; `dataPalette` doğrudan kullanılmaz (yalnız grafikler). Kategori renkle değil ikonla kodlanır, renk tek başına anlam taşımaz. Lavanta `surface-tint` emeklidir (`--color-surface-tint` = kağıt tonu) (G1/G7).
 
 ## 3. Kaskad
 

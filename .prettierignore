@@ -13,3 +13,5 @@ results.sarif
 apps/web/app/styles/tokens.css
 apps/web/app/lib/design-tokens.ts
 apps/mobile/src/theme/tokens.ts
+apps/web/app/lib/icon-paths.ts
+apps/mobile/src/theme/icon-paths.ts

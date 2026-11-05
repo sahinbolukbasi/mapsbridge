@@ -14,21 +14,21 @@ const mix = (name: PaletteName, percent: number): ColorValue => ({ mix: name, pe
 // CSS adı → değer. Sıra üretilen dosyada korunur.
 export const color: Record<string, ColorValue> = {
   // Zeminler ve yüzeyler
-  "color-bg": r("slate-50"),
-  "color-surface": r("slate-0"),
-  "color-surface-sunken": r("slate-100"),
-  "color-surface-tint": r("lavender-100"),
+  "color-bg": r("paper-50"),
+  "color-surface": r("paper-0"),
+  "color-surface-sunken": r("paper-100"),
+  "color-surface-tint": r("paper-100"),
   "color-surface-brand": r("mint-50"),
   "color-surface-brand-strong": r("mint-100"),
   "color-on-surface-brand": r("emerald-800"),
-  "color-surface-inverse": r("forest-950"),
+  "color-surface-inverse": r("ink-900"),
   "color-surface-inverse-strong": r("forest-990"),
   // Metin
-  "color-text": r("slate-900"),
-  "color-text-muted": r("sage-600"),
-  "color-text-subtle": r("slate-500"),
-  "color-text-inverse": r("slate-0"),
-  "color-text-inverse-muted": r("slate-300"),
+  "color-text": r("ink-900"),
+  "color-text-muted": r("ink-700"),
+  "color-text-subtle": r("ink-500"),
+  "color-text-inverse": r("paper-50"),
+  "color-text-inverse-muted": r("paper-200"),
   "color-text-inverse-subtle": r("slate-400"),
   "color-text-brand": r("forest-900"),
   // Koyu yüzey üstü soluk marka yeşili (Stitch on-primary-container)
@@ -71,10 +71,10 @@ export const color: Record<string, ColorValue> = {
   "color-neutral-800": r("slate-800"),
   "color-neutral-900": r("slate-900"),
   // Kenarlıklar
-  "color-border": r("slate-200"),
+  "color-border": r("paper-200"),
   "color-border-subtle": mix("slate-200", 85),
-  "color-border-control": r("slate-500"),
-  "color-border-strong": r("slate-300"),
+  "color-border-control": r("ink-500"),
+  "color-border-strong": r("paper-300"),
   // Durum renkleri
   "color-success": r("emerald-700"),
   "color-success-strong": r("emerald-600"),
@@ -95,8 +95,28 @@ export const color: Record<string, ColorValue> = {
   "color-info-bg": r("blue-50"),
   "color-info-border": r("blue-200"),
   "color-info-icon": r("blue-500"),
+  // "Örnek" rozeti (design §3.2): mevcut warning tonlarına alias
+  "color-example-bg": { token: "color-warning-bg" },
+  "color-example-fg": { token: "color-warning" },
+  "color-example-border": { token: "color-warning-border" },
+  // Kil vurgu (Yön B, design §3.2)
+  "color-highlight": r("clay-600"),
+  "color-highlight-text": r("clay-700"),
+  "color-highlight-bg": r("clay-50"),
+  "color-highlight-bg-strong": r("clay-100"),
+  "color-text-inverse-highlight": r("clay-300"),
+  // Harita gün renkleri (döngüsel; 8. gün = day-1). Pin numarası color-on-day.
+  "color-day-1": r("forest-900"),
+  "color-day-2": r("clay-600"),
+  "color-day-3": r("steel-600"),
+  "color-day-4": r("plum-600"),
+  "color-day-5": r("olive-700"),
+  "color-day-6": r("rose-700"),
+  "color-day-7": r("ochre-700"),
+  "color-on-day": r("slate-0"),
   // Harita
   "color-map-route": r("blue-600"),
+  "color-map-route-casing": r("paper-0"),
   // Focus
   "focus-ring-color": r("forest-900"),
   "focus-ring-color-inverse": r("emerald-400"),
@@ -154,8 +174,19 @@ export const fontSize = {
   xl: 1.25,
   "2xl": 1.5,
   "3xl": 1.875,
+  "4xl": 2.25,
+  "5xl": 3,
+  "6xl": 3.75,
 } as const;
-export const fontSizeDisplay = "clamp(2rem, 4.5vw, 2.75rem)";
+// Hero h1 36→60 px (design §3.3)
+export const fontSizeDisplay = "clamp(2.25rem, 1.2rem + 3.6vw, 3.75rem)";
+
+export const letterSpacing = {
+  tight: "-0.03em",
+  snug: "-0.02em",
+  normal: "0",
+  caps: "0.08em",
+} as const;
 
 export const fontWeight = {
   regular: 400,
@@ -167,7 +198,7 @@ export const fontWeight = {
 export const lineHeight = { tight: 1.15, heading: 1.2, body: 1.6 } as const;
 
 // px
-export const radius = { xs: 6, sm: 8, md: 12, lg: 16, xl: 24, full: 9999 } as const;
+export const radius = { xs: 4, sm: 6, md: 10, lg: 14, xl: 20, full: 9999 } as const;
 
 // Gölgeler: taban forest-950 (13,40,30)
 export const shadow = {
@@ -178,6 +209,14 @@ export const shadow = {
   xl: { y: 24, blur: 64, alpha: 0.16, elevation: 12 },
 } as const;
 export const shadowBase: PaletteName = "forest-950";
+
+// Semantik yükseklik takma adları: değer shadow adımının adıdır ("none" = gölgesiz).
+export const elevation = {
+  flat: "none",
+  raised: "sm",
+  overlay: "lg",
+  floating: "xl",
+} as const satisfies Record<string, keyof typeof shadow | "none">;
 
 export const zIndex = {
   base: 0,
@@ -192,8 +231,20 @@ export const zIndex = {
 } as const;
 
 export const motion = {
-  duration: { instant: 0, fast: 120, base: 200, slow: 320 },
-  easing: { standard: "cubic-bezier(0.2, 0, 0, 1)", emphasized: "cubic-bezier(0.3, 0, 0, 1)" },
+  duration: { instant: 0, fast: 120, base: 200, slow: 320, deliberate: 480, route: 900 },
+  easing: {
+    standard: "cubic-bezier(0.2, 0, 0, 1)",
+    emphasized: "cubic-bezier(0.3, 0, 0, 1)",
+    enter: "cubic-bezier(0.05, 0.7, 0.1, 1)", // giriş (decelerate)
+    exit: "cubic-bezier(0.3, 0, 0.8, 0.15)", // çıkış (accelerate)
+  },
+  distance: { sm: 4, md: 8, lg: 16 }, // px, giriş kayması
+  stagger: { step: 40, max: 240 }, // ms
+  // Yalnız RN (Animated.spring); web çıktısına yazılmaz.
+  spring: {
+    sheet: { stiffness: 260, damping: 28, mass: 1 },
+    press: { stiffness: 400, damping: 30, mass: 1 },
+  },
 } as const;
 
 export const control = { "height-sm": 36, height: 44, "height-lg": 52, touch: 44 } as const;
@@ -214,14 +265,18 @@ export const layout = {
   "content-form": "500px",
   "page-gutter": "clamp(1rem, 3vw, 1.5rem)",
   "header-height": "64px",
+  "bottom-nav-height": "64px",
+  "sheet-peek": "25dvh",
+  "sheet-half": "55dvh",
+  "sheet-full": "92dvh",
 } as const;
 
 // Breakpoint'e bağlı token'lar: taban ve override html seçicisinde yazılır (design §2.3).
 export const responsive = {
   "app-header-height": {
-    base: "calc(76px + env(safe-area-inset-top, 0px))",
+    base: "calc(72px + env(safe-area-inset-top, 0px))",
     overrides: [
-      { media: "(max-width: 767px)", value: "calc(64px + env(safe-area-inset-top, 0px))" },
+      { media: "(max-width: 767px)", value: "calc(56px + env(safe-area-inset-top, 0px))" },
     ],
   },
 } as const;
