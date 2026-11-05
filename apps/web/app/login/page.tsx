@@ -3,7 +3,7 @@
 import React, { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { signIn, handleGoogleCredentialResponse, getStoredSession } from "../lib/cognito";
-import { Alert, Button, Checkbox, Field, Input, Modal, PageShell } from "../components/ui";
+import { Alert, Button, Field, Input, Modal, PageShell } from "../components/ui";
 import {
   AuthCard,
   AuthErrorSummary,
@@ -24,7 +24,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -363,11 +362,6 @@ export default function LoginPage() {
           </Field>
 
           <div className="auth-card__row">
-            <Checkbox
-              label="Beni bu cihazda hatırla"
-              checked={rememberMe}
-              onChange={setRememberMe}
-            />
             <Link
               className="auth-card__link"
               href={`/reset-password/${email ? `?email=${encodeURIComponent(email)}` : ""}`}

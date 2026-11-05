@@ -396,6 +396,9 @@ export const LEGACY_REDIRECTS: Readonly<Record<RoutePath, RoutePath>> = {
   "/welcome/": "/register/",
   "/forgot-password/": "/reset-password/",
   "/sifre-sifirla/": "/reset-password/",
+  // Doğrulama e-postası (backend şablonu) /dogrula/?email=&code= bağlantısı verir; statik
+  // export'ta sayfa yoktu (404). LegacyRedirect sorguyu korur, /verify/ kodu doldurur (karar S20).
+  "/dogrula/": "/verify/",
   "/u/": "/checkout/",
   "/admin/": "/u/admin/",
 };

@@ -4,7 +4,7 @@ import React, { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { forgotPassword, confirmForgotPassword, signIn } from "../lib/cognito";
 import Link from "next/link";
-import { Alert, Button, Checkbox, Field, Input, PageShell } from "../components/ui";
+import { Alert, Button, Field, Input, PageShell } from "../components/ui";
 import { AuthCard, AuthPasswordInput, AuthPasswordRules } from "../components/auth/auth-card";
 
 export default function ForgotPasswordPage() {
@@ -15,7 +15,6 @@ export default function ForgotPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [signOutOtherSessions, setSignOutOtherSessions] = useState(true);
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -288,14 +287,6 @@ export default function ForgotPasswordPage() {
                 />
               )}
             </Field>
-
-            <Checkbox
-              name="sign_out_other_sessions"
-              label="Tüm açık oturumlardan çıkış yap"
-              hint="Şifre yenilendikten sonra diğer cihazlardaki oturumları sonlandır (önerilir)."
-              checked={signOutOtherSessions}
-              onChange={setSignOutOtherSessions}
-            />
 
             <Button
               type="submit"

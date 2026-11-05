@@ -16,6 +16,20 @@ export default function VerifyPage() {
     typeof window === "undefined" ? "" : (new URLSearchParams(location.search).get("email") ?? "");
   const phone =
     typeof window === "undefined" ? "" : (new URLSearchParams(location.search).get("phone") ?? "");
+  // Kayıt ekranına dönüşte `next` korunur (login/register ile aynı desen, design §5.4).
+  const nextUrl =
+    typeof window === "undefined" ? DEFAULT_NEXT : readNext(location.search, location.origin);
+  const registerHref =
+    nextUrl !== DEFAULT_NEXT ? `/register/?next=${encodeURIComponent(nextUrl)}` : "/register/";
+
+  // Doğrulama e-postası bağlantısı (/dogrula/ → /verify/, karar S20) `?code=` taşır: yalnız
+  // 6 haneli ise alana doldurulur. Statik HTML ile eşleşmesi için mount sonrası yazılır.
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("code")?.trim() ?? "";
+    if (/^\d{6}$/.test(code) && codeRef.current && !codeRef.current.value) {
+      codeRef.current.value = code;
+    }
+  }, []);
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -71,7 +85,7 @@ export default function VerifyPage() {
             tone="danger"
             title="E-posta adresi bulunamadı."
             action={
-              <Button href="/register/" variant="link">
+              <Button href={registerHref} variant="link">
                 Kayıt ekranına dön
               </Button>
             }
@@ -84,7 +98,7 @@ export default function VerifyPage() {
               Kod gönderilen adres:{" "}
               <span className="auth-card__recipient-email">{email || phone}</span>
             </span>
-            <Button href="/register/" variant="link" size="sm">
+            <Button href={registerHref} variant="link" size="sm">
               Adres yanlış mı?
             </Button>
           </div>

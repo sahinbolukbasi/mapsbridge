@@ -63,7 +63,14 @@ function AppleLogo() {
   );
 }
 
-/** Google + Apple düğmeleri ve "veya e-posta ile" ayracı; işleyiciler sayfadan gelir. */
+/**
+ * Apple ile giriş web'de henüz entegre değil (sayfa işleyicileri yalnız "yakında" mesajı verir).
+ * I10 gereği düğme render edilmez (karar S20); işleyiciler sayfalarda durur, entegrasyon
+ * tamamlanınca bu bayrağı `true` yapmak yeterlidir.
+ */
+export const APPLE_SIGN_IN_WEB_ENABLED = false;
+
+/** Google (+ etkinse Apple) düğmeleri ve "veya e-posta ile" ayracı; işleyiciler sayfadan gelir. */
 export function AuthSocialButtons({
   googleLabel,
   appleLabel,
@@ -92,16 +99,18 @@ export function AuthSocialButtons({
         >
           {googleLoading ? "Bağlanıyor…" : googleLabel}
         </Button>
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          iconStart={<AppleLogo />}
-          disabled={appleLoading}
-          onClick={onApple}
-        >
-          {appleLoading ? "Bağlanıyor…" : appleLabel}
-        </Button>
+        {APPLE_SIGN_IN_WEB_ENABLED && (
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
+            iconStart={<AppleLogo />}
+            disabled={appleLoading}
+            onClick={onApple}
+          >
+            {appleLoading ? "Bağlanıyor…" : appleLabel}
+          </Button>
+        )}
       </div>
       <p className="auth-card__divider">
         <span>veya e-posta ile</span>
