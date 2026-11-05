@@ -149,15 +149,28 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     footer: "product",
   },
   {
+    // design §7: herkese açık plan karşılaştırması; fiyat yalnızca canlı katalogdan (S2).
+    path: "/pricing/",
+    file: "app/pricing/page.tsx",
+    layout: "content",
+    title: t("Planlar ve kredi", "Plans and credits"),
+    description: t(
+      "Kredi yalnızca AI işlemlerinde ve yalnızca sunucuda düşer. İşlem başlamadan ayrılır, başarısız olursa otomatik iade edilir.",
+      "Credits are only used for AI actions and only on the server. They are reserved before the action starts and refunded automatically if it fails.",
+    ),
+    sitemap: true,
+    robots: "index",
+    footer: "product",
+    nav: t("Planlar", "Plans"),
+  },
+  {
+    // Yalnızca bakiye ve satın alma adımı (design §5.2); karşılaştırma /pricing/'de.
     path: "/checkout/",
     file: "app/checkout/page.tsx",
     layout: "content",
-    title: t("Plan ve kredi", "Plans and credits"),
+    title: t("Bakiye ve ödeme", "Balance and payment"),
     sitemap: false,
     robots: "noindex",
-    // Geçici "Planlar ve kredi" yuvası: FEAT-005'te /pricing/'e taşınır (plan D6).
-    footer: "product",
-    nav: t("Planlar", "Plans"),
   },
   {
     path: "/how-it-works/",
@@ -390,6 +403,7 @@ export const LEGACY_REDIRECTS: Readonly<Record<RoutePath, RoutePath>> = {
   "/harita/": "/maps/",
   "/haritalar/": "/maps/",
   "/mobil-uygulamalar/": "/mobile-apps/",
+  "/planlar/": "/pricing/",
   "/forgot-password/": "/reset-password/",
   "/sifre-sifirla/": "/reset-password/",
   "/u/": "/checkout/",

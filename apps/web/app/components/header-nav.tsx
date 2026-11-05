@@ -16,8 +16,8 @@ export type HeaderVariant = ChromeVariant;
 
 // Tek IA (design §5.3): header, mobil web alt menüsü ve native sekmeler aynı öğeleri aynı sırayla
 // gösterir. Etiketler i18n nav.* anahtarlarından (adlandırma sözlüğü §5.1).
-// "Planlar" FEAT-005'e kadar /checkout/?tab=plans'a gider (plan D6).
-const PLANS_HREF = "/checkout/?tab=plans";
+// "Planlar" ve "Planlar ve kredi" herkese açık fiyat sayfasına gider (design §5.3, §7).
+const PLANS_HREF = "/pricing/";
 
 interface NavItem {
   href: string;

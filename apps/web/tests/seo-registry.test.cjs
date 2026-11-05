@@ -50,7 +50,7 @@ test("(1) sitemap'teki her URL self-canonical ve <title> registry başlığıyla
   }
 });
 
-test("(2) LEGACY: hedefi sitemap:true olan 7 sayfada canonical = hedef; diğerlerinde canonical yok", (t) => {
+test("(2) LEGACY: hedefi sitemap:true olan 8 sayfada (/planlar/ → /pricing/ dahil) canonical = hedef; diğerlerinde canonical yok", (t) => {
   const s = requireBuild(t, true);
   if (!s) return;
   let withCanonical = 0;
@@ -68,7 +68,7 @@ test("(2) LEGACY: hedefi sitemap:true olan 7 sayfada canonical = hedef; diğerle
       );
     }
   }
-  assert.equal(withCanonical, 7);
+  assert.equal(withCanonical, 8);
 });
 
 test("(3) / ve /en/ self-canonical (D15)", (t) => {

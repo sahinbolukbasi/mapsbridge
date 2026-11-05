@@ -1,0 +1,97 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* /pricing/ (design §7.2, mock b-pricing.html). Yalnızca yerleşim ve token; .ui-* ezilmez. */
+  .pricing {
+    padding-block-end: var(--space-12);
+  }
+  .pricing__alert {
+    margin-block-end: var(--space-4);
+  }
+  .pricing__period {
+    display: flex;
+    margin-block: var(--space-2) var(--space-6);
+  }
+  /* <768 dikey yığın · 768–1023 2×2 · ≥1024 4 sütun (design §7.2 madde 3). */
+  .pricing__plans {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pricing__plan {
+    display: grid;
+  }
+  .pricing__note {
+    margin-block: var(--space-4) 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+  .pricing__muted {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: var(--line-height-body);
+  }
+  .pricing__section {
+    margin-block-start: var(--space-4);
+  }
+  .pricing__packs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pricing__pack {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    background: var(--card-bg);
+    color: var(--card-fg);
+  }
+  .pricing__pack-credits {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+  }
+  .pricing__pack-price {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .pricing__independence {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-block-start: var(--space-8);
+  }
+  .pricing__independence-icon {
+    flex: none;
+    color: var(--color-text-brand);
+  }
+  .pricing__independence-title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+  }
+  @media (min-width: 640px) {
+    .pricing__packs {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 768px) {
+    .pricing__plans {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .pricing__plans {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+}

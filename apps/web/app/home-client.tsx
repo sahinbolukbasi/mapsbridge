@@ -205,9 +205,8 @@ export default function Home() {
           <div className="home-credits">
             <CreditCostTable />
             <div className="home-section__more">
-              {/* D6: /pricing/ FEAT-005'te gelene kadar plan karşılaştırması checkout'ta. */}
               <Button
-                href="/checkout/?tab=plans"
+                href="/pricing/"
                 variant="link"
                 iconEnd={<Icon name="arrow" size={16} />}
               >

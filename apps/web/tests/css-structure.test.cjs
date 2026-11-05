@@ -11,7 +11,6 @@ const ORDER = "@layer tokens, base, legacy, chrome, pages, primitives;";
 const UNLAYERED = new Set(["styles/tokens.css", "styles/vendor-overrides.css"]);
 const LEGACY = [
   "operations.css",
-  "components/upgrade-modal.css",
   "styles.css",
   "auth.css",
   // tw-utils.css'ten üretilmiş yerleşim sınıfları (codemod --mode tw, design §2.7 8b): legacy

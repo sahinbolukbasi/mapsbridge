@@ -443,6 +443,16 @@ export const PRIMITIVE_SURFACES: PrimitiveSurface[] = [
       inverse: "remap",
     }),
   ),
+  // FEAT-005 alan bileşeni (plan D2): fiyat sayfası plan kartı kendi kağıt zeminini çizer.
+  row({
+    primitive: "PlanCard",
+    variant: "default",
+    file: "../billing/plan-card.tsx",
+    bg: "card-bg",
+    text: ["card-fg", "color-text-muted"],
+    ownSurface: true,
+    inverse: "light",
+  }),
 ];
 
 /** AC-4f kap zeminleri: açık ve koyu (inverse) kapların her biri için üç zemin. */

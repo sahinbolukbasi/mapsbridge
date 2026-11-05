@@ -65,12 +65,14 @@ const BASELINE_42 = [
   "/verify/",
   "/welcome/",
 ];
-// Başlangıçtaki 13 sitemap URL'si (design §5.1; AC-13).
-const SITEMAP_13 = [
+// Sitemap URL'leri (design §5.1; AC-13): başlangıçtaki 13 URL + /pricing/ (design §7.1, karar S4
+// artım 5: yeni kanonik, indekslenen fiyat sayfası).
+const SITEMAP_URLS = [
   "/en/",
   "/maps/",
   "/travel-assistant/",
   "/mobile-apps/",
+  "/pricing/",
   "/community/",
   "/how-it-works/",
   "/welcome/",
@@ -165,9 +167,9 @@ test("chrome/footer/nav alanları (design §5.1–5.3, R5): enum, kanonik footer
   const byGroup = Object.fromEntries(
     FOOTER_GROUPS.map((g) => [g, plain(footerRoutes(g).map((r) => r.path))]),
   );
-  // design §5.3 sütunları; /checkout/ FEAT-005'te /pricing/ ile değişir (plan D6).
+  // design §5.3 sütunları; "Planlar ve kredi" = /pricing/ (design §7, FEAT-005).
   assert.deepEqual(byGroup, {
-    product: ["/maps/", "/travel-assistant/", "/community/", "/mobile-apps/", "/checkout/"],
+    product: ["/maps/", "/travel-assistant/", "/community/", "/mobile-apps/", "/pricing/"],
     resources: ["/how-it-works/", "/articles/", "/support/", "/contact/", "/about/"],
     legal: ["/privacy/", "/terms/", "/cookies/"],
   });
@@ -189,7 +191,9 @@ test("adlandırma sözlüğü (design §5.1): başlıklar ve kısa menü etiketl
   assert.deepEqual(nav("/community/"), { tr: "Topluluk", en: "Community" });
   assert.deepEqual(nav("/messages/"), { tr: "Mesajlar", en: "Messages" });
   assert.deepEqual(nav("/profile/"), { tr: "Profil", en: "Profile" });
-  assert.deepEqual(nav("/checkout/"), { tr: "Planlar", en: "Plans" });
+  assert.deepEqual(nav("/pricing/"), { tr: "Planlar", en: "Plans" });
+  assert.deepEqual(title("/pricing/"), { tr: "Planlar ve kredi", en: "Plans and credits" });
+  assert.deepEqual(title("/checkout/"), { tr: "Bakiye ve ödeme", en: "Balance and payment" });
   const banned =
     /6 haneli|6-digit|topografik|topographic|saniyeler içinde|in seconds|senkronize|sync|çevrimdışı navigasyon|offline navigation|saha modu|field mode/i;
   for (const r of CANONICAL_ROUTES)
@@ -217,13 +221,13 @@ function seoPages() {
     .map((m) => m[1])
     .sort();
 }
-test("AC-13: sitemap.xml = generate-seo.cjs PAGES = registry sitemap:true = başlangıçtaki 13 URL", () => {
+test("AC-13: sitemap.xml = generate-seo.cjs PAGES = registry sitemap:true = SITEMAP_URLS (13 + /pricing/)", () => {
   const registry = plain(CANONICAL_ROUTES.filter((r) => r.sitemap).map((r) => r.path)).sort();
-  assert.deepEqual(sitemapPaths(), [...SITEMAP_13].sort(), "public/sitemap.xml değişti");
-  assert.deepEqual(seoPages(), [...SITEMAP_13].sort(), "generate-seo.cjs PAGES değişti");
+  assert.deepEqual(sitemapPaths(), [...SITEMAP_URLS].sort(), "public/sitemap.xml değişti");
+  assert.deepEqual(seoPages(), [...SITEMAP_URLS].sort(), "generate-seo.cjs PAGES değişti");
   assert.deepEqual(
     registry,
-    [...SITEMAP_13].sort(),
+    [...SITEMAP_URLS].sort(),
     "registry sitemap:true kümesi sitemap ile ayrıştı",
   );
 });

@@ -129,7 +129,6 @@ const TS_FILES = walk(APP, (n) => /\.tsx?$/.test(n) && !n.endsWith(".d.ts"));
 // design §2.6 dosya → layer eşlemesi.
 const LEGACY = [
   "operations.css",
-  "components/upgrade-modal.css",
   "styles.css",
   "auth.css",
   // tw-utils.css'ten üretilmiş yerleşim sınıfları (codemod --mode tw, design §2.7 8b): legacy
