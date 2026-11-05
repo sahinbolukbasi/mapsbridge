@@ -82,7 +82,7 @@ test("dosyalar doğru layer'dadır (legacy / chrome / pages)", () => {
     if (UNLAYERED.has(rel)) continue;
     const first = strip(read(rel)).split("\n")[1] ?? "";
     const expected =
-      rel === "styles/base.css"
+      rel === "styles/base.css" || rel === "styles/motion.css"
         ? "base"
         : rel === "components/ui/ui.css"
           ? "primitives"

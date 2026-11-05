@@ -4,6 +4,8 @@
 // büyükse ("baseline'ı düşürün"). Baseline yalnızca aşağı yönde yeniden yazılır:
 //   node apps/web/tests/design-system-guard.test.cjs --write-baseline        (artışı reddeder)
 //   node apps/web/tests/design-system-guard.test.cjs --write-baseline --init (yalnızca dosya yokken)
+//   node apps/web/tests/design-system-guard.test.cjs --write-baseline --seed G24,G25 (baseline'da
+//     olmayan yeni kuralı bir kez ekler; G24–G29 ui-ux-redesign FEAT-002'de seed edildi)
 // Baseline dosyası yoksa (C19 sonrası) tüm kurallar 0 bekler. G13 baseline yerine
 // packages/design-tokens/src/breakpoints.ts `legacyBreakpoints` listesini kullanır (D18).
 // CSS'te yorumlar atılır ve renk kuralları yalnızca declaration değerlerine bakar; TS/TSX
@@ -57,6 +59,12 @@ const STEERING_SECTION = {
   G21: "URL ve SEO",
   G22: "Kaskad",
   G23: "Renk",
+  G24: "Boşluk ve tipografi",
+  G25: "Boşluk ve tipografi",
+  G26: "Boşluk ve tipografi",
+  G27: "Kaskad",
+  G28: "Primitive'ler",
+  G29: "Erişilebilirlik",
 };
 const ref = (rule) =>
   `(bkz. .kiro/steering/design-system.md §${STEERING_SECTION[rule.replace(/[a-z]$/, "")]})`;
@@ -89,6 +97,12 @@ const HINT = {
   G21: "useSearchParams yalnızca *-listener.tsx içinde, tüketicide <Suspense fallback={null}> ile",
   G22: "Leaflet'e ait seçiciler yalnızca styles/vendor-overrides.css'te yazılır",
   G23: "veri/gün/kategori renkleri yalnızca harita ve rota dosyalarında kullanılır",
+  G24: "süre ve easing yalnızca var(--duration-*) / var(--easing-*) ile yazılır",
+  G25: "font-family yalnızca var(--font-family-*) ile yazılır",
+  G26: "font-size / border-radius / box-shadow / z-index için ölçek token'ı (var(--font-size-*), --radius-*, --shadow-*/--elevation-*, --z-*) kullanın",
+  G27: "@view-transition, ::view-transition-*, scroll-behavior ve scroll-padding yalnızca styles/motion.css'te",
+  G28: "emoji yerine Icon primitive'ini kullanın (components/ui/svg-icon.tsx)",
+  G29: "animation / animation-name yalnızca @media (prefers-reduced-motion: no-preference) içinde",
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -130,7 +144,7 @@ const CHROME = ["components/header-nav.css", "components/site-footer.css"];
 function layerOf(abs) {
   const r = appRel(abs);
   if (r === "styles/tokens.css") return "tokens";
-  if (r === "styles/base.css") return "base";
+  if (r === "styles/base.css" || r === "styles/motion.css") return "base";
   if (r === "components/ui/ui.css") return "primitives";
   if (r === "styles/vendor-overrides.css") return null;
   if (LEGACY.includes(r)) return "legacy";
@@ -438,6 +452,47 @@ const THIRD_PARTY_HEX = new Set(Object.values(palette.thirdParty).map((h) => h.t
 
 function stripValue(value) {
   return value.replace(/url\([^)]*\)/gi, "url()").replace(/"[^"]*"|'[^']*'/g, '""');
+}
+
+// G24–G29 yardımcıları. tokens.css (token tanımları) altı kuraldan da muaftır.
+const MOTION_PROPS = new Set([
+  "transition",
+  "transition-duration",
+  "transition-delay",
+  "transition-timing-function",
+  "animation",
+  "animation-duration",
+  "animation-delay",
+  "animation-timing-function",
+]);
+const SCALE_PROPS = new Set(["font-size", "border-radius", "box-shadow", "z-index"]);
+const TIME_LITERAL = /(?<![\w.-])[-+]?(?:\d+\.?\d*|\.\d+)m?s(?![\w-])/;
+const EASING_LITERAL =
+  /(?<![\w-])(?:cubic-bezier|steps)\(|(?<![\w-])(?:ease(?:-in-out|-in|-out)?|linear|step-start|step-end)(?![\w-])/;
+const LENGTH_LITERAL = /(?<![\w.-])(\d+\.?\d*|\.\d+)(?:px|rem|em)(?![\w-])/g;
+const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
+/** var(...) çağrılarını (iç içe parantezleriyle) değerden çıkarır: fallback literal'i sayılmaz. */
+function withoutVars(value) {
+  let out = "";
+  for (let k = 0; k < value.length;) {
+    if (value.startsWith("var(", k) && !/[\w-]/.test(value[k - 1] ?? "")) {
+      let depth = 0;
+      let j = k + 3;
+      for (; j < value.length; j++) {
+        if (value[j] === "(") depth++;
+        else if (value[j] === ")" && --depth === 0) break;
+      }
+      out += " ";
+      k = j + 1;
+    } else out += value[k++];
+  }
+  return out;
+}
+function* motionScopedDecls() {
+  for (const abs of CSS_FILES) {
+    if (appRel(abs) === "styles/tokens.css") continue;
+    for (const d of cssDecls(abs)) yield { abs, d };
+  }
 }
 
 const RULES = {
@@ -968,6 +1023,88 @@ const RULES = {
     }
     return c.result;
   },
+  // G24–G26 (R1, design §15): hareket ve ölçek literal'leri. Declaration başına bir ihlal.
+  G24() {
+    const c = collector();
+    for (const { abs, d } of motionScopedDecls()) {
+      if (!MOTION_PROPS.has(d.prop)) continue;
+      const v = withoutVars(stripValue(d.value));
+      if (TIME_LITERAL.test(v) || EASING_LITERAL.test(v))
+        c.add(rel(abs), d.line, `${d.prop}: ${d.value}`);
+    }
+    return c.result;
+  },
+  G25() {
+    const c = collector();
+    for (const { abs, d } of motionScopedDecls()) {
+      if (d.prop !== "font-family") continue;
+      if (d.node.type === "at" && d.node.name === "font-face") continue;
+      if (/^(var\(--font-family-|inherit\b)/i.test(d.value.trim())) continue;
+      c.add(rel(abs), d.line, `font-family: ${d.value}`);
+    }
+    return c.result;
+  },
+  G26() {
+    const c = collector();
+    for (const { abs, d } of motionScopedDecls()) {
+      if (!SCALE_PROPS.has(d.prop)) continue;
+      const v = withoutVars(stripValue(d.value)).replace(/!\s*important/i, "");
+      const bad =
+        d.prop === "z-index"
+          ? [...v.matchAll(/(?<![\w.-])-?\d+(?![\w.%-])/g)].some((m) => Number(m[0]) !== 0)
+          : [...v.matchAll(LENGTH_LITERAL)].some((m) => Number(m[1]) !== 0);
+      if (bad) c.add(rel(abs), d.line, `${d.prop}: ${d.value}`);
+    }
+    return c.result;
+  },
+  // G27 (R2): view transition ve global kaydırma davranışı yalnızca styles/motion.css'te.
+  G27() {
+    const c = collector();
+    for (const abs of CSS_FILES) {
+      const r = appRel(abs);
+      if (r === "styles/tokens.css" || r === "styles/motion.css") continue;
+      for (const n of allNodes(css(abs).top)) {
+        if (n.type === "at" && n.name === "view-transition")
+          c.add(rel(abs), n.line, "@view-transition");
+        if (n.type === "rule" && /::view-transition/.test(n.selector))
+          c.add(rel(abs), n.line, n.selector);
+        for (const d of n.decls ?? [])
+          if (d.prop === "scroll-behavior" || d.prop.startsWith("scroll-padding"))
+            c.add(rel(abs), d.line, `${d.prop}: ${d.value}`);
+      }
+    }
+    return c.result;
+  },
+  // G28 (R3): TSX string/template literal'lerinde ve JSX metninde emoji kod noktası (eşleşme başına).
+  G28() {
+    const c = collector();
+    for (const abs of TSX_FILES) {
+      const sf = source(abs);
+      const scan = (text, line) => {
+        for (const m of text.matchAll(EMOJI)) c.add(rel(abs), line, m[0]);
+      };
+      for (const s of tsStrings(abs)) scan(s.text, s.line);
+      for (const n of tsNodes(sf)) if (ts.isJsxText(n)) scan(n.text, lineOfTs(sf, n));
+    }
+    return c.result;
+  },
+  // G29 (R9): animasyon yalnızca no-preference bloğunda (statik varsayılan; `none` serbest).
+  G29() {
+    const c = collector();
+    for (const { abs, d } of motionScopedDecls()) {
+      if (d.prop !== "animation" && d.prop !== "animation-name") continue;
+      if (/^none\b/i.test(d.value.trim()) || inKeyframes(d.node)) continue;
+      const chain = [...d.node.ancestors, d.node];
+      const allowed = chain.some(
+        (a) =>
+          a.type === "at" &&
+          a.name === "media" &&
+          /prefers-reduced-motion\s*:\s*no-preference/.test(a.prelude),
+      );
+      if (!allowed) c.add(rel(abs), d.line, `${d.prop}: ${d.value}`);
+    }
+    return c.result;
+  },
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -1024,11 +1161,32 @@ function writeBaseline() {
     console.error("--init yalnızca baseline dosyası yokken kullanılabilir.");
     process.exit(1);
   }
+  // --seed G24,G25: baseline'da HİÇ olmayan yeni kuralları bugünkü sayılarıyla bir kez ekler
+  // (plan D5). Baseline'da zaten bulunan kural seed edilemez; diğer kurallar yalnızca düşer.
+  const seedArg = process.argv.indexOf("--seed");
+  const seed = new Set(
+    seedArg > 0 ? (process.argv[seedArg + 1] ?? "").split(",").filter(Boolean) : [],
+  );
+  if (seedArg > 0 && !seed.size) {
+    console.error("--seed bir kural listesi ister: --seed G24,G25");
+    process.exit(1);
+  }
+  for (const rule of seed) {
+    if (!RULES[rule]) {
+      console.error(`--seed: bilinmeyen kural ${rule}`);
+      process.exit(1);
+    }
+    if (existing?.[rule]) {
+      console.error(`--seed: ${rule} baseline'da zaten var; yalnızca aşağı yönde yazılabilir.`);
+      process.exit(1);
+    }
+  }
   const actual = actualCounts();
   if (existing) {
     const ups = [];
     for (const [rule, files] of Object.entries(actual))
       for (const [file, n] of Object.entries(files)) {
+        if (seed.has(rule)) continue;
         const prev = existing[rule]?.[file] ?? 0;
         if (n > prev) ups.push(`${rule}: ${file} ${prev} → ${n}`);
       }
@@ -1047,6 +1205,8 @@ function writeBaseline() {
   console.log(
     `Baseline yazıldı: ${path.relative(ROOT, BASELINE_PATH)} (${Object.keys(actual).length} kural, ${total} ihlal)`,
   );
+  for (const [rule, files] of Object.entries(actual))
+    console.log(`  ${rule}: ${Object.values(files).reduce((a, b) => a + b, 0)}`);
 }
 
 if (require.main === module && process.argv.includes("--write-baseline")) {
