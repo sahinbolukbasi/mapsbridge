@@ -2,7 +2,8 @@
 // /checkout/ = yalnızca bakiye + satın alma adımı (design §5.2, §7.1). Plan karşılaştırması
 // /pricing/'de. Fiyat ve ürünler yalnızca canlı katalogdan (S2); contracts TRY fiyatları ve
 // maliyetleri gösterilmez. Kredi yalnızca sunucuda düşer/eklenir; satın alma akışı (RevenueCat
-// checkout + webhook doğrulama yoklaması) bugünkü gibi.
+// checkout + webhook doğrulama yoklaması) bugünkü gibi. Metinler i18n `checkout.*` (I11; locale
+// yol tabanlıdır, /checkout/ bugün yalnızca TR çözülür).
 // ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
 // edilmeli.
 import { useEffect, useState } from "react";
@@ -20,6 +21,7 @@ import {
   Section,
   SegmentedControl,
   useUrlParam,
+  VisuallyHidden,
 } from "../components/ui";
 import { apiFetch } from "../lib/api-client";
 import { billingService } from "../lib/billing/billing-service";
@@ -43,9 +45,12 @@ import "./checkout.css";
 
 const PAID_TIERS: readonly Exclude<PlanTier, "free">[] = ["explorer", "pro", "agency"];
 const TABS: readonly CheckoutTab[] = ["plans", "credits"];
+/** Durum mesajı: i18n anahtarı (etkilerde) ya da hazır metin (sunucu/olay işleyici). */
+type Notice = { key: string } | { text: string } | null;
 
 export default function CheckoutClient() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const num = (n: number) => n.toLocaleString(locale === "en" ? "en-GB" : "tr-TR");
   const [catalog, setCatalog] = useState<Catalog | "loading">("loading");
   const [wallet, setWallet] = useState(() => billingService.getWallet());
   const [tab, setTab] = useUrlParam<CheckoutTab>("tab", { allowed: TABS, fallback: "plans" });
@@ -54,7 +59,8 @@ export default function CheckoutClient() {
     fallback: "monthly",
   });
   const [plan, setPlan] = useState<PlanTier | null>(null);
-  const [message, setMessage] = useState("");
+  const [notice, setNotice] = useState<Notice>(null);
+  const setMessage = (key: string) => setNotice({ key });
   const [busy, setBusy] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [promoCode, setPromoCode] = useState("");
@@ -71,12 +77,16 @@ export default function CheckoutClient() {
         method: "POST",
         body: JSON.stringify({ code }),
       });
-      setPromoMsg(`${res.credits} kredi hesabına eklendi. Yeni bakiye: ${res.balance}`);
+      setPromoMsg(
+        t("checkout.promo.added")
+          .replace("{credits}", num(res.credits))
+          .replace("{balance}", num(res.balance)),
+      );
       setPromoCode("");
       setWallet((w) => ({ ...w, credits: res.balance }));
     } catch (e: unknown) {
       const err = e as { message?: string };
-      setPromoMsg(err?.message || "Kod kullanılamadı.");
+      setPromoMsg(err?.message || t("checkout.promo.failed"));
     } finally {
       setPromoBusy(false);
     }
@@ -96,7 +106,7 @@ export default function CheckoutClient() {
     // plan/period/tab enum'lara karşı doğrulanır (design §12.2); geçersiz değer yok sayılır.
     const params = parseCheckoutParams(location.search);
     if (params.plan && params.plan !== "free") setPlan(params.plan);
-    if (params.canceled) setMessage("Ödeme iptal edildi. Kredi eklenmedi.");
+    if (params.canceled) setMessage("checkout.msg.canceled");
 
     loadCatalog(controller.signal);
 
@@ -105,7 +115,7 @@ export default function CheckoutClient() {
         if (!stopped) setWallet(x);
       });
     void refresh().catch(() => {
-      if (!stopped) setMessage("Kredi bilgisi alınamadı. Tekrar deneyin.");
+      if (!stopped) setMessage("checkout.msg.walletFailed");
     });
 
     let timer: ReturnType<typeof setTimeout>;
@@ -118,18 +128,14 @@ export default function CheckoutClient() {
           const updated = await billingService.refreshWallet();
           if (stopped) return;
           if (updated.credits > 0) {
-            setMessage("Ödemen doğrulandı, kredilerin hesabına eklendi.");
+            setMessage("checkout.msg.verified");
             return;
           }
-          setMessage("Ödemen kontrol ediliyor. Doğrulandığında kredilerin otomatik eklenecek.");
+          setMessage("checkout.msg.verifying");
           if (++attempts < 10) timer = setTimeout(check, 3000);
-          else
-            setMessage(
-              "Ödeme doğrulaması devam ediyor. Daha sonra bakiyeni tekrar kontrol et; yeniden ödeme yapmana gerek yok.",
-            );
+          else setMessage("checkout.msg.verifyPending");
         } catch {
-          if (!stopped)
-            setMessage("Ödeme durumu alınamadı. Yeniden ödeme yapmadan önce bakiyeni kontrol et.");
+          if (!stopped) setMessage("checkout.msg.verifyFailed");
         }
       };
       void check();
@@ -147,7 +153,7 @@ export default function CheckoutClient() {
       return;
     }
     setBusy(true);
-    setMessage("Güvenli ödeme sayfası hazırlanıyor…");
+    setMessage("checkout.msg.preparing");
     const result = await billingService.processCheckout({
       mode: product.mode,
       targetId: product.id,
@@ -157,7 +163,7 @@ export default function CheckoutClient() {
       location.assign(result.stripeRedirectUrl);
       return;
     }
-    setMessage(result.message);
+    setNotice({ text: result.message });
     setBusy(false);
   }
 
@@ -173,6 +179,7 @@ export default function CheckoutClient() {
     !!ok && tab === "plans" && plan !== null && !subscriptions.some((s) => s.tier === plan);
   const tierName = t(`pricing.tier.${wallet.subscriptionTier}`);
   const gift = wallet.welcomeGift;
+  const message = notice ? ("key" in notice ? t(notice.key) : notice.text) : "";
 
   function buyButton(product: CatalogProduct, isCurrent: boolean) {
     const purchasable = !!ok?.enabled && product.available && !isCurrent;
@@ -185,12 +192,12 @@ export default function CheckoutClient() {
         onClick={() => void buy(product)}
       >
         {isCurrent
-          ? "Mevcut planın"
+          ? t("pricing.current")
           : !ok?.enabled || !product.available
-            ? "Şu an satın alınamıyor"
+            ? t("pricing.unavailable")
             : signedIn
-              ? "Satın al"
-              : "Giriş yap ve satın al"}
+              ? t("checkout.buy")
+              : t("checkout.buy.login")}
       </Button>
     );
   }
@@ -201,35 +208,48 @@ export default function CheckoutClient() {
       className="checkout"
       header={
         <PageHeader
-          description="Bakiyeni gör, abonelik ya da kredi paketi satın al."
+          description={t("checkout.description")}
           actions={
             <Button href="/pricing/" variant="link" iconEnd={<Icon name="arrow" size={16} />}>
-              Planları karşılaştır
+              {t("upgrade.compare")}
             </Button>
           }
         />
       }
     >
-      <section className="checkout-balance" data-surface="default" aria-label="Kredi hesabı">
+      <section
+        className="checkout-balance"
+        data-surface="default"
+        aria-label={t("checkout.balance.region")}
+      >
         <div className="checkout-balance__main">
-          <p className="checkout-balance__label">Kullanılabilir AI kredin</p>
-          <p className="checkout-balance__value">
-            {signedIn ? wallet.credits.toLocaleString("tr-TR") : "—"}
-          </p>
-          {signedIn && <p className="checkout-balance__tier">Planın: {tierName}</p>}
+          <p className="checkout-balance__label">{t("checkout.balance.label")}</p>
+          {signedIn ? (
+            <p className="checkout-balance__value">{num(wallet.credits)}</p>
+          ) : (
+            <p className="checkout-balance__value">
+              <span aria-hidden="true">—</span>
+              <VisuallyHidden>{t("checkout.balance.guest")}</VisuallyHidden>
+            </p>
+          )}
+          {signedIn && (
+            <p className="checkout-balance__tier">
+              {t("upgrade.tier").replace("{name}", tierName)}
+            </p>
+          )}
         </div>
         <Button
           href={signedIn ? "/travel-assistant/" : "/login/?next=%2Fcheckout%2F"}
           variant="secondary"
         >
-          {signedIn ? "Rotamı planla" : "Giriş yap"}
+          {signedIn ? t("checkout.balance.plan") : t("checkout.balance.login")}
         </Button>
       </section>
 
       <p className="checkout-note">
         {gift
-          ? `Hoş geldin hediyen (${gift.credits.toLocaleString("tr-TR")} kredi) hesabına tanımlandı. Bu hediye tek seferliktir.`
-          : `E-postanı doğruladığında hesabına ${WELCOME_CREDITS_DISPLAY} hoş geldin kredisi tanımlanır.`}
+          ? t("checkout.gift.granted").replace("{n}", num(gift.credits))
+          : t("checkout.gift.pending").replace("{n}", num(WELCOME_CREDITS_DISPLAY))}
       </p>
 
       {message && (
@@ -242,10 +262,10 @@ export default function CheckoutClient() {
           tone="info"
           live="polite"
           className="checkout-alert"
-          title="Paketler yüklenemedi"
+          title={t("checkout.catalog.failed")}
           action={
             <Button variant="secondary" size="sm" onClick={() => loadCatalog()}>
-              Tekrar dene
+              {t("pricing.alert.retry")}
             </Button>
           }
         />
@@ -255,45 +275,49 @@ export default function CheckoutClient() {
           tone="warning"
           live="polite"
           className="checkout-alert"
-          title="Satın alma şu an kapalı"
+          title={t("pricing.alert.disabled")}
         >
-          Mevcut ve hediye kredilerini kullanabilirsin.
+          {t("checkout.closed.body")}
         </Alert>
       )}
 
-      <Section title="Satın al" className="checkout-section">
+      <Section title={t("checkout.buy.title")} className="checkout-section">
         <SegmentedControl
-          label="Satın alma türü"
+          label={t("checkout.type.label")}
           value={tab}
           onChange={setTab}
           options={[
-            { value: "plans", label: "Abonelik" },
-            { value: "credits", label: "Kredi paketi" },
+            { value: "plans", label: t("checkout.type.plans") },
+            { value: "credits", label: t("checkout.type.credits") },
           ]}
         />
         {tab === "plans" && (
           <SegmentedControl
-            label="Ödeme dönemi"
+            label={t("pricing.period.label")}
             value={period}
             onChange={setPeriod}
             options={[
-              { value: "monthly", label: "Aylık" },
-              { value: "yearly", label: "Yıllık" },
+              { value: "monthly", label: t("pricing.period.monthly") },
+              { value: "yearly", label: t("pricing.period.yearly") },
             ]}
           />
         )}
         {planMissing && (
           <Alert tone="info" className="checkout-alert">
-            Seçtiğin plan bu dönem için şu an satın alınamıyor.
+            {t("checkout.planMissing")}
           </Alert>
         )}
         {catalog === "loading" ? (
-          <LoadingState label="Paketler yükleniyor…" />
+          <LoadingState label={t("checkout.loading")} />
         ) : !ok ? null : tab === "plans" ? (
           subscriptions.length > 0 ? (
             <ul className="checkout-products">
               {subscriptions.map(({ tier, product }) => {
-                const isCurrent = signedIn && wallet.subscriptionTier === tier;
+                // Sunucu wallet'ı dönem bildirmez; subscriptionCycle bugün hep "monthly".
+                const isCurrent =
+                  signedIn &&
+                  wallet.subscriptionTier === tier &&
+                  wallet.subscriptionCycle === period;
                 return (
                   <li
                     key={product.id}
@@ -306,54 +330,54 @@ export default function CheckoutClient() {
                   >
                     <div className="checkout-product__head">
                       <h3 className="checkout-product__name">{t(`pricing.tier.${tier}`)}</h3>
-                      {tier === plan && <Badge tone="info">Seçtiğin plan</Badge>}
+                      {tier === plan && <Badge tone="info">{t("checkout.selected")}</Badge>}
                     </div>
                     <p className="checkout-product__credits">
-                      {product.credits.toLocaleString("tr-TR")} kredi
+                      {t("credits.other").replace("{n}", num(product.credits))}
                     </p>
                     <p className="checkout-product__price">
-                      {formatPrice(product.amount, "tr")} / {period === "yearly" ? "yıl" : "ay"}
+                      {t(
+                        period === "yearly" ? "pricing.price.yearly" : "pricing.price.monthly",
+                      ).replace("{price}", formatPrice(product.amount, locale))}
                     </p>
-                    <p className="checkout-muted">
-                      Abonelik dönemsel yenilenir; istediğin an iptal edebilirsin.
-                    </p>
+                    <p className="checkout-muted">{t("checkout.subscription.note")}</p>
                     {buyButton(product, isCurrent)}
                   </li>
                 );
               })}
             </ul>
           ) : (
-            <p className="checkout-muted">Bu dönem için şu an satın alınabilir abonelik yok.</p>
+            <p className="checkout-muted">{t("checkout.noSubscriptions")}</p>
           )
         ) : packs.length > 0 ? (
           <ul className="checkout-products">
             {packs.map((product) => (
               <li key={product.id} className="checkout-product" data-surface="default">
                 <h3 className="checkout-product__name">
-                  {product.credits.toLocaleString("tr-TR")} kredi
+                  {t("credits.other").replace("{n}", num(product.credits))}
                 </h3>
-                <p className="checkout-product__price">{formatPrice(product.amount, "tr")}</p>
-                <p className="checkout-muted">Tek seferlik ek kredi. Kredilerin süresi dolmaz.</p>
+                <p className="checkout-product__price">{formatPrice(product.amount, locale)}</p>
+                <p className="checkout-muted">{t("checkout.pack.note")}</p>
                 {buyButton(product, false)}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="checkout-muted">Şu an satın alınabilir kredi paketi yok.</p>
+          <p className="checkout-muted">{t("checkout.noPacks")}</p>
         )}
       </Section>
 
       {signedIn && (
-        <Section title="Promosyon kodu" className="checkout-section">
+        <Section title={t("checkout.promo.title")} className="checkout-section">
           <div className="checkout-promo">
-            <Field label="Promosyon kodun var mı?" className="checkout-promo__field">
+            <Field label={t("checkout.promo.label")} className="checkout-promo__field">
               {(ids) => (
                 <Input
                   {...ids}
                   type="text"
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                  placeholder="KOD"
+                  placeholder={t("checkout.promo.placeholder")}
                   autoComplete="off"
                   maxLength={32}
                   disabled={promoBusy}
@@ -366,7 +390,7 @@ export default function CheckoutClient() {
               disabled={!promoCode.trim()}
               loading={promoBusy}
             >
-              Kodu kullan
+              {t("checkout.promo.submit")}
             </Button>
           </div>
           {promoMsg && (
@@ -378,15 +402,12 @@ export default function CheckoutClient() {
       )}
 
       <Section
-        title="Ne kadar kredi harcar?"
-        description="Kredi, ücretli işlem başlamadan sunucuda ayrılır. İşlem başarısız olursa otomatik iade edilir."
+        title={t("pricing.costs.title")}
+        description={t("checkout.costs.sub")}
         className="checkout-section"
       >
         <CreditCostTable />
-        <p className="checkout-muted">
-          Ödemeler RevenueCat üzerinden güvenli biçimde gerçekleşir. Krediler yalnızca ödeme
-          sunucuda doğrulandıktan sonra hesabına yüklenir.
-        </p>
+        <p className="checkout-muted">{t("checkout.costs.payment")}</p>
       </Section>
     </PageShell>
   );

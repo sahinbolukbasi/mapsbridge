@@ -103,15 +103,21 @@ export function derivePlanEquivalents(credits: number): { deepTrips: number; cha
 }
 
 /**
- * Yıllık indirim yüzdesi: yalnızca katalogda iki dönem de varsa (design §7.2 madde 2); aksi halde
- * undefined (metin gösterilmez). Yıllık 12 aydan pahalı ya da eşitse de undefined.
+ * Yıllık indirim yüzdesi, KREDİ BAŞINA (design §7.2 madde 2): yalnızca katalogda iki dönem de
+ * varsa; aksi halde undefined (metin gösterilmez). Yıllık ürün 12 × aylık kredi vermeyebilir
+ * (ör. pro 500 kr/₺499, pro-yearly 5.500 kr/₺4.999), bu yüzden yalnızca tutar karşılaştırılmaz;
+ * kredi başına fiyat karşılaştırılır (≈ %9). Kredi başı yıllık pahalı ya da eşitse undefined.
  */
 export function yearlyDiscount(
   monthly: CatalogProduct | undefined,
   yearly: CatalogProduct | undefined,
 ): number | undefined {
-  if (!monthly || !yearly || monthly.amount <= 0 || yearly.amount <= 0) return undefined;
-  const pct = Math.round((1 - yearly.amount / (monthly.amount * 12)) * 100);
+  if (!monthly || !yearly) return undefined;
+  if (monthly.amount <= 0 || yearly.amount <= 0 || monthly.credits <= 0 || yearly.credits <= 0)
+    return undefined;
+  const monthlyPerCredit = monthly.amount / monthly.credits;
+  const yearlyPerCredit = yearly.amount / yearly.credits;
+  const pct = Math.round((1 - yearlyPerCredit / monthlyPerCredit) * 100);
   return pct > 0 ? pct : undefined;
 }
 
@@ -150,16 +156,32 @@ export type CatalogPrice = { amount: number; period: PlanPeriod; credits: number
 export type PlanPriceState = CatalogPrice | "loading" | "unavailable" | "free" | "none";
 /** ok: CTA etkin · closed: enabled:false · unavailable: ürün yok/available:false · current. */
 export type PlanPurchase = "ok" | "closed" | "unavailable" | "current";
-export type PlanOffer = { price: PlanPriceState; discount?: number; purchase: PlanPurchase };
+/**
+ * `credits` yalnızca yıllık dönemde katalogda yıllık ürün varsa verilir: kartın birincil kredi
+ * satırı ve "≈" satırı o zaman ürünün yıllık kredisinden gelir ("5.500 kredi / yıl"); aksi halde
+ * statik aylık kredi (planInfos) gösterilir.
+ */
+export type PlanOffer = {
+  price: PlanPriceState;
+  discount?: number;
+  purchase: PlanPurchase;
+  credits?: { n: number; kind: "yearly" };
+};
 
-/** Kart durumu (design §7.3) tek yerde: fiyat, yıllık indirim ve CTA'nın satın alınabilirliği. */
+/**
+ * Kart durumu (design §7.3) tek yerde: fiyat, kredi, yıllık indirim ve CTA'nın satın
+ * alınabilirliği. "Mevcut planın" tier VE dönem eşleşince (free dönemsizdir); sunucu wallet'ı
+ * dönem bildirmez, `subscriptionCycle` bugün hep "monthly" (sunucuda tier "pro" yalnızca aylık
+ * `pro` ürününden yazılır).
+ */
 export function planOffer(
   tier: PlanTier,
   period: PlanPeriod,
   catalog: Catalog | "loading",
   currentTier: PlanTier | null,
+  currentPeriod: PlanPeriod = "monthly",
 ): PlanOffer {
-  const current = currentTier === tier;
+  const current = currentTier === tier && (tier === "free" || currentPeriod === period);
   if (tier === "free") return { price: "free", purchase: current ? "current" : "ok" };
   if (catalog === "loading") return { price: "loading", purchase: current ? "current" : "ok" };
   if (catalog.status === "unavailable")
@@ -182,7 +204,10 @@ export function planOffer(
       : !product || !product.available
         ? "unavailable"
         : "ok";
-  return discount === undefined ? { price, purchase } : { price, discount, purchase };
+  const offer: PlanOffer = { price, purchase };
+  if (discount !== undefined) offer.discount = discount;
+  if (product && period === "yearly") offer.credits = { n: product.credits, kind: "yearly" };
+  return offer;
 }
 
 /** Katalog tutarı (kuruş) → "₺499" / "₺49,90"; para birimi bugünkü checkout ile aynı (TRY). */

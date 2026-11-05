@@ -34,9 +34,10 @@ export function PlanCard({
 }: {
   tier: PlanTier;
   credits: number;
-  creditsKind: "welcome" | "monthly";
+  /** yearly: katalogdaki yıllık ürünün kredisi ("5.500 kredi / yıl"), yalnızca yıllık dönemde. */
+  creditsKind: "welcome" | "monthly" | "yearly";
   price: PlanPriceState;
-  /** Yıllık indirim yüzdesi; yalnızca katalogda iki dönem de varsa verilir (design §7.2). */
+  /** Kredi başına yıllık indirim yüzdesi; yalnızca katalogda iki dönem de varsa (design §7.2). */
   discount?: number;
   current?: boolean;
   cta?: PlanCta;
@@ -48,9 +49,7 @@ export function PlanCard({
   const eq = derivePlanEquivalents(credits);
   const name = t(`pricing.tier.${tier}`);
   const num = (n: number) => n.toLocaleString(locale === "en" ? "en-GB" : "tr-TR");
-  const creditsLine = t(
-    creditsKind === "welcome" ? "pricing.credits.welcome" : "pricing.credits.monthly",
-  ).replace("{n}", num(credits));
+  const creditsLine = t(`pricing.credits.${creditsKind}`).replace("{n}", num(credits));
   const eqLine = t(eq.deepTrips === 1 ? "pricing.equivalents.oneTrip" : "pricing.equivalents")
     .replace("{trips}", num(eq.deepTrips))
     .replace("{chats}", num(eq.chats));
@@ -121,21 +120,11 @@ function PriceLine({ price }: { price: PlanPriceState }) {
   if (price === "free") return <p className="bl-plan-card__price">{t("pricing.price.free")}</p>;
   const amount = formatPrice(price.amount, locale);
   return (
-    <>
-      <p className="bl-plan-card__price">
-        {t(price.period === "yearly" ? "pricing.price.yearly" : "pricing.price.monthly").replace(
-          "{price}",
-          amount,
-        )}
-      </p>
-      {price.period === "yearly" && (
-        <p className="bl-plan-card__price-note">
-          {t("pricing.price.yearlyCredits").replace(
-            "{n}",
-            price.credits.toLocaleString(locale === "en" ? "en-GB" : "tr-TR"),
-          )}
-        </p>
+    <p className="bl-plan-card__price">
+      {t(price.period === "yearly" ? "pricing.price.yearly" : "pricing.price.monthly").replace(
+        "{price}",
+        amount,
       )}
-    </>
+    </p>
   );
 }

@@ -54,7 +54,7 @@ export default function PricingClient() {
   });
   const [catalog, setCatalog] = useState<Catalog | "loading">("loading");
   const [signedIn, setSignedIn] = useState(false);
-  const [currentTier, setCurrentTier] = useState<PlanTier | null>(null);
+  const [current, setCurrent] = useState<{ tier: PlanTier; period: PlanPeriod } | null>(null);
 
   const load = useCallback((signal?: AbortSignal) => {
     setCatalog("loading");
@@ -72,7 +72,8 @@ export default function PricingClient() {
       void billingService
         .refreshWallet()
         .then((w) => {
-          if (!controller.signal.aborted && getStoredSession()) setCurrentTier(w.subscriptionTier);
+          if (!controller.signal.aborted && getStoredSession())
+            setCurrent({ tier: w.subscriptionTier, period: w.subscriptionCycle });
         })
         .catch(() => {});
     }
@@ -143,13 +144,14 @@ export default function PricingClient() {
       </div>
       <ul className="pricing__plans" aria-label={t("pricing.plans.label")}>
         {planInfos().map((info) => {
-          const offer = planOffer(info.tier, period, catalog, signedIn ? currentTier : null);
+          const mine = signedIn ? current : null;
+          const offer = planOffer(info.tier, period, catalog, mine?.tier ?? null, mine?.period);
           return (
             <li key={info.tier} className="pricing__plan">
               <PlanCard
                 tier={info.tier}
-                credits={info.credits}
-                creditsKind={info.kind}
+                credits={offer.credits?.n ?? info.credits}
+                creditsKind={offer.credits?.kind ?? info.kind}
                 price={offer.price}
                 discount={offer.discount}
                 current={offer.purchase === "current"}
@@ -167,7 +169,7 @@ export default function PricingClient() {
         id="krediler"
         title={t("pricing.costs.title")}
         description={t("pricing.costs.free")}
-        className="pricing__section pricing__section--split"
+        className="pricing__section"
       >
         <CreditCostTable />
       </Section>
@@ -219,15 +221,16 @@ export default function PricingClient() {
         </Section>
       )}
 
-      <section className="pricing__independence" aria-labelledby="pricing-independence-title">
-        <Icon name="shield" size={24} className="pricing__independence-icon" />
-        <div>
-          <h2 id="pricing-independence-title" className="pricing__independence-title">
-            {t("pricing.independence.title")}
-          </h2>
+      <Section
+        id="bagimsizlik"
+        title={t("pricing.independence.title")}
+        className="pricing__section pricing__independence"
+      >
+        <div className="pricing__independence-body">
+          <Icon name="shield" size={24} className="pricing__independence-icon" />
           <p className="pricing__muted">{t("pricing.independence.body")}</p>
         </div>
-      </section>
+      </Section>
 
       <Section id="sss" title={t("pricing.faq.title")} className="pricing__section">
         <Accordion

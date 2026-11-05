@@ -65,19 +65,16 @@
     font-variant-numeric: tabular-nums;
   }
   .pricing__independence {
+    margin-block-start: var(--space-8);
+  }
+  .pricing__independence-body {
     display: flex;
     align-items: flex-start;
     gap: var(--space-3);
-    margin-block-start: var(--space-8);
   }
   .pricing__independence-icon {
     flex: none;
     color: var(--color-text-brand);
-  }
-  .pricing__independence-title {
-    margin: 0 0 var(--space-1);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
   }
   @media (min-width: 640px) {
     .pricing__packs {

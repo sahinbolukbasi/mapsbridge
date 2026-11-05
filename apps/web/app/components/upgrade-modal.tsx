@@ -3,10 +3,13 @@
 // İçerik: CreditCostTable, sunucudan gelen bakiye, "Planları karşılaştır" (→ /pricing/) ve
 // "Kredi paketi al" (→ /checkout/?tab=credits). Fiyat/plan listesi burada YOK: fiyat yalnızca
 // canlı katalogdan /pricing/ ve /checkout/'ta gösterilir (S2). Kredi istemcide hesaplanmaz.
+// Katalog yüklendi ve satın alınabilir kredi paketi yoksa "Kredi paketi al" çizilmez (I10,
+// /pricing/ "Kredin bitince" ile aynı kural); katalog bilinmiyorsa (yükleniyor/hata) gösterilir.
 // Root layout `UpgradeModal`'ı bağlar; çağıranlar `openUpgradeModal(reason, tab, placement)`
 // imzasını değiştirmeden kullanır.
 import { useEffect, useState } from "react";
 import { billingService } from "../lib/billing/billing-service";
+import { creditPacks, fetchCatalog } from "../lib/billing/catalog";
 import type { WalletData } from "../lib/billing/billing-types";
 import { getStoredSession } from "../lib/cognito";
 import { useLocale } from "../lib/locale-context";
@@ -17,22 +20,25 @@ type UpgradeTab = "subscriptions" | "packs";
 type WalletState =
   { status: "loading" } | { status: "ok"; wallet: WalletData } | { status: "none" };
 
-/** Sheet görünümü (saf sunum): bakiye durumu ve açılış sekmesi dışarıdan gelir. */
+/** Sheet görünümü (saf sunum): bakiye durumu, açılış sekmesi ve paket bilgisi dışarıdan gelir. */
 export function UpgradeSheet({
   open,
   onClose,
   reason,
   tab,
   wallet,
+  packsAvailable = true,
 }: {
   open: boolean;
   onClose: () => void;
   reason?: string;
   tab?: UpgradeTab;
   wallet: WalletState;
+  /** false: katalog yüklendi ve satın alınabilir paket yok → "Kredi paketi al" çizilmez (I10). */
+  packsAvailable?: boolean;
 }) {
   const { t, locale } = useLocale();
-  const packsFirst = tab === "packs";
+  const packsFirst = tab === "packs" && packsAvailable;
   const compare = (
     <Button
       key="compare"
@@ -65,7 +71,7 @@ export function UpgradeSheet({
       description={reason || t("upgrade.description")}
       footer={
         <div className="bl-upgrade__actions">
-          {packsFirst ? [packs, compare] : [compare, packs]}
+          {!packsAvailable ? compare : packsFirst ? [packs, compare] : [compare, packs]}
         </div>
       }
     >
@@ -75,26 +81,29 @@ export function UpgradeSheet({
             <Icon name="coin" size={24} className="bl-upgrade__balance-icon" />
             <div className="bl-upgrade__balance-text">
               <p className="bl-upgrade__balance-label">{t("upgrade.balance")}</p>
-              {wallet.status === "loading" ? (
-                <p className="bl-upgrade__balance-value">
-                  <Skeleton width="72px" height="12px" />
-                  <VisuallyHidden>{t("ui.loading", "Yükleniyor…")}</VisuallyHidden>
-                </p>
-              ) : (
-                <p className="bl-upgrade__balance-value" role="status">
-                  {t(wallet.wallet.credits === 1 ? "credits.one" : "credits.other").replace(
-                    "{n}",
-                    wallet.wallet.credits.toLocaleString(locale === "en" ? "en-GB" : "tr-TR"),
-                  )}
-                  <span className="bl-upgrade__tier">
-                    {" · "}
-                    {t("upgrade.tier").replace(
-                      "{name}",
-                      t(`pricing.tier.${wallet.wallet.subscriptionTier}`),
+              {/* role="status" yükleme sırasında da bağlı kalır: bakiye gelince duyurulur. */}
+              <p className="bl-upgrade__balance-value" role="status">
+                {wallet.status === "loading" ? (
+                  <>
+                    <Skeleton width="72px" height="12px" />
+                    <VisuallyHidden>{t("ui.loading", "Yükleniyor…")}</VisuallyHidden>
+                  </>
+                ) : (
+                  <>
+                    {t(wallet.wallet.credits === 1 ? "credits.one" : "credits.other").replace(
+                      "{n}",
+                      wallet.wallet.credits.toLocaleString(locale === "en" ? "en-GB" : "tr-TR"),
                     )}
-                  </span>
-                </p>
-              )}
+                    <span className="bl-upgrade__tier">
+                      {" · "}
+                      {t("upgrade.tier").replace(
+                        "{name}",
+                        t(`pricing.tier.${wallet.wallet.subscriptionTier}`),
+                      )}
+                    </span>
+                  </>
+                )}
+              </p>
             </div>
           </div>
         )}
@@ -111,6 +120,7 @@ export function UpgradeModal() {
   const [reason, setReason] = useState("");
   const [tab, setTab] = useState<UpgradeTab | undefined>(undefined);
   const [wallet, setWallet] = useState<WalletState>({ status: "none" });
+  const [packsAvailable, setPacksAvailable] = useState(true);
 
   useEffect(() => {
     const handleOpen = (
@@ -123,6 +133,15 @@ export function UpgradeModal() {
       setReason(e.detail?.reason || "");
       setTab(e.detail?.tab);
       setIsOpen(true);
+      // Paket bilgisi yalnızca katalogdan; bilinmiyorsa (hata) buton kalır, checkout kendi
+      // durumunu gösterir.
+      setPacksAvailable(true);
+      void fetchCatalog().then((catalog) => {
+        if (catalog.status === "ok")
+          setPacksAvailable(
+            catalog.enabled && creditPacks(catalog.products).some((p) => p.available),
+          );
+      });
       // Bakiye yalnızca sunucudan (oturum varsa); istemci kredi hesaplamaz.
       if (!getStoredSession()) {
         setWallet({ status: "none" });
@@ -158,6 +177,7 @@ export function UpgradeModal() {
       reason={reason}
       tab={tab}
       wallet={wallet}
+      packsAvailable={packsAvailable}
     />
   );
 }

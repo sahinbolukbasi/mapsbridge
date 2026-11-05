@@ -115,15 +115,25 @@ test("planInfos: tier kredileri contracts + hoş geldin 5 (design §7.2 tablosu)
   ]);
 });
 
-test("yearlyDiscount: yalnızca iki dönem de varsa", () => {
+test("yearlyDiscount: kredi başına, yalnızca iki dönem de varsa", () => {
   const monthly = product();
   const yearly = product({ id: "pro-yearly", amount: 499900, credits: 5500 });
-  assert.equal(catalog.yearlyDiscount(monthly, yearly), 17);
+  // Canlı katalog: 49900/500 = 99,8 kuruş/kredi, 499900/5500 ≈ 90,9 → %9 (yalnızca tutar: %17 YANLIŞ).
+  assert.equal(catalog.yearlyDiscount(monthly, yearly), 9);
+  // 12 × aylık kredi veren yıllık ürün: kredi başı indirim = tutar indirimi.
+  assert.equal(
+    catalog.yearlyDiscount(monthly, product({ id: "pro-yearly", amount: 499900, credits: 6000 })),
+    17,
+  );
+  assert.equal(catalog.yearlyDiscount(monthly, product({ amount: 499900, credits: 0 })), undefined);
   assert.equal(catalog.yearlyDiscount(monthly, undefined), undefined);
   assert.equal(catalog.yearlyDiscount(undefined, yearly), undefined);
   assert.equal(catalog.yearlyDiscount(undefined, undefined), undefined);
   // 12 aydan pahalı/eşit yıllık indirim sayılmaz; sıfır tutar bölmez.
-  assert.equal(catalog.yearlyDiscount(monthly, product({ amount: 49900 * 12 })), undefined);
+  assert.equal(
+    catalog.yearlyDiscount(monthly, product({ amount: 49900 * 12, credits: 6000 })),
+    undefined,
+  );
   assert.equal(catalog.yearlyDiscount(product({ amount: 0 }), yearly), undefined);
 });
 
@@ -157,10 +167,18 @@ test("planOffer: §7.3 durumları (yükleniyor, başarısız, kapalı, ürün yo
     price: { amount: 49900, period: "monthly", credits: 500 },
     purchase: "ok",
   });
+  // Yıllık: kredi satırı katalogdaki yıllık üründen (5.500 / yıl), indirim kredi başına (%9).
   assert.deepEqual(offer("pro", "yearly", ok(), null), {
     price: { amount: 499900, period: "yearly", credits: 5500 },
-    discount: 17,
+    discount: 9,
     purchase: "ok",
+    credits: { n: 5500, kind: "yearly" },
+  });
+  // Aylık dönemde ve yıllık ürün yokken kredi satırı statik kalır (credits verilmez).
+  assert.equal(offer("pro", "monthly", ok(), null).credits, undefined);
+  assert.deepEqual(offer("pro", "yearly", ok({ products: [product()] }), null), {
+    price: "none",
+    purchase: "unavailable",
   });
   assert.equal(offer("pro", "monthly", ok({ enabled: false }), null).purchase, "closed");
   assert.deepEqual(offer("explorer", "monthly", ok(), null), {
@@ -173,6 +191,12 @@ test("planOffer: §7.3 durumları (yükleniyor, başarısız, kapalı, ürün yo
   );
   assert.equal(offer("pro", "monthly", ok(), "pro").purchase, "current");
   assert.equal(offer("free", "monthly", ok(), "free").purchase, "current");
+  // "Mevcut planın" dönemle birlikte eşleşir; free dönemsizdir.
+  assert.equal(offer("pro", "yearly", ok(), "pro").purchase, "ok");
+  assert.equal(offer("pro", "yearly", ok(), "pro", "monthly").purchase, "ok");
+  assert.equal(offer("pro", "yearly", ok(), "pro", "yearly").purchase, "current");
+  assert.equal(offer("pro", "monthly", ok(), "pro", "yearly").purchase, "ok");
+  assert.equal(offer("free", "yearly", ok(), "free").purchase, "current");
 });
 
 test("fetchCatalog: skipAuth + 8 sn; hata/iptal unavailable döner, fırlatmaz", async () => {
@@ -244,7 +268,7 @@ test("yasak metinler: EN POPÜLER, deneme, kredi kartı ve contracts TRY fiyatla
   ].map((f) => fs.readFileSync(path.join(WEB, f), "utf8"));
   const locales = ["tr", "en"].map((l) =>
     Object.entries(JSON.parse(fs.readFileSync(path.join(WEB, `locales/${l}.json`), "utf8")))
-      .filter(([k]) => k.startsWith("pricing.") || k.startsWith("upgrade."))
+      .filter(([k]) => /^(pricing|upgrade|checkout)\./.test(k))
       .map(([, v]) => v)
       .join("\n"),
   );
