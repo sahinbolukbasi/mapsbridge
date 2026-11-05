@@ -28,10 +28,10 @@ export function SegmentedControl<V extends string>({
   className?: string;
 }) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
-  const index = Math.max(
-    0,
-    options.findIndex((o) => o.value === value),
-  );
+  // value hiçbir seçenekle eşleşmezse hiçbiri seçili gösterilmez (yanlış aria-checked yok);
+  // APG gereği o durumda sekme sırasına ilk seçenek girer.
+  const index = options.findIndex((o) => o.value === value);
+  const tabbable = Math.max(0, index);
   function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, k: number) {
     const next = nextTabIndex(
       k,
@@ -43,7 +43,7 @@ export function SegmentedControl<V extends string>({
     refs.current[next]?.focus();
     if (next !== index) onChange(options[next].value);
   }
-  const style = { "--segment-count": options.length, "--segment-index": index } as CSSProperties;
+  const style = { "--segment-count": options.length, "--segment-index": tabbable } as CSSProperties;
   return (
     <div
       className={cx("ui-segmented", className)}
@@ -52,7 +52,7 @@ export function SegmentedControl<V extends string>({
       data-surface="default"
       style={style}
     >
-      <span className="ui-segmented__indicator" aria-hidden="true" />
+      {index >= 0 && <span className="ui-segmented__indicator" aria-hidden="true" />}
       {options.map((option, k) => (
         <button
           key={option.value}
@@ -63,7 +63,7 @@ export function SegmentedControl<V extends string>({
           role="radio"
           className="ui-segmented__option"
           aria-checked={k === index}
-          tabIndex={k === index ? 0 : -1}
+          tabIndex={k === tabbable ? 0 : -1}
           onClick={() => {
             if (k !== index) onChange(option.value);
           }}

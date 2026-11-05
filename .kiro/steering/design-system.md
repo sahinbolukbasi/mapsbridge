@@ -129,7 +129,7 @@ Kural → bölüm eşlemesi:
 | §URL ve SEO          | G9, G21                         |
 | §Erişilebilirlik     | G11, G12, G29                   |
 
-Ratchet: `apps/web/tests/design-system-baseline.json` kalan eski ihlalleri dosya bazında sayar ve yalnızca aşağı yazılır (`node apps/web/tests/design-system-guard.test.cjs --write-baseline`). Yeni dosyada ihlal 0'dır; mevcut dosyada sayı artamaz. Yeni bir kural baseline'a yalnızca bir kez, bugünkü sayılarıyla `--write-baseline --seed <G..>` ile girer (baseline'da olan kural seed edilemez).
+Ratchet: `apps/web/tests/design-system-baseline.json` kalan eski ihlalleri dosya bazında sayar ve yalnızca aşağı yazılır (`node apps/web/tests/design-system-guard.test.cjs --write-baseline`). Yeni dosyada ihlal 0'dır; mevcut dosyada sayı artamaz. Yeni bir kural baseline'a yalnızca bir kez, bugünkü sayılarıyla `--write-baseline --seed <G..>` ile girer. Her kural baseline'da anahtar olarak kalır (sıfıra inen kural `{}`); anahtarı olan kural, sayısı 0 olsa bile, seed edilemez.
 
 ## 14. Yeni sayfa ekleme
 

@@ -941,9 +941,10 @@
     color: var(--segment-selected-fg);
   }
 
-  /* BottomSheet: tam yükseklik, snap transform ile (yerleşim sayfaya ait) */
+  /* BottomSheet: kutu tam boy, snap transform ile; gövde görünen snap boyu (WCAG 2.4.11) */
   .ui-bottom-sheet {
-    --sheet-offset: calc(var(--sheet-full) - var(--sheet-peek));
+    --sheet-visible: var(--sheet-peek);
+    --sheet-offset: calc(var(--sheet-full) - var(--sheet-visible));
     display: flex;
     flex-direction: column;
     block-size: var(--sheet-full);
@@ -955,10 +956,10 @@
     transform: translateY(max(0px, calc(var(--sheet-offset) + var(--sheet-drag, 0px))));
   }
   .ui-bottom-sheet[data-snap="half"] {
-    --sheet-offset: calc(var(--sheet-full) - var(--sheet-half));
+    --sheet-visible: var(--sheet-half);
   }
   .ui-bottom-sheet[data-snap="full"] {
-    --sheet-offset: 0px;
+    --sheet-visible: var(--sheet-full);
   }
   .ui-bottom-sheet__handle {
     display: grid;
@@ -979,8 +980,8 @@
     background: var(--sheet-handle);
   }
   .ui-bottom-sheet__body {
-    flex: 1;
-    min-block-size: 0;
+    flex: none;
+    block-size: calc(var(--sheet-visible) - var(--touch-target));
     overflow-y: auto;
     overscroll-behavior: contain;
   }
@@ -1102,6 +1103,11 @@
   @media (prefers-reduced-motion: no-preference) {
     .ui-page-enter {
       animation: ui-page-enter var(--duration-slow) var(--easing-enter) backwards;
+    }
+    /* app/sidebar: yalnız fade; <main> transform'u fixed torunları kaydırır (design §8.2, S15) */
+    .ui-page-shell--app.ui-page-enter,
+    .ui-page-shell--sidebar.ui-page-enter {
+      animation-name: ui-fade-in;
     }
     .ui-button:active:not([aria-disabled="true"]) {
       transform: scale(0.98);

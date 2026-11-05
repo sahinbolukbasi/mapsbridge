@@ -5,7 +5,9 @@
 //   node apps/web/tests/design-system-guard.test.cjs --write-baseline        (artışı reddeder)
 //   node apps/web/tests/design-system-guard.test.cjs --write-baseline --init (yalnızca dosya yokken)
 //   node apps/web/tests/design-system-guard.test.cjs --write-baseline --seed G24,G25 (baseline'da
-//     olmayan yeni kuralı bir kez ekler; G24–G29 ui-ux-redesign FEAT-002'de seed edildi)
+//     anahtarı olmayan yeni kuralı bir kez ekler; G24–G29 ui-ux-redesign FEAT-002'de seed edildi)
+// Her kural baseline'da anahtar olarak durur (temizlenen kural `{}`); böylece sıfıra inmiş kural
+// --seed ile yeniden açılamaz.
 // Baseline dosyası yoksa (C19 sonrası) tüm kurallar 0 bekler. G13 baseline yerine
 // packages/design-tokens/src/breakpoints.ts `legacyBreakpoints` listesini kullanır (D18).
 // CSS'te yorumlar atılır ve renk kuralları yalnızca declaration değerlerine bakar; TS/TSX
@@ -1139,12 +1141,12 @@ function countsOf(violations) {
   for (const [file, list] of Object.entries(violations)) out[file] = list.length;
   return out;
 }
+// Sıfıra inen kural da baseline'da `{}` olarak kalır: anahtarın varlığı "bu kural bir kez
+// yazıldı" demektir ve --seed ile yeniden açılamaz (ratchet yalnızca aşağı).
 function actualCounts() {
   const all = {};
-  for (const [rule, fn] of Object.entries(RULES)) {
-    const counts = countsOf(fn());
-    if (Object.keys(counts).length) all[rule] = Object.fromEntries(Object.entries(counts).sort());
-  }
+  for (const [rule, fn] of Object.entries(RULES))
+    all[rule] = Object.fromEntries(Object.entries(countsOf(fn())).sort());
   return all;
 }
 const readBaseline = () =>
@@ -1161,8 +1163,9 @@ function writeBaseline() {
     console.error("--init yalnızca baseline dosyası yokken kullanılabilir.");
     process.exit(1);
   }
-  // --seed G24,G25: baseline'da HİÇ olmayan yeni kuralları bugünkü sayılarıyla bir kez ekler
-  // (plan D5). Baseline'da zaten bulunan kural seed edilemez; diğer kurallar yalnızca düşer.
+  // --seed G24,G25: baseline'da anahtarı HİÇ olmayan (RULES'a yeni eklenmiş) kuralları bugünkü
+  // sayılarıyla bir kez ekler (plan D5). Anahtarı olan kural (sayısı 0 olsa bile, `{}`) seed
+  // edilemez; diğer kurallar yalnızca düşer.
   const seedArg = process.argv.indexOf("--seed");
   const seed = new Set(
     seedArg > 0 ? (process.argv[seedArg + 1] ?? "").split(",").filter(Boolean) : [],
@@ -1176,7 +1179,7 @@ function writeBaseline() {
       console.error(`--seed: bilinmeyen kural ${rule}`);
       process.exit(1);
     }
-    if (existing?.[rule]) {
+    if (existing && Object.hasOwn(existing, rule)) {
       console.error(`--seed: ${rule} baseline'da zaten var; yalnızca aşağı yönde yazılabilir.`);
       process.exit(1);
     }
@@ -1269,7 +1272,12 @@ if (require.main === module && process.argv.includes("--write-baseline")) {
     assert.ok(fs.existsSync(REGISTRY_PATH), "lib/route-registry.ts yok: G4/G9 koşamaz");
   });
 
-  test("baseline biçimi: bilinen kurallar, pozitif tam sayılar", () => {
+  test("baseline biçimi: bilinen kurallar, pozitif tam sayılar, her kural anahtar olarak var", () => {
+    for (const rule of Object.keys(RULES))
+      assert.ok(
+        Object.hasOwn(baseline, rule),
+        `baseline'da ${rule} anahtarı yok: temizlenen kural {} olarak kalır, yeni kural --seed ile girer`,
+      );
     for (const [rule, files] of Object.entries(baseline)) {
       assert.ok(RULES[rule], `baseline'da bilinmeyen kural: ${rule}`);
       for (const [file, n] of Object.entries(files))
