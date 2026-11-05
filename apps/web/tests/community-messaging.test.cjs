@@ -169,3 +169,116 @@ test("/k/: kod tek kuraldan (share-code) geçer; geçersizde istek atılmaz", ()
   assert.ok(submit.indexOf("return;") < submit.indexOf("lookup(valid)"));
   assert.match(src, /<CopyRouteButton/);
 });
+
+// ─── FEAT-009 review: gerçek social-sync + user-storage ile kayıt/yeniden okuma ────────────
+function socialSyncEnv() {
+  const store = new Map();
+  const localStorage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+    removeItem: (k) => store.delete(k),
+  };
+  localStorage.setItem("mapsbridge.userEmail", "Ayse.Kaya@example.com");
+  localStorage.setItem("mapsbridge.accessToken", "token");
+  const window = { dispatchEvent() {}, addEventListener() {}, removeEventListener() {} };
+  class CustomEvent {
+    constructor(type, init) {
+      this.type = type;
+      this.detail = init && init.detail;
+    }
+  }
+  const fetch = () => Promise.resolve({ ok: false, json: async () => ({}) });
+  const mod = loadTs(path.join(APP, "lib/social-sync.ts"), {
+    globals: { window, localStorage, CustomEvent, fetch },
+  });
+  const key = `mapsbridge.account.${encodeURIComponent("ayse.kaya@example.com")}.mapsbridge.userProfileDetails`;
+  return { mod, store, key };
+}
+
+test("social-sync: profil kaydı diller/ilgi/bağlantı/eski alanları korur, uydurma sayaç yazmaz", () => {
+  const { mod, store, key } = socialSyncEnv();
+  const stored = {
+    fullName: "Ayşe",
+    languages: ["Türkçe", "İngilizce"],
+    interests: ["Tarih"],
+    instagram: "@ayse",
+    youtubeOrBlog: "https://ornek.example",
+    showProBadge: false,
+  };
+  store.set(key, JSON.stringify(stored));
+  // /profile/edit/ saveProfile sırası: birleşik ayrıntılar, sonra updateProfile.
+  const clean = { ...stored, fullName: "Ayşe Kaya", username: "ayse", bio: "Merhaba" };
+  store.set(key, JSON.stringify(clean));
+  mod.webSocialSync.updateProfile({ fullName: "Ayşe Kaya", username: "ayse", bio: "Merhaba" });
+  const after = JSON.parse(store.get(key));
+  assert.deepEqual(after.languages, ["Türkçe", "İngilizce"]);
+  assert.deepEqual(after.interests, ["Tarih"]);
+  assert.equal(after.instagram, "@ayse");
+  assert.equal(after.youtubeOrBlog, "https://ornek.example");
+  assert.equal(after.showProBadge, false);
+  assert.equal(after.fullName, "Ayşe Kaya");
+  for (const k of [
+    "followersCount",
+    "followingCount",
+    "routesCount",
+    "stopsCount",
+    "verified",
+    "email",
+  ])
+    assert.equal(k in after, false, `${k} kaydedilmemeli`);
+  const p = mod.webSocialSync.getProfile();
+  assert.equal(p.username, "ayse");
+  assert.equal(p.followersCount, 0);
+  assert.equal(p.verified, false);
+});
+
+test("social-sync: profil ayrıntısı yoksa kimlik oturumdan; konum/avatar/etiket uydurulmaz (I1)", () => {
+  const { mod } = socialSyncEnv();
+  const profile = mod.webSocialSync.getProfile();
+  assert.equal(profile.username, "aysekaya");
+  assert.equal(profile.fullName, "Ayse.kaya");
+  assert.equal(profile.email, "ayse.kaya@example.com");
+  assert.equal(profile.location, "");
+  assert.equal(profile.bio, "");
+  const post = plain(
+    mod.webSocialSync.createPost({ content: "Roma'dan selam", category: "Gastronomi" }),
+  );
+  assert.equal(post.authorUsername, "aysekaya");
+  assert.equal(post.authorDisplayName, "Ayse.kaya");
+  assert.equal("authorAvatar" in post, false);
+  assert.equal("locationTag" in post, false);
+  assert.equal("authorFollowersCount" in post, false);
+  assert.deepEqual(post.hashtags, []);
+  const src = read("lib/social-sync.ts");
+  assert.doesNotMatch(src, /googleusercontent|İstanbul, Türkiye|1420|"#Seyahat"/);
+  assert.deepEqual(plain(mod.deriveIdentity("x@y.z", { firstName: "Can", lastName: "Er" })), {
+    fullName: "Can Er",
+    username: "x",
+  });
+});
+
+test("review düzeltmeleri: örnek profilde takip/mesaj yok, yorum taslağı kapıda korunur, akış canlı bölge değil", () => {
+  const client = read("[username]/public-profile-client.tsx");
+  const sampleBranch = client.slice(
+    client.indexOf(": sample ? ("),
+    client.indexOf(") : (\n            <>"),
+  );
+  assert.ok(sampleBranch.length > 0, "örnek profil dalı yok");
+  assert.doesNotMatch(sampleBranch, /follow|messages\/\?user/);
+  assert.match(
+    read("features/community/components/PostCard.tsx"),
+    /if \(actions\.onAddComment\(post\.id, text\)\) setComment\(""\)/,
+  );
+  const community = read("community/page.tsx");
+  assert.doesNotMatch(community, /aria-live/);
+  assert.match(community, /role="status"/);
+  const edit = read("profile/edit/page.tsx");
+  assert.doesNotMatch(edit, /useState<WalletData>\(\(\) => billingService\.getWallet\(\)\)/);
+  assert.match(read("components/ui/media.tsx"), /naturalWidth/);
+});
+
+test("mesajlar (S21): grup oluşturma ve sohbet türü süzgeci yok; uydurma grup thread'i gönderilmez", () => {
+  const src = read("messages/page.tsx");
+  assert.doesNotMatch(src, /NewGroupModal|startGroup|newGroup|SegmentedControl|group-\$\{/);
+  assert.doesNotMatch(src, /messages\.filter/);
+});

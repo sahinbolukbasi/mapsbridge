@@ -15,17 +15,14 @@ import {
   Modal,
   PageHeader,
   PageShell,
-  SegmentedControl,
   cx,
 } from "../components/ui";
 import {
-  CONVERSATION_FILTERS,
   DIRECT_MESSAGES_KEY,
   cleanHandle,
   conversationsFromDirectMessages,
   directConversationId,
   filterConversations,
-  type ConversationFilter,
 } from "../features/messaging/conversations";
 import type { ChatConversation, ChatMessage } from "../features/messaging/types";
 import { useAuth } from "../lib/auth-context";
@@ -52,7 +49,8 @@ function handleFromEmail(email: string): string {
  * Mesajlar (design §5.2, §6.4, F18): misafire tek AuthGate sayfası; oturumluda sohbet listesi +
  * MessageLog/MessageBubble + ComposerBar (maliyet yok; mesajlaşma kredi harcamaz). Sohbetler
  * cihazdaki doğrudan mesaj kaydından ve WebSocket olaylarından gelir; kişi, üye ya da durum
- * uydurulmaz (I1). Immersive chrome: footer yok; klavye açıkken alt menü SiteChrome'da gizlenir.
+ * uydurulmaz (I1). Grup sohbeti yok (karar S21): sunucuda grup thread'i olmadığı için oluşturma
+ * ve tür süzgeci gösterilmez (I10). Immersive chrome: footer yok; klavye açıkken alt menü SiteChrome'da gizlenir.
  */
 export default function MessagesPage() {
   const { t } = useLocale();
@@ -63,11 +61,9 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [activeId, setActiveId] = useState("");
   const [pane, setPane] = useState<"list" | "thread">("list");
-  const [filter, setFilter] = useState<ConversationFilter>("all");
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [newChatOpen, setNewChatOpen] = useState(false);
-  const [newGroupOpen, setNewGroupOpen] = useState(false);
 
   // Oturum + cihazdaki doğrudan mesajlar + ?user= / ?to= / ?chat= ile sohbet açma.
   useEffect(() => {
@@ -155,8 +151,8 @@ export default function MessagesPage() {
   }, [wsOn]);
 
   const visible = useMemo(
-    () => filterConversations(conversations, filter, query),
-    [conversations, filter, query],
+    () => filterConversations(conversations, "all", query),
+    [conversations, query],
   );
   const active = conversations.find((c) => c.id === activeId) ?? null;
 
@@ -223,29 +219,6 @@ export default function MessagesPage() {
     setNewChatOpen(false);
   }
 
-  function startGroup(title: string, route: string) {
-    const conv: ChatConversation = {
-      id: `group-${Date.now()}`,
-      type: "group",
-      title,
-      routeTag: route || undefined,
-      lastMessage: "",
-      lastTime: clock(),
-      messages: [
-        {
-          id: "init",
-          senderName: "",
-          time: clock(),
-          isSystemEvent: true,
-          text: t("messages.group.created", "“{name}” grubu oluşturuldu.").replace("{name}", title),
-        },
-      ],
-    };
-    setConversations((prev) => [conv, ...prev]);
-    open(conv.id);
-    setNewGroupOpen(false);
-  }
-
   if (authed === false) return <AuthGate variant="page" reason="messages" next={NEXT} />;
 
   if (authed === null) {
@@ -256,8 +229,6 @@ export default function MessagesPage() {
       </PageShell>
     );
   }
-
-  const groupsCount = conversations.filter((c) => c.type === "group").length;
 
   return (
     <PageShell layout="app" className="msg-page">
@@ -276,13 +247,6 @@ export default function MessagesPage() {
               >
                 {t("messages.new", "Yeni mesaj")}
               </Button>
-              <IconButton
-                icon="users"
-                label={t("messages.newGroup", "Yeni grup")}
-                size="sm"
-                variant="ghost"
-                onClick={() => setNewGroupOpen(true)}
-              />
             </div>
           </div>
           <Field label={t("messages.search", "Sohbet ara")} className="msg-list__search">
@@ -295,22 +259,6 @@ export default function MessagesPage() {
               />
             )}
           </Field>
-          <SegmentedControl<ConversationFilter>
-            label={t("messages.filter", "Sohbet türü")}
-            value={filter}
-            onChange={setFilter}
-            options={[
-              { value: CONVERSATION_FILTERS[0], label: t("messages.filter.all", "Tümü") },
-              {
-                value: CONVERSATION_FILTERS[1],
-                label: `${t("messages.filter.groups", "Gruplar")} ${groupsCount}`,
-              },
-              {
-                value: CONVERSATION_FILTERS[2],
-                label: `${t("messages.filter.direct", "Birebir")} ${conversations.length - groupsCount}`,
-              },
-            ]}
-          />
           {visible.length === 0 ? (
             <EmptyState
               icon="message"
@@ -323,7 +271,7 @@ export default function MessagesPage() {
               description={
                 query
                   ? t("messages.empty.searchBody", "Farklı bir arama dene.")
-                  : t("messages.empty.body", "Bir gezgine yazarak ya da grup açarak başla.")
+                  : t("messages.empty.body", "Bir gezgine yazarak başla.")
               }
               action={
                 query ? undefined : (
@@ -345,10 +293,7 @@ export default function MessagesPage() {
                   >
                     <Avatar name={c.title} size="sm" decorative />
                     <span className="msg-item__text">
-                      <span className="msg-item__title">
-                        {c.type === "group" && <Icon name="users" size={16} />}
-                        {c.title}
-                      </span>
+                      <span className="msg-item__title">{c.title}</span>
                       <span className="msg-item__last">
                         {c.lastMessage || t("messages.noMessages", "Henüz mesaj yok")}
                       </span>
@@ -379,11 +324,7 @@ export default function MessagesPage() {
                   <h2 id="msg-thread-title" className="msg-thread__title">
                     {active.title}
                   </h2>
-                  <p className="msg-thread__sub">
-                    {active.type === "group"
-                      ? active.routeTag || t("messages.groupLabel", "Gezi grubu")
-                      : `@${active.title}`}
-                  </p>
+                  <p className="msg-thread__sub">@{active.title}</p>
                 </div>
               </div>
               <MessageLog
@@ -400,9 +341,6 @@ export default function MessagesPage() {
                     </p>
                   ) : (
                     <MessageBubble key={m.id} role={m.isOutgoing ? "user" : "assistant"}>
-                      {!m.isOutgoing && active.type === "group" && m.senderName && (
-                        <span className="msg-bubble__sender">{m.senderName}</span>
-                      )}
                       <span className="msg-bubble__text">{m.text}</span>
                       {m.time && <span className="msg-bubble__time">{m.time}</span>}
                     </MessageBubble>
@@ -436,11 +374,6 @@ export default function MessagesPage() {
         open={newChatOpen}
         onClose={() => setNewChatOpen(false)}
         onStart={startDirect}
-      />
-      <NewGroupModal
-        open={newGroupOpen}
-        onClose={() => setNewGroupOpen(false)}
-        onCreate={startGroup}
       />
     </PageShell>
   );
@@ -521,79 +454,6 @@ function NewChatModal({
             </ul>
           </div>
         )}
-      </form>
-    </Modal>
-  );
-}
-
-function NewGroupModal({
-  open,
-  onClose,
-  onCreate,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onCreate: (title: string, route: string) => void;
-}) {
-  const { t } = useLocale();
-  const [title, setTitle] = useState("");
-  const [route, setRoute] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  function submit(e: FormEvent) {
-    e.preventDefault();
-    if (!title.trim()) {
-      setError(t("messages.newGroup.required", "Grup adı yaz."));
-      return;
-    }
-    onCreate(title.trim(), route.trim());
-    setTitle("");
-    setRoute("");
-    setError(null);
-  }
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={t("messages.newGroup", "Yeni grup")}
-      size="sm"
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose}>
-            {t("ui.cancel", "İptal")}
-          </Button>
-          <Button type="submit" form="msg-new-group">
-            {t("messages.newGroup.create", "Grubu oluştur")}
-          </Button>
-        </>
-      }
-    >
-      <form id="msg-new-group" className="msg-form" onSubmit={submit} noValidate>
-        <Field label={t("messages.newGroup.name", "Grup adı")} error={error} required>
-          {(ids) => (
-            <Input
-              {...ids}
-              value={title}
-              maxLength={80}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                if (error) setError(null);
-              }}
-            />
-          )}
-        </Field>
-        <Field
-          label={t("messages.newGroup.route", "Bağlı rota")}
-          optionalLabel={t("ui.optional", "isteğe bağlı")}
-        >
-          {(ids) => (
-            <Input
-              {...ids}
-              value={route}
-              maxLength={80}
-              onChange={(e) => setRoute(e.target.value)}
-            />
-          )}
-        </Field>
       </form>
     </Modal>
   );

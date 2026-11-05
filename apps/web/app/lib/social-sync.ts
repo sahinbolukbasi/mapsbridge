@@ -36,65 +36,96 @@ export function sanitizeInput(val?: string | null): string {
     .trim();
 }
 
+type StoredDetails = Record<string, unknown>;
+
+function text(v: unknown): string {
+  return typeof v === "string" ? v : "";
+}
+
+/** Bu hesabın cihazdaki profil ayrıntıları (yoksa boş obje). */
+function readStoredDetails(): StoredDetails {
+  try {
+    const raw = userStorage.getItem(STORAGE_PROFILE_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : null;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as StoredDetails;
+    }
+  } catch {}
+  return {};
+}
+
+/** Oturumdaki e-posta (user-storage'ın hesap sahibi anahtarıyla aynı kaynak). */
+function sessionEmail(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return (localStorage.getItem("mapsbridge.userEmail") || "").trim().toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Hesabın görünen adı ve kullanıcı adı: önce kayıtlı profil ayrıntıları, yoksa oturum e-postasının
+ * öneki. Uydurma varsayılan ad yoktur (I1); /profile/ ve topluluk aynı kimliği kullanır.
+ */
+export function deriveIdentity(
+  email: string,
+  details: StoredDetails | null,
+): { fullName: string; username: string } {
+  const d = details ?? {};
+  const prefix = (email.split("@")[0] || "").trim();
+  const handle = prefix.toLowerCase().replace(/[^a-z0-9_]/g, "");
+  const named = text(d.fullName).trim() || `${text(d.firstName)} ${text(d.lastName)}`.trim() || "";
+  return {
+    fullName: named || (prefix ? prefix.charAt(0).toUpperCase() + prefix.slice(1) : ""),
+    username: text(d.username).trim() || handle,
+  };
+}
+
 export const webSocialSync = {
   // ─── Profile Sync ──────────────────────────────────────────────────────────
+  /**
+   * Profil yalnızca hesap/cihaz verisinden okunur; boş alanlar boş kalır. Sayaçlar ve "onaylı"
+   * bilgisi sunucudan gelmediği için 0/false döner (uydurma sayı yok, I1/F2).
+   */
   getProfile(): WebUserProfile {
-    let fullName = "Gezgin";
-    let username = "gezgin";
-    let email = "user@mapsbridge.com";
-    let travelTitle = "Kaşif & Gezgin";
-    let bio = "Sırt Çantalı Gezgin · Akdeniz kıyıları ve tarihi İpek Yolu kaşifi.";
-    let location = "İstanbul, Türkiye";
-    let avatarUrl = "";
-    let coverPhotoUrl = "";
-
-    try {
-      const stored = userStorage.getItem(STORAGE_PROFILE_KEY);
-      if (stored) {
-        const d = JSON.parse(stored);
-        if (d.fullName) fullName = d.fullName;
-        if (d.username) username = d.username;
-        if (d.email) email = d.email;
-        if (d.travelTitle) travelTitle = d.travelTitle;
-        if (d.bio) bio = d.bio;
-        if (d.location) location = d.location;
-      }
-    } catch {}
-
-    const storedAvatar = userStorage.getItem(STORAGE_AVATAR_KEY);
-    if (storedAvatar) avatarUrl = storedAvatar;
-
-    const storedCover = userStorage.getItem(STORAGE_COVER_KEY);
-    if (storedCover) coverPhotoUrl = storedCover;
+    const d = readStoredDetails();
+    const email = sessionEmail() || text(d.email);
+    const { fullName, username } = deriveIdentity(email, d);
+    const avatarUrl = userStorage.getItem(STORAGE_AVATAR_KEY) || "";
+    const coverPhotoUrl = userStorage.getItem(STORAGE_COVER_KEY) || "";
 
     return {
       fullName,
       username,
       email,
-      travelTitle,
-      bio,
-      location,
+      travelTitle: text(d.travelTitle),
+      bio: text(d.bio),
+      location: text(d.location),
       avatarUrl: avatarUrl || undefined,
       coverPhotoUrl: coverPhotoUrl || undefined,
-      followersCount: 1420,
-      followingCount: 284,
-      routesCount: 12,
-      stopsCount: 38,
-      verified: true,
+      followersCount: 0,
+      followingCount: 0,
+      routesCount: 0,
+      stopsCount: 0,
+      verified: false,
     };
   },
 
+  /**
+   * Yalnızca verilen alanlar kayıtlı ayrıntıların ÜZERİNE yazılır; diller, ilgi alanları,
+   * bağlantılar ve eski alanlar korunur. Hesaplanan alanlar (sayaçlar, e-posta) kaydedilmez.
+   */
   updateProfile(updates: Partial<WebUserProfile>): WebUserProfile {
-    const current = this.getProfile();
-    const updated = { ...current, ...updates };
-
-    userStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify(updated));
-    if (updates.avatarUrl) {
-      userStorage.setItem(STORAGE_AVATAR_KEY, updates.avatarUrl);
+    const { avatarUrl, coverPhotoUrl, ...fields } = updates;
+    userStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify({ ...readStoredDetails(), ...fields }));
+    if (avatarUrl) {
+      userStorage.setItem(STORAGE_AVATAR_KEY, avatarUrl);
     }
-    if (updates.coverPhotoUrl) {
-      userStorage.setItem(STORAGE_COVER_KEY, updates.coverPhotoUrl);
+    if (coverPhotoUrl) {
+      userStorage.setItem(STORAGE_COVER_KEY, coverPhotoUrl);
     }
+    const updated = this.getProfile();
 
     // Also cascade author updates to user's posts
     this.cascadeAuthorToPosts(updated.fullName, updated.username, updated.avatarUrl);
@@ -189,17 +220,15 @@ export const webSocialSync = {
 
     const cleanContent = sanitizeInput(data.content);
     const cleanCategory = sanitizeInput(data.category) || "Tarih & Kültür";
-    const cleanLocation = sanitizeInput(data.locationTag) || profile.location;
-    const cleanHashtags = (data.hashtags || ["#Seyahat", "#Keşif"]).map((t) => sanitizeInput(t));
+    // Konum, avatar ve etiket yalnızca kullanıcının verdiğinden; varsayılan uydurulmaz (I1).
+    const cleanLocation = sanitizeInput(data.locationTag) || undefined;
+    const cleanHashtags = (data.hashtags || []).map((t) => sanitizeInput(t));
 
     const newPost: CommunityPost = {
       id: `post-${Date.now()}`,
-      authorDisplayName: profile.fullName,
+      authorDisplayName: profile.fullName || profile.username,
       authorUsername: profile.username,
-      authorAvatar:
-        profile.avatarUrl ||
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCQdOMegHKRlkwubsFEMHDlXU8mVoZKUlXw7A0Quos1oSmZCSZEg30fAB4aMRnCI9q8UEUkdzonH9DUfJ3dTRjIPGpEsvmdB7q2Hrn_b98XcVBeB1CNFBlpaQM33IpQEZ9Bj2TQCR_rWOyCdeIsnX_hZXhb7z1nrWj53EXbHiVov_Hx5WO-_ikQRe6lEE_jnkFjZlEF1WXEue5BMqYbUXVJqoHBc--0mvHvT89fTCsu0mllchVOc6h24A",
-      authorFollowersCount: profile.followersCount,
+      authorAvatar: profile.avatarUrl,
       createdAt: "Şimdi",
       category: cleanCategory,
       content: cleanContent,

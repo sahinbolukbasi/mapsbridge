@@ -95,7 +95,9 @@ export default function EditProfilePage() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [newLanguage, setNewLanguage] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
-  const [wallet, setWallet] = useState<WalletData>(() => billingService.getWallet());
+  // Sunucu cüzdanı gelene kadar varsayılan (Gezgin, 0) gerçekmiş gibi gösterilmez.
+  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [walletFailed, setWalletFailed] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
 
   useEffect(() => {
@@ -128,7 +130,10 @@ export default function EditProfilePage() {
     setAvatar(userStorage.getItem("mapsbridge.userAvatar"));
     const onWallet = () => setWallet(billingService.getWallet());
     window.addEventListener("mapsbridge:wallet_updated", onWallet);
-    void billingService.refreshWallet().catch(() => {});
+    void billingService
+      .refreshWallet()
+      .then(setWallet)
+      .catch(() => setWalletFailed(true));
     return () => window.removeEventListener("mapsbridge:wallet_updated", onWallet);
   }, []);
 
@@ -164,8 +169,11 @@ export default function EditProfilePage() {
       youtubeOrBlog: details.youtubeOrBlog.trim(),
     };
     setDetails(clean);
-    // Bu sayfada artık düzenlenmeyen eski alanlar (ör. showProBadge, emailPrivacy) korunur.
-    userStorage.setItem("mapsbridge.userProfileDetails", JSON.stringify({ ...stored, ...clean }));
+    // Bu sayfada artık düzenlenmeyen eski alanlar (ör. showProBadge, emailPrivacy) korunur;
+    // updateProfile kayıtlı ayrıntıların üzerine birleştirir (diller, ilgi alanları, bağlantılar).
+    const merged = { ...stored, ...clean };
+    userStorage.setItem("mapsbridge.userProfileDetails", JSON.stringify(merged));
+    setStored(merged);
     webSocialSync.updateProfile({
       fullName: clean.fullName,
       username,
@@ -410,16 +418,19 @@ export default function EditProfilePage() {
     pro: ["plan.pro", "Pro Kaşif"],
     agency: ["plan.agency", "Tur Lideri"],
   };
-  const tier = tierLabel[wallet.subscriptionTier] ?? tierLabel.free;
+  const tier = wallet ? (tierLabel[wallet.subscriptionTier] ?? tierLabel.free) : null;
+  const walletPending = walletFailed
+    ? t("profile.balanceFailed", "Bakiye şu an alınamadı.")
+    : t("profile.balanceUnknown", "Bakiye yükleniyor…");
 
   const billingTab = (
     <div className="edit-stack">
       <Card className="edit-plan">
         <p className="edit-plan__label">{t("edit.plan", "Planın")}</p>
-        <p className="edit-plan__value">{t(...tier)}</p>
+        <p className="edit-plan__value">{tier ? t(...tier) : walletPending}</p>
         <p className="edit-plan__label">{t("profile.balance", "Kredi bakiyen")}</p>
-        <p className="edit-plan__value">{wallet.credits}</p>
-        {wallet.subscriptionRenewsAt && (
+        <p className="edit-plan__value">{wallet ? wallet.credits : walletPending}</p>
+        {wallet?.subscriptionRenewsAt && (
           <p className="edit-plan__meta">
             {t("edit.plan.renews", "Yenilenme: {date}").replace(
               "{date}",

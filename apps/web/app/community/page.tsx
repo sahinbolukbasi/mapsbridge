@@ -13,6 +13,7 @@ import {
   SegmentedControl,
   useToast,
   useUrlParam,
+  VisuallyHidden,
 } from "../components/ui";
 import { EditPostModalWeb, NewPostModal, PostCard, type NewPostInput } from "../features/community";
 import type { CommunityPost } from "../features/community/types";
@@ -79,13 +80,14 @@ export default function CommunityPage() {
     [posts, mode, category, followed],
   );
 
-  /** Yazma eylemi: misafirde kapı, oturumluda eylem. */
-  function guarded(action: () => void) {
+  /** Yazma eylemi: misafirde kapı (false), oturumluda eylem (true). */
+  function guarded(action: () => void): boolean {
     if (!signedIn) {
       setGateOpen(true);
-      return;
+      return false;
     }
     action();
+    return true;
   }
 
   function createPost(data: NewPostInput) {
@@ -165,7 +167,13 @@ export default function CommunityPage() {
         </ChipGroup>
       </div>
 
-      <div className="community-feed" aria-live="polite">
+      {/* Kısa durum duyurusu; kartların kendisi canlı bölge değildir. */}
+      <div role="status">
+        <VisuallyHidden>
+          {t("community.count", "{n} paylaşım gösteriliyor").replace("{n}", String(visible.length))}
+        </VisuallyHidden>
+      </div>
+      <div className="community-feed">
         {visible.length === 0 ? (
           <EmptyState
             icon="users"

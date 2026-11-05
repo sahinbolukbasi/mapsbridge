@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cx } from "./cx";
 import { Icon } from "./svg-icon";
 import "./ui.css";
@@ -25,7 +25,16 @@ export function Media({
   className?: string;
 }) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const failed = !src || failedSrc === src;
+  // Statik HTML'deki <img> hidrasyondan önce hata verirse React onError'u hiç çalışmaz:
+  // bağlanınca tamamlanmış ama boyutsuz görseli decode() ile doğrula (bozuksa reddeder;
+  // ertelenmiş tembel görselde yükleme bitene kadar bekler).
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!src || !img || !img.complete || img.naturalWidth > 0) return;
+    img.decode().catch(() => setFailedSrc(src));
+  }, [src]);
   return (
     <div className={cx("ui-media", RATIO_CLASS[ratio], className)} data-surface="default">
       {failed ? (
@@ -39,6 +48,7 @@ export function Media({
       ) : (
         // Statik export: next/image optimizasyonu yok; düz <img> + tembel yükleme.
         <img
+          ref={imgRef}
           className="ui-media__img"
           src={src}
           alt={alt}

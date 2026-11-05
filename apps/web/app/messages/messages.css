@@ -155,12 +155,6 @@
     text-align: center;
   }
 
-  .msg-bubble__sender {
-    display: block;
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-  }
-
   .msg-bubble__text {
     display: block;
     white-space: pre-line;

@@ -66,6 +66,7 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
+  const [walletFailed, setWalletFailed] = useState(false);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [points, setPoints] = useState<LegacySavedPoint[]>([]);
   const [editing, setEditing] = useState<CommunityPost | null>(null);
@@ -84,25 +85,12 @@ export default function ProfilePage() {
       return;
     }
     setAuthed(true);
-    const prefix = session.email.split("@")[0] || "";
+    // Topluluktaki "benim" süzgeciyle aynı kimlik (social-sync deriveIdentity).
     const profile = webSocialSync.getProfile();
-    let name = prefix ? prefix.charAt(0).toUpperCase() + prefix.slice(1) : "";
-    let handle = prefix.toLowerCase();
-    let about = "";
-    try {
-      const raw = userStorage.getItem("mapsbridge.userProfileDetails");
-      if (raw) {
-        const d = JSON.parse(raw);
-        if (d.fullName) name = d.fullName;
-        else if (d.firstName) name = `${d.firstName} ${d.lastName || ""}`.trim();
-        if (d.username) handle = d.username;
-        if (d.bio) about = d.bio;
-      }
-    } catch {}
-    setFullName(name);
-    setUsername(handle || profile.username);
-    setBio(about);
-    setAvatar(userStorage.getItem("mapsbridge.userAvatar"));
+    setFullName(profile.fullName);
+    setUsername(profile.username);
+    setBio(profile.bio);
+    setAvatar(profile.avatarUrl ?? null);
     setPoints(readLegacyPoints());
     setPosts(webSocialSync.getPosts());
     const unsubPosts = webSocialSync.subscribePosts(setPosts);
@@ -116,7 +104,7 @@ export default function ProfilePage() {
     void billingService
       .refreshWallet()
       .then((w) => setCredits(w.credits))
-      .catch(() => {});
+      .catch(() => setWalletFailed(true));
     const onWallet = () => setCredits(billingService.getWallet().credits);
     window.addEventListener("mapsbridge:wallet_updated", onWallet);
     return () => {
@@ -225,7 +213,11 @@ export default function ProfilePage() {
         <Card className="profile-tile">
           <p className="profile-tile__label">{t("profile.balance", "Kredi bakiyen")}</p>
           <p className="profile-tile__value">
-            {credits === null ? t("profile.balanceUnknown", "Bakiye yükleniyor…") : credits}
+            {credits !== null
+              ? credits
+              : walletFailed
+                ? t("profile.balanceFailed", "Bakiye şu an alınamadı.")
+                : t("profile.balanceUnknown", "Bakiye yükleniyor…")}
           </p>
           <div className="profile-tile__actions">
             <Button href="/checkout/" size="sm">
@@ -277,7 +269,10 @@ export default function ProfilePage() {
                 actions={{
                   onToggleLike: (id) => webSocialSync.toggleLike(id),
                   onToggleBookmark: (id) => webSocialSync.toggleBookmark(id),
-                  onAddComment: (id, text) => webSocialSync.addComment(id, text),
+                  onAddComment: (id, text) => {
+                    webSocialSync.addComment(id, text);
+                    return true;
+                  },
                   onEdit: setEditing,
                   onDelete: setDeleting,
                   onShare: () => void share(),

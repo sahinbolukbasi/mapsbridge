@@ -11,7 +11,8 @@ import "../community-feed.css";
 export type PostActions = {
   onToggleLike: (id: string) => void;
   onToggleBookmark: (id: string) => void;
-  onAddComment: (id: string, text: string) => void;
+  /** true: yorum eklendi; false: eklenmedi (ör. misafire kapı açıldı) — taslak korunur. */
+  onAddComment: (id: string, text: string) => boolean;
   onToggleFollow?: (username: string) => void;
   onEdit?: (post: CommunityPost) => void;
   onDelete?: (post: CommunityPost) => void;
@@ -52,8 +53,7 @@ export function PostCard({
     e.preventDefault();
     const text = comment.trim();
     if (!text) return;
-    actions.onAddComment(post.id, text);
-    setComment("");
+    if (actions.onAddComment(post.id, text)) setComment("");
   }
 
   return (

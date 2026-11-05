@@ -31,7 +31,8 @@ function titleCase(name: string): string {
  * Gezgin profili (design F2, F18, F20). Statik olarak üretilen dört kullanıcı adı örnek
  * profildir: "Örnek profil" rozeti taşır, takipçi/rota/puan gibi sayısal iddia içermez ve örnek
  * rotaları gerçek bir kullanıcıya ait değildir. Sayfa ziyaretçinin kendi profiliyse cihazdaki
- * profil bilgisi gösterilir ve rozet çizilmez. Takip ve mesaj misafirde AuthGate sheet açar.
+ * profil bilgisi gösterilir ve rozet çizilmez. Örnek profilde takip/mesaj yoktur (I10); diğer
+ * profillerde takip ve mesaj misafirde AuthGate sheet açar.
  */
 export default function PublicProfileClient({ initialUsername }: { initialUsername: string }) {
   const { t, locale } = useLocale();
@@ -105,6 +106,15 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
               iconStart={<Icon name="edit" size={16} />}
             >
               {t("profile.edit", "Profili düzenle")}
+            </Button>
+          ) : sample ? (
+            // Örnek profil gerçek bir kişi değildir: takip ve mesaj uygulanmaz (I10).
+            <Button
+              variant="ghost"
+              onClick={() => void copyLink()}
+              iconStart={<Icon name="copy" size={16} />}
+            >
+              {t("profile.copyLink", "Bağlantıyı kopyala")}
             </Button>
           ) : (
             <>
