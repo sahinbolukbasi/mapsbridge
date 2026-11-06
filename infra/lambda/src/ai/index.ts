@@ -58,14 +58,14 @@ import {
 } from "../../../../apps/web/server/ai/memory-service";
 import { createHash } from "node:crypto";
 import { jsonResponse } from "../shared/http";
-
+import { handlePlacesRequest } from "../places-search/handler";
 interface Event {
   body?: string;
   isBase64Encoded?: boolean;
   headers?: Record<string, string>;
   queryStringParameters?: Record<string, string>;
   rawQueryString?: string;
-  requestContext?: { http?: { method?: string; path?: string } };
+  requestContext?: { http?: { method?: string; path?: string; sourceIp?: string } };
 }
 const reply = jsonResponse;
 const resolveUser = getVerifiedUser;
@@ -92,6 +92,9 @@ async function handleRequest(event: Event) {
     const user = await resolveUser(
       authorization?.startsWith("Bearer ") ? authorization.slice(7) : undefined,
     );
+    // Yer verisi proxy'si (Increment 1.5): misafire de açık, 401'den ÖNCE. LLM/kredi yok.
+    if (event.queryStringParameters?.op === "places")
+      return handlePlacesRequest(event, user ? { sub: user.sub } : null);
     if (!user) return reply(401, { error: "Lütfen giriş yapın." });
     try {
       if (user.emailVerified) await initializeTrial(user.sub);

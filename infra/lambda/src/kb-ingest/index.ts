@@ -11,6 +11,7 @@ import { BedrockAgentClient, StartIngestionJobCommand } from "@aws-sdk/client-be
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { isGoogleDerived } from "../places-search/google-content";
 
 const TABLE = process.env.DYNAMODB_TABLE!;
 const BUCKET = process.env.KB_RAW_BUCKET!;
@@ -47,6 +48,7 @@ async function collectAndUpload(): Promise<{ status: string; uploaded: number }>
         const items = Array.isArray(raw) ? raw : [raw];
         for (const item of items) {
           if (!item.approved || !item.text) continue;
+          if (isGoogleDerived(item)) continue;
           const docText = `Title: ${item.title || item.city || "Travel Info"}\nCity: ${item.city || ""}\nCountry: ${item.country || ""}\n\n${item.text}`;
           const key = `published/curated/${item.id || item.city || file.replace(".json", "")}.txt`;
           await s3.send(
@@ -84,6 +86,8 @@ async function collectAndUpload(): Promise<{ status: string; uploaded: number }>
     for (const raw of result.Items || []) {
       const item = unmarshall(raw) as Record<string, unknown>;
       if (!item.prompt || !item.summary) continue;
+      // K3: Google Places içeriği RAG korpusuna (Bedrock KB) girmez.
+      if (isGoogleDerived(item)) continue;
       const docText = [
         `Destination: ${item.destination || "unknown"}`,
         `Query: ${item.prompt}`,

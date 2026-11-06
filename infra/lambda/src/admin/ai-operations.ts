@@ -18,6 +18,12 @@ import {
   defaultControl,
 } from "../shared/ai-operations";
 import { AdminError, bodyOf, commit, get, table, text, type Row } from "./management";
+import {
+  DEFAULT_PLACES_CONTROL,
+  PLACES_CONTROL_KEY,
+  parsePlacesControl,
+  validatePlacesControlInput,
+} from "../places-search/places-control";
 import { getDynamoClient } from "../shared/dynamo";
 import { ok, type ApiGatewayEvent } from "../shared/http";
 const TRAINING_PARTITION = "AI#TRAINING_PENDING";
@@ -31,7 +37,7 @@ const QUALITY_THRESHOLDS = {
 };
 
 export async function aiOverview() {
-  const [stored, runtime, result] = await Promise.all([
+  const [stored, runtime, result, placesRow] = await Promise.all([
     get(AI_CONTROL_KEY),
     get(AI_RUNTIME_KEY),
     getDynamoClient().send(
@@ -47,6 +53,7 @@ export async function aiOverview() {
         ConsistentRead: true,
       }),
     ),
+    get(PLACES_CONTROL_KEY),
   ]);
   const events = (result.Items || []).map((item) => {
     const { PK: _PK, SK, expiresAt: _expiresAt, ...event } = unmarshall(item);
@@ -57,6 +64,11 @@ export async function aiOverview() {
   if (runtime) base.defaultModel = runtime.primaryModel;
   return ok({
     control: { ...base, ...stored, PK: undefined, SK: undefined },
+    // Yer verisi kill switch'i (Increment 1.5); kayıt yoksa Google kapalı varsayılanı.
+    places: {
+      ...(placesRow ? parsePlacesControl(placesRow) : DEFAULT_PLACES_CONTROL),
+      version: placesRow?.version || 0,
+    },
     runtime,
     events,
     truncated: !!result.LastEvaluatedKey,
@@ -90,6 +102,10 @@ export async function updateAIControl(event: ApiGatewayEvent) {
     throw new AdminError(400, "Geçerli model ve açma/kapama ayarları gerekli.");
   if (body.enabled && body.disabledModels.includes(body.defaultModel))
     throw new AdminError(400, "Varsayılan model kapalı olamaz. Önce başka bir model seçin.");
+  // İsteğe bağlı yer verisi kill switch'i: AI ayarlarından ÖNCE doğrulanır (kısmi yazım yok).
+  const places = body.places === undefined ? undefined : validatePlacesControlInput(body.places);
+  if (places === null)
+    throw new AdminError(400, "Yer servisi ayarları geçersiz (googleEnabled, limitler).");
   const next = await commit(
     event,
     {
@@ -103,6 +119,18 @@ export async function updateAIControl(event: ApiGatewayEvent) {
     reason,
     existing,
   );
+  let placesOut: Row | undefined;
+  if (places) {
+    const existingPlaces = await get(PLACES_CONTROL_KEY);
+    const saved = await commit(
+      event,
+      { PK: PLACES_CONTROL_KEY, SK: "META", ...places },
+      "places_control_updated",
+      reason,
+      existingPlaces,
+    );
+    placesOut = { ...places, version: saved.version };
+  }
   return ok({
     control: {
       enabled: next.enabled,
@@ -110,6 +138,7 @@ export async function updateAIControl(event: ApiGatewayEvent) {
       disabledModels: next.disabledModels,
       version: next.version,
     },
+    ...(placesOut ? { places: placesOut } : {}),
   });
 }
 

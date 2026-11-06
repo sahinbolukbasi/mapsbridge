@@ -137,3 +137,27 @@ test("consent and guardrails cannot be bypassed; related turns stay in one datas
   assert.equal(a.record.groupId, b.record.groupId);
   assert.notEqual(a.id, b.id);
 });
+// K3 (Increment 1.5): Google Places içeriği ve yer önbelleği kayıtları eğitim korpusuna girmez.
+test("Google kaynaklı içerik ya da PLACECACHE#/PLACEID# kaydı dışa aktarılmaz, iş silinir", async () => {
+  for (const taint of [
+    (job) => (job.record.metadata = { places: [{ provider: "google", name: "Kahve" }] }),
+    (job) => (job.record.metadata = { cacheKey: "PLACECACHE#google#abc" }),
+    (job) => (job.record.metadata = { ref: "PLACEID#ChIJ123" }),
+  ]) {
+    const h = harness();
+    const job = h.createTrainingJob(input);
+    job.record.privacyReview = "approved";
+    taint(job);
+    h.rows.push(job);
+    await h.handler({});
+    assert.equal(
+      h.calls.some((c) => c.name === "PutObjectCommand"),
+      false,
+      "korpusa yazılmamalı",
+    );
+    assert.ok(
+      h.calls.some((c) => c.name === "DeleteItemCommand"),
+      "iş silinmeli",
+    );
+  }
+});

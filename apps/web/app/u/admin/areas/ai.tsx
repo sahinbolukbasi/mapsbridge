@@ -34,6 +34,7 @@ export function AiArea() {
 function Control() {
   const run = useAdminMutation();
   const [open, setOpen] = useState(false);
+  const [placesOpen, setPlacesOpen] = useState(false);
   const { data, errors, loading, reload } = useAreaData(["aiOperations"] as const);
   const ops = data.aiOperations;
   const models = ops?.runtime?.models ?? [];
@@ -71,6 +72,31 @@ function Control() {
           ]}
         />
       </Panel>
+      <Panel
+        title="Yer servisi (harita araması, keşif)"
+        actions={
+          ops?.runtime && (
+            <Button variant="secondary" size="sm" onClick={() => setPlacesOpen(true)}>
+              Düzenle
+            </Button>
+          )
+        }
+      >
+        <DetailList
+          items={[
+            [
+              "Google Places",
+              ops?.places?.googleEnabled ? (
+                <Badge tone="success">Açık</Badge>
+              ) : (
+                <Badge tone="neutral">Kapalı (Amazon Location)</Badge>
+              ),
+            ],
+            ["Kullanıcı başına günlük arama", formatNumber(ops?.places?.userDailyLimit)],
+            ["Aylık Google çağrı bütçesi", formatNumber(ops?.places?.monthlyGoogleCalls)],
+          ]}
+        />
+      </Panel>
       <EditDialog
         open={open}
         title="AI kontrolü"
@@ -103,6 +129,54 @@ function Control() {
             "ai.control",
             { body: { ...values, reason, version: ops?.control.version ?? 0 } },
             { success: "AI kontrolü güncellendi.", after: reload },
+          );
+        }}
+      />
+      <EditDialog
+        open={placesOpen}
+        title="Yer servisi"
+        tone="danger"
+        description="Google Places ücretlidir. Kapalıyken arama ve keşif Amazon Location ile çalışır."
+        fields={[
+          { name: "googleEnabled", label: "Google Places açık", type: "checkbox" },
+          {
+            name: "userDailyLimit",
+            label: "Kullanıcı başına günlük arama",
+            type: "number",
+            required: true,
+            min: 0,
+            max: 10000,
+          },
+          {
+            name: "monthlyGoogleCalls",
+            label: "Aylık Google çağrı bütçesi",
+            type: "number",
+            required: true,
+            min: 0,
+            max: 1000000,
+          },
+        ]}
+        initial={{
+          googleEnabled: ops?.places?.googleEnabled ?? false,
+          userDailyLimit: ops?.places?.userDailyLimit ?? 300,
+          monthlyGoogleCalls: ops?.places?.monthlyGoogleCalls ?? 0,
+        }}
+        onClose={() => setPlacesOpen(false)}
+        onSubmit={async (values, reason) => {
+          // Mevcut AI ayarları aynen gönderilir; yalnız places değişir.
+          await run(
+            "ai.control",
+            {
+              body: {
+                enabled: ops?.control.enabled,
+                defaultModel: ops?.control.defaultModel,
+                disabledModels: ops?.control.disabledModels,
+                version: ops?.control.version ?? 0,
+                reason,
+                places: values,
+              },
+            },
+            { success: "Yer servisi ayarları güncellendi.", after: reload },
           );
         }}
       />

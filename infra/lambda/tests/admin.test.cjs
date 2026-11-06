@@ -1169,3 +1169,73 @@ test("AI release requires a quality gate and supports publish plus rollback", as
   });
   assert.equal(JSON.parse(rollback.body).release.status, "rolled_back");
 });
+// Increment 1.5: yer verisi kill switch'i mevcut POST /admin/ai-control gövdesinde (`places`).
+test("AI control: places kill switch SYSTEM#PLACES_CONTROL'a yazılır; geçersizse hiç yazım yok; RBAC system", async () => {
+  const runtime = {
+    models: ["primary"],
+    primaryModel: "primary",
+    observedAt: new Date().toISOString(),
+  };
+  const existing = { version: 1, enabled: true, defaultModel: "primary", disabledModels: [] };
+  const mk = () =>
+    harness({
+      data: (c) =>
+        c.name === "GetItemCommand"
+          ? {
+              Item:
+                c.input.Key.PK === "SYSTEM#AI_RUNTIME"
+                  ? runtime
+                  : c.input.Key.PK === "SYSTEM#AI_CONTROL"
+                    ? existing
+                    : undefined,
+            }
+          : {},
+    });
+  const body = (places) => ({
+    version: 1,
+    enabled: true,
+    defaultModel: "primary",
+    disabledModels: [],
+    reason: "Google maliyet koruması",
+    places,
+  });
+  const make = (places) => ({
+    ...event("POST", "/admin/ai-control", adminToken(), body(places)),
+    verifiedUser: { sub: "admin-user" },
+  });
+  for (const bad of [
+    { googleEnabled: "true", userDailyLimit: 10, monthlyGoogleCalls: 10 },
+    { googleEnabled: true, userDailyLimit: -1, monthlyGoogleCalls: 10 },
+    { googleEnabled: true, userDailyLimit: 10, monthlyGoogleCalls: 1.5 },
+    "kapat",
+  ]) {
+    const h = mk();
+    await assert.rejects(
+      () => h.load("admin/ai-operations.ts").updateAIControl(make(bad)),
+      (err) => err.status === 400,
+    );
+    assert.equal(h.calls.data.filter((c) => c.name === "TransactWriteItemsCommand").length, 0);
+  }
+  const h = mk();
+  const res = await h
+    .load("admin/ai-operations.ts")
+    .updateAIControl(make({ googleEnabled: false, userDailyLimit: 50, monthlyGoogleCalls: 0 }));
+  const out = JSON.parse(res.body);
+  assert.deepEqual(
+    [out.places.googleEnabled, out.places.userDailyLimit, out.places.monthlyGoogleCalls],
+    [false, 50, 0],
+  );
+  const writes = h.calls.data.filter((c) => c.name === "TransactWriteItemsCommand");
+  assert.equal(writes.length, 2);
+  const placesPut = writes[1].input.TransactItems[0].Put.Item;
+  assert.deepEqual([placesPut.PK, placesPut.SK], ["SYSTEM#PLACES_CONTROL", "META"]);
+  assert.equal(writes[1].input.TransactItems[1].Put.Item.action, "places_control_updated");
+  // Gövdesiz places: yalnız AI ayarı yazılır (geriye uyum).
+  const h2 = mk();
+  await h2.load("admin/ai-operations.ts").updateAIControl(make(undefined));
+  assert.equal(h2.calls.data.filter((c) => c.name === "TransactWriteItemsCommand").length, 1);
+  const { routePermission, can } = harness().load("admin/permissions.ts");
+  const permission = routePermission("/admin/ai-control", "POST");
+  assert.equal(can("support", permission), false, "yetkisiz rol yazamaz (403)");
+  assert.equal(can("admin", permission), true);
+});

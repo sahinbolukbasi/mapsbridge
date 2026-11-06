@@ -224,6 +224,13 @@ export type AdminAiControl = {
   disabledModels: string[];
   version: number;
 };
+/** Yer verisi kill switch'i (POST /admin/ai-control `places`; SYSTEM#PLACES_CONTROL). */
+export type AdminPlacesControl = {
+  googleEnabled: boolean;
+  userDailyLimit: number;
+  monthlyGoogleCalls: number;
+  version: number;
+};
 
 /** Uç nokta → yanıt gövdesi. adminRequest<Id> dönüş tipini buradan alır. */
 export interface AdminResponses {
@@ -336,12 +343,13 @@ export interface AdminResponses {
   tokenUsage: { usage: TokenUsageOk | TokenUsageUnavailable };
   aiOperations: {
     control: AdminAiControl;
+    places?: AdminPlacesControl;
     runtime: { primaryModel: string; models: string[]; observedAt?: string } | null;
     events: AdminRow[];
     truncated?: boolean;
     observedAt: string;
   };
-  "ai.control": { control: AdminAiControl };
+  "ai.control": { control: AdminAiControl; places?: AdminPlacesControl };
   aiAgents: {
     agents: AdminAgent[];
     version: number;

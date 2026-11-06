@@ -2,6 +2,7 @@ import { QueryCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
 import { getDynamoClient } from "../shared/dynamo";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { isGoogleDerived } from "../places-search/google-content";
 import {
   TRAINING_PARTITION,
   type TrainingJob,
@@ -56,6 +57,14 @@ export async function handler(_event: unknown, context?: { getRemainingTimeInMil
           continue;
         }
         if (job.record?.privacyReview !== "approved") continue;
+        // K3: Google Places içeriği / yer önbelleği kayıtları eğitim korpusuna girmez.
+        if (isGoogleDerived(job.record) || isGoogleDerived(job.PK)) {
+          await db.send(
+            new DeleteItemCommand({ TableName: table, Key: marshall({ PK: job.PK, SK: job.SK }) }),
+          );
+          trainingMetric("SkippedThirdPartyContent", 1);
+          continue;
+        }
         if (job.expiresAt > Date.now() / 1000) {
           if (
             !/^[a-f0-9]{64}$/.test(job.id) ||
