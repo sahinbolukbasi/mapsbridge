@@ -8,6 +8,7 @@
 // istemci kredi hesaplamaz (S1).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { getStoredSession } from "../lib/cognito";
 import { AuthGate } from "../components/auth-gate";
 import {
@@ -24,7 +25,13 @@ import {
   type MapCanvasHandle,
   type MapLayerId,
 } from "../components/trip/map-canvas";
-import type { LeafletFeatureGroup, LeafletLayer } from "../components/trip/map-canvas";
+import type {
+  LeafletFeatureGroup,
+  LeafletLayer,
+  LeafletMarker,
+} from "../components/trip/map-canvas";
+import { PinPopupContent } from "../components/trip/pin-popup";
+import { openPinEffects, pinPopupModel } from "../lib/trip/pin-popup";
 import { TripPicker } from "../components/trip/trip-picker";
 import { ShareModal, type ShareTarget } from "../components/trip/share-modal";
 import { dayColorIndex } from "../components/trip/trip-format";
@@ -217,12 +224,60 @@ export default function Panel() {
     );
   };
 
-  const openPin = (id: string) => {
+  /**
+   * Pini seç ve ayrıntıyı aç. "Rotalarım" görünümünde kenar çubuğu yok: önce plana geçilir ki
+   * ayrıntı olayı kaybolmasın (bug 3). Mobilde harita pini dokunuşu yalnız popup açar
+   * (`expand:false`); sayfayı "Ayrıntı" düğmesi yarıya çeker.
+   */
+  const openPin = (id: string, opts: { expand?: boolean } = {}) => {
     pointRequest.current++;
     setQuickPoint(null);
+    const effects = openPinEffects(view, compact, opts.expand !== false);
+    if (effects.switchToPlan) setView("plan");
     planner.setSelectedPinId(id);
-    if (compact) setSheetSnap("half");
+    if (effects.expandSheet) setSheetSnap("half");
     window.dispatchEvent(new CustomEvent("mapsbridge:show-pin-detail", { detail: { id } }));
+  };
+
+  // ── Pin popup (bug 3): Leaflet popup'ı + React portal. Pin yeniden çizilince açık popup
+  // aynı pin için yeniden açılır; çizim sırasındaki kapanma olayları yok sayılır. ──
+  const [popup, setPopup] = useState<{
+    pinId: string;
+    host: HTMLElement;
+    marker: LeafletMarker;
+  } | null>(null);
+  const popupFor = useRef<string | null>(null);
+  const redrawing = useRef(false);
+  useEffect(() => {
+    if (!popup) return;
+    const frame = requestAnimationFrame(() => popup.marker.getPopup()?.update());
+    return () => cancelAnimationFrame(frame);
+  }, [popup, planner.pinsWithTime, planner.generalPins]);
+  const bindPinPopup = (marker: LeafletMarker, pinId: string) => {
+    const host = document.createElement("div");
+    host.className = "planner-popup__body";
+    host.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      marker.closePopup();
+      (marker.getElement?.() as HTMLElement | undefined)?.focus();
+    });
+    marker.bindPopup(host, {
+      className: "planner-popup",
+      maxWidth: 280,
+      minWidth: 220,
+      autoPanPadding: [24, 24],
+      closeButton: true,
+    });
+    marker.on("popupopen", () => {
+      popupFor.current = pinId;
+      setPopup({ pinId, host, marker });
+    });
+    marker.on("popupclose", () => {
+      if (redrawing.current) return;
+      popupFor.current = null;
+      setPopup((cur) => (cur?.pinId === pinId ? null : cur));
+    });
   };
 
   // ── Harita: numaralı pinler, rota çizgisi, seçili nokta (Leaflet; design §4.4) ──
@@ -239,7 +294,9 @@ export default function Panel() {
   useEffect(() => {
     if (!canvas) return;
     const { L, map } = canvas;
+    redrawing.current = true;
     if (markersRef.current) map.removeLayer(markersRef.current);
+    redrawing.current = false;
     if (routeRef.current) map.removeLayer(routeRef.current);
     markersRef.current = null;
     routeRef.current = null;
@@ -281,6 +338,7 @@ export default function Panel() {
       routeRef.current = group;
     }
     const group = L.featureGroup();
+    const markers = new Map<string, LeafletMarker>();
     pinsToRender.forEach((pin, index) => {
       const selected = planner.selectedPinId === pin.id;
       const number = pin.order || index + 1;
@@ -290,15 +348,16 @@ export default function Panel() {
         iconSize: [32, 32],
         iconAnchor: [16, 16],
       });
-      L.marker([pin.lat, pin.lng], {
+      const marker = L.marker([pin.lat, pin.lng], {
         icon,
         title: `${number}. ${pin.label}`,
         keyboard: true,
         riseOnHover: true,
         zIndexOffset: selected ? 1000 : 0,
-      })
-        .on("click", () => openPin(pin.id))
-        .addTo(group);
+      });
+      bindPinPopup(marker, pin.id);
+      marker.on("click", () => openPin(pin.id, { expand: false })).addTo(group);
+      markers.set(pin.id, marker);
     });
     planner.generalPins.forEach((pin) => {
       const icon = L.divIcon({
@@ -307,12 +366,22 @@ export default function Panel() {
         iconSize: [20, 20],
         iconAnchor: [10, 10],
       });
-      L.marker([pin.lat, pin.lng], { icon, title: pin.label, keyboard: true })
-        .on("click", () => openPin(pin.id))
-        .addTo(group);
+      const marker = L.marker([pin.lat, pin.lng], { icon, title: pin.label, keyboard: true });
+      bindPinPopup(marker, pin.id);
+      marker.on("click", () => openPin(pin.id, { expand: false })).addTo(group);
+      markers.set(pin.id, marker);
     });
     group.addTo(map);
     markersRef.current = group;
+    // Açık popup yeniden çizimden sağ çıkar; pin artık yoksa kapanır.
+    if (popupFor.current) {
+      const again = markers.get(popupFor.current);
+      if (again) again.openPopup();
+      else {
+        popupFor.current = null;
+        setPopup(null);
+      }
+    }
     if (pinsToRender.length > 0 && lastFit.current !== fitKey) {
       lastFit.current = fitKey;
       try {
@@ -570,6 +639,13 @@ export default function Panel() {
   );
 
   const trip = planner.activeTrip;
+  const targetDay =
+    planner.activeDayIndex && planner.activeDayIndex > 0 ? planner.activeDayIndex : 1;
+  const popupPin = popup
+    ? (planner.activeTrip?.pins.find((p) => p.id === popup.pinId) ??
+      planner.generalPins.find((p) => p.id === popup.pinId))
+    : undefined;
+  const popupModel = popupPin ? pinPopupModel(popupPin) : null;
   return (
     <PageShell layout="app" className="planner">
       {/* AC-34: tek h1 "Rota planlayıcı" (registry, görsel olarak gizli). */}
@@ -595,6 +671,31 @@ export default function Panel() {
         <div className="planner__map">{map}</div>
       </div>
 
+      {popup && popupPin && popupModel
+        ? createPortal(
+            <PinPopupContent
+              model={popupModel}
+              addDay={targetDay}
+              onDetails={() => openPin(popupPin.id)}
+              onToggleVisited={() => planner.togglePinVisitedAnywhere(popupPin.id)}
+              onAddToDay={
+                popupPin.dayIndex > 0 || !planner.activeTripId
+                  ? undefined
+                  : () => {
+                      planner.assignPinToTrip(popupPin.id, planner.activeTripId, targetDay);
+                      popup.marker.closePopup();
+                      toast.show({
+                        tone: "success",
+                        message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
+                          .replace("{name}", popupPin.label)
+                          .replace("{day}", String(targetDay)),
+                      });
+                    }
+              }
+            />,
+            popup.host,
+          )
+        : null}
       <AuthGate
         variant="sheet"
         reason={gate ?? "save"}

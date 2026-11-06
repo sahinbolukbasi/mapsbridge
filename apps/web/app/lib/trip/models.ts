@@ -47,6 +47,9 @@ export type InterestTag =
 export interface Pin {
   /** Only the Google place ID is persisted; provider content is fetched for display. */
   googlePlaceId?: string;
+  /** Yer proxy'sinden eklenen yerin sağlayıcı kimliği (Amazon Location Storage; ayrıntı için). */
+  placeId?: string;
+  placeProvider?: "amazon" | "google";
   id: string;
   label: string;
   address: string;

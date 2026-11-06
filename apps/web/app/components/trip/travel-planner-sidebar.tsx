@@ -45,6 +45,7 @@ import {
   Badge,
   Button,
   ConfirmDialog,
+  CostBadge,
   EmptyState,
   Field,
   Icon,
@@ -56,37 +57,16 @@ import {
   Textarea,
   cx,
   useToast,
-  type IconName,
 } from "../ui";
 import { GooglePlaceInfo } from "./google-place-info";
+import { PlaceFacts } from "./place-facts";
+import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
 import { StopRow } from "./stop-row";
 import { Connector, type ConnectorMode } from "./connector";
 import { DayHeader } from "./day-header";
 import { dayColorIndex } from "./trip-format";
 import "./travel-planner.css";
 
-/** Kategori ikonla kodlanır (renk tek bilgi taşıyıcı değil, WCAG 1.4.1; design F45). */
-const CATEGORY_ICON: Record<PinCategory, IconName> = {
-  tarih: "landmark",
-  muze: "landmark",
-  kultur: "landmark",
-  turistik: "landmark",
-  yemek: "food",
-  gastronomi: "food",
-  kahve: "food",
-  alisveris: "bag",
-  manzara: "camera",
-  fotograf: "camera",
-  doga: "compass",
-  gezi: "compass",
-  gezilecek: "compass",
-  aktivite: "sparkle",
-  eglence: "sparkle",
-  spor: "sparkle",
-  konaklama: "home",
-  otel: "home",
-  genel: "map",
-};
 const MODE: Record<string, ConnectorMode> = { walking: "walk", cycling: "walk", driving: "drive" };
 /** Arama: en az 3 karakter, 400 ms bekleme (design §6.3; Nominatim/Photon kullanım politikası). */
 const SEARCH_MIN = 3;
@@ -194,6 +174,11 @@ export function TravelPlannerSidebar({
       group: "Genel",
       visited: false,
       durationMinutes: 60,
+      // Kaynak kimliği yalnız proxy sonucunda (ayrıntı için); Google kimliği mevcut alanda.
+      ...(place.placeId && place.provider === "google" ? { googlePlaceId: place.placeId } : {}),
+      ...(place.placeId && place.provider === "amazon"
+        ? { placeId: place.placeId, placeProvider: "amazon" as const }
+        : {}),
     };
     if (target === "trip") {
       addPinDirectlyToTrip(activeTripId, pin, targetDay);
@@ -262,342 +247,348 @@ export function TravelPlannerSidebar({
     };
   }, [allPins]);
 
-  if (selectedPin && showDetail) {
-    return (
-      <PinDetail
-        planner={planner}
-        pin={selectedPin}
-        mode={mode}
-        onBack={() => setShowDetail(false)}
-        onRequireAuth={onRequireAuth}
-      />
-    );
-  }
-
+  // Ayrıntı listenin üstüne kayar; liste bağlı kalır (arama metni/sonuçları korunur).
+  const detailOpen = Boolean(selectedPin && showDetail);
   return (
-    <div className="planner-list">
-      <div className="planner-days" role="group" aria-label={t("planner.days", "Günler")}>
-        <button
-          type="button"
-          className="planner-days__tab"
-          aria-pressed={!activeDayIndex}
-          onClick={() => setActiveDayIndex(0)}
-        >
-          {t("planner.days.all", "Tümü")}
-          <span className="planner-days__count">{allPins.length}</span>
-        </button>
-        {(activeTrip?.days ?? []).map((d) => (
-          <button
-            key={d.dayIndex}
-            type="button"
-            className="planner-days__tab"
-            aria-pressed={activeDayIndex === d.dayIndex}
-            onClick={() => setActiveDayIndex(d.dayIndex)}
-          >
-            <span
-              className="planner-days__dot trip-day-color"
-              data-day={dayColorIndex(d.dayIndex)}
-              aria-hidden="true"
-            />
-            {t("planner.days.day", "{n}. Gün").replace("{n}", String(d.dayIndex))}
-            <span className="planner-days__count">
-              {allPins.filter((p) => p.dayIndex === d.dayIndex).length}
-            </span>
-          </button>
-        ))}
-        <IconButton
-          icon="plus"
-          size="sm"
-          label={t("planner.days.add", "Gün ekle")}
-          onClick={() => {
-            addDay();
-            toast.show({
-              tone: "success",
-              message: t("planner.toast.dayAdded", "Yeni gün eklendi."),
-            });
-          }}
-        />
-      </div>
-
-      <SegmentedControl
-        className="planner-list__mode"
-        label={t("planner.mode.label", "Görünüm")}
-        options={[
-          { value: "edit", label: t("planner.mode.edit", "Düzenle") },
-          { value: "travel", label: t("planner.mode.travel", "Gezi modu") },
-        ]}
-        value={workspaceMode}
-        onChange={setWorkspaceMode}
-      />
-
-      {workspaceMode === "edit" ? (
-        <PlaceSearch
-          near={searchBias}
-          onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}
-          onAdd={addPlace}
-        />
-      ) : (
-        <div className="planner-travel">
-          <p className="planner-travel__progress-label" id="planner-progress">
-            {t("planner.travel.progress", "{done} / {total} durak tamamlandı")
-              .replace("{done}", String(visitedCount))
-              .replace("{total}", String(pinsWithTime.length))}
-          </p>
-          <progress
-            className="planner-travel__progress"
-            aria-labelledby="planner-progress"
-            max={Math.max(1, pinsWithTime.length)}
-            value={visitedCount}
+    <>
+      {detailOpen && selectedPin && (
+        <div className="planner-detail-layer">
+          <PinDetail
+            planner={planner}
+            pin={selectedPin}
+            mode={mode}
+            onBack={() => setShowDetail(false)}
+            onRequireAuth={onRequireAuth}
           />
-          <div className="planner-travel__actions">
-            <Button
-              size="sm"
-              variant="secondary"
-              iconStart={<Icon name="external" size={16} />}
-              onClick={() => {
-                const res = exportTripToGoogleMaps(
-                  pinsWithTime.length > 0 ? pinsWithTime : allPins,
-                );
-                toast.show({
-                  tone: res.success ? "success" : "warning",
-                  message: res.message.replace(/^[^\p{L}\p{N}]+/u, ""),
-                });
-              }}
-            >
-              {t("planner.travel.googleMaps", "Google Haritalar'da aç")}
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              iconStart={<Icon name="copy" size={16} />}
-              onClick={() =>
-                window.dispatchEvent(new CustomEvent("mapsbridge:open-trip-manifesto"))
-              }
-            >
-              {t("planner.travel.summary", "Seyahat özeti (.md)")}
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              iconStart={<Icon name="locate" size={16} />}
-              onClick={() => {
-                const next = pinsWithTime.find((p) => !p.visited);
-                if (next) {
-                  setSelectedPinId(next.id);
-                  onFlyToPin?.(next);
-                } else {
-                  toast.show({
-                    tone: "success",
-                    message: t("planner.toast.allDone", "Tüm duraklar tamamlandı."),
-                  });
-                }
-              }}
-            >
-              {t("planner.travel.next", "Sıradaki durak")}
-            </Button>
-          </div>
         </div>
       )}
+      <div className="planner-list" hidden={detailOpen}>
+        <div className="planner-days" role="group" aria-label={t("planner.days", "Günler")}>
+          <button
+            type="button"
+            className="planner-days__tab"
+            aria-pressed={!activeDayIndex}
+            onClick={() => setActiveDayIndex(0)}
+          >
+            {t("planner.days.all", "Tümü")}
+            <span className="planner-days__count">{allPins.length}</span>
+          </button>
+          {(activeTrip?.days ?? []).map((d) => (
+            <button
+              key={d.dayIndex}
+              type="button"
+              className="planner-days__tab"
+              aria-pressed={activeDayIndex === d.dayIndex}
+              onClick={() => setActiveDayIndex(d.dayIndex)}
+            >
+              <span
+                className="planner-days__dot trip-day-color"
+                data-day={dayColorIndex(d.dayIndex)}
+                aria-hidden="true"
+              />
+              {t("planner.days.day", "{n}. Gün").replace("{n}", String(d.dayIndex))}
+              <span className="planner-days__count">
+                {allPins.filter((p) => p.dayIndex === d.dayIndex).length}
+              </span>
+            </button>
+          ))}
+          <IconButton
+            icon="plus"
+            size="sm"
+            label={t("planner.days.add", "Gün ekle")}
+            onClick={() => {
+              addDay();
+              toast.show({
+                tone: "success",
+                message: t("planner.toast.dayAdded", "Yeni gün eklendi."),
+              });
+            }}
+          />
+        </div>
 
-      {selectedMapPoint && (
-        <PlaceCard
-          eyebrow={t("planner.point.eyebrow", "Haritadan seçildi")}
-          place={{
-            ...selectedMapPoint,
-            label: selectedMapPoint.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
-          }}
-          day={targetDay}
-          onAdd={(target) => {
-            addPlace(
-              {
-                ...selectedMapPoint,
-                label:
-                  selectedMapPoint.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
-              },
-              target,
-            );
-            onClearSelectedMapPoint?.();
-          }}
-          onClose={() => onClearSelectedMapPoint?.()}
-        />
-      )}
-
-      {sections.map(({ day, pins, timeline }) => (
-        <section
-          key={day.dayIndex}
-          className="planner-day"
-          aria-labelledby={`planner-day-${day.dayIndex}`}
-        >
-          <div id={`planner-day-${day.dayIndex}`}>
-            <DayHeader
-              title={t("planner.days.day", "{n}. Gün").replace("{n}", String(day.dayIndex))}
-              eyebrow={activeTrip?.destination || undefined}
-              stops={pins.length}
-              meters={timeline && pins.length > 1 ? timeline.travelMeters : undefined}
-              minutes={
-                timeline && pins.length > 1
-                  ? timeline.travelMinutes +
-                    pins.reduce((sum, p) => sum + (p.durationMinutes ?? 60), 0)
-                  : undefined
-              }
-              offline={planner.deviceSaved}
-            />
-          </div>
-          {pins.length === 0 ? (
-            <EmptyState
-              icon="map"
-              level={4}
-              title={t("planner.day.empty", "Bu günde henüz durak yok")}
-              description={t(
-                "planner.day.emptyHint",
-                "Mekan ara ya da haritaya dokunarak durak ekle.",
-              )}
-            />
-          ) : (
-            <ol className="planner-stops">
-              {pins.map((pin, index) => {
-                const prev = index > 0 ? pins[index - 1] : null;
-                const leg = prev ? activeRouteLegs[legKey(prev.id, pin.id)] : undefined;
-                const meta = DEFAULT_CATEGORY_META[pin.category] ?? DEFAULT_CATEGORY_META.genel;
-                return (
-                  <Fragment key={pin.id}>
-                    {prev && (
-                      <li className="planner-stops__connector">
-                        <Connector
-                          mode={connectorMode}
-                          minutes={leg ? Math.round(leg.durationSeconds / 60) : undefined}
-                          meters={leg ? leg.distanceMeters : undefined}
-                        />
-                      </li>
-                    )}
-                    <li
-                      className={cx("planner-stop", pin.visited && "is-visited")}
-                      data-selected={pin.id === selectedPinId || undefined}
-                    >
-                      <StopRow
-                        index={index + 1}
-                        day={day.dayIndex}
-                        time={timeline?.times[index]}
-                        name={pin.label}
-                        category={CATEGORY_ICON[pin.category] ?? "map"}
-                        categoryLabel={meta.label}
-                        duration={pin.durationMinutes ?? 60}
-                        selected={pin.id === selectedPinId}
-                        onMove={
-                          workspaceMode === "edit"
-                            ? (direction) => moveStop(pins, pin, direction)
-                            : undefined
-                        }
-                        isFirst={index === 0}
-                        isLast={index === pins.length - 1}
-                      />
-                      <div className="planner-stop__actions">
-                        {workspaceMode === "travel" ? (
-                          <Button
-                            size="sm"
-                            variant={pin.visited ? "secondary" : "ghost"}
-                            iconStart={<Icon name="check" size={16} />}
-                            aria-pressed={pin.visited}
-                            onClick={() => togglePinVisitedAnywhere(pin.id)}
-                          >
-                            {pin.visited
-                              ? t("planner.stop.done", "Tamamlandı")
-                              : t("planner.stop.markDone", "Tamamla")}
-                          </Button>
-                        ) : null}
-                        <IconButton
-                          icon="info"
-                          size="sm"
-                          label={`${t("planner.stop.details", "Ayrıntılar")}: ${pin.label}`}
-                          onClick={() => {
-                            setSelectedPinId(pin.id);
-                            setShowDetail(true);
-                            onFlyToPin?.(pin);
-                          }}
-                        />
-                        {workspaceMode === "edit" && (
-                          <IconButton
-                            icon="trash"
-                            size="sm"
-                            label={`${t("planner.stop.delete", "Durağı sil")}: ${pin.label}`}
-                            onClick={() => setPendingDelete(pin)}
-                          />
-                        )}
-                      </div>
-                    </li>
-                  </Fragment>
-                );
-              })}
-            </ol>
-          )}
-        </section>
-      ))}
-
-      {workspaceMode === "edit" && generalPins.length > 0 && (
-        <Accordion
-          className="planner-pool"
-          items={[
-            {
-              id: "planner-pool",
-              summary: t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
-                "{n}",
-                String(generalPins.length),
-              ),
-              content: (
-                <ul className="planner-pool__list">
-                  {generalPins.map((p) => (
-                    <li key={p.id} className="planner-pool__item">
-                      <Icon name={CATEGORY_ICON[p.category] ?? "map"} size={20} />
-                      <span className="planner-pool__text">
-                        <span className="planner-pool__name">{p.label}</span>
-                        <span className="planner-pool__address">{p.address}</span>
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => {
-                          assignPinToTrip(p.id, activeTripId, targetDay);
-                          toast.show({
-                            tone: "success",
-                            message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
-                              .replace("{name}", p.label)
-                              .replace("{day}", String(targetDay)),
-                          });
-                        }}
-                      >
-                        {t("planner.pool.add", "Güne ekle")}
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              ),
-            },
+        <SegmentedControl
+          className="planner-list__mode"
+          label={t("planner.mode.label", "Görünüm")}
+          options={[
+            { value: "edit", label: t("planner.mode.edit", "Düzenle") },
+            { value: "travel", label: t("planner.mode.travel", "Gezi modu") },
           ]}
+          value={workspaceMode}
+          onChange={setWorkspaceMode}
         />
-      )}
 
-      {footer}
-      <p className="planner-list__note">
-        {t(
-          "planner.note.osrm",
-          "Süre ve mesafeler OSRM yol ağı tahminidir; hesaplanamayan bacaklar boş kalır.",
+        {workspaceMode === "edit" ? (
+          <PlaceSearch
+            near={searchBias}
+            onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}
+            onAdd={addPlace}
+          />
+        ) : (
+          <div className="planner-travel">
+            <p className="planner-travel__progress-label" id="planner-progress">
+              {t("planner.travel.progress", "{done} / {total} durak tamamlandı")
+                .replace("{done}", String(visitedCount))
+                .replace("{total}", String(pinsWithTime.length))}
+            </p>
+            <progress
+              className="planner-travel__progress"
+              aria-labelledby="planner-progress"
+              max={Math.max(1, pinsWithTime.length)}
+              value={visitedCount}
+            />
+            <div className="planner-travel__actions">
+              <Button
+                size="sm"
+                variant="secondary"
+                iconStart={<Icon name="external" size={16} />}
+                onClick={() => {
+                  const res = exportTripToGoogleMaps(
+                    pinsWithTime.length > 0 ? pinsWithTime : allPins,
+                  );
+                  toast.show({
+                    tone: res.success ? "success" : "warning",
+                    message: res.message.replace(/^[^\p{L}\p{N}]+/u, ""),
+                  });
+                }}
+              >
+                {t("planner.travel.googleMaps", "Google Haritalar'da aç")}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                iconStart={<Icon name="copy" size={16} />}
+                onClick={() =>
+                  window.dispatchEvent(new CustomEvent("mapsbridge:open-trip-manifesto"))
+                }
+              >
+                {t("planner.travel.summary", "Seyahat özeti (.md)")}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                iconStart={<Icon name="locate" size={16} />}
+                onClick={() => {
+                  const next = pinsWithTime.find((p) => !p.visited);
+                  if (next) {
+                    setSelectedPinId(next.id);
+                    onFlyToPin?.(next);
+                  } else {
+                    toast.show({
+                      tone: "success",
+                      message: t("planner.toast.allDone", "Tüm duraklar tamamlandı."),
+                    });
+                  }
+                }}
+              >
+                {t("planner.travel.next", "Sıradaki durak")}
+              </Button>
+            </div>
+          </div>
         )}
-      </p>
 
-      <ConfirmDialog
-        open={pendingDelete !== null}
-        title={t("planner.stop.deleteTitle", "Durak silinsin mi?")}
-        consequence={t("planner.stop.deleteBody", "“{name}” rotadan çıkarılır.").replace(
-          "{name}",
-          pendingDelete?.label ?? "",
+        {selectedMapPoint && (
+          <PlaceCard
+            eyebrow={t("planner.point.eyebrow", "Haritadan seçildi")}
+            place={{
+              ...selectedMapPoint,
+              label: selectedMapPoint.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
+            }}
+            day={targetDay}
+            onAdd={(target) => {
+              addPlace(
+                {
+                  ...selectedMapPoint,
+                  label:
+                    selectedMapPoint.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
+                },
+                target,
+              );
+              onClearSelectedMapPoint?.();
+            }}
+            onClose={() => onClearSelectedMapPoint?.()}
+          />
         )}
-        confirmLabel={t("planner.stop.delete", "Durağı sil")}
-        onConfirm={async () => {
-          if (pendingDelete) deletePinAnywhere(pendingDelete.id);
-        }}
-        onClose={() => setPendingDelete(null)}
-      />
-    </div>
+
+        {sections.map(({ day, pins, timeline }) => (
+          <section
+            key={day.dayIndex}
+            className="planner-day"
+            aria-labelledby={`planner-day-${day.dayIndex}`}
+          >
+            <div id={`planner-day-${day.dayIndex}`}>
+              <DayHeader
+                title={t("planner.days.day", "{n}. Gün").replace("{n}", String(day.dayIndex))}
+                eyebrow={activeTrip?.destination || undefined}
+                stops={pins.length}
+                meters={timeline && pins.length > 1 ? timeline.travelMeters : undefined}
+                minutes={
+                  timeline && pins.length > 1
+                    ? timeline.travelMinutes +
+                      pins.reduce((sum, p) => sum + (p.durationMinutes ?? 60), 0)
+                    : undefined
+                }
+                offline={planner.deviceSaved}
+              />
+            </div>
+            {pins.length === 0 ? (
+              <EmptyState
+                icon="map"
+                level={4}
+                title={t("planner.day.empty", "Bu günde henüz durak yok")}
+                description={t(
+                  "planner.day.emptyHint",
+                  "Mekan ara ya da haritaya dokunarak durak ekle.",
+                )}
+              />
+            ) : (
+              <ol className="planner-stops">
+                {pins.map((pin, index) => {
+                  const prev = index > 0 ? pins[index - 1] : null;
+                  const leg = prev ? activeRouteLegs[legKey(prev.id, pin.id)] : undefined;
+                  const meta = DEFAULT_CATEGORY_META[pin.category] ?? DEFAULT_CATEGORY_META.genel;
+                  return (
+                    <Fragment key={pin.id}>
+                      {prev && (
+                        <li className="planner-stops__connector">
+                          <Connector
+                            mode={connectorMode}
+                            minutes={leg ? Math.round(leg.durationSeconds / 60) : undefined}
+                            meters={leg ? leg.distanceMeters : undefined}
+                          />
+                        </li>
+                      )}
+                      <li
+                        className={cx("planner-stop", pin.visited && "is-visited")}
+                        data-selected={pin.id === selectedPinId || undefined}
+                      >
+                        <StopRow
+                          index={index + 1}
+                          day={day.dayIndex}
+                          time={timeline?.times[index]}
+                          name={pin.label}
+                          category={CATEGORY_ICON[pin.category] ?? "map"}
+                          categoryLabel={meta.label}
+                          duration={pin.durationMinutes ?? 60}
+                          selected={pin.id === selectedPinId}
+                          onMove={
+                            workspaceMode === "edit"
+                              ? (direction) => moveStop(pins, pin, direction)
+                              : undefined
+                          }
+                          isFirst={index === 0}
+                          isLast={index === pins.length - 1}
+                        />
+                        <div className="planner-stop__actions">
+                          {workspaceMode === "travel" ? (
+                            <Button
+                              size="sm"
+                              variant={pin.visited ? "secondary" : "ghost"}
+                              iconStart={<Icon name="check" size={16} />}
+                              aria-pressed={pin.visited}
+                              onClick={() => togglePinVisitedAnywhere(pin.id)}
+                            >
+                              {pin.visited
+                                ? t("planner.stop.done", "Tamamlandı")
+                                : t("planner.stop.markDone", "Tamamla")}
+                            </Button>
+                          ) : null}
+                          <IconButton
+                            icon="info"
+                            size="sm"
+                            label={`${t("planner.stop.details", "Ayrıntılar")}: ${pin.label}`}
+                            onClick={() => {
+                              setSelectedPinId(pin.id);
+                              setShowDetail(true);
+                              onFlyToPin?.(pin);
+                            }}
+                          />
+                          {workspaceMode === "edit" && (
+                            <IconButton
+                              icon="trash"
+                              size="sm"
+                              label={`${t("planner.stop.delete", "Durağı sil")}: ${pin.label}`}
+                              onClick={() => setPendingDelete(pin)}
+                            />
+                          )}
+                        </div>
+                      </li>
+                    </Fragment>
+                  );
+                })}
+              </ol>
+            )}
+          </section>
+        ))}
+
+        {workspaceMode === "edit" && generalPins.length > 0 && (
+          <Accordion
+            className="planner-pool"
+            items={[
+              {
+                id: "planner-pool",
+                summary: t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
+                  "{n}",
+                  String(generalPins.length),
+                ),
+                content: (
+                  <ul className="planner-pool__list">
+                    {generalPins.map((p) => (
+                      <li key={p.id} className="planner-pool__item">
+                        <Icon name={CATEGORY_ICON[p.category] ?? "map"} size={20} />
+                        <span className="planner-pool__text">
+                          <span className="planner-pool__name">{p.label}</span>
+                          <span className="planner-pool__address">{p.address}</span>
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            assignPinToTrip(p.id, activeTripId, targetDay);
+                            toast.show({
+                              tone: "success",
+                              message: t(
+                                "planner.toast.addedToDay",
+                                "“{name}” {day}. güne eklendi.",
+                              )
+                                .replace("{name}", p.label)
+                                .replace("{day}", String(targetDay)),
+                            });
+                          }}
+                        >
+                          {t("planner.pool.add", "Güne ekle")}
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                ),
+              },
+            ]}
+          />
+        )}
+
+        {footer}
+        <p className="planner-list__note">
+          {t(
+            "planner.note.osrm",
+            "Süre ve mesafeler OSRM yol ağı tahminidir; hesaplanamayan bacaklar boş kalır.",
+          )}
+        </p>
+
+        <ConfirmDialog
+          open={pendingDelete !== null}
+          title={t("planner.stop.deleteTitle", "Durak silinsin mi?")}
+          consequence={t("planner.stop.deleteBody", "“{name}” rotadan çıkarılır.").replace(
+            "{name}",
+            pendingDelete?.label ?? "",
+          )}
+          confirmLabel={t("planner.stop.delete", "Durağı sil")}
+          onConfirm={async () => {
+            if (pendingDelete) deletePinAnywhere(pendingDelete.id);
+          }}
+          onClose={() => setPendingDelete(null)}
+        />
+      </div>
+    </>
   );
 }
 
@@ -1175,9 +1166,11 @@ function PinDetail({
             )}
           </section>
 
+          <PlaceFacts pin={pin} />
+
           <section className="planner-detail__section" aria-labelledby="planner-detail-ask">
             <h4 id="planner-detail-ask" className="planner-detail__title">
-              {t("planner.ask.title", "Bu mekan hakkında sor")}
+              {t("planner.ask.title", "Bu mekan hakkında sor")} <CostBadge cost={1} />
             </h4>
             <form
               className="planner-detail__ask"

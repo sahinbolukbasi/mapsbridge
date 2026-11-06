@@ -28,9 +28,16 @@ export interface LeafletLayer {
 export interface LeafletFeatureGroup extends LeafletLayer {
   getBounds(): LeafletBounds;
 }
+export interface LeafletPopup {
+  update(): this;
+}
 export interface LeafletMarker extends LeafletLayer {
   setLatLng(latlng: [number, number]): this;
   getLatLng(): LeafletLatLng;
+  bindPopup(content: HTMLElement, options?: object): this;
+  openPopup(): this;
+  closePopup(): this;
+  getPopup(): LeafletPopup | undefined;
 }
 export interface LeafletMouseEvent {
   latlng: LeafletLatLng;

@@ -88,3 +88,94 @@
 .map-canvas .leaflet-control-attribution a {
   color: var(--color-link);
 }
+/* Pin popup'ı (Increment 1.7, bug 3; maps-client bindPopup className "planner-popup"). İçerik
+   React portal'dır (components/trip/pin-popup.tsx); kap, kuyruk ve kapat düğmesi Leaflet'in. */
+.leaflet-popup.planner-popup .leaflet-popup-content-wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--elevation-overlay);
+  color: var(--color-text);
+}
+.leaflet-popup.planner-popup .leaflet-popup-content {
+  margin: var(--space-3) var(--space-4);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+.leaflet-popup.planner-popup .leaflet-popup-tip {
+  background: var(--color-surface);
+  box-shadow: none;
+}
+.leaflet-popup.planner-popup .leaflet-popup-close-button {
+  display: grid;
+  place-items: center;
+  inline-size: var(--touch-target);
+  block-size: var(--touch-target);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+}
+.leaflet-popup.planner-popup .leaflet-popup-close-button:hover {
+  color: var(--color-text);
+}
+.planner-popup .planner-popup__inner {
+  display: grid;
+  gap: var(--space-1);
+  padding-inline-end: var(--space-6);
+}
+.planner-popup .planner-popup__category,
+.planner-popup .planner-popup__visited {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+.planner-popup .planner-popup__day {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-inline-start: var(--space-1);
+}
+.planner-popup .planner-popup__day-dot {
+  inline-size: var(--space-2);
+  block-size: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--trip-day);
+}
+.planner-popup .planner-popup__title {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+}
+.planner-popup .planner-popup__address,
+.planner-popup .planner-popup__note {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+.planner-popup .planner-popup__note {
+  font-style: italic;
+}
+.planner-popup .planner-popup__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .leaflet-popup.planner-popup {
+    animation: planner-popup-in var(--duration-fast) var(--easing-enter) both;
+  }
+}
+@keyframes planner-popup-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
