@@ -1,4 +1,4 @@
-// Tasarım sistemi guard'ı G1–G23 (design §10 tablosu, AC-36; mesaj → steering eşlemesi §11).
+// Tasarım sistemi guard'ı G1–G33 (design §10 tablosu, AC-36; mesaj → steering eşlemesi §11).
 // Ratchet: apps/web/tests/design-system-baseline.json `{ rule: { file: count } }`. Test şu durumlarda
 // kırmızıdır: sayı baseline'ı aşarsa, baseline'da olmayan dosyada ihlal varsa, baseline gerçekten
 // büyükse ("baseline'ı düşürün"). Baseline yalnızca aşağı yönde yeniden yazılır:
@@ -63,6 +63,10 @@ const STEERING_SECTION = {
   G27: "Kaskad",
   G28: "Primitive'ler",
   G29: "Erişilebilirlik",
+  G30: "Sayfa şablonu",
+  G31: "Primitive'ler",
+  G32: "Erişilebilirlik",
+  G33: "Renk",
 };
 const ref = (rule) =>
   `(bkz. .kiro/steering/design-system.md §${STEERING_SECTION[rule.replace(/[a-z]$/, "")]})`;
@@ -101,6 +105,10 @@ const HINT = {
   G27: "@view-transition, ::view-transition-*, scroll-behavior ve scroll-padding yalnızca styles/motion.css'te",
   G28: "emoji yerine Icon primitive'ini kullanın (components/ui/svg-icon.tsx)",
   G29: "animation / animation-name yalnızca @media (prefers-reduced-motion: no-preference) içinde",
+  G30: "PageShell layout= prop'unu kaldırın; genişliği route-registry layout alanı belirler (R11)",
+  G31: ".ui-modal--sheet yerleşimi yalnızca @media (max-width: 767.98px) içinde; ≥768 ortalı dialog (R10)",
+  G32: "sonsuz animasyon yalnız no-preference içinde ve ≥ calc(var(--duration-route) * 6) (işlevsel spinner/iskelet/ilerleme hariç, R14/R15)",
+  G33: 'backdrop-filter yalnız data-surface="inverse" eşli sınıflarda ya da ui.css primitive katmanında (R13)',
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -484,6 +492,55 @@ function* motionScopedDecls() {
     for (const d of cssDecls(abs)) yield { abs, d };
   }
 }
+
+// data-surface="inverse" taşıyan JSX öğelerinin className'lerindeki sınıflar (G18, G33).
+let inverseCache = null;
+function inverseClassSet() {
+  if (inverseCache) return inverseCache;
+  inverseCache = new Set();
+  for (const abs of TSX_FILES)
+    for (const el of jsxElements(abs)) {
+      const surface = el.attrs.find((a) => attrName(a) === "data-surface");
+      if (!surface || !attrStrings(surface).includes("inverse")) continue;
+      const cls = el.attrs.find((a) => attrName(a) === "className");
+      if (cls)
+        for (const s of attrStrings(cls))
+          for (const k of s.split(/\s+/)) if (k) inverseCache.add(k);
+    }
+  return inverseCache;
+}
+const inMedia = (n, re) =>
+  [...n.ancestors, n].some((a) => a.type === "at" && a.name === "media" && re.test(a.prelude));
+const NO_PREF = /prefers-reduced-motion\s*:\s*no-preference/;
+// G30: PageShell layout= yalnız kayıt dışı kapılarda (dosya → izinli değerler).
+const LAYOUT_PROP_ALLOWED = {
+  "components/auth-gate.tsx": ["form"],
+  "components/ui/legacy-redirect.tsx": ["form"],
+  "components/not-found-view.tsx": ["content"],
+  "u/admin/admin-client.tsx": ["form"],
+};
+// G31: sheet yerleşim bildirimleri.
+const SHEET_LAYOUT_PROPS = new Set([
+  "inline-size",
+  "max-inline-size",
+  "width",
+  "max-width",
+  "margin",
+  "margin-block",
+  "margin-block-end",
+  "margin-bottom",
+  "border-radius",
+  "border-end-start-radius",
+  "border-end-end-radius",
+  "inset-block-end",
+]);
+// G32: işlevsel sonsuz döngüler (durum göstergesi; dekoratif değil).
+const FUNCTIONAL_LOOPS = new Set([
+  "ui-spin",
+  "ui-pulse",
+  "ui-shimmer",
+  "ui-progress-indeterminate",
+]);
 
 const RULES = {
   G1() {
@@ -874,16 +931,7 @@ const RULES = {
   },
   G18() {
     const c = collector();
-    const inverseClasses = new Set();
-    for (const abs of TSX_FILES)
-      for (const el of jsxElements(abs)) {
-        const surface = el.attrs.find((a) => attrName(a) === "data-surface");
-        if (!surface || !attrStrings(surface).includes("inverse")) continue;
-        const cls = el.attrs.find((a) => attrName(a) === "className");
-        if (cls)
-          for (const s of attrStrings(cls))
-            for (const k of s.split(/\s+/)) if (k) inverseClasses.add(k);
-      }
+    const inverseClasses = inverseClassSet();
     for (const abs of CSS_FILES) {
       if (layerOf(abs) !== "pages") continue;
       for (const r of cssRules(abs)) {
@@ -1092,6 +1140,76 @@ const RULES = {
           /prefers-reduced-motion\s*:\s*no-preference/.test(a.prelude),
       );
       if (!allowed) c.add(rel(abs), d.line, `${d.prop}: ${d.value}`);
+    }
+    return c.result;
+  },
+  // G30 (R11): sayfa genişliği registry'den; PageShell layout= override'ı yok.
+  G30() {
+    const c = collector();
+    for (const abs of TSX_FILES) {
+      if (appRel(abs) === "components/ui/page-shell.tsx") continue;
+      const allowed = LAYOUT_PROP_ALLOWED[appRel(abs)] ?? [];
+      for (const el of jsxElements(abs)) {
+        if (el.tag !== "PageShell") continue;
+        const attr = el.attrs.find((a) => attrName(a) === "layout");
+        if (!attr) continue;
+        const value = attrStrings(attr)[0];
+        if (!value || !allowed.includes(value)) c.add(rel(abs), el.line, `layout="${value}"`);
+      }
+    }
+    return c.result;
+  },
+  // G31 (R10): .ui-modal--sheet yerleşimi yalnız <768 medya sorgusunda.
+  G31() {
+    const c = collector();
+    const abs = path.join(APP, "components/ui/ui.css");
+    for (const r of cssRules(abs)) {
+      if (!/\.ui-modal--sheet(?![\w-])/.test(r.selector)) continue;
+      if (inMedia(r, /max-width\s*:\s*767\.98px/)) continue;
+      for (const d of r.decls)
+        if (SHEET_LAYOUT_PROPS.has(d.prop)) c.add(rel(abs), d.line, `${d.prop}: ${d.value}`);
+    }
+    return c.result;
+  },
+  // G32 (R14/R15): sonsuz döngü yalnız no-preference'ta ve ≥ route×6; işlevsel döngüler muaf.
+  G32() {
+    const c = collector();
+    for (const { abs, d } of motionScopedDecls()) {
+      if (inKeyframes(d.node)) continue;
+      const isAnim = d.prop === "animation" || d.prop === "animation-iteration-count";
+      if (!isAnim || !/(?<![\w-])infinite(?![\w-])/.test(d.value)) continue;
+      const names =
+        [d.value, ...d.node.decls.filter((x) => x.prop === "animation-name").map((x) => x.value)]
+          .join(" ")
+          .match(/[a-z][\w-]*/gi) ?? [];
+      const functional = names.some((n) => FUNCTIONAL_LOOPS.has(n));
+      const durations = [
+        d.value,
+        ...d.node.decls.filter((x) => x.prop === "animation-duration").map((x) => x.value),
+      ].join(" ");
+      const m = durations.match(/calc\(\s*var\(--duration-route\)\s*\*\s*([\d.]+)\s*\)/);
+      const longEnough = m ? Number(m[1]) >= 6 : false;
+      if (!inMedia(d.node, NO_PREF) || (!functional && !longEnough))
+        c.add(rel(abs), d.line, `${d.prop}: ${d.value}`);
+    }
+    return c.result;
+  },
+  // G33 (R13): backdrop-filter yalnız inverse yüzeyli sınıflarda (ui.css primitive'leri muaf).
+  G33() {
+    const c = collector();
+    const inverse = inverseClassSet();
+    for (const abs of CSS_FILES) {
+      if (appRel(abs) === "components/ui/ui.css" || appRel(abs) === "styles/tokens.css") continue;
+      for (const r of cssRules(abs)) {
+        const decl = r.decls.find((d) => /^(-webkit-)?backdrop-filter$/.test(d.prop));
+        if (!decl || /^none\b/.test(decl.value.trim())) continue;
+        for (const s of splitSelectors(r.selector)) {
+          const last = s.split(/[\s>+~]+/).pop() ?? "";
+          const classes = [...last.matchAll(/\.([\w-]+)/g)].map((m) => m[1]);
+          const surfaced = /\[data-surface=["']?inverse/.test(s);
+          if (!surfaced && !classes.some((k) => inverse.has(k))) c.add(rel(abs), r.line, s);
+        }
+      }
     }
     return c.result;
   },

@@ -19,6 +19,7 @@ Web (`apps/web`, Next.js statik export, vanilla CSS) ve mobil (`apps/mobile`, Ex
 - Yeni renk gerekirse önce mevcut semantik token aranır; yoksa `palette.ts` + `tokens.ts`'e eklenir ve `npm run tokens:build` çalıştırılır.
 - `legacy-aliases.ts` boş objedir (`{}`); eski sayfa token adları (`--mb-*`, `--stitch-*`, `--chat-*`) yazılmaz (G14).
 - Harita gün renkleri yalnız `--color-day-*` (JS'te `dayPalette`) ile ve yalnız harita dosyalarında; `dataPalette` doğrudan kullanılmaz (yalnız grafikler). Kategori renkle değil ikonla kodlanır, renk tek başına anlam taşımaz. Lavanta `surface-tint` emeklidir (`--color-surface-tint` = kağıt tonu) (G1/G7).
+- R13: Fotoğraf üstü cam panelde `backdrop-filter` + `color-mix(in srgb, var(--color-surface-inverse) N%, transparent)` serbesttir; panel `data-surface="inverse"` taşır. Fotoğraf perdesi `linear-gradient` içinde yalnız token + `color-mix` kullanır. `backdrop-filter` yalnız `data-surface="inverse"` eşli sınıflarda ve primitive katmanında (modal scrim, `ui.css`) yazılır (G33).
 
 ## 3. Kaskad
 
@@ -35,6 +36,7 @@ Web (`apps/web`, Next.js statik export, vanilla CSS) ve mobil (`apps/mobile`, Ex
 - Yeni `@media` yalnızca 640/768/1024/1280 ve `max-width` için `.98` eşlenikleri (G13).
 - Mevcut küme dışı koşullar `packages/design-tokens/src/breakpoints.ts` `legacyBreakpoints` listesinde donmuştur; liste yalnızca küçülür.
 - R1: `transition`/`animation` süreleri yalnız `var(--duration-*)` (gerekirse `calc(var(--duration-*) * n)`), easing yalnız `var(--easing-*)` (G24). `font-family` yalnız `var(--font-family-*)` (`@font-face` ve `inherit` hariç, G25). `font-size`, `border-radius`, `box-shadow`, `z-index` literal'i yeni dosyada 0 (G26). Mevcut dosyalar ratchet'e sayılır, yalnız düşer.
+- R14: Uzun/sonsuz animasyon süreleri `calc(var(--duration-route) * n)` ile yazılır. Kutlama (konfeti, onay) süresi ≤ `calc(var(--duration-route) * 1.2)`. İşlevsel sonsuz döngüler (düğme spinner'ı `ui-spin`, iskelet parıltısı `ui-shimmer`/`ui-pulse`, belirsiz ilerleme `ui-progress-indeterminate`) `calc(var(--duration-route) * 1.6)` civarındadır ve G32'den muaftır.
 
 ## 5. Primitive'ler
 
@@ -43,6 +45,8 @@ Web (`apps/web`, Next.js statik export, vanilla CSS) ve mobil (`apps/mobile`, Ex
 - Primitive görünümü yalnızca prop ile değişir; `.ui-*` sınıfları sayfa CSS'inde ezilmez (G8). Primitive dış margin/width/position tanımlamaz; yerleşim sayfaya aittir.
 - Tailwind-benzeri sınıf (`flex`, `text-slate-400`, `bg-[#…]`) yazılmaz (G6); yerleşim sınıfı yazın.
 - R3: İkon yalnız `Icon` primitive'iyle (`components/ui/svg-icon.tsx`, path'ler `packages/design-tokens/src/icons.ts`); emoji ikon/etiket olarak kullanılmaz, içerik metni hariç (G28). Seçenek → `Chip`/`ChipGroup`; 2–4 karşılıklı dışlayan seçenek → `SegmentedControl`; mobil kalıcı panel → `BottomSheet`; sayı seçimi → `Stepper`; SSS → `Accordion`; kredi bilgisi → `CostBadge` / `CreditCostTable` (veri `lib/billing/credit-costs.ts`) ya da `Button cost`; oranlı görsel → `Media`.
+- R10: `Modal size="sheet"` (ve AuthGate `variant="sheet"`) alt sayfa yerleşimi yalnız `<768` (`@media (max-width: 767.98px)`); `≥768` her modal ortalı dialogdur ve ölçek + solma ile açılır (`translateY(var(--motion-distance-sm)) scale(.96)` → yerinde, `--duration-slow`/`--easing-enter`; kapanış `.97` + solma, `--duration-base`/`--easing-exit`). Sunum `components/ui/logic/modal-presentation.ts` `modalPresentation()` ile seçilir. `ui.css`'te `.ui-modal--sheet` yerleşim bildirimi (`inline-size`, `max-inline-size`, `margin-block-end`, alt köşe radius) medya sorgusu dışında yazılmaz (G31).
+- Geri bildirim primitive'leri: geçici bildirim → `Toast` (ton, başlık, eylem, süre çubuğu; hata kendiliğinden kapanmaz), ilerleme → `Progress` (`determinate|indeterminate|steps`), başarı anı → `Celebrate`, yer tutucu → `Skeleton` (`line|card|list-row|panel`). Kaydırmada açılma `useReveal`, basma halkası `useRipple` (`components/ui/hooks/`).
 
 ## 6. Sayfa şablonu
 
@@ -51,7 +55,7 @@ import { PageShell, PageHeader, Section } from "../components/ui";
 import "./<slug>.css";
 export default function Page() {
   return (
-    <PageShell layout="content" header={<PageHeader title="Başlık" description="Kısa açıklama" />}>
+    <PageShell header={<PageHeader title="Başlık" description="Kısa açıklama" />}>
       <Section title="Bölüm">…primitive'ler…</Section>
     </PageShell>
   );
@@ -62,6 +66,8 @@ export default function Page() {
 - İstemci ağırlıklı sayfada `page.tsx` server kalır, kök `<slug>-client.tsx` PageShell'i render eder.
 - Kimlik kapıları (AuthGate page) sayfanın yerine kendi PageShell'ini çizer.
 - R7: Kimlik kapıları yalnız `AuthGate` (`components/auth-gate.tsx`) ile: `variant="page"` sayfanın yerine kendi PageShell + PageHeader'ını çizer, `variant="sheet"` Modal primitive'idir (Escape = "Şimdilik devam et"). `reason` (`save`/`ai`/`messages`/`profile`) başlığı seçer; dönüş `?next=` safe-next ile doğrulanır. Yeni kapı tasarımı yazılmaz; eski `FullPagePromotion`/`AuthActionModal`/`PanelGuestBanner` sarmalayıcıları kaldırıldı (G4 kapsamı).
+- R11: Sayfa genişliğini registry `layout` alanı belirler; sayfa `PageShell layout=` override'ı yazmaz (G30; izinli tek istisnalar kayıt dışı kapılar: `auth-gate.tsx`, `legacy-redirect.tsx`, `not-found-view.tsx`, admin erişim kapısı). Layout'lar: `reading` 720 ortalı · `content` 1200 ortalı · `landing` bant kenardan kenara, içerik 1200 · `auth` · `form` 500 ortalı · `app` tam ekran (≥768 panel + tuval; panel genişliği sayfa katmanında `--app-panel` yerleşim değişkeniyle: `/maps/` `clamp(16rem, 20vw, 24rem)`, `/travel-assistant/` `clamp(22rem, 34vw, 32rem)`, `/messages/` `clamp(18rem, 26vw, 24rem)`) · `sidebar` yalnız `/u/admin/`. `content` içinde sola yaslı dar sütun yazılmaz: dar sütun `margin-inline: auto` ile ortalanır ya da ana + yan ızgara olur.
+- R12: `auth` layout'u kimlik rotaları içindir (`/login/`, `/register/`, `/reset-password/`, `/verify/`; chrome `focus`): 1200 içinde `minmax(0, 520px) 1fr` (form + görsel, `PageShell aside`); görsel yoksa ya da `<1024` form tek sütun ortalı (≤520). `PageLayout` tipinde yer alır.
 
 ## 7. Chrome
 
@@ -87,6 +93,7 @@ export default function Page() {
 - Kontrast AA (metin ≥ 4,5:1). `outline: none` yazılmaz; odak halkası `base.css` `:focus-visible` kuralından gelir (G11).
 - `<img>` `alt` taşır (G12). Değişikliği klavyeyle deneyin; `npm run ui:audit -- --axe-width 375,1280` serious/critical 0.
 - R9: Animasyonlar `@media (prefers-reduced-motion: no-preference)` bloğunda tanımlanır, statik son durum varsayılandır (G29); JS'te `lib/a11y/use-reduced-motion.ts`. Sürükle-bırak her zaman klavye alternatifine sahiptir.
+- R15: Kaydırmaya bağlı açılmada (`[data-reveal]`, `useReveal`) içerik yalnız `html[data-js]` + `no-preference` altında gizli başlar; JS yoksa ya da hareket azaltıldığında her şey baştan görünür. Dekoratif sonsuz döngüler (nabız, salınım, kontur kayması) yalnız `no-preference` altında ve ≥5 sn döngüyle (`calc(var(--duration-route) * 6)` ve üstü) yazılır (G32).
 
 ## 10. Formlar
 
@@ -101,6 +108,7 @@ export default function Page() {
 - `accessibilityRole/Label/State`; modallarda `accessibilityViewIsModal` + `onRequestClose`; 44pt; `maxFontSizeMultiplier`; `useReducedMotion`.
 - Hex/rgba literal yazılmaz; `tokens.*` kullanılır (`mobile-design-system.test.cjs`).
 - R6: Yeni kodda `TouchableOpacity` yerine primitive (`Button`, `IconButton`, `Chip`, …) ya da `Pressable`; dosya başına `TouchableOpacity` sayısı `TOUCHABLE_BASELINE` ratchet'inde yalnızca düşer, yeni dosyada 0. `Animated.timing/spring/loop` yalnız `src/ui/motion.ts` içinde (`animate`, `spring`, `easing`, `loop`); sekme ve ekran geçişleri `motion.ts` üzerinden. Web ile aynı adlı primitive'ler (`Icon`, `Chip`/`ChipGroup`, `SegmentedControl`, `BottomSheet`, `Stepper`, `Accordion`, `CostBadge`, `CreditCostTable`, `PlanCard`, `QuestionCard`, `ComposerBar`, `MessageLog`, `StopRow`/`Connector`/`DayHeader`, `AuthGate`, `Media`) `src/ui`'dan gelir; kopya veri/mantık (`src/billing`, `src/guest`, `src/i18n/ui.ts`, `src/ui/logic`) `mobile-parity.test.cjs` ile web'e eşit tutulur.
+- R16: Haptik yalnız `src/ui/haptics.ts` sarmalayıcısından (`expo-haptics` başka dosyada import edilmez, `mobile-design-system.test.cjs`); sarmalayıcı `useReducedMotion` ve sistem ayarına saygılıdır.
 
 ## 12. Admin
 
@@ -124,14 +132,14 @@ Kural → bölüm eşlemesi:
 
 | Bölüm                | Kurallar                        |
 | -------------------- | ------------------------------- |
-| §Renk                | G1, G7, G14, G17, G18, G23      |
+| §Renk                | G1, G7, G14, G17, G18, G23, G33 |
 | §Kaskad              | G2, G3, G15, G16, G20, G22, G27 |
 | §Boşluk ve tipografi | G13, G24, G25, G26              |
-| §Primitive'ler       | G6, G8, G28                     |
-| §Sayfa şablonu       | G4, G10                         |
+| §Primitive'ler       | G6, G8, G28, G31                |
+| §Sayfa şablonu       | G4, G10, G30                    |
 | §Chrome              | G5, G19                         |
 | §URL ve SEO          | G9, G21                         |
-| §Erişilebilirlik     | G11, G12, G29                   |
+| §Erişilebilirlik     | G11, G12, G29, G32              |
 
 Ratchet: `apps/web/tests/design-system-baseline.json` kalan eski ihlalleri dosya bazında sayar ve yalnızca aşağı yazılır (`node apps/web/tests/design-system-guard.test.cjs --write-baseline`). Yeni dosyada ihlal 0'dır; mevcut dosyada sayı artamaz. Yeni bir kural baseline'a yalnızca bir kez, bugünkü sayılarıyla `--write-baseline --seed <G..>` ile girer. Her kural baseline'da anahtar olarak kalır (sıfıra inen kural `{}`); anahtarı olan kural, sayısı 0 olsa bile, seed edilemez.
 

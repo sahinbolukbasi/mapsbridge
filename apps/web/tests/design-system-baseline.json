@@ -86,5 +86,42 @@
   "G29": {
     "app/maps/maps.css": 3,
     "app/styles.css": 1
+  },
+  "G30": {
+    "app/[username]/public-profile-client.tsx": 1,
+    "app/auth/callback/page.tsx": 2,
+    "app/checkout/checkout-client.tsx": 1,
+    "app/community/page.tsx": 1,
+    "app/home-client.tsx": 1,
+    "app/how-it-works/how-it-works-client.tsx": 1,
+    "app/k/page.tsx": 1,
+    "app/login/page.tsx": 1,
+    "app/maps/maps-client.tsx": 1,
+    "app/messages/page.tsx": 2,
+    "app/mobile-apps/mobile-apps-client.tsx": 1,
+    "app/pricing/pricing-client.tsx": 1,
+    "app/profile/edit/page.tsx": 2,
+    "app/profile/page.tsx": 2,
+    "app/profile/photo/page.tsx": 2,
+    "app/profiles/profiles-client.tsx": 1,
+    "app/register/page.tsx": 1,
+    "app/reset-password/page.tsx": 2,
+    "app/travel-assistant/guest-assistant.tsx": 2,
+    "app/travel-assistant/travel-assistant-client.tsx": 2,
+    "app/u/admin/admin-client.tsx": 1,
+    "app/verify/page.tsx": 1
+  },
+  "G31": {
+    "app/components/ui/ui.css": 5
+  },
+  "G32": {
+    "app/components/assistant/assistant-ui.css": 1,
+    "app/maps/maps.css": 2,
+    "app/travel-assistant/studio.css": 2
+  },
+  "G33": {
+    "app/components/header-nav.css": 2,
+    "app/maps/maps.css": 6,
+    "app/styles.css": 2
   }
 }

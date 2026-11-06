@@ -221,6 +221,26 @@ test("R6: Animated.timing/spring/loop yalnız src/ui/motion.ts'te (reduce-motion
   assert.match(motion, /isReducedMotion\(\)/, "reduce-motion gözetilir");
 });
 
+test("R16: expo-haptics yalnız src/ui/haptics.ts sarmalayıcısından (reduce-motion + sistem ayarı)", () => {
+  const offenders = [];
+  for (const rel of FILES) {
+    if (rel === "src/ui/haptics.ts") continue;
+    const src = read(rel);
+    for (const m of src.matchAll(/(?:from\s+|require\(\s*|import\(\s*)["']expo-haptics["']/g))
+      offenders.push(`${rel}:${lineOf(src, m.index)}`);
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    `src/ui/haptics.ts sarmalayıcısını kullanın:\n${offenders.join("\n")}`,
+  );
+  if (FILES.includes("src/ui/haptics.ts"))
+    assert.match(
+      read("src/ui/haptics.ts"),
+      /isReducedMotion\(|useReducedMotion\(/,
+      "haptik reduce-motion'a saygılı",
+    );
+});
 // FEAT-011 ile eklenen RN primitive'leri (design §4.2): web ile aynı ad; dokunulabilir öğeler
 // Pressable, accessibilityRole taşır ve metinler maxFontSizeMultiplier ile ölçeklenir.
 const PRIMITIVES = [
