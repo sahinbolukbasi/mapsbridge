@@ -369,3 +369,45 @@ test("Toast görünümü: ton şeridi + ikon, hata role=alert, süre çubuğu ya
   assert.match(motion, /ui-toast-timer var\(--toast-duration\) var\(--easing-linear\)/);
   assert.match(css, /\.ui-toast--danger \{\s*--toast-accent: var\(--color-danger\)/);
 });
+test("progress: değer sınırlama, adım durumu ve duyuru metni", () => {
+  const p = load("progress");
+  assert.equal(p.clampProgress(50), 50);
+  assert.equal(p.clampProgress(3, 4), 75);
+  assert.equal(p.clampProgress(-5), 0);
+  assert.equal(p.clampProgress(250), 100);
+  assert.equal(p.clampProgress(Number.NaN), 0);
+  assert.equal(p.clampProgress(1, 0), 0);
+  assert.equal(p.clampProgress(1, 3), 33.3);
+  assert.deepEqual(
+    [0, 1, 2].map((i) => p.stepState(i, 1)),
+    ["done", "active", "pending"],
+  );
+  assert.deepEqual(
+    [0, 1].map((i) => p.stepState(i, 5)),
+    ["done", "done"],
+  );
+  assert.equal(
+    p.stepAnnouncement("Adım {n}/{total}: {label}", 1, ["Niyet", "Aday havuzu", "Kümeleme"]),
+    "Adım 2/3: Aday havuzu",
+  );
+  assert.equal(p.stepAnnouncement("x", 0, []), "");
+});
+test("Celebrate/Skeleton/Progress: süre tavanı ve hareket yalnız no-preference (R14/R15)", () => {
+  const css = fs.readFileSync(path.resolve(__dirname, "../app/components/ui/ui.css"), "utf8");
+  const m = css.match(/ui-confetti calc\(var\(--duration-route\) \* ([\d.]+)\)/);
+  assert.ok(m && Number(m[1]) <= 1.2, "konfeti ≤ route × 1.2");
+  assert.match(css, /\.ui-celebrate__confetti \{\s*display: none;/, "azaltmada konfeti yok");
+  assert.match(css, /ui-shimmer calc\(var\(--duration-route\) \* 1\.6\)/);
+  const src = fs.readFileSync(
+    path.resolve(__dirname, "../app/components/ui/celebrate.tsx"),
+    "utf8",
+  );
+  assert.match(src, /role="status"/);
+  assert.match(src, /CELEBRATE_BITS = 18/);
+  const prog = fs.readFileSync(
+    path.resolve(__dirname, "../app/components/ui/progress.tsx"),
+    "utf8",
+  );
+  assert.match(prog, /role="progressbar"/);
+  assert.match(prog, /aria-live="polite"/);
+});

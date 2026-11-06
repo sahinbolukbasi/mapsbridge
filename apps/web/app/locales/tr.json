@@ -38,6 +38,8 @@
   "ui.footerLinks": "Alt bilgi bağlantıları",
   "ui.userMenu": "Profil menüsü",
   "ui.loading": "Yükleniyor…",
+  "ui.progress.step": "Adım {n}/{total}: {label}",
+  "ui.progress.done": "Tamamlandı",
   "ui.close": "Kapat",
   "ui.cancel": "İptal",
   "ui.retry": "Tekrar dene",

@@ -83,9 +83,13 @@ export const icons = {
   bed: "M3 19V6 M3 15h18v4 M21 15v-3a3 3 0 0 0-3-3h-7v6 M7 12.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z",
   phone:
     "M5 3h3.5l2 5-2.6 1.6a11 11 0 0 0 5.5 5.5L15 12.5l5 2V18a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2Z",
+  // Boş durum kontur illüstrasyonu (direction §3): iç içe eş yükselti eğrileri + merkez nokta.
+  // EmptyState'te büyük boyutta ince çizgiyle (iconStroke.contour) çizilir.
+  contour:
+    "M12 2.5c5.2 0 9.5 3.6 9.5 8.4 0 5.4-4.6 10.6-10 10.6-5 0-9-4-9-9.3C2.5 6.8 6.6 2.5 12 2.5Z M12.2 6c3.3 0 6 2.3 6 5.3 0 3.4-2.9 6.6-6.3 6.6-3.2 0-5.9-2.6-5.9-6C6 8.8 8.8 6 12.2 6Z M12.1 9.3c1.6 0 2.9 1.1 2.9 2.5 0 1.6-1.4 3-3 3-1.5 0-2.8-1.2-2.8-2.8 0-1.5 1.3-2.7 2.9-2.7Z M12 11.6v.8",
 } as const;
 
 export type IconName = keyof typeof icons;
 
 // Çizgi kalınlığı (viewBox birimi): grip noktaları daha kalın çizilir.
-export const iconStroke = { default: 1.8, grip: 3 } as const;
+export const iconStroke = { default: 1.8, grip: 3, contour: 0.6 } as const;

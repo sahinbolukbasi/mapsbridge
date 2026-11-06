@@ -38,6 +38,8 @@
   "ui.footerLinks": "Footer links",
   "ui.userMenu": "Profile menu",
   "ui.loading": "Loading…",
+  "ui.progress.step": "Step {n} of {total}: {label}",
+  "ui.progress.done": "Done",
   "ui.close": "Close",
   "ui.cancel": "Cancel",
   "ui.retry": "Try again",

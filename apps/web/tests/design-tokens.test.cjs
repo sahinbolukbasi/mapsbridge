@@ -112,9 +112,10 @@ test("AC-4f: primitive varyantları × açık/inverse kap × üç zemin (metin �
 // (design §4.2) için plan D1 kararı. Özelliğe özgü bileşimler ui.css dışında, yalnız kendi
 // rotalarında yüklenir. redesign-v2 Increment 2 (approval.json ruleChanges a/R10–R15): auth
 // layout'u, modal ölçek/solma, Toast tonları, Progress, Celebrate ve Skeleton varyantları genel
-// primitive'lerdir → 53 248 → 61 440 B (60 KB). Sayfaya özgü koreografi yine sayfa CSS'inde.
-const CSS_BUDGET = 61440;
-test("NFR-7: tokens.css + base.css + ui.css ≤ 60 KB (geçici legacy alias bölümü hariç)", () => {
+// primitive'lerdir (+ hover/basma/ripple, 2.7) → 53 248 → 73 728 B (72 KB). Sayfaya özgü koreografi
+// yine sayfa CSS'inde.
+const CSS_BUDGET = 73728;
+test("NFR-7: tokens.css + base.css + ui.css ≤ 72 KB (geçici legacy alias bölümü hariç)", () => {
   const tokens = read("apps/web/app/styles/tokens.css");
   // Legacy alias bölümü geçicidir (design §13.1 tokens.css satırı "alias bölümü hariç"); C18'de boşalır.
   const alias = tokens.match(/ {4}\/\* Geçici legacy alias[^\n]*\n(?: {4}--[^\n]*\n)*/);

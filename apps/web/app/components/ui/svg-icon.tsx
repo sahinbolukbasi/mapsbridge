@@ -4,7 +4,8 @@ import { iconPaths, iconStroke, type IconName } from "../../lib/icon-paths";
 import { cx } from "./cx";
 import "./ui.css";
 export type { IconName };
-export type IconSize = 16 | 20 | 24;
+/** 96 yalnız illüstrasyon (EmptyState kontur) içindir. */
+export type IconSize = 16 | 20 | 24 | 96;
 const STROKE: Partial<Record<IconName, number>> = iconStroke;
 /** Etiket yoksa dekoratiftir (aria-hidden); etiket verilirse role="img" + aria-label taşır. */
 export function Icon({
