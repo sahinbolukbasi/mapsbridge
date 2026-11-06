@@ -392,3 +392,86 @@ test("social-sync: sunucu 404 → gönderi 'Yalnız bu cihazda' işaretlenir; su
   );
   assert.equal(merged[1].content, "sunucu");
 });
+
+// ─── Increment 1.14 (M1/M2): mesaj istekleri arayüzü (web + native) ─────────
+const reqs = loadTs(path.join(APP, "features/messaging/requests.ts"));
+const MOBILE_SRC = path.resolve(__dirname, "../../mobile/src");
+test("mesaj istekleri: gelen / giden / aktif gruplama; reddedilen listelenmez", () => {
+  const threads = [
+    {
+      threadId: "in",
+      otherParticipant: "ali",
+      request: { status: "pending", from: "x", to: "me" },
+    },
+    { threadId: "out", request: { status: "pending", from: "me", to: "y" } },
+    { threadId: "old" },
+    { threadId: "ok", request: { status: "accepted", from: "me", to: "z" } },
+    { threadId: "no", request: { status: "declined", from: "me", to: "z" } },
+    { threadId: "bl", request: { status: "blocked", from: "q", to: "me" } },
+  ];
+  const g = plain(reqs.groupThreads(threads, "me"));
+  assert.deepEqual(
+    g.incoming.map((t) => t.threadId),
+    ["in"],
+  );
+  assert.deepEqual(
+    g.outgoing.map((t) => t.threadId),
+    ["out"],
+  );
+  assert.deepEqual(
+    g.active.map((t) => t.threadId),
+    ["old", "ok"],
+  );
+});
+test("mesaj istekleri: 404/409/403 sunucu kodları metne; diğerleri null (yerel davranış)", () => {
+  assert.equal(reqs.chatErrorKey(404, "USER_NOT_FOUND"), "messages.req.userNotFound");
+  assert.equal(reqs.chatErrorKey(409, "REQUEST_PENDING", true), "messages.req.waiting");
+  assert.equal(reqs.chatErrorKey(409, "REQUEST_PENDING", false), "messages.req.respondFirst");
+  assert.equal(reqs.chatErrorKey(403, "REQUEST_CLOSED"), "messages.req.closed");
+  assert.equal(reqs.chatErrorKey(404, undefined), null, "uç canlı değil → yerel fallback");
+  assert.equal(reqs.chatErrorKey(0, undefined), null);
+  const tok = [
+    "h",
+    Buffer.from(JSON.stringify({ sub: "abc-123" })).toString("base64url"),
+    "s",
+  ].join(".");
+  assert.equal(reqs.jwtSub(tok), "abc-123");
+  assert.equal(reqs.jwtSub("bozuk"), "");
+  const tr = require("../app/locales/tr.json");
+  const en = require("../app/locales/en.json");
+  for (const k of [
+    "messages.req.userNotFound",
+    "messages.req.waiting",
+    "messages.req.respondFirst",
+    "messages.req.closed",
+    "messages.req.accept",
+    "messages.req.decline",
+    "messages.req.block",
+    "messages.req.pending",
+  ])
+    assert.ok(tr[k] && en[k], k);
+});
+test("mesaj istekleri: mobil kopya web ile birebir; web ve native ekranlar Kabul/Reddet/Engelle bağlar", () => {
+  assert.equal(
+    fs.readFileSync(path.join(MOBILE_SRC, "ui/logic/chat-requests.ts"), "utf8"),
+    read("features/messaging/requests.ts"),
+  );
+  const web = read("messages/message-requests.tsx") + read("messages/page.tsx");
+  for (const a of ['"accept"', '"decline"', '"block"']) assert.ok(web.includes(a), a);
+  assert.match(web, /chatApi\.respondRequest\(threadId, action\)/);
+  assert.match(web, /chatApi\.createThread\(conv\.title, text\)/);
+  assert.match(
+    read("lib/api-client.ts"),
+    /body: JSON\.stringify\(\{ participantId, initialMessage \}\)/,
+  );
+  const native = fs.readFileSync(path.join(MOBILE_SRC, "screens/ChatScreen.tsx"), "utf8");
+  assert.match(native, /chatRequestApi\.respondRequest\(thread\.threadId, action\)/);
+  for (const k of [
+    "messages.req.accept",
+    "messages.req.decline",
+    "messages.req.block",
+    "messages.req.pending",
+    "messages.req.sentNote",
+  ])
+    assert.ok(native.includes(`"${k}"`), k);
+});

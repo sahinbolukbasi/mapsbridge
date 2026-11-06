@@ -208,4 +208,46 @@
       display: contents;
     }
   }
+  /* Mesaj istekleri (Increment 1.14) */
+  .msg-requests {
+    display: grid;
+    gap: var(--space-2);
+    padding-block: var(--space-2);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .msg-requests__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+  }
+  .msg-requests__list {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .msg-requests__item {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+  .msg-requests__who {
+    margin: 0;
+    font-weight: var(--font-weight-semibold);
+  }
+  .msg-requests__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .msg-thread__alert {
+    margin-inline: var(--space-4);
+  }
 }

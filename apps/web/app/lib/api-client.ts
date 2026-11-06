@@ -281,8 +281,11 @@ export const mediaApi = {
 export interface ChatThreadSummary {
   threadId: string;
   title?: string;
-  participants: string[];
-  lastMessageAt: string;
+  participants?: string[];
+  otherParticipant?: string;
+  lastMessageAt?: string;
+  /** Mesaj isteği durumu (Increment 1.14); REQUEST kaydı yoksa "accepted". */
+  request?: { status?: string; from?: string; to?: string };
 }
 
 export interface ChatMessageItem {
@@ -300,14 +303,25 @@ export const chatApi = {
     return apiFetch<{ threads: ChatThreadSummary[] }>("/chat/threads");
   },
 
+  /** Mesaj isteği açar (alıcı: kullanıcı kimliği ya da yayınlanmış profil kullanıcı adı). */
   async createThread(
-    participants: string[],
+    participantId: string,
     initialMessage?: string,
-  ): Promise<{ threadId: string }> {
-    return apiFetch<{ threadId: string }>("/chat/threads", {
+  ): Promise<{ threadId: string; request?: string }> {
+    return apiFetch<{ threadId: string; request?: string }>("/chat/threads", {
       method: "POST",
-      body: JSON.stringify({ participants, initialMessage }),
+      body: JSON.stringify({ participantId, initialMessage }),
     });
+  },
+  /** Alıcı isteği yanıtlar: kabul / reddet / engelle (Increment 1.14). */
+  async respondRequest(
+    threadId: string,
+    action: "accept" | "decline" | "block",
+  ): Promise<{ threadId: string; request: string }> {
+    return apiFetch<{ threadId: string; request: string }>(
+      `/chat/threads/${encodeURIComponent(threadId)}/request`,
+      { method: "POST", body: JSON.stringify({ action }) },
+    );
   },
 
   async getMessages(

@@ -1,7 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { tripStore, type TripStop } from "../services/tripStore";
-import { authService } from "../services/api";
+import {
+  authService,
+  chatRequestApi,
+  type ChatApiError,
+  type ServerChatThread,
+} from "../services/api";
+import { chatErrorKey, groupThreads, jwtSub, type RequestAction } from "../ui/logic/chat-requests";
 import { chatStore, type ChatBubbleItem, type ChatContact } from "../services/chatStore";
 import {
   Avatar,
@@ -42,11 +48,35 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
   const [newUser, setNewUser] = useState("");
   const [newError, setNewError] = useState<string | undefined>(undefined);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // Mesaj istekleri (Increment 1.14): sunucu thread'leri + kişi → sunucu thread eşlemesi.
+  const [mySub, setMySub] = useState("");
+  const [serverThreads, setServerThreads] = useState<ServerChatThread[]>([]);
+  const [serverIds, setServerIds] = useState<Record<string, { id: string; pendingOut: boolean }>>(
+    {},
+  );
+  const [busyRequest, setBusyRequest] = useState<string | null>(null);
+  const [threadError, setThreadError] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
+  const loadServerThreads = () =>
+    chatRequestApi
+      .listThreads()
+      .then((r) => setServerThreads(Array.isArray(r?.threads) ? r.threads : []))
+      .catch(() => setServerThreads([]));
+  const errorText = (err: unknown, iAmSender?: boolean) => {
+    const e = err as Partial<ChatApiError>;
+    const key = chatErrorKey(e?.status, e?.code, iAmSender);
+    return key ? tr(key as Parameters<typeof tr>[0]) : null;
+  };
+  const requests = useMemo(() => groupThreads(serverThreads, mySub), [serverThreads, mySub]);
 
   useEffect(() => {
     let alive = true;
     authService.getSession().then((s) => {
       if (alive && s?.email) setMe(s.email.split("@")[0]);
+      if (alive && s?.token) {
+        setMySub(jwtSub(s.token));
+        void loadServerThreads();
+      }
     });
     chatStore.getThreads().then((threads) => alive && setContacts(threads));
     const unsub = chatStore.subscribeThreads(setContacts);
@@ -72,6 +102,47 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
   }, [active?.id]);
 
   useBackHandler(!!active, () => setActive(null));
+  useEffect(() => setThreadError(null), [active?.id]);
+  /** İlk mesaj isteği açar; sonrası sunucu istek kapısından geçer. false: gönderilmedi. */
+  const sendToServer = async (contact: ChatContact, text: string): Promise<boolean> => {
+    const known = serverIds[contact.id];
+    try {
+      if (!known) {
+        const res = await chatRequestApi.createThread(contact.username || contact.name, text);
+        setServerIds((m) => ({ ...m, [contact.id]: { id: res.threadId, pendingOut: true } }));
+        void loadServerThreads();
+      } else {
+        await chatRequestApi.sendMessage(known.id, text);
+      }
+      return true;
+    } catch (err) {
+      const msg = errorText(err, !known || known.pendingOut ? true : undefined);
+      if (msg) {
+        setThreadError(msg);
+        return false;
+      }
+      // Uç henüz canlı değil ya da ağ hatası: bugünkü cihaz-içi davranış sürer.
+      return true;
+    }
+  };
+  const respond = async (thread: ServerChatThread, action: RequestAction) => {
+    setBusyRequest(thread.threadId);
+    setListError(null);
+    try {
+      await chatRequestApi.respondRequest(thread.threadId, action);
+      await loadServerThreads();
+      if (action === "accept") {
+        const handle = thread.otherParticipant || thread.threadId;
+        const { contact } = await chatStore.startOrGetDirectThread({ name: handle, handle });
+        setServerIds((m) => ({ ...m, [contact.id]: { id: thread.threadId, pendingOut: false } }));
+        setActive(contact);
+      }
+    } catch (err) {
+      setListError(errorText(err) ?? tr("messages.req.failed"));
+    } finally {
+      setBusyRequest(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase("tr-TR");
@@ -178,13 +249,29 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
             ))
           )}
         </MessageLog>
+        {serverIds[active.id]?.pendingOut && !threadError ? (
+          <View style={styles.note} accessibilityLiveRegion="polite">
+            <Txt variant="small" tone="muted">
+              {tr("messages.req.sentNote")}
+            </Txt>
+          </View>
+        ) : null}
+        {threadError ? (
+          <View style={styles.note} accessibilityRole="alert" accessibilityLiveRegion="assertive">
+            <Txt variant="small" tone="danger">
+              {threadError}
+            </Txt>
+          </View>
+        ) : null}
         <View style={styles.composer}>
           <ComposerBar
             placeholder={tr("messages.composer")}
             label={tr("messages.composer")}
-            onSubmit={(text) =>
-              chatStore.sendMessage(active.id, { text, senderId: "me", senderName: me })
-            }
+            onSubmit={async (text) => {
+              setThreadError(null);
+              if (!(await sendToServer(active, text))) return;
+              await chatStore.sendMessage(active.id, { text, senderId: "me", senderName: me });
+            }}
           />
         </View>
         <ConfirmDialog
@@ -224,6 +311,61 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
           maxFontSizeMultiplier={tokens.font.maxScale.body}
           style={[styles.search, { fontFamily: fontFamily("regular") }]}
         />
+        {requests.incoming.length > 0 || requests.outgoing.length > 0 ? (
+          <View style={styles.requests} accessibilityRole="summary">
+            <Txt variant="heading" header>
+              {tr("messages.req.title", { n: requests.incoming.length })}
+            </Txt>
+            {listError ? (
+              <View accessibilityRole="alert">
+                <Txt variant="small" tone="danger">
+                  {listError}
+                </Txt>
+              </View>
+            ) : null}
+            {requests.incoming.map((x) => (
+              <Card key={x.threadId} variant="bordered">
+                <View style={styles.cardBody}>
+                  <Txt variant="label">{x.otherParticipant || tr("messages.req.someone")}</Txt>
+                  <View style={styles.actions}>
+                    <Button
+                      label={tr("messages.req.accept")}
+                      size="sm"
+                      loading={busyRequest === x.threadId}
+                      onPress={() => void respond(x, "accept")}
+                    />
+                    <Button
+                      label={tr("messages.req.decline")}
+                      size="sm"
+                      variant="secondary"
+                      disabled={busyRequest === x.threadId}
+                      onPress={() => void respond(x, "decline")}
+                    />
+                    <Button
+                      label={tr("messages.req.block")}
+                      size="sm"
+                      variant="ghost"
+                      disabled={busyRequest === x.threadId}
+                      onPress={() => void respond(x, "block")}
+                    />
+                  </View>
+                </View>
+              </Card>
+            ))}
+            {requests.outgoing.map((x) => (
+              <Card key={x.threadId} variant="bordered">
+                <View style={styles.row}>
+                  <Txt variant="label" style={styles.flex}>
+                    {x.otherParticipant || tr("messages.req.someone")}
+                  </Txt>
+                  <Txt variant="caption" tone="muted">
+                    {tr("messages.req.pending")}
+                  </Txt>
+                </View>
+              </Card>
+            ))}
+          </View>
+        ) : null}
         {filtered.length === 0 ? (
           <View style={styles.empty}>
             <Txt variant="heading" header>
@@ -313,4 +455,7 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.color.composerBg,
   },
   form: { padding: tokens.space["5"], gap: tokens.space["4"] },
+  requests: { gap: tokens.space["2"] },
+  actions: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["2"] },
+  note: { paddingHorizontal: tokens.space["4"], paddingVertical: tokens.space["2"] },
 });

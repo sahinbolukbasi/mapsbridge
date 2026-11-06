@@ -566,3 +566,56 @@ test("1.14 WS: pending 409, reddedilmiş 403, kabul edilmiş gönderilir (kapı 
   assert.equal(ok.statusCode, 200);
   assert.equal(JSON.parse(ok.body).status, "sent");
 });
+
+test("1.14: yayınlanmış profil kullanıcı adıyla istek; 404 USER_NOT_FOUND kodu; liste istek durumunu taşır", async () => {
+  const env = chatEnv({
+    "PROFILE#ayse_k|PUBLIC": {
+      PK: "PROFILE#ayse_k",
+      SK: "PUBLIC",
+      published: true,
+      owner: "user-b",
+    },
+    "PROFILE#gizli|PUBLIC": {
+      PK: "PROFILE#gizli",
+      SK: "PUBLIC",
+      published: false,
+      owner: "user-b",
+    },
+  });
+  const byName = await env.call("user-a", "POST", "/chat/threads", { participantId: "Ayse_K" });
+  assert.equal(byName.statusCode, 201);
+  const id = JSON.parse(byName.body).threadId;
+  assert.equal(env.s.rows.get(`THREAD#${id}|REQUEST`).to, "user-b", "kullanıcı adı → sahip sub");
+  const unpublished = await env.call("user-a", "POST", "/chat/threads", { participantId: "gizli" });
+  assert.equal(unpublished.statusCode, 404);
+  assert.equal(JSON.parse(unpublished.body).code, "USER_NOT_FOUND");
+  // Liste: GSI1 satırı + REQUEST durumu; REQUEST'siz eski thread accepted.
+  const h = harness({
+    data: (c) =>
+      c.name === "QueryCommand"
+        ? { Items: [{ threadId: "t-new", otherParticipant: "user-b" }, { threadId: "t-old" }] }
+        : c.name === "BatchGetItemCommand"
+          ? {
+              Responses: {
+                "test-data": [
+                  {
+                    PK: "THREAD#t-new",
+                    SK: "REQUEST",
+                    status: "pending",
+                    from: "user-a",
+                    to: "user-b",
+                  },
+                ],
+              },
+            }
+          : {},
+  });
+  const list = JSON.parse(
+    (await h.load("chat/index.ts").handler(event("GET", "/chat/threads", token()))).body,
+  );
+  assert.deepEqual(
+    list.threads.map((x) => x.request.status),
+    ["pending", "accepted"],
+  );
+  assert.equal(list.threads[0].request.from, "user-a");
+});

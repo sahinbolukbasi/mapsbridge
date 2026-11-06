@@ -45,6 +45,19 @@ router.add("GET /chat/threads/{id}/messages", handleGetMessages);
 router.add("POST /chat/threads/{id}/messages", handleSendMessage);
 router.add("POST /chat/threads/{id}/request", handleRespondRequest);
 
+/** Yayınlanmış profil kullanıcı adının sahibi (auth lambda PROFILE#<ad>/PUBLIC.owner). */
+async function profileOwner(username: string): Promise<string | null> {
+  const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall, unmarshall } = await import("@aws-sdk/util-dynamodb");
+  const r = await getDynamoClient().send(
+    new GetItemCommand({
+      TableName: getTableName(),
+      Key: marshall({ PK: `PROFILE#${username.toLowerCase()}`, SK: "PUBLIC" }),
+    }),
+  );
+  const row = r.Item ? unmarshall(r.Item) : null;
+  return row?.published === true && typeof row.owner === "string" && row.owner ? row.owner : null;
+}
 /** Alıcı kayıtlı kullanıcı mı (USER#<id>/META ya da USER#<id>/CREDITS kaydı)? */
 async function isRegisteredUser(id: string) {
   const { BatchGetItemCommand } = await import("@aws-sdk/client-dynamodb");
@@ -106,7 +119,37 @@ async function handleListThreads(event: ApiGatewayEvent) {
   );
 
   const threads = (result.Items || []).map((i) => unmarshall(i));
-  return ok({ threads });
+  // M1/M2: her thread'e istek durumu (REQUEST kaydı; yoksa eski thread → accepted).
+  const ids = [...new Set(threads.map((x) => String(x.threadId || "")).filter(Boolean))];
+  const requests = new Map<string, Record<string, unknown>>();
+  if (ids.length) {
+    const { BatchGetItemCommand } = await import("@aws-sdk/client-dynamodb");
+    const got = await ddb.send(
+      new BatchGetItemCommand({
+        RequestItems: {
+          [getTableName()]: {
+            Keys: ids.map((id) => marshall({ PK: `THREAD#${id}`, SK: "REQUEST" })),
+          },
+        },
+      }),
+    );
+    for (const item of got.Responses?.[getTableName()] || []) {
+      const r = unmarshall(item);
+      requests.set(String(r.PK).slice("THREAD#".length), r);
+    }
+  }
+  return ok({
+    threads: threads.map((x) => {
+      const r = requests.get(String(x.threadId));
+      return {
+        ...x,
+        request:
+          r && typeof r.status === "string"
+            ? { status: r.status, from: r.from, to: r.to }
+            : { status: "accepted" },
+      };
+    }),
+  });
 }
 
 // ─── Create Thread ────────────────────────────────────────────────────────
@@ -119,12 +162,16 @@ async function handleCreateThread(event: ApiGatewayEvent) {
 
   const body = parseBody<{ participantId?: string; initialMessage?: string }>(event);
   if (!body?.participantId) return badRequest("Alıcı kullanıcı ID'si zorunludur.");
-  if (body.participantId === userId) return badRequest("Kendine mesaj isteği gönderemezsin.");
-  if (
-    !/^[A-Za-z0-9_-]{1,128}$/.test(body.participantId) ||
-    !(await isRegisteredUser(body.participantId))
-  )
-    return notFound("Bu kullanıcı bulunamadı.");
+  // Alıcı: kayıtlı kullanıcı kimliği ya da yayınlanmış profil kullanıcı adı (PROFILE#<ad>).
+  const recipient = /^[A-Za-z0-9_-]{1,128}$/.test(body.participantId)
+    ? (await isRegisteredUser(body.participantId))
+      ? body.participantId
+      : await profileOwner(body.participantId)
+    : null;
+  if (!recipient)
+    return jsonResponse(404, { error: "Bu kullanıcı bulunamadı.", code: "USER_NOT_FOUND" });
+  if (recipient === userId) return badRequest("Kendine mesaj isteği gönderemezsin.");
+  body.participantId = recipient;
 
   const threadId = crypto.randomUUID();
   const now = new Date().toISOString();

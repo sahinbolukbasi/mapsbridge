@@ -4,6 +4,7 @@ import { MessageBubble, MessageLog } from "../components/assistant/message-log";
 import { ComposerBar } from "../components/assistant/composer-bar";
 import { AuthGate } from "../components/auth-gate";
 import {
+  Alert,
   Avatar,
   Button,
   EmptyState,
@@ -17,6 +18,10 @@ import {
   PageShell,
   cx,
 } from "../components/ui";
+import { MessageRequests } from "./message-requests";
+import { chatApi, type ApiResponseError, type ChatThreadSummary } from "../lib/api-client";
+import { decodeJwtPayload } from "../lib/cognito";
+import { chatErrorKey, groupThreads, type RequestAction } from "../features/messaging/requests";
 import {
   DIRECT_MESSAGES_KEY,
   cleanHandle,
@@ -64,6 +69,16 @@ export default function MessagesPage() {
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [newChatOpen, setNewChatOpen] = useState(false);
+  // Mesaj istekleri (Increment 1.14): sunucu thread'leri + istek durumu.
+  const [serverThreads, setServerThreads] = useState<ChatThreadSummary[]>([]);
+  const [mySub, setMySub] = useState("");
+  const [busyRequest, setBusyRequest] = useState<string | null>(null);
+  const [threadError, setThreadError] = useState<string | null>(null);
+  const loadServerThreads = () =>
+    chatApi
+      .listThreads()
+      .then((r) => setServerThreads(Array.isArray(r?.threads) ? r.threads : []))
+      .catch(() => setServerThreads([]));
 
   // Oturum + cihazdaki doğrudan mesajlar + ?user= / ?to= / ?chat= ile sohbet açma.
   useEffect(() => {
@@ -110,6 +125,11 @@ export default function MessagesPage() {
       setPane("thread");
     }
     setConversations(list);
+    if (session?.token) {
+      const sub = decodeJwtPayload(session.token)?.sub;
+      if (typeof sub === "string") setMySub(sub);
+      void loadServerThreads();
+    }
   }, []);
 
   useEffect(() => {
@@ -155,14 +175,74 @@ export default function MessagesPage() {
     [conversations, query],
   );
   const active = conversations.find((c) => c.id === activeId) ?? null;
-
+  const requests = useMemo(() => groupThreads(serverThreads, mySub), [serverThreads, mySub]);
   function open(id: string) {
     setActiveId(id);
     setPane("thread");
+    setThreadError(null);
   }
-
-  function send(text: string) {
+  const errorText = (err: unknown, iAmSender?: boolean) => {
+    const e = err as Partial<ApiResponseError>;
+    const key = chatErrorKey(e?.status, e?.code, iAmSender);
+    return key ? t(key) : null;
+  };
+  async function respond(threadId: string, action: RequestAction) {
+    setBusyRequest(threadId);
+    try {
+      await chatApi.respondRequest(threadId, action);
+      const thread = serverThreads.find((x) => x.threadId === threadId);
+      await loadServerThreads();
+      if (action === "accept" && thread) {
+        const name = thread.otherParticipant || threadId;
+        const conv: ChatConversation = {
+          id: threadId,
+          serverId: threadId,
+          type: "direct",
+          title: name,
+          lastMessage: "",
+          lastTime: "",
+          messages: [],
+        };
+        setConversations((prev) => [conv, ...prev.filter((c) => c.id !== threadId)]);
+        open(threadId);
+      }
+    } catch (err) {
+      setThreadError(
+        errorText(err) ?? t("messages.req.failed", "İstek şu an yanıtlanamadı. Tekrar dene."),
+      );
+    } finally {
+      setBusyRequest(null);
+    }
+  }
+  /** Sunucu sohbeti (Increment 1.14): ilk mesaj isteği açar, sonrası istek kapısından geçer. */
+  async function sendToServer(conv: ChatConversation, text: string): Promise<boolean> {
+    try {
+      if (!conv.serverId) {
+        const res = await chatApi.createThread(conv.title, text);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === conv.id ? { ...c, serverId: res.threadId, pendingOut: true } : c,
+          ),
+        );
+        void loadServerThreads();
+      } else {
+        await chatApi.sendMessage(conv.serverId, text);
+      }
+      return true;
+    } catch (err) {
+      const msg = errorText(err, conv.pendingOut || !conv.serverId ? true : undefined);
+      if (msg) {
+        setThreadError(msg);
+        return false;
+      }
+      // Uç henüz canlı değil ya da ağ hatası: bugünkü cihaz-içi davranış sürer.
+      return true;
+    }
+  }
+  async function send(text: string) {
     if (!active) return;
+    setThreadError(null);
+    if (active.type === "direct" && !(await sendToServer(active, text))) return;
     const msg: ChatMessage = {
       id: `msg-${Date.now()}`,
       senderName: me.name,
@@ -201,6 +281,7 @@ export default function MessagesPage() {
   function startDirect(rawName: string) {
     const name = cleanHandle(rawName);
     if (!name) return;
+    setThreadError(null);
     const existing = conversations.find((c) => c.title.toLowerCase() === name.toLowerCase());
     if (existing) {
       open(existing.id);
@@ -259,6 +340,12 @@ export default function MessagesPage() {
               />
             )}
           </Field>
+          <MessageRequests
+            incoming={requests.incoming}
+            outgoing={requests.outgoing}
+            busyId={busyRequest}
+            onRespond={(id, action) => void respond(id, action)}
+          />
           {visible.length === 0 ? (
             <EmptyState
               icon="message"
@@ -347,13 +434,26 @@ export default function MessagesPage() {
                   ),
                 )}
               </MessageLog>
+              {active.pendingOut && !threadError && (
+                <p className="msg-note" role="status">
+                  {t(
+                    "messages.req.sentNote",
+                    "Mesaj isteğin gönderildi. Kabul edilene kadar yeni mesaj gönderemezsin.",
+                  )}
+                </p>
+              )}
+              {threadError && (
+                <Alert tone="warning" live="assertive" className="msg-thread__alert">
+                  {threadError}
+                </Alert>
+              )}
               <ComposerBar
                 className="msg-thread__composer"
                 placeholder={t("messages.composer", "Mesaj yaz")}
                 maxLength={2000}
                 value={draft}
                 onChange={setDraft}
-                onSubmit={send}
+                onSubmit={(text) => void send(text)}
               />
             </>
           ) : (

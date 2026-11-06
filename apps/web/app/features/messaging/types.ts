@@ -16,4 +16,8 @@ export interface ChatConversation {
   lastMessage: string;
   lastTime: string;
   messages: ChatMessage[];
+  /** Sunucu thread kimliği (Increment 1.14); yoksa yalnız cihazdaki sohbet. */
+  serverId?: string;
+  /** Gönderdiğim istek yanıt bekliyor. */
+  pendingOut?: boolean;
 }

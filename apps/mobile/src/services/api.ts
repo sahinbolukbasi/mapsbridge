@@ -710,6 +710,57 @@ export const chatService = {
   },
 };
 
+// ─── Mesaj istekleri (Increment 1.14, M1/M2) ────────────────────────────────
+// Durum kodu ve sunucu `code` alanı korunur (apiRequest yalnız metin döndürür); istek kapısı
+// hataları (404 USER_NOT_FOUND, 409 REQUEST_PENDING, 403 REQUEST_CLOSED) arayüzde gösterilir.
+export type ChatApiError = { status: number; code?: string; message: string };
+async function chatCall<T>(endpoint: string, init: RequestInit = {}): Promise<T> {
+  const session = await authService.getSession();
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${endpoint}`, {
+      ...init,
+      headers: {
+        "content-type": "application/json",
+        ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
+      },
+    });
+  } catch {
+    throw { status: 0, message: "İnternet bağlantısı yok." } satisfies ChatApiError;
+  }
+  const body = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+  if (!res.ok)
+    throw {
+      status: res.status,
+      code: body.code,
+      message: body.error || `İstek başarısız (${res.status})`,
+    } satisfies ChatApiError;
+  return body as T;
+}
+export type ServerChatThread = {
+  threadId: string;
+  otherParticipant?: string;
+  lastMessageAt?: string;
+  request?: { status?: string; from?: string; to?: string };
+};
+export const chatRequestApi = {
+  listThreads: () => chatCall<{ threads?: ServerChatThread[] }>("/chat/threads"),
+  createThread: (participantId: string, initialMessage?: string) =>
+    chatCall<{ threadId: string }>("/chat/threads", {
+      method: "POST",
+      body: JSON.stringify({ participantId, initialMessage }),
+    }),
+  sendMessage: (threadId: string, content: string) =>
+    chatCall<{ timestamp: string }>(`/chat/threads/${encodeURIComponent(threadId)}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }),
+  respondRequest: (threadId: string, action: "accept" | "decline" | "block") =>
+    chatCall<{ request: string }>(`/chat/threads/${encodeURIComponent(threadId)}/request`, {
+      method: "POST",
+      body: JSON.stringify({ action }),
+    }),
+};
 // ─── Plan kataloğu (design §7.1, karar S2) ───────────────────────────────────
 // Web /pricing/ ile aynı uç: GET /revenuecat/plans (oturumsuz). Ham gövde döner; doğrulama
 // src/billing/catalog.ts parseCatalog'dadır. Fiyat yalnızca buradan gösterilir.
