@@ -600,8 +600,13 @@ async function handleStreamRequest(
         );
 
         const { preferenceUpdates, conversationState, ...publicResult } = result;
+        // Increment 1.10 (bug 6): buffered yol (handleRequest / server/ai-handler.ts) ile aynı
+        // hesap: ücret = supervisor'ın authorizeAI ile ayırdığı maliyet. Sabit 5 yazmak,
+        // ayrılan maliyetten büyükse finishAI'de 402 verip üretilmiş rotayı düşürüyordu.
         const actualCost =
-          result.responseMode === "clarify" ? 0 : result.responseMode === "chat" ? 1 : 5;
+          result.responseMode === "clarify"
+            ? 0
+            : (reservation?.cost ?? (result.responseMode === "chat" ? 1 : 5));
         const updates =
           memoryTable() && !personal.settings.enabled ? {} : sanitizePreferences(preferenceUpdates);
         const trainingJob = createTrainingJob({

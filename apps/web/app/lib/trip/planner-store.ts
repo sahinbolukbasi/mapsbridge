@@ -43,6 +43,20 @@ export function guestDraftsForTransfer<
     .map((t) => ({ ...t, origin: "user" as const }));
 }
 
+/**
+ * Asistandan haritaya aktarılmış ("ai-…") ve sunucuya henüz yazılamamış geziler (Increment
+ * 1.10, bug 6). Girişte sunucu listesi yüklenince silinmezler; etkin gezi eşitlemesi onları
+ * hesaba yazar. Kayıt zaten sahip-yalıtımlıdır (readPlannerStore), başka hesaba geçmez.
+ */
+export function assistantDraftsToKeep<
+  T extends { id: string; origin?: TripOrigin; pins: unknown[] },
+>(trips: readonly T[]): T[] {
+  return trips
+    .filter((t) => t.id.startsWith("ai-") && t.pins.length > 0)
+    .map((t) => ({ ...t, origin: "user" as const }));
+}
+/** Sunucuya henüz yazılmamış yerel gezi kimliği (eşitleme create ile yazar). */
+export const isUnsyncedTripId = (id: string) => id.startsWith("trip-") || id.startsWith("ai-");
 /** Şu anki sahip (localStorage oturumu; cognito.getStoredSession ile aynı anahtarlar). */
 export const currentPlannerOwner = currentDeviceOwner;
 

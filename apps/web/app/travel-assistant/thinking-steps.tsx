@@ -4,80 +4,54 @@ import { useEffect, useRef, useState } from "react";
 import { Icon, type IconName } from "../components/ui";
 import { useLocale } from "../lib/locale-context";
 
-// Her aşama [anahtar, TR yedeği]; ikon Icon primitive adı (R3).
+// Aşamalar GERÇEK boru hattı adımlarıdır (Increment 1.10, bug 6): S0 niyet → S1 aday havuzu
+// (gerçek mekan verisi) → S3 günlere kümeleme → S3/S4 gün içi sıra → S5 anlatım. Süre ya da
+// sistemin yapmadığı bir iş (uçuş/konaklama taraması vb.) metinde iddia edilmez. Stream
+// yokken (buffered /ai/chat) aşamalar zamanlayıcıyla ilerler; sunucu aşaması gelirse ona atlar.
 const THINKING_PHASES: readonly { icon: IconName; key: string; label: string; delay: number }[] = [
-  { icon: "sparkle", key: "studio.think.intent", label: "İsteğini analiz ediyorum...", delay: 0 },
+  { icon: "sparkle", key: "studio.think.intent", label: "İsteğini anlıyorum…", delay: 0 },
   {
     icon: "search",
     key: "studio.think.research",
-    label: "Mekanları ve bölgeleri araştırıyorum...",
-    delay: 2200,
+    label: "Gerçek mekan verisinden aday yerleri topluyorum…",
+    delay: 2500,
   },
   {
-    icon: "plane",
-    key: "studio.think.flights",
-    label: "Uçuş fiyatlarını kontrol ediyorum...",
-    delay: 4200,
-  },
-  {
-    icon: "shield",
-    key: "studio.think.advisory",
-    label: "Seyahat tavsiyelerini ve giriş koşullarını alıyorum...",
-    delay: 6000,
+    icon: "calendar",
+    key: "studio.think.cluster",
+    label: "Durakları günlere ayırıyorum…",
+    delay: 7000,
   },
   {
     icon: "route",
     key: "studio.think.route",
-    label: "Rota ve zaman optimizasyonu yapıyorum...",
-    delay: 8500,
-  },
-  {
-    icon: "bed",
-    key: "studio.think.stay",
-    label: "Konaklama seçeneklerini değerlendiriyorum...",
-    delay: 11500,
-  },
-  {
-    icon: "food",
-    key: "studio.think.discovery",
-    label: "Yerel lezzetleri ve aktiviteleri eşleştiriyorum...",
-    delay: 14500,
+    label: "Gün içi sırayı hesaplıyorum…",
+    delay: 11000,
   },
   {
     icon: "check",
     key: "studio.think.finalize",
-    label: "Bilgileri doğrulayıp planı derliyorum...",
-    delay: 17500,
+    label: "Planı anlatıyorum…",
+    delay: 15000,
   },
 ];
-
-const QUICK_FACTS: readonly (readonly [string, string])[] = [
-  ["studio.think.fact.walk", "Şehir içi yürüyüş mesafelerini hesaplıyorum"],
-  ["studio.think.fact.hours", "Açılış saatlerini ve müze bilet slotlarını kontrol ediyorum"],
-  ["studio.think.fact.budget", "Bütçe dostu alternatifleri değerlendiriyorum"],
-  ["studio.think.fact.sunset", "Gün batımı ve fotoğraf noktalarını belirliyorum"],
-  ["studio.think.fact.card", "Yerel ulaşım kartı avantajlarını karşılaştırıyorum"],
-  ["studio.think.fact.events", "Mevsimsel etkinlik ve festivalleri tarıyorum"],
-  ["studio.think.fact.crowds", "Kalabalık saatlerden kaçınma stratejisi oluşturuyorum"],
-  ["studio.think.fact.gateway", "AgentCore Gateway'den mekan verileri çekiyorum"],
-  ["studio.think.fact.flights", "Travelpayouts önbelleğinden uçuş fiyatlarını alıyorum"],
-  ["studio.think.fact.fcdo", "FCDO seyahat tavsiyesi kontrol ediliyor"],
-];
-
-// Map SSE status phase strings to THINKING_PHASES indexes
+/** Sohbet (rota yok) yanıtında yalnız niyet + anlatım aşamaları. */
+const CHAT_PHASES = [THINKING_PHASES[0], THINKING_PHASES[4]] as const;
+// Sunucu SSE aşaması → THINKING_PHASES indeksi.
 const PHASE_MAP: Record<string, number> = {
   intent: 0,
   research: 1,
   places: 1,
-  flights: 2,
-  advisory: 3,
-  route: 4,
-  stay: 5,
-  discovery: 6,
-  finalize: 7,
-  complete: 7,
+  flights: 1,
+  advisory: 1,
+  stay: 1,
+  discovery: 1,
+  cluster: 2,
+  route: 3,
+  finalize: 4,
+  narration: 4,
+  complete: 4,
 };
-
 /** Sunucu aşaması: index THINKING_PHASES'e, message sunucunun kendi metni (varsa). */
 export interface LivePhase {
   index: number;
@@ -92,7 +66,6 @@ interface ThinkingStepsProps {
 export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
   const { t } = useLocale();
   const [visiblePhases, setVisiblePhases] = useState(1);
-  const [factIndex, setFactIndex] = useState(0);
   const timersCleaned = useRef(false);
 
   // If livePhase is provided, jump to the matching phase index
@@ -113,15 +86,9 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  useEffect(() => {
-    if (!isRoute) return;
-    const interval = setInterval(() => {
-      setFactIndex((prev) => (prev + 1) % QUICK_FACTS.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [isRoute]);
-
-  const phases = isRoute ? THINKING_PHASES : THINKING_PHASES.slice(0, 3);
+  const phases: readonly (typeof THINKING_PHASES)[number][] = isRoute
+    ? THINKING_PHASES
+    : CHAT_PHASES;
   const liveLabel = livePhase
     ? livePhase.message ||
       t(THINKING_PHASES[livePhase.index]?.key ?? "", THINKING_PHASES[livePhase.index]?.label)
@@ -135,8 +102,8 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
       </p>
 
       <ol className="as-studio-thinking__phases">
-        {phases.slice(0, visiblePhases).map((phase, i) => {
-          const isLatest = i === visiblePhases - 1;
+        {phases.slice(0, Math.min(visiblePhases, phases.length)).map((phase, i, shown) => {
+          const isLatest = i === shown.length - 1;
           return (
             <li
               key={phase.key}
@@ -149,13 +116,6 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
           );
         })}
       </ol>
-
-      {isRoute && visiblePhases >= 3 && (
-        <p className="as-studio-thinking__fact" key={factIndex}>
-          <Icon name="info" size={16} />
-          <span>{t(...QUICK_FACTS[factIndex])}</span>
-        </p>
-      )}
     </div>
   );
 }

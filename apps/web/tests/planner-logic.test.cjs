@@ -432,3 +432,28 @@ test("P2: girişli kullanıcıda OSRM önce sunucu vekilinden; vekil düşerse s
     "vekil + doğrudan OSRM düşerse yedek (süre gösterilmez)",
   );
 });
+
+// Increment 1.10 (bug 6): asistandan aktarılan "ai-…" gezi girişte silinmez.
+test("planner-store: ai-… yerel geziler sunucu listesi yüklenince korunur ve eşitlenir", () => {
+  const S = loadTs(path.join(APP, "lib/trip/planner-store.ts"));
+  const trips = [
+    { id: "ai-conv1", origin: "user", pins: [{}] },
+    { id: "ai-empty", origin: "user", pins: [] },
+    { id: "trip-1", origin: "guest", pins: [{}] },
+    { id: "route-9", origin: "user", pins: [{}] },
+  ];
+  assert.deepEqual(
+    plain(S.assistantDraftsToKeep(trips)).map((t) => t.id),
+    ["ai-conv1"],
+  );
+  assert.equal(S.isUnsyncedTripId("ai-conv1"), true);
+  assert.equal(S.isUnsyncedTripId("trip-1"), true);
+  assert.equal(S.isUnsyncedTripId("route-9"), false);
+  const hook = fs.readFileSync(path.join(APP, "lib/trip/use-travel-planner.ts"), "utf8");
+  assert.match(hook, /\.\.\.assistantDraftsToKeep\(prevTripsRef\.current\)/);
+  assert.match(
+    hook,
+    /if \(isUnsyncedTripId\(activeTrip\.id\)\)/,
+    "ai- gezi create ile sunucuya yazılır",
+  );
+});

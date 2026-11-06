@@ -297,3 +297,32 @@ test("taslak bölümleri + karşılama EN sözlükle render edilir: eksik anahta
     assert.match(html, /class="as-studio-stop__num" data-surface="inverse"/);
   }
 });
+
+// Increment 1.10 (bug 6): buffered /ai/chat 12 sn varsayılanıyla kesiliyordu.
+test("AI_CHAT_TIMEOUT_MS ≥ 35000 ve iki buffered /ai/chat çağrısı sabiti kullanır", () => {
+  const chat = fs.readFileSync(path.join(APP, "lib/ai/chat.ts"), "utf8");
+  const m = chat.match(/export const AI_CHAT_TIMEOUT_MS = (\d+);/);
+  assert.ok(m, "AI_CHAT_TIMEOUT_MS yok");
+  assert.ok(Number(m[1]) >= 35000);
+  const client = fs.readFileSync(path.join(TA, "travel-assistant-client.tsx"), "utf8");
+  const calls = [...client.matchAll(/apiFetch\("\/ai\/chat", \{([^}]*)\}/g)].map((x) => x[1]);
+  assert.equal(calls.length, 2, "iki buffered çağrı");
+  for (const body of calls) assert.match(body, /timeoutMs: AI_CHAT_TIMEOUT_MS/);
+});
+
+test("düşünme aşamaları gerçek boru hattı adımları; yapılmayan iş iddiası ve süre metni yok", () => {
+  const src = fs.readFileSync(path.join(TA, "thinking-steps.tsx"), "utf8");
+  for (const key of ["intent", "research", "cluster", "route", "finalize"])
+    assert.ok(src.includes(`studio.think.${key}"`), key);
+  assert.doesNotMatch(src, /QUICK_FACTS|Travelpayouts|FCDO|AgentCore Gateway|Uçuş fiyat/);
+  assert.doesNotMatch(src, /\d+\s*(sn|saniye|dk|seconds?)\b/i, "süre metni uydurulmaz");
+});
+
+test("openMap: girişli kullanıcıda rota sunucuya yazılır (routesApi.create) ve dönen kimlikle açılır", () => {
+  const client = fs.readFileSync(path.join(TA, "travel-assistant-client.tsx"), "utf8");
+  const fn = client.slice(client.indexOf("async function openMap()"));
+  const body = fn.slice(0, fn.indexOf("\n  function dictate"));
+  assert.match(body, /routesApi\.create\(/);
+  assert.match(body, /\/maps\/\?tripId=\$\{encodeURIComponent\(res\.routeId\)\}/);
+  assert.match(body, /`ai-\$\{activeId\}`/, "hata/misafir yolunda yerel ai- yazımı kalır");
+});

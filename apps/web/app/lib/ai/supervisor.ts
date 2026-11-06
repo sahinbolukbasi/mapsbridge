@@ -46,7 +46,7 @@ import {
 import { generateContextChips } from "./context-chips";
 import {
   parseItineraryToolCalls,
-  assertMutationConsistency,
+  mutationGuardError,
   type ItineraryActionPayload,
 } from "./itinerary-actions";
 
@@ -966,7 +966,10 @@ export async function runMultiAgentSupervisor(
   // §12.5.3 — Consistency guard: if model claims a mutation but no tool call, block delivery
   const finalSummary =
     String((output.data as Record<string, unknown>).orchestratorSummary ?? "").trim() + sourceNote;
-  const mutationError = assertMutationConsistency(finalSummary, itineraryActions.length > 0);
+  const mutationError = mutationGuardError(finalSummary, {
+    itineraryActions: itineraryActions.length,
+    route: Boolean(route),
+  });
   if (mutationError) {
     // Model claimed to add/remove but no tool call was made — return an error prompt
     return complete({

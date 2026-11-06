@@ -9,6 +9,12 @@ import type {
   RouteStop,
 } from "./types";
 
+/**
+ * Buffered `/ai/chat` istemci zaman aşımı (Increment 1.10, bug 6). Sunucu bütçesi ≈24,5 sn
+ * (intake 7,5 + üretim ≤18 sn) + alt ajanlar; lambda 30 sn. apiFetch varsayılanı 12 sn rota
+ * yanıtını rutin olarak kesiyordu (regresyon 0ef14b5).
+ */
+export const AI_CHAT_TIMEOUT_MS = 40000;
 export interface QuickReplyOption {
   label: string;
   prompt: string;

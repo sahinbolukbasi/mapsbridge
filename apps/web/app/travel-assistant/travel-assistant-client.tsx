@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { AuthGate } from "../components/auth-gate";
 import { openUpgradeModal } from "../components/upgrade-modal";
 import { getStoredSession, refreshSession, isTokenExpired } from "../lib/cognito";
-import { apiFetch } from "../lib/api-client";
+import { apiFetch, routesApi } from "../lib/api-client";
 import { userStorage } from "../lib/user-storage";
 import {
   isRoutePlan,
@@ -21,8 +21,14 @@ import {
   type TravelAdvisoryInfo,
 } from "../lib/ai/types";
 import type { TripContext } from "../lib/ai/planning";
-import { planText, shouldRecheckRequest, type ChatMessage } from "../lib/ai/chat";
+import {
+  AI_CHAT_TIMEOUT_MS,
+  planText,
+  shouldRecheckRequest,
+  type ChatMessage,
+} from "../lib/ai/chat";
 import { routeToTrip } from "../lib/trip/workspace-store";
+import { tripToRouteStops } from "../lib/trip/use-travel-planner";
 import { PLANNER_TRIPS_KEY, readPlannerStore, writePlannerStore } from "../lib/trip/planner-store";
 import { tripToMarkdown, saveTripMarkdown } from "../lib/trip/trip-markdown";
 import { DAY_COLORS, type Trip, type Pin, type PinCategory } from "../lib/trip/models";
@@ -738,6 +744,7 @@ export default function AIPage() {
           return (await apiFetch("/ai/chat", {
             method: "POST",
             body: JSON.stringify(request),
+            timeoutMs: AI_CHAT_TIMEOUT_MS,
           })) as typeof result;
         };
         const isBusinessError = (e: unknown) => {
@@ -758,6 +765,7 @@ export default function AIPage() {
         result = (await apiFetch("/ai/chat", {
           method: "POST",
           body: JSON.stringify(request),
+          timeoutMs: AI_CHAT_TIMEOUT_MS,
         })) as typeof result;
       }
       setTrainingConsent(false);
@@ -1044,8 +1052,37 @@ export default function AIPage() {
     setPanelOpen(true);
     setMobileTab("draft");
   }
-  function openMap() {
+  /**
+   * Haritada aç (bug 6). Girişli kullanıcıda rota önce sunucuya yazılır ve dönen kimlikle
+   * /maps/?tripId= açılır; böylece planlayıcının sunucu yüklemesi onu silmez. Hata ya da
+   * misafirde yerel "ai-…" yazımı kalır (planlayıcı birleştirmesi korur: assistantDraftsToKeep).
+   */
+  async function openMap() {
     if (!route) return;
+    if (getStoredSession()?.token) {
+      try {
+        const local = routeToTrip(route, `ai-${activeId}`);
+        const res = await routesApi.create({
+          name: local.title || route.title,
+          stops: tripToRouteStops(local),
+        });
+        if (res?.routeId) {
+          const trip = routeToTrip(route, res.routeId);
+          const raw = readPlannerStore(PLANNER_TRIPS_KEY);
+          const parsed: unknown = raw ? JSON.parse(raw) : [];
+          const trips = Array.isArray(parsed) ? (parsed as { id: string }[]) : [];
+          writePlannerStore(
+            PLANNER_TRIPS_KEY,
+            JSON.stringify([...trips.filter((x) => x.id !== trip.id), { ...trip, origin: "user" }]),
+          );
+          window.location.assign(`/maps/?tripId=${encodeURIComponent(res.routeId)}`);
+          return;
+        }
+      } catch (err) {
+        if (process.env.NODE_ENV !== "production")
+          console.warn("Rota sunucuya yazılamadı; cihazda açılıyor", err);
+      }
+    }
     try {
       const raw = readPlannerStore(PLANNER_TRIPS_KEY);
       const trips = raw ? JSON.parse(raw) : [];
@@ -2019,7 +2056,7 @@ export default function AIPage() {
                       variant="primary"
                       fullWidth
                       iconStart={<Icon name="map" size={16} />}
-                      onClick={openMap}
+                      onClick={() => void openMap()}
                     >
                       {t("studio.msg.openMap", "Haritada aç")}
                     </Button>

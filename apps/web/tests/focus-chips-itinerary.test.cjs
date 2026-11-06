@@ -339,3 +339,31 @@ describe("Confirmation messages", () => {
     assert.match(msg, /geri al/i);
   });
 });
+
+// Increment 1.10 (bug 6): rota üreten yanıtta "taşıdım/ekledim" anlatısı rotayı atmaz.
+describe("Mutation guard rota yanıtında devreye girmez", () => {
+  test("route + mutasyon iddialı özet → hata yok (rota korunur)", () => {
+    const err = itineraryActions.mutationGuardError("Durakları güne göre taşıdım ve sıraladım.", {
+      itineraryActions: 0,
+      route: true,
+    });
+    assert.equal(err, null);
+  });
+  test("route'suz chat + iddia + araç çağrısı yok → clarify hatası", () => {
+    const err = itineraryActions.mutationGuardError("Rotaya ekledim.", {
+      itineraryActions: 0,
+      route: false,
+    });
+    assert.ok(err && err.startsWith("MUTATION_CLAIM_WITHOUT_DB_WRITE"));
+  });
+  test("supervisor kapıyı route bilgisiyle çağırır", () => {
+    const src = require("node:fs").readFileSync(
+      require("node:path").resolve(__dirname, "../app/lib/ai/supervisor.ts"),
+      "utf8",
+    );
+    assert.match(
+      src,
+      /mutationGuardError\(finalSummary, \{\s*itineraryActions: itineraryActions\.length,\s*route: Boolean\(route\),/,
+    );
+  });
+});

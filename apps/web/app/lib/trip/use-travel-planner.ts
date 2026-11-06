@@ -28,7 +28,9 @@ import {
   PLANNER_GENERAL_PINS_KEY,
   PLANNER_TRIPS_KEY,
   currentPlannerOwner,
+  assistantDraftsToKeep,
   guestDraftsForTransfer,
+  isUnsyncedTripId,
   readPlannerStore,
   writePlannerStore,
   type TripOrigin,
@@ -83,7 +85,7 @@ function routeEntityToTrip(entity: RouteEntity): Trip {
   };
 }
 
-function tripToRouteStops(trip: Trip): RouteStop[] {
+export function tripToRouteStops(trip: Trip): RouteStop[] {
   return trip.pins.map((p) => ({
     id: p.id,
     name: p.label,
@@ -266,7 +268,11 @@ export function useTravelPlanner() {
           // (origin "guest"), sunucuya henüz yazılmamış ve durağı olan geziler korunur, sunucu
           // rotalarının yanına eklenir ve ilki etkinleşir; etkin gezi eşitlemesi onu hesaba
           // yazar. Başka bir hesabın taslağı asla aktarılmaz (planner-store).
-          const drafts = guestDraftsForTransfer(prevTripsRef.current);
+          // Asistandan aktarılıp sunucuya yazılamamış "ai-…" geziler de korunur (bug 6).
+          const drafts = [
+            ...guestDraftsForTransfer(prevTripsRef.current),
+            ...assistantDraftsToKeep(prevTripsRef.current),
+          ];
           const loadedTrips = res.routes.map(routeEntityToTrip);
           const next = [...loadedTrips, ...drafts];
           if (next.length > 0) {
@@ -299,7 +305,7 @@ export function useTravelPlanner() {
       if (!sameOwner()) return;
       try {
         const stops = tripToRouteStops(activeTrip);
-        if (activeTrip.id.startsWith("trip-")) {
+        if (isUnsyncedTripId(activeTrip.id)) {
           const res = await routesApi.create({
             name: activeTrip.title || "Yeni Rota",
             stops,

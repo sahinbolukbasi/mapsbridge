@@ -124,6 +124,18 @@ export function assertMutationConsistency(
   return null;
 }
 
+/**
+ * Supervisor tutarlılık kapısı (Increment 1.10, bug 6). Rota üreten yanıtta rota kendisi
+ * yazılan değişikliktir: "ekledim/taşıdım" anlatısı rotayı ATMAZ. Kapı yalnız rota üretmeyen
+ * (chat/clarify) yanıtlarda, iddia edilen değişiklik için araç çağrısı yoksa devreye girer.
+ */
+export function mutationGuardError(
+  assistantText: string,
+  applied: { itineraryActions: number; route: boolean },
+): string | null {
+  if (applied.route) return null;
+  return assertMutationConsistency(assistantText, applied.itineraryActions > 0);
+}
 // ---------------------------------------------------------------------------
 // Confirmation messages
 // ---------------------------------------------------------------------------
