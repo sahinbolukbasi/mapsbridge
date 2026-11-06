@@ -40,7 +40,6 @@ import { exportTripToGoogleMaps } from "../../features/trip-planner/google-maps-
 import { dayTimeline, legKey } from "../../lib/trip/planner-logic";
 import { useLocale } from "../../lib/locale-context";
 import {
-  Accordion,
   Alert,
   Badge,
   Button,
