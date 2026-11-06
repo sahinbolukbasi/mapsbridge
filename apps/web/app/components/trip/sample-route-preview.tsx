@@ -1,6 +1,6 @@
 "use client";
-import { Fragment } from "react";
-import { Badge } from "../ui";
+import { Fragment, type CSSProperties } from "react";
+import { Badge, Icon } from "../ui";
 import { useLocale } from "../../lib/locale-context";
 import { Connector } from "./connector";
 import { DayHeader } from "./day-header";
@@ -58,6 +58,108 @@ const MINOR = [
   ...Array.from({ length: 12 }, (_, i) => `M${30 + i * 76} -20 L${60 + i * 72} 620`),
 ];
 
+/** Statik örnek harita (Leaflet yok); pin'ler dekoratif, harita role="img" ile adlandırılır. */
+function SampleMap({ label }: { label: string }) {
+  return (
+    <svg
+      className="trip-sample__svg"
+      viewBox="100 170 560 360"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      aria-label={label}
+    >
+      <rect className="trip-map__land" x="-40" y="-20" width="880" height="640" />
+      {MINOR.map((d) => (
+        <path key={d} className="trip-map__minor" d={d} strokeWidth="3" fill="none" />
+      ))}
+      <path
+        className="trip-map__park"
+        d="M640 420 c60 -20 140 0 150 60 c10 60 -60 110 -140 90 c-70 -18 -80 -130 -10 -150Z"
+      />
+      <path
+        className="trip-map__park"
+        d="M90 90 h150 a20 20 0 0 1 20 20 v70 a20 20 0 0 1 -20 20 h-150 a20 20 0 0 1 -20 -20 v-70 a20 20 0 0 1 20 -20Z"
+      />
+      <path
+        className="trip-map__water"
+        d="M110 -20 C 170 120 80 230 150 340 S 250 520 190 640"
+        strokeWidth="40"
+        fill="none"
+        strokeLinecap="round"
+      />
+      {ROADS.map((d) => (
+        <Fragment key={d}>
+          <path
+            className="trip-map__road-case"
+            d={d}
+            strokeWidth="14"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <path
+            className="trip-map__road"
+            d={d}
+            strokeWidth="9"
+            fill="none"
+            strokeLinecap="round"
+          />
+        </Fragment>
+      ))}
+      <path
+        className="trip-map__route-casing"
+        d={ROUTE_D}
+        strokeWidth="10"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        className="trip-map__route trip-day-color"
+        data-day="1"
+        d={ROUTE_D}
+        pathLength={1}
+        strokeWidth="5"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {PINS.map(([x, y], i) => {
+        const selected = i === 1;
+        return (
+          <g key={`${x}-${y}`} className="trip-map__pin" aria-hidden="true">
+            {selected && (
+              <circle
+                className="trip-map__pin-halo trip-day-color"
+                data-day="1"
+                cx={x}
+                cy={y}
+                r="30"
+              />
+            )}
+            <circle
+              className="trip-map__pin-dot trip-day-color"
+              data-day="1"
+              cx={x}
+              cy={y}
+              r={selected ? 19 : 15}
+              strokeWidth="3"
+            />
+            <text
+              className="trip-map__pin-num"
+              x={x}
+              y={y + 5}
+              textAnchor="middle"
+              fontSize={selected ? 15 : 13}
+            >
+              {i + 1}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 export function SampleRoutePreview() {
   const { t } = useLocale();
   const totalMinutes =
@@ -96,105 +198,68 @@ export function SampleRoutePreview() {
           </ol>
         </div>
         <div className="trip-sample__map">
-          <svg
-            className="trip-sample__svg"
-            viewBox="100 170 560 360"
-            preserveAspectRatio="xMidYMid slice"
-            role="img"
-            aria-label={t("home.sample.mapLabel")}
-          >
-            <rect className="trip-map__land" x="-40" y="-20" width="880" height="640" />
-            {MINOR.map((d) => (
-              <path key={d} className="trip-map__minor" d={d} strokeWidth="3" fill="none" />
-            ))}
-            <path
-              className="trip-map__park"
-              d="M640 420 c60 -20 140 0 150 60 c10 60 -60 110 -140 90 c-70 -18 -80 -130 -10 -150Z"
-            />
-            <path
-              className="trip-map__park"
-              d="M90 90 h150 a20 20 0 0 1 20 20 v70 a20 20 0 0 1 -20 20 h-150 a20 20 0 0 1 -20 -20 v-70 a20 20 0 0 1 20 -20Z"
-            />
-            <path
-              className="trip-map__water"
-              d="M110 -20 C 170 120 80 230 150 340 S 250 520 190 640"
-              strokeWidth="40"
-              fill="none"
-              strokeLinecap="round"
-            />
-            {ROADS.map((d) => (
-              <Fragment key={d}>
-                <path
-                  className="trip-map__road-case"
-                  d={d}
-                  strokeWidth="14"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                <path
-                  className="trip-map__road"
-                  d={d}
-                  strokeWidth="9"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-              </Fragment>
-            ))}
-            <path
-              className="trip-map__route-casing"
-              d={ROUTE_D}
-              strokeWidth="10"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              className="trip-map__route trip-day-color"
-              data-day="1"
-              d={ROUTE_D}
-              pathLength={1}
-              strokeWidth="5"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {PINS.map(([x, y], i) => {
-              const selected = i === 1;
-              return (
-                <g key={`${x}-${y}`} className="trip-map__pin" aria-hidden="true">
-                  {selected && (
-                    <circle
-                      className="trip-map__pin-halo trip-day-color"
-                      data-day="1"
-                      cx={x}
-                      cy={y}
-                      r="30"
-                    />
-                  )}
-                  <circle
-                    className="trip-map__pin-dot trip-day-color"
-                    data-day="1"
-                    cx={x}
-                    cy={y}
-                    r={selected ? 19 : 15}
-                    strokeWidth="3"
-                  />
-                  <text
-                    className="trip-map__pin-num"
-                    x={x}
-                    y={y + 5}
-                    textAnchor="middle"
-                    fontSize={selected ? 15 : 13}
-                  >
-                    {i + 1}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+          <SampleMap label={t("home.sample.mapLabel")} />
         </div>
       </div>
       <figcaption className="trip-sample__note">
+        <Badge tone="example">{t("home.hero.productNote")}</Badge>
+      </figcaption>
+    </figure>
+  );
+}
+
+const PACE_KEYS = [
+  "home.sample.pace.calm",
+  "home.sample.pace.balanced",
+  "home.sample.pace.busy",
+] as const;
+
+/**
+ * Hero sahnesi (direction home.html, Increment 3.1): fotoğraf + örnek harita kartı + yüzen
+ * durak ve soru kartları. Tüm veri örnektir ve "Örnek görünüm" rozetiyle işaretlidir (I1).
+ * Hareket (eğik giriş, pin düşmesi, rota çizimi, yavaş salınım) yalnız no-preference'ta.
+ */
+export function SampleRouteStage({ photoSrc, photoAlt }: { photoSrc: string; photoAlt: string }) {
+  const { t } = useLocale();
+  const stop = SAMPLE_STOPS[1];
+  const i = (n: number) => ({ "--i": n }) as CSSProperties;
+  return (
+    <figure className="trip-stage">
+      <div className="trip-stage__photo">
+        <img src={photoSrc} alt={photoAlt} className="trip-stage__img" />
+        <span className="trip-stage__caption" data-surface="inverse">
+          {t("home.hero.photoCaption")}
+        </span>
+      </div>
+      <div className="trip-stage__map" data-enter="scale" style={i(2)}>
+        <SampleMap label={t("home.sample.mapLabel")} />
+      </div>
+      <div className="trip-stage__float trip-stage__float--stop" style={i(4)}>
+        <StopRow
+          index={2}
+          day={1}
+          time={stop.time}
+          name={t(stop.nameKey)}
+          category={stop.category}
+          categoryLabel={t(stop.categoryKey)}
+          duration={stop.duration}
+          selected
+        />
+      </div>
+      <div className="trip-stage__float trip-stage__float--ask" style={i(6)}>
+        <p className="trip-stage__ask">
+          <Icon name="sparkle" size={16} />
+          {t("home.sample.ask")}
+        </p>
+        <ul className="trip-stage__opts" aria-label={t("home.sample.ask")}>
+          {PACE_KEYS.map((key, n) => (
+            <li key={key} className="trip-stage__opt" data-on={n === 1 ? "" : undefined}>
+              {t(key)}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <figcaption className="trip-stage__note">
         <Badge tone="example">{t("home.hero.productNote")}</Badge>
       </figcaption>
     </figure>

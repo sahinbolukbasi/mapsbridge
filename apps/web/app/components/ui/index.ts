@@ -50,5 +50,6 @@ export { VisuallyHidden } from "./visually-hidden";
 export { toUiError, APIFETCH_MESSAGES, type UiError, type UiErrorKind } from "./logic/http-error";
 export { toggleChoice, type ChoiceMode } from "./logic/choice";
 export { useReveal } from "./hooks/use-reveal";
+export { Reveal, revealItem, enterItem } from "./reveal";
 export { useRipple } from "./hooks/use-ripple";
 export { clampProgress, stepState, type StepState } from "./logic/progress";

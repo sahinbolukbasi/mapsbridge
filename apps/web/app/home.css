@@ -1,21 +1,61 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
-  /* Ana sayfa (design §10, mock b-home.html, Yön B · Kartograf). Yalnızca token; primitive
-     sınıfları ezilmez, yerleşim bu dosyadaki home-* sınıflarıyla verilir. */
+  /* Ana sayfa (Increment 3.1, direction/mocks/home.html). Yalnızca token; primitive sınıfları
+     ezilmez. Hareket yalnız no-preference altında, varsayılan statik son durumdur (R9/G29). */
   .home {
     padding-block-end: var(--space-8);
   }
 
-  /* Hero: tek sütun; ≥1024 metin + ürün kanıtı yan yana (mock "split"). */
+  /* Hero: kenardan kenara bant (kontur + ışık lekeleri), içerik 1200. */
   .home-hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding-block: var(--space-4) var(--space-16);
+    background:
+      radial-gradient(
+        60% 70% at 100% 0%,
+        color-mix(in srgb, var(--color-highlight-bg-strong) 70%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        50% 60% at 0% 100%,
+        color-mix(in srgb, var(--color-surface-brand-strong) 70%, transparent),
+        transparent 70%
+      ),
+      var(--color-bg);
+  }
+  .home-hero__contours,
+  .home-band__contours {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    color: var(--color-brand);
+    opacity: 0.12;
+    pointer-events: none;
+  }
+  .home-band__contours {
+    color: var(--color-accent-strong);
+    opacity: 0.1;
+  }
+  :is(.home-hero__contours, .home-band__contours) path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+  }
+  .home-hero__grid {
+    position: relative;
     display: grid;
-    gap: var(--space-6);
+    gap: var(--space-10);
+    align-items: center;
     box-sizing: border-box;
     max-inline-size: var(--container-max);
     margin-inline: auto;
     padding-inline: var(--page-gutter);
   }
-  .home-hero__copy {
+  .home-hero__copy,
+  .home-hero__proof {
     min-inline-size: 0;
   }
   .home-hero__resume {
@@ -44,18 +84,38 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* HeroPrompt + ShareCodeForm */
+  /* HeroPrompt: yüzen composer kabı (gölge + odakta marka halkası). */
   .home-prompt {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-2);
     margin-block-start: var(--space-2);
   }
   .home-prompt__form {
     display: grid;
     gap: var(--space-3);
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+    transition:
+      border-color var(--duration-fast) var(--easing-standard),
+      box-shadow var(--duration-base) var(--easing-standard);
+  }
+  .home-prompt__form:focus-within {
+    border-color: var(--color-brand);
+    box-shadow: var(--shadow-lg);
+    outline: 6px solid var(--color-accent-a10);
   }
   .home-prompt__submit {
     inline-size: 100%;
+  }
+  .home-prompt__hint {
+    min-block-size: 1.5em;
+    margin: 0;
+    color: var(--color-highlight-text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
   }
   .home-code {
     display: grid;
@@ -101,7 +161,7 @@
   .home-section {
     box-sizing: border-box;
     max-inline-size: var(--container-max);
-    margin: 0 auto;
+    margin: var(--space-10) auto 0;
     padding-inline: var(--page-gutter);
   }
   /* SSS ve son CTA da 1200 içinde (R11 landing); dar metin kartın içinde ortalanır. */
@@ -117,24 +177,36 @@
     margin-inline: auto;
     text-align: start;
   }
-  /* Tam genişlik koyu bant; içindeki Section kap genişliğinde kalır. */
   .home-band {
-    margin-block-start: var(--space-4);
-    padding-block: var(--space-2);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    margin-block-start: var(--space-10);
+    padding-block: var(--space-6);
     background: var(--color-surface-inverse);
     color: var(--color-text);
   }
   .home-band > .home-section {
+    position: relative;
     margin-block-start: 0;
   }
   .home-eyebrow {
     order: -1;
+    justify-self: start;
+    inline-size: fit-content;
     margin: 0 0 calc(var(--space-2) * -1);
-    color: var(--color-highlight-text);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-brand);
+    color: var(--color-on-surface-brand);
     font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-bold);
     letter-spacing: var(--letter-spacing-caps);
     text-transform: uppercase;
+  }
+  .home-eyebrow--clay {
+    background: var(--color-highlight-bg);
+    color: var(--color-highlight-text);
   }
   .home-section__more {
     display: flex;
@@ -150,116 +222,341 @@
     color: var(--color-text-muted);
   }
 
-  /* #nasil-calisir */
-  .home-steps,
-  .home-features,
-  .home-points {
+  /* #nasil-calisir: numaralı adımlar, kesikli bağlantı çizgisi, mini örnekler. */
+  .home-how {
+    position: relative;
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-5);
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  .home-steps__inner {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-1) var(--space-4);
-    align-content: start;
+  .home-how__line {
+    display: none;
   }
-  .home-steps__num {
-    grid-row: span 2;
-    color: var(--color-highlight-text);
+  .home-how__item {
+    position: relative;
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    padding: var(--space-6);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-xs);
+  }
+  .home-how__num {
+    display: grid;
+    place-items: center;
+    inline-size: 56px;
+    block-size: 56px;
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
     font-family: var(--font-family-display);
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-xl);
     font-weight: var(--font-weight-extrabold);
-    line-height: var(--line-height-tight);
-    font-variant-numeric: tabular-nums;
+    outline: 6px solid var(--color-bg);
+  }
+  .home-how__mini {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: 64px;
+    margin-block-start: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+  }
+  .home-how__bubble {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-xs);
+    background: var(--color-surface);
+  }
+  .home-how__chip {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--chip-border);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+  }
+  .home-how__chip[data-on] {
+    border-color: transparent;
+    background: var(--chip-selected-bg);
+    color: var(--chip-selected-fg);
   }
 
-  /* #ozellikler */
-  .home-features__inner {
-    display: flex;
-    align-items: flex-start;
+  /* #baslangic: destinasyon fotoğraf kartları (yalnız asistana hazır cümle). */
+  .home-dest {
+    display: grid;
     gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
-  .home-features__icon {
-    display: inline-grid;
-    flex: none;
+  .home-dest__item {
+    display: grid;
+  }
+  .home-dest__card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-xl);
+    background: var(--color-surface-sunken);
+    box-shadow: var(--shadow-md);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: box-shadow var(--duration-base) var(--easing-standard);
+  }
+  .home-dest__card:hover {
+    box-shadow: var(--shadow-xl);
+  }
+  .home-dest__card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 40%,
+      color-mix(in srgb, var(--color-surface-inverse-strong) 80%, transparent)
+    );
+  }
+  .home-dest__img,
+  .home-dest__art {
+    position: absolute;
+    inset: 0;
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .home-dest__cap {
+    position: absolute;
+    z-index: var(--z-raised);
+    inset-inline: var(--space-5);
+    inset-block-end: var(--space-5);
+    display: grid;
+    gap: var(--space-2);
+  }
+  .home-dest__name {
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-extrabold);
+  }
+  .home-dest__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .home-art__land {
+    fill: var(--color-surface-sunken);
+  }
+  .home-art__water {
+    fill: color-mix(in srgb, var(--color-accent-sky) 18%, var(--color-surface));
+  }
+  .home-art__park {
+    fill: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+  }
+  .home-art__road-case {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 12;
+    stroke-linecap: round;
+  }
+  .home-art__road {
+    fill: none;
+    stroke: var(--color-surface);
+    stroke-width: 9;
+    stroke-linecap: round;
+  }
+  .home-art__route-case {
+    fill: none;
+    stroke: var(--color-map-route-casing);
+    stroke-width: 9;
+    stroke-linecap: round;
+  }
+  .home-art__route {
+    fill: none;
+    stroke: var(--color-map-route);
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+  .home-art__stop {
+    fill: var(--color-map-route);
+    stroke: var(--color-map-route-casing);
+    stroke-width: 3;
+  }
+
+  /* #ozellikler: bento (büyük koyu planlayıcı karosu + bağlantılı kartlar). */
+  .home-bento {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .home-bento__big,
+  .home-bento__item {
+    position: relative;
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    padding: var(--space-6);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-xs);
+    transition:
+      box-shadow var(--duration-base) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard);
+  }
+  .home-bento__big {
+    overflow: hidden;
+    min-block-size: 320px;
+    border-color: transparent;
+    background: var(--color-primary);
+    color: var(--color-text);
+  }
+  .home-bento__item:hover,
+  .home-bento__item:focus-within,
+  .home-bento__big:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 35%, var(--card-border));
+    box-shadow: var(--shadow-lg);
+  }
+  /* Kartın tamamı tek bağlantı; başlık bağlantısı kartı kaplar. */
+  .home-bento__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .home-bento__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .home-bento__icon {
+    display: grid;
     place-items: center;
     inline-size: var(--touch-target);
     block-size: var(--touch-target);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     background: var(--color-highlight-bg);
     color: var(--color-highlight-text);
   }
-  .home-features__text {
+  .home-bento__icon--inverse {
+    background: var(--color-white-a12);
+    color: var(--color-text);
+  }
+  .home-bento__body {
+    max-inline-size: 40ch;
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+  .home-bento__days {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--space-2);
+    margin-block-start: auto;
+    font-size: var(--font-size-sm);
   }
-
-  /* #bagimsizlik (data-surface="inverse", Section surface) */
-  .home-points {
-    gap: var(--space-4);
-  }
-  .home-points__item {
+  .home-bento__day {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--space-3);
   }
+  .home-bento__bar {
+    display: block;
+    inline-size: 70%;
+    block-size: 10px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent-strong);
+    transform-origin: left;
+  }
+  .home-bento__day[data-day="2"] .home-bento__bar {
+    inline-size: 55%;
+    background: var(--color-text-inverse-highlight);
+  }
+  .home-bento__day[data-day="3"] .home-bento__bar {
+    inline-size: 62%;
+    background: var(--color-accent-sky-soft);
+  }
+
+  /* #bagimsizlik (data-surface="inverse"): ilke karoları. */
+  .home-points {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .home-points__item {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    padding: var(--space-6);
+    border: 1px solid var(--color-white-a12);
+    border-radius: var(--radius-xl);
+    background: var(--color-white-a08);
+  }
   .home-points__icon {
-    color: var(--color-text-inverse-highlight);
+    color: var(--color-accent-strong);
   }
   .home-points__body {
     margin: var(--space-1) 0 0;
     color: var(--color-text-muted);
   }
 
-  /* #krediler */
+  /* #krediler / #paylasim */
   .home-credits {
     display: grid;
     gap: var(--space-4);
     max-inline-size: var(--content-reading);
   }
+  .home-share-card,
+  .home-final-card {
+    display: grid;
+  }
 
   @media (min-width: 768px) {
-    .home-steps {
+    .home-how {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--space-5);
     }
-    .home-steps__inner {
-      grid-template-columns: minmax(0, 1fr);
+    .home-how__line {
+      display: block;
+      position: absolute;
+      inset-inline: 8%;
+      inset-block-start: 52px;
+      inline-size: 84%;
+      block-size: 4px;
+      overflow: visible;
     }
-    .home-steps__num {
-      grid-row: auto;
-      font-size: var(--font-size-4xl);
+    .home-how__line path {
+      fill: none;
+      stroke: var(--color-highlight);
+      stroke-width: 3;
+      stroke-dasharray: 0.02 0.03;
+      vector-effect: non-scaling-stroke;
     }
-    .home-features {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--space-5);
+    .home-dest {
+      grid-template-columns: 1.3fr 1fr 1fr;
     }
-    .home-features__inner {
-      flex-direction: column;
+    .home-dest__item:first-child .home-dest__card {
+      aspect-ratio: auto;
+      block-size: 100%;
     }
-    .home-points__item {
-      padding: var(--space-4);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
+    .home-bento {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-    .home-section {
-      margin-block-start: var(--space-12);
+    .home-bento__big {
+      grid-column: span 2;
+      grid-row: span 2;
     }
-    .home-band {
-      margin-block-start: var(--space-12);
-      padding-block: var(--space-6);
-    }
-  }
-  @media (min-width: 1024px) {
-    .home-hero {
-      grid-template-columns: minmax(0, 42fr) minmax(0, 58fr);
-      gap: var(--space-10);
-      align-items: center;
-    }
-    .home-features {
+    .home-points {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
     .home-section {
@@ -269,7 +566,15 @@
       margin-block-start: var(--space-16);
       padding-block: var(--space-12);
     }
-    .home-section--band,
+  }
+  @media (min-width: 1024px) {
+    .home-hero {
+      padding-block: var(--space-6) var(--space-20);
+    }
+    .home-hero__grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: var(--space-12);
+    }
     .home-section--split {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       column-gap: var(--space-12);
@@ -277,34 +582,77 @@
     }
   }
 
-  /* Kaydırma ile belirme (design §8.2): yalnızca hareket tercihinde ve use-reveal
-     data-reveal yazdıysa; JS'siz ve azaltılmış harekette içerik baştan görünür. */
+  /* Hareket (yalnız no-preference). */
   @media (prefers-reduced-motion: no-preference) {
-    .home-reveal[data-reveal],
-    .home-reveal[data-reveal] :is(.home-steps, .home-features, .home-points) > * {
+    /* Kontur dokusu çok yavaş kayar: dekoratif sonsuz döngü ≥ route × 6 (R15/G32). */
+    :is(.home-hero__contours, .home-band__contours) path {
+      animation: home-contour calc(var(--duration-route) * 40) var(--easing-linear) infinite
+        alternate;
+    }
+    /* Bağlantı çizgisi kademe açılınca soldan çizilir. */
+    .home-how[data-reveal="pending"] .home-how__line {
+      clip-path: inset(0 100% 0 0);
+    }
+    .home-how[data-reveal="shown"] .home-how__line {
+      clip-path: inset(0 0 0 0);
+      transition: clip-path calc(var(--duration-route) * 1.2) var(--easing-emphasized)
+        var(--duration-slow);
+    }
+    .home-how__num {
+      transition: transform var(--duration-base) var(--easing-emphasized);
+    }
+    .home-how__item:hover .home-how__num {
+      transform: scale(1.08) rotate(-6deg);
+    }
+    /* Fotoğraf kartı: görsel 1,06 yakınlaşır, ok 4 px kayar. */
+    .home-dest__img,
+    .home-dest__art {
+      transition: transform calc(var(--duration-route) * 0.8) var(--easing-emphasized);
+    }
+    .home-dest__card:is(:hover, :focus-visible) :is(.home-dest__img, .home-dest__art) {
+      transform: scale(1.06);
+    }
+    .home-dest__arrow {
+      transition: transform var(--duration-base) var(--easing-emphasized);
+    }
+    .home-dest__card:is(:hover, :focus-visible) .home-dest__arrow {
+      transform: translateX(var(--motion-distance-sm));
+    }
+    /* Bento kartı 4 px kalkar; ikon döner; gün çubukları açılınca dolar. */
+    .home-bento__item,
+    .home-bento__big {
       transition:
-        opacity var(--duration-slow) var(--easing-enter),
-        transform var(--duration-slow) var(--easing-enter);
+        transform var(--duration-base) var(--easing-standard),
+        box-shadow var(--duration-base) var(--easing-standard),
+        border-color var(--duration-fast) var(--easing-standard);
     }
-    .home-reveal[data-reveal="pending"],
-    .home-reveal[data-reveal="pending"] :is(.home-steps, .home-features, .home-points) > * {
-      opacity: 0;
-      transform: translateY(var(--motion-distance-md));
+    .home-bento__item:hover,
+    .home-bento__big:hover {
+      transform: translateY(-4px);
     }
-    .home-reveal[data-reveal] :is(.home-steps, .home-features, .home-points) > :nth-child(2) {
-      transition-delay: var(--stagger-step);
+    .home-bento__icon {
+      transition: transform var(--duration-slow) var(--easing-emphasized);
     }
-    .home-reveal[data-reveal] :is(.home-steps, .home-features, .home-points) > :nth-child(3) {
-      transition-delay: calc(var(--stagger-step) * 2);
+    .home-bento__item:hover .home-bento__icon {
+      transform: rotate(-8deg) scale(1.08);
     }
-    .home-reveal[data-reveal] :is(.home-steps, .home-features, .home-points) > :nth-child(4) {
-      transition-delay: calc(var(--stagger-step) * 3);
+    .home-bento[data-reveal="pending"] .home-bento__bar {
+      transform: scaleX(0);
     }
-    .home-reveal[data-reveal] :is(.home-steps, .home-features, .home-points) > :nth-child(5) {
-      transition-delay: calc(var(--stagger-step) * 4);
+    .home-bento[data-reveal="shown"] .home-bento__bar {
+      transition: transform calc(var(--duration-route) * 1.2) var(--easing-emphasized)
+        var(--duration-deliberate);
     }
-    .home-reveal[data-reveal] :is(.home-steps, .home-features, .home-points) > :nth-child(6) {
-      transition-delay: min(calc(var(--stagger-step) * 5), var(--stagger-max));
+    .home-bento__day[data-day="2"] .home-bento__bar {
+      transition-delay: calc(var(--duration-deliberate) + var(--stagger-step) * 3);
+    }
+    .home-bento__day[data-day="3"] .home-bento__bar {
+      transition-delay: calc(var(--duration-deliberate) + var(--stagger-step) * 6);
+    }
+    @keyframes home-contour {
+      to {
+        transform: translate(-40px, 12px);
+      }
     }
   }
 }

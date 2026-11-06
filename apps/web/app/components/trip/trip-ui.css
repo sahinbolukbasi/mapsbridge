@@ -217,6 +217,187 @@
     font-weight: var(--font-weight-bold);
   }
 
+  /* Hero sahnesi (SampleRouteStage, direction home.html): eğik fotoğraf + harita kartı + yüzen
+     kartlar. Konumlar sahneye görelidir; <640'ta soru kartı gizlenir. */
+  .trip-stage {
+    position: relative;
+    min-block-size: 440px;
+    margin: 0 0 var(--space-10);
+  }
+  .trip-stage__photo {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    inline-size: 62%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    rotate: 3deg;
+  }
+  .trip-stage__img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .trip-stage__caption {
+    position: absolute;
+    inset-inline-start: var(--space-3);
+    inset-block-end: var(--space-3);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-surface-inverse) 60%, transparent);
+    backdrop-filter: blur(8px);
+    color: var(--color-text);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+  .trip-stage__map {
+    position: absolute;
+    inset-block-start: 12%;
+    inset-inline-start: 0;
+    inline-size: 78%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xl);
+  }
+  .trip-stage__float {
+    position: absolute;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+    font-size: var(--font-size-sm);
+  }
+  .trip-stage__float--stop {
+    inset-inline-start: 40%;
+    inset-block-end: 4%;
+    min-inline-size: 240px;
+  }
+  .trip-stage__float--ask {
+    display: grid;
+    gap: var(--space-2);
+    inset-inline-start: -2%;
+    inset-block-end: -4%;
+    max-inline-size: 270px;
+    padding: var(--space-3) var(--space-4);
+  }
+  .trip-stage__ask {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-weight: var(--font-weight-semibold);
+  }
+  .trip-stage__opts {
+    display: flex;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .trip-stage__opt {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--chip-border);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+  }
+  .trip-stage__opt[data-on] {
+    border-color: transparent;
+    background: var(--chip-selected-bg);
+    color: var(--chip-selected-fg);
+  }
+  .trip-stage__note {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-end: calc(var(--space-10) * -1);
+    display: flex;
+  }
+  @media (max-width: 639.98px) {
+    .trip-stage {
+      min-block-size: 360px;
+    }
+    .trip-stage__float--ask {
+      display: none;
+    }
+    .trip-stage__float--stop {
+      inset-inline-start: 18%;
+      min-inline-size: 0;
+      inset-inline-end: 0;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .trip-stage__photo {
+      animation: trip-tilt-in var(--duration-route) var(--easing-enter) both;
+    }
+    /* Yavaş salınım: dekoratif sonsuz döngü ≥ route × 6 (R15/G32). */
+    .trip-stage__float {
+      animation:
+        trip-rise var(--duration-deliberate) var(--easing-enter) both,
+        trip-float-y calc(var(--duration-route) * 6) var(--easing-standard)
+          calc(var(--duration-route) * 2) infinite alternate;
+      animation-delay:
+        calc(var(--i, 0) * var(--stagger-step) * 2),
+        calc(var(--duration-route) * 2 + var(--i, 0) * var(--stagger-step) * 2);
+    }
+    /* Pin'ler sırayla düşer. */
+    .trip-stage .trip-map__pin {
+      animation-name: trip-pin-drop;
+      animation-duration: var(--duration-deliberate);
+      animation-timing-function: var(--easing-emphasized);
+    }
+    .trip-stage .trip-map__pin:nth-of-type(1) {
+      animation-delay: calc(var(--duration-route) * 0.6);
+    }
+    .trip-stage .trip-map__pin:nth-of-type(2) {
+      animation-delay: calc(var(--duration-route) * 0.6 + var(--stagger-step) * 3);
+    }
+    .trip-stage .trip-map__pin:nth-of-type(3) {
+      animation-delay: calc(var(--duration-route) * 0.6 + var(--stagger-step) * 6);
+    }
+    .trip-stage .trip-map__route {
+      animation-delay: calc(var(--duration-route) * 0.8);
+      animation-duration: calc(var(--duration-route) * 1.2);
+    }
+    @keyframes trip-tilt-in {
+      from {
+        opacity: 0;
+        rotate: 8deg;
+        transform: translateY(var(--motion-distance-lg));
+      }
+    }
+    @keyframes trip-rise {
+      from {
+        opacity: 0;
+        transform: translateY(var(--motion-distance-lg));
+      }
+    }
+    @keyframes trip-float-y {
+      to {
+        transform: translateY(calc(var(--motion-distance-md) * -1));
+      }
+    }
+    @keyframes trip-pin-drop {
+      0% {
+        opacity: 0;
+        transform: translateY(-40px);
+      }
+      70% {
+        opacity: 1;
+        transform: translateY(4px);
+      }
+      100% {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
+
   /* Rota açılması (design §8.2): yalnızca hareket tercihinde; varsayılan tam çizili. */
   @media (prefers-reduced-motion: no-preference) {
     .trip-map__route {

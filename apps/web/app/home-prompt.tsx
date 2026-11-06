@@ -39,46 +39,74 @@ export function HeroPrompt({
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [codeOpen, setCodeOpen] = useState(false);
+  const [hint, setHint] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const trimmed = query.trim();
 
+  // Birincil CTA her zaman tam renkli ve etkin (direction §4); boş gönderimde kap sallanır,
+  // ipucu duyurulur ve odak alana döner. Sallanma yalnız no-preference (ui.css .ui-shake).
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (!trimmed) return;
+    if (!trimmed) {
+      setHint(t("home.hero.emptyHint"));
+      const form = formRef.current;
+      if (form) {
+        form.classList.remove("ui-shake");
+        void form.offsetWidth;
+        form.classList.add("ui-shake");
+      }
+      inputRef.current?.focus();
+      return;
+    }
+    setHint("");
     router.push(`/travel-assistant/?q=${encodeURIComponent(trimmed.slice(0, PROMPT_MAX_LENGTH))}`);
   }
 
   return (
     <div className="home-prompt">
-      <form className="home-prompt__form" onSubmit={submit}>
+      <form
+        ref={formRef}
+        className="home-prompt__form"
+        onSubmit={submit}
+        onAnimationEnd={(e) => e.currentTarget.classList.remove("ui-shake")}
+      >
         <Field
           id={`${idPrefix}-q`}
           label={t("home.hero.inputLabel")}
           className="home-prompt__field"
         >
-          <Input
-            ref={inputRef}
-            id={`${idPrefix}-q`}
-            size="lg"
-            value={query}
-            maxLength={PROMPT_MAX_LENGTH}
-            placeholder={t("home.hero.inputPlaceholder")}
-            autoComplete="off"
-            enterKeyHint="go"
-            onChange={(e) => setQuery(e.target.value)}
-          />
+          {(ids) => (
+            <Input
+              {...ids}
+              ref={inputRef}
+              size="lg"
+              value={query}
+              maxLength={PROMPT_MAX_LENGTH}
+              placeholder={t("home.hero.inputPlaceholder")}
+              autoComplete="off"
+              enterKeyHint="go"
+              aria-describedby={`${idPrefix}-hint`}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                if (hint) setHint("");
+              }}
+            />
+          )}
         </Field>
         <Button
           type="submit"
           size="lg"
           variant={submitVariant}
-          disabled={!trimmed}
           className="home-prompt__submit"
           iconEnd={<Icon name="arrow" size={20} />}
         >
           {t("home.hero.submit")}
         </Button>
       </form>
+      <p id={`${idPrefix}-hint`} className="home-prompt__hint" aria-live="polite">
+        {hint}
+      </p>
       {withChips && (
         <>
           <ChipGroup

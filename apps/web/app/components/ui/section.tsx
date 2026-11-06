@@ -12,9 +12,12 @@ export function Section({
   actions,
   id,
   surface = "default",
+  size = "default",
   className,
   children,
 }: {
+  /** "display": vitrin bölümleri için büyük başlık + geniş açıklama (direction home.html). */
+  size?: "default" | "display";
   title?: string;
   level?: 2 | 3;
   description?: ReactNode;
@@ -30,7 +33,12 @@ export function Section({
   return (
     <section
       id={id}
-      className={cx("ui-section", surface !== "default" && `ui-section--${surface}`, className)}
+      className={cx(
+        "ui-section",
+        surface !== "default" && `ui-section--${surface}`,
+        size === "display" && "ui-section--display",
+        className,
+      )}
       aria-labelledby={title ? headingId : undefined}
       data-surface={surface === "inverse" ? "inverse" : undefined}
     >
