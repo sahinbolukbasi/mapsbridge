@@ -1,7 +1,8 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
   /* ── Rota planlayıcı AppSplit (design §4.3, FEAT-007) ──────────────────────────────────
-     ≥1024: liste %40 | harita %60. 768–1023: harita üstte %45, liste altta.
+     ≥1024: liste clamp(16rem, 20vw, 24rem) | harita kalan alan (bug 2: panel eski %40'ın yarısı;
+     1280'de 256 px, 1920'de 384 px). 768–1023: harita üstte %45, liste altta.
      <768: tam ekran harita + BottomSheet (peek/half/full); harita alanı peek kadar kısalır ki
      atıf ve kontroller sayfanın altında görünür kalsın. */
   /* PageShell kökü (primitives layer display/min-block-size'ı belirler); yükseklik bölmede. */
@@ -45,7 +46,7 @@
   @media (min-width: 1024px) {
     .planner__split {
       grid-template-rows: minmax(0, 1fr);
-      grid-template-columns: 40% 60%;
+      grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr);
     }
     .planner__map {
       order: 0;
