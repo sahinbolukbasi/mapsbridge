@@ -118,13 +118,13 @@
 .leaflet-popup.planner-popup .leaflet-popup-close-button:hover {
   color: var(--color-text);
 }
-.planner-popup .planner-popup__inner {
+.leaflet-popup.planner-popup .planner-popup__inner {
   display: grid;
   gap: var(--space-1);
   padding-inline-end: var(--space-6);
 }
-.planner-popup .planner-popup__category,
-.planner-popup .planner-popup__visited {
+.leaflet-popup.planner-popup .planner-popup__category,
+.leaflet-popup.planner-popup .planner-popup__visited {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -134,19 +134,19 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
 }
-.planner-popup .planner-popup__day {
+.leaflet-popup.planner-popup .planner-popup__day {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   margin-inline-start: var(--space-1);
 }
-.planner-popup .planner-popup__day-dot {
+.leaflet-popup.planner-popup .planner-popup__day-dot {
   inline-size: var(--space-2);
   block-size: var(--space-2);
   border-radius: var(--radius-full);
   background: var(--trip-day);
 }
-.planner-popup .planner-popup__title {
+.leaflet-popup.planner-popup .planner-popup__title {
   margin: 0;
   color: var(--color-text);
   font-family: var(--font-family-display);
@@ -154,15 +154,15 @@
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-heading);
 }
-.planner-popup .planner-popup__address,
-.planner-popup .planner-popup__note {
+.leaflet-popup.planner-popup .planner-popup__address,
+.leaflet-popup.planner-popup .planner-popup__note {
   margin: 0;
   color: var(--color-text-muted);
 }
-.planner-popup .planner-popup__note {
+.leaflet-popup.planner-popup .planner-popup__note {
   font-style: italic;
 }
-.planner-popup .planner-popup__actions {
+.leaflet-popup.planner-popup .planner-popup__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -173,19 +173,13 @@
     animation: planner-popup-in var(--duration-fast) var(--easing-enter) both;
   }
 }
-@keyframes planner-popup-in {
-  from {
-    opacity: 0;
-    transform: translateY(var(--space-2));
-  }
-}
 /* Keşif havuzu pini (Increment 1.8, bug 5): kesik halka; rota pinlerinden şekille ayrılır
    (renk tek başına anlam taşımaz). */
 .leaflet-marker-icon.planner-discover-pin {
   border: 0;
   background: transparent;
 }
-.planner-discover-pin .planner-discover-pin__ring {
+.leaflet-marker-icon.planner-discover-pin .planner-discover-pin__ring {
   display: block;
   box-sizing: border-box;
   inline-size: 100%;
