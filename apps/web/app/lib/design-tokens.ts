@@ -197,7 +197,7 @@ export const color = {
   costBg: "#fbece4",
   costFg: "#9a3f1e",
   composerBg: "#fffdf8",
-  composerBorder: "#5f6762",
+  composerBorder: "#5f6762"
 } as const;
 
 export const dataPalette = {
@@ -216,7 +216,7 @@ export const dataPalette = {
   purple: "#a855f7",
   "orange-deep": "#ea580c",
   amber: "#b45309",
-  slate: "#64748b",
+  slate: "#64748b"
 } as const;
 
 export const thirdParty = {
@@ -227,19 +227,19 @@ export const thirdParty = {
   "google-blue-hover": "#3367d6",
   whatsapp: "#25d366",
   yandex: "#fc3f1d",
-  stripe: "#635bff",
+  stripe: "#635bff"
 } as const;
 
 export const illustration = {
   "globe-sky-100": "#bae6fd",
   "globe-sky-600": "#0284c7",
   "globe-sky-700": "#0369a1",
-  "globe-navy": "#172554",
+  "globe-navy": "#172554"
 } as const;
 
 export const mapLine = {
   route: "#2563eb",
-  casing: "#fffdf8",
+  casing: "#fffdf8"
 } as const;
 
 // Harita gün renkleri (color-day-1…7; döngüsel, 8. gün = 1. renk). Yalnız harita dosyalarında.
@@ -250,12 +250,12 @@ export const dayPalette = [
   "#7a3e8e",
   "#5b6b1f",
   "#a2324f",
-  "#8a5a00",
+  "#8a5a00"
 ] as const;
 
 export const breakpoints = {
   sm: 640,
   md: 768,
   lg: 1024,
-  xl: 1280,
+  xl: 1280
 } as const;
