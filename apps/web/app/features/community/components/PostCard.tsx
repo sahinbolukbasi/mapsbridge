@@ -1,8 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useId, useState, type FormEvent } from "react";
 import { CopyRouteButton } from "../../../components/copy-route-button";
 import { Avatar, Badge, Button, Card, Field, Icon, Input, Media } from "../../../components/ui";
 import { useLocale } from "../../../lib/locale-context";
+import { profileHref } from "../../../lib/navigation/profile-href";
+import { isDeviceOnlyImage } from "../media";
 import { toCopyStops } from "../../../lib/trip/copy-stops";
 import type { CommunityPost } from "../types";
 import "../community-feed.css";
@@ -48,6 +51,13 @@ export function PostCard({
   const comments = post.comments ?? [];
   const stops = toCopyStops(post.linkedRoute?.stops);
   const stopCount = post.linkedRoute?.stops ? stops.length : (post.linkedRoute?.stopCount ?? 0);
+  const authorHref = profileHref(post.authorUsername);
+  // Tepki "pop" animasyonu yalnız tıklanan düğmede (CSS: prefers-reduced-motion: no-preference).
+  const [popped, setPopped] = useState<"like" | "save" | null>(null);
+  const pop = (kind: "like" | "save") => {
+    setPopped(null);
+    requestAnimationFrame(() => setPopped(kind));
+  };
 
   function submitComment(e: FormEvent) {
     e.preventDefault();
@@ -59,10 +69,26 @@ export function PostCard({
   return (
     <Card as="article" className="cm-post" padding="md">
       <div className="cm-post__head">
-        <Avatar src={post.authorAvatar} name={post.authorDisplayName} size="md" decorative />
+        {authorHref ? (
+          <Link href={authorHref} className="cm-post__avatar-link" tabIndex={-1} aria-hidden="true">
+            <Avatar src={post.authorAvatar} name={post.authorDisplayName} size="md" decorative />
+          </Link>
+        ) : (
+          <Avatar src={post.authorAvatar} name={post.authorDisplayName} size="md" decorative />
+        )}
         <div className="cm-post__who">
           <p className="cm-post__author">
-            <span>{post.authorDisplayName}</span>
+            {authorHref ? (
+              <Link
+                href={authorHref}
+                className="cm-post__author-link"
+                aria-label={`${post.authorDisplayName} — ${t("community.post.profile", "profili")}`}
+              >
+                {post.authorDisplayName}
+              </Link>
+            ) : (
+              <span>{post.authorDisplayName}</span>
+            )}
             {post.verified === true && (
               <Badge tone="success">{t("community.post.verified", "Onaylı")}</Badge>
             )}
@@ -105,6 +131,14 @@ export function PostCard({
           className="cm-post__media"
         />
       )}
+      {(isDeviceOnlyImage(post.image) || post.deviceOnly) && (
+        <p className="cm-post__local">
+          <Badge tone="example">
+            <Icon name="offline" size={16} />
+            {t("community.post.deviceOnly", "Yalnız bu cihazda")}
+          </Badge>
+        </p>
+      )}
 
       {post.linkedRoute && (
         <div className="cm-post__route" data-surface="default">
@@ -131,8 +165,15 @@ export function PostCard({
           size="sm"
           variant="ghost"
           aria-pressed={post.likedByMe}
+          className="cm-react"
+          data-pop={popped === "like" || undefined}
+          data-active={post.likedByMe || undefined}
+          onAnimationEnd={() => setPopped(null)}
           iconStart={<Icon name="heart" size={16} />}
-          onClick={() => actions.onToggleLike(post.id)}
+          onClick={() => {
+            if (!post.likedByMe) pop("like");
+            actions.onToggleLike(post.id);
+          }}
         >
           {t("community.post.like", "Beğen")} {post.likesCount || 0}
         </Button>
@@ -150,8 +191,15 @@ export function PostCard({
           size="sm"
           variant="ghost"
           aria-pressed={Boolean(post.savedByMe)}
+          className="cm-react"
+          data-pop={popped === "save" || undefined}
+          data-active={post.savedByMe || undefined}
+          onAnimationEnd={() => setPopped(null)}
           iconStart={<Icon name="bookmark" size={16} />}
-          onClick={() => actions.onToggleBookmark(post.id)}
+          onClick={() => {
+            if (!post.savedByMe) pop("save");
+            actions.onToggleBookmark(post.id);
+          }}
         >
           {post.savedByMe
             ? t("community.post.saved", "Kaydedildi")

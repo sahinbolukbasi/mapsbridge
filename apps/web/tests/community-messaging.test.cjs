@@ -282,3 +282,77 @@ test("mesajlar (S21): grup oluşturma ve sohbet türü süzgeci yok; uydurma gru
   assert.doesNotMatch(src, /NewGroupModal|startGroup|newGroup|SegmentedControl|group-\$\{/);
   assert.doesNotMatch(src, /messages\.filter/);
 });
+
+// ─── Increment 1.12 (bug 7): composer görseli, emoji, yazar profili ─────────
+const media = loadTs(path.join(APP, "features/community/media.ts"));
+const emoji = loadTs(path.join(APP, "features/community/emoji.ts"));
+const { profileHref, normalizeUsername } = loadTs(path.join(APP, "lib/navigation/profile-href.ts"));
+
+test("validateImage: JPG/PNG/WEBP ve ≤10 MB; diğerleri reddedilir", () => {
+  const MB = 1024 * 1024;
+  for (const type of ["image/jpeg", "image/png", "image/webp"])
+    assert.deepEqual(plain(media.validateImage({ type, size: 2 * MB })), { ok: true }, type);
+  assert.equal(media.validateImage({ type: "image/gif", size: MB }).reason, "type");
+  assert.equal(media.validateImage({ type: "application/pdf", size: MB }).reason, "type");
+  assert.equal(media.validateImage({ type: "image/png", size: 10 * MB + 1 }).reason, "size");
+  assert.equal(media.validateImage({ type: "image/png", size: 0 }).reason, "empty");
+});
+
+test("fitWithin: en uzun kenar ≤1600, oran korunur, büyütme yok", () => {
+  assert.deepEqual(plain(media.fitWithin(4000, 3000)), { w: 1600, h: 1200 });
+  assert.deepEqual(plain(media.fitWithin(1200, 3000)), { w: 640, h: 1600 });
+  assert.deepEqual(plain(media.fitWithin(800, 600)), { w: 800, h: 600 });
+  assert.equal(media.isDeviceOnlyImage("data:image/png;base64,AA"), true);
+  assert.equal(media.isDeviceOnlyImage("https://media.example/x.jpg"), false);
+});
+
+test("createPost görsel alanını taşır; composer görseli ve emoji seçiciyi içerir", () => {
+  const { mod } = socialSyncEnv();
+  const post = plain(
+    mod.webSocialSync.createPost({ content: "Kapadokya", photo: "data:image/jpeg;base64,AA" }),
+  );
+  assert.equal(post.image, "data:image/jpeg;base64,AA");
+  assert.match(read("community/page.tsx"), /photo: data\.image,/);
+  const modal = read("features/community/components/NewPostModal.tsx");
+  assert.match(modal, /type="file"/);
+  assert.match(modal, /accept=\{IMAGE_TYPES\.join\(","\)\}/);
+  assert.match(modal, /onDrop=\{onDrop\}/);
+  assert.match(modal, /fileRef\.current\?\.click\(\)/, "sürükle-bırakın düğme alternatifi");
+  assert.match(modal, /<progress/);
+  assert.match(modal, /<EmojiPicker onPick=\{addEmoji\} \/>/);
+});
+
+test("emoji imleç konumuna eklenir", () => {
+  assert.deepEqual(plain(emoji.insertAt("Merhaba dünya", "🌅", 7)), {
+    text: "Merhaba🌅 dünya",
+    caret: 9,
+  });
+  assert.deepEqual(plain(emoji.insertAt("ab", "!", null)), { text: "ab!", caret: 3 });
+  assert.deepEqual(plain(emoji.insertAt("abcd", "X", 1, 3)), { text: "aXd", caret: 2 });
+  assert.ok(emoji.EMOJIS.length >= 8);
+});
+
+test("profileHref: örnek slug /<slug>/, gerçek kullanıcı /profiles/?u=; geçersiz null", () => {
+  assert.equal(profileHref("gezgin"), "/gezgin/");
+  assert.equal(profileHref("@Traveler"), "/traveler/");
+  assert.equal(profileHref("@Ayse_K"), "/profiles/?u=ayse_k");
+  assert.equal(profileHref("ali.veli"), "/profiles/?u=ali.veli");
+  assert.equal(profileHref("../etc"), null);
+  assert.equal(profileHref(""), null);
+  assert.equal(normalizeUsername("<script>"), null);
+});
+
+test("PostCard: yazar adı ve avatar profil bağlantısı; aria-label görünür adla başlar; tepki animasyonu reduced-motion'a uyar", () => {
+  const card = read("features/community/components/PostCard.tsx");
+  assert.match(card, /const authorHref = profileHref\(post\.authorUsername\);/);
+  assert.match(card, /<Link\s+href=\{authorHref\}\s+className="cm-post__author-link"/);
+  assert.match(card, /aria-label=\{`\$\{post\.authorDisplayName\} — /);
+  const css = read("features/community/community-feed.css");
+  const motion = css.slice(css.indexOf("@media (prefers-reduced-motion: no-preference)"));
+  assert.match(motion, /\.cm-react\[data-pop\] \{\s*animation: cm-pop var\(--duration-slow\)/);
+  const before = css.slice(0, css.indexOf("@media (prefers-reduced-motion: no-preference)"));
+  assert.doesNotMatch(before, /animation:/, "animasyon yalnız no-preference bloğunda");
+  const client = read("profiles/profiles-client.tsx");
+  assert.match(client, /new URLSearchParams\(window\.location\.search\)\.get\("u"\)/);
+  assert.doesNotMatch(client, /import \{[^}]*useSearchParams/);
+});

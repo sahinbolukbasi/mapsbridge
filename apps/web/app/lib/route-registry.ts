@@ -321,6 +321,15 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     staticParams: ["/gezgin/", "/traveler/", "/demo/", "/kasif/"],
   },
   {
+    path: "/profiles/",
+    file: "app/profiles/page.tsx",
+    layout: "content",
+    // Gerçek kullanıcı profili ?u= ile (statik export; topluluk yazar bağlantıları).
+    title: t("Gezgin profili", "Traveler profile"),
+    sitemap: false,
+    robots: "noindex",
+  },
+  {
     path: "/k/",
     file: "app/k/page.tsx",
     layout: "content",

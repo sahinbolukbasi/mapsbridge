@@ -15,6 +15,7 @@ import {
   Section,
   useToast,
 } from "../components/ui";
+import { apiFetch } from "../lib/api-client";
 import { getStoredSession } from "../lib/cognito";
 import { isFollowingUser, toggleFollowUser } from "../lib/follow-system";
 import { useLocale } from "../lib/locale-context";
@@ -34,11 +35,18 @@ function titleCase(name: string): string {
  * profil bilgisi gösterilir ve rozet çizilmez. Örnek profilde takip/mesaj yoktur (I10); diğer
  * profillerde takip ve mesaj misafirde AuthGate sheet açar.
  */
-export default function PublicProfileClient({ initialUsername }: { initialUsername: string }) {
+export default function PublicProfileClient({
+  initialUsername,
+  canonicalPath,
+}: {
+  initialUsername: string;
+  /** /profiles/?u= sayfasından açıldığında dönüş yolu (Increment 1.12). */
+  canonicalPath?: string;
+}) {
   const { t, locale } = useLocale();
   const toast = useToast();
   const username = initialUsername.toLowerCase();
-  const next = `/${encodeURIComponent(username)}/`;
+  const next = canonicalPath ?? `/${encodeURIComponent(username)}/`;
   const [signedIn, setSignedIn] = useState(false);
   const [own, setOwn] = useState(false);
   const [name, setName] = useState(titleCase(username));
@@ -68,6 +76,29 @@ export default function PublicProfileClient({ initialUsername }: { initialUserna
   }, [username]);
 
   const sample = !own && isSampleProfile(username);
+  // Yayınlanmış herkese açık profil (GET /profiles/{username}); yalnız dönen alanlar (I1).
+  useEffect(() => {
+    if (own || isSampleProfile(username)) return;
+    let alive = true;
+    apiFetch<Record<string, unknown>>(`/profiles/${encodeURIComponent(username)}`, {
+      skipAuth: true,
+      timeoutMs: 8000,
+    })
+      .then((p) => {
+        if (!alive || !p || typeof p !== "object") return;
+        const full = typeof p.fullName === "string" ? p.fullName.trim() : "";
+        const about = typeof p.bio === "string" ? p.bio.trim() : "";
+        const pic =
+          typeof p.avatarUrl === "string" && /^https:\/\//.test(p.avatarUrl) ? p.avatarUrl : "";
+        if (full) setName(full);
+        if (about) setBio(about);
+        if (pic) setAvatar(pic);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [username, own]);
 
   function follow() {
     if (!signedIn) {

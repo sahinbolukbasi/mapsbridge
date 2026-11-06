@@ -140,4 +140,139 @@
     flex-direction: column;
     gap: var(--space-4);
   }
+  /* Yazar bağlantısı (bug 7): profil sayfasına gider. */
+  .cm-post__author-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .cm-post__author-link:hover {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+  .cm-post__avatar-link {
+    display: inline-flex;
+    border-radius: var(--radius-full);
+  }
+  .cm-post__local {
+    margin: 0;
+  }
+  /* Composer: emoji ve fotoğraf (bug 7). */
+  .cm-compose__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .cm-emoji {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--touch-target), 1fr));
+    gap: var(--space-1);
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-sunken);
+  }
+  .cm-emoji__item {
+    display: grid;
+    place-items: center;
+    min-block-size: var(--touch-target);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+  }
+  .cm-emoji__item:hover {
+    background: var(--color-surface);
+  }
+  .cm-drop {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-4);
+    border: 2px dashed var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-sunken);
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+  .cm-drop[data-dragging] {
+    border-color: var(--color-link);
+    background: var(--color-surface);
+  }
+  .cm-drop__hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+  }
+  .cm-drop__preview {
+    display: grid;
+    gap: var(--space-2);
+    inline-size: 100%;
+  }
+  .cm-drop__img {
+    inline-size: 100%;
+    max-block-size: 16rem;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+  .cm-drop__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .cm-drop__progress {
+    display: grid;
+    gap: var(--space-2);
+    inline-size: 100%;
+  }
+  .cm-drop__bar {
+    inline-size: 100%;
+    accent-color: var(--color-link);
+  }
+  /* Beğeni/kaydet tepkisi: etkin durum renkle değil aria-pressed + ikonla da okunur. */
+  .cm-react {
+    position: relative;
+  }
+  .cm-react[data-active] {
+    color: var(--color-danger);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cm-react[data-pop] {
+      animation: cm-pop var(--duration-slow) var(--easing-enter);
+    }
+    .cm-react[data-pop]::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 2px solid currentColor;
+      border-radius: var(--radius-full);
+      pointer-events: none;
+      animation: cm-burst var(--duration-deliberate) var(--easing-exit) forwards;
+    }
+    .cm-emoji__item {
+      transition: transform var(--duration-fast) var(--easing-standard);
+    }
+    .cm-emoji__item:hover {
+      transform: scale(1.2);
+    }
+  }
+  @keyframes cm-pop {
+    40% {
+      transform: scale(1.18);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes cm-burst {
+    from {
+      opacity: 0.6;
+      transform: translateY(0) scale(0.6);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(calc(var(--space-4) * -1)) scale(1.4);
+    }
+  }
 }

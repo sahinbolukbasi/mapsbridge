@@ -97,6 +97,7 @@ export default function CommunityPage() {
       locationTag: data.locationTag,
       hashtags: data.hashtags,
       linkedRoute: data.linkedRoute,
+      photo: data.image,
     });
     trackEvent("post_view", { targetId: post.id, targetTitle: post.content.slice(0, 30) });
     setComposerOpen(false);

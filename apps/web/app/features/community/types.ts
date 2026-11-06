@@ -17,6 +17,8 @@ export interface CommunityPost {
   verified?: boolean;
   content: string;
   image?: string;
+  /** Gönderi yalnız bu cihazda (sunucu senkronu yok); kartta rozet. */
+  deviceOnly?: boolean;
   tags: string[];
   hashtags?: string[];
   locationTag?: string;
