@@ -9,6 +9,7 @@
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Celebrate,
   Badge,
   Button,
   CreditCostTable,
@@ -16,6 +17,7 @@ import {
   Icon,
   Input,
   LoadingState,
+  Progress,
   PageHeader,
   PageShell,
   Section,
@@ -129,6 +131,8 @@ export default function CheckoutClient() {
           await verifyRevenueCatPurchase().catch(() => null);
           const updated = await billingService.refreshWallet();
           if (stopped) return;
+          // Bakiye her yoklamada güncellenir (Increment 2.8): doğrulanınca yeni bakiye görünür.
+          setWallet(updated);
           if (updated.credits > 0) {
             setMessage("checkout.msg.verified");
             return;
@@ -258,10 +262,24 @@ export default function CheckoutClient() {
           : t("checkout.gift.pending").replace("{n}", num(WELCOME_CREDITS_DISPLAY))}
       </p>
 
-      {message && (
+      {notice && "key" in notice && notice.key === "checkout.msg.verified" ? (
+        // Ödeme dönüşü başarısı (Increment 2.8): Celebrate role="status" gerçek olayı anlatır.
+        <Celebrate
+          className="checkout-alert"
+          title={t("checkout.celebrate.title", "Ödeme tamam")}
+          message={message}
+        />
+      ) : notice && "key" in notice && notice.key === "checkout.msg.verifying" ? (
         <Alert tone="info" live="polite" className="checkout-alert">
           {message}
+          <Progress variant="indeterminate" label={message} className="checkout-progress" />
         </Alert>
+      ) : (
+        message && (
+          <Alert tone="info" live="polite" className="checkout-alert">
+            {message}
+          </Alert>
+        )
       )}
       {catalog !== "loading" && catalog.status === "unavailable" && (
         <Alert

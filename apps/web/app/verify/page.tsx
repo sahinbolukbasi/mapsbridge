@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { confirmSignUp, resendConfirmationCode } from "../lib/cognito";
-import { Alert, Button, Field, Input, PageShell } from "../components/ui";
+import { Alert, Button, Celebrate, Field, Input, PageShell } from "../components/ui";
 import { AuthCard } from "../components/auth/auth-card";
 import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 
@@ -12,6 +12,9 @@ export default function VerifyPage() {
   const codeRef = useRef<HTMLInputElement>(null);
   const [resendMessage, setResendMessage] = useState("");
   const [seconds, setSeconds] = useState(120);
+  const [busy, setBusy] = useState(false);
+  // Kayıt başarısı (Increment 2.8): doğrulanınca Celebrate, kısa süre sonra girişe geçilir.
+  const [verifiedHref, setVerifiedHref] = useState<string | null>(null);
   const email =
     typeof window === "undefined" ? "" : (new URLSearchParams(location.search).get("email") ?? "");
   const phone =
@@ -47,14 +50,18 @@ export default function VerifyPage() {
       return;
     }
     setCodeError(null);
+    setBusy(true);
     try {
       await confirmSignUp(email, code);
       // Dönüş yolu safe-next ile doğrulanır (design §5.4, R8).
       const nextTarget = readNext(window.location.search, window.location.origin);
       const nextParam =
         nextTarget !== DEFAULT_NEXT ? `?next=${encodeURIComponent(nextTarget)}` : "";
-      window.location.assign(`/login/${nextParam}`);
+      const href = `/login/${nextParam}`;
+      setVerifiedHref(href);
+      window.setTimeout(() => window.location.assign(href), 1800);
     } catch (error) {
+      setBusy(false);
       setMessage(error instanceof Error ? error.message : "Kod doğrulanamadı.");
     }
   }
@@ -103,27 +110,39 @@ export default function VerifyPage() {
             </Button>
           </div>
         )}
-        <form className="auth-card__form" onSubmit={submit} noValidate>
-          <Field label="Doğrulama kodu" required error={codeError}>
-            {(ids) => (
-              <Input
-                {...ids}
-                ref={codeRef}
-                size="lg"
-                name="code"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                required
-                minLength={6}
-                maxLength={6}
-                placeholder="123456"
-              />
-            )}
-          </Field>
-          <Button type="submit" size="lg" fullWidth>
-            Doğrula ve giriş yap
-          </Button>
-        </form>
+        {verifiedHref ? (
+          <Celebrate
+            title="Hesabın doğrulandı"
+            message="Giriş sayfasına yönlendiriliyorsun."
+            action={
+              <Button href={verifiedHref} variant="primary">
+                Şimdi giriş yap
+              </Button>
+            }
+          />
+        ) : (
+          <form className="auth-card__form" onSubmit={submit} noValidate>
+            <Field label="Doğrulama kodu" required error={codeError}>
+              {(ids) => (
+                <Input
+                  {...ids}
+                  ref={codeRef}
+                  size="lg"
+                  name="code"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  minLength={6}
+                  maxLength={6}
+                  placeholder="123456"
+                />
+              )}
+            </Field>
+            <Button type="submit" size="lg" fullWidth loading={busy} loadingLabel="Doğrulanıyor…">
+              Doğrula ve giriş yap
+            </Button>
+          </form>
+        )}
         {message && (
           <Alert tone="danger" live="assertive">
             {message}

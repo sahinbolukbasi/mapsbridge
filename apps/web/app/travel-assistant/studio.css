@@ -472,24 +472,6 @@
     border-radius: var(--radius-full);
     background: var(--color-text-accent);
   }
-  .as-studio-thinking__phases {
-    display: grid;
-    gap: var(--space-1);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .as-studio-thinking__phase {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-  }
-  .as-studio-thinking__phase[data-state="active"] {
-    color: var(--color-text);
-    font-weight: var(--font-weight-semibold);
-  }
   .as-studio-thinking__fact {
     display: flex;
     align-items: center;

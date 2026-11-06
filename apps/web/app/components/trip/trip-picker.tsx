@@ -1,6 +1,18 @@
 "use client";
 import { useState } from "react";
-import { Button, ConfirmDialog, EmptyState, Field, Icon, IconButton, Input, cx } from "../ui";
+import {
+  Alert,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Field,
+  Icon,
+  IconButton,
+  Input,
+  Skeleton,
+  VisuallyHidden,
+  cx,
+} from "../ui";
 import { useLocale } from "../../lib/locale-context";
 import type { useTravelPlanner } from "../../lib/trip/use-travel-planner";
 import type { PlannerMode } from "./travel-planner-sidebar";
@@ -29,6 +41,29 @@ export function TripPicker({
   const deviceOnly = mode === "guest" || Boolean(pendingDelete?.id.startsWith("trip-"));
   return (
     <div className="trip-picker">
+      {/* Increment 2.8: hesaptaki rotalar yüklenirken iskelet; hata neden + tek sonraki adım. */}
+      {planner.routesStatus === "loading" && (
+        <div role="status">
+          <VisuallyHidden>
+            {t("planner.trips.loading", "Hesabındaki rotalar yükleniyor…")}
+          </VisuallyHidden>
+          <Skeleton variant="list-row" count={3} />
+        </div>
+      )}
+      {planner.routesStatus === "error" && (
+        <Alert
+          tone="warning"
+          live="polite"
+          title={t("planner.trips.loadFailed", "Hesabındaki rotalar alınamadı.")}
+          action={
+            <Button variant="secondary" size="sm" onClick={planner.loadServerRoutes}>
+              {t("pricing.alert.retry", "Tekrar dene")}
+            </Button>
+          }
+        >
+          {t("planner.trips.loadFailedBody", "Şimdilik bu cihazdaki rotalar gösteriliyor.")}
+        </Alert>
+      )}
       {planner.trips.length === 0 ? (
         <EmptyState
           icon="route"

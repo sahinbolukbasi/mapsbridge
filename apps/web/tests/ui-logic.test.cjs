@@ -467,3 +467,40 @@ test("Button: loading görünür etiket + aria-busy, disabledReason aria-describ
   assert.match(src, /"aria-describedby": showReason \? reasonId : undefined/);
   assert.match(src, /useRipple/);
 });
+test("flash: tek seferlik, yalnız bilinen anahtar, depolama hatasında akış sürer", () => {
+  const { setFlash, takeFlash } = loadTs(path.resolve(__dirname, "../app/lib/navigation/flash.ts"));
+  const mem = new Map();
+  const storage = {
+    getItem: (k) => (mem.has(k) ? mem.get(k) : null),
+    setItem: (k, v) => mem.set(k, v),
+    removeItem: (k) => mem.delete(k),
+  };
+  setFlash("routeSaved", storage);
+  assert.equal(takeFlash(storage), "routeSaved");
+  assert.equal(takeFlash(storage), null, "okununca silinir");
+  storage.setItem("mapsbridge.flash", "<script>");
+  assert.equal(takeFlash(storage), null, "bilinmeyen değer yok sayılır");
+  const broken = {
+    getItem: () => {
+      throw new Error("x");
+    },
+    setItem: () => {
+      throw new Error("x");
+    },
+    removeItem: () => {},
+  };
+  assert.doesNotThrow(() => setFlash("routeOnDevice", broken));
+  assert.equal(takeFlash(broken), null);
+});
+test("çekirdek akış geri bildirimi bağlı (Increment 2.8)", () => {
+  const read = (rel) => fs.readFileSync(path.resolve(__dirname, "../app", rel), "utf8");
+  assert.match(read("travel-assistant/thinking-steps.tsx"), /<Progress\s+variant="steps"/);
+  const checkout = read("checkout/checkout-client.tsx");
+  assert.match(checkout, /<Progress variant="indeterminate"/);
+  assert.match(checkout, /<Celebrate/);
+  assert.match(checkout, /setWallet\(updated\)/);
+  assert.match(read("components/trip/travel-planner-sidebar.tsx"), /announcePinDeleted/);
+  assert.match(read("components/trip/share-modal.tsx"), /planner\.share\.copyFailed/);
+  assert.match(read("verify/page.tsx"), /<Celebrate/);
+  assert.match(read("components/trip/trip-picker.tsx"), /variant="list-row"/);
+});

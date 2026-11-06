@@ -74,6 +74,24 @@ const SEARCH_MIN = 3;
 const SEARCH_DEBOUNCE_MS = 400;
 
 type Planner = ReturnType<typeof useTravelPlanner>;
+type ToastApi = ReturnType<typeof useToast>;
+type Translate = (key: string, fallback?: string) => string;
+/**
+ * Silme sonrası geri bildirim (Increment 2.8): gezideki durak oturum içi geri alma yığınındadır →
+ * "Geri al" eylemli toast (eylem araç çubuğundaki Geri al düğmesinde de kalıcı). Kaydedilen yer
+ * yığında değildir → yalnız bilgi toast'ı (geri alınamaz vaadi verilmez).
+ */
+function announcePinDeleted(planner: Planner, toast: ToastApi, t: Translate, pin: Pin) {
+  const message = t("planner.toast.deleted", "“{name}” silindi.").replace("{name}", pin.label);
+  if (pin.tripId)
+    toast.show({
+      tone: "success",
+      message,
+      action: { label: t("planner.undo", "Geri al"), onClick: planner.undo },
+      actionAlsoAt: "planner-toolbar undo IconButton",
+    });
+  else toast.show({ tone: "success", message });
+}
 type Place = {
   lat: number;
   lng: number;
@@ -601,7 +619,9 @@ export function TravelPlannerSidebar({
           )}
           confirmLabel={t("planner.stop.delete", "Durağı sil")}
           onConfirm={async () => {
-            if (pendingDelete) deletePinAnywhere(pendingDelete.id);
+            if (!pendingDelete) return;
+            deletePinAnywhere(pendingDelete.id);
+            announcePinDeleted(planner, toast, t, pendingDelete);
           }}
           onClose={() => setPendingDelete(null)}
         />
@@ -797,7 +817,7 @@ function PlaceSearch({
         <ul className="planner-search__results" aria-hidden="true">
           {[0, 1, 2].map((n) => (
             <li key={n} className="planner-search__skeleton">
-              <Skeleton lines={2} />
+              <Skeleton variant="list-row" />
             </li>
           ))}
         </ul>
@@ -1370,6 +1390,7 @@ function PinDetail({
         confirmLabel={t("planner.stop.delete", "Durağı sil")}
         onConfirm={async () => {
           deletePinAnywhere(pin.id);
+          announcePinDeleted(planner, toast, t, pin);
           onBack();
         }}
         onClose={() => setConfirmDelete(false)}

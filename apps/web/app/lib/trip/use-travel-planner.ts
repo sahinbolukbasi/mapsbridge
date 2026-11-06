@@ -250,12 +250,14 @@ export function useTravelPlanner() {
     }
   }, [trips]);
 
-  // Load real server routes on initial load / login
-  useEffect(() => {
+  // Load real server routes on initial load / login. Durum (Increment 2.8): "Rotalarım"
+  // listesinde iskelet / hata + "Tekrar dene" için.
+  const [routesStatus, setRoutesStatus] = useState<"idle" | "loading" | "error">("idle");
+  const loadServerRoutes = useCallback(() => {
     if (typeof window === "undefined") return;
     const session = getStoredSession();
     if (!session?.token) return;
-
+    setRoutesStatus("loading");
     routesApi
       .list()
       .then((res) => {
@@ -284,9 +286,16 @@ export function useTravelPlanner() {
             setActiveTripId(initial[0].id);
           }
         }
+        setRoutesStatus("idle");
       })
-      .catch((err) => console.warn("Failed to load routes from server:", err));
+      .catch((err) => {
+        console.warn("Failed to load routes from server:", err);
+        setRoutesStatus("error");
+      });
   }, []);
+  useEffect(() => {
+    loadServerRoutes();
+  }, [loadServerRoutes]);
 
   // Debounced auto-sync of active trip to server
   const serverSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1238,6 +1247,8 @@ export function useTravelPlanner() {
 
   return {
     trips,
+    routesStatus,
+    loadServerRoutes,
     generalPins,
     allPins,
     selectedPin,

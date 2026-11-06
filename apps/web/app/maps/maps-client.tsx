@@ -33,6 +33,7 @@ import type {
 import { PinPopupContent } from "../components/trip/pin-popup";
 import { DISCOVERY_POOL_EVENT, type DiscoveryPoolDetail } from "../components/trip/discover-panel";
 import { openPinEffects, pinPopupModel } from "../lib/trip/pin-popup";
+import { takeFlash } from "../lib/navigation/flash";
 import { TripPicker } from "../components/trip/trip-picker";
 import { ShareModal, type ShareTarget } from "../components/trip/share-modal";
 import { dayColorIndex } from "../components/trip/trip-format";
@@ -94,6 +95,29 @@ export default function Panel() {
   const [gate, setGate] = useState<"ai" | "save" | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  // Asistandan gelen rota (Increment 2.8): kaydedildi / cihazda açıldı geri bildirimi.
+  useEffect(() => {
+    const flash = takeFlash();
+    if (flash === "routeSaved")
+      toast.show({
+        tone: "success",
+        title: t("planner.flash.savedTitle", "Rotan hazır"),
+        message: t(
+          "planner.flash.saved",
+          "Asistanın rotası hesabına kaydedildi ve haritada açıldı.",
+        ),
+      });
+    else if (flash === "routeOnDevice")
+      toast.show({
+        tone: "success",
+        title: t("planner.flash.savedTitle", "Rotan hazır"),
+        message: t(
+          "planner.flash.device",
+          "Asistanın rotası haritada açıldı; şimdilik bu cihazda kayıtlı.",
+        ),
+      });
+    // yalnız ilk açılışta (toast/t kararlı; bağımlılık eklenmez)
+  }, []);
   const [sheetSnap, setSheetSnap] = useState<SheetSnap>("peek");
   const [quickPoint, setQuickPoint] = useState<QuickPoint | null>(null);
   const [layer, setLayer] = useState<MapLayerId>("standart");

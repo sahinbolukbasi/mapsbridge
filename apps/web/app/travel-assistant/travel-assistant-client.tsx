@@ -61,6 +61,7 @@ import {
   type GuestDraft,
 } from "../lib/guest/guest-draft";
 import { GuestAssistant, GuestDraftSummary, guestStorage } from "./guest-assistant";
+import { setFlash } from "../lib/navigation/flash";
 import "./assistant.css";
 import "./studio.css";
 import { AssistantMessage } from "./assistant-message";
@@ -1075,6 +1076,7 @@ export default function AIPage() {
             PLANNER_TRIPS_KEY,
             JSON.stringify([...trips.filter((x) => x.id !== trip.id), { ...trip, origin: "user" }]),
           );
+          setFlash("routeSaved");
           window.location.assign(`/maps/?tripId=${encodeURIComponent(res.routeId)}`);
           return;
         }
@@ -1099,6 +1101,7 @@ export default function AIPage() {
         )
       )
         throw Error(t("studio.err.mapTransfer", "Rota aktarılamadı."));
+      setFlash("routeOnDevice");
       window.location.assign(`/maps/?tripId=${encodeURIComponent(tripId)}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t("studio.err.mapTransfer", "Rota aktarılamadı."));

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Alert, Button, Icon, Modal, SegmentedControl } from "../ui";
+import { Alert, Button, Celebrate, Icon, Modal, SegmentedControl, useToast } from "../ui";
 import { useLocale } from "../../lib/locale-context";
 import { API_ENDPOINT } from "../../lib/api";
 import { getStoredSession } from "../../lib/cognito";
@@ -33,6 +33,7 @@ export function ShareModal({
   onClose: () => void;
 }) {
   const { t } = useLocale();
+  const toast = useToast();
   const [hours, setHours] = useState<ShareHours>(DEFAULT_SHARE_HOURS);
   const [created, setCreated] = useState<Created | null>(null);
   const [busy, setBusy] = useState(false);
@@ -130,8 +131,25 @@ export function ShareModal({
       .then(() => {
         setCopied(kind);
         window.setTimeout(() => setCopied(null), 2500);
+        // Increment 2.8: kopyalama onayı (ikon onay + toast).
+        toast.show({
+          tone: "success",
+          message:
+            kind === "code"
+              ? t("planner.share.copiedCode", "Paylaşım kodu kopyalandı.")
+              : t("planner.share.copiedLink", "Paylaşım bağlantısı kopyalandı."),
+        });
       })
-      .catch(() => {});
+      .catch(() =>
+        // Hata yutulmaz: neden + tek sonraki adım (direction §3).
+        toast.show({
+          tone: "danger",
+          message: t(
+            "planner.share.copyFailed",
+            "Kopyalanamadı. Kodu seçip elle kopyalayabilirsin.",
+          ),
+        }),
+      );
   }
 
   const options = SHARE_DURATIONS.map((d) => ({
@@ -180,12 +198,13 @@ export function ShareModal({
         </div>
       ) : (
         <div className="planner-share__body">
-          <p className="planner-share__hint" role="status">
-            {t("planner.share.ready", "Bağlantı {duration} geçerli.").replace(
+          <Celebrate
+            title={t("planner.share.readyTitle", "Bağlantı hazır")}
+            message={t("planner.share.ready", "Bağlantı {duration} geçerli.").replace(
               "{duration}",
               durationText,
             )}
-          </p>
+          />
           <div className="planner-share__code">
             <span className="planner-share__code-label">
               {t("planner.share.code", "Paylaşım kodu")}

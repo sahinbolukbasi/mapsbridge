@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Icon, type IconName } from "../components/ui";
+import { Progress, type IconName } from "../components/ui";
 import { useLocale } from "../lib/locale-context";
 
 // Aşamalar GERÇEK boru hattı adımlarıdır (Increment 1.10, bug 6): S0 niyet → S1 aday havuzu
@@ -89,6 +89,12 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
   const phases: readonly (typeof THINKING_PHASES)[number][] = isRoute
     ? THINKING_PHASES
     : CHAT_PHASES;
+  // Etkin adım: rota modunda görünen aşama sayısı − 1; sohbet modunda niyet → anlatım.
+  const current = isRoute
+    ? Math.min(visiblePhases, phases.length) - 1
+    : visiblePhases >= THINKING_PHASES.length
+      ? 1
+      : 0;
   const liveLabel = livePhase
     ? livePhase.message ||
       t(THINKING_PHASES[livePhase.index]?.key ?? "", THINKING_PHASES[livePhase.index]?.label)
@@ -101,21 +107,13 @@ export function ThinkingSteps({ isRoute, livePhase }: ThinkingStepsProps) {
         {liveLabel ?? t("studio.think.title", "Planlıyorum")}
       </p>
 
-      <ol className="as-studio-thinking__phases">
-        {phases.slice(0, Math.min(visiblePhases, phases.length)).map((phase, i, shown) => {
-          const isLatest = i === shown.length - 1;
-          return (
-            <li
-              key={phase.key}
-              className="as-studio-thinking__phase"
-              data-state={isLatest ? "active" : "done"}
-            >
-              <Icon name={isLatest ? phase.icon : "check"} size={16} />
-              <span>{t(phase.key, phase.label)}</span>
-            </li>
-          );
-        })}
-      </ol>
+      {/* Increment 2.8: aşamalı ilerleme primitive'i (aktif adım döner, tamamlanan onaylanır). */}
+      <Progress
+        variant="steps"
+        label={t("studio.think.title", "Planlıyorum")}
+        steps={phases.map((phase) => ({ id: phase.key, label: t(phase.key, phase.label) }))}
+        current={current}
+      />
     </div>
   );
 }

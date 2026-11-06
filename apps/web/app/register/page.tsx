@@ -441,7 +441,13 @@ export default function SignUpPage() {
             size="lg"
             fullWidth
             loading={isLoading}
+            loadingLabel="Hesap oluşturuluyor…"
             disabled={password.length > 0 && !isPasswordValid}
+            disabledReason={
+              password.length > 0 && !isPasswordValid
+                ? "Şifre kurallarının hepsi sağlanınca etkinleşir."
+                : undefined
+            }
           >
             Hesap oluştur
           </Button>

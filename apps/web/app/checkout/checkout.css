@@ -45,6 +45,9 @@
   .checkout-alert {
     margin-block-start: var(--space-4);
   }
+  .checkout-progress {
+    margin-block-start: var(--space-2);
+  }
   .checkout-section {
     margin-block-start: var(--space-4);
   }

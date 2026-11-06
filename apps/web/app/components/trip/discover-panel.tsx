@@ -260,7 +260,7 @@ export function DiscoverPanel({
         <ul className="planner-discover__list" aria-hidden="true">
           {[0, 1, 2].map((n) => (
             <li key={n} className="planner-discover__card">
-              <Skeleton lines={3} />
+              <Skeleton variant="panel" />
             </li>
           ))}
         </ul>
