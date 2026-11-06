@@ -1,6 +1,7 @@
 import { retrieveTravelEvidence } from "./retrieval";
 import { bundledEvidence, mergeEvidence } from "./bundled-evidence";
 import { autoSplitPinsIntoDays } from "../trip/routing-service";
+import { fitDayBudget, orderDayStops } from "./day-fitting";
 import { invokeBedrockJSON, invokeBedrockChatStream, invokeIntakeJSON } from "./bedrock-client";
 import {
   isRoutePlan,
@@ -1077,9 +1078,9 @@ export function sortAndEnrichDayStops(dayStops: RouteStop[]): RouteStop[] {
     }));
   }
 
-  // The model's explicit order/time slots and user reorder requests take precedence
-  // over a nearest-neighbour heuristic that could move an evening stop to morning.
-  const ordered = [...dayStops];
+  // I2 (Increment 1.11): zaman dilimleri korunur (akşam durağı sabaha taşınmaz); aynı
+  // dilimdeki duraklar deterministik 2-opt ile sıralanır. LLM sırası kullanılmaz.
+  const ordered = orderDayStops(dayStops);
 
   const total = ordered.length;
   return ordered.map((stop, idx) => {
@@ -1185,19 +1186,32 @@ export function buildResearchedRoute(
     day: dayByPinId.get(st.id) ?? st.day,
   }));
   // Gerçekleşen gün sayısı (k-means boş küme eleyebilir)
+  // S4 (I9): her gün ≥%20 programsız tampon. Bütçe aşılırsa S2 sırası en düşük (araştırma
+  // havuzunda en sonda) durak düşer, gün yeniden çözülür. Düşenler yanıtta listelenir.
+  const priority = new Map(research.places.map((p, i) => [p.id, i]));
   const enrichedStops: RouteStop[] = [];
+  const droppedStops: { id: string; name: string; day: number }[] = [];
   for (let d = 1; d <= estimatedDays; d++) {
     const dayStops = reassigned.filter((stop) => stop.day === d);
-    if (dayStops.length > 0) enrichedStops.push(...sortAndEnrichDayStops(dayStops));
+    if (dayStops.length === 0) continue;
+    const fitted = fitDayBudget(dayStops, priority);
+    for (const s of fitted.dropped) droppedStops.push({ id: s.id, name: s.name, day: d });
+    enrichedStops.push(...sortAndEnrichDayStops(fitted.stops));
   }
+  const dropNote = droppedStops.length
+    ? `\n\nGün bütçesi (en az %20 boş zaman) için çıkarılan duraklar: ${droppedStops
+        .map((s) => `${s.name} (${s.day}. gün)`)
+        .join(", ")}.`
+    : "";
 
   const route = {
     title: cand.title as string,
-    summary: cand.summary as string,
+    summary: typeof cand.summary === "string" ? `${cand.summary}${dropNote}` : cand.summary,
     theme: cand.theme as string | undefined,
     destination: context.destination || (cand.destination as string) || "",
     estimatedDays,
     stops: enrichedStops,
+    ...(droppedStops.length ? { droppedStops } : {}),
   };
   if (
     !isRoutePlan(route) ||

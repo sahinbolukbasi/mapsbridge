@@ -32,6 +32,8 @@ export interface UnifiedRoutePlan {
   theme: string;
   destination: string;
   stops: RouteStop[];
+  /** S4 gün bütçesi (≥%20 tampon) için deterministik olarak çıkarılan duraklar. */
+  droppedStops?: { id: string; name: string; day: number }[];
 }
 
 export interface StayOption {
