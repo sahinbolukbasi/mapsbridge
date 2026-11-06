@@ -1,17 +1,38 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
-  /* Topluluk sayfası yerleşimi (design F17). Kart görünümü features/community/community-feed.css. */
-  .community-filters {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    margin-bottom: var(--space-6);
+  /* Topluluk sayfası yerleşimi (design F17). Kart görünümü features/community/community-feed.css.
+     content 1200 (R11): ana akış + 320 yan sütun (≥1024); altında tek sütun, filtre üstte.
+     Sola yaslı dar sütun yok. */
+  .community-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+    padding-block-end: var(--space-12);
   }
-
+  .community-main {
+    display: grid;
+    gap: var(--space-4);
+    min-inline-size: 0;
+  }
+  .community-aside {
+    display: grid;
+    gap: var(--space-4);
+  }
   .community-feed {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    max-width: var(--content-reading);
+  }
+  @media (min-width: 1024px) {
+    .community-layout {
+      grid-template-columns: minmax(0, 1fr) 20rem;
+    }
+    .community-aside {
+      grid-column: 2;
+      grid-row: 1;
+      position: sticky;
+      inset-block-start: calc(var(--app-header-height) + var(--space-4));
+    }
   }
 }

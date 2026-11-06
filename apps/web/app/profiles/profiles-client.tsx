@@ -23,7 +23,6 @@ export default function ProfilesClient() {
     );
   return (
     <PageShell
-      layout="content"
       header={<PageHeader title={t("profiles.title", "Gezgin profili")} />}
     >
       {user === undefined ? (

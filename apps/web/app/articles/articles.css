@@ -40,10 +40,12 @@
     font-size: var(--font-size-sm);
     line-height: var(--line-height-body);
   }
+  /* Makale okuyucu reading genişliğinde (720) ortalı (R11). */
   .articles-reader {
     display: grid;
     gap: var(--space-3);
     max-inline-size: var(--content-reading);
+    margin-inline: auto;
   }
   .articles-reader__body {
     color: var(--color-text);

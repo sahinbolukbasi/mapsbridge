@@ -55,10 +55,13 @@
     color: var(--color-highlight-text);
   }
 
+  /* content 1200 içinde dar sütun ortalanır (R11). */
   .hiw-credits {
     display: grid;
     gap: var(--space-3);
     max-inline-size: var(--content-reading);
+    margin-inline: auto;
+    inline-size: 100%;
   }
   .hiw-actions {
     display: flex;

@@ -84,7 +84,7 @@ export default function Home() {
   }, []);
 
   return (
-    <PageShell layout="landing" className="home">
+    <PageShell className="home">
       <div id="basla" className="home-hero">
         <div className="home-hero__copy">
           <PageHeader
@@ -232,13 +232,15 @@ export default function Home() {
 
       <Reveal>
         <Section id="sss" title={t("home.faq.title")} className="home-section home-section--narrow">
-          <Accordion
-            items={FAQ.map((item) => ({
-              id: item.id,
-              summary: t(item.q),
-              content: <p className="home-card__body">{t(item.a)}</p>,
-            }))}
-          />
+          <Card className="home-narrow-card">
+            <Accordion
+              items={FAQ.map((item) => ({
+                id: item.id,
+                summary: t(item.q),
+                content: <p className="home-card__body">{t(item.a)}</p>,
+              }))}
+            />
+          </Card>
         </Section>
       </Reveal>
 
@@ -248,7 +250,9 @@ export default function Home() {
           title={t("home.final.title")}
           className="home-section home-section--final"
         >
-          <HeroPrompt idPrefix="son" />
+          <Card className="home-narrow-card">
+            <HeroPrompt idPrefix="son" />
+          </Card>
         </Section>
       </Reveal>
     </PageShell>

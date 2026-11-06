@@ -313,7 +313,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <PageShell layout="form" className="auth-card-shell">
+    <PageShell className="auth-card-shell">
       <AuthCard
         description="E-posta ve şifreyle ücretsiz hesap aç; rotaların tüm cihazlarında seninle olsun."
         footer={

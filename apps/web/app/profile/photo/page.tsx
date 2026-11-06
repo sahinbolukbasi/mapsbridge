@@ -105,7 +105,7 @@ export default function ProfilePhotoPage() {
   if (authed === false) return <AuthGate variant="page" reason="profile" next={NEXT} />;
   if (authed === null) {
     return (
-      <PageShell layout="form">
+      <PageShell>
         <PageHeader />
         <LoadingState />
       </PageShell>
@@ -160,7 +160,7 @@ export default function ProfilePhotoPage() {
   const name = email ? email.split("@")[0] : "?";
 
   return (
-    <PageShell layout="form" className="photo-page">
+    <PageShell className="photo-page">
       <PageHeader
         breadcrumb={[
           { label: t("nav.profile", "Profil"), href: "/profile/" },

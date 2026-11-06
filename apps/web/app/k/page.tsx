@@ -209,7 +209,7 @@ export default function SharedLocationPage() {
     : [];
 
   return (
-    <PageShell layout="app" className="share-page">
+    <PageShell className="share-page">
       <PageHeader
         variant="hidden"
         title={t("share.title", "Paylaşılan konum")}

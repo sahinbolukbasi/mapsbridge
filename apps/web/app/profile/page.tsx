@@ -118,7 +118,7 @@ export default function ProfilePage() {
 
   if (authed === null) {
     return (
-      <PageShell layout="content" className="profile-page">
+      <PageShell className="profile-page">
         <PageHeader />
         <LoadingState label={t("profile.loading", "Profil yükleniyor…")} />
       </PageShell>
@@ -161,7 +161,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <PageShell layout="content" className="profile-page">
+    <PageShell className="profile-page">
       <PageHeader
         actions={
           <>

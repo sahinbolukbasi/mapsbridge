@@ -104,9 +104,18 @@
     margin: 0 auto;
     padding-inline: var(--page-gutter);
   }
+  /* SSS ve son CTA da 1200 içinde (R11 landing); dar metin kartın içinde ortalanır. */
   .home-section--narrow,
   .home-section--final {
-    max-inline-size: calc(var(--content-reading) + var(--page-gutter) * 2);
+    justify-items: center;
+    text-align: center;
+  }
+  .home-narrow-card {
+    box-sizing: border-box;
+    inline-size: 100%;
+    max-inline-size: var(--content-reading);
+    margin-inline: auto;
+    text-align: start;
   }
   /* Tam genişlik koyu bant; içindeki Section kap genişliğinde kalır. */
   .home-band {

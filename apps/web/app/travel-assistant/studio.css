@@ -23,6 +23,10 @@
     background: var(--color-surface);
   }
   .as-studio {
+    /* --app-panel: sohbet sütunu (R11; sayfa katmanı yerleşim değişkeni, token değil). */
+    --app-panel: clamp(22rem, 34vw, 32rem);
+  }
+  .as-studio {
     flex: 1 1 auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -888,11 +892,13 @@
     .as-studio {
       grid-template-columns: 280px minmax(0, 1fr);
     }
+    /* Taslak/harita açıkken sohbet okunabilir sütun (--app-panel), tuval kalan alan; geniş
+       taslakta sohbet alt sınıra (22rem) iner. */
     .as-studio[data-panel="open"] {
-      grid-template-columns: 280px minmax(0, 1fr) minmax(0, 40%);
+      grid-template-columns: 280px var(--app-panel) minmax(0, 1fr);
     }
     .as-studio[data-panel="open"][data-wide] {
-      grid-template-columns: 280px minmax(0, 1fr) minmax(0, 55%);
+      grid-template-columns: 280px 22rem minmax(0, 1fr);
     }
     .as-studio__sessions {
       display: flex;

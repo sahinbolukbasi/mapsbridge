@@ -33,10 +33,12 @@
     white-space: pre-wrap;
   }
 
-  /* Misafir asistan (design §6.1, §4.3 AppSplit; guest-assistant.tsx). ≥1024: sohbet %42 /
-     harita önizlemesi %58; altında sohbet tam genişlik. Harita alanı statik bir paneldir
+  /* Misafir asistan (design §6.1, §4.3 AppSplit; guest-assistant.tsx). ≥1024: sohbet
+     var(--app-panel) / harita önizlemesi kalan alan; altında sohbet tam genişlik. Harita alanı statik bir paneldir
      (Leaflet yüklenmez, ağ çağrısı yok). */
   .as-guest {
+    /* --app-panel: sohbet sütunu (R11; sayfa katmanı yerleşim değişkeni, token değil). */
+    --app-panel: clamp(22rem, 34vw, 32rem);
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     block-size: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
@@ -109,7 +111,7 @@
   }
   @media (min-width: 1024px) {
     .as-guest {
-      grid-template-columns: minmax(0, 42fr) minmax(0, 58fr);
+      grid-template-columns: var(--app-panel) minmax(0, 1fr);
     }
     .as-guest__chat {
       border-inline-end: 1px solid var(--color-border);

@@ -106,7 +106,6 @@ export default function PricingClient() {
 
   return (
     <PageShell
-      layout="content"
       className="pricing"
       header={<PageHeader description={route?.description?.[locale]} />}
     >

@@ -1,15 +1,16 @@
 // Yeni sayfa iskeleti (design §11 "Scaffold", steering §Yeni sayfa ekleme).
-// Kullanım: npm run new:page -- <slug> [--layout content|reading|form|landing|app|sidebar] [--root <dizin>]
+// Kullanım: npm run new:page -- <slug> [--layout content|reading|form|landing|app|sidebar|auth] [--root <dizin>]
 // app/<slug>/{layout.tsx, page.tsx, <slug>.css} üretir; route-registry kayıt satırını stdout'a yazar.
 // Slug ^[a-z0-9-]{2,40}$ olmalı; var olan klasörün üzerine yazılmaz (exit 1).
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-const LAYOUTS = ["content", "reading", "form", "landing", "app", "sidebar"] as const;
+const LAYOUTS = ["content", "reading", "form", "landing", "app", "sidebar", "auth"] as const;
 type Layout = (typeof LAYOUTS)[number];
 const LAYER = "@layer tokens, base, legacy, chrome, pages, primitives;";
 
-export function pageFiles(slug: string, layout: Layout): Record<string, string> {
+// Genişliği registry layout alanı belirler (R11/G30): page.tsx PageShell layout= yazmaz.
+export function pageFiles(slug: string): Record<string, string> {
   return {
     "layout.tsx": `import { routeMetadata } from "../lib/site-metadata";
 export const metadata = routeMetadata("/${slug}/");
@@ -21,7 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 import "./${slug}.css";
 export default function Page() {
   return (
-    <PageShell layout="${layout}" header={<PageHeader />}>
+    <PageShell header={<PageHeader />}>
       <Section title="Bölüm">
         <p className="${slug}-intro">İçerik buraya.</p>
       </Section>
@@ -73,7 +74,7 @@ function main(argv: string[]): number {
     return 1;
   }
   mkdirSync(dir, { recursive: true });
-  for (const [name, body] of Object.entries(pageFiles(slug, layout)))
+  for (const [name, body] of Object.entries(pageFiles(slug)))
     writeFileSync(join(dir, name), body);
   console.log(`Oluşturuldu: apps/web/app/${slug}/{layout.tsx,page.tsx,${slug}.css}`);
   console.log("route-registry.ts'e ekleyin:");

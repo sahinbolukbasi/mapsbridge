@@ -68,7 +68,7 @@ export default function AuthCallbackPage() {
   }, []);
   if (failed) {
     return (
-      <PageShell layout="form" className="auth-card-shell">
+      <PageShell className="auth-card-shell">
         <AuthCard titleText="Oturum doğrulanıyor" title="Google ile giriş">
           <ErrorState error={FAILED} />
           <Button href={loginHref} size="lg" fullWidth>
@@ -79,7 +79,7 @@ export default function AuthCallbackPage() {
     );
   }
   return (
-    <PageShell layout="form" className="auth-card-shell">
+    <PageShell className="auth-card-shell">
       <AuthCard description="Google kimliğin doğrulanıyor; birazdan yönlendirileceksin.">
         <div className="auth-callback__progress">
           <div className="auth-callback-spinner" aria-hidden="true" />

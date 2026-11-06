@@ -196,7 +196,7 @@ export default function ForgotPasswordPage() {
 
   if (step === "confirm") {
     return (
-      <PageShell layout="form" className="auth-card-shell">
+      <PageShell className="auth-card-shell">
         <AuthCard
           title="Yeni şifreni belirle"
           titleText="Şifre sıfırlama"
@@ -307,7 +307,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <PageShell layout="form" className="auth-card-shell">
+    <PageShell className="auth-card-shell">
       <AuthCard
         title="Şifreni mi unuttun?"
         titleText="Şifre sıfırlama"

@@ -1,12 +1,14 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
   /* Profili düzenle (design §5.2). Form kontrolleri primitive'lerden (Field/Input/Textarea). */
+  /* Form 1200 içinde ortalanır (R11; sola yaslı dar sütun yok). */
   .edit-form,
   .edit-stack {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
     max-width: var(--content-reading);
+    margin-inline: auto;
   }
 
   .edit-avatar {
@@ -136,6 +138,7 @@
     flex-direction: column;
     gap: var(--space-3);
     max-width: var(--content-reading);
+    margin-inline: auto;
   }
 
   .edit-danger__title {

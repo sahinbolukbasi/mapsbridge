@@ -211,7 +211,6 @@ export default function CheckoutClient() {
 
   return (
     <PageShell
-      layout="content"
       className="checkout"
       header={
         <PageHeader

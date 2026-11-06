@@ -270,7 +270,7 @@ export default function LoginPage() {
   }
 
   return (
-    <PageShell layout="form" className="auth-card-shell">
+    <PageShell className="auth-card-shell">
       <AuthCard
         description="Rotalarına ve kayıtlı duraklarına kaldığın yerden devam et."
         footer={

@@ -252,7 +252,7 @@ export function GuestAssistant() {
 
   if (!draft) {
     return (
-      <PageShell layout="app" className="as-guest-shell">
+      <PageShell className="as-guest-shell">
         <PageHeader variant="hidden" />
       </PageShell>
     );
@@ -283,7 +283,7 @@ export function GuestAssistant() {
   };
 
   return (
-    <PageShell layout="app" className="as-guest-shell">
+    <PageShell className="as-guest-shell">
       <PageHeader variant="hidden" />
       <div className="as-guest">
         <section className="as-guest__chat" aria-labelledby="as-guest-title">

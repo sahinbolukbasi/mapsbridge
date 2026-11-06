@@ -146,6 +146,31 @@
   .ui-page-shell--form {
     max-inline-size: var(--content-form);
   }
+  /* auth (R12): 1200 içinde form ≤520 + görsel; görsel yoksa ya da <1024 tek sütun ortalı. */
+  .ui-page-shell__auth {
+    display: grid;
+    grid-template-columns: minmax(0, 520px);
+    justify-content: center;
+    gap: var(--space-8);
+  }
+  .ui-page-shell__auth-form {
+    min-inline-size: 0;
+  }
+  .ui-page-shell__auth-aside {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .ui-page-shell__auth--split {
+      grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+      justify-content: stretch;
+      align-items: start;
+    }
+    .ui-page-shell__auth--split .ui-page-shell__auth-aside {
+      display: block;
+      position: sticky;
+      inset-block-start: calc(var(--app-header-height) + var(--space-6));
+    }
+  }
   .ui-page-shell--landing,
   .ui-page-shell--app {
     max-inline-size: none;

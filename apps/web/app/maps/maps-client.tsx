@@ -695,7 +695,7 @@ export default function Panel() {
     : undefined;
   const popupModel = popupPin ? pinPopupModel(popupPin) : null;
   return (
-    <PageShell layout="app" className="planner">
+    <PageShell className="planner">
       {/* AC-34: tek h1 "Rota planlayıcı" (registry, görsel olarak gizli). */}
       <PageHeader variant="hidden" />
       <div className="planner__split" data-compact={compact || undefined}>

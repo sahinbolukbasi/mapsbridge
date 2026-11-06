@@ -133,7 +133,7 @@ export default function CommunityPage() {
   const openComposer = () => guarded(() => setComposerOpen(true));
 
   return (
-    <PageShell layout="content" className="community-page">
+    <PageShell className="community-page">
       <PageHeader
         title={t("community.title", "Topluluk")}
         titleText={t("community.title", "Topluluk")}
@@ -148,74 +148,80 @@ export default function CommunityPage() {
         }
       />
 
-      <div className="community-filters">
-        <SegmentedControl<FeedMode>
-          label={t("community.mode.label", "Akış")}
-          value={mode}
-          onChange={setMode}
-          options={[
-            { value: "latest", label: t("community.mode.latest", "Güncel") },
-            { value: "popular", label: t("community.mode.popular", "Popüler") },
-            { value: "following", label: t("community.mode.following", "Takip ettiklerin") },
-          ]}
-        />
-        <ChipGroup label={t("community.filter.label", "Kategori")} mode="single">
-          {FEED_CATEGORIES.map((c) => (
-            <Chip key={c} pressed={category === c} onPress={() => setCategory(c)}>
-              {t(CATEGORY_LABEL_KEY[c], c === "all" ? "Tümü" : c)}
-            </Chip>
-          ))}
-        </ChipGroup>
-      </div>
-
-      {/* Kısa durum duyurusu; kartların kendisi canlı bölge değildir. */}
-      <div role="status">
-        <VisuallyHidden>
-          {t("community.count", "{n} paylaşım gösteriliyor").replace("{n}", String(visible.length))}
-        </VisuallyHidden>
-      </div>
-      <div className="community-feed">
-        {visible.length === 0 ? (
-          <EmptyState
-            icon="users"
-            title={t("community.empty.title", "Henüz paylaşım yok")}
-            description={
-              mode === "following"
-                ? t(
-                    "community.empty.following",
-                    "Takip ettiğin gezginlerin paylaşımları burada görünür.",
-                  )
-                : t("community.empty.body", "İlk seyahat deneyimini paylaşarak akışı başlat.")
-            }
-            action={
-              <Button variant="secondary" onClick={openComposer}>
-                {t("community.empty.cta", "İlk paylaşımı yap")}
-              </Button>
-            }
+      <div className="community-layout">
+        <aside className="community-aside" aria-label={t("community.filter.label", "Kategori")}>
+          <ChipGroup label={t("community.filter.label", "Kategori")} mode="single">
+            {FEED_CATEGORIES.map((c) => (
+              <Chip key={c} pressed={category === c} onPress={() => setCategory(c)}>
+                {t(CATEGORY_LABEL_KEY[c], c === "all" ? "Tümü" : c)}
+              </Chip>
+            ))}
+          </ChipGroup>
+        </aside>
+        <div className="community-main">
+          <SegmentedControl<FeedMode>
+            label={t("community.mode.label", "Akış")}
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: "latest", label: t("community.mode.latest", "Güncel") },
+              { value: "popular", label: t("community.mode.popular", "Popüler") },
+              { value: "following", label: t("community.mode.following", "Takip ettiklerin") },
+            ]}
           />
-        ) : (
-          visible.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              isMine={signedIn && sameUser(post.authorUsername, myUsername)}
-              isFollowing={followed.some((u) => sameUser(u, post.authorUsername))}
-              next={NEXT}
-              actions={{
-                onToggleLike: (id) => guarded(() => webSocialSync.toggleLike(id)),
-                onToggleBookmark: (id) => guarded(() => webSocialSync.toggleBookmark(id)),
-                onAddComment: (id, text) => guarded(() => webSocialSync.addComment(id, text)),
-                onToggleFollow: (username) =>
-                  guarded(() => toggleFollowUser(username.replace(/^@/, ""))),
-                onEdit: (p) => setEditing(p),
-                onDelete: (p) => setDeleting(p),
-                onShare: (p) => void sharePost(p),
-              }}
-            />
-          ))
-        )}
-      </div>
 
+          {/* Kısa durum duyurusu; kartların kendisi canlı bölge değildir. */}
+          <div role="status">
+            <VisuallyHidden>
+              {t("community.count", "{n} paylaşım gösteriliyor").replace(
+                "{n}",
+                String(visible.length),
+              )}
+            </VisuallyHidden>
+          </div>
+          <div className="community-feed">
+            {visible.length === 0 ? (
+              <EmptyState
+                icon="users"
+                title={t("community.empty.title", "Henüz paylaşım yok")}
+                description={
+                  mode === "following"
+                    ? t(
+                        "community.empty.following",
+                        "Takip ettiğin gezginlerin paylaşımları burada görünür.",
+                      )
+                    : t("community.empty.body", "İlk seyahat deneyimini paylaşarak akışı başlat.")
+                }
+                action={
+                  <Button variant="secondary" onClick={openComposer}>
+                    {t("community.empty.cta", "İlk paylaşımı yap")}
+                  </Button>
+                }
+              />
+            ) : (
+              visible.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  isMine={signedIn && sameUser(post.authorUsername, myUsername)}
+                  isFollowing={followed.some((u) => sameUser(u, post.authorUsername))}
+                  next={NEXT}
+                  actions={{
+                    onToggleLike: (id) => guarded(() => webSocialSync.toggleLike(id)),
+                    onToggleBookmark: (id) => guarded(() => webSocialSync.toggleBookmark(id)),
+                    onAddComment: (id, text) => guarded(() => webSocialSync.addComment(id, text)),
+                    onToggleFollow: (username) =>
+                      guarded(() => toggleFollowUser(username.replace(/^@/, ""))),
+                    onEdit: (p) => setEditing(p),
+                    onDelete: (p) => setDeleting(p),
+                    onShare: (p) => void sharePost(p),
+                  }}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
       <NewPostModal
         open={composerOpen}
         onClose={() => setComposerOpen(false)}

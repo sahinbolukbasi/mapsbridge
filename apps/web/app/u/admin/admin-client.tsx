@@ -161,7 +161,6 @@ function AdminWorkspace({ session }: { session: AdminSession }) {
   return (
     <AdminContext.Provider value={ctx}>
       <PageShell
-        layout="sidebar"
         className="admin-shell"
         header={
           <PageHeader

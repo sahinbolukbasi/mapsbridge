@@ -2,8 +2,10 @@
 @layer pages {
   /* Mesajlar (design §5.2 immersive, F18). Balon ve composer görünümü assistant-ui.css'ten. */
   .msg-layout {
+    /* --app-panel: konuşma listesi (R11; sayfa katmanı yerleşim değişkeni, token değil). */
+    --app-panel: clamp(18rem, 26vw, 24rem);
     display: grid;
-    grid-template-columns: minmax(16rem, 22rem) 1fr;
+    grid-template-columns: var(--app-panel) minmax(0, 1fr);
     block-size: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
     min-block-size: 24rem;
     border-block-start: 1px solid var(--color-border);

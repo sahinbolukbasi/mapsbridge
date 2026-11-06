@@ -140,7 +140,7 @@ export default function EditProfilePage() {
   if (authed === false) return <AuthGate variant="page" reason="profile" next={NEXT} />;
   if (authed === null) {
     return (
-      <PageShell layout="content">
+      <PageShell>
         <PageHeader />
         <LoadingState />
       </PageShell>
@@ -471,7 +471,7 @@ export default function EditProfilePage() {
   );
 
   return (
-    <PageShell layout="content" className="edit-page">
+    <PageShell className="edit-page">
       <PageHeader
         breadcrumb={[
           { label: t("nav.profile", "Profil"), href: "/profile/" },

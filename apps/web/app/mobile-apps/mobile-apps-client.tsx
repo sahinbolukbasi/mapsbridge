@@ -33,7 +33,6 @@ export default function MobileAppsClient() {
   const parity = showStoreClaims() ? t("home.mobile.sub") : t("mobileApps.parity.goal");
   return (
     <PageShell
-      layout="content"
       className="mobile-apps"
       header={
         <PageHeader

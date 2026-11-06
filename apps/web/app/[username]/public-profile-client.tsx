@@ -124,7 +124,7 @@ export default function PublicProfileClient({
   }
 
   return (
-    <PageShell layout="content" className="pub-profile">
+    <PageShell className="pub-profile">
       <PageHeader
         title={name}
         titleText={name}

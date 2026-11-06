@@ -304,7 +304,7 @@ export default function MessagesPage() {
 
   if (authed === null) {
     return (
-      <PageShell layout="app" className="msg-page">
+      <PageShell className="msg-page">
         <PageHeader variant="hidden" />
         <LoadingState label={t("messages.loading", "Mesajlar yükleniyor…")} />
       </PageShell>
@@ -312,7 +312,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <PageShell layout="app" className="msg-page">
+    <PageShell className="msg-page">
       <PageHeader variant="hidden" />
       <div className="msg-layout" data-pane={pane}>
         <aside className="msg-list" aria-labelledby="msg-list-title" data-surface="default">

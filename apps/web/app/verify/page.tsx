@@ -71,7 +71,7 @@ export default function VerifyPage() {
   }
 
   return (
-    <PageShell layout="form" className="auth-card-shell">
+    <PageShell className="auth-card-shell">
       <AuthCard
         description="E-postana gönderilen 6 haneli kodu gir."
         footer={

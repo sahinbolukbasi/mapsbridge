@@ -1178,7 +1178,7 @@ export default function AIPage() {
 
   if (isAuthenticated === null) {
     return (
-      <PageShell layout="app" className="as-studio-shell">
+      <PageShell className="as-studio-shell">
         {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
         <PageHeader variant="hidden" />
         <div className="as-studio-loading">
@@ -1231,7 +1231,7 @@ export default function AIPage() {
   );
 
   return (
-    <PageShell layout="app" className="as-studio-shell">
+    <PageShell className="as-studio-shell">
       {/* AC-34: tek h1 "Seyahat asistanı" (registry, görsel olarak gizli); marka satırı <p>. */}
       <PageHeader variant="hidden" />
       <div className="as-studio-frame">

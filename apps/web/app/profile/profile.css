@@ -75,11 +75,13 @@
     margin-top: auto;
   }
 
+  /* content 1200 içinde dar akış ortalanır (R11; sola yaslı dar sütun yok). */
   .profile-posts {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
     max-width: var(--content-reading);
+    margin-inline: auto;
   }
 
   .profile-places {

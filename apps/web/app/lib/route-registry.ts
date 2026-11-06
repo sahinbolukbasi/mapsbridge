@@ -3,7 +3,7 @@
 // (getAlternatePath), header varyantı (SiteChrome) ve guard G4/G9 buradan okur.
 // Bağımlılıksızdır (ui-audit Node type-stripping ile de yükler); erasable TS sözdizimi kullanılır.
 
-export type PageLayout = "content" | "reading" | "form" | "landing" | "app" | "sidebar";
+export type PageLayout = "content" | "reading" | "form" | "landing" | "app" | "sidebar" | "auth";
 /**
  * Chrome varyantı (G19, design §5.2 / R5): sayfa CSS'i chrome'u override etmez.
  * immersive: footer yok, sayfa header altı ekranı doldurur, mobil alt menü görünür.
@@ -125,7 +125,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/community/",
     file: "app/community/page.tsx",
-    layout: "sidebar",
+    layout: "content",
     title: t("Gezgin rehberleri ve seyahat topluluğu", "Traveler guides and community"),
     description: t(
       "Destinasyonlara göre ücretsiz ve ücretli seyahat rehberlerini keşfet. Gezgin deneyimlerini incele ve grup gezilerine katıl.",
@@ -287,7 +287,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/profile/",
     file: "app/profile/page.tsx",
-    layout: "sidebar",
+    layout: "content",
     title: t("Profilim", "My profile"),
     sitemap: false,
     robots: "noindex",
@@ -332,7 +332,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/k/",
     file: "app/k/page.tsx",
-    layout: "content",
+    layout: "app",
     title: t("Konum paylaşımı", "Location share"),
     sitemap: false,
     robots: "noindex",
@@ -340,7 +340,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/login/",
     file: "app/login/page.tsx",
-    layout: "form",
+    layout: "auth",
     title: t("Giriş yap", "Sign in"),
     sitemap: false,
     robots: "noindex",
@@ -349,7 +349,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/register/",
     file: "app/register/page.tsx",
-    layout: "form",
+    layout: "auth",
     title: t("Hesap oluştur", "Create account"),
     sitemap: false,
     robots: "noindex",
@@ -358,7 +358,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/reset-password/",
     file: "app/reset-password/page.tsx",
-    layout: "form",
+    layout: "auth",
     title: t("Şifre sıfırlama", "Reset password"),
     sitemap: false,
     robots: "noindex",
@@ -367,7 +367,7 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
   {
     path: "/verify/",
     file: "app/verify/page.tsx",
-    layout: "form",
+    layout: "auth",
     title: t("Hesabını doğrula", "Verify your account"),
     sitemap: false,
     robots: "noindex",

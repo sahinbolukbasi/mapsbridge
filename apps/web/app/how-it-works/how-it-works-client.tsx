@@ -82,7 +82,6 @@ export function HowItWorksClient() {
   const { t } = useLocale();
   return (
     <PageShell
-      layout="content"
       className="hiw"
       header={
         <PageHeader

@@ -1,8 +1,8 @@
 "use client";
-// Kimlik sayfalarının ortak düzeni (design §4.3 FocusForm, F13/F14): tek 440 px sütun, görsel yan
-// panel yok. Chrome "focus" route-registry'den gelir (yalın header, alt menü ve footer yok).
-// Sayfa kendi <PageShell layout="form" className="auth-card-shell"> kökünü çizer (G4), AuthCard
-// onun içindeki sütundur.
+// Kimlik sayfalarının ortak düzeni (design §4.3 FocusForm, F13/F14): tek 440 px sütun. Layout
+// registry'den `auth` (R12: 1200 içinde form ≤520 + isteğe bağlı görsel `aside`); chrome "focus"
+// (yalın header, alt menü ve footer yok). Sayfa kendi <PageShell className="auth-card-shell">
+// kökünü çizer (G4, layout prop'u yok — G30), AuthCard onun içindeki sütundur.
 // Yalnız görünüm: Cognito/Google/Apple çağrıları sayfalarda kalır, bu dosya hiçbirini çağırmaz.
 import { forwardRef, type ReactNode } from "react";
 import {
