@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Alert, Button, Celebrate, Icon, Modal, SegmentedControl, useToast } from "../ui";
+import { Alert, Button, Celebrate, Icon, Modal, SegmentedControl } from "../ui";
 import { useLocale } from "../../lib/locale-context";
 import { API_ENDPOINT } from "../../lib/api";
 import { getStoredSession } from "../../lib/cognito";
@@ -33,18 +33,23 @@ export function ShareModal({
   onClose: () => void;
 }) {
   const { t } = useLocale();
-  const toast = useToast();
   const [hours, setHours] = useState<ShareHours>(DEFAULT_SHARE_HOURS);
   const [created, setCreated] = useState<Created | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
+  // Kopyalama geri bildirimi modalın İÇİNDE (review-foundation B2): showModal() açıkken dışarıdaki
+  // Toaster inert ve scrim altındadır; toast ne görünür ne duyurulur.
+  const [copyStatus, setCopyStatus] = useState("");
+  const [copyError, setCopyError] = useState("");
   const pending = useRef(false);
   useEffect(() => {
     if (!open) {
       setCreated(null);
       setError("");
       setCopied(null);
+      setCopyStatus("");
+      setCopyError("");
     }
   }, [open]);
 
@@ -126,29 +131,28 @@ export function ShareModal({
   }
 
   function copy(kind: "code" | "link", text: string) {
-    navigator.clipboard
-      ?.writeText(text)
+    setCopyError("");
+    setCopyStatus("");
+    // Pano API'si yoksa (eski tarayıcı / güvensiz bağlam) da hata gösterilir; sessiz kalmaz.
+    const write = navigator.clipboard?.writeText
+      ? navigator.clipboard.writeText(text)
+      : Promise.reject(new Error("clipboard unavailable"));
+    write
       .then(() => {
         setCopied(kind);
         window.setTimeout(() => setCopied(null), 2500);
-        // Increment 2.8: kopyalama onayı (ikon onay + toast).
-        toast.show({
-          tone: "success",
-          message:
-            kind === "code"
-              ? t("planner.share.copiedCode", "Paylaşım kodu kopyalandı.")
-              : t("planner.share.copiedLink", "Paylaşım bağlantısı kopyalandı."),
-        });
+        // Increment 2.8: kopyalama onayı (ikon onay + modal içi status bölgesi).
+        setCopyStatus(
+          kind === "code"
+            ? t("planner.share.copiedCode", "Paylaşım kodu kopyalandı.")
+            : t("planner.share.copiedLink", "Paylaşım bağlantısı kopyalandı."),
+        );
       })
       .catch(() =>
-        // Hata yutulmaz: neden + tek sonraki adım (direction §3).
-        toast.show({
-          tone: "danger",
-          message: t(
-            "planner.share.copyFailed",
-            "Kopyalanamadı. Kodu seçip elle kopyalayabilirsin.",
-          ),
-        }),
+        // Hata yutulmaz: neden + tek sonraki adım (direction §3), modal içinde role="alert".
+        setCopyError(
+          t("planner.share.copyFailed", "Kopyalanamadı. Kodu seçip elle kopyalayabilirsin."),
+        ),
       );
   }
 
@@ -245,6 +249,14 @@ export function ShareModal({
             </Button>
           </div>
           {error && <Alert tone="danger">{error}</Alert>}
+          {copyError && (
+            <Alert tone="danger" live="assertive">
+              {copyError}
+            </Alert>
+          )}
+          <p className="ui-visually-hidden" role="status" data-share-copy-status>
+            {copyStatus}
+          </p>
         </div>
       )}
     </Modal>

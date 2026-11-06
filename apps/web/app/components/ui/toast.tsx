@@ -21,6 +21,7 @@ import {
   toastDuration,
   type ToastTimer,
 } from "./logic/toast-timing";
+import { admitToast, isModalOpen, releaseHeld } from "./logic/toast-hold";
 import { Icon, type IconName } from "./svg-icon";
 import "./ui.css";
 
@@ -139,37 +140,64 @@ function leaveMs(): number {
   return (Number.isFinite(ms) ? ms : 200) + 40;
 }
 
+function modalOpenNow(): boolean {
+  return typeof document !== "undefined" && isModalOpen((s) => document.querySelector(s));
+}
 /**
  * SiteChrome'da tek örnek (C6). Kalıcı canlı bölgeler sayfa yüklenirken DOM'dadır: bilgi/başarı/
  * uyarı polite; hata role="alert" (assertive). Konum: masaüstü sağ üst, mobil alt menünün üstü.
+ * Modal (showModal) açıkken gelen toast bekletilir ve son modal kapanınca gösterilir; aksi halde
+ * inert arka planda görünmez ve duyurulmaz kalırdı (logic/toast-hold.ts, review-foundation B2).
  */
 export function Toaster({ children }: { children?: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
+  const [held, setHeld] = useState<ToastItem[]>([]);
   const nextId = useRef(1);
   const dismiss = useCallback((id: number) => {
+    setHeld((list) => list.filter((i) => i.id !== id));
     setItems((list) => list.map((i) => (i.id === id ? { ...i, leaving: true } : i)));
     window.setTimeout(() => setItems((list) => list.filter((i) => i.id !== id)), leaveMs());
   }, []);
   const show = useCallback((input: ToastInput) => {
     const id = nextId.current++;
     const tone = input.tone ?? "info";
-    setItems((list) => [
-      ...list,
-      {
-        id,
+    const item: ToastItem = {
+      id,
+      tone,
+      title: input.title,
+      message: input.message,
+      action: input.action,
+      duration: toastDuration({
         tone,
-        title: input.title,
-        message: input.message,
-        action: input.action,
-        duration: toastDuration({
-          tone,
-          hasAction: Boolean(input.action),
-          durationMs: input.action ? undefined : input.durationMs,
-        }),
-      },
-    ]);
+        hasAction: Boolean(input.action),
+        durationMs: input.action ? undefined : input.durationMs,
+      }),
+    };
+    if (admitToast(modalOpenNow()) === "hold") setHeld((list) => [...list, item]);
+    else setItems((list) => [...list, item]);
     return id;
   }, []);
+  // Bekleyen varken dialog açık/kapalı ve ekleme/çıkarma değişimleri izlenir; modal kalmayınca
+  // bekleyenler canlı bölgelere eklenir (o an duyurulur, süre o an başlar).
+  useEffect(() => {
+    if (held.length === 0) return;
+    const flush = () => {
+      const { show: ready } = releaseHeld(held, modalOpenNow());
+      if (ready.length === 0) return;
+      setHeld([]);
+      setItems((list) => [...list, ...ready]);
+    };
+    flush();
+    if (typeof MutationObserver === "undefined") return;
+    const observer = new MutationObserver(flush);
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["open"],
+    });
+    return () => observer.disconnect();
+  }, [held]);
   const api = useMemo(() => ({ show, dismiss }), [show, dismiss]);
   const polite = items.filter((i) => i.tone !== "danger");
   const assertive = items.filter((i) => i.tone === "danger");

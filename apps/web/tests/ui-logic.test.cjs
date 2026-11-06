@@ -504,3 +504,34 @@ test("çekirdek akış geri bildirimi bağlı (Increment 2.8)", () => {
   assert.match(read("verify/page.tsx"), /<Celebrate/);
   assert.match(read("components/trip/trip-picker.tsx"), /variant="list-row"/);
 });
+test("toast-hold (B2): modal açıkken toast bekletilir, son modal kapanınca sırasıyla gösterilir", () => {
+  const h = load("toast-hold");
+  assert.equal(h.admitToast(true), "hold");
+  assert.equal(h.admitToast(false), "show");
+  assert.deepEqual(plain(h.releaseHeld([1, 2], true)), { show: [], keep: [1, 2] });
+  assert.deepEqual(plain(h.releaseHeld([1, 2], false)), { show: [1, 2], keep: [] });
+  // :modal desteklenmezse (SyntaxError) aria-modal yedeğine düşer.
+  const legacy = (s) => {
+    if (s.includes(":modal")) throw new Error("unsupported");
+    return s.includes("aria-modal") ? {} : null;
+  };
+  assert.equal(h.isModalOpen(legacy), true);
+  assert.equal(
+    h.isModalOpen(() => null),
+    false,
+  );
+  const src = fs.readFileSync(path.resolve(__dirname, "../app/components/ui/toast.tsx"), "utf8");
+  assert.match(src, /admitToast\(modalOpenNow\(\)\) === "hold"/);
+  assert.match(src, /new MutationObserver\(flush\)/);
+});
+test("ShareModal (B2): kopyalama hatası modal içinde role=alert, toast'a gitmez (inert değil)", () => {
+  const src = fs.readFileSync(
+    path.resolve(__dirname, "../app/components/trip/share-modal.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(src, /toast\.show|useToast/);
+  const modal = src.slice(src.indexOf("<Modal"), src.lastIndexOf("</Modal>"));
+  assert.match(modal, /copyError && \(\s*<Alert tone="danger" live="assertive">/);
+  assert.match(modal, /role="status" data-share-copy-status/);
+  assert.match(src, /Promise\.reject\(new Error\("clipboard unavailable"\)\)/);
+});

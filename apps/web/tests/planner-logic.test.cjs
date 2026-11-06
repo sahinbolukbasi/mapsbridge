@@ -457,3 +457,30 @@ test("planner-store: ai-… yerel geziler sunucu listesi yüklenince korunur ve 
     "ai- gezi create ile sunucuya yazılır",
   );
 });
+test("B1: iki gezide ilk gezinin durağı silinir → tek geri alma kaydı, tek undo geri getirir", () => {
+  const a1 = { id: "p1" };
+  const a2 = { id: "p2" };
+  const b1 = { id: "q1" };
+  const before = [
+    { id: "tA", pins: [a1, a2], days: [] },
+    { id: "tB", pins: [b1], days: [] },
+  ];
+  const after = L.mapTripPins(before, "p1", (pins) => pins.filter((p) => p.id !== "p1"));
+  assert.equal(after[1], before[1], "pini içermeyen gezi aynı referansla kalır");
+  assert.deepEqual(plain(after[0].pins), [a2]);
+  const stack = L.undoSnapshots(before, after);
+  assert.equal(stack.length, 1);
+  assert.equal(stack[0].tripId, "tA");
+  const restored = L.restoreSnapshot(after, stack.pop());
+  assert.deepEqual(plain(restored[0].pins), [a1, a2]);
+  assert.equal(restored[1], after[1]);
+  assert.equal(L.undoSnapshots(after, restored).length, 1);
+});
+test("B1: use-travel-planner *Anywhere mutatörleri mapTripPins kullanır (tüm gezileri yeniden yazmaz)", () => {
+  const src = fs.readFileSync(path.join(APP, "lib/trip/use-travel-planner.ts"), "utf8");
+  for (const name of ["updatePinAnywhere", "deletePinAnywhere", "togglePinVisitedAnywhere"]) {
+    const body = src.slice(src.indexOf(`const ${name} = useCallback`)).split("\n  const ")[0];
+    assert.match(body, /mapTripPins\(prev, pinId/, name);
+  }
+  assert.match(src, /undoSnapshots\(prev, trips\)/);
+});

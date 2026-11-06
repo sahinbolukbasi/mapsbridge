@@ -129,3 +129,38 @@ export function addTargetFor(
     ? { kind: "day", day: activeDayIndex }
     : { kind: "general" };
 }
+/**
+ * Pini içeren geziye `update` uygular; içermeyen gezi AYNI referansla döner. Böylece geri alma
+ * yığını (undoSnapshots) yalnız gerçekten değişen gezi için kayıt alır; çok gezili kullanıcıda
+ * "Geri al" doğru geziyi geri getirir (review-foundation B1).
+ */
+export function mapTripPins<T extends { pins: { id: string }[] }>(
+  trips: readonly T[],
+  pinId: string,
+  update: (pins: T["pins"]) => T["pins"],
+): T[] {
+  return trips.map((t) =>
+    t.pins.some((p) => p.id === pinId) ? { ...t, pins: update(t.pins) } : t,
+  );
+}
+type UndoTrip = { id: string; pins: unknown[]; days: unknown[] };
+export type UndoEntry<T extends UndoTrip> = { tripId: string; pins: T["pins"]; days: T["days"] };
+/** Önceki ve sonraki gezi listesinde pins/days referansı değişen her gezi için bir anlık görüntü. */
+export function undoSnapshots<T extends UndoTrip>(
+  prev: readonly T[],
+  next: readonly T[],
+): UndoEntry<T>[] {
+  const out: UndoEntry<T>[] = [];
+  for (const before of prev) {
+    const after = next.find((t) => t.id === before.id);
+    if (!after || (after.pins === before.pins && after.days === before.days)) continue;
+    out.push({ tripId: before.id, pins: before.pins, days: before.days });
+  }
+  return out;
+}
+/** Anlık görüntüyü sahibi olan geziye geri yazar; diğer geziler aynı referansla kalır. */
+export function restoreSnapshot<T extends UndoTrip>(trips: readonly T[], entry: UndoEntry<T>): T[] {
+  return trips.map((t) =>
+    t.id === entry.tripId ? { ...t, pins: entry.pins, days: entry.days } : t,
+  );
+}

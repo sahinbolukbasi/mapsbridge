@@ -35,7 +35,14 @@ import {
   writePlannerStore,
   type TripOrigin,
 } from "./planner-store";
-import { canRequestRoute, routeLegMap, routeRequestKey } from "./planner-logic";
+import {
+  canRequestRoute,
+  mapTripPins,
+  restoreSnapshot,
+  routeLegMap,
+  routeRequestKey,
+  undoSnapshots,
+} from "./planner-logic";
 
 const STORAGE_KEY = PLANNER_TRIPS_KEY;
 /** Yeni gezinin kökeni: oturumsuzken oluşturulanlar girişte hesaba aktarılabilir (§6.3). */
@@ -218,10 +225,8 @@ export function useTravelPlanner() {
       restoringRef.current = false;
       return;
     }
-    for (const before of prev) {
-      const after = trips.find((t) => t.id === before.id);
-      if (!after || (after.pins === before.pins && after.days === before.days)) continue;
-      undoStack.current.push({ tripId: before.id, pins: before.pins, days: before.days });
+    for (const entry of undoSnapshots(prev, trips)) {
+      undoStack.current.push(entry);
       if (undoStack.current.length > 30) undoStack.current.shift();
     }
     setCanUndo(undoStack.current.length > 0);
@@ -236,9 +241,7 @@ export function useTravelPlanner() {
     setCanUndo(stack.length > 0);
     if (!entry) return;
     restoringRef.current = true;
-    setTrips((prev) =>
-      prev.map((t) => (t.id === entry.tripId ? { ...t, pins: entry.pins, days: entry.days } : t)),
-    );
+    setTrips((prev) => restoreSnapshot(prev, entry));
   }, []);
 
   // Persist trips to localStorage. "Cihazda kayıtlı" rozeti yalnızca son yazım başarılıysa
@@ -1212,22 +1215,17 @@ export function useTravelPlanner() {
   const updatePinAnywhere = useCallback((pinId: string, updates: Partial<Pin>) => {
     setGeneralPins((prev) => prev.map((p) => (p.id === pinId ? { ...p, ...updates } : p)));
     setTrips((prev) =>
-      prev.map((t) => ({
-        ...t,
-        pins: t.pins.map((p) => (p.id === pinId ? { ...p, ...updates } : p)),
-      })),
+      mapTripPins(prev, pinId, (pins) =>
+        pins.map((p) => (p.id === pinId ? { ...p, ...updates } : p)),
+      ),
     );
   }, []);
 
   const deletePinAnywhere = useCallback(
     (pinId: string) => {
       setGeneralPins((prev) => prev.filter((p) => p.id !== pinId));
-      setTrips((prev) =>
-        prev.map((t) => ({
-          ...t,
-          pins: t.pins.filter((p) => p.id !== pinId),
-        })),
-      );
+      // Yalnız pini içeren gezi değişir → tek geri alma kaydı (review-foundation B1).
+      setTrips((prev) => mapTripPins(prev, pinId, (pins) => pins.filter((p) => p.id !== pinId)));
       if (selectedPinId === pinId) {
         setSelectedPinId(null);
       }
@@ -1238,10 +1236,9 @@ export function useTravelPlanner() {
   const togglePinVisitedAnywhere = useCallback((pinId: string) => {
     setGeneralPins((prev) => prev.map((p) => (p.id === pinId ? { ...p, visited: !p.visited } : p)));
     setTrips((prev) =>
-      prev.map((t) => ({
-        ...t,
-        pins: t.pins.map((p) => (p.id === pinId ? { ...p, visited: !p.visited } : p)),
-      })),
+      mapTripPins(prev, pinId, (pins) =>
+        pins.map((p) => (p.id === pinId ? { ...p, visited: !p.visited } : p)),
+      ),
     );
   }, []);
 
