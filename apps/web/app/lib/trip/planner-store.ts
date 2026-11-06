@@ -10,6 +10,8 @@ export { GUEST_OWNER };
 export const PLANNER_TRIPS_KEY = "mapsbridge.travelPlanner.v5";
 /** Güne atanmamış yerler havuzu. */
 export const PLANNER_GENERAL_PINS_KEY = "mapsbridge.generalPins.v5";
+/** Son harita aramaları (en çok 8; sahip bazlı, çıkışta silinir). */
+export const PLANNER_RECENT_SEARCHES_KEY = "mapsbridge.recentSearches.v1";
 /** Kaydın sahibi: küçük harf e-posta ya da `guest`. */
 export const PLANNER_OWNER_KEY = "mapsbridge.travelPlanner.owner";
 export type TripOrigin = "guest" | "user";
@@ -81,6 +83,7 @@ export function clearPlannerStore(): void {
   try {
     localStorage.removeItem(PLANNER_TRIPS_KEY);
     localStorage.removeItem(PLANNER_GENERAL_PINS_KEY);
+    localStorage.removeItem(PLANNER_RECENT_SEARCHES_KEY);
     localStorage.removeItem(PLANNER_OWNER_KEY);
   } catch {}
 }

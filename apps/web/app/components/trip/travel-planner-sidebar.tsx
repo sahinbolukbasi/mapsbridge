@@ -10,6 +10,7 @@ import {
   Fragment,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useState,
   type FormEvent,
@@ -19,6 +20,19 @@ import { DEFAULT_CATEGORY_META, type Pin, type PinCategory } from "../../lib/tri
 import type { useTravelPlanner } from "../../lib/trip/use-travel-planner";
 import { googleMapsEnabled } from "../../lib/google/maps-client";
 import { searchPlaces, type GeocodedPlace } from "../../lib/trip/geocoding-service";
+import {
+  initialSearchState,
+  parseCoordinates,
+  parseRecent,
+  pushRecent,
+  searchReducer,
+  type RecentSearch,
+} from "../../lib/trip/place-search-logic";
+import {
+  PLANNER_RECENT_SEARCHES_KEY,
+  readPlannerStore,
+  writePlannerStore,
+} from "../../lib/trip/planner-store";
 import { apiFetch } from "../../lib/api-client";
 import type { MultiAgentResponse } from "../../lib/ai/types";
 import { interactionTracker } from "../../lib/analytics/tracker";
@@ -38,6 +52,7 @@ import {
   Input,
   SegmentedControl,
   Select,
+  Skeleton,
   Textarea,
   cx,
   useToast,
@@ -78,7 +93,15 @@ const SEARCH_MIN = 3;
 const SEARCH_DEBOUNCE_MS = 400;
 
 type Planner = ReturnType<typeof useTravelPlanner>;
-type Place = { lat: number; lng: number; address: string; label: string };
+type Place = {
+  lat: number;
+  lng: number;
+  address: string;
+  label: string;
+  /** Proxy sonucunda sağlayıcı kimliği (ayrıntı/atıf için). */
+  placeId?: string;
+  provider?: "amazon" | "google";
+};
 export type PlannerMode = "guest" | "user";
 
 export interface TravelPlannerSidebarProps {
@@ -229,6 +252,15 @@ export function TravelPlannerSidebar({
 
   const visitedCount = pinsWithTime.filter((p) => p.visited).length;
   const allPins = activeTrip?.pins ?? [];
+  // Arama yakınlık önceliği: gezinin gerçek duraklarının ağırlık merkezi (yoksa yok).
+  const searchBias = useMemo(() => {
+    const pts = allPins.filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+    if (pts.length === 0) return undefined;
+    return {
+      lat: pts.reduce((s, p) => s + p.lat, 0) / pts.length,
+      lng: pts.reduce((s, p) => s + p.lng, 0) / pts.length,
+    };
+  }, [allPins]);
 
   if (selectedPin && showDetail) {
     return (
@@ -300,6 +332,7 @@ export function TravelPlannerSidebar({
 
       {workspaceMode === "edit" ? (
         <PlaceSearch
+          near={searchBias}
           onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}
           onAdd={addPlace}
         />
@@ -568,48 +601,54 @@ export function TravelPlannerSidebar({
   );
 }
 
-/** Mekan/adres arama: yazarken 400 ms sonra (≥3 karakter) öneri; otomatik yeniden deneme yok. */
+/**
+ * Mekan/adres arama (bug 4): yazarken 400 ms sonra (≥3 karakter) öneri; otomatik yeniden deneme
+ * yok. Durum makinesi `place-search-logic`: hata "Sonuç bulunamadı" değil `role="alert"` uyarısı
+ * + "Tekrar dene"; yüklenirken iskelet satırları; koordinat yapıştırılınca "Bu koordinata pin
+ * ekle"; son aramalar (sahip bazlı, en çok 8).
+ */
 function PlaceSearch({
+  near,
   onPick,
   onAdd,
 }: {
+  near?: { lat: number; lng: number };
   onPick: (place: Place) => void;
   onAdd: (place: Place, target: "trip" | "general") => void;
 }) {
   const { t } = useLocale();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Place[]>([]);
-  const [state, setState] = useState<"idle" | "loading" | "empty" | "error">("idle");
+  const [search, dispatch] = useReducer(searchReducer<Place>, initialSearchState<Place>());
   const [picked, setPicked] = useState<Place | null>(null);
+  const [recent, setRecent] = useState<RecentSearch[]>([]);
   const request = useRef(0);
+  useEffect(() => setRecent(parseRecent(readPlannerStore(PLANNER_RECENT_SEARCHES_KEY))), []);
+  const coords = parseCoordinates(query);
   const run = async (q: string) => {
     const id = ++request.current;
-    setState("loading");
+    dispatch({ type: "start", requestId: id });
     try {
-      const places: GeocodedPlace[] = await searchPlaces(q);
-      if (id !== request.current) return;
+      const places: GeocodedPlace[] = await searchPlaces(q, 5, { near });
       const list = places.slice(0, 5).map((p) => ({
         lat: p.lat,
         lng: p.lng,
         address: p.address,
         label: p.label || p.address.split(",")[0],
+        placeId: p.placeId,
+        provider: p.provider,
       }));
-      setResults(list);
-      setState(list.length > 0 ? "idle" : "empty");
+      dispatch({ type: "success", requestId: id, results: list });
     } catch (err) {
-      if (id !== request.current) return;
       if (process.env.NODE_ENV !== "production") console.warn("Arama başarısız", err);
-      setResults([]);
-      setState("error");
+      dispatch({ type: "failure", requestId: id });
     }
   };
   useEffect(() => {
     if (googleMapsEnabled) return;
     const q = query.trim();
-    if (q.length < SEARCH_MIN) {
+    if (q.length < SEARCH_MIN || parseCoordinates(q)) {
       request.current++;
-      setResults([]);
-      setState("idle");
+      dispatch({ type: "reset" });
       return;
     }
     const timer = window.setTimeout(() => void run(q), SEARCH_DEBOUNCE_MS);
@@ -622,13 +661,23 @@ function PlaceSearch({
       return;
     }
     const q = query.trim();
-    if (q.length >= SEARCH_MIN) void run(q);
+    if (q.length >= SEARCH_MIN && !parseCoordinates(q)) void run(q);
   };
   const pick = (place: Place) => {
     setPicked(place);
-    setResults([]);
+    request.current++;
+    dispatch({ type: "reset" });
+    const next = pushRecent(recent, {
+      label: place.label,
+      address: place.address,
+      lat: place.lat,
+      lng: place.lng,
+    });
+    setRecent(next);
+    writePlannerStore(PLANNER_RECENT_SEARCHES_KEY, JSON.stringify(next));
     onPick(place);
   };
+  const results = search.status === "results" ? search.results : [];
   return (
     <div className="planner-search">
       <form className="planner-search__form" role="search" onSubmit={submit} noValidate>
@@ -651,20 +700,56 @@ function PlaceSearch({
             />
           )}
         </Field>
-        <Button type="submit" variant="secondary" loading={state === "loading"}>
+        <Button type="submit" variant="secondary" loading={search.status === "loading"}>
           {t("planner.search.submit", "Ara")}
         </Button>
       </form>
       <div role="status" className="planner-search__status">
-        {state === "empty" && t("planner.search.empty", "Sonuç bulunamadı.")}
+        {search.status === "empty" && t("planner.search.empty", "Sonuç bulunamadı.")}
+        {search.status === "loading" && (
+          <span className="ui-visually-hidden">{t("planner.search.loading", "Aranıyor…")}</span>
+        )}
       </div>
-      {state === "error" && (
-        <Alert tone="warning">
-          <span>{t("planner.search.error", "Arama şu an yanıt vermiyor.")}</span>{" "}
-          <Button size="sm" variant="link" onClick={() => void run(query.trim())}>
-            {t("ui.retry", "Tekrar dene")}
-          </Button>
+      {coords && (
+        <Button
+          size="sm"
+          variant="secondary"
+          iconStart={<Icon name="locate" size={16} />}
+          onClick={() =>
+            pick({
+              lat: coords.lat,
+              lng: coords.lng,
+              label: `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`,
+              address: t("planner.search.coordsAddress", "Koordinat: {lat}, {lng}")
+                .replace("{lat}", coords.lat.toFixed(5))
+                .replace("{lng}", coords.lng.toFixed(5)),
+            })
+          }
+        >
+          {t("planner.search.coords", "Bu koordinata pin ekle")}
+        </Button>
+      )}
+      {search.status === "error" && (
+        <Alert
+          tone="warning"
+          live="assertive"
+          action={
+            <Button size="sm" variant="secondary" onClick={() => void run(query.trim())}>
+              {t("ui.retry", "Tekrar dene")}
+            </Button>
+          }
+        >
+          {t("planner.search.error", "Arama şu an yanıt vermiyor.")}
         </Alert>
+      )}
+      {search.status === "loading" && (
+        <ul className="planner-search__results" aria-hidden="true">
+          {[0, 1, 2].map((n) => (
+            <li key={n} className="planner-search__skeleton">
+              <Skeleton lines={2} />
+            </li>
+          ))}
+        </ul>
       )}
       {results.length > 0 && (
         <ul
@@ -677,12 +762,34 @@ function PlaceSearch({
                 <Icon name="map" size={16} />
                 <span className="planner-search__result-text">
                   <span className="planner-search__result-name">{r.label}</span>
-                  <span className="planner-search__result-address">{r.address}</span>
+                  {r.address && <span className="planner-search__result-address">{r.address}</span>}
                 </span>
               </button>
             </li>
           ))}
         </ul>
+      )}
+      {!query.trim() && !picked && recent.length > 0 && (
+        <div className="planner-search__recent">
+          <p className="planner-search__recent-title" id="planner-recent-title">
+            {t("planner.search.recent", "Son aramalar")}
+          </p>
+          <ul className="planner-search__results" aria-labelledby="planner-recent-title">
+            {recent.map((r) => (
+              <li key={`${r.lat},${r.lng},${r.label}`}>
+                <button type="button" className="planner-search__result" onClick={() => pick(r)}>
+                  <Icon name="clock" size={16} />
+                  <span className="planner-search__result-text">
+                    <span className="planner-search__result-name">{r.label}</span>
+                    {r.address && (
+                      <span className="planner-search__result-address">{r.address}</span>
+                    )}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       {picked && (
         <PlaceCard
@@ -699,7 +806,6 @@ function PlaceSearch({
     </div>
   );
 }
-
 function PlaceCard({
   eyebrow,
   place,

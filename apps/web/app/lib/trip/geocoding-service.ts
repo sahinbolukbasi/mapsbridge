@@ -1,11 +1,13 @@
 // ============================================================
-// Multi-Tier Geocoding & Reverse Geocoding Service
-// Supports: Nominatim, Photon (Komoot), and BigDataCloud
+// Çok katmanlı arama ve ters geocoding (Increment 1.6, bug 4)
+// Sıra: sunucu yer proxy'si (GET /ai/chat?op=places; CSP'den bağımsız) → Nominatim → Photon
+// (→ BigDataCloud yalnız reverse). Doğrudan sağlayıcılar CSP connect-src açılırsa çalışır
+// (infra-changes.md). Hiçbir katman yanıt vermezse arama PlaceSearchError fırlatır: hata asla
+// "Sonuç bulunamadı" (boş dizi) olarak gösterilmez. I1: alan uydurulmaz (ülke varsayılanı yok).
 // ============================================================
-
 import { PinCategory } from "./models";
 import { placesCache } from "../google/places-cache";
-
+import { placesApi, type ApiPlace, type PlaceProvider } from "./places-api";
 export interface GeocodedPlace {
   label: string;
   address: string;
@@ -16,17 +18,32 @@ export interface GeocodedPlace {
   lng: number;
   category: PinCategory;
   importance?: number;
+  /** Yalnız proxy sonucunda: sağlayıcı yer kimliği (ayrıntı için). */
+  placeId?: string;
+  provider?: PlaceProvider;
+  attribution?: string;
 }
-
-export interface NearbyPoi {
-  label: string;
-  category: PinCategory;
-  distanceMeters: number;
-  lat: number;
-  lng: number;
+/** Tüm arama katmanları başarısız (ağ/CSP/sağlayıcı); gerçek boş sonuç DEĞİL. */
+export class PlaceSearchError extends Error {
+  constructor(message = "Arama şu an yanıt vermiyor.") {
+    super(message);
+    this.name = "PlaceSearchError";
+  }
 }
-
-function detectCategoryFromText(text: string): PinCategory {
+/** Proxy yerini planlayıcı biçimine çevirir; adres yoksa boş kalır (uydurulmaz). */
+export function fromApiPlace(p: ApiPlace): GeocodedPlace {
+  return {
+    label: p.name,
+    address: p.address || "",
+    lat: p.lat,
+    lng: p.lng,
+    category: detectCategoryFromText(`${p.name} ${p.category || ""}`),
+    placeId: p.id,
+    provider: p.provider,
+    attribution: p.attribution,
+  };
+}
+export function detectCategoryFromText(text: string): PinCategory {
   const lower = text.toLowerCase();
   if (
     lower.includes("cami") ||
@@ -112,7 +129,15 @@ export async function reverseGeocodeLocation(lat: number, lng: number): Promise<
 
   const fallbackLabel = `Nokta (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
   const fallbackAddr = `Enlem: ${lat.toFixed(5)}, Boylam: ${lng.toFixed(5)}`;
-
+  // 0. Katman: sunucu yer proxy'si (Amazon Location ReverseGeocode).
+  try {
+    const { places } = await placesApi.reverse(lat, lng);
+    const hit = places[0];
+    if (hit) {
+      // Ad ve adres kaynaktan; koordinat kullanıcının dokunduğu nokta kalır.
+      return { ...fromApiPlace(hit), lat, lng, address: hit.address || fallbackAddr };
+    }
+  } catch {}
   // 1. Tier: Nominatim with explicit email parameter to prevent rate-limiting
   try {
     const controller = new AbortController();
@@ -151,7 +176,7 @@ export async function reverseGeocodeLocation(lat: number, lng: number): Promise<
           address,
           district,
           city,
-          country: addr.country || "Türkiye",
+          country: addr.country || undefined,
           lat,
           lng,
           category: detectCategoryFromText(`${label} ${address} ${data.type || ""}`),
@@ -182,7 +207,7 @@ export async function reverseGeocodeLocation(lat: number, lng: number): Promise<
           address,
           district: p.district || "",
           city: p.city || p.state || "",
-          country: p.country || "Türkiye",
+          country: p.country || undefined,
           lat,
           lng,
           category: detectCategoryFromText(`${label} ${address}`),
@@ -211,7 +236,7 @@ export async function reverseGeocodeLocation(lat: number, lng: number): Promise<
         address,
         district: data.locality || "",
         city: data.principalSubdivision || "",
-        country: data.countryName || "Türkiye",
+        country: data.countryName || undefined,
         lat,
         lng,
         category: detectCategoryFromText(`${label} ${address}`),
@@ -228,13 +253,25 @@ export async function reverseGeocodeLocation(lat: number, lng: number): Promise<
   };
 }
 
-/** Search Places with Multi-Tier Geocoding */
-export async function searchPlaces(query: string, limit = 5): Promise<GeocodedPlace[]> {
+/**
+ * Mekan/adres araması. Proxy yanıt verirse (boş da olsa) onun sonucu döner. Proxy düşerse
+ * Nominatim ve Photon denenir; yanıt veren ilk katmanın sonucu (boş olabilir) döner. Hiçbir
+ * katman yanıt vermezse PlaceSearchError.
+ */
+export async function searchPlaces(
+  query: string,
+  limit = 5,
+  opts: { near?: { lat: number; lng: number } } = {},
+): Promise<GeocodedPlace[]> {
   const cleanQ = query.trim();
   if (!cleanQ) return [];
-
+  // 0. Katman: sunucu yer proxy'si.
+  try {
+    const { places } = await placesApi.search(cleanQ, { near: opts.near });
+    return places.slice(0, limit).map(fromApiPlace);
+  } catch {}
+  let answered = false;
   const results: GeocodedPlace[] = [];
-
   // 1. Tier: Nominatim Search
   try {
     const controller = new AbortController();
@@ -245,19 +282,21 @@ export async function searchPlaces(query: string, limit = 5): Promise<GeocodedPl
     );
     clearTimeout(timeout);
     if (res.ok) {
+      answered = true;
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         for (const item of data) {
           const lat = parseFloat(item.lat);
           const lng = parseFloat(item.lon);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
           const addr = item.address || {};
           const namePart = item.name || item.display_name?.split(",")[0];
+          if (!namePart) continue;
           const district = addr.suburb || addr.district || addr.town || "";
           const city = addr.province || addr.city || "";
-          const shortAddr = [district, city].filter(Boolean).join(", ") || item.display_name;
-
+          const shortAddr = [district, city].filter(Boolean).join(", ") || item.display_name || "";
           results.push({
-            label: namePart || cleanQ,
+            label: namePart,
             address: shortAddr,
             district,
             city,
@@ -272,7 +311,6 @@ export async function searchPlaces(query: string, limit = 5): Promise<GeocodedPl
       }
     }
   } catch {}
-
   // 2. Tier: Photon Komoot Search
   try {
     const controller = new AbortController();
@@ -283,14 +321,15 @@ export async function searchPlaces(query: string, limit = 5): Promise<GeocodedPl
     );
     clearTimeout(timeout);
     if (res.ok) {
+      answered = true;
       const data = await res.json();
       if (data && Array.isArray(data.features)) {
         for (const f of data.features) {
           const p = f.properties || {};
-          const [lon, lat] = f.geometry.coordinates;
-          const label = p.name || cleanQ;
-          const address = [p.street, p.district, p.city].filter(Boolean).join(", ") || label;
-
+          const [lon, lat] = f.geometry?.coordinates || [];
+          if (!p.name || !Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+          const label = p.name;
+          const address = [p.street, p.district, p.city].filter(Boolean).join(", ");
           results.push({
             label,
             address,
@@ -305,42 +344,6 @@ export async function searchPlaces(query: string, limit = 5): Promise<GeocodedPl
       }
     }
   } catch {}
-
+  if (!answered) throw new PlaceSearchError();
   return results;
-}
-
-/** Fetch Nearby Curated Suggestions around a Coordinate */
-export function getCuratedNearbyPOIs(lat: number, lng: number): NearbyPoi[] {
-  // Istanbul Historical Peninsula & Kadıköy anchor samples
-  const sampleAnchors: { lat: number; lng: number; name: string; cat: PinCategory }[] = [
-    { lat: 41.0054, lng: 28.9768, name: "Sultanahmet Camii", cat: "tarih" },
-    { lat: 41.0086, lng: 28.9802, name: "Ayasofya-i Kebîr Câmii", cat: "tarih" },
-    { lat: 41.0084, lng: 28.9778, name: "Yerebatan Sarnıcı", cat: "muze" },
-    { lat: 41.0115, lng: 28.9833, name: "Topkapı Sarayı Müzesi", cat: "muze" },
-    { lat: 41.0106, lng: 28.968, name: "Kapalıçarşı", cat: "alisveris" },
-    { lat: 41.0165, lng: 28.971, name: "Mısır Çarşısı (Eminönü)", cat: "alisveris" },
-    { lat: 41.0256, lng: 28.9741, name: "Galata Kulesi", cat: "manzara" },
-    { lat: 41.0369, lng: 28.985, name: "İstiklal Caddesi & Taksim", cat: "turistik" },
-    { lat: 40.9882, lng: 29.0267, name: "Moda Sahili & Parkı", cat: "manzara" },
-    { lat: 40.9904, lng: 29.0289, name: "Bahariye Caddesi & Süreyya Operası", cat: "kultur" },
-    { lat: 38.6431, lng: 34.8289, name: "Göreme Açık Hava Müzesi", cat: "muze" },
-    { lat: 38.6521, lng: 34.8054, name: "Uçhisar Kalesi", cat: "manzara" },
-    { lat: 41.8902, lng: 12.4922, name: "Kolezyum (Colosseum)", cat: "tarih" },
-    { lat: 35.6595, lng: 139.7005, name: "Shibuya Crossing", cat: "turistik" },
-  ];
-
-  return sampleAnchors
-    .map((anchor) => {
-      const d = Math.hypot(anchor.lat - lat, anchor.lng - lng) * 111000; // ~meters
-      return {
-        label: anchor.name,
-        category: anchor.cat,
-        distanceMeters: Math.round(d),
-        lat: anchor.lat,
-        lng: anchor.lng,
-      };
-    })
-    .filter((poi) => poi.distanceMeters < 50000) // Within 50km
-    .sort((a, b) => a.distanceMeters - b.distanceMeters)
-    .slice(0, 4);
 }

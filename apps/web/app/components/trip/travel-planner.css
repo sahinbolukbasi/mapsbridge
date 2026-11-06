@@ -150,6 +150,19 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .planner-search__skeleton {
+    padding: var(--space-2);
+  }
+  .planner-search__recent {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .planner-search__recent-title {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+  }
   /* Seçilen yer kartı (arama sonucu / haritadan seçilen nokta) */
   .planner-place {
     display: grid;
