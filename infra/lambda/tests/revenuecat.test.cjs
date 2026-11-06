@@ -611,3 +611,104 @@ test("syncFromSubscriber: aktif mapsbridge_pro entitlement yoksa no-op", async (
     "süresi geçmiş entitlement için yazım yapılmamalı",
   );
 });
+
+// ─── Increment 1.2 (bug 1: kredi yükleme) ───────────────────────────────────
+const PACK_ENV = { RC_PRODUCT_PACK_100: "mb_pack_100", RC_PRICE_PACK_100: "19900" };
+const plansEvent = () => ({
+  rawPath: "/revenuecat/plans",
+  requestContext: { http: { method: "GET", path: "/revenuecat/plans" } },
+  headers: {},
+});
+
+test("NON_RENEWING_PURCHASE pack-100 → +100 kredi (RC_PURCHASE#tx)", async () => {
+  const { load, rows } = harness({ env: PACK_ENV });
+  rows.set("USER#user-a|CREDITS", { PK: "USER#user-a", SK: "CREDITS", credits: 7 });
+  const { handler } = load("revenuecat/index.ts");
+  const res = await handler(
+    webhookEvent("NON_RENEWING_PURCHASE", {
+      id: "evt-pack-1",
+      product_id: "mb_pack_100",
+      transaction_id: "txn-pack-1",
+      expiration_at_ms: undefined,
+    }),
+  );
+  assert.equal(res.statusCode, 200);
+  assert.equal(rows.get("USER#user-a|CREDITS")?.credits, 107);
+  assert.ok(
+    [...rows.keys()].some((k) => k.includes("RC_PURCHASE#txn-pack-1")),
+    "idempotent satın alma kaydı RC_PURCHASE#<tx>",
+  );
+  assert.equal(rows.get("USER#user-a|SUBSCRIPTION"), undefined, "paket abonelik yazmaz");
+});
+
+test("NON_RENEWING_PURCHASE aynı olay / aynı işlem iki kez → tek kredi", async () => {
+  const { load, rows } = harness({ env: PACK_ENV });
+  rows.set("USER#user-a|CREDITS", { PK: "USER#user-a", SK: "CREDITS", credits: 0 });
+  const { handler } = load("revenuecat/index.ts");
+  const ev = { product_id: "mb_pack_100", transaction_id: "txn-pack-2" };
+  await handler(webhookEvent("NON_RENEWING_PURCHASE", { id: "evt-pack-2", ...ev }));
+  const dupEvent = await handler(
+    webhookEvent("NON_RENEWING_PURCHASE", { id: "evt-pack-2", ...ev }),
+  );
+  assert.equal(JSON.parse(dupEvent.body).duplicate, true);
+  // Farklı olay kimliği, aynı işlem kimliği (RC yeniden gönderim) → grantCredits idempotent.
+  await handler(webhookEvent("NON_RENEWING_PURCHASE", { id: "evt-pack-2b", ...ev }));
+  assert.equal(rows.get("USER#user-a|CREDITS")?.credits, 100);
+});
+
+test("plans: env yokken yeni ürünler available:false ve amount:null; welcomeCredits 100", async () => {
+  const { load } = harness();
+  const { handler } = load("revenuecat/index.ts");
+  const body = JSON.parse((await handler(plansEvent())).body);
+  assert.equal(body.welcomeCredits, 100);
+  for (const id of ["explorer", "agency", "pack-30", "pack-100", "pack-300"]) {
+    const p = body.products.find((x) => x.id === id);
+    assert.ok(p, `${id} katalogda`);
+    assert.equal(p.available, false, `${id}: ürün kimliği yok → satılamaz`);
+    assert.equal(p.amount, null, `${id}: fiyat uydurulmaz`);
+  }
+  assert.equal(body.products.find((x) => x.id === "pro").available, true, "pro korunur");
+  const mode = (id) => body.products.find((x) => x.id === id).mode;
+  assert.equal(mode("pack-100"), "credit_pack");
+  assert.equal(mode("agency"), "subscription");
+});
+
+test("plans: ürün kimliği + fiyat env'i varsa available:true; BILLING_ENABLED kapalıysa false", async () => {
+  const on = harness({ env: PACK_ENV });
+  const body = JSON.parse((await on.load("revenuecat/index.ts").handler(plansEvent())).body);
+  const pack = body.products.find((x) => x.id === "pack-100");
+  assert.deepEqual([pack.available, pack.amount, pack.credits], [true, 19900, 100]);
+  const onlyId = harness({ env: { RC_PRODUCT_PACK_30: "mb_pack_30" } });
+  const b2 = JSON.parse((await onlyId.load("revenuecat/index.ts").handler(plansEvent())).body);
+  assert.equal(b2.products.find((x) => x.id === "pack-30").available, false, "fiyatsız satılmaz");
+  const off = harness({ env: { ...PACK_ENV, BILLING_ENABLED: "false" } });
+  const b3 = JSON.parse((await off.load("revenuecat/index.ts").handler(plansEvent())).body);
+  assert.equal(b3.enabled, false);
+  assert.equal(b3.products.find((x) => x.id === "pack-100").available, false);
+});
+
+test("checkout: success_url/cancel_url /checkout/'a döner; kimliksiz ürün reddedilir", async () => {
+  const { load } = harness({ env: PACK_ENV });
+  const { handler } = load("revenuecat/index.ts");
+  const post = (body) =>
+    handler({
+      rawPath: "/revenuecat/checkout",
+      requestContext: { http: { method: "POST", path: "/revenuecat/checkout" } },
+      headers: { authorization: "Bearer " + token() },
+      body: JSON.stringify(body),
+    });
+  const ok = await post({ targetId: "pack-100" });
+  assert.equal(ok.statusCode, 201);
+  const url = new URL(JSON.parse(ok.body).url);
+  assert.equal(url.searchParams.get("product_id"), "mb_pack_100");
+  assert.equal(
+    url.searchParams.get("success_url"),
+    "https://mapsbridge.com/checkout/?success=true",
+  );
+  assert.equal(
+    url.searchParams.get("cancel_url"),
+    "https://mapsbridge.com/checkout/?canceled=true",
+  );
+  const missing = await post({ targetId: "pack-300" });
+  assert.equal(missing.statusCode, 400);
+});

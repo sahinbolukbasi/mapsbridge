@@ -3,7 +3,7 @@ import { resolveEnvSecret } from "../shared/http";
 import type { ApiGatewayEvent } from "../shared/http";
 import { BillingError, table, wallet, grantCredits, initializeTrial } from "../billing/store";
 import { getDynamoClient } from "../shared/dynamo";
-import { catalog } from "../billing/catalog";
+import { revenuecatCatalog as catalog, isProductAvailable } from "../billing/catalog";
 import { UpdateItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 import { timingSafeEqual } from "node:crypto";
@@ -75,9 +75,10 @@ export async function handler(event: ApiGatewayEvent) {
         enabled: process.env.BILLING_ENABLED === "true",
         products: catalog().map((p) => ({
           ...p,
-          available: process.env.BILLING_ENABLED === "true" && !!p.productId,
+          available: isProductAvailable(p),
         })),
-        welcomeCredits: 5,
+        // Sunucu gerçeği: store.ts initializeTrial 100 kredi verir (approval userAdjustments).
+        welcomeCredits: 100,
         costs: { route: 5, chat: 1, clarify: 0 },
       });
 
@@ -114,7 +115,8 @@ export async function handler(event: ApiGatewayEvent) {
       await initializeTrial(userId);
       const product = catalog().find(
         (p) =>
-          p.productId && (body.productId ? p.productId === body.productId : p.id === body.targetId),
+          isProductAvailable(p) &&
+          (body.productId ? p.productId === body.productId : p.id === body.targetId),
       );
       if (!product) return reply(400, { error: "Satışa açık bir paket seçin." });
       const url = await createWebCheckoutUrl(userId, product, user.email);
@@ -212,6 +214,9 @@ async function handleWebhook(event: ApiGatewayEvent) {
   }
   try {
     switch (ev.type as string) {
+      // Tüketilebilir kredi paketleri (ve lifetime) RevenueCat'te NON_RENEWING_PURCHASE olarak
+      // gelir; aynı idempotent grantCredits anahtarlarıyla INITIAL_PURCHASE dalını paylaşır.
+      case "NON_RENEWING_PURCHASE":
       case "INITIAL_PURCHASE": {
         const product = catalog().find((p) => p.productId === productId);
         if (!product) break;
@@ -322,7 +327,11 @@ async function handleWebhook(event: ApiGatewayEvent) {
     }
   }
 
-  if (ev.type === "INITIAL_PURCHASE" || ev.type === "RENEWAL") {
+  if (
+    ev.type === "INITIAL_PURCHASE" ||
+    ev.type === "NON_RENEWING_PURCHASE" ||
+    ev.type === "RENEWAL"
+  ) {
     await publishConversion(ev.id, userId, ev.type, productId, ev.store);
   }
   return reply(200, { received: true });
@@ -421,8 +430,8 @@ async function createWebCheckoutUrl(
   const url = new URL(baseUrl);
   url.searchParams.set("app_user_id", userId);
   url.searchParams.set("product_id", product.productId!);
-  url.searchParams.set("success_url", `${appOrigin()}/odeme/?success=true`);
-  url.searchParams.set("cancel_url", `${appOrigin()}/odeme/?canceled=true`);
+  url.searchParams.set("success_url", `${appOrigin()}/checkout/?success=true`);
+  url.searchParams.set("cancel_url", `${appOrigin()}/checkout/?canceled=true`);
   if (email) url.searchParams.set("email", email);
   return url.href;
 }

@@ -34,3 +34,47 @@ export const catalog = () => [
     priceId: null,
   },
 ];
+
+/**
+ * RevenueCat kataloğu (Increment 1.2, bug 1) = mevcut ürünler + Kaşif / Tur Lideri abonelikleri
+ * ve kredi paketleri. Ürün/paket kimliği ve fiyat koda GÖMÜLMEZ: RevenueCat dashboard'da
+ * oluşturulup env ile verilir (revenuecat-setup.md). Env yoksa productId boş → /revenuecat/plans
+ * available:false, checkout "Satışa açık bir paket seçin." döner; amount null → UI fiyat çizmez.
+ * Stripe yolu (danger zone #3) yalnız `catalog()`'u okur ve değişmez.
+ */
+export const revenuecatCatalog = () => [
+  ...catalog().map((p) => ({ ...p, amount: p.amount as number | null })),
+  envProduct("explorer", "subscription", 100),
+  envProduct("agency", "subscription", 2500),
+  envProduct("pack-30", "credit_pack", 30),
+  envProduct("pack-100", "credit_pack", 100),
+  envProduct("pack-300", "credit_pack", 300),
+];
+
+/** `pack-100` → `PACK_100`; env anahtarı soneki. */
+const envSuffix = (id: string) => id.toUpperCase().replace(/-/g, "_");
+
+/**
+ * Env'den okunan ürün. `RC_PRICE_<ID>` kuruş cinsinden pozitif tam sayıysa amount, aksi halde
+ * null (fiyat uydurulmaz).
+ */
+function envProduct(id: string, mode: "subscription" | "credit_pack", credits: number) {
+  const suffix = envSuffix(id);
+  const rawPrice = process.env[`RC_PRICE_${suffix}`];
+  const price = rawPrice && /^\d+$/.test(rawPrice) ? Number(rawPrice) : NaN;
+  return {
+    id,
+    mode,
+    credits,
+    amount: Number.isSafeInteger(price) && price > 0 ? price : null,
+    productId: process.env[`RC_PRODUCT_${suffix}`] || undefined,
+    packageId: process.env[`RC_PACKAGE_${suffix}`] || undefined,
+    entitlementId: mode === "subscription" ? "mapsbridge_pro" : undefined,
+    priceId: null,
+  };
+}
+
+export type CatalogProduct = ReturnType<typeof revenuecatCatalog>[number];
+/** Satın alınabilir: satış açık + ürün kimliği + sunucu fiyatı var. */
+export const isProductAvailable = (p: CatalogProduct) =>
+  process.env.BILLING_ENABLED === "true" && !!p.productId && p.amount !== null;
