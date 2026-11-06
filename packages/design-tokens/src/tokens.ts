@@ -237,6 +237,7 @@ export const motion = {
     emphasized: "cubic-bezier(0.3, 0, 0, 1)",
     enter: "cubic-bezier(0.05, 0.7, 0.1, 1)", // giriş (decelerate)
     exit: "cubic-bezier(0.3, 0, 0.8, 0.15)", // çıkış (accelerate)
+    linear: "cubic-bezier(0, 0, 1, 1)", // süre çubuğu, belirsiz ilerleme, spinner (sabit hız)
   },
   distance: { sm: 4, md: 8, lg: 16 }, // px, giriş kayması
   stagger: { step: 40, max: 240 }, // ms

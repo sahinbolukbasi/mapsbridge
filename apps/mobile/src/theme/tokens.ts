@@ -378,6 +378,12 @@ export const tokens = {
         0,
         0.8,
         0.15
+      ],
+      linear: [
+        0,
+        0,
+        1,
+        1
       ]
     },
     distance: {

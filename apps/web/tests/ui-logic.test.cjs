@@ -342,3 +342,30 @@ test("modalPresentation (R10): sheet yalnız <768, ≥768 ve diğer boyutlar ort
     /\.ui-modal\.ui-modal--closing\s*\{\s*animation:\s*ui-dialog-out var\(--duration-base\) var\(--easing-exit\)/,
   );
 });
+test("toast-timing: hata ve eylemli süresiz, diğerleri 6 sn; duraklat/sürdür kalan süreyi korur", () => {
+  const t = load("toast-timing");
+  assert.equal(t.toastDuration({ tone: "danger", hasAction: false }), null);
+  assert.equal(t.toastDuration({ tone: "success", hasAction: true, durationMs: 3000 }), null);
+  assert.equal(t.toastDuration({ tone: "info", hasAction: false }), t.DEFAULT_TOAST_MS);
+  assert.equal(t.toastDuration({ tone: "success", hasAction: false, durationMs: 3000 }), 3000);
+  assert.equal(t.toastDuration({ tone: "warning", hasAction: false, durationMs: -1 }), 6000);
+  let timer = t.startTimer(6000, 1000);
+  timer = t.pauseTimer(timer, 3000);
+  assert.deepEqual(plain(timer), { remaining: 4000, startedAt: null });
+  assert.deepEqual(plain(t.pauseTimer(timer, 9000)), plain(timer), "ikinci duraklatma değiştirmez");
+  assert.equal(t.timerProgress(timer, 6000, 99999), 4000 / 6000, "duraklatılmışken çubuk durur");
+  timer = t.resumeTimer(timer, 10000);
+  assert.deepEqual(plain(timer), { remaining: 4000, startedAt: 10000 });
+  assert.equal(t.timerProgress(timer, 6000, 12000), 2000 / 6000);
+  assert.equal(t.timerProgress(timer, 6000, 20000), 0);
+});
+test("Toast görünümü: ton şeridi + ikon, hata role=alert, süre çubuğu yalnız no-preference", () => {
+  const src = fs.readFileSync(path.resolve(__dirname, "../app/components/ui/toast.tsx"), "utf8");
+  assert.match(src, /role="alert" aria-live="assertive"/);
+  assert.match(src, /toastDuration\(/);
+  const css = fs.readFileSync(path.resolve(__dirname, "../app/components/ui/ui.css"), "utf8");
+  assert.match(css, /\.ui-toast__timer \{\s*display: none;/);
+  const motion = css.slice(css.indexOf("Toast: alttan 8 px"));
+  assert.match(motion, /ui-toast-timer var\(--toast-duration\) var\(--easing-linear\)/);
+  assert.match(css, /\.ui-toast--danger \{\s*--toast-accent: var\(--color-danger\)/);
+});

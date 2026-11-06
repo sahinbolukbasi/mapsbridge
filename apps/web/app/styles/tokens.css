@@ -298,6 +298,7 @@
     --easing-emphasized: cubic-bezier(0.3, 0, 0, 1);
     --easing-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
     --easing-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+    --easing-linear: cubic-bezier(0, 0, 1, 1);
     --motion-distance-sm: 4px;
     --motion-distance-md: 8px;
     --motion-distance-lg: 16px;
