@@ -136,7 +136,7 @@ export function toUiError(err: unknown, ctx: { method?: HttpMethod } = {}): UiEr
         "Bu işlem için yeterli krediniz yok. Kredi paketi alarak ya da planınızı yükselterek devam edebilirsiniz.",
       retryable: false,
       action: "upgrade",
-      actionUrl: upgradeUrl ?? "/odeme/?tab=plans",
+      actionUrl: upgradeUrl ?? "/checkout/?tab=plans",
     };
   // 403: üç ayrı neden — kodu/mesajı kullanıcıya net ve doğru aksiyonla göster.
   if (status === 403) {
@@ -178,7 +178,7 @@ export function toUiError(err: unknown, ctx: { method?: HttpMethod } = {}): UiEr
         message: server ?? "Bu özellik için planınızı yükseltmeniz gerekiyor.",
         retryable: false,
         action: "upgrade",
-        actionUrl: upgradeUrl ?? "/odeme/?tab=plans",
+        actionUrl: upgradeUrl ?? "/checkout/?tab=plans",
       };
     // Diğer tüm 403'ler: gerçek yetki eksikliği.
     return {

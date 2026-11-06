@@ -402,6 +402,9 @@ export const LEGACY_REDIRECTS: Readonly<Record<RoutePath, RoutePath>> = {
   // export'ta sayfa yoktu (404). LegacyRedirect sorguyu korur, /verify/ kodu doldurur (karar S20).
   "/dogrula/": "/verify/",
   "/u/": "/checkout/",
+  // RevenueCat/Stripe success_url'leri /odeme/?success=true… döner; statik export'ta sayfa yoktu
+  // (404). LegacyRedirect sorguyu korur, /checkout/ ödeme doğrulama yoklamasını başlatır.
+  "/odeme/": "/checkout/",
   "/admin/": "/u/admin/",
 };
 

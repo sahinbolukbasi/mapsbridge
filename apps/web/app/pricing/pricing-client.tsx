@@ -197,7 +197,9 @@ export default function PricingClient() {
                         pack.credits.toLocaleString(locale === "en" ? "en-GB" : "tr-TR"),
                       )}
                     </p>
-                    <p className="pricing__pack-price">{formatPrice(pack.amount, locale)}</p>
+                    {pack.amount !== null && (
+                      <p className="pricing__pack-price">{formatPrice(pack.amount, locale)}</p>
+                    )}
                     {buyable ? (
                       <Button
                         variant="secondary"

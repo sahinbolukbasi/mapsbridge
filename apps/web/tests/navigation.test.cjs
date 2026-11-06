@@ -112,3 +112,19 @@ test("dönüş parametresi üreticileri yalnızca next yazar; paylaşım üretic
   }
   assert.deepEqual(bad, []);
 });
+
+// Bug 1: RevenueCat/Stripe success_url'leri /odeme/?success=true… — /checkout/'a sorguyla gider.
+test("/odeme/ → /checkout/ LEGACY yönlendirmesi sorguyu korur", () => {
+  const fs = require("node:fs");
+  const { LEGACY_REDIRECTS } = loadTs(path.join(APP, "lib/route-registry.ts"));
+  assert.equal(LEGACY_REDIRECTS["/odeme/"], "/checkout/");
+  const page = fs.readFileSync(path.join(APP, "odeme/page.tsx"), "utf8");
+  assert.match(page, /<LegacyRedirect from="\/odeme\/" \/>/);
+  // LegacyRedirect'in inline betiği ile aynı ifade: hedef + search + hash.
+  const src = fs.readFileSync(path.join(APP, "components/ui/legacy-redirect.tsx"), "utf8");
+  assert.ok(src.includes("+location.search+location.hash"));
+  const location = { search: "?success=true&session_id=cs_1", hash: "" };
+  const target = LEGACY_REDIRECTS["/odeme/"] + location.search + location.hash;
+  assert.equal(target, "/checkout/?success=true&session_id=cs_1");
+  assert.equal(safeNext("/odeme/?success=true", ORIGIN), "/odeme/?success=true");
+});

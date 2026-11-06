@@ -186,7 +186,7 @@ test("http-error: 403/402 koda göre ayrışır (e-posta/cüzdan/plan/kredi)", (
   const credit = toUiError(api(402, "İşlem başarısız oldu (402)"));
   assert.deepEqual(
     [credit.kind, credit.action, credit.actionUrl],
-    ["insufficient-credit", "upgrade", "/odeme/?tab=plans"],
+    ["insufficient-credit", "upgrade", "/checkout/?tab=plans"],
   );
 });
 

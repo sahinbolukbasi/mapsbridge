@@ -295,3 +295,38 @@ test("yasak metinler: EN POPÜLER, deneme, kredi kartı ve contracts TRY fiyatla
     /EN POPÜLER|most popular|ücretsiz deneme|free trial|deneme süresi|kredi kartı gerekmez|no credit card|yakında|uygulamayı indir|YEARLY_RATES|monthlyPriceTry|yearlyPriceTry|priceTry|₺\s?\d/i;
   for (const src of [...files, ...locales]) assert.doesNotMatch(src, banned);
 });
+
+// Bug 1 (kredi yükleme): checkout tek durum kaynağı + fiyatsız ürün satılmaz.
+test("checkoutAvailability: closed / noProducts / open", () => {
+  const ok = (enabled, products) => ({ status: "ok", enabled, products });
+  assert.equal(catalog.checkoutAvailability(ok(false, [product()])), "closed");
+  assert.equal(catalog.checkoutAvailability(ok(true, [])), "noProducts");
+  assert.equal(
+    catalog.checkoutAvailability(ok(true, [product({ available: false })])),
+    "noProducts",
+    "available:false ürün satış açık saymaz",
+  );
+  assert.equal(
+    catalog.checkoutAvailability(ok(true, [product({ id: "pro-yearly" })])),
+    "noProducts",
+    "yalnız yıllık ürün web'de satılmaz (S18)",
+  );
+  assert.equal(
+    catalog.checkoutAvailability(
+      ok(true, [product({ id: "pack-100", mode: "credit_pack", credits: 100 })]),
+    ),
+    "open",
+  );
+});
+test("parseCatalog: amount:null kabul edilir ama ürün satın alınamaz; planOffer fiyat çizmez", () => {
+  const parsed = plain(
+    catalog.parseCatalog({ enabled: true, products: [product({ id: "explorer", amount: null })] }),
+  );
+  assert.equal(parsed.products.length, 1);
+  assert.equal(parsed.products[0].amount, null);
+  assert.equal(parsed.products[0].available, false);
+  assert.equal(catalog.checkoutAvailability(parsed), "noProducts");
+  const offer = plain(catalog.planOffer("explorer", "monthly", parsed, "free"));
+  assert.equal(offer.price, "none", "fiyat uydurulmaz");
+  assert.equal(offer.purchase, "unavailable");
+});

@@ -19,8 +19,11 @@ export type CatalogProduct = {
   id: string;
   mode: CatalogMode;
   credits: number;
-  /** Kuruş (amount / 100 = TRY); checkout bugün de böyle gösterir. */
-  amount: number;
+  /**
+   * Kuruş (amount / 100 = TRY); checkout bugün de böyle gösterir. `null`: sunucuda fiyat
+   * tanımlı değil (RC_PRICE_<ID> env yok) → fiyat satırı çizilmez, ürün satın alınamaz.
+   */
+  amount: number | null;
   available: boolean;
 };
 export type Catalog =
@@ -40,9 +43,16 @@ function parseProduct(raw: unknown): CatalogProduct | null {
   if (typeof id !== "string" || id.length === 0) return null;
   if (typeof mode !== "string" || !CATALOG_MODES.includes(mode as CatalogMode)) return null;
   if (!isNonNegative(credits) || !Number.isInteger(credits)) return null;
-  if (!isNonNegative(amount)) return null;
+  if (amount !== null && !isNonNegative(amount)) return null;
   if (typeof available !== "boolean") return null;
-  return { id, mode: mode as CatalogMode, credits, amount, available };
+  // Fiyatsız ürün satılamaz (sunucu da available:false yazar; burada ikinci kez zorlanır).
+  return {
+    id,
+    mode: mode as CatalogMode,
+    credits,
+    amount,
+    available: available && amount !== null,
+  };
 }
 
 /**
@@ -112,7 +122,7 @@ export function yearlyDiscount(
   monthly: CatalogProduct | undefined,
   yearly: CatalogProduct | undefined,
 ): number | undefined {
-  if (!monthly || !yearly) return undefined;
+  if (!monthly || !yearly || monthly.amount === null || yearly.amount === null) return undefined;
   if (monthly.amount <= 0 || yearly.amount <= 0 || monthly.credits <= 0 || yearly.credits <= 0)
     return undefined;
   const monthlyPerCredit = monthly.amount / monthly.credits;
@@ -142,6 +152,21 @@ export function isWebSellable(product: CatalogProduct): boolean {
   return product.mode === "credit_pack" || !product.id.endsWith("-yearly");
 }
 
+/**
+ * Checkout'un tek durumu (bug 1): `closed` (enabled:false → yalnız "Kredi satışı henüz açık
+ * değil" uyarısı), `noProducts` (satış açık ama satın alınabilir ürün yok), `open`. Bugünkü uyarı
+ * + devre dışı düğme + "paket yok" metni üst üste binmesin diye checkout bunu tek yerden okur.
+ */
+export type CheckoutAvailability = "closed" | "noProducts" | "open";
+export function checkoutAvailability(
+  catalog: Extract<Catalog, { status: "ok" }>,
+): CheckoutAvailability {
+  if (!catalog.enabled) return "closed";
+  const sellable = catalog.products.some(
+    (p) => p.available && p.amount !== null && isWebSellable(p),
+  );
+  return sellable ? "open" : "noProducts";
+}
 /** Kredi paketleri yalnızca katalogdan (design §7.2 madde 5). */
 export function creditPacks(products: readonly CatalogProduct[]): CatalogProduct[] {
   return products.filter((p) => p.mode === "credit_pack");
@@ -207,14 +232,15 @@ export function planOffer(
           findPlanProduct(catalog.products, tier, "yearly"),
         )
       : undefined;
-  const price: PlanPriceState = product
-    ? { amount: product.amount, period, credits: product.credits }
-    : "none";
+  const price: PlanPriceState =
+    product && product.amount !== null
+      ? { amount: product.amount, period, credits: product.credits }
+      : "none";
   const purchase: PlanPurchase = current
     ? "current"
     : !catalog.enabled
       ? "closed"
-      : !product || !product.available || !isWebSellable(product)
+      : !product || !product.available || product.amount === null || !isWebSellable(product)
         ? "unavailable"
         : "ok";
   const offer: PlanOffer = { price, purchase };

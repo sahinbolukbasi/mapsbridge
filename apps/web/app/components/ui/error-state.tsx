@@ -44,7 +44,7 @@ export function ErrorState({
         </Button>
       )}
       {error.action === "upgrade" && (
-        <Button variant="primary" size="sm" href={error.actionUrl ?? "/odeme/?tab=plans"}>
+        <Button variant="primary" size="sm" href={error.actionUrl ?? "/checkout/?tab=plans"}>
           {t("ui.upgrade", "Planları gör")}
         </Button>
       )}

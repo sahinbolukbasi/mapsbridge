@@ -27,6 +27,7 @@ import { apiFetch } from "../lib/api-client";
 import { billingService } from "../lib/billing/billing-service";
 import {
   PLAN_PERIODS,
+  checkoutAvailability,
   creditPacks,
   fetchCatalog,
   findPlanProduct,
@@ -179,6 +180,8 @@ export default function CheckoutClient() {
       })
     : [];
   const packs = ok ? creditPacks(ok.products) : [];
+  // Tek durum kaynağı (bug 1): kapalıyken yalnız bir uyarı; ürünsüzken yalnız bir metin.
+  const availability = ok ? checkoutAvailability(ok) : null;
   const planMissing =
     !!ok && tab === "plans" && plan !== null && !subscriptions.some((s) => s.tier === plan);
   const tierName = t(`pricing.tier.${wallet.subscriptionTier}`);
@@ -186,7 +189,7 @@ export default function CheckoutClient() {
   const message = notice ? ("key" in notice ? t(notice.key) : notice.text) : "";
 
   function buyButton(product: CatalogProduct, isCurrent: boolean) {
-    const purchasable = !!ok?.enabled && product.available && !isCurrent;
+    const purchasable = !!ok?.enabled && product.available && product.amount !== null && !isCurrent;
     return (
       <Button
         variant="primary"
@@ -197,7 +200,7 @@ export default function CheckoutClient() {
       >
         {isCurrent
           ? t("pricing.current")
-          : !ok?.enabled || !product.available
+          : !ok?.enabled || !product.available || product.amount === null
             ? t("pricing.unavailable")
             : signedIn
               ? t("checkout.buy")
@@ -274,102 +277,119 @@ export default function CheckoutClient() {
           }
         />
       )}
-      {ok && !ok.enabled && (
+      {availability === "closed" && (
         <Alert
           tone="warning"
           live="polite"
           className="checkout-alert"
-          title={t("pricing.alert.disabled")}
+          title={t("checkout.closed.title")}
         >
           {t("checkout.closed.body")}
         </Alert>
       )}
-
-      <Section title={t("checkout.buy.title")} className="checkout-section">
-        <SegmentedControl
-          label={t("checkout.type.label")}
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: "plans", label: t("checkout.type.plans") },
-            { value: "credits", label: t("checkout.type.credits") },
-          ]}
-        />
-        {tab === "plans" && (
-          <SegmentedControl
-            label={t("pricing.period.label")}
-            value={period}
-            onChange={setPeriod}
-            options={[
-              { value: "monthly", label: t("pricing.period.monthly") },
-              { value: "yearly", label: t("pricing.period.yearly") },
-            ]}
-          />
-        )}
-        {planMissing && (
-          <Alert tone="info" className="checkout-alert">
-            {t("checkout.planMissing")}
-          </Alert>
-        )}
-        {catalog === "loading" ? (
-          <LoadingState label={t("checkout.loading")} />
-        ) : !ok ? null : tab === "plans" ? (
-          subscriptions.length > 0 ? (
-            <ul className="checkout-products">
-              {subscriptions.map(({ tier, product }) => {
-                // Sunucu wallet'ı dönem bildirmez; subscriptionCycle bugün hep "monthly".
-                const isCurrent =
-                  signedIn &&
-                  wallet.subscriptionTier === tier &&
-                  wallet.subscriptionCycle === period;
-                return (
-                  <li
-                    key={product.id}
-                    className={
-                      tier === plan
-                        ? "checkout-product checkout-product--selected"
-                        : "checkout-product"
-                    }
-                    data-surface="default"
-                  >
-                    <div className="checkout-product__head">
-                      <h3 className="checkout-product__name">{t(`pricing.tier.${tier}`)}</h3>
-                      {tier === plan && <Badge tone="info">{t("checkout.selected")}</Badge>}
-                    </div>
-                    <p className="checkout-product__credits">
-                      {t("credits.other").replace("{n}", num(product.credits))}
-                    </p>
-                    <p className="checkout-product__price">
-                      {t(
-                        period === "yearly" ? "pricing.price.yearly" : "pricing.price.monthly",
-                      ).replace("{price}", formatPrice(product.amount, locale))}
-                    </p>
-                    <p className="checkout-muted">{t("checkout.subscription.note")}</p>
-                    {buyButton(product, isCurrent)}
-                  </li>
-                );
-              })}
-            </ul>
+      {availability !== "closed" && (
+        <Section title={t("checkout.buy.title")} className="checkout-section">
+          {availability === "noProducts" ? (
+            <p className="checkout-muted" role="status">
+              {t("checkout.noProducts")}
+            </p>
           ) : (
-            <p className="checkout-muted">{t("checkout.noSubscriptions")}</p>
-          )
-        ) : packs.length > 0 ? (
-          <ul className="checkout-products">
-            {packs.map((product) => (
-              <li key={product.id} className="checkout-product" data-surface="default">
-                <h3 className="checkout-product__name">
-                  {t("credits.other").replace("{n}", num(product.credits))}
-                </h3>
-                <p className="checkout-product__price">{formatPrice(product.amount, locale)}</p>
-                <p className="checkout-muted">{t("checkout.pack.note")}</p>
-                {buyButton(product, false)}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="checkout-muted">{t("checkout.noPacks")}</p>
-        )}
-      </Section>
+            <>
+              <SegmentedControl
+                label={t("checkout.type.label")}
+                value={tab}
+                onChange={setTab}
+                options={[
+                  { value: "plans", label: t("checkout.type.plans") },
+                  { value: "credits", label: t("checkout.type.credits") },
+                ]}
+              />
+              {tab === "plans" && (
+                <SegmentedControl
+                  label={t("pricing.period.label")}
+                  value={period}
+                  onChange={setPeriod}
+                  options={[
+                    { value: "monthly", label: t("pricing.period.monthly") },
+                    { value: "yearly", label: t("pricing.period.yearly") },
+                  ]}
+                />
+              )}
+              {planMissing && (
+                <Alert tone="info" className="checkout-alert">
+                  {t("checkout.planMissing")}
+                </Alert>
+              )}
+              {catalog === "loading" ? (
+                <LoadingState label={t("checkout.loading")} />
+              ) : !ok ? null : tab === "plans" ? (
+                subscriptions.length > 0 ? (
+                  <ul className="checkout-products">
+                    {subscriptions.map(({ tier, product }) => {
+                      // Sunucu wallet'ı dönem bildirmez; subscriptionCycle bugün hep "monthly".
+                      const isCurrent =
+                        signedIn &&
+                        wallet.subscriptionTier === tier &&
+                        wallet.subscriptionCycle === period;
+                      return (
+                        <li
+                          key={product.id}
+                          className={
+                            tier === plan
+                              ? "checkout-product checkout-product--selected"
+                              : "checkout-product"
+                          }
+                          data-surface="default"
+                        >
+                          <div className="checkout-product__head">
+                            <h3 className="checkout-product__name">{t(`pricing.tier.${tier}`)}</h3>
+                            {tier === plan && <Badge tone="info">{t("checkout.selected")}</Badge>}
+                          </div>
+                          <p className="checkout-product__credits">
+                            {t("credits.other").replace("{n}", num(product.credits))}
+                          </p>
+                          {product.amount !== null && (
+                            <p className="checkout-product__price">
+                              {t(
+                                period === "yearly"
+                                  ? "pricing.price.yearly"
+                                  : "pricing.price.monthly",
+                              ).replace("{price}", formatPrice(product.amount, locale))}
+                            </p>
+                          )}
+                          <p className="checkout-muted">{t("checkout.subscription.note")}</p>
+                          {buyButton(product, isCurrent)}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="checkout-muted">{t("checkout.noSubscriptions")}</p>
+                )
+              ) : packs.length > 0 ? (
+                <ul className="checkout-products">
+                  {packs.map((product) => (
+                    <li key={product.id} className="checkout-product" data-surface="default">
+                      <h3 className="checkout-product__name">
+                        {t("credits.other").replace("{n}", num(product.credits))}
+                      </h3>
+                      {product.amount !== null && (
+                        <p className="checkout-product__price">
+                          {formatPrice(product.amount, locale)}
+                        </p>
+                      )}
+                      <p className="checkout-muted">{t("checkout.pack.note")}</p>
+                      {buyButton(product, false)}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="checkout-muted">{t("checkout.noPacks")}</p>
+              )}
+            </>
+          )}
+        </Section>
+      )}
 
       {signedIn && (
         <Section title={t("checkout.promo.title")} className="checkout-section">
