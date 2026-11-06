@@ -5,20 +5,18 @@ import { useLocale } from "../../lib/locale-context";
 import { cx } from "./cx";
 import { IconButton } from "./icon-button";
 import { FOCUSABLE_SELECTOR, nextFocusIndex, shouldWrap } from "./logic/focus-trap";
+import {
+  MOBILE_SHEET_QUERY,
+  animatesClose,
+  modalPresentation,
+  type ModalPresentation,
+} from "./logic/modal-presentation";
 import "./ui.css";
 
 export type ModalSize = "sm" | "md" | "lg" | "sheet";
 
-// sheet varyantı küçük ekranda alttan kayar; kapanış animasyonu bitince dialog.close() (§8.2).
-const SHEET_MOTION_QUERY = "(max-width: 767.98px)";
-function animatesSheet(size: ModalSize): boolean {
-  return (
-    size === "sheet" &&
-    !prefersReducedMotion() &&
-    typeof window.matchMedia === "function" &&
-    window.matchMedia(SHEET_MOTION_QUERY).matches
-  );
-}
+// R10: sheet yalnız <768 alttan kayar; ≥768 her modal ortalı dialog (ölçek + solma). Kapanış
+// animasyonu her iki sunumda beklenir, bitince dialog.close(); azaltılmış harekette anında.
 /** Kapanış animasyonu takılırsa güvenlik süresi: --duration-slow (+ pay). */
 function closeFallbackMs(el: HTMLElement): number {
   const raw = getComputedStyle(el).getPropertyValue("--duration-slow").trim();
@@ -34,8 +32,9 @@ function focusables(root: HTMLElement): HTMLElement[] {
 /**
  * Yerel <dialog> + showModal() (inert arka plan, Esc, üst katman). Odak: initialFocus ya da ilk
  * odaklanabilir, yoksa başlık; Tab döngüsü logic/focus-trap.ts; kapanışta tetikleyiciye döner.
- * sheet: küçük ekranda --duration-deliberate/--easing-enter ile açılır, --duration-slow/
- * --easing-exit ile kapanır (yalnızca hareket tercihinde; aksi halde anında).
+ * Sunum logic/modal-presentation.ts: sheet yalnız <768 (alttan, --duration-deliberate); ≥768 ve
+ * diğer boyutlar ortalı dialog (translateY + scale .96 → yerinde, --duration-slow/--easing-enter;
+ * kapanış .97 + solma, --duration-base/--easing-exit). Hareket yalnız no-preference'ta.
  */
 export function Modal({
   open,
@@ -66,6 +65,18 @@ export function Modal({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
   const [closing, setClosing] = useState(false);
+  const [presentation, setPresentation] = useState<ModalPresentation>("dialog");
+  useEffect(() => {
+    if (size !== "sheet" || typeof window.matchMedia !== "function") {
+      setPresentation("dialog");
+      return;
+    }
+    const mql = window.matchMedia(MOBILE_SHEET_QUERY);
+    const update = () => setPresentation(modalPresentation(size, mql.matches));
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, [size]);
   const id = useId();
   const titleId = `${id}-title`;
   const descId = description ? `${id}-desc` : undefined;
@@ -97,7 +108,7 @@ export function Modal({
         setClosing(false);
         trigger.current?.focus?.();
       };
-      if (!animatesSheet(size)) {
+      if (!animatesClose(prefersReducedMotion())) {
         finish();
         return;
       }
@@ -127,6 +138,7 @@ export function Modal({
       ref={ref}
       className={cx("ui-modal", `ui-modal--${size}`, closing && "ui-modal--closing", className)}
       data-surface="default"
+      data-presentation={presentation}
       aria-labelledby={titleId}
       aria-describedby={descId}
       aria-modal="true"

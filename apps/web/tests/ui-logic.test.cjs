@@ -320,3 +320,25 @@ test("I8: <TravelAffiliateCards / <InlineAffiliateStrip JSX'i yalnız travel-ass
   assert.equal(tr["ai.prepTab"], "Hazırlık");
   assert.equal(en["ai.prepTab"], "Trip prep");
 });
+test("modalPresentation (R10): sheet yalnız <768, ≥768 ve diğer boyutlar ortalı dialog", () => {
+  const { modalPresentation, animatesClose, MOBILE_SHEET_QUERY } = load("modal-presentation");
+  assert.equal(modalPresentation("sheet", true), "sheet");
+  assert.equal(modalPresentation("sheet", false), "dialog");
+  for (const size of ["sm", "md", "lg"]) {
+    assert.equal(modalPresentation(size, true), "dialog");
+    assert.equal(modalPresentation(size, false), "dialog");
+  }
+  assert.equal(MOBILE_SHEET_QUERY, "(max-width: 767.98px)");
+  assert.equal(animatesClose(false), true, "hareket serbestken kapanış animasyonu beklenir");
+  assert.equal(animatesClose(true), false, "azaltmada anında kapanır");
+  const css = fs.readFileSync(path.resolve(__dirname, "../app/components/ui/ui.css"), "utf8");
+  assert.match(css, /@keyframes ui-dialog-in\s*\{\s*from\s*\{[^}]*scale\(0\.96\)/);
+  assert.match(
+    css,
+    /\.ui-modal\[open\]\s*\{\s*animation:\s*ui-dialog-in var\(--duration-slow\) var\(--easing-enter\)/,
+  );
+  assert.match(
+    css,
+    /\.ui-modal\.ui-modal--closing\s*\{\s*animation:\s*ui-dialog-out var\(--duration-base\) var\(--easing-exit\)/,
+  );
+});

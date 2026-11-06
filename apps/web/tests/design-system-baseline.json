@@ -87,9 +87,7 @@
     "app/styles.css": 1
   },
   "G30": {},
-  "G31": {
-    "app/components/ui/ui.css": 5
-  },
+  "G31": {},
   "G32": {
     "app/components/assistant/assistant-ui.css": 1,
     "app/maps/maps.css": 2,
