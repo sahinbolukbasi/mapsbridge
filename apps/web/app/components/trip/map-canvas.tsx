@@ -46,6 +46,7 @@ export interface LeafletMap {
   flyTo(latlng: [number, number] | LeafletLatLng, zoom: number, options?: object): this;
   setView(latlng: [number, number] | LeafletLatLng, zoom: number, options?: object): this;
   zoomIn(): this;
+  getCenter(): LeafletLatLng;
   zoomOut(): this;
   getZoom(): number;
   getSize(): LeafletPoint;

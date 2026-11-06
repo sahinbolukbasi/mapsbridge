@@ -31,6 +31,7 @@ import type {
   LeafletMarker,
 } from "../components/trip/map-canvas";
 import { PinPopupContent } from "../components/trip/pin-popup";
+import { DISCOVERY_POOL_EVENT, type DiscoveryPoolDetail } from "../components/trip/discover-panel";
 import { openPinEffects, pinPopupModel } from "../lib/trip/pin-popup";
 import { TripPicker } from "../components/trip/trip-picker";
 import { ShareModal, type ShareTarget } from "../components/trip/share-modal";
@@ -406,6 +407,34 @@ export default function Panel() {
     planner.selectedPinId,
   ]);
 
+  // Keşif havuzu (bug 5): ayrı stil (kesik halka), rota pinlerinden ayırt edilir.
+  const [discoveryPool, setDiscoveryPool] = useState<DiscoveryPoolDetail["places"]>([]);
+  const discoveryRef = useRef<LeafletFeatureGroup | null>(null);
+  useEffect(() => {
+    const onPool = (e: Event) =>
+      setDiscoveryPool((e as CustomEvent<DiscoveryPoolDetail>).detail?.places ?? []);
+    window.addEventListener(DISCOVERY_POOL_EVENT, onPool);
+    return () => window.removeEventListener(DISCOVERY_POOL_EVENT, onPool);
+  }, []);
+  useEffect(() => {
+    if (!canvas) return;
+    if (discoveryRef.current) canvas.map.removeLayer(discoveryRef.current);
+    discoveryRef.current = null;
+    if (discoveryPool.length === 0) return;
+    const group = canvas.L.featureGroup();
+    for (const p of discoveryPool) {
+      const icon = canvas.L.divIcon({
+        className: "planner-discover-pin",
+        html: `<span class="planner-discover-pin__ring"></span>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+      });
+      canvas.L.marker([p.lat, p.lng], { icon, title: p.name, keyboard: false }).addTo(group);
+    }
+    group.addTo(canvas.map);
+    discoveryRef.current = group;
+  }, [canvas, discoveryPool]);
+
   // Haritada seçilen (henüz durak olmayan) nokta.
   useEffect(() => {
     if (!canvas) return;
@@ -573,6 +602,10 @@ export default function Panel() {
           onClearSelectedMapPoint={() => setQuickPoint(null)}
           onRequireAuth={(reason) => setGate(reason)}
           footer={actions}
+          mapCenter={() => {
+            const c = canvas?.map.getCenter();
+            return c ? { lat: c.lat, lng: c.lng } : null;
+          }}
         />
       )}
     </>

@@ -60,6 +60,7 @@ import {
 } from "../ui";
 import { GooglePlaceInfo } from "./google-place-info";
 import { PlaceFacts } from "./place-facts";
+import { DiscoverPanel } from "./discover-panel";
 import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
 import { StopRow } from "./stop-row";
 import { Connector, type ConnectorMode } from "./connector";
@@ -81,6 +82,8 @@ type Place = {
   /** Proxy sonucunda sağlayıcı kimliği (ayrıntı/atıf için). */
   placeId?: string;
   provider?: "amazon" | "google";
+  /** Keşiften gelen yerin kategorisi; yoksa "genel". */
+  category?: PinCategory;
 };
 export type PlannerMode = "guest" | "user";
 
@@ -95,6 +98,8 @@ export interface TravelPlannerSidebarProps {
   onRequireAuth: (reason: "ai" | "save") => void;
   /** Liste sonundaki eylemler (optimize/paylaş/asistan). */
   footer?: ReactNode;
+  /** Keşif "Haritadaki alan" kapsamı için harita merkezi. */
+  mapCenter?: () => { lat: number; lng: number } | null;
 }
 
 export function TravelPlannerSidebar({
@@ -106,6 +111,7 @@ export function TravelPlannerSidebar({
   onClearSelectedMapPoint,
   onRequireAuth,
   footer,
+  mapCenter,
 }: TravelPlannerSidebarProps) {
   const { t } = useLocale();
   const toast = useToast();
@@ -129,7 +135,7 @@ export function TravelPlannerSidebar({
     togglePinVisitedAnywhere,
     addDay,
   } = planner;
-  const [workspaceMode, setWorkspaceMode] = useState<"edit" | "travel">("edit");
+  const [workspaceMode, setWorkspaceMode] = useState<"edit" | "discover" | "travel">("edit");
   const [showDetail, setShowDetail] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Pin | null>(null);
   const targetDay = activeDayIndex && activeDayIndex > 0 ? activeDayIndex : 1;
@@ -169,7 +175,7 @@ export function TravelPlannerSidebar({
       address: place.address,
       lat: place.lat,
       lng: place.lng,
-      category: "genel" as PinCategory,
+      category: place.category ?? ("genel" as PinCategory),
       dayIndex: target === "trip" ? targetDay : 0,
       group: "Genel",
       visited: false,
@@ -311,13 +317,23 @@ export function TravelPlannerSidebar({
           label={t("planner.mode.label", "Görünüm")}
           options={[
             { value: "edit", label: t("planner.mode.edit", "Düzenle") },
+            { value: "discover", label: t("planner.mode.discover", "Keşfet") },
             { value: "travel", label: t("planner.mode.travel", "Gezi modu") },
           ]}
           value={workspaceMode}
           onChange={setWorkspaceMode}
         />
 
-        {workspaceMode === "edit" ? (
+        {workspaceMode === "discover" ? (
+          <DiscoverPanel
+            dayPins={activeDayIndex && activeDayIndex > 0 ? pinsWithTime : allPins}
+            allPins={[...allPins, ...generalPins]}
+            activeDay={activeDayIndex && activeDayIndex > 0 ? activeDayIndex : undefined}
+            mapCenter={mapCenter}
+            onAdd={addPlace}
+            onFocus={(lat, lng, label) => onFlyToCoords?.(lat, lng, label)}
+          />
+        ) : workspaceMode === "edit" ? (
           <PlaceSearch
             near={searchBias}
             onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}

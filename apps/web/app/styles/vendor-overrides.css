@@ -179,3 +179,19 @@
     transform: translateY(var(--space-2));
   }
 }
+/* Keşif havuzu pini (Increment 1.8, bug 5): kesik halka; rota pinlerinden şekille ayrılır
+   (renk tek başına anlam taşımaz). */
+.leaflet-marker-icon.planner-discover-pin {
+  border: 0;
+  background: transparent;
+}
+.planner-discover-pin .planner-discover-pin__ring {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 3px dashed var(--color-text);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  box-shadow: var(--elevation-raised);
+}

@@ -163,6 +163,72 @@
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
   }
+  /* Keşfet (Increment 1.8, bug 5) */
+  .planner-discover {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .planner-discover__hint,
+  .planner-discover__meta,
+  .planner-discover__address,
+  .planner-discover__source {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .planner-discover__status:empty {
+    display: none;
+  }
+  .planner-discover__list {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .planner-discover__card {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+  .planner-discover__name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--touch-target);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-weight: var(--font-weight-semibold);
+    text-align: start;
+    cursor: pointer;
+  }
+  .planner-discover__name:hover {
+    color: var(--color-link);
+  }
+  .planner-discover__reasons {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding-inline-start: var(--space-4);
+    font-size: var(--font-size-sm);
+  }
+  .planner-discover__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .planner-discover__source {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--font-size-xs);
+  }
   /* Seçilen yer kartı (arama sonucu / haritadan seçilen nokta) */
   .planner-place {
     display: grid;
