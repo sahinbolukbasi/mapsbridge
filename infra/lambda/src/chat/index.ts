@@ -45,7 +45,19 @@ router.add("GET /chat/threads/{id}/messages", handleGetMessages);
 router.add("POST /chat/threads/{id}/messages", handleSendMessage);
 router.add("POST /chat/threads/{id}/request", handleRespondRequest);
 
-/** Yayınlanmış profil kullanıcı adının sahibi (auth lambda PROFILE#<ad>/PUBLIC.owner). */
+/** Kayıtlı kullanıcı kimliği (Cognito sub) biçimi. */
+const USER_ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
+/**
+ * Profil kullanıcı adı biçimi. Web istemcisinin USERNAME_RE'si (navigation/profile-href.ts) ile
+ * birebir aynı tutulur (backend web'i import edemez; chat.test.cjs eşitliği doğrular).
+ */
+const PROFILE_USERNAME_RE = /^[a-z0-9_.-]{1,40}$/;
+
+/**
+ * Yayınlanmış profil kullanıcı adının sahibi (auth lambda PROFILE#<ad>/PUBLIC.owner).
+ * PROFILE# anahtarları auth publish yolunda küçük harfle yazılır; burada da küçük harfle okunur.
+ * Yayınlanmamış/sahipsiz profil null döner (çağıran, var olmayan kullanıcıyla aynı 404'ü verir).
+ */
 async function profileOwner(username: string): Promise<string | null> {
   const { GetItemCommand } = await import("@aws-sdk/client-dynamodb");
   const { marshall, unmarshall } = await import("@aws-sdk/util-dynamodb");
@@ -163,11 +175,14 @@ async function handleCreateThread(event: ApiGatewayEvent) {
   const body = parseBody<{ participantId?: string; initialMessage?: string }>(event);
   if (!body?.participantId) return badRequest("Alıcı kullanıcı ID'si zorunludur.");
   // Alıcı: kayıtlı kullanıcı kimliği ya da yayınlanmış profil kullanıcı adı (PROFILE#<ad>).
-  const recipient = /^[A-Za-z0-9_-]{1,128}$/.test(body.participantId)
-    ? (await isRegisteredUser(body.participantId))
-      ? body.participantId
-      : await profileOwner(body.participantId)
-    : null;
+  const raw = body.participantId.trim();
+  const username = raw.replace(/^@+/, "").toLowerCase();
+  const recipient =
+    USER_ID_RE.test(raw) && (await isRegisteredUser(raw))
+      ? raw
+      : PROFILE_USERNAME_RE.test(username)
+        ? await profileOwner(username)
+        : null;
   if (!recipient)
     return jsonResponse(404, { error: "Bu kullanıcı bulunamadı.", code: "USER_NOT_FOUND" });
   if (recipient === userId) return badRequest("Kendine mesaj isteği gönderemezsin.");

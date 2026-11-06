@@ -619,3 +619,70 @@ test("1.14: yayınlanmış profil kullanıcı adıyla istek; 404 USER_NOT_FOUND 
   );
   assert.equal(list.threads[0].request.from, "user-a");
 });
+
+test("1.14: alıcı çözümleme — noktalı ve @'li kullanıcı adı, yayınlanmamış/geçersiz 404, ham kimlik", async () => {
+  const profile = (name, extra) => ({
+    [`PROFILE#${name}|PUBLIC`]: { PK: `PROFILE#${name}`, SK: "PUBLIC", owner: "user-b", ...extra },
+  });
+  const env = chatEnv({
+    ...profile("ali.k", { published: true }),
+    ...profile("ayse_k", { published: true }),
+    ...profile("gizli", { published: false }),
+    ...profile("sahipsiz", { published: true, owner: undefined }),
+  });
+  const create = (participantId) => env.call("user-a", "POST", "/chat/threads", { participantId });
+  const recipientOf = (res) => env.s.rows.get(`THREAD#${JSON.parse(res.body).threadId}|REQUEST`).to;
+
+  const dotted = await create("ali.k");
+  assert.equal(dotted.statusCode, 201, "noktalı kullanıcı adı çözülür");
+  assert.equal(recipientOf(dotted), "user-b");
+
+  const at = await create("@Ayse_K");
+  assert.equal(at.statusCode, 201, "@ önekli + büyük harf çözülür (anahtar küçük harf)");
+  assert.equal(recipientOf(at), "user-b");
+
+  const raw = await create("user-b");
+  assert.equal(raw.statusCode, 201, "ham kullanıcı kimliği çalışır");
+  assert.equal(recipientOf(raw), "user-b");
+
+  // Yayınlanmamış, sahipsiz, var olmayan ve geçersiz: aynı genel 404 (hesap varlığı sızmaz).
+  const notFound = [await create("gizli"), await create("sahipsiz"), await create("yok_boyle")];
+  const invalid = [await create("ali k!"), await create("x".repeat(41)), await create("@@")];
+  const bodies = [...notFound, ...invalid].map((r) => {
+    assert.equal(r.statusCode, 404);
+    return r.body;
+  });
+  assert.equal(new Set(bodies).size, 1, "tüm 404 gövdeleri aynı");
+  assert.deepEqual(JSON.parse(bodies[0]), {
+    error: "Bu kullanıcı bulunamadı.",
+    code: "USER_NOT_FOUND",
+  });
+  // Geçersiz ad DynamoDB'ye PROFILE# okuması yapmaz.
+  const profileReads = env.h.calls.data
+    .filter((c) => c.name === "GetItemCommand")
+    .map((c) => JSON.stringify(c.input.Key))
+    .filter((k) => k.includes("PROFILE#"));
+  assert.ok(!profileReads.some((k) => /ali k|xxxxxxxxxx/.test(k)));
+});
+
+test("1.14: chat PROFILE_USERNAME_RE web USERNAME_RE ile birebir aynı (sapma yok)", () => {
+  const repo = path.resolve(__dirname, "../../..");
+  const pick = (file, name) => {
+    const src = readFileSync(path.join(repo, file), "utf8");
+    const m = src.match(new RegExp(`const ${name} = (/.+/[a-z]*);`));
+    assert.ok(m, `${name} ${file} içinde bulunamadı`);
+    return m[1];
+  };
+  assert.equal(
+    pick("infra/lambda/src/chat/index.ts", "PROFILE_USERNAME_RE"),
+    pick("apps/web/app/lib/navigation/profile-href.ts", "USERNAME_RE"),
+  );
+});
+
+test("1.14: PROFILE# anahtarı auth publish yolunda küçük harfle yazılır, chat küçük harfle okur", () => {
+  const auth = readFileSync(path.join(sourceRoot, "auth/index.ts"), "utf8");
+  assert.match(auth, /const username = body\.username\.toLowerCase\(\);/);
+  assert.match(auth, /PK: `PROFILE#\$\{username\}`/);
+  const chat = readFileSync(path.join(sourceRoot, "chat/index.ts"), "utf8");
+  assert.match(chat, /PK: `PROFILE#\$\{username\.toLowerCase\(\)\}`/);
+});
