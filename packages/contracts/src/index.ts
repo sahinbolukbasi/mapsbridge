@@ -10,7 +10,8 @@ export const BILLING_COST = {
   ROUTE: 5 as const,
   CHAT: 1 as const,
   CLARIFY: 0 as const,
-  WELCOME_CREDITS: 5 as const,
+  // Sunucu gerçeği: infra/lambda/src/billing/store.ts initializeTrial 100 kredi (approval, S1).
+  WELCOME_CREDITS: 100 as const,
 } as const;
 
 export type AICreditAction =

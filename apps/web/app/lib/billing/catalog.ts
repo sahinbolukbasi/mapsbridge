@@ -2,7 +2,7 @@
 // katalogdan (GET /revenuecat/plans) okunur; contracts TRY fiyatları gösterilmez. Tier adı ve
 // aylık kredi statiktir (SUBSCRIPTION_PLAN_DEFS.monthlyCredits + i18n pricing.tier.*). Bu modül
 // yalnızca GÖSTERİM içindir: kredi istemcide hesaplanmaz/düşülmez, sunucu kredi zinciri değişmez.
-// ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
+// UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
 // edilmeli.
 import { SUBSCRIPTION_PLAN_DEFS } from "@mapsbridge/contracts";
 import { apiFetch } from "../api-client";

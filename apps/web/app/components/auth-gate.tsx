@@ -121,7 +121,7 @@ function GateContent({
  * - page: sayfanın yerine kendi PageShell + PageHeader'ını (tek h1) çizer (G4 kapı sözleşmesi).
  * - sheet: Modal primitive'i (role=dialog, odak tuzağı, Escape = "Şimdilik devam et").
  * Kredi bilgisi yalnızca gösterimdir (credit-costs.ts); istemci kredi hesaplamaz ya da düşmez.
- * ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından
+ * UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından
  * teyit edilmeli.
  */
 export function AuthGate({ variant, reason, draft, next, open = false, onClose }: AuthGateProps) {

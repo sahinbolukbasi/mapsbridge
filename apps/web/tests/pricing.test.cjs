@@ -1,6 +1,6 @@
 // /pricing/ saf mantığı (design §7.2, §7.3, §12.2; FEAT-005). Katalog doğrulama, "≈" türetimi,
 // yıllık indirim, kart durumu ve checkout URL parametreleri. lib/api-client.ts stub'lanır
-// (window/localStorage/fetch yok). ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri
+// (window/localStorage/fetch yok). UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri
 // yayından önce kullanıcı tarafından teyit edilmeli.
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -106,9 +106,9 @@ test("derivePlanEquivalents: maliyet tablosundan aşağı yuvarlanır (5 derin r
   assert.deepEqual(plain(catalog.derivePlanEquivalents(NaN)), { deepTrips: 0, chats: 0 });
 });
 
-test("planInfos: tier kredileri contracts + hoş geldin 5 (design §7.2 tablosu)", () => {
+test("planInfos: tier kredileri contracts + hoş geldin 100 (design §7.2 tablosu)", () => {
   assert.deepEqual(plain(catalog.planInfos()), [
-    { tier: "free", credits: 5, kind: "welcome" },
+    { tier: "free", credits: 100, kind: "welcome" },
     { tier: "explorer", credits: 100, kind: "monthly" },
     { tier: "pro", credits: 500, kind: "monthly" },
     { tier: "agency", credits: 2500, kind: "monthly" },

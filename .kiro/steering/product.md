@@ -28,7 +28,7 @@ Krediler **yalnızca sunucuda** düşülür; istemci asla doğrudan kredi harcam
 | Konaklama & gastronomi analizi (`ai_stay_dining`) | 2        |
 | Derin çok günlü rota (`ai_deep_trip`)             | 5        |
 
-Abonelik kademeleri: `free` (Gezgin, 5 hoş geldin kredisi) · `explorer` (Kaşif, aylık 100) · `pro` (Pro Kaşif, aylık 500) · `agency` (Tur Lideri, aylık 2500).
+Abonelik kademeleri: `free` (Gezgin, 100 hoş geldin kredisi; sunucu `initializeTrial` ile hizalı) · `explorer` (Kaşif, aylık 100) · `pro` (Pro Kaşif, aylık 500) · `agency` (Tur Lideri, aylık 2500).
 
 ## Dil
 

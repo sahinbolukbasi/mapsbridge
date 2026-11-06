@@ -15,7 +15,7 @@ import { Screen } from "./Screen";
 // - sheet: ModalFrame (bottomSheet; accessibilityViewIsModal, Android geri = "Şimdilik devam et").
 // Native'de URL yok: `next` yerine onRegister/onLogin geri çağrıları AuthScreen'i açar.
 // Kredi bilgisi yalnızca gösterimdir; istemci kredi hesaplamaz ya da düşmez.
-// ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından
+// UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından
 // teyit edilmeli.
 export type AuthGateReason = "save" | "ai" | "messages" | "profile";
 

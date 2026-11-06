@@ -1,7 +1,7 @@
 // Plan kartı verisi (design §7.2, §4.2 PlanCard; karar S2): web lib/billing/catalog.ts'in
 // gösterim parçalarının kopyası (planInfos, derivePlanEquivalents, formatPrice; parite testli).
 // Fiyat burada YOKTUR: yalnızca canlı katalogdan (GET /revenuecat/plans) gelir. Yalnızca gösterim;
-// kredi istemcide hesaplanmaz/düşülmez. ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri
+// kredi istemcide hesaplanmaz/düşülmez. UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri
 // yayından önce kullanıcı tarafından teyit edilmeli.
 import { costOf, WELCOME_CREDITS_DISPLAY, type CreditCostAction } from "./credit-costs";
 

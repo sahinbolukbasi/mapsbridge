@@ -26,7 +26,7 @@ import { tokens } from "../theme";
 // alınabilir, yoksa CTA "Şu an satın alınamıyor" olur. Mağaza kendi yerel fiyatını tahsil
 // edebileceğinden fiyatın altında "Kesin fiyat mağaza ödeme ekranında gösterilir" notu durur (C2). Misafirde (`guest`) RevenueCat çağrılmaz; kartlar bilgi amaçlıdır
 // ve kayıt/giriş düğmeleri gösterilir.
-// ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
+// UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
 // edilmeli.
 interface PaywallModalProps {
   visible: boolean;
@@ -124,7 +124,7 @@ export function PaywallModal({
     if (catalog === "loading") return "loading";
     if (catalog.status === "unavailable") return "unavailable";
     const product = findMonthlyProduct(catalog.products, tier);
-    return product
+    return product && product.amount !== null
       ? { amount: product.amount, period: "monthly", credits: product.credits }
       : "none";
   };

@@ -2,7 +2,7 @@
 // /pricing/ (design §7, mock b-pricing.html; karar S1/S2). Herkese açık; API'siz de çalışır:
 // tier adı + kredi statik, fiyat ve satın alınabilirlik yalnızca canlı katalogdan. Kredi istemcide
 // hesaplanmaz/düşülmez; "≈" satırları yalnızca gösterim için maliyet tablosundan türetilir.
-// ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
+// UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
 // edilmeli.
 import { useCallback, useEffect, useState } from "react";
 import { PlanCard, type PlanCta } from "../components/billing/plan-card";

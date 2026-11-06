@@ -687,8 +687,8 @@ test("native Paywall mağaza paketini katalogun packageId/productId alanıyla e�
   });
   const raw = {
     enabled: true,
-    products: lambda.catalog().map((p) => ({ ...p, available: !!p.productId })),
-    welcomeCredits: 5,
+    products: lambda.revenuecatCatalog().map((p) => ({ ...p, available: !!p.productId })),
+    welcomeCredits: 100,
   };
   const parsed = mob.parseCatalog(raw);
   assert.deepEqual(plain(parsed), plain(webCatalog.parseCatalog(raw)), "web paritesi korunur");

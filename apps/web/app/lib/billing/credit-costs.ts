@@ -3,7 +3,7 @@
 // ve düşülmez, sunucu kredi zinciri tek otoritedir. Değerler product.md "Kredi Modeli"
 // tablosundan gelir; contracts ile eşitliği tests/credit-costs.test.cjs doğrular (S1 kararı:
 // contracts ai_chat 0.5 ve lambda hoş geldin 100 çelişkisi testte KNOWN_EXCEPTIONS olarak durur).
-// ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından
+// UI hoş geldin 100 (sunucu initializeTrial ile hizalı) / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından
 // teyit edilmeli.
 
 export type CreditCost = number | "free";
@@ -19,8 +19,11 @@ export const CREDIT_COST_ROWS = [
 export type CreditCostAction = (typeof CREDIT_COST_ROWS)[number]["action"];
 export type CreditCostRow = (typeof CREDIT_COST_ROWS)[number];
 
-/** Ücretsiz hesapla gösterilen hoş geldin kredisi (product.md; ⚠ S1). */
-export const WELCOME_CREDITS_DISPLAY = 5;
+/**
+ * Ücretsiz hesapla gösterilen hoş geldin kredisi (S1 güncellendi, redesign-v2 approval): UI
+ * sunucu davranışını yansıtır; store.ts initializeTrial 100 kredi verir.
+ */
+export const WELCOME_CREDITS_DISPLAY = 100;
 
 /** Bir işlemin gösterilen maliyeti. */
 export function costOf(action: CreditCostAction): CreditCost {

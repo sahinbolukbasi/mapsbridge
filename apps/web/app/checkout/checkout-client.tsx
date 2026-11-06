@@ -4,7 +4,7 @@
 // maliyetleri gösterilmez. Kredi yalnızca sunucuda düşer/eklenir; satın alma akışı (RevenueCat
 // checkout + webhook doğrulama yoklaması) bugünkü gibi. Metinler i18n `checkout.*` (I11; locale
 // yol tabanlıdır, /checkout/ bugün yalnızca TR çözülür).
-// ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
+// UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından teyit
 // edilmeli.
 import { useEffect, useState } from "react";
 import {

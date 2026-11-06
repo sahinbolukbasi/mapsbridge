@@ -1,7 +1,7 @@
 // Kredi gösterim tablosu ↔ contracts eşitliği (design §7.4, S1 kararı).
 // UI product.md değerlerini gösterir; bilinen çelişkiler KNOWN_EXCEPTIONS'ta ADIYLA durur ve
 // test çelişkinin hâlâ var olduğunu doğrular: hata düzeltilince istisna sessizce yaşamaz.
-// ⚠ UI hoş geldin 5 / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından
+// UI hoş geldin 100 (sunucuyla hizalı) / ai_chat 1 gösterir; sunucu değeri yayından önce kullanıcı tarafından
 // teyit edilmeli.
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -29,20 +29,16 @@ const KNOWN_EXCEPTIONS = [
     action: "ai_chat",
     stillDiverges: () => ACTION_CREDIT_COSTS.ai_chat !== 1,
   },
-  {
-    // Gerekçe: lambda billing/store.ts (ve stripe/index.ts) hoş geldin hediyesini 100 kredi
-    // yazıyor; product.md ve BILLING_COST.WELCOME_CREDITS 5. S1 kararı: UI 5 gösterir, backend
-    // değişmez; gerçek sunucu değeri yayından önce kullanıcı tarafından teyit edilecek.
-    id: "lambda-welcome-100",
-    action: "welcome",
-    stillDiverges: () => {
-      const src = fs.readFileSync(LAMBDA_BILLING_STORE, "utf8");
-      const m = src.match(/welcomeGift:\s*\{\s*credits:\s*(\d+)/);
-      assert.ok(m, "billing/store.ts'te welcomeGift.credits bulunamadı (istisnayı gözden geçirin)");
-      return Number(m[1]) !== WELCOME_CREDITS_DISPLAY;
-    },
-  },
 ];
+// redesign-v2 (approval userAdjustments, S1 güncellendi): eski "lambda-welcome-100" istisnası
+// kaldırıldı; UI artık sunucunun gerçekten verdiği hoş geldin kredisini gösterir.
+test("hoş geldin kredisi: UI = contracts = lambda store.ts initializeTrial (100)", () => {
+  const src = fs.readFileSync(LAMBDA_BILLING_STORE, "utf8");
+  const m = src.match(/welcomeGift:\s*\{\s*credits:\s*(\d+)/);
+  assert.ok(m, "billing/store.ts'te welcomeGift.credits bulunamadı");
+  assert.equal(Number(m[1]), WELCOME_CREDITS_DISPLAY);
+  assert.equal(WELCOME_CREDITS_DISPLAY, 100);
+});
 
 test("tablo sırası ve değerleri product.md ile aynı (design §7.4)", () => {
   // vm realm dizileri düz JSON'a çevrilip karşılaştırılır.
@@ -76,7 +72,7 @@ test("WELCOME_CREDITS_DISPLAY = BILLING_COST.WELCOME_CREDITS", () => {
 test("KNOWN_EXCEPTIONS adıyla listelenir ve çelişki hâlâ vardır (sessizce yaşamaz)", () => {
   assert.deepEqual(
     KNOWN_EXCEPTIONS.map((e) => e.id),
-    ["contracts-ai_chat-0.5", "lambda-welcome-100"],
+    ["contracts-ai_chat-0.5"],
   );
   for (const e of KNOWN_EXCEPTIONS)
     assert.ok(

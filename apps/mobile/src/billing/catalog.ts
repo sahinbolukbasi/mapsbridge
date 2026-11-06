@@ -11,8 +11,8 @@ export type CatalogProduct = {
   id: string;
   mode: CatalogMode;
   credits: number;
-  /** Kuruş (amount / 100 = TRY). */
-  amount: number;
+  /** Kuruş (amount / 100 = TRY). `null`: sunucuda fiyat yok → fiyat çizilmez, satılamaz. */
+  amount: number | null;
   available: boolean;
 };
 export type Catalog =
@@ -29,9 +29,16 @@ function parseProduct(raw: unknown): CatalogProduct | null {
   if (typeof id !== "string" || id.length === 0) return null;
   if (typeof mode !== "string" || !CATALOG_MODES.includes(mode as CatalogMode)) return null;
   if (!isNonNegative(credits) || !Number.isInteger(credits)) return null;
-  if (!isNonNegative(amount)) return null;
+  if (amount !== null && !isNonNegative(amount)) return null;
   if (typeof available !== "boolean") return null;
-  return { id, mode: mode as CatalogMode, credits, amount, available };
+  // Fiyatsız ürün satılamaz (web parseCatalog ile aynı).
+  return {
+    id,
+    mode: mode as CatalogMode,
+    credits,
+    amount,
+    available: available && amount !== null,
+  };
 }
 
 /** Katalog yanıtını doğrular (web parseCatalog ile aynı). */
