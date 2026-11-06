@@ -14,7 +14,7 @@ export const CREDIT_COST_ROWS = [
   {
     action: "route_optimize",
     labelKey: "credits.row.routeOptimize",
-    label: "Rota optimizasyonu",
+    label: "AI rota optimizasyonu",
     cost: 1,
   },
   {

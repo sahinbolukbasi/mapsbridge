@@ -33,7 +33,10 @@ export function DayHeader({
   titleAs?: "h2" | "h3" | "p";
 }) {
   const { t, locale } = useLocale();
-  const stopsText = t("trip.day.stops", "{n} durak").replace("{n}", String(stops));
+  const stopsText = t(stops === 1 ? "trip.day.stops.one" : "trip.day.stops", "{n} durak").replace(
+    "{n}",
+    String(stops),
+  );
   const pct = bufferRatio === undefined ? null : Math.round(bufferRatio * 100);
   const lowBuffer = bufferRatio !== undefined && bufferRatio < MIN_BUFFER_RATIO;
   return (

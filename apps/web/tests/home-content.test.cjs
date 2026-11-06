@@ -286,3 +286,27 @@ test("(e) S6: hiçbir web rotasının HTML'inde mağaza rozeti, indirme, sürüm
   }
   assert.deepEqual(hits, [], `mağaza iddiası: ${hits.join("; ")}`);
 });
+test("summarizeLastTrip: en son güncellenen gezi seçilir, zaman damgası yoksa ilk geçerli gezi (final review #9)", () => {
+  const { summarizeLastTrip } = loadTs(path.join(APP, "lib/trip/last-trip.ts"));
+  const pin = { id: "p" };
+  const raw = JSON.stringify([
+    { title: "Eski", pins: [pin, pin], updatedAt: "2026-01-01T00:00:00.000Z" },
+    { title: "Yeni", pins: [pin], updatedAt: "2026-03-01T00:00:00.000Z" },
+    { title: "Boş", pins: [], updatedAt: "2026-09-01T00:00:00.000Z" },
+    { title: "Orta", pins: [pin], createdAt: "2026-02-01T00:00:00.000Z" },
+  ]);
+  assert.deepEqual({ ...summarizeLastTrip(raw) }, { title: "Yeni", stops: 1 });
+  const noStamps = JSON.stringify([
+    { title: "A", pins: [pin] },
+    { title: "B", pins: [pin, pin] },
+  ]);
+  assert.deepEqual({ ...summarizeLastTrip(noStamps) }, { title: "A", stops: 1 });
+  assert.equal(summarizeLastTrip("[]"), null);
+  assert.equal(summarizeLastTrip("{"), null);
+});
+test("EN tekil durak: home.lastTrip.stops.one / trip.day.stops.one (final review #9)", () => {
+  assert.equal(en["home.lastTrip.stops.one"], "{n} stop");
+  assert.equal(en["trip.day.stops.one"], "{n} stop");
+  assert.equal(tr["home.lastTrip.stops.one"], "{n} durak");
+  assert.equal(tr["trip.day.stops.one"], "{n} durak");
+});

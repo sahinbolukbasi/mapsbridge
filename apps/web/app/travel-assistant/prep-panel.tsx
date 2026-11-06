@@ -32,7 +32,7 @@ export function PrepPanel({
   if (context.kind === "strip") {
     const token = getStoredSession()?.token;
     return (
-      <Section title={t("ai.prepTab", "✈ Hazırlık")}>
+      <Section title={t("ai.prepTab", "Hazırlık")}>
         <InlineAffiliateStrip
           destination={context.destination}
           messageText={context.messageText}

@@ -347,7 +347,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
             label={tr("native.ai.viewLabel")}
             options={[
               { value: "chat", label: tr("assistant.log.label") },
-              { value: "prep", label: tr("native.ai.prepTab") },
+              { value: "prep", label: tr("ai.prepTab") },
             ]}
             value={tab}
             onChange={setTab}

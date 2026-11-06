@@ -73,6 +73,16 @@ export const icons = {
     "M3 3l18 18 M10.6 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2 M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6 M9.9 9.9a3 3 0 0 0 4.2 4.2",
   inbox: "M3 13h5l1.5 3h5l1.5-3h5 M5.5 5h13L21 13v6H3v-6Z",
   sort: "M8 9l4-4 4 4 M8 15l4 4 4-4",
+  // FEAT-013: oturumlu asistanın Material Symbols kullanımları (sesli giriş, indir, tekrar dene,
+  // Hazırlık/uçuş, konaklama, acil telefon).
+  mic: "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z M5 11a7 7 0 0 0 14 0 M12 18v3 M9 21h6",
+  download: "M12 3v12 M7 10l5 5 5-5 M4 20h16",
+  refresh: "M20 12a8 8 0 0 1-14.3 4.9 M4 12a8 8 0 0 1 14.3-4.9 M18.5 3v4h-4 M5.5 21v-4h4",
+  plane:
+    "M10.2 21l2.3-7 6.5-1a1.8 1.8 0 0 0 0-3.6l-6.5-1-2.3-7H8.3l1.4 7.4-4.4.6L3.6 6H2.3l.9 6-.9 6h1.3l1.7-2.4 4.4.6L8.3 21Z",
+  bed: "M3 19V6 M3 15h18v4 M21 15v-3a3 3 0 0 0-3-3h-7v6 M7 12.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z",
+  phone:
+    "M5 3h3.5l2 5-2.6 1.6a11 11 0 0 0 5.5 5.5L15 12.5l5 2V18a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2Z",
 } as const;
 
 export type IconName = keyof typeof icons;

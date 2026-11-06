@@ -3,9 +3,12 @@
 import type { ChatMessage } from "../lib/ai/chat";
 import type { UnifiedRoutePlan } from "../lib/ai/types";
 import type { Trip } from "../lib/trip/models";
+import { Icon, type IconName } from "../components/ui";
+import { useLocale } from "../lib/locale-context";
+import { fill, type Translate } from "./studio-format";
 
 interface SmartAction {
-  icon: string;
+  icon: IconName;
   label: string;
   prompt: string;
   category: "route" | "food" | "hotel" | "activity" | "edit" | "info";
@@ -23,10 +26,17 @@ function getDestination(
   route: UnifiedRoutePlan | null,
   trip: Trip | null,
   messages: ChatMessage[],
+  t: Translate,
 ): string | null {
   if (route?.destination) return route.destination;
   if (trip?.destination) return trip.destination;
-  if (trip?.title && !trip.title.includes("Seyahat")) return trip.title;
+  // Varsayılan gezi adı ("Seyahat Rotası" / çevirisi) hedef sayılmaz.
+  if (
+    trip?.title &&
+    !trip.title.includes("Seyahat") &&
+    trip.title !== t("studio.trip.defaultTitle", "Seyahat Rotası")
+  )
+    return trip.title;
   const lastUser = [...messages].reverse().find((m) => m.role === "user");
   return lastUser?.text?.slice(0, 40) || null;
 }
@@ -35,8 +45,9 @@ function buildActions(
   messages: ChatMessage[],
   route: UnifiedRoutePlan | null,
   trip: Trip | null,
+  t: Translate,
 ): SmartAction[] {
-  const dest = getDestination(route, trip, messages);
+  const dest = getDestination(route, trip, messages, t);
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
   const hasRoute = !!route;
   const hasStays = !!lastAssistant?.stayAndTransit;
@@ -45,118 +56,144 @@ function buildActions(
 
   if (msgCount === 0) return [];
 
+  const a = (
+    icon: IconName,
+    id: string,
+    label: string,
+    prompt: string,
+    category: SmartAction["category"],
+  ): SmartAction => ({
+    icon,
+    label: t(`studio.smart.${id}`, label),
+    prompt: fill(t(`studio.smart.${id}.prompt`, prompt), { dest: dest ?? "" }),
+    category,
+  });
   const actions: SmartAction[] = [];
 
   if (hasRoute && dest) {
     actions.push(
-      {
-        icon: "restaurant",
-        label: "Akşam yemeği ekle",
-        prompt: `${dest} rotasına akşam için yerel bir restoran ekle`,
-        category: "food",
-      },
-      {
-        icon: "coffee",
-        label: "Kahve molası ekle",
-        prompt: `Rotadaki duraklara yakın butik kahveciler öner ve araya ekle`,
-        category: "food",
-      },
-      {
-        icon: "pace",
-        label: "Tempoyu gevşet",
-        prompt: `Rotayı daha sakin bir tempoya çevir, mola aralarını artır`,
-        category: "edit",
-      },
-      {
-        icon: "add_location",
-        label: "Gizli nokta ekle",
-        prompt: `${dest} için turistlerin bilmediği yerel bir gizli köşe öner ve rotaya ekle`,
-        category: "activity",
-      },
+      a(
+        "food",
+        "dinner",
+        "Akşam yemeği ekle",
+        "{dest} rotasına akşam için yerel bir restoran ekle",
+        "food",
+      ),
+      a(
+        "food",
+        "coffee",
+        "Kahve molası ekle",
+        "Rotadaki duraklara yakın butik kahveciler öner ve araya ekle",
+        "food",
+      ),
+      a(
+        "walk",
+        "pace",
+        "Tempoyu gevşet",
+        "Rotayı daha sakin bir tempoya çevir, mola aralarını artır",
+        "edit",
+      ),
+      a(
+        "locate",
+        "gem",
+        "Gizli nokta ekle",
+        "{dest} için turistlerin bilmediği yerel bir gizli köşe öner ve rotaya ekle",
+        "activity",
+      ),
     );
     if (!hasStays) {
-      actions.push({
-        icon: "hotel",
-        label: "Otel öner",
-        prompt: `${dest} rotasına uygun merkezi ve bütçe dostu otel semtleri ve oteller öner`,
-        category: "hotel",
-      });
+      actions.push(
+        a(
+          "bed",
+          "hotel",
+          "Otel öner",
+          "{dest} rotasına uygun merkezi ve bütçe dostu otel semtleri ve oteller öner",
+          "hotel",
+        ),
+      );
     }
     if (!hasDiscovery) {
-      actions.push({
-        icon: "local_dining",
-        label: "Yerel lezzetler",
-        prompt: `${dest} şehrinde mutlaka denenmesi gereken yerel yemekler ve restoranlar neler?`,
-        category: "food",
-      });
+      actions.push(
+        a(
+          "food",
+          "local",
+          "Yerel lezzetler",
+          "{dest} şehrinde mutlaka denenmesi gereken yerel yemekler ve restoranlar neler?",
+          "food",
+        ),
+      );
     }
     actions.push(
-      {
-        icon: "nightlife",
-        label: "Gece hayatı",
-        prompt: `${dest} için akşam/gece aktiviteleri ve barlar öner`,
-        category: "activity",
-      },
-      {
-        icon: "photo_camera",
-        label: "Fotoğraf noktaları",
-        prompt: `${dest} rotasındaki en iyi fotoğraf ve manzara noktalarını listele`,
-        category: "activity",
-      },
+      a(
+        "sparkle",
+        "nightlife",
+        "Gece hayatı",
+        "{dest} için akşam/gece aktiviteleri ve barlar öner",
+        "activity",
+      ),
+      a(
+        "camera",
+        "photo",
+        "Fotoğraf noktaları",
+        "{dest} rotasındaki en iyi fotoğraf ve manzara noktalarını listele",
+        "activity",
+      ),
     );
   } else if (dest && msgCount >= 2) {
     actions.push(
-      {
-        icon: "map",
-        label: "Rota oluştur",
-        prompt: `${dest} için detaylı bir gezi rotası oluştur`,
-        category: "route",
-      },
-      {
-        icon: "restaurant",
-        label: "Nerede yenir?",
-        prompt: `${dest} şehrinde en iyi yerel restoranlar ve sokak yemekleri neler?`,
-        category: "food",
-      },
-      {
-        icon: "hotel",
-        label: "Nerede kalınır?",
-        prompt: `${dest} için merkezi, güvenli ve bütçe dostu otel bölgeleri ve öneriler`,
-        category: "hotel",
-      },
-      {
-        icon: "local_activity",
-        label: "Aktiviteler",
-        prompt: `${dest} şehrinde yapılabilecek en iyi aktiviteler ve deneyimler neler?`,
-        category: "activity",
-      },
+      a("map", "route", "Rota oluştur", "{dest} için detaylı bir gezi rotası oluştur", "route"),
+      a(
+        "food",
+        "eat",
+        "Nerede yenir?",
+        "{dest} şehrinde en iyi yerel restoranlar ve sokak yemekleri neler?",
+        "food",
+      ),
+      a(
+        "bed",
+        "stay",
+        "Nerede kalınır?",
+        "{dest} için merkezi, güvenli ve bütçe dostu otel bölgeleri ve öneriler",
+        "hotel",
+      ),
+      a(
+        "compass",
+        "activities",
+        "Aktiviteler",
+        "{dest} şehrinde yapılabilecek en iyi aktiviteler ve deneyimler neler?",
+        "activity",
+      ),
     );
   } else {
     actions.push(
-      {
-        icon: "explore",
-        label: "Popüler rotalar",
-        prompt: "Bu sezon en popüler Avrupa şehir rotalarını öner",
-        category: "route",
-      },
-      {
-        icon: "savings",
-        label: "Bütçe dostu gezi",
-        prompt: "500€ altı bütçeyle 3 günlük bir şehir gezisi planla",
-        category: "route",
-      },
-      {
-        icon: "family_restroom",
-        label: "Aile gezisi",
-        prompt: "Çocuklarla gidilebilecek eğlenceli ve güvenli bir şehir öner",
-        category: "route",
-      },
-      {
-        icon: "flight",
-        label: "Hafta sonu kaçamağı",
-        prompt: "Bu hafta sonu için 2 günlük kısa bir kaçamak planla",
-        category: "route",
-      },
+      a(
+        "compass",
+        "popular",
+        "Popüler rotalar",
+        "Bu sezon en popüler Avrupa şehir rotalarını öner",
+        "route",
+      ),
+      a(
+        "coin",
+        "budget",
+        "Bütçe dostu gezi",
+        "500€ altı bütçeyle 3 günlük bir şehir gezisi planla",
+        "route",
+      ),
+      a(
+        "users",
+        "family",
+        "Aile gezisi",
+        "Çocuklarla gidilebilecek eğlenceli ve güvenli bir şehir öner",
+        "route",
+      ),
+      a(
+        "plane",
+        "weekend",
+        "Hafta sonu kaçamağı",
+        "Bu hafta sonu için 2 günlük kısa bir kaçamak planla",
+        "route",
+      ),
     );
   }
 
@@ -164,39 +201,34 @@ function buildActions(
 }
 
 export function SmartActions({ messages, route, currentTrip, onAction, busy }: SmartActionsProps) {
-  const actions = buildActions(messages, route, currentTrip);
+  const { t } = useLocale();
+  const actions = buildActions(messages, route, currentTrip, t);
 
   if (actions.length === 0) return null;
 
   return (
-    <div className="ai-smart-actions">
-      <div className="ai-smart-actions-header">
-        <span
-          className="material-symbols-outlined"
-          aria-hidden="true"
-          style={{ fontSize: "14px", color: "var(--color-text-accent)" }}
-        >
-          auto_awesome
-        </span>
-        <span>Hızlı İşlemler</span>
-      </div>
-      <div className="ai-smart-actions-grid">
+    <div className="as-studio-actions">
+      <p className="as-studio-actions__title" id="as-studio-actions-title">
+        <Icon name="sparkle" size={16} />
+        {t("studio.smart.title", "Hızlı işlemler")}
+      </p>
+      <ul className="as-studio-actions__list" aria-labelledby="as-studio-actions-title">
         {actions.map((action) => (
-          <button
-            key={action.prompt}
-            type="button"
-            className={`ai-smart-action-btn ai-smart-action-${action.category}`}
-            onClick={() => onAction(action.prompt)}
-            disabled={busy}
-            title={action.prompt}
-          >
-            <span className="material-symbols-outlined ai-smart-action-icon" aria-hidden="true">
-              {action.icon}
-            </span>
-            <span className="ai-smart-action-label">{action.label}</span>
-          </button>
+          <li key={action.prompt}>
+            <button
+              type="button"
+              className="as-studio-action"
+              data-category={action.category}
+              onClick={() => onAction(action.prompt)}
+              disabled={busy}
+              title={action.prompt}
+            >
+              <Icon name={action.icon} size={16} />
+              <span>{action.label}</span>
+            </button>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

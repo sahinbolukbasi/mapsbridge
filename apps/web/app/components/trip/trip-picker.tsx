@@ -39,7 +39,10 @@ export function TripPicker({
         <ul className="trip-picker__list">
           {planner.trips.map((trip) => {
             const active = trip.id === planner.activeTripId;
-            const stops = t("trip.day.stops", "{n} durak").replace("{n}", String(trip.pins.length));
+            const stops = t(
+              trip.pins.length === 1 ? "trip.day.stops.one" : "trip.day.stops",
+              "{n} durak",
+            ).replace("{n}", String(trip.pins.length));
             return (
               <li key={trip.id} className={cx("trip-picker__item", active && "is-active")}>
                 <button

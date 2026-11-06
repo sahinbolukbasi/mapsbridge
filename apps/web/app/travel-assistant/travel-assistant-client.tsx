@@ -1,5 +1,9 @@
 "use client";
-
+// Oturumlu gezi asistanı (FEAT-013: Kartograf yüzeyi). Görünüm primitive'lerle (Icon, Button,
+// IconButton, Tabs, SegmentedControl, Alert, EmptyState) ve studio.css ile çizilir; tüm
+// kullanıcı metinleri t() üzerinden (I11). Sunucu kredi zinciri değişmez: istemci kredi
+// hesaplamaz, gönder düğmesi sabit rozet taşımaz (S22), işlem başı not girişin altındadır.
+// Affiliate yalnız taslak panelinin Hazırlık sekmesinde, PrepPanel ile (I8).
 import { useEffect, useRef, useState } from "react";
 import { AuthGate } from "../components/auth-gate";
 import { openUpgradeModal } from "../components/upgrade-modal";
@@ -21,11 +25,25 @@ import { planText, shouldRecheckRequest, type ChatMessage } from "../lib/ai/chat
 import { routeToTrip } from "../lib/trip/workspace-store";
 import { PLANNER_TRIPS_KEY, readPlannerStore, writePlannerStore } from "../lib/trip/planner-store";
 import { tripToMarkdown, saveTripMarkdown } from "../lib/trip/trip-markdown";
-import type { Trip, Pin } from "../lib/trip/models";
+import { DAY_COLORS, type Trip, type Pin, type PinCategory } from "../lib/trip/models";
 import { interactionTracker } from "../lib/analytics/tracker";
-import { Button, PageHeader, PageShell } from "../components/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  EmptyState,
+  Icon,
+  IconButton,
+  LoadingState,
+  PageHeader,
+  PageShell,
+  SegmentedControl,
+  Tabs,
+  buttonClassName,
+  type AlertTone,
+  type SegmentOption,
+} from "../components/ui";
 import { useLocale } from "../lib/locale-context";
-import { DealTrackerPanel } from "../components/tracker/deal-tracker-panel";
 import { ComposerBar } from "../components/assistant/composer-bar";
 import { MessageBubble, MessageLog } from "../components/assistant/message-log";
 import { QuestionCard } from "../components/assistant/question-card";
@@ -38,12 +56,24 @@ import {
 } from "../lib/guest/guest-draft";
 import { GuestAssistant, GuestDraftSummary, guestStorage } from "./guest-assistant";
 import "./assistant.css";
+import "./studio.css";
 import { AssistantMessage } from "./assistant-message";
-import { ThinkingSteps, sseStatusToLivePhase } from "./thinking-steps";
+import { ThinkingSteps, sseStatusToLivePhase, type LivePhase } from "./thinking-steps";
 import { SmartActions } from "./smart-actions";
 import { ContextualFollowups } from "./contextual-followups";
 import { PrepPanel } from "./prep-panel";
 import { pickPrepContext } from "./prep-context";
+import { StudioWelcome } from "./studio-welcome";
+import {
+  DraftAdvisory,
+  DraftDiscovery,
+  DraftEmergency,
+  DraftStay,
+  DraftStops,
+  type PlaceInput,
+} from "./draft-sections";
+import { ROUTE_STYLES, type RouteStyleKey } from "./studio-starters";
+import { dateLocale, daysLabel, fill, stopsLabel, type Translate } from "./studio-format";
 import { extractDestinationFromText } from "../lib/affiliate/travelpayouts";
 import { useUserMemory } from "../lib/ai/user-memory-hook";
 import {
@@ -87,6 +117,7 @@ interface Pending {
   conversationId: string;
   trainingConsent?: boolean;
 }
+type DraftTab = "route" | "stay" | "discovery" | "emergency" | "flights" | "advisory";
 const newSession = (): Session => ({
   id: crypto.randomUUID(),
   title: "New trip",
@@ -94,196 +125,97 @@ const newSession = (): Session => ({
   route: null,
 });
 
-const POPULAR_DESTINATIONS = [
-  {
-    city: "Roma",
-    country: "İtalya",
-    flag: "🇮🇹",
-    prompt: "Roma'da 3 günlük tarih, sanat ve lezzet odaklı bir rota oluştur",
-  },
-  {
-    city: "Paris",
-    country: "Fransa",
-    flag: "🇫🇷",
-    prompt: "Paris'te 3 günlük kültür, müze ve cafe odaklı bir gezi planla",
-  },
-  {
-    city: "İstanbul",
-    country: "Türkiye",
-    flag: "🇹🇷",
-    prompt: "İstanbul'da 2 günlük butik kahve, galeri ve Boğaz rotası oluştur",
-  },
-  {
-    city: "Barcelona",
-    country: "İspanya",
-    flag: "🇪🇸",
-    prompt: "Barcelona'da 3 günlük Gaudi, sahil ve tapas rotası planla",
-  },
-  {
-    city: "Amsterdam",
-    country: "Hollanda",
-    flag: "🇳🇱",
-    prompt: "Amsterdam'da 2 günlük müze, kanal ve bisiklet rotası oluştur",
-  },
-  {
-    city: "Kapadokya",
-    country: "Türkiye",
-    flag: "🇹🇷",
-    prompt: "Kapadokya'da 2 günlük balon, vadi ve yeraltı şehri rotası oluştur",
-  },
-  {
-    city: "Londra",
-    country: "İngiltere",
-    flag: "🇬🇧",
-    prompt: "Londra'da 3 günlük tarihi yerler, pub ve pazar rotası planla",
-  },
-  {
-    city: "Tokyo",
-    country: "Japonya",
-    flag: "🇯🇵",
-    prompt: "Tokyo'da 4 günlük tapınak, anime, ramen ve teknoloji rotası oluştur",
-  },
-];
-
-const ACTIVITY_STARTERS = [
-  {
-    icon: "restaurant",
-    label: "Yerel Lezzetler",
-    desc: "Otantik restoranlar ve sokak yemekleri",
-    prompt: "Gideceğim şehirde mutlaka denenmesi gereken yerel yemekler ve en iyi restoranlar",
-  },
-  {
-    icon: "hotel",
-    label: "Otel & Konaklama",
-    desc: "Bölge ve bütçe önerileri",
-    prompt: "Merkezi, güvenli ve bütçe dostu otel semtleri ve butik otel önerileri",
-  },
-  {
-    icon: "coffee",
-    label: "Kahve & Mekan",
-    desc: "Sessiz cafeler ve çalışma mekanları",
-    prompt: "Şehirde en iyi butik kahveciler, sessiz çalışma mekanları ve atmosferik kafeler",
-  },
-  {
-    icon: "nightlife",
-    label: "Gece Hayatı",
-    desc: "Barlar, canlı müzik ve rooftop",
-    prompt: "Şehrin en iyi gece mekanları, rooftop barları ve canlı müzik noktaları",
-  },
-  {
-    icon: "photo_camera",
-    label: "Fotoğraf Rotası",
-    desc: "Manzara ve gizli köşeler",
-    prompt: "Instagram için en iyi fotoğraf noktaları, gizli köşeler ve gün batımı manzaraları",
-  },
-  {
-    icon: "savings",
-    label: "Bütçe Gezisi",
-    desc: "500€ altı kompakt tur",
-    prompt:
-      "500€ altı bütçeyle 3 günlük kompakt bir şehir gezisi planla, ücretsiz aktiviteler dahil",
-  },
-];
-
-// Quick guides map to exact KB documents — answered with minimal tokens via RAG context.
-// Order: vary by month so the selection feels fresh across seasons.
-const KB_QUICK_GUIDES = [
-  {
-    flag: "🇹🇷",
-    city: "İstanbul",
-    topic: "Semtler",
-    prompt: "İstanbul'un semtleri hakkında bilgi ver: Beyoğlu, Kadıköy, Karaköy",
-  },
-  {
-    flag: "🇪🇸",
-    city: "Barcelona",
-    topic: "Gaudi",
-    prompt: "Barcelona'da Gaudí eserleri: Sagrada Família ve Park Güell ziyaret rehberi",
-  },
-  {
-    flag: "🇫🇷",
-    city: "Paris",
-    topic: "Müzeler",
-    prompt: "Paris müzeleri rehberi: Louvre, Orsay ve Paris Müze Kartı",
-  },
-  {
-    flag: "🇯🇵",
-    city: "Tokyo",
-    topic: "Ulaşım",
-    prompt: "Tokyo toplu ulaşım rehberi: JR, metro ve Suica kart nasıl kullanılır?",
-  },
-  {
-    flag: "🇮🇹",
-    city: "Roma",
-    topic: "Mutfak",
-    prompt: "Roma mutfağı: cacio e pepe, carbonara ve pizza al taglio nerede yenir?",
-  },
-  {
-    flag: "🇳🇱",
-    city: "Amsterdam",
-    topic: "Müzeler",
-    prompt: "Amsterdam müzeleri: Rijksmuseum, Van Gogh ve I Amsterdam City Card",
-  },
-  {
-    flag: "🇦🇪",
-    city: "Dubai",
-    topic: "Pratik",
-    prompt: "Dubai seyahati pratik bilgiler: iklim, kıyafet kuralları ve metro rehberi",
-  },
-  {
-    flag: "🇬🇧",
-    city: "Londra",
-    topic: "Ücretsiz",
-    prompt: "Londra'da ücretsiz müzeler: British Museum, Natural History Museum ziyaret rehberi",
-  },
-  {
-    flag: "🇹🇷",
-    city: "Antalya",
-    topic: "Doğa",
-    prompt: "Antalya'da doğa: Düden Şelalesi, Köprülü Kanyon ve Kaş rehberi",
-  },
-  {
-    flag: "🇹🇷",
-    city: "İstanbul",
-    topic: "Ulaşım",
-    prompt: "İstanbul toplu ulaşım rehberi: İstanbulkart, metro, tramvay ve vapur",
-  },
-  {
-    flag: "🇪🇸",
-    city: "Barcelona",
-    topic: "Yemek",
-    prompt: "Barcelona mutfağı: tapas, vermouth kültürü ve La Boqueria pazarı",
-  },
-  {
-    flag: "🇫🇷",
-    city: "Paris",
-    topic: "Semtler",
-    prompt: "Paris semtleri: Marais, Montmartre, Saint-Germain ve Bastille karakterleri",
-  },
-];
-
-function getSeasonalGuides(count = 6): typeof KB_QUICK_GUIDES {
-  const month = new Date().getMonth();
-  const offset = (month * 3) % KB_QUICK_GUIDES.length;
-  const rotated = [...KB_QUICK_GUIDES.slice(offset), ...KB_QUICK_GUIDES.slice(0, offset)];
-  return rotated.slice(0, count);
+function creditsLabel(t: Translate, n: number): string {
+  return fill(
+    n === 1 ? t("studio.quota.credits.one", "{n} kredi") : t("studio.quota.credits", "{n} kredi"),
+    {
+      n,
+    },
+  );
 }
 
-const ROUTE_STYLES = [
-  { key: "calm" as const, icon: "🌿", label: "Sakin rota", hint: "Az yürüyüş · uzun molalar" },
-  {
-    key: "classic" as const,
-    icon: "🗺️",
-    label: "Klasik rota",
-    hint: "Dengeli tempo · temel duraklar",
-  },
-  {
-    key: "explorer" as const,
-    icon: "✨",
-    label: "Kaşif rota",
-    hint: "Yerel noktalar · derin keşif",
-  },
-];
+/** Uçuş fiyatları (yalnız Hazırlık sekmesinde, PrepPanel'in flightBlock'u olarak; I8). */
+function FlightPrices({ info }: { info: FlightPriceInfo | null | undefined }) {
+  const { t, locale } = useLocale();
+  if (!info)
+    return (
+      <p className="as-studio__muted">
+        {t(
+          "studio.flight.none",
+          "Uçuş fiyatı bilgisi bu rota için mevcut değil. Rota oluştururken otomatik kontrol edilir.",
+        )}
+      </p>
+    );
+  if (info.source === "unavailable")
+    return (
+      <div className="as-studio-card">
+        <p className="as-studio__muted">{info.note}</p>
+      </div>
+    );
+  return (
+    <div className="as-studio-section">
+      <div className="as-studio-card as-studio-card--tint">
+        <p className="as-studio-section__title">
+          <Icon name="plane" size={16} />
+          {t("studio.flight.title", "Uçuş fiyatları")}
+        </p>
+        <p className="as-studio__meta">
+          Travelpayouts · {new Date(info.checkedAt).toLocaleDateString(dateLocale(locale))}
+        </p>
+        <p className="as-studio-card__text">{info.note}</p>
+      </div>
+      {info.deals.length > 0 && (
+        <ul className="as-studio-cards">
+          {info.deals.map((deal, idx) => (
+            <li key={idx}>
+              <a
+                href={deal.affiliateLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="as-studio-deal"
+              >
+                <span className="as-studio-deal__route">
+                  <strong>
+                    {deal.origin} → {deal.destination}
+                  </strong>
+                  {deal.departureMonth && (
+                    <span className="as-studio__meta">{deal.departureMonth}</span>
+                  )}
+                </span>
+                <span className="as-studio-deal__price">
+                  <strong>
+                    {deal.currency} {deal.price}
+                  </strong>
+                  <span className="as-studio-deal__cta">
+                    {t("studio.flight.search", "Bilet ara")}
+                    <Icon name="arrow" size={16} />
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {info.deals[0] && (
+        <a
+          href={info.deals[0].affiliateLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonClassName("primary", "md", true)}
+        >
+          <Icon name="plane" size={16} />
+          <span>{t("studio.flight.compare", "Tüm uçuşları karşılaştır")}</span>
+        </a>
+      )}
+      <p className="as-studio__meta">
+        {t(
+          "studio.flight.disclaimer",
+          "Travelpayouts üzerinden arama yapılır. Fiyatlar değişkendir.",
+        )}
+      </p>
+    </div>
+  );
+}
 
 export default function AIPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -303,17 +235,13 @@ export default function AIPage() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelWide, setPanelWide] = useState(false);
   const [day, setDay] = useState(1);
-  const [draftTab, setDraftTab] = useState<
-    "route" | "stay" | "discovery" | "emergency" | "flights" | "advisory"
-  >("route");
+  const [draftTab, setDraftTab] = useState<DraftTab>("route");
   const [mobileTab, setMobileTab] = useState<"chat" | "draft">("chat");
   const [currentTrip, setCurrentTrip] = useState<Trip | null>(null);
-  const [showManifestoModal, setShowManifestoModal] = useState(false);
-  const [showDealTrackerModal, setShowDealTrackerModal] = useState(false);
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
-  const [routeMode, setRouteMode] = useState<"calm" | "classic" | "explorer">("classic");
+  const [routeMode, setRouteMode] = useState<RouteStyleKey>("classic");
   const [streamText, setStreamText] = useState("");
-  const [streamPhase, setStreamPhase] = useState<{ icon: string; label: string } | null>(null);
+  const [streamPhase, setStreamPhase] = useState<LivePhase | null>(null);
   const [retryAvailable, setRetryAvailable] = useState(false);
   // ?resume=1 (J1 adım 6): kayıt öncesi misafir taslağı. Otomatik ücretli istek YOK.
   const [resumeDraft, setResumeDraft] = useState<GuestDraft | null>(null);
@@ -326,7 +254,7 @@ export default function AIPage() {
   const route = session?.route && isRoutePlan(session.route) ? session.route : null;
   const { memory, learnFromPrompt, buildContextString, clearMemory } = useUserMemory();
   const [conversationFlow, setConversationFlow] = useState<ConversationFlow>(EMPTY_FLOW);
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   // I8 (§9.1): affiliate yüzeyleri yalnız taslak panelinin Hazırlık bölümünde (prep-panel.tsx).
   const prepContext = pickPrepContext({
     route,
@@ -334,15 +262,13 @@ export default function AIPage() {
     surfacePricing: shouldSurfacePricing(conversationFlow),
     extractDestination: extractDestinationFromText,
   });
-  const draftHeadingRef = useRef<HTMLElement>(null);
+  const draftHeadingRef = useRef<HTMLHeadingElement>(null);
   const openPrep = () => {
     setPanelOpen(true);
     setMobileTab("draft");
     if (route) setDraftTab("flights");
     window.setTimeout(() => draftHeadingRef.current?.focus(), 0);
   };
-  const prepIcon = t("ai.prepTab", "✈ Hazırlık").split(" ")[0];
-  const prepLabel = t("ai.prepTab", "✈ Hazırlık").split(" ").slice(1).join(" ");
 
   // Affiliate click analytics
   useEffect(() => {
@@ -371,8 +297,7 @@ export default function AIPage() {
     }
   }
 
-  function deleteSession(id: string, e: React.MouseEvent) {
-    e.stopPropagation();
+  function deleteSession(id: string) {
     if (inFlight.current) return;
     const remaining = sessions.filter((s) => s.id !== id);
     setSessions(remaining);
@@ -408,30 +333,24 @@ export default function AIPage() {
     setCurrentTrip(null);
   }
 
-  function addPlaceToActiveTrip(place: {
-    label: string;
-    address?: string;
-    lat?: number;
-    lng?: number;
-    category?: string;
-    note?: string;
-    durationMinutes?: number;
-    isHotel?: boolean;
-  }) {
+  function addPlaceToActiveTrip(place: PlaceInput) {
     if (typeof window === "undefined") return;
     try {
       const raw = readPlannerStore(PLANNER_TRIPS_KEY);
       let trips: Trip[] = raw ? (JSON.parse(raw) as Trip[]) : [];
       if (!Array.isArray(trips)) trips = [];
 
-      let trip = currentTrip ? trips.find((t) => t.id === currentTrip.id) : trips[0];
+      const dayOne = t("studio.trip.day1", "1. Gün");
+      let trip = currentTrip ? trips.find((x) => x.id === currentTrip.id) : trips[0];
       if (!trip) {
         trip = {
           id: `trip-${crypto.randomUUID().slice(0, 8)}`,
-          title: place.isHotel ? `${place.label} Konaklamalı Gezi` : "Seyahat Rotası",
+          title: place.isHotel
+            ? fill(t("studio.trip.hotelTitle", "{name} Konaklamalı Gezi"), { name: place.label })
+            : t("studio.trip.defaultTitle", "Seyahat Rotası"),
           destination: place.address || place.label,
           transportMode: "walking",
-          days: [{ dayIndex: 1, label: "1. Gün", color: "#10b981", pins: [] }],
+          days: [{ dayIndex: 1, label: dayOne, color: DAY_COLORS[1], pins: [] }],
           pins: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -448,21 +367,23 @@ export default function AIPage() {
         address: place.address || place.label,
         lat: place.lat ?? 41.0082,
         lng: place.lng ?? 28.9784,
-        category: place.isHotel
-          ? "otel"
-          : (place.category as import("../lib/trip/models").PinCategory) || "genel",
+        category: place.isHotel ? "otel" : (place.category as PinCategory) || "genel",
         dayIndex: 1,
         order: (trip!.days?.[0]?.pins?.length || 0) + 1,
-        group: place.isHotel ? "Konaklama" : "Öneriler",
+        group: place.isHotel
+          ? t("studio.trip.groupStay", "Konaklama")
+          : t("studio.trip.groupSuggestions", "Öneriler"),
         visited: false,
         durationMinutes: place.durationMinutes || (place.isHotel ? 120 : 60),
         note:
           place.note ||
-          (place.isHotel ? "AI Asistan tarafından önerilen otel" : "AI Asistan tarafından eklendi"),
+          (place.isHotel
+            ? t("studio.trip.noteHotel", "AI Asistan tarafından önerilen otel")
+            : t("studio.trip.noteStop", "AI Asistan tarafından eklendi")),
       };
 
       if (!trip!.days || trip!.days.length === 0) {
-        trip!.days = [{ dayIndex: 1, label: "1. Gün", color: "#10b981", pins: [newPin] }];
+        trip!.days = [{ dayIndex: 1, label: dayOne, color: DAY_COLORS[1], pins: [newPin] }];
       } else {
         if (!trip!.days[0].pins) trip!.days[0].pins = [];
         trip!.days[0].pins.push(newPin);
@@ -470,7 +391,9 @@ export default function AIPage() {
       trip!.updatedAt = new Date().toISOString();
 
       if (!writePlannerStore(PLANNER_TRIPS_KEY, JSON.stringify(trips)))
-        throw new Error("Değişiklik kaydedilemedi. Depolama alanını kontrol edin.");
+        throw new Error(
+          t("studio.err.storage", "Değişiklik kaydedilemedi. Depolama alanını kontrol edin."),
+        );
       saveTripMarkdown(trip!.id, tripToMarkdown(trip!));
       setCurrentTrip({ ...trip! });
 
@@ -484,10 +407,25 @@ export default function AIPage() {
       });
 
       setNotice(
-        `✓ "${place.label}" ${place.isHotel ? "otel olarak" : "durak olarak"} rotana eklendi ve .md manifestosuna işlendi!`,
+        fill(
+          place.isHotel
+            ? t(
+                "studio.notice.addedHotel",
+                "“{name}” otel olarak rotana eklendi ve .md manifestosuna işlendi.",
+              )
+            : t(
+                "studio.notice.addedStop",
+                "“{name}” durak olarak rotana eklendi ve .md manifestosuna işlendi.",
+              ),
+          { name: place.label },
+        ),
       );
     } catch (e: unknown) {
-      setError(`Rotaya eklenirken hata: ${e instanceof Error ? e.message : String(e)}`);
+      setError(
+        fill(t("studio.err.addPlace", "Rotaya eklenirken hata: {message}"), {
+          message: e instanceof Error ? e.message : String(e),
+        }),
+      );
     }
   }
 
@@ -511,10 +449,17 @@ export default function AIPage() {
         setActiveId(valid[0]?.id || "");
         pending.current = valid[0]?.pendingRequest || null;
         if (pending.current)
-          setError("Önceki isteğin sonucu bekleniyor. Aynı isteği tekrar kontrol edebilirsin.");
+          setError(
+            t(
+              "studio.err.pendingStored",
+              "Önceki isteğin sonucu bekleniyor. Aynı isteği tekrar kontrol edebilirsin.",
+            ),
+          );
       }
     } catch {
-      setError("Sohbet geçmişi okunamadı. Yeni bir sohbet başlatabilirsin.");
+      setError(
+        t("studio.err.historyRead", "Sohbet geçmişi okunamadı. Yeni bir sohbet başlatabilirsin."),
+      );
     }
     refreshCurrentTrip();
     if (new URLSearchParams(window.location.search).get("resume") === "1") {
@@ -562,7 +507,7 @@ export default function AIPage() {
       try {
         userStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.slice(0, 15)));
       } catch {
-        setNotice("Sohbet bu cihazda kaydedilemedi.");
+        setNotice(t("studio.notice.saveFailed", "Sohbet bu cihazda kaydedilemedi."));
       }
     }
   }, [sessions, ready]);
@@ -599,7 +544,8 @@ export default function AIPage() {
     setNotice("");
     setConversationFlow(EMPTY_FLOW);
     pending.current = sessions.find((s) => s.id === id)?.pendingRequest || null;
-    if (pending.current) setError("Bu sohbette sonuç bekleyen bir istek var.");
+    if (pending.current)
+      setError(t("studio.err.pendingSession", "Bu sohbette sonuç bekleyen bir istek var."));
   }
   /** true: sunucu yanıtı başarıyla işlendi (resume taslağı ancak o zaman silinir). */
   async function send(retry = false, customPrompt?: string): Promise<boolean> {
@@ -617,13 +563,18 @@ export default function AIPage() {
     }
     if (!stored?.token) {
       if (promptToSend && !input) setInput(promptToSend);
-      setNotice("Sohbete devam etmek için lütfen giriş yapın. Sorunuz hazır bekliyor.");
+      setNotice(
+        t(
+          "studio.notice.signIn",
+          "Sohbete devam etmek için lütfen giriş yapın. Sorunuz hazır bekliyor.",
+        ),
+      );
       setAuthModal(true);
       return false;
     }
     if (retry && !pending.current) return false;
     if (!retry && pending.current) {
-      setError("Önce bekleyen isteği tekrar kontrol et.");
+      setError(t("studio.err.checkPending", "Önce bekleyen isteği tekrar kontrol et."));
       return false;
     }
     let target = session;
@@ -720,8 +671,11 @@ export default function AIPage() {
             throw Object.assign(
               new Error(
                 aborted
-                  ? "AI yanıtı zaman aşımına uğradı."
-                  : "AI servisine ulaşılamadı (bağlantı/erişim engellendi).",
+                  ? t("studio.err.timeout", "AI yanıtı zaman aşımına uğradı.")
+                  : t(
+                      "studio.err.unreachable",
+                      "AI servisine ulaşılamadı (bağlantı/erişim engellendi).",
+                    ),
               ),
               { code: aborted ? "AI_TIMEOUT" : "AI_UNREACHABLE" },
             );
@@ -775,7 +729,7 @@ export default function AIPage() {
               }
             }
           }
-          throw new Error("Yanıt tamamlanamadı — stream kapandı.");
+          throw new Error(t("studio.err.streamClosed", "Yanıt tamamlanamadı, akış kapandı."));
         };
         // Buffered fallback: stream (Function URL) erişilemezse API Gateway /ai/chat
         // üzerinden tek-seferlik (streaming'siz) yanıt al. Org politikası public
@@ -808,7 +762,7 @@ export default function AIPage() {
       }
       setTrainingConsent(false);
       if (!result.orchestratorSummary?.trim() || (result.route && !isRoutePlan(result.route)))
-        throw Error("Yanıt tamamlanamadı.");
+        throw Error(t("studio.err.incomplete", "Yanıt tamamlanamadı."));
       const detectedDest = !result.route
         ? extractDestinationFromText(result.orchestratorSummary)
         : undefined;
@@ -832,11 +786,26 @@ export default function AIPage() {
           : detectedDest && !result.clarification?.quickOptions?.length
             ? [
                 {
-                  label: `${detectedDest} rotası planla`,
-                  prompt: `${detectedDest} için rota planı oluştur`,
+                  label: fill(t("studio.quick.route", "{dest} rotası planla"), {
+                    dest: detectedDest,
+                  }),
+                  prompt: fill(t("studio.quick.route.prompt", "{dest} için rota planı oluştur"), {
+                    dest: detectedDest,
+                  }),
                 },
-                { label: "Uçuş fiyatları?", prompt: `${detectedDest} uçuş biletleri ne kadar?` },
-                { label: "Otel önerileri?", prompt: `${detectedDest} otel tavsiyeleri ver` },
+                {
+                  label: t("studio.quick.flights", "Uçuş fiyatları?"),
+                  prompt: fill(
+                    t("studio.quick.flights.prompt", "{dest} uçuş biletleri ne kadar?"),
+                    { dest: detectedDest },
+                  ),
+                },
+                {
+                  label: t("studio.quick.hotels", "Otel önerileri?"),
+                  prompt: fill(t("studio.quick.hotels.prompt", "{dest} otel tavsiyeleri ver"), {
+                    dest: detectedDest,
+                  }),
+                },
               ]
             : undefined;
 
@@ -898,7 +867,16 @@ export default function AIPage() {
       }
 
       const cost = result.billing?.cost ?? result.cost ?? 0;
-      setNotice(cost ? `${cost} kredi kullanıldı.` : "Danışmanlık ve sorular ücretsizdir.");
+      setNotice(
+        cost
+          ? fill(
+              cost === 1
+                ? t("studio.notice.cost.one", "{n} kredi kullanıldı.")
+                : t("studio.notice.cost", "{n} kredi kullanıldı."),
+              { n: cost },
+            )
+          : t("studio.notice.free", "Danışmanlık ve sorular ücretsizdir."),
+      );
       if (result.billing) setWallet((w) => ({ ...w, credits: result.billing!.credits }));
       pending.current = null;
       void refreshWallet();
@@ -912,57 +890,107 @@ export default function AIPage() {
         if (refreshed?.token) {
           setError("");
           setErrorCode("");
-          setNotice("Oturum yenilendi, isteğiniz gönderiliyor...");
+          setNotice(
+            t("studio.notice.sessionRefreshed", "Oturum yenilendi, isteğiniz gönderiliyor..."),
+          );
           inFlight.current = false;
           setBusy(false);
           return send(false, promptToSend);
         } else {
-          setError("Oturum süreniz doldu. Lütfen tekrar giriş yapın.");
+          // Kod yoksa da giriş eylemi gösterilsin (metin çevrildiği için metne bakılamaz).
+          setErrorCode("UNAUTHORIZED");
+          setError(
+            t("studio.err.sessionExpired", "Oturum süreniz doldu. Lütfen tekrar giriş yapın."),
+          );
           setInput(promptToSend);
           setAuthModal(true);
         }
       } else if (code === "EMAIL_NOT_VERIFIED") {
         setError(
-          "AI asistanı kullanmak için e-postanızı onaylamanız gerekiyor. Giriş ekranından onay maili gönderebilirsiniz.",
+          t(
+            "studio.err.emailNotVerified",
+            "AI asistanı kullanmak için e-postanızı onaylamanız gerekiyor. Giriş ekranından onay maili gönderebilirsiniz.",
+          ),
         );
       } else if (code === "WALLET_FROZEN") {
-        setError("Kredi hesabınız geçici olarak durduruldu. Detay için destek ekibine ulaşın.");
+        setError(
+          t(
+            "studio.err.walletFrozen",
+            "Kredi hesabınız geçici olarak durduruldu. Detay için destek ekibine ulaşın.",
+          ),
+        );
       } else if (code === "INSUFFICIENT_CREDITS" || err?.status === 402) {
-        setError(err?.message || "Bu işlem için yeterli krediniz yok.");
-        openUpgradeModal(err?.message || "Krediniz yetersiz.", undefined, "ai_credits_depleted");
+        setError(
+          err?.message || t("studio.err.insufficient", "Bu işlem için yeterli krediniz yok."),
+        );
+        openUpgradeModal(
+          err?.message || t("studio.err.insufficientShort", "Krediniz yetersiz."),
+          undefined,
+          "ai_credits_depleted",
+        );
       } else if (code === "USER_DAILY_LIMIT") {
         setError(
-          "Bugünlük 20 mesaj sınırına ulaştınız. Sayaç her gece saat 03:00'te (Türkiye saati) sıfırlanır.",
+          t(
+            "studio.err.dailyLimit",
+            "Bugünlük 20 mesaj sınırına ulaştınız. Sayaç her gece saat 03:00'te (Türkiye saati) sıfırlanır.",
+          ),
         );
       } else if (code === "SERVICE_DAILY_LIMIT") {
-        setError("Servis kapasitesi şu an yoğun. Birkaç dakika sonra tekrar deneyin.");
+        setError(
+          t(
+            "studio.err.serviceLimit",
+            "Servis kapasitesi şu an yoğun. Birkaç dakika sonra tekrar deneyin.",
+          ),
+        );
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;
       } else if (code === "AI_DISABLED") {
-        setError("AI asistanı şu an bakımda. Kısa süre içinde tekrar kullanılabilir olacak.");
+        setError(
+          t(
+            "studio.err.maintenance",
+            "AI asistanı şu an bakımda. Kısa süre içinde tekrar kullanılabilir olacak.",
+          ),
+        );
       } else if (code === "REQUEST_IN_PROGRESS") {
-        setError("Önceki isteğin sonucu bekleniyor. Sonuç gelince otomatik gösterilecek.");
+        setError(
+          t(
+            "studio.err.inProgress",
+            "Önceki isteğin sonucu bekleniyor. Sonuç gelince otomatik gösterilecek.",
+          ),
+        );
         setRetryAvailable(true);
       } else if (
         shouldRecheckRequest(err) ||
         err?.status === 408 ||
         ((err?.status ?? 0) >= 500 && code !== "AI_RESULT_UNCONFIRMED")
       ) {
-        setError("Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.");
+        setError(
+          t(
+            "studio.err.connection",
+            "Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.",
+          ),
+        );
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;
       } else if (code === "AI_UNREACHABLE" || err?.status === 403) {
         setError(
-          "AI servisine şu anda erişilemiyor (erişim engellendi). Bu geçici bir sunucu/ağ ayarı sorunudur, kredinizle ilgili değildir. Lütfen birazdan tekrar deneyin; sorun sürerse destek ekibine bildirin.",
+          t(
+            "studio.err.blocked",
+            "AI servisine şu anda erişilemiyor (erişim engellendi). Bu geçici bir sunucu/ağ ayarı sorunudur, kredinizle ilgili değildir. Lütfen birazdan tekrar deneyin; sorun sürerse destek ekibine bildirin.",
+          ),
         );
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;
       } else if (code === "AI_TIMEOUT") {
-        setError("AI yanıtı zaman aşımına uğradı. Lütfen tekrar deneyin.");
+        setError(
+          t("studio.err.timeoutRetry", "AI yanıtı zaman aşımına uğradı. Lütfen tekrar deneyin."),
+        );
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;
       } else {
-        setError(err?.message || "Yanıt alınamadı. Tekrar deneyebilirsin.");
+        setError(
+          err?.message || t("studio.err.generic", "Yanıt alınamadı. Tekrar deneyebilirsin."),
+        );
         setRetryAvailable(false);
       }
       setSessions((s) =>
@@ -1022,19 +1050,21 @@ export default function AIPage() {
       const raw = readPlannerStore(PLANNER_TRIPS_KEY);
       const trips = raw ? JSON.parse(raw) : [];
       if (!Array.isArray(trips))
-        throw Error("Harita kayıtları okunamadı; mevcut veriler değiştirilmedi.");
+        throw Error(
+          t("studio.err.mapRead", "Harita kayıtları okunamadı; mevcut veriler değiştirilmedi."),
+        );
       const tripId = `ai-${activeId}`;
       const trip = routeToTrip(route, tripId);
       if (
         !writePlannerStore(
           PLANNER_TRIPS_KEY,
-          JSON.stringify([...trips.filter((t) => t.id !== tripId), trip]),
+          JSON.stringify([...trips.filter((x) => x.id !== tripId), trip]),
         )
       )
-        throw Error("Rota aktarılamadı.");
+        throw Error(t("studio.err.mapTransfer", "Rota aktarılamadı."));
       window.location.assign(`/maps/?tripId=${encodeURIComponent(tripId)}`);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Rota aktarılamadı.");
+      setError(e instanceof Error ? e.message : t("studio.err.mapTransfer", "Rota aktarılamadı."));
     }
   }
   function dictate() {
@@ -1045,7 +1075,12 @@ export default function AIPage() {
     };
     const Recognition = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (!Recognition) {
-      setNotice("Bu tarayıcı sesli girişi desteklemiyor. Mesajını yazarak gönderebilirsin.");
+      setNotice(
+        t(
+          "studio.notice.noSpeech",
+          "Bu tarayıcı sesli girişi desteklemiyor. Mesajını yazarak gönderebilirsin.",
+        ),
+      );
       return;
     }
     if (listening) {
@@ -1054,16 +1089,29 @@ export default function AIPage() {
     }
     const recognition = new Recognition();
     speech.current = recognition;
-    recognition.lang = "tr-TR";
+    recognition.lang = locale === "en" ? "en-US" : "tr-TR";
     recognition.onstart = () => setListening(true);
     recognition.onend = () => setListening(false);
     recognition.onresult = (event: SpeechRecognitionEvent) =>
       setInput((old) => `${old} ${event.results[0][0].transcript}`.trim().slice(0, 2000));
     recognition.onerror = () => {
       setListening(false);
-      setNotice("Ses alınamadı. Mikrofon iznini kontrol et.");
+      setNotice(t("studio.notice.micError", "Ses alınamadı. Mikrofon iznini kontrol et."));
     };
     recognition.start();
+  }
+  function addMyLocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const where = fill(t("studio.composer.myLocation", "(Konumum: {lat}, {lng})"), {
+          lat: pos.coords.latitude.toFixed(4),
+          lng: pos.coords.longitude.toFixed(4),
+        });
+        setInput((prev) => `${prev} ${where}`);
+      },
+      () => setNotice(t("studio.composer.locationDenied", "Konum izni alınamadı.")),
+    );
   }
   function download() {
     if (!route) return;
@@ -1072,7 +1120,7 @@ export default function AIPage() {
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = "seyahat-plani.txt";
+    a.download = t("studio.download.filename", "seyahat-plani.txt");
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -1080,33 +1128,24 @@ export default function AIPage() {
     if (!route) return;
     try {
       await navigator.clipboard.writeText(planText(route));
-      setNotice("Plan kopyalandı.");
+      setNotice(t("studio.notice.planCopied", "Plan kopyalandı."));
     } catch {
-      setError("Plan kopyalanamadı.");
+      setError(t("studio.err.planCopy", "Plan kopyalanamadı."));
     }
+  }
+  /** Öneri/hızlı işlem: girişi doldurur ve mevcut send() ile gönderir (önceki davranış). */
+  function pick(prompt: string) {
+    setInput(prompt);
+    void send(false, prompt);
   }
 
   if (isAuthenticated === null) {
     return (
-      <PageShell layout="app" className="ai-studio-shell">
-        <div
-          className="ai-studio-root"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "100vh",
-            background: "var(--color-neutral-900)",
-          }}
-        >
-          <div
-            className="ai-studio-main"
-            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-          >
-            {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
-            <PageHeader variant="hidden" />
-            <div className="ai-thinking-dot" style={{ width: "2rem", height: "2rem" }} />
-          </div>
+      <PageShell layout="app" className="as-studio-shell">
+        {/* AC-34: prerender HTML'inde tek h1 (başlık route-registry'den; görsel olarak gizli). */}
+        <PageHeader variant="hidden" />
+        <div className="as-studio-loading">
+          <LoadingState label={t("studio.loading", "Asistan yükleniyor…")} />
         </div>
       </PageShell>
     );
@@ -1117,234 +1156,292 @@ export default function AIPage() {
     return <GuestAssistant />;
   }
 
+  const isAuthError =
+    errorCode === "UNAUTHORIZED" ||
+    (errorCode === "" && (error.includes("giriş") || error.includes("Oturum")));
+  const isCreditLow = errorCode === "INSUFFICIENT_CREDITS";
+  const isWalletFrozen = errorCode === "WALLET_FROZEN";
+  const isEmailVerify = errorCode === "EMAIL_NOT_VERIFIED";
+  const isDailyLimit = errorCode === "USER_DAILY_LIMIT";
+  const isServiceLimit = errorCode === "SERVICE_DAILY_LIMIT";
+  const isMaintenance = errorCode === "AI_DISABLED";
+  const errorTone: AlertTone = isCreditLow
+    ? "warning"
+    : isEmailVerify || isDailyLimit || isServiceLimit || isMaintenance
+      ? "info"
+      : "danger";
+  const showRetry =
+    retryAvailable ||
+    (!isAuthError &&
+      !isEmailVerify &&
+      !isCreditLow &&
+      !isWalletFrozen &&
+      !isDailyLimit &&
+      Boolean(pending.current));
+  const lastMessage = session?.messages[session.messages.length - 1];
+  const selectedStyle = ROUTE_STYLES.find((s) => s.key === routeMode) ?? ROUTE_STYLES[1];
+  const styleOption = (style: (typeof ROUTE_STYLES)[number]): SegmentOption<RouteStyleKey> => ({
+    value: style.key,
+    label: (
+      <span className="as-studio__style-option">
+        <Icon name={style.icon} size={16} />
+        {t(...style.label)}
+      </span>
+    ),
+  });
+  const advisoryWarn = Boolean(
+    session?.travelAdvisory?.level && session.travelAdvisory.level !== "normal",
+  );
+
   return (
-    <PageShell layout="app" className="ai-studio-shell">
-      <div className="ai-studio-root">
-        <div className="ai-studio-main">
-          {/* AC-34: tek h1 "Seyahat asistanı" (registry, görsel olarak gizli); marka satırı <p>. */}
-          <PageHeader variant="hidden" />
-          <div className={`ai-studio-workspace ${panelWide ? "ai-panel-wide" : ""}`}>
-            <aside className="ai-studio-aside-left" aria-label="Sohbetler">
-              <div>
-                <button className="ai-new-plan-btn" onClick={startNew} disabled={busy}>
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ fontSize: "18px" }}
-                  >
-                    add
-                  </span>
-                  Yeni Seyahat Planla
-                </button>
-                <div className="ai-section-label-row">
-                  <span className="ai-section-label">SOHBET GEÇMİŞİ</span>
-                  {sessions.length > 0 && (
-                    <span className="ai-section-count">{sessions.length} Kayıt</span>
-                  )}
-                </div>
-                <div className="ai-session-list ai-custom-scrollbar">
-                  {sessions.map((s, idx) => (
-                    <div key={s.id} className="ai-history-item-wrap">
+    <PageShell layout="app" className="as-studio-shell">
+      {/* AC-34: tek h1 "Seyahat asistanı" (registry, görsel olarak gizli); marka satırı <p>. */}
+      <PageHeader variant="hidden" />
+      <div className="as-studio-frame">
+        <div className="as-studio__switch">
+          <SegmentedControl
+            label={t("studio.view.label", "Görünüm")}
+            value={mobileTab}
+            onChange={(v) => {
+              setMobileTab(v);
+              setPanelOpen(v === "draft");
+            }}
+            options={[
+              { value: "chat", label: t("studio.view.chat", "Sohbet") },
+              {
+                value: "draft",
+                label: route
+                  ? `${t("studio.view.route", "Rota")} · ${stopsLabel(t, route.stops.length)}`
+                  : t("studio.view.route", "Rota"),
+              },
+            ]}
+          />
+        </div>
+        <div
+          className="as-studio"
+          data-panel={panelOpen ? "open" : "closed"}
+          data-wide={panelWide ? "true" : undefined}
+          data-view={mobileTab}
+        >
+          <aside
+            className="as-studio__sessions"
+            aria-label={t("studio.sessions.label", "Sohbetler")}
+          >
+            <Button
+              variant="primary"
+              fullWidth
+              iconStart={<Icon name="plus" size={16} />}
+              onClick={startNew}
+              disabled={busy}
+            >
+              {t("studio.new", "Yeni seyahat planla")}
+            </Button>
+            <div className="as-studio__sessions-head">
+              <p className="as-studio__eyebrow">{t("studio.sessions.title", "Sohbet geçmişi")}</p>
+              {sessions.length > 0 && (
+                <span className="as-studio__meta">
+                  {fill(t("studio.sessions.count", "{n} kayıt"), { n: sessions.length })}
+                </span>
+              )}
+            </div>
+            {sessions.length ? (
+              <ul className="as-studio-history">
+                {sessions.map((s, idx) => {
+                  const active = s.id === activeId;
+                  const title = s.messages.length
+                    ? s.title
+                    : t("studio.sessions.untitled", "Yeni gezi");
+                  return (
+                    <li
+                      key={s.id}
+                      className="as-studio-history__item"
+                      data-active={active || undefined}
+                    >
                       <button
+                        type="button"
                         disabled={busy}
-                        className={`ai-history-item ${s.id === activeId ? "active" : ""}`}
+                        className="as-studio-history__open"
+                        aria-current={active ? "true" : undefined}
                         onClick={() => select(s.id)}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            flex: 1,
-                            overflow: "hidden",
-                          }}
-                        >
-                          <span
-                            className="material-symbols-outlined"
-                            aria-hidden="true"
-                            style={{
-                              fontSize: "16px",
-                              flexShrink: 0,
-                              color:
-                                s.id === activeId
-                                  ? "var(--color-accent)"
-                                  : "var(--color-text-subtle)",
-                            }}
-                          >
-                            {s.id === activeId ? "chat_bubble" : "history"}
-                          </span>
-                          <span
-                            style={{
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {s.title}
-                          </span>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            flexShrink: 0,
-                            opacity: 0.7,
-                            letterSpacing: "0.04em",
-                          }}
-                        >
+                        <Icon name={active ? "message" : "clock"} size={16} />
+                        <span className="as-studio-history__title">{title}</span>
+                        <span className="as-studio-history__code">
                           {s.id.slice(0, 2).toUpperCase()}-{(idx + 1).toString().padStart(3, "0")}
                         </span>
                       </button>
-                      <button
-                        type="button"
-                        className="ai-history-delete-btn"
-                        onClick={(e) => deleteSession(s.id, e)}
-                        title="Sohbeti Sil"
-                        aria-label="Sohbeti Sil"
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "15px" }}
-                        >
-                          delete
-                        </span>
-                      </button>
-                    </div>
-                  ))}
-                  {!sessions.length && <p className="ai-muted">Birlikte ilk gezini planlayalım.</p>}
-                </div>
-              </div>
-              <div className="ai-quota-card">
-                <strong>{wallet ? `${wallet.credits} kredi` : "Seyahat danışmanın"}</strong>
-                <p>{t("assistant.composer.costNote", CREDIT_NOTE_TR)}</p>
-                {wallet?.usage && (
-                  <p>
-                    Bugün {wallet.usage.requestsToday} / {wallet.usage.dailyLimit} mesaj denemesi.
-                    Yenilenme:{" "}
-                    {new Date(wallet.usage.resetsAt).toLocaleTimeString("tr-TR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                    .
-                  </p>
-                )}
-              </div>
-            </aside>
-            <section className="ai-studio-chat-section" aria-label="Seyahat sohbeti">
-              <div className="ai-chat-header">
-                <div className="ai-chat-header-brand">
-                  <div className="ai-chat-brand-icon">
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "18px" }}
-                    >
-                      neurology
-                    </span>
-                  </div>
-                  <div>
-                    <div className="ai-chat-brand-title-row">
-                      <p className="ai-chat-title">MapsBridge AI</p>
-                      <span className="ai-online-dot" aria-label="Çevrimiçi" />
-                    </div>
-                    <span className="ai-muted" style={{ fontSize: "11.5px" }}>
-                      Seyahat asistanın hazır
-                    </span>
-                  </div>
-                </div>
-                <div className="ai-header-actions">
-                  <button className="ai-small-btn ai-new-mobile" onClick={startNew} disabled={busy}>
-                    Yeni
-                  </button>
-                  <button
-                    className="ai-icon-btn"
-                    aria-expanded={panelOpen}
-                    aria-controls="route-draft"
-                    onClick={() => {
-                      setPanelOpen(!panelOpen);
-                      setMobileTab(panelOpen ? "chat" : "draft");
-                    }}
-                    title={panelOpen ? "Sohbeti büyüt" : "Rota panelini aç"}
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "18px" }}
-                    >
-                      {panelOpen ? "close_fullscreen" : "open_in_full"}
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {session?.context && (
-                <div className="ai-context-strip" aria-label="Gezi tercihleri">
-                  {session.context.destination && <span>{session.context.destination}</span>}
-                  {session.context.days && <span>{session.context.days} gün</span>}
-                  {session.context.interests?.map((i) => (
-                    <span key={i}>{i}</span>
-                  ))}
-                </div>
-              )}
-              {(memory.interests.length > 0 ||
-                memory.destinations.length > 0 ||
-                memory.budgetHabit) && (
-                <div className="ai-user-memory-strip" aria-label="Kullanıcı hafızası">
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ fontSize: "14px", color: "var(--color-text-accent)" }}
-                  >
-                    psychology
-                  </span>
-                  <span style={{ fontWeight: 600, color: "var(--color-success-strong)" }}>
-                    Seni tanıyorum:
-                  </span>
-                  {memory.destinations.slice(-2).map((d) => (
-                    <span key={d} className="ai-user-memory-pill">
-                      {d}
-                    </span>
-                  ))}
-                  {memory.interests.slice(-3).map((i) => (
-                    <span key={i} className="ai-user-memory-pill">
-                      {i}
-                    </span>
-                  ))}
-                  {memory.budgetHabit && (
-                    <span className="ai-user-memory-pill">
-                      {memory.budgetHabit === "budget"
-                        ? "ekonomik"
-                        : memory.budgetHabit === "luxury"
-                          ? "lüks"
-                          : "orta bütçe"}
-                    </span>
+                      <IconButton
+                        icon="trash"
+                        size="sm"
+                        label={`${t("studio.sessions.delete", "Sohbeti sil")}: ${title}`}
+                        onClick={() => deleteSession(s.id)}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="as-studio__muted">
+                {t("studio.sessions.empty", "Birlikte ilk gezini planlayalım.")}
+              </p>
+            )}
+            <div className="as-studio__quota" data-surface="default">
+              <p className="as-studio__quota-title">
+                {wallet
+                  ? creditsLabel(t, wallet.credits)
+                  : t("studio.quota.fallback", "Seyahat danışmanın")}
+              </p>
+              <p className="as-studio__meta">{t("assistant.composer.costNote", CREDIT_NOTE_TR)}</p>
+              {wallet?.usage && (
+                <p className="as-studio__meta">
+                  {fill(
+                    t(
+                      "studio.quota.usage",
+                      "Bugün {used} / {limit} mesaj denemesi. Yenilenme: {time}.",
+                    ),
+                    {
+                      used: wallet.usage.requestsToday,
+                      limit: wallet.usage.dailyLimit,
+                      time: new Date(wallet.usage.resetsAt).toLocaleTimeString(dateLocale(locale), {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }),
+                    },
                   )}
-                  <button
-                    type="button"
-                    className="ai-user-memory-clear"
-                    onClick={clearMemory}
-                    title="Hafızayı sıfırla"
-                  >
-                    Sıfırla
-                  </button>
-                </div>
+                </p>
               )}
+            </div>
+          </aside>
+
+          <section
+            className="as-studio__chat"
+            aria-label={t("studio.chat.label", "Seyahat sohbeti")}
+          >
+            <div className="as-studio__head">
+              <span className="as-studio__avatar">
+                <Icon name="sparkle" size={20} />
+              </span>
+              <div className="as-studio__head-text">
+                <p className="as-studio__title">{t("studio.head.title", "MapsBridge AI")}</p>
+                <p className="as-studio__sub">
+                  <span className="as-studio__online" aria-hidden="true" />
+                  {t("studio.head.sub", "Seyahat asistanın hazır")}
+                </p>
+              </div>
+              <div className="as-studio__head-actions">
+                <span className="as-studio__new-mobile">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    iconStart={<Icon name="plus" size={16} />}
+                    onClick={startNew}
+                    disabled={busy}
+                  >
+                    {t("studio.newShort", "Yeni")}
+                  </Button>
+                </span>
+                <IconButton
+                  icon="route"
+                  label={
+                    panelOpen
+                      ? t("studio.panel.collapse", "Sohbeti büyüt")
+                      : t("studio.panel.open", "Rota panelini aç")
+                  }
+                  expanded={panelOpen}
+                  controls="route-draft"
+                  onClick={() => {
+                    setPanelOpen(!panelOpen);
+                    setMobileTab(panelOpen ? "chat" : "draft");
+                  }}
+                />
+              </div>
+            </div>
+
+            {session?.context && (
+              <ul
+                className="as-studio__chips"
+                aria-label={t("studio.context.label", "Gezi tercihleri")}
+              >
+                {session.context.destination && (
+                  <li>
+                    <Badge tone="neutral">{session.context.destination}</Badge>
+                  </li>
+                )}
+                {session.context.days && (
+                  <li>
+                    <Badge tone="neutral">{daysLabel(t, session.context.days)}</Badge>
+                  </li>
+                )}
+                {session.context.interests?.map((i) => (
+                  <li key={i}>
+                    <Badge tone="neutral">{i}</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {(memory.interests.length > 0 ||
+              memory.destinations.length > 0 ||
+              memory.budgetHabit) && (
+              <div
+                className="as-studio__memory"
+                role="group"
+                aria-label={t("studio.memory.label", "Kullanıcı hafızası")}
+              >
+                <Icon name="user" size={16} />
+                <span className="as-studio__memory-title">
+                  {t("studio.memory.title", "Seni tanıyorum:")}
+                </span>
+                {memory.destinations.slice(-2).map((d) => (
+                  <Badge key={d} tone="highlight">
+                    {d}
+                  </Badge>
+                ))}
+                {memory.interests.slice(-3).map((i) => (
+                  <Badge key={i} tone="highlight">
+                    {i}
+                  </Badge>
+                ))}
+                {memory.budgetHabit && (
+                  <Badge tone="highlight">
+                    {memory.budgetHabit === "budget"
+                      ? t("studio.memory.budget.budget", "ekonomik")
+                      : memory.budgetHabit === "luxury"
+                        ? t("studio.memory.budget.luxury", "lüks")
+                        : t("studio.memory.budget.mid", "orta bütçe")}
+                  </Badge>
+                )}
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={clearMemory}
+                  aria-label={t("studio.memory.resetLabel", "Hafızayı sıfırla")}
+                >
+                  {t("studio.memory.reset", "Sıfırla")}
+                </Button>
+              </div>
+            )}
+            {!session?.messages.length && !resumeDraft && !busy ? (
+              // Boş sohbet: karşılama kendi kaydırma alanında, başından görünür (MessageLog sona
+              // kaydırır). İlk mesajla birlikte MessageLog'a geçilir.
+              <div className="as-studio__welcome-scroll">
+                <StudioWelcome busy={busy} onPick={pick} />
+              </div>
+            ) : (
               <MessageLog
-                className="ai-chat-feed ai-custom-scrollbar"
+                className="as-studio__log"
                 label={t("assistant.log.label", "Sohbet")}
                 busy={busy}
                 typing={
                   busy &&
                   (streamText ? (
-                    <div className="ai-stream-text" role="status">
+                    <div className="as-studio__stream" role="status">
                       {streamText}
-                      <span className="ai-stream-cursor" aria-hidden="true">
+                      <span className="as-studio__cursor" aria-hidden="true">
                         ▋
                       </span>
                     </div>
                   ) : (
-                    <div className="ai-thinking-bubble" role="status">
+                    <div className="as-studio__typing" role="status">
                       <ThinkingSteps
                         isRoute={input.length > 20 || (session?.messages.length || 0) >= 2}
                         livePhase={streamPhase}
@@ -1376,187 +1473,44 @@ export default function AIPage() {
                     />
                   </div>
                 )}
-                {!session?.messages.length && !resumeDraft && (
-                  <div className="ai-welcome-hub">
-                    <div className="ai-welcome-header">
-                      <div className="ai-welcome-avatar">
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "24px" }}
-                        >
-                          waving_hand
-                        </span>
-                      </div>
-                      <div className="ai-welcome-title-wrap">
-                        <h2>İyi günler! Nereye gitmek istersin?</h2>
-                        <p>
-                          Bir şehir seç veya ne yapmak istediğini söyle — rotanı saniyeler içinde
-                          oluşturayım.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="ai-welcome-section">
-                      <h3 className="ai-welcome-section-title">
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "16px" }}
-                        >
-                          flight_takeoff
-                        </span>
-                        Popüler Destinasyonlar
-                      </h3>
-                      <div className="ai-destination-grid">
-                        {POPULAR_DESTINATIONS.map((d) => (
-                          <button
-                            key={d.city}
-                            type="button"
-                            className="ai-destination-chip"
-                            onClick={() => {
-                              setInput(d.prompt);
-                              void send(false, d.prompt);
-                            }}
-                            disabled={busy}
-                          >
-                            <span className="ai-destination-flag">{d.flag}</span>
-                            <div className="ai-destination-text">
-                              <strong>{d.city}</strong>
-                              <span>{d.country}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="ai-welcome-section">
-                      <h3 className="ai-welcome-section-title">
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "16px" }}
-                        >
-                          explore
-                        </span>
-                        Ne Yapmak İstersin?
-                      </h3>
-                      <div className="ai-activity-grid">
-                        {ACTIVITY_STARTERS.map((a) => (
-                          <button
-                            key={a.label}
-                            type="button"
-                            className="ai-activity-card"
-                            onClick={() => {
-                              setInput(a.prompt);
-                              void send(false, a.prompt);
-                            }}
-                            disabled={busy}
-                          >
-                            <span
-                              className="material-symbols-outlined ai-activity-icon"
-                              aria-hidden="true"
-                            >
-                              {a.icon}
-                            </span>
-                            <div className="ai-activity-text">
-                              <strong>{a.label}</strong>
-                              <span>{a.desc}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="ai-welcome-section">
-                      <h3 className="ai-welcome-section-title">
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "16px" }}
-                        >
-                          menu_book
-                        </span>
-                        Hızlı Rehberler
-                      </h3>
-                      <div className="ai-kb-guide-grid">
-                        {getSeasonalGuides(6).map((g) => (
-                          <button
-                            key={`${g.city}-${g.topic}`}
-                            type="button"
-                            className="ai-kb-guide-chip"
-                            onClick={() => {
-                              setInput(g.prompt);
-                              void send(false, g.prompt);
-                            }}
-                            disabled={busy}
-                          >
-                            <span className="ai-kb-guide-flag">{g.flag}</span>
-                            <div className="ai-kb-guide-text">
-                              <strong>{g.city}</strong>
-                              <span>{g.topic}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
                 {session?.messages.map((m) => (
                   <MessageBubble key={m.id} role={m.role === "user" ? "user" : "assistant"}>
                     {m.role === "assistant" ? <AssistantMessage text={m.text} /> : m.text}
 
-                    {/* Bot Mesaj İşlem Araçları (Kopyala, Rotayı Aç) */}
+                    {/* Mesaj araçları: kopyala, rotayı incele, haritada aç. */}
                     {m.role === "assistant" && (
-                      <div className="ai-msg-actions-row">
-                        <button
-                          type="button"
-                          className="ai-msg-action-btn"
+                      <div className="as-studio-msg__actions">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          iconStart={
+                            <Icon name={copiedMsgId === m.id ? "check" : "copy"} size={16} />
+                          }
                           onClick={() => copyMessageText(m.id, m.text)}
-                          title="Mesajı Kopyala"
                         >
-                          <span
-                            className="material-symbols-outlined"
-                            aria-hidden="true"
-                            style={{ fontSize: "13px" }}
-                          >
-                            {copiedMsgId === m.id ? "check" : "content_copy"}
-                          </span>
-                          <span>{copiedMsgId === m.id ? "Kopyalandı" : "Kopyala"}</span>
-                        </button>
+                          {copiedMsgId === m.id
+                            ? t("studio.msg.copied", "Kopyalandı")
+                            : t("studio.msg.copy", "Kopyala")}
+                        </Button>
                         {m.route && isRoutePlan(m.route) && (
-                          <button
-                            type="button"
-                            className="ai-msg-action-btn"
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            iconStart={<Icon name="map" size={16} />}
                             onClick={() => showRoute(m.route!, m)}
-                            title="Rotayı Panoda Aç"
                           >
-                            <span
-                              className="material-symbols-outlined"
-                              aria-hidden="true"
-                              style={{ fontSize: "13px", color: "var(--color-text-accent)" }}
-                            >
-                              map
-                            </span>
-                            <span>Rotayı İncele ({m.route.stops.length} Durak)</span>
-                          </button>
+                            {`${t("studio.msg.review", "Rotayı incele")} · ${stopsLabel(t, m.route.stops.length)}`}
+                          </Button>
                         )}
                         {currentTrip && (
-                          <a
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             href={`/maps/?tripId=${currentTrip.id}`}
-                            className="ai-msg-action-btn"
-                            title="Haritada İncele"
-                            style={{ textDecoration: "none" }}
+                            iconStart={<Icon name="external" size={16} />}
                           >
-                            <span
-                              className="material-symbols-outlined"
-                              aria-hidden="true"
-                              style={{ fontSize: "13px", color: "#0ea5e9" }}
-                            >
-                              open_in_new
-                            </span>
-                            <span>Haritada Aç</span>
-                          </a>
+                            {t("studio.msg.openMap", "Haritada aç")}
+                          </Button>
                         )}
                       </div>
                     )}
@@ -1564,33 +1518,12 @@ export default function AIPage() {
                     {m.role === "assistant" &&
                       m.decisionSummary &&
                       m.decisionSummary.length > 0 && (
-                        <div
-                          style={{
-                            marginTop: "0.55rem",
-                            padding: "0.55rem 0.7rem",
-                            borderRadius: "10px",
-                            background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
-                            border: "1px solid var(--color-accent-a20)",
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              color: "var(--color-text-accent)",
-                              marginBottom: "0.25rem",
-                            }}
-                          >
-                            🧭 Bu seçimi neden yaptım?
-                          </div>
-                          <ul
-                            style={{
-                              margin: 0,
-                              paddingLeft: "1.1rem",
-                              fontSize: "12px",
-                              lineHeight: 1.45,
-                            }}
-                          >
+                        <div className="as-studio-msg__why">
+                          <p className="as-studio-msg__why-title">
+                            <Icon name="compass" size={16} />
+                            {t("studio.msg.why", "Bu seçimi neden yaptım?")}
+                          </p>
+                          <ul className="as-studio-msg__why-list">
                             {m.decisionSummary.map((item, index) => (
                               <li key={index}>{item}</li>
                             ))}
@@ -1600,13 +1533,17 @@ export default function AIPage() {
 
                     {m.role === "assistant" && m.route && isRoutePlan(m.route) && (
                       <>
-                        <div className="ai-route-sync-card">
+                        <div className="as-studio-msg__route">
                           <span>
-                            {m.route.title} · {m.route.stops.length} durak
+                            {m.route.title} · {stopsLabel(t, m.route.stops.length)}
                           </span>
-                          <button className="ai-small-btn" onClick={() => showRoute(m.route!, m)}>
-                            Rotayı göster
-                          </button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => showRoute(m.route!, m)}
+                          >
+                            {t("studio.msg.showRoute", "Rotayı göster")}
+                          </Button>
                         </div>
                         <Button variant="link" onClick={openPrep}>
                           {t(
@@ -1633,11 +1570,11 @@ export default function AIPage() {
                       })()}
 
                     {/* I3/I10: yalnız son asistan turundaki yapılandırılmış hızlı yanıtlar
-                          (sunucu clarification.quickOptions ya da akış yanıtları) QuestionCard
-                          olur; 2–4 seçenek yoksa kart render edilmez. */}
+                      (sunucu clarification.quickOptions ya da akış yanıtları) QuestionCard
+                      olur; 2–4 seçenek yoksa kart render edilmez. */}
                     {m.role === "assistant" &&
                       !busy &&
-                      m === session?.messages[session.messages.length - 1] &&
+                      m === lastMessage &&
                       (() => {
                         const replies = m.quickReplies ?? [];
                         const qs = clampQuestions([
@@ -1659,8 +1596,7 @@ export default function AIPage() {
                               const picked = replies[Number(answers[`qr-${m.id}`]?.[0])];
                               if (picked === undefined) return;
                               const prompt = typeof picked === "string" ? picked : picked.prompt;
-                              setInput(prompt);
-                              void send(false, prompt);
+                              pick(prompt);
                             }}
                             note={
                               <Button
@@ -1678,58 +1614,43 @@ export default function AIPage() {
                       })()}
 
                     {/* Contextual follow-ups from AI response */}
-                    {m.role === "assistant" &&
-                      m === session?.messages[session.messages.length - 1] && (
-                        <ContextualFollowups
-                          message={m}
-                          route={route}
-                          onAction={(p) => {
-                            setInput(p);
-                            void send(false, p);
-                          }}
-                          busy={busy}
-                        />
-                      )}
+                    {m.role === "assistant" && m === lastMessage && (
+                      <ContextualFollowups message={m} route={route} onAction={pick} busy={busy} />
+                    )}
 
                     {m.role === "assistant" && m.nearbyPins && m.nearbyPins.length > 0 && (
-                      <div
-                        style={{
-                          marginTop: "0.5rem",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "4px",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            color: "var(--color-text-accent)",
-                          }}
-                        >
-                          📍 Yakındaki Mekanlar:
-                        </span>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                      <div className="as-studio-msg__nearby">
+                        <p className="as-studio-msg__why-title">
+                          <Icon name="locate" size={16} />
+                          {t("studio.nearby.title", "Yakındaki mekanlar")}
+                        </p>
+                        <ul className="as-studio-msg__nearby-list">
                           {m.nearbyPins.map((pin) => (
-                            <div
-                              key={pin.id}
-                              style={{ display: "inline-flex", gap: "3px", alignItems: "center" }}
-                            >
-                              <button
-                                className="ai-small-btn"
-                                style={{ fontSize: "11px", padding: "3px 7px" }}
-                                onClick={() => {
-                                  const q = `Rotaya ${pin.name} durağını ekle`;
-                                  setInput(q);
-                                  void send(false, q);
-                                }}
+                            <li key={pin.id} className="as-studio-msg__nearby-item">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                iconStart={<Icon name="message" size={16} />}
                                 title={pin.description}
+                                onClick={() =>
+                                  pick(
+                                    fill(t("studio.nearby.ask", "Rotaya {name} durağını ekle"), {
+                                      name: pin.name,
+                                    }),
+                                  )
+                                }
                               >
-                                💬 {pin.name} ({pin.suggestedDuration})
-                              </button>
-                              <button
-                                className="ai-action-chip"
-                                style={{ fontSize: "10.5px", padding: "2px 6px" }}
+                                {`${pin.name} (${pin.suggestedDuration})`}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                iconStart={<Icon name="plus" size={16} />}
+                                title={t(
+                                  "studio.nearby.addHint",
+                                  "Bu durağı doğrudan seyahat planına ekle",
+                                )}
+                                aria-label={`${t("studio.nearby.add", "Rotaya ekle")}: ${pin.name}`}
                                 onClick={() =>
                                   addPlaceToActiveTrip({
                                     label: pin.name,
@@ -1739,1457 +1660,400 @@ export default function AIPage() {
                                     note: pin.description,
                                   })
                                 }
-                                title="Bu durağı doğrudan seyahat planına ekle"
                               >
-                                ➕ Rotaya Ekle
-                              </button>
-                            </div>
+                                {t("studio.nearby.add", "Rotaya ekle")}
+                              </Button>
+                            </li>
                           ))}
-                        </div>
+                        </ul>
                       </div>
                     )}
                   </MessageBubble>
                 ))}
               </MessageLog>
-              <div className="ai-chat-composer-area">
-                {error &&
-                  (() => {
-                    const isAuth =
-                      errorCode === "UNAUTHORIZED" ||
-                      (errorCode === "" && (error.includes("giriş") || error.includes("Oturum")));
-                    const isCreditLow = errorCode === "INSUFFICIENT_CREDITS";
-                    const isWalletFrozen = errorCode === "WALLET_FROZEN";
-                    const isEmailVerify = errorCode === "EMAIL_NOT_VERIFIED";
-                    const isDailyLimit = errorCode === "USER_DAILY_LIMIT";
-                    const isServiceLimit = errorCode === "SERVICE_DAILY_LIMIT";
-                    const isMaintenance = errorCode === "AI_DISABLED";
-                    const iconName =
-                      isCreditLow || isWalletFrozen
-                        ? "account_balance_wallet"
-                        : isEmailVerify
-                          ? "mark_email_unread"
-                          : isDailyLimit || isServiceLimit
-                            ? "timer"
-                            : isMaintenance
-                              ? "build_circle"
-                              : isAuth
-                                ? "lock"
-                                : "error";
-                    const iconColor = isCreditLow
-                      ? "#f59e0b"
-                      : isWalletFrozen
-                        ? "#ef4444"
-                        : isEmailVerify || isDailyLimit || isServiceLimit || isMaintenance
-                          ? "#6366f1"
-                          : "#ef4444";
-                    return (
-                      <div
-                        className="ai-error-banner"
-                        role="alert"
-                        data-code={errorCode || undefined}
-                      >
-                        <div className="ai-error-content">
-                          <span
-                            className="material-symbols-outlined"
-                            aria-hidden="true"
-                            style={{ color: iconColor, fontSize: "18px" }}
+            )}
+            <div className="as-studio__composer">
+              {error && (
+                <div className="as-studio__error" data-code={errorCode || undefined}>
+                  <Alert
+                    tone={errorTone}
+                    live="assertive"
+                    action={
+                      <div className="as-studio__error-actions">
+                        {isAuthError && (
+                          <Button size="sm" onClick={() => setAuthModal(true)}>
+                            {t("studio.err.action.signIn", "Giriş yap")}
+                          </Button>
+                        )}
+                        {isEmailVerify && (
+                          <Button size="sm" onClick={() => setAuthModal(true)}>
+                            {t("studio.err.action.account", "Hesabıma git")}
+                          </Button>
+                        )}
+                        {isCreditLow && (
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              openUpgradeModal(error, undefined, "ai_credits_depleted")
+                            }
                           >
-                            {iconName}
-                          </span>
-                          <span className="ai-error-text">{error}</span>
-                        </div>
-                        <div className="ai-error-actions">
-                          {isAuth && (
-                            <button
-                              type="button"
-                              className="ai-error-cta-btn"
-                              onClick={() => setAuthModal(true)}
-                            >
-                              Giriş Yap
-                            </button>
-                          )}
-                          {isEmailVerify && (
-                            <button
-                              type="button"
-                              className="ai-error-cta-btn"
-                              onClick={() => setAuthModal(true)}
-                            >
-                              Hesabıma Git
-                            </button>
-                          )}
-                          {isCreditLow && (
-                            <button
-                              type="button"
-                              className="ai-error-cta-btn"
-                              onClick={() =>
-                                openUpgradeModal(error, undefined, "ai_credits_depleted")
-                              }
-                            >
-                              Kredi Satın Al
-                            </button>
-                          )}
-                          {isDailyLimit && (
-                            <button
-                              type="button"
-                              className="ai-error-cta-btn"
-                              onClick={() =>
-                                openUpgradeModal(
+                            {t("studio.err.action.buy", "Kredi satın al")}
+                          </Button>
+                        )}
+                        {isDailyLimit && (
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              openUpgradeModal(
+                                t(
+                                  "studio.err.upgradeDaily",
                                   "Günlük mesaj sınırını Pro ile kaldırın; kota her gece sıfırlanır.",
-                                  "subscriptions",
-                                  "ai_daily_quota",
-                                )
-                              }
-                            >
-                              Pro'ya Geç
-                            </button>
-                          )}
-                          {(retryAvailable ||
-                            (!isAuth &&
-                              !isEmailVerify &&
-                              !isCreditLow &&
-                              !isWalletFrozen &&
-                              !isDailyLimit &&
-                              pending.current)) && (
-                            <button
-                              disabled={busy}
-                              className="ai-error-cta-btn ai-retry-btn"
-                              onClick={() => {
-                                setRetryAvailable(false);
-                                setError("");
-                                setErrorCode("");
-                                const p = lastPromptRef.current || pending.current?.prompt;
-                                if (p) void send(false, p);
-                                else void send(true);
-                              }}
-                            >
-                              <span
-                                className="material-symbols-outlined"
-                                aria-hidden="true"
-                                style={{ fontSize: "14px", verticalAlign: "middle" }}
-                              >
-                                refresh
-                              </span>{" "}
-                              Tekrar Dene
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="ai-error-dismiss"
+                                ),
+                                "subscriptions",
+                                "ai_daily_quota",
+                              )
+                            }
+                          >
+                            {t("studio.err.action.pro", "Pro'ya geç")}
+                          </Button>
+                        )}
+                        {showRetry && (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            disabled={busy}
+                            iconStart={<Icon name="refresh" size={16} />}
                             onClick={() => {
+                              setRetryAvailable(false);
                               setError("");
                               setErrorCode("");
-                              setRetryAvailable(false);
+                              const p = lastPromptRef.current || pending.current?.prompt;
+                              if (p) void send(false, p);
+                              else void send(true);
                             }}
-                            aria-label="Kapat"
                           >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                {notice && (
-                  <p className="ai-muted" role="status">
-                    {notice}
-                  </p>
-                )}
-
-                <SmartActions
-                  messages={session?.messages || []}
-                  route={route}
-                  currentTrip={currentTrip}
-                  onAction={(p) => {
-                    setInput(p);
-                    void send(false, p);
-                  }}
-                  busy={busy}
-                />
-                <div className="ai-quick-modes-bar" aria-label="Rota tarzı">
-                  {ROUTE_STYLES.map((style) => (
-                    <button
-                      key={style.key}
-                      type="button"
-                      className="ai-quick-mode-pill"
-                      aria-pressed={routeMode === style.key}
-                      onClick={() => setRouteMode(style.key)}
-                      title={style.hint}
-                    >
-                      <span>{style.icon}</span>
-                      <span>{style.label}</span>
-                    </button>
-                  ))}
-                </div>
-                <p className="ai-composer-note">
-                  Rota tarzı seçimi yalnızca bu isteği etkiler; kalıcı tercihlerini değiştirmez.
-                </p>
-
-                <ComposerBar
-                  value={input}
-                  onChange={setInput}
-                  inputRef={textareaRef}
-                  maxLength={2000}
-                  // S22: mesaj başı maliyet sunucuda belirlenir (netleştirme 0, sohbet 1, rota 5) ve
-                  // istemcide önceden bilinmez; sabit rozet yok, işlem başı maliyetler notta.
-                  note={t("assistant.composer.costNote", CREDIT_NOTE_TR)}
-                  busy={busy}
-                  label={t("assistant.composer.label", "Asistana mesaj")}
-                  placeholder={t(
-                    "assistant.composer.placeholder",
-                    "Bir durak ekle, rotayı değiştir veya soru sor...",
-                  )}
-                  onSubmit={(text) => void send(false, text)}
-                  leading={
-                    <>
-                      <button
-                        type="button"
-                        className="ai-input-icon-btn"
-                        onClick={() => {
-                          if (navigator.geolocation) {
-                            navigator.geolocation.getCurrentPosition(
-                              (pos) => {
-                                setInput(
-                                  (prev) =>
-                                    `${prev} (Konumum: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`,
-                                );
-                              },
-                              () => setNotice("Konum izni alınamadı."),
-                            );
-                          }
-                        }}
-                        title="Konumumu Ekle"
-                        aria-label="Konumumu Ekle"
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "18px" }}
-                        >
-                          add_location_alt
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`ai-input-icon-btn ${listening ? "ai-mic-pulsing" : ""}`}
-                        onClick={dictate}
-                        disabled={busy}
-                        aria-label={listening ? "Sesli girişi durdur" : "Sesli mesaj yazdır"}
-                        title={listening ? "Dinleniyor... Durdurmak için tıklayın" : "Sesli Mesaj"}
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          aria-hidden="true"
-                          style={{ fontSize: "18px" }}
-                        >
-                          {listening ? "mic" : "mic"}
-                        </span>
-                      </button>
-                    </>
-                  }
-                />
-
-                <div className="ai-composer-footer-bar">
-                  <div className="ai-composer-credits-pill">
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "15px", color: "var(--color-text-accent)" }}
-                    >
-                      bolt
-                    </span>
-                    <span>{wallet ? `${wallet.credits} Kredi` : "Ücretsiz Danışmanlık"}</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openUpgradeModal("Yapay Zeka Seyahat Asistanı için Kredi Yükleyin")
-                      }
-                      className="ai-buy-credits-link"
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 0,
-                        font: "inherit",
-                      }}
-                    >
-                      + Kredi Yükle
-                    </button>
-                  </div>
-                  <div className="ai-composer-disclaimer">
-                    <span>
-                      ✨ Sorular ve netleştirme ücretsizdir · Rota ve harita entegrasyonu 5 kredi
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </section>
-            {panelOpen && (
-              <aside
-                id="route-draft"
-                className={`ai-studio-aside-right ${mobileTab === "draft" ? "mobile-visible" : ""}`}
-                aria-label="Oluşturulan rota"
-              >
-                <div className="ai-draft-header">
-                  <strong ref={draftHeadingRef} tabIndex={-1}>
-                    Oluşturulan rota
-                  </strong>
-                  <div className="ai-header-actions">
-                    <button
-                      className="ai-small-btn ai-panel-resize"
-                      onClick={() => setPanelWide(!panelWide)}
-                      aria-label={panelWide ? "Rota panelini küçült" : "Rota panelini büyüt"}
-                    >
-                      {panelWide ? "Küçült" : "Büyüt"}
-                    </button>
-                    <button
-                      className="ai-small-btn"
-                      onClick={() => {
-                        setPanelOpen(false);
-                        setMobileTab("chat");
-                      }}
-                      aria-label="Rota panelini kapat"
-                    >
-                      Kapat
-                    </button>
-                  </div>
-                </div>
-                {!route ? (
-                  <div className="ai-route-empty">
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      map
-                    </span>
-                    <h2>Henüz rota yok</h2>
-                    <p>Tercihlerini konuştuktan sonra oluşturduğumuz rota burada görünecek.</p>
-                    {prepContext.kind === "strip" && <PrepPanel context={prepContext} />}
-                  </div>
-                ) : (
-                  <>
-                    <div className="ai-route-heading">
-                      <h2>{route.title}</h2>
-                      <p>
-                        {route.destination} · {route.estimatedDays} gün · {route.stops.length} durak
-                      </p>
-                      <p className="ai-muted">{route.summary}</p>
-                    </div>
-                    <div
-                      className="ai-day-tabs-bar"
-                      role="group"
-                      aria-label="Taslak bölümleri"
-                      style={{ marginBottom: "0.5rem", flexWrap: "wrap", gap: "4px" }}
-                    >
-                      <button
-                        type="button"
-                        aria-pressed={draftTab === "route"}
-                        className={`ai-day-tab-btn ${draftTab === "route" ? "active" : ""}`}
-                        onClick={() => setDraftTab("route")}
-                      >
-                        🗺️ Duraklar
-                      </button>
-                      <button
-                        type="button"
-                        aria-pressed={draftTab === "stay"}
-                        className={`ai-day-tab-btn ${draftTab === "stay" ? "active" : ""}`}
-                        onClick={() => setDraftTab("stay")}
-                      >
-                        🏨 Konaklama
-                      </button>
-                      <button
-                        type="button"
-                        aria-pressed={draftTab === "discovery"}
-                        className={`ai-day-tab-btn ${draftTab === "discovery" ? "active" : ""}`}
-                        onClick={() => setDraftTab("discovery")}
-                      >
-                        ✨ Keşif
-                      </button>
-                      <button
-                        type="button"
-                        aria-pressed={draftTab === "flights"}
-                        className={`ai-day-tab-btn ${draftTab === "flights" ? "active" : ""}`}
-                        onClick={() => setDraftTab("flights")}
-                      >
-                        <span aria-hidden="true">{prepIcon}</span> {prepLabel}
-                        {session?.flightPrices?.cheapestPrice
-                          ? ` · ${session.flightPrices.cheapestCurrency} ${session.flightPrices.cheapestPrice}`
-                          : ""}
-                      </button>
-                      <button
-                        type="button"
-                        aria-pressed={draftTab === "advisory"}
-                        className={`ai-day-tab-btn ${draftTab === "advisory" ? "active" : ""}`}
-                        onClick={() => setDraftTab("advisory")}
-                      >
-                        📋 Tavsiye
-                        {session?.travelAdvisory?.level && session.travelAdvisory.level !== "normal"
-                          ? " ⚠️"
-                          : ""}
-                      </button>
-                      <button
-                        type="button"
-                        aria-pressed={draftTab === "emergency"}
-                        className={`ai-day-tab-btn ${draftTab === "emergency" ? "active" : ""}`}
-                        onClick={() => setDraftTab("emergency")}
-                      >
-                        🛡️ Güvenlik
-                      </button>
-                    </div>
-                    {draftTab === "route" && (
-                      <>
-                        <div className="ai-day-tabs-bar">
-                          {Array.from({ length: route.estimatedDays }, (_, i) => (
-                            <button
-                              key={i}
-                              type="button"
-                              aria-pressed={day === i + 1}
-                              className={`ai-day-tab-btn ${day === i + 1 ? "active" : ""}`}
-                              onClick={() => setDay(i + 1)}
-                            >
-                              {i + 1}. Gün
-                            </button>
-                          ))}
-                        </div>
-                        <div className="ai-timeline-container ai-custom-scrollbar">
-                          {route.stops
-                            .filter((s) => s.day === day)
-                            .map((s, i) => (
-                              <article className="ai-stop-row" key={s.id}>
-                                <span className="ai-stop-badge-num">{i + 1}</span>
-                                <div className="ai-stop-card">
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      justifyContent: "space-between",
-                                      alignItems: "baseline",
-                                      gap: "0.5rem",
-                                    }}
-                                  >
-                                    <strong>{s.name}</strong>
-                                    {s.timeSlot && (
-                                      <span
-                                        style={{
-                                          fontSize: "10.5px",
-                                          padding: "2px 6px",
-                                          borderRadius: "6px",
-                                          backgroundColor: "var(--color-surface-brand)",
-                                          color: "var(--color-text-accent)",
-                                          fontWeight: 700,
-                                        }}
-                                      >
-                                        {s.timeSlot === "morning"
-                                          ? "🌅 Sabah"
-                                          : s.timeSlot === "evening"
-                                            ? "🌆 Akşam"
-                                            : s.timeSlot === "night"
-                                              ? "🌙 Gece"
-                                              : "☀️ Öğle"}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="ai-muted">{s.address}</span>
-                                  <p>{s.description}</p>
-                                  <small>Önerilen ziyaret: {s.suggestedDuration}</small>
-                                </div>
-                                {s.distanceToNextKm !== undefined && (
-                                  <div className="ai-travel-interval-badge">
-                                    <span>Sonraki durağa kuş uçuşu ~{s.distanceToNextKm} km</span>
-                                  </div>
-                                )}
-                              </article>
-                            ))}
-                        </div>
-                      </>
-                    )}
-                    {draftTab === "stay" && (
-                      <div
-                        className="ai-timeline-container ai-custom-scrollbar"
-                        style={{ padding: "0.5rem" }}
-                      >
-                        {!session?.stayAndTransit ? (
-                          <p className="ai-muted">
-                            Bu rota için ulaşım ve konaklama önerilerini sohbette sorabilirsin.{" "}
-                            <button
-                              className="ai-small-btn"
-                              onClick={() =>
-                                setInput(
-                                  "Mevcut rotama uygun konaklama bölgeleri ve şehir içi ulaşım seçenekleri öner; rotayı değiştirme.",
-                                )
-                              }
-                            >
-                              Sohbette sor
-                            </button>
-                          </p>
-                        ) : (
-                          <>
-                            <div style={{ marginBottom: "1rem" }}>
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                📍 Önerilen Konaklama Semtleri
-                              </h3>
-                              <ul
-                                style={{
-                                  margin: 0,
-                                  paddingLeft: "1.2rem",
-                                  fontSize: "12.5px",
-                                  color: "var(--mb-text-subtle)",
-                                }}
-                              >
-                                {session.stayAndTransit.recommendedAreas?.map((a, idx) => (
-                                  <li key={idx} style={{ marginBottom: "3px" }}>
-                                    {a}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div style={{ marginBottom: "1rem" }}>
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                🏨 Önerilen Otel & Konaklama Tipleri
-                              </h3>
-                              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                                {session.stayAndTransit.stays?.map((stay, idx) => (
-                                  <div key={idx} className="ai-stop-card">
-                                    <div
-                                      style={{ display: "flex", justifyContent: "space-between" }}
-                                    >
-                                      <strong>{stay.name}</strong>
-                                      <span style={{ fontSize: "11px", fontWeight: 700 }}>
-                                        {stay.priceLevel} · {stay.type}
-                                      </span>
-                                    </div>
-                                    <span className="ai-muted">{stay.area}</span>
-                                    <p style={{ fontSize: "12px", margin: "3px 0" }}>
-                                      {stay.description}
-                                    </p>
-                                    {stay.pros?.length > 0 && (
-                                      <small style={{ color: "var(--color-text-accent)" }}>
-                                        ✓ {stay.pros.join(" · ")}
-                                      </small>
-                                    )}
-                                    <div style={{ marginTop: "6px" }}>
-                                      <button
-                                        type="button"
-                                        className="ai-action-chip ai-hotel-chip"
-                                        onClick={() =>
-                                          addPlaceToActiveTrip({
-                                            label: stay.name,
-                                            address: stay.area,
-                                            isHotel: true,
-                                            category: "otel",
-                                            note: `${stay.type} · ${stay.priceLevel} - ${stay.description}`,
-                                          })
-                                        }
-                                      >
-                                        🏨 Bu Oteli Rotama Kaydet
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div>
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                🚇 Havalimanı & Şehir İçi Ulaşım
-                              </h3>
-                              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                                {session.stayAndTransit.transitTips?.map((tip, idx) => (
-                                  <div key={idx} className="ai-stop-card">
-                                    <strong>{tip.title}</strong>
-                                    <p style={{ fontSize: "12px", margin: "3px 0" }}>
-                                      {tip.description}
-                                    </p>
-                                    {tip.estimatedCost && (
-                                      <small
-                                        style={{
-                                          color: "var(--color-surface-inverse)",
-                                          fontWeight: 600,
-                                        }}
-                                      >
-                                        Tahmini Ücret: {tip.estimatedCost}
-                                      </small>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                              {session.stayAndTransit.cityCardRecommendation && (
-                                <p
-                                  style={{
-                                    fontSize: "12px",
-                                    marginTop: "6px",
-                                    padding: "6px",
-                                    backgroundColor: "var(--color-surface-brand)",
-                                    borderRadius: "6px",
-                                    color: "var(--color-surface-inverse)",
-                                  }}
-                                >
-                                  💳 <strong>Kart Önerisi:</strong>{" "}
-                                  {session.stayAndTransit.cityCardRecommendation}
-                                </p>
-                              )}
-                            </div>
-                          </>
+                            {t("studio.err.action.retry", "Tekrar dene")}
+                          </Button>
                         )}
-                      </div>
-                    )}
-                    {draftTab === "discovery" && (
-                      <div
-                        className="ai-timeline-container ai-custom-scrollbar"
-                        style={{ padding: "0.5rem" }}
-                      >
-                        {!session?.discovery ? (
-                          <p className="ai-muted">
-                            Yerel lezzetler ve keşif önerilerini sohbette sorabilirsin.{" "}
-                            <button
-                              className="ai-small-btn"
-                              onClick={() =>
-                                setInput(
-                                  "Mevcut rotamın şehrinde hangi yerel lezzetleri denemeliyim? Rotayı değiştirme.",
-                                )
-                              }
-                            >
-                              Sohbette sor
-                            </button>
-                          </p>
-                        ) : (
-                          <>
-                            <div style={{ marginBottom: "1rem" }}>
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                🍽️ Mutlaka Tadılması Gereken Spesiyaller
-                              </h3>
-                              <ul
-                                style={{
-                                  margin: 0,
-                                  paddingLeft: "1.2rem",
-                                  fontSize: "12.5px",
-                                  color: "var(--mb-text-subtle)",
-                                }}
-                              >
-                                {session.discovery.specialties?.map((s, idx) => (
-                                  <li key={idx} style={{ marginBottom: "3px" }}>
-                                    {s}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div style={{ marginBottom: "1rem" }}>
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                💎 Gizli Köşeler & Otantik Noktalar
-                              </h3>
-                              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                                {session.discovery.gems?.map((gem, idx) => (
-                                  <div key={idx} className="ai-stop-card">
-                                    <div
-                                      style={{ display: "flex", justifyContent: "space-between" }}
-                                    >
-                                      <strong>{gem.name}</strong>
-                                      <span style={{ fontSize: "11px", fontWeight: 600 }}>
-                                        {gem.category}
-                                      </span>
-                                    </div>
-                                    <p style={{ fontSize: "12px", margin: "3px 0" }}>
-                                      {gem.description}
-                                    </p>
-                                    <small style={{ color: "var(--color-text-accent)" }}>
-                                      ✨ Özel: {gem.highlight}
-                                    </small>
-                                    <div style={{ marginTop: "6px" }}>
-                                      <button
-                                        type="button"
-                                        className="ai-action-chip"
-                                        onClick={() =>
-                                          addPlaceToActiveTrip({
-                                            label: gem.name,
-                                            category:
-                                              (gem.category as import("../lib/trip/models").PinCategory) ||
-                                              "aktivite",
-                                            note: `${gem.highlight ? gem.highlight + " - " : ""}${gem.description}`,
-                                          })
-                                        }
-                                      >
-                                        ➕ Bu Noktayı Rotama Ekle
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div>
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                💡 Yerel Yaşam & Kültürel İpuçları
-                              </h3>
-                              <ul
-                                style={{
-                                  margin: 0,
-                                  paddingLeft: "1.2rem",
-                                  fontSize: "12.5px",
-                                  color: "var(--mb-text-subtle)",
-                                }}
-                              >
-                                {session.discovery.cultureTips?.map((c, idx) => (
-                                  <li key={idx} style={{ marginBottom: "3px" }}>
-                                    {c}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
-                    {draftTab === "flights" && (
-                      <div
-                        className="ai-timeline-container ai-custom-scrollbar"
-                        style={{ padding: "0.5rem" }}
-                      >
-                        <PrepPanel
-                          context={prepContext}
-                          flightBlock={
-                            !session?.flightPrices ? (
-                              <p className="ai-muted">
-                                Uçuş fiyatı bilgisi bu rota için mevcut değil. Rota oluştururken
-                                otomatik kontrol edilir.
-                              </p>
-                            ) : session.flightPrices.source === "unavailable" ? (
-                              <div className="ai-stop-card">
-                                <p className="ai-muted">{session.flightPrices.note}</p>
-                              </div>
-                            ) : (
-                              <>
-                                <div
-                                  style={{
-                                    marginBottom: "0.75rem",
-                                    padding: "0.75rem 1rem",
-                                    borderRadius: "12px",
-                                    background:
-                                      "linear-gradient(135deg,color-mix(in srgb, var(--color-accent) 12%, transparent),color-mix(in srgb, var(--color-accent-sky-soft) 8%, transparent))",
-                                    border: "1px solid var(--color-accent-a30)",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "8px",
-                                      marginBottom: "6px",
-                                    }}
-                                  >
-                                    <span style={{ fontSize: "20px" }}>✈️</span>
-                                    <div>
-                                      <div
-                                        style={{
-                                          fontSize: "14px",
-                                          fontWeight: 700,
-                                          color: "var(--color-text-accent)",
-                                        }}
-                                      >
-                                        Uçuş Fiyatları
-                                      </div>
-                                      <div
-                                        style={{
-                                          fontSize: "11px",
-                                          color: "var(--color-text-subtle)",
-                                        }}
-                                      >
-                                        Travelpayouts ·{" "}
-                                        {new Date(
-                                          session.flightPrices.checkedAt,
-                                        ).toLocaleDateString("tr-TR")}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <p
-                                    style={{
-                                      fontSize: "12px",
-                                      margin: 0,
-                                      color: "var(--mb-text-subtle)",
-                                    }}
-                                  >
-                                    {session.flightPrices.note}
-                                  </p>
-                                </div>
-                                {session.flightPrices.deals.length > 0 && (
-                                  <div
-                                    style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-                                  >
-                                    {session.flightPrices.deals.map((deal, idx) => (
-                                      <a
-                                        key={idx}
-                                        href={deal.affiliateLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{ textDecoration: "none", display: "block" }}
-                                      >
-                                        <div
-                                          style={{
-                                            padding: "0.75rem 1rem",
-                                            borderRadius: "10px",
-                                            background:
-                                              "color-mix(in srgb, var(--color-accent) 6%, transparent)",
-                                            border: "1px solid var(--color-accent-a20)",
-                                            cursor: "pointer",
-                                            transition: "border-color 0.2s",
-                                          }}
-                                        >
-                                          <div
-                                            style={{
-                                              display: "flex",
-                                              justifyContent: "space-between",
-                                              alignItems: "center",
-                                            }}
-                                          >
-                                            <div>
-                                              <strong
-                                                style={{
-                                                  fontSize: "14px",
-                                                  color: "var(--mb-text)",
-                                                }}
-                                              >
-                                                {deal.origin} → {deal.destination}
-                                              </strong>
-                                              {deal.departureMonth && (
-                                                <div
-                                                  style={{
-                                                    fontSize: "11px",
-                                                    color: "var(--mb-text-subtle)",
-                                                    marginTop: "2px",
-                                                  }}
-                                                >
-                                                  {deal.departureMonth}
-                                                </div>
-                                              )}
-                                            </div>
-                                            <div
-                                              style={{
-                                                display: "flex",
-                                                flexDirection: "column",
-                                                alignItems: "flex-end",
-                                                gap: "4px",
-                                              }}
-                                            >
-                                              <strong
-                                                style={{
-                                                  color: "var(--color-text-accent)",
-                                                  fontSize: "18px",
-                                                  lineHeight: 1,
-                                                }}
-                                              >
-                                                {deal.currency} {deal.price}
-                                              </strong>
-                                              <span
-                                                style={{
-                                                  fontSize: "11px",
-                                                  padding: "2px 8px",
-                                                  borderRadius: "6px",
-                                                  background:
-                                                    "color-mix(in srgb, var(--color-accent) 15%, transparent)",
-                                                  color: "var(--color-text-accent)",
-                                                  fontWeight: 600,
-                                                }}
-                                              >
-                                                Bilet Ara →
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </a>
-                                    ))}
-                                  </div>
-                                )}
-                                {session.flightPrices.deals[0] && (
-                                  <a
-                                    href={session.flightPrices.deals[0].affiliateLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      gap: "8px",
-                                      marginTop: "12px",
-                                      padding: "12px",
-                                      borderRadius: "12px",
-                                      background:
-                                        "linear-gradient(135deg,var(--color-accent),var(--color-accent-sky-soft))",
-                                      color: "var(--color-on-primary)",
-                                      fontWeight: 700,
-                                      fontSize: "14px",
-                                      textDecoration: "none",
-                                      boxShadow: "0 2px 12px var(--color-accent-a30)",
-                                    }}
-                                  >
-                                    ✈️ Tüm Uçuşları Karşılaştır
-                                  </a>
-                                )}
-                                <p
-                                  style={{
-                                    fontSize: "10px",
-                                    color: "var(--color-text-subtle)",
-                                    marginTop: "8px",
-                                    lineHeight: 1.4,
-                                    textAlign: "center",
-                                  }}
-                                >
-                                  Travelpayouts üzerinden arama yapılır. Fiyatlar değişkendir.
-                                </p>
-                              </>
-                            )
-                          }
+                        <IconButton
+                          icon="x"
+                          size="sm"
+                          label={t("studio.err.action.dismiss", "Kapat")}
+                          onClick={() => {
+                            setError("");
+                            setErrorCode("");
+                            setRetryAvailable(false);
+                          }}
                         />
                       </div>
-                    )}
-
-                    {draftTab === "advisory" && (
-                      <div
-                        className="ai-timeline-container ai-custom-scrollbar"
-                        style={{ padding: "0.5rem" }}
-                      >
-                        {!session?.travelAdvisory ? (
-                          <p className="ai-muted">
-                            Seyahat tavsiyesi bu destinasyon için mevcut değil.
-                          </p>
-                        ) : (
-                          <>
-                            <div
-                              style={{
-                                marginBottom: "0.75rem",
-                                padding: "0.65rem 0.85rem",
-                                borderRadius: "10px",
-                                background:
-                                  session.travelAdvisory.level === "avoid"
-                                    ? "rgba(239,68,68,0.1)"
-                                    : session.travelAdvisory.level === "avoid_non_essential"
-                                      ? "rgba(245,158,11,0.1)"
-                                      : session.travelAdvisory.level === "some_risk"
-                                        ? "rgba(251,191,36,0.08)"
-                                        : "rgba(16,185,129,0.08)",
-                                border:
-                                  session.travelAdvisory.level === "avoid"
-                                    ? "1px solid rgba(239,68,68,0.3)"
-                                    : session.travelAdvisory.level === "avoid_non_essential"
-                                      ? "1px solid rgba(245,158,11,0.3)"
-                                      : session.travelAdvisory.level === "some_risk"
-                                        ? "1px solid rgba(251,191,36,0.3)"
-                                        : "1px solid rgba(16,185,129,0.2)",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  fontSize: "13px",
-                                  fontWeight: 700,
-                                  marginBottom: "4px",
-                                  color:
-                                    session.travelAdvisory.level === "avoid"
-                                      ? "#ef4444"
-                                      : session.travelAdvisory.level === "avoid_non_essential"
-                                        ? "#f59e0b"
-                                        : session.travelAdvisory.level === "some_risk"
-                                          ? "#fbbf24"
-                                          : "var(--color-accent)",
-                                }}
-                              >
-                                {session.travelAdvisory.level === "avoid"
-                                  ? "🔴"
-                                  : session.travelAdvisory.level === "avoid_non_essential"
-                                    ? "🟡"
-                                    : session.travelAdvisory.level === "some_risk"
-                                      ? "🟠"
-                                      : "🟢"}{" "}
-                                {session.travelAdvisory.levelLabel}
-                              </div>
-                              <strong style={{ fontSize: "12px" }}>
-                                {session.travelAdvisory.country}
-                              </strong>
-                            </div>
-                            {session.travelAdvisory.summary && (
-                              <div className="ai-stop-card" style={{ marginBottom: "8px" }}>
-                                <h3
-                                  style={{ fontSize: "12px", fontWeight: 700, margin: "0 0 6px" }}
-                                >
-                                  📋 Özet Tavsiye
-                                </h3>
-                                <p
-                                  style={{
-                                    fontSize: "12px",
-                                    margin: 0,
-                                    lineHeight: 1.5,
-                                    color: "var(--mb-text-subtle)",
-                                  }}
-                                >
-                                  {session.travelAdvisory.summary}
-                                </p>
-                              </div>
-                            )}
-                            {session.travelAdvisory.changeNote && (
-                              <div
-                                className="ai-stop-card"
-                                style={{
-                                  marginBottom: "8px",
-                                  background:
-                                    "color-mix(in srgb, var(--color-accent-sky-soft) 6%, transparent)",
-                                  border: "1px solid rgba(56,189,248,0.2)",
-                                }}
-                              >
-                                <h3
-                                  style={{
-                                    fontSize: "12px",
-                                    fontWeight: 700,
-                                    margin: "0 0 4px",
-                                    color: "#38bdf8",
-                                  }}
-                                >
-                                  🔔 Son Güncelleme
-                                </h3>
-                                <p
-                                  style={{
-                                    fontSize: "12px",
-                                    margin: 0,
-                                    color: "var(--mb-text-subtle)",
-                                  }}
-                                >
-                                  {session.travelAdvisory.changeNote}
-                                </p>
-                              </div>
-                            )}
-                            <p
-                              style={{
-                                fontSize: "10.5px",
-                                color: "var(--color-text-subtle)",
-                                lineHeight: 1.5,
-                                marginTop: "8px",
-                              }}
-                            >
-                              ⚠️ {session.travelAdvisory.disclaimer}
-                            </p>
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "8px",
-                                marginTop: "8px",
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              <a
-                                href={session.travelAdvisory.sourceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="ai-small-btn"
-                                style={{ fontSize: "11px" }}
-                              >
-                                🇬🇧 FCDO Kaynağı
-                              </a>
-                              <a
-                                href="https://www.mfa.gov.tr/default.tr.mfa"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="ai-small-btn"
-                                style={{ fontSize: "11px" }}
-                              >
-                                🇹🇷 T.C. Dışişleri
-                              </a>
-                            </div>
-                            <p
-                              style={{
-                                fontSize: "10px",
-                                color: "var(--color-text-subtle)",
-                                marginTop: "6px",
-                              }}
-                            >
-                              Son kontrol:{" "}
-                              {new Date(session.travelAdvisory.lastChecked).toLocaleString("tr-TR")}{" "}
-                              · Kaynak: FCDO GOV.UK
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    )}
-
-                    {draftTab === "emergency" && (
-                      <div
-                        className="ai-timeline-container ai-custom-scrollbar"
-                        style={{ padding: "0.5rem" }}
-                      >
-                        {!session?.emergency ? (
-                          <p className="ai-muted">Bu rota için ek güvenlik bilgisi alınamadı.</p>
-                        ) : (
-                          <>
-                            <div style={{ marginBottom: "1rem" }} className="ai-stop-card">
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                🏛️{" "}
-                                {session.emergency.turkishEmbassyConsulate?.title ||
-                                  "T.C. Temsilciliği"}
-                              </h3>
-                              <p style={{ fontSize: "12px", margin: "2px 0" }}>
-                                📍 {session.emergency.turkishEmbassyConsulate?.address}
-                              </p>
-                              <p style={{ fontSize: "12px", margin: "2px 0" }}>
-                                📞 Tel: {session.emergency.turkishEmbassyConsulate?.phone}
-                              </p>
-                              <p
-                                style={{
-                                  fontSize: "12px",
-                                  margin: "2px 0",
-                                  color: "#dc2626",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                🚨 7/24 Acil Çağrı:{" "}
-                                {session.emergency.turkishEmbassyConsulate?.emergencyHotline}
-                              </p>
-                              {session.emergency.turkishEmbassyConsulate?.workingHours && (
-                                <small className="ai-muted">
-                                  Çalışma Saatleri:{" "}
-                                  {session.emergency.turkishEmbassyConsulate.workingHours}
-                                </small>
-                              )}
-                            </div>
-                            <div style={{ marginBottom: "1rem" }}>
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                🚨 Yerel Acil Numaralar
-                              </h3>
-                              <div
-                                style={{
-                                  display: "grid",
-                                  gridTemplateColumns: "1fr 1fr",
-                                  gap: "6px",
-                                  fontSize: "12px",
-                                }}
-                              >
-                                <div className="ai-stop-card">
-                                  <strong>Polis</strong>
-                                  <span>{session.emergency.localEmergencyNumbers?.police}</span>
-                                </div>
-                                <div className="ai-stop-card">
-                                  <strong>Ambulans</strong>
-                                  <span>{session.emergency.localEmergencyNumbers?.ambulance}</span>
-                                </div>
-                                <div className="ai-stop-card">
-                                  <strong>İtfaiye</strong>
-                                  <span>{session.emergency.localEmergencyNumbers?.fire}</span>
-                                </div>
-                                <div className="ai-stop-card">
-                                  <strong>Genel Acil</strong>
-                                  <span>
-                                    {session.emergency.localEmergencyNumbers?.generalEmergency}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div>
-                              <h3
-                                style={{ fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}
-                              >
-                                ⚠️ Pasaport Kaybı ve Güvenlik Protokolü
-                              </h3>
-                              <ul
-                                style={{
-                                  margin: 0,
-                                  paddingLeft: "1.2rem",
-                                  fontSize: "12px",
-                                  color: "var(--mb-text-subtle)",
-                                }}
-                              >
-                                {session.emergency.safetyAndPassportTips?.map((tip, idx) => (
-                                  <li key={idx} style={{ marginBottom: "4px" }}>
-                                    {tip}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
-                    <div className="ai-draft-footer-actions">
-                      <p className="ai-muted">
-                        Değişiklik için sohbete yaz: “İkinci güne kahve ekle” veya “Daha sakin
-                        olsun”.
-                      </p>
-                      <button className="ai-open-in-map-btn" onClick={openMap}>
-                        Haritada aç
-                      </button>
-                      <div className="ai-header-actions">
-                        <button className="ai-small-btn" onClick={copy}>
-                          Planı kopyala
-                        </button>
-                        <button className="ai-small-btn" onClick={download}>
-                          Metin olarak indir
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </aside>
-            )}
-          </div>
-        </div>
-
-        {/* Seyahat Manifestosu (.md) Modalı */}
-        {showManifestoModal && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 9999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "1rem",
-              backgroundColor: "rgba(0,0,0,0.65)",
-              backdropFilter: "blur(4px)",
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: "var(--color-neutral-900)",
-                border: "1px solid color-mix(in srgb, var(--color-neutral-700) 80%, transparent)",
-                borderRadius: "16px",
-                width: "100%",
-                maxWidth: "640px",
-                maxHeight: "85vh",
-                display: "flex",
-                flexDirection: "column",
-                boxShadow: "0 25px 50px -12px rgba(0,0,0,0.6)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "1rem 1.5rem",
-                  borderBottom: "1px solid var(--color-neutral-800)",
-                  backgroundColor: "var(--color-neutral-900)",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ color: "#38bdf8", fontSize: "20px" }}
+                    }
                   >
-                    description
-                  </span>
-                  <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#f8fafc" }}>
-                    Seyahat Manifestosu (.md)
-                  </h3>
+                    {error}
+                  </Alert>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowManifestoModal(false)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "#94a3b8",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "4px",
-                    borderRadius: "8px",
-                  }}
-                  title="Kapat"
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    aria-hidden="true"
-                    style={{ fontSize: "18px" }}
-                  >
-                    close
-                  </span>
-                </button>
-              </div>
-
-              <div style={{ padding: "1rem 1.5rem", flex: 1, overflowY: "auto" }}>
-                <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 12px 0" }}>
-                  AI Asistanımız bu markdown manifestosunu her sorunuzda okuyarak otellerinizi, rota
-                  duraklarınızı ve günlerinizi bilir; önerileri buna göre optimize eder.
+              )}
+              {notice && (
+                <p className="as-studio__notice" role="status">
+                  {notice}
                 </p>
-                <pre
-                  style={{
-                    backgroundColor: "var(--color-neutral-900)",
-                    padding: "12px",
-                    borderRadius: "10px",
-                    border: "1px solid var(--color-neutral-800)",
-                    fontSize: "11.5px",
-                    fontFamily: "monospace",
-                    color: "#e2e8f0",
-                    overflowX: "auto",
-                    whiteSpace: "pre-wrap",
-                    maxHeight: "45vh",
-                    lineHeight: "1.6",
-                  }}
-                >
-                  {currentTrip
-                    ? tripToMarkdown(currentTrip)
-                    : "# Henüz aktif bir seyahat rotası seçilmedi."}
-                </pre>
+              )}
+
+              <SmartActions
+                messages={session?.messages || []}
+                route={route}
+                currentTrip={currentTrip}
+                onAction={pick}
+                busy={busy}
+              />
+              <div className="as-studio__style">
+                <SegmentedControl
+                  label={t("studio.style.label", "Rota tarzı")}
+                  value={routeMode}
+                  onChange={setRouteMode}
+                  options={[
+                    styleOption(ROUTE_STYLES[0]),
+                    styleOption(ROUTE_STYLES[1]),
+                    styleOption(ROUTE_STYLES[2]),
+                  ]}
+                />
+                <p className="as-studio__meta">
+                  {`${t(...selectedStyle.hint)}. ${t(
+                    "studio.style.note",
+                    "Rota tarzı seçimi yalnızca bu isteği etkiler; kalıcı tercihlerini değiştirmez.",
+                  )}`}
+                </p>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "0.85rem 1.5rem",
-                  borderTop: "1px solid var(--color-neutral-800)",
-                  backgroundColor: "var(--color-neutral-900)",
-                  flexWrap: "wrap",
-                  gap: "8px",
-                }}
-              >
-                {currentTrip && (
-                  <a
-                    href={`/maps/?tripId=${currentTrip.id}`}
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      color: "var(--color-accent-strong)",
-                      textDecoration: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "16px" }}
-                    >
-                      map
-                    </span>
-                    <span>Haritada Düzenle</span>
-                  </a>
+              <ComposerBar
+                value={input}
+                onChange={setInput}
+                inputRef={textareaRef}
+                maxLength={2000}
+                // S22: mesaj başı maliyet sunucuda belirlenir (netleştirme 0, sohbet 1, rota 5) ve
+                // istemcide önceden bilinmez; sabit rozet yok, işlem başı maliyetler notta.
+                note={t("assistant.composer.costNote", CREDIT_NOTE_TR)}
+                busy={busy}
+                label={t("assistant.composer.label", "Asistana mesaj")}
+                placeholder={t(
+                  "assistant.composer.placeholder",
+                  "Bir durak ekle, rotayı değiştir veya soru sor...",
                 )}
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "auto" }}
+                onSubmit={(text) => void send(false, text)}
+                leading={
+                  <>
+                    <IconButton
+                      icon="locate"
+                      label={t("studio.composer.location", "Konumumu ekle")}
+                      onClick={addMyLocation}
+                    />
+                    <IconButton
+                      icon="mic"
+                      pressed={listening}
+                      disabled={busy}
+                      label={
+                        listening
+                          ? t("studio.composer.dictateStop", "Sesli girişi durdur")
+                          : t("studio.composer.dictate", "Sesli mesaj yazdır")
+                      }
+                      onClick={dictate}
+                    />
+                  </>
+                }
+              />
+
+              <div className="as-studio__wallet">
+                <Icon name="coin" size={16} />
+                <span>
+                  {wallet
+                    ? creditsLabel(t, wallet.credits)
+                    : t("studio.wallet.free", "Ücretsiz danışmanlık")}
+                </span>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() =>
+                    openUpgradeModal(
+                      t(
+                        "studio.wallet.topUpReason",
+                        "Yapay zeka seyahat asistanı için kredi yükleyin",
+                      ),
+                    )
+                  }
                 >
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!currentTrip) return;
-                      await navigator.clipboard.writeText(tripToMarkdown(currentTrip));
-                      setNotice("✓ Markdown panoya kopyalandı!");
-                    }}
-                    className="ai-small-btn"
-                    style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "14px" }}
+                  {t("studio.wallet.topUp", "Kredi yükle")}
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          {panelOpen && (
+            <aside
+              id="route-draft"
+              className="as-studio__draft"
+              aria-label={t("studio.draft.label", "Oluşturulan rota")}
+            >
+              <div className="as-studio__draft-head">
+                <h2 ref={draftHeadingRef} tabIndex={-1} className="as-studio__draft-title">
+                  {t("studio.draft.label", "Oluşturulan rota")}
+                </h2>
+                <div className="as-studio__head-actions">
+                  <span className="as-studio__panel-resize">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-label={
+                        panelWide
+                          ? t("studio.draft.narrow", "Rota panelini küçült")
+                          : t("studio.draft.widen", "Rota panelini büyüt")
+                      }
+                      onClick={() => setPanelWide(!panelWide)}
                     >
-                      content_copy
-                    </span>
-                    <span>Kopyala</span>
-                  </button>
-                  <button
-                    type="button"
+                      {panelWide
+                        ? t("studio.draft.narrowShort", "Küçült")
+                        : t("studio.draft.widenShort", "Büyüt")}
+                    </Button>
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    iconStart={<Icon name="x" size={16} />}
+                    aria-label={t("studio.draft.closeLabel", "Rota panelini kapat")}
                     onClick={() => {
-                      if (!currentTrip) return;
-                      const content = tripToMarkdown(currentTrip);
-                      const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `${(currentTrip.title || "seyahat").toLowerCase().replace(/[^a-z0-9]/gi, "_")}_manifesto.md`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                      setNotice("✓ Markdown dosyası indirildi!");
-                    }}
-                    className="ai-send-btn"
-                    style={{
-                      fontSize: "12px",
-                      padding: "0.4rem 0.85rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
+                      setPanelOpen(false);
+                      setMobileTab("chat");
                     }}
                   >
-                    <span
-                      className="material-symbols-outlined"
-                      aria-hidden="true"
-                      style={{ fontSize: "14px" }}
-                    >
-                      download
-                    </span>
-                    <span>İndir (.md)</span>
-                  </button>
+                    {t("studio.draft.close", "Kapat")}
+                  </Button>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Fiyat Takip & Ucuz Bilet/Otel Botu Modalı */}
-        {showDealTrackerModal && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 9999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "1rem",
-              backgroundColor: "rgba(0,0,0,0.65)",
-              backdropFilter: "blur(4px)",
-            }}
-          >
-            <div style={{ width: "100%", maxWidth: "820px", maxHeight: "90vh", overflowY: "auto" }}>
-              <DealTrackerPanel
-                initialDestination={currentTrip?.destination || currentTrip?.title || ""}
-                onClose={() => setShowDealTrackerModal(false)}
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="ai-mobile-switcher">
-          <button
-            className={`ai-mobile-switch-btn ${mobileTab === "chat" ? "active" : ""}`}
-            onClick={() => {
-              setMobileTab("chat");
-              setPanelOpen(false);
-            }}
-          >
-            Sohbet
-          </button>
-          <button
-            className={`ai-mobile-switch-btn ${mobileTab === "draft" ? "active" : ""}`}
-            onClick={() => {
-              setMobileTab("draft");
-              setPanelOpen(true);
-            }}
-          >
-            Rota {route ? `· ${route.stops.length} durak` : ""}
-          </button>
+              {!route ? (
+                <div className="as-studio__draft-body">
+                  <EmptyState
+                    icon="map"
+                    level={3}
+                    title={t("studio.draft.empty.title", "Henüz rota yok")}
+                    description={t(
+                      "studio.draft.empty.text",
+                      "Tercihlerini konuştuktan sonra oluşturduğumuz rota burada görünecek.",
+                    )}
+                  />
+                  {prepContext.kind === "strip" && <PrepPanel context={prepContext} />}
+                </div>
+              ) : (
+                <div className="as-studio__draft-body">
+                  <div className="as-studio__route-head">
+                    <h3 className="as-studio__route-title">{route.title}</h3>
+                    <p className="as-studio__meta">
+                      {route.destination} · {daysLabel(t, route.estimatedDays)} ·{" "}
+                      {stopsLabel(t, route.stops.length)}
+                    </p>
+                    <p className="as-studio__muted">{route.summary}</p>
+                  </div>
+                  <Tabs
+                    label={t("studio.draft.tabs", "Taslak bölümleri")}
+                    value={draftTab}
+                    onChange={(id) => setDraftTab(id as DraftTab)}
+                    items={[
+                      {
+                        id: "route",
+                        label: (
+                          <>
+                            <Icon name="map" size={16} />
+                            {t("studio.tab.stops", "Duraklar")}
+                          </>
+                        ),
+                        panel: <DraftStops route={route} day={day} onDay={setDay} />,
+                      },
+                      {
+                        id: "stay",
+                        label: (
+                          <>
+                            <Icon name="bed" size={16} />
+                            {t("studio.tab.stay", "Konaklama")}
+                          </>
+                        ),
+                        panel: (
+                          <DraftStay
+                            info={session?.stayAndTransit}
+                            onAsk={setInput}
+                            onAddPlace={addPlaceToActiveTrip}
+                          />
+                        ),
+                      },
+                      {
+                        id: "discovery",
+                        label: (
+                          <>
+                            <Icon name="compass" size={16} />
+                            {t("studio.tab.discovery", "Keşif")}
+                          </>
+                        ),
+                        panel: (
+                          <DraftDiscovery
+                            info={session?.discovery}
+                            onAsk={setInput}
+                            onAddPlace={addPlaceToActiveTrip}
+                          />
+                        ),
+                      },
+                      {
+                        id: "flights",
+                        label: (
+                          <>
+                            <Icon name="plane" size={16} />
+                            {t("ai.prepTab", "Hazırlık")}
+                          </>
+                        ),
+                        badge: session?.flightPrices?.cheapestPrice ? (
+                          <span className="as-studio__tab-meta">
+                            {`· ${session.flightPrices.cheapestCurrency} ${session.flightPrices.cheapestPrice}`}
+                          </span>
+                        ) : undefined,
+                        panel: (
+                          <PrepPanel
+                            context={prepContext}
+                            flightBlock={<FlightPrices info={session?.flightPrices} />}
+                          />
+                        ),
+                      },
+                      {
+                        id: "advisory",
+                        label: (
+                          <>
+                            <Icon name="info" size={16} />
+                            {t("studio.tab.advisory", "Tavsiye")}
+                          </>
+                        ),
+                        badge: advisoryWarn ? (
+                          <Icon
+                            name="alert"
+                            size={16}
+                            className="as-studio__tab-warn"
+                            label={t("studio.tab.advisoryWarn", "Uyarı var")}
+                          />
+                        ) : undefined,
+                        panel: <DraftAdvisory info={session?.travelAdvisory} />,
+                      },
+                      {
+                        id: "emergency",
+                        label: (
+                          <>
+                            <Icon name="shield" size={16} />
+                            {t("studio.tab.safety", "Güvenlik")}
+                          </>
+                        ),
+                        panel: <DraftEmergency info={session?.emergency} />,
+                      },
+                    ]}
+                  />
+                  <div className="as-studio__draft-foot">
+                    <p className="as-studio__muted">
+                      {t(
+                        "studio.draft.footerNote",
+                        "Değişiklik için sohbete yaz: “İkinci güne kahve ekle” veya “Daha sakin olsun”.",
+                      )}
+                    </p>
+                    <Button
+                      variant="primary"
+                      fullWidth
+                      iconStart={<Icon name="map" size={16} />}
+                      onClick={openMap}
+                    >
+                      {t("studio.msg.openMap", "Haritada aç")}
+                    </Button>
+                    <div className="as-studio__head-actions">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        iconStart={<Icon name="copy" size={16} />}
+                        onClick={copy}
+                      >
+                        {t("studio.draft.copy", "Planı kopyala")}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        iconStart={<Icon name="download" size={16} />}
+                        onClick={download}
+                      >
+                        {t("studio.draft.download", "Metin olarak indir")}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </aside>
+          )}
         </div>
-        <AuthGate
-          variant="sheet"
-          reason="ai"
-          next="/travel-assistant/"
-          open={authModal}
-          onClose={() => setAuthModal(false)}
-        />
       </div>
+      <AuthGate
+        variant="sheet"
+        reason="ai"
+        next="/travel-assistant/"
+        open={authModal}
+        onClose={() => setAuthModal(false)}
+      />
     </PageShell>
   );
 }

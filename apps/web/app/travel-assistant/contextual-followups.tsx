@@ -2,20 +2,39 @@
 
 import type { ChatMessage } from "../lib/ai/chat";
 import type { UnifiedRoutePlan } from "../lib/ai/types";
+import { Icon, type IconName } from "../components/ui";
+import { useLocale } from "../lib/locale-context";
+import { fill, type Translate } from "./studio-format";
 
 interface FollowupChip {
-  icon: string;
+  icon: IconName;
   label: string;
   prompt: string;
 }
 
-function extractFollowups(message: ChatMessage, _route: UnifiedRoutePlan | null): FollowupChip[] {
+function extractFollowups(
+  message: ChatMessage,
+  _route: UnifiedRoutePlan | null,
+  t: Translate,
+): FollowupChip[] {
   const chips: FollowupChip[] = [];
   const text = message.text.toLowerCase();
 
   if (message.quickReplies && message.quickReplies.length > 0) {
     return [];
   }
+
+  const chip = (
+    icon: IconName,
+    id: string,
+    label: string,
+    prompt: string,
+    values: Record<string, string | number> = {},
+  ): FollowupChip => ({
+    icon,
+    label: fill(t(`studio.follow.${id}`, label), values),
+    prompt: fill(t(`studio.follow.${id}.prompt`, prompt), values),
+  });
 
   if (message.route) {
     const r = message.route;
@@ -24,140 +43,149 @@ function extractFollowups(message: ChatMessage, _route: UnifiedRoutePlan | null)
     const stops = r.stops?.length || 0;
 
     chips.push(
-      {
-        icon: "restaurant",
-        label: `${dest} lezzetleri`,
-        prompt: `${dest} rotasındaki her gün için yerel restoran ve yemek önerileri ekle`,
-      },
-      {
-        icon: "hotel",
-        label: "Otel semti öner",
-        prompt: `${dest} için ${days} gecelik merkezi ve bütçe dostu konaklama semtleri ve otel öner`,
-      },
-      {
-        icon: "schedule",
-        label: "Tempoyu değiştir",
-        prompt: "Rotayı daha rahat bir tempoya çevir, molalar ekle ve yürüyüş mesafelerini azalt",
-      },
+      chip(
+        "food",
+        "routeFood",
+        "{dest} lezzetleri",
+        "{dest} rotasındaki her gün için yerel restoran ve yemek önerileri ekle",
+        { dest },
+      ),
+      chip(
+        "bed",
+        "routeHotel",
+        "Otel semti öner",
+        "{dest} için {days} gecelik merkezi ve bütçe dostu konaklama semtleri ve otel öner",
+        { dest, days },
+      ),
+      chip(
+        "clock",
+        "routePace",
+        "Tempoyu değiştir",
+        "Rotayı daha rahat bir tempoya çevir, molalar ekle ve yürüyüş mesafelerini azalt",
+      ),
     );
 
     if (stops > 4) {
-      chips.push({
-        icon: "remove_circle",
-        label: "Daha az durak",
-        prompt: "Rota çok yoğun, en önemli durakları bırakıp gerisini çıkar",
-      });
+      chips.push(
+        chip(
+          "minus",
+          "routeFewer",
+          "Daha az durak",
+          "Rota çok yoğun, en önemli durakları bırakıp gerisini çıkar",
+        ),
+      );
     }
     if (days < 3) {
-      chips.push({
-        icon: "add_circle",
-        label: "1 gün daha ekle",
-        prompt: `Rotaya 1 gün daha ekle, yeni duraklar ve aktiviteler öner`,
-      });
+      chips.push(
+        chip(
+          "plus",
+          "routeMoreDay",
+          "1 gün daha ekle",
+          "Rotaya 1 gün daha ekle, yeni duraklar ve aktiviteler öner",
+        ),
+      );
     }
-    chips.push({
-      icon: "nightlife",
-      label: "Akşam planı",
-      prompt: `${dest} için akşam yemeği sonrası bar, rooftop veya canlı müzik planı öner`,
-    });
+    chips.push(
+      chip(
+        "sparkle",
+        "routeEvening",
+        "Akşam planı",
+        "{dest} için akşam yemeği sonrası bar, rooftop veya canlı müzik planı öner",
+        { dest },
+      ),
+    );
 
     return chips.slice(0, 4);
   }
 
   if (message.stayAndTransit) {
     chips.push(
-      {
-        icon: "compare",
-        label: "Daha ucuz seçenek",
-        prompt: "Daha bütçe dostu otel ve hostel alternatifleri öner",
-      },
-      {
-        icon: "location_city",
-        label: "Farklı semt",
-        prompt: "Başka bir semtte konaklama seçeneklerini karşılaştır",
-      },
-      {
-        icon: "map",
-        label: "Rotayı göster",
-        prompt: "Şimdi bu konaklama bilgisiyle günlük rota oluştur",
-      },
+      chip(
+        "coin",
+        "stayCheaper",
+        "Daha ucuz seçenek",
+        "Daha bütçe dostu otel ve hostel alternatifleri öner",
+      ),
+      chip(
+        "landmark",
+        "stayArea",
+        "Farklı semt",
+        "Başka bir semtte konaklama seçeneklerini karşılaştır",
+      ),
+      chip(
+        "map",
+        "stayRoute",
+        "Rotayı göster",
+        "Şimdi bu konaklama bilgisiyle günlük rota oluştur",
+      ),
     );
     return chips.slice(0, 3);
   }
 
   if (message.discovery) {
     chips.push(
-      {
-        icon: "add_location",
-        label: "Rotaya ekle",
-        prompt: "Bu keşif noktalarını mevcut rotama ekle",
-      },
-      {
-        icon: "restaurant",
-        label: "Detaylı yemek",
-        prompt: "Bu restoranların menü tavsiyeleri, fiyat aralığı ve rezervasyon bilgisi ver",
-      },
-      {
-        icon: "schedule",
-        label: "Zaman planla",
-        prompt: "Bu keşif noktaları için hangi gün ve saatlerde gitmem gerektiğini planla",
-      },
+      chip("plus", "discAdd", "Rotaya ekle", "Bu keşif noktalarını mevcut rotama ekle"),
+      chip(
+        "food",
+        "discFood",
+        "Detaylı yemek",
+        "Bu restoranların menü tavsiyeleri, fiyat aralığı ve rezervasyon bilgisi ver",
+      ),
+      chip(
+        "clock",
+        "discTime",
+        "Zaman planla",
+        "Bu keşif noktaları için hangi gün ve saatlerde gitmem gerektiğini planla",
+      ),
     );
     return chips.slice(0, 3);
   }
 
   if (text.includes("otel") || text.includes("konaklama") || text.includes("hotel")) {
     chips.push(
-      {
-        icon: "map",
-        label: "Rota da oluştur",
-        prompt: "Bu otel bölgesine göre günlük yürüyüş rotası oluştur",
-      },
-      {
-        icon: "savings",
-        label: "Daha ucuzu?",
-        prompt: "Daha bütçe dostu alternatif oteller ve hosteller öner",
-      },
+      chip(
+        "map",
+        "hotelRoute",
+        "Rota da oluştur",
+        "Bu otel bölgesine göre günlük yürüyüş rotası oluştur",
+      ),
+      chip(
+        "coin",
+        "hotelCheaper",
+        "Daha ucuzu?",
+        "Daha bütçe dostu alternatif oteller ve hosteller öner",
+      ),
     );
   } else if (text.includes("restoran") || text.includes("yemek") || text.includes("lezzet")) {
     chips.push(
-      {
-        icon: "add_location",
-        label: "Rotaya ekle",
-        prompt: "Bu restoranları gezi rotama sırala ve ekle",
-      },
-      { icon: "coffee", label: "Kahve de ekle", prompt: "Yakınlardaki en iyi kahvecileri de öner" },
+      chip("plus", "foodAdd", "Rotaya ekle", "Bu restoranları gezi rotama sırala ve ekle"),
+      chip("food", "foodCoffee", "Kahve de ekle", "Yakınlardaki en iyi kahvecileri de öner"),
     );
   } else if (text.includes("müze") || text.includes("tarihi") || text.includes("sanat")) {
     chips.push(
-      {
-        icon: "schedule",
-        label: "Bilet ve saat",
-        prompt: "Bu müzelerin bilet fiyatları, ücretsiz günleri ve en uygun ziyaret saatlerini ver",
-      },
-      {
-        icon: "restaurant",
-        label: "Yakın restoran",
-        prompt: "Bu müzelere yürüme mesafesinde iyi restoranlar öner",
-      },
+      chip(
+        "clock",
+        "museumTickets",
+        "Bilet ve saat",
+        "Bu müzelerin bilet fiyatları, ücretsiz günleri ve en uygun ziyaret saatlerini ver",
+      ),
+      chip(
+        "food",
+        "museumFood",
+        "Yakın restoran",
+        "Bu müzelere yürüme mesafesinde iyi restoranlar öner",
+      ),
     );
   } else {
     chips.push(
-      {
-        icon: "map",
-        label: "Bunu rotaya çevir",
-        prompt: "Bu bilgilere göre detaylı bir gezi rotası oluştur",
-      },
-      {
-        icon: "help",
-        label: "Daha detay",
-        prompt: "Bu konuda daha detaylı bilgi ve pratik ipuçları ver",
-      },
-      {
-        icon: "explore",
-        label: "Alternatif öner",
-        prompt: "Farklı ve alternatif seçenekler de öner",
-      },
+      chip(
+        "map",
+        "toRoute",
+        "Bunu rotaya çevir",
+        "Bu bilgilere göre detaylı bir gezi rotası oluştur",
+      ),
+      chip("help", "detail", "Daha detay", "Bu konuda daha detaylı bilgi ve pratik ipuçları ver"),
+      chip("compass", "alt", "Alternatif öner", "Farklı ve alternatif seçenekler de öner"),
     );
   }
 
@@ -172,30 +200,26 @@ interface ContextualFollowupsProps {
 }
 
 export function ContextualFollowups({ message, route, onAction, busy }: ContextualFollowupsProps) {
-  const chips = extractFollowups(message, route);
+  const { t } = useLocale();
+  const chips = extractFollowups(message, route, t);
 
   if (chips.length === 0) return null;
 
   return (
-    <div className="ai-contextual-followups">
-      {chips.map((chip) => (
-        <button
-          key={chip.prompt}
-          type="button"
-          className="ai-contextual-chip"
-          onClick={() => onAction(chip.prompt)}
-          disabled={busy}
-        >
-          <span
-            className="material-symbols-outlined"
-            aria-hidden="true"
-            style={{ fontSize: "13px" }}
+    <ul className="as-studio-followups" aria-label={t("studio.follow.label", "Önerilen devam")}>
+      {chips.map((c) => (
+        <li key={c.prompt}>
+          <button
+            type="button"
+            className="as-studio-action"
+            onClick={() => onAction(c.prompt)}
+            disabled={busy}
           >
-            {chip.icon}
-          </span>
-          <span>{chip.label}</span>
-        </button>
+            <Icon name={c.icon} size={16} />
+            <span>{c.label}</span>
+          </button>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

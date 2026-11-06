@@ -116,7 +116,7 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
             right={
               <IconButton
                 icon="trash"
-                label={tr("native.chat.delete")}
+                label={tr("studio.sessions.delete")}
                 onPress={() => setConfirmDelete(true)}
               />
             }

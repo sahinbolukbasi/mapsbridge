@@ -268,6 +268,10 @@ export const UI_TR = {
   "upgrade.compare": "Planları karşılaştır",
   "upgrade.description": "Bu işlem için yeterli kredin yok.",
   "upgrade.note": "Kredi yalnızca sunucuda düşer; işlem başarısız olursa otomatik iade edilir.",
+  // FEAT-013: web oturumlu asistanla aynı metinler web anahtarını kullanır (review #10 kuralı).
+  "ai.prepTab": "Hazırlık",
+  "studio.sessions.delete": "Sohbeti sil",
+  "studio.tab.stops": "Duraklar",
 } as const;
 
 // Yalnız native'de olan metinler (web tr.json'da karşılığı yok). Anahtarlar `native.` ile başlar,
@@ -278,7 +282,6 @@ export const NATIVE_TR = {
     "Nereye gitmek istiyorsun? Seyahatini birlikte planlayabilir ya da aklındaki soruyla başlayabiliriz.",
   "native.ai.newChat": "Yeni sohbet",
   "native.ai.viewLabel": "Asistan görünümü",
-  "native.ai.prepTab": "Hazırlık",
   "native.ai.noReply": "Yanıt alınamadı. Aynı mesajı tekrar göndererek sonucu kontrol edebilirsin.",
   "native.ai.assumptions": "Varsayımlar: {list}",
   "native.ai.routeTitle": "{destination} rotası",
@@ -291,7 +294,6 @@ export const NATIVE_TR = {
   "native.prep.source": "Kaynağı aç",
   "native.prep.offer": "Teklifi aç",
   "native.place.defaultCategory": "Mekan",
-  "native.chat.delete": "Sohbeti sil",
   "native.chat.deleteTitle": "Sohbet silinsin mi?",
   "native.chat.deleteBody": "Bu sohbet ve mesajları bu cihazdan silinir.",
   "native.profile.signOutTitle": "Çıkış yapılsın mı?",
@@ -307,7 +309,6 @@ export const NATIVE_TR = {
   "native.splash.label": "MapsBridge yükleniyor",
   "native.error.body": "Ekran yüklenirken beklenmeyen bir sorun oluştu. Tekrar deneyebilirsin.",
   "native.stopList.show": "Durak listesini göster",
-  "native.stopList.title": "Duraklar",
   "native.stopList.empty": "Bu rotada henüz durak yok.",
   "native.guest.storageWarn": "Taslağın bu cihazda saklanamıyor; uygulamayı kapatırsan kaybolur.",
   "native.date.format": "YYYY-AA-GG",

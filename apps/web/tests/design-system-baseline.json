@@ -3,7 +3,7 @@
     "app/maps/maps.css": 35,
     "app/operations.css": 9,
     "app/styles.css": 6,
-    "app/travel-assistant/assistant.css": 32
+    "app/travel-assistant/assistant.css": 4
   },
   "G2": {},
   "G3": {},
@@ -21,9 +21,7 @@
     "app/lib/test-reset.ts": 1,
     "app/lib/trip/models.ts": 27,
     "app/lib/trip/use-trip-workspace.ts": 15,
-    "app/travel-assistant/loading.tsx": 1,
-    "app/travel-assistant/travel-affiliate-cards.tsx": 15,
-    "app/travel-assistant/travel-assistant-client.tsx": 29
+    "app/travel-assistant/travel-affiliate-cards.tsx": 15
   },
   "G8": {
     "app/styles.css": 3
@@ -31,27 +29,25 @@
   "G10": {},
   "G11": {
     "app/maps/maps.css": 1,
-    "app/styles.css": 1,
-    "app/travel-assistant/assistant.css": 1
+    "app/styles.css": 1
   },
   "G12": {},
   "G14": {},
   "G15": {
-    "app/maps/maps.css": 10,
-    "app/travel-assistant/assistant.css": 4
+    "app/maps/maps.css": 10
   },
   "G16": {},
   "G16c": {
     "app/maps/maps.css": 2,
     "app/operations.css": 8,
     "app/styles.css": 4,
-    "app/travel-assistant/assistant.css": 4
+    "app/travel-assistant/assistant.css": 1
   },
   "G16d": {
     "app/maps/maps.css": 1,
     "app/operations.css": 2,
     "app/styles.css": 3,
-    "app/travel-assistant/assistant.css": 18
+    "app/travel-assistant/assistant.css": 3
   },
   "G17": {},
   "G18": {},
@@ -66,12 +62,11 @@
     "app/maps/maps.css": 23,
     "app/styles.css": 12,
     "app/styles/base.css": 3,
-    "app/travel-assistant/assistant.css": 33
+    "app/travel-assistant/assistant.css": 2
   },
   "G25": {
     "app/operations.css": 2,
-    "app/styles/base.css": 1,
-    "app/travel-assistant/assistant.css": 1
+    "app/styles/base.css": 1
   },
   "G26": {
     "app/components/ui/ui.css": 3,
@@ -79,7 +74,7 @@
     "app/operations.css": 15,
     "app/styles.css": 42,
     "app/styles/base.css": 2,
-    "app/travel-assistant/assistant.css": 180
+    "app/travel-assistant/assistant.css": 13
   },
   "G27": {
     "app/styles/base.css": 1
@@ -89,13 +84,10 @@
     "app/components/tracker/deal-tracker-panel.tsx": 19,
     "app/components/travel-globe.tsx": 7,
     "app/components/trip/google-place-info.tsx": 3,
-    "app/components/trip/google-planner-map.tsx": 8,
-    "app/travel-assistant/prep-panel.tsx": 1,
-    "app/travel-assistant/travel-assistant-client.tsx": 50
+    "app/components/trip/google-planner-map.tsx": 8
   },
   "G29": {
     "app/maps/maps.css": 3,
-    "app/styles.css": 1,
-    "app/travel-assistant/assistant.css": 7
+    "app/styles.css": 1
   }
 }

@@ -101,17 +101,19 @@ export function ComposerBar({
             }
           }}
         />
-        <Button
-          type="submit"
-          variant="primary"
-          cost={cost}
-          loading={busy}
-          disabled={!canSend}
-          aria-describedby={describedBy}
-          iconEnd={<Icon name="send" size={16} />}
-        >
-          {submitLabel ?? t("assistant.composer.send", "Gönder")}
-        </Button>
+        <span className="as-composer__send">
+          <Button
+            type="submit"
+            variant="primary"
+            cost={cost}
+            loading={busy}
+            disabled={!canSend}
+            aria-describedby={describedBy}
+            iconEnd={<Icon name="send" size={16} />}
+          >
+            {submitLabel ?? t("assistant.composer.send", "Gönder")}
+          </Button>
+        </span>
       </form>
       {noteId && (
         <p id={noteId} className="as-composer__note">

@@ -316,6 +316,7 @@ test("I8: <TravelAffiliateCards / <InlineAffiliateStrip JSX'i yalnız travel-ass
   for (const k of ["ai.prepTab", "ai.prepAffiliateTitle", "ai.prepLink"]) {
     assert.ok(tr[k] && en[k], `${k} TR/EN'de olmalı`);
   }
-  assert.equal(tr["ai.prepTab"], "✈ Hazırlık");
-  assert.equal(en["ai.prepTab"], "✈ Trip prep");
+  // FEAT-013 (R3/G28): sekme ikonu Icon primitive'inden gelir; etiket emoji taşımaz.
+  assert.equal(tr["ai.prepTab"], "Hazırlık");
+  assert.equal(en["ai.prepTab"], "Trip prep");
 });

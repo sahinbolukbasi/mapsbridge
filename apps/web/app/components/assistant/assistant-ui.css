@@ -60,6 +60,11 @@
     color: var(--color-text);
     box-shadow: var(--shadow-xs);
   }
+  /* Gönder düğmesi dar ekranda daralmaz; metin alanı küçülür (FEAT-013). */
+  .as-composer__send {
+    display: flex;
+    flex: none;
+  }
   .as-composer__leading {
     display: flex;
     align-items: center;

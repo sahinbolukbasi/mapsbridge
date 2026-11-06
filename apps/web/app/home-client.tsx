@@ -1,7 +1,7 @@
 "use client";
 // Ana sayfa (design §10, F1–F10, F41, F42; kararlar S6/S11). Metinler yalnızca §10'dan
 // (home.* anahtarları); istatistik, yorum, fiyat ya da mağaza iddiası yok. Bölüm 7 (mobil)
-// render edilmez (S6); SSS q4 planlayıcı artımında doğrulanana kadar render edilmez (S11, D6).
+// render edilmez (S6); SSS q4 FEAT-007'de önbellek kapsamı doğrulandıktan sonra render edilir (S11).
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Accordion,
@@ -105,7 +105,9 @@ export default function Home() {
                 <p className="home-last-trip__label">{t("home.lastTrip.title")}</p>
                 <p className="home-last-trip__title">{lastTrip.title}</p>
                 <p className="home-last-trip__meta">
-                  {t("home.lastTrip.stops").replace("{n}", String(lastTrip.stops))}
+                  {t(
+                    lastTrip.stops === 1 ? "home.lastTrip.stops.one" : "home.lastTrip.stops",
+                  ).replace("{n}", String(lastTrip.stops))}
                 </p>
                 <Button href="/maps/" variant="link">
                   {t("home.lastTrip.open")}

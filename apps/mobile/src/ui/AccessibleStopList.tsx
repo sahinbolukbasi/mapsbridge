@@ -62,7 +62,7 @@ export function AccessibleStopList({ day, stops, onSelectStop }: AccessibleStopL
       <ModalFrame
         visible={open}
         variant="sheet"
-        title={tr("native.stopList.title")}
+        title={tr("studio.tab.stops")}
         onRequestClose={() => setOpen(false)}
       >
         <ScrollView>
