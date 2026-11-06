@@ -108,6 +108,11 @@ export default tseslint.config(
                 "Header/footer yalnızca SiteChrome'dan render edilir (components/ui/site-chrome.tsx; bkz. .kiro/steering/design-system.md §Chrome).",
             },
             {
+              group: ["motion", "motion/*", "framer-motion", "framer-motion/*"],
+              message:
+                "motion yalnız apps/web/app/lib/motion/index.ts sarmalayıcısından (reduced-motion tek yerden; approval motion@14.9.1 yalnız sürükle-bırak ve paylaşılan öğe geçişleri).",
+            },
+            {
               group: ["**/tw-utils.css"],
               message:
                 "tw-utils.css yeni import edilmez; yerleşim sınıfı ya da primitive kullanın (bkz. .kiro/steering/design-system.md §Primitive'ler).",
@@ -133,6 +138,30 @@ export default tseslint.config(
               ],
               message:
                 "Header/footer yalnızca SiteChrome'dan render edilir (components/ui/site-chrome.tsx; bkz. .kiro/steering/design-system.md §Chrome).",
+            },
+            {
+              group: ["motion", "motion/*", "framer-motion", "framer-motion/*"],
+              message:
+                "motion yalnız apps/web/app/lib/motion/index.ts sarmalayıcısından (reduced-motion tek yerden; approval motion@14.9.1 yalnız sürükle-bırak ve paylaşılan öğe geçişleri).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // motion (Increment 2.4): .ts dosyalarında da yalnız lib/motion/index.ts sarmalayıcısı.
+  {
+    files: ["apps/web/app/**/*.ts"],
+    ignores: ["apps/web/app/lib/motion/index.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["motion", "motion/*", "framer-motion", "framer-motion/*"],
+              message:
+                "motion yalnız apps/web/app/lib/motion/index.ts sarmalayıcısından (reduced-motion tek yerden; approval motion@14.9.1 yalnız sürükle-bırak ve paylaşılan öğe geçişleri).",
             },
           ],
         },
