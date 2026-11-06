@@ -5,6 +5,7 @@
  */
 
 import { userStorage } from "./user-storage";
+import { apiFetch } from "./api-client";
 import type { CommunityPost } from "../features/community/types";
 
 export interface WebUserProfile {
@@ -24,6 +25,25 @@ export interface WebUserProfile {
 }
 
 const STORAGE_POSTS_KEY = "mapsbridge.communityPosts";
+/** Sunucu senkronu (Increment 1.13): GET en sık 30 sn'de bir; 404/ağ hatası yerel kayda düşer. */
+const REFRESH_MIN_MS = 30_000;
+let lastRefresh = 0;
+/** Sunucuda kimliği olmayan (yalnız yerel) gönderi kimliği. */
+export const isLocalPostId = (id: string) => id.startsWith("post-");
+/**
+ * Sunucu akışı + yalnız bu cihazdaki gönderiler (deviceOnly ya da yerel kimlikli) birleşir;
+ * sunucu yanıtı yerel taslakları silmez.
+ */
+export function mergeServerPosts(
+  server: readonly CommunityPost[],
+  local: readonly CommunityPost[],
+): CommunityPost[] {
+  const ids = new Set(server.map((p) => p.id));
+  const localOnly = local.filter((p) => !ids.has(p.id) && (p.deviceOnly || isLocalPostId(p.id)));
+  return [...localOnly, ...server];
+}
+const syncWarn = (what: string) => (e: unknown) =>
+  console.warn(`[webSocialSync] ${what} sunucuya yazılamadı; yerel kayıt korunuyor:`, e);
 const STORAGE_PROFILE_KEY = "mapsbridge.userProfileDetails";
 const STORAGE_AVATAR_KEY = "mapsbridge.userAvatar";
 const STORAGE_COVER_KEY = "mapsbridge.userCoverPhoto";
@@ -186,25 +206,52 @@ export const webSocialSync = {
 
   async refreshPostsFromBackend(): Promise<CommunityPost[]> {
     if (typeof window === "undefined") return [];
-
+    if (Date.now() - lastRefresh < REFRESH_MIN_MS) return [];
+    lastRefresh = Date.now();
     try {
-      const profile = this.getProfile();
-      const res = await fetch(
-        `/api/community/posts?username=${encodeURIComponent(profile.username)}`,
+      const data = await apiFetch<{ success?: boolean; posts?: CommunityPost[] }>(
+        "/community/posts",
+        { timeoutMs: 8000, skipAuth: !this.hasSession() },
       );
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.posts)) {
-          userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(data.posts));
-          window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: data.posts }));
-          return data.posts;
-        }
+      if (data?.success && Array.isArray(data.posts)) {
+        const merged = mergeServerPosts(data.posts, this.readLocalPosts());
+        userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(merged));
+        window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: merged }));
+        return merged;
       }
     } catch (e) {
-      console.warn("[webSocialSync] Background API fetch failed, using local cache:", e);
+      console.warn("[webSocialSync] Topluluk akışı alınamadı, yerel kayıt kullanılıyor:", e);
     }
-
     return [];
+  },
+
+  hasSession(): boolean {
+    try {
+      return Boolean(
+        localStorage.getItem("mapsbridge.accessToken") ||
+        localStorage.getItem("mapsbridge.idToken"),
+      );
+    } catch {
+      return false;
+    }
+  },
+
+  readLocalPosts(): CommunityPost[] {
+    try {
+      const raw = userStorage.getItem(STORAGE_POSTS_KEY);
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? (parsed as CommunityPost[]) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  /** Yerel gönderinin kaydını günceller (sunucu kimliği / deviceOnly) ve yayınlar. */
+  patchLocalPost(id: string, patch: Partial<CommunityPost>) {
+    const next = this.readLocalPosts().map((p) => (p.id === id ? { ...p, ...patch } : p));
+    userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(next));
+    if (typeof window !== "undefined")
+      window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: next }));
   },
 
   createPost(data: {
@@ -251,22 +298,36 @@ export const webSocialSync = {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: nextPosts }));
 
-      // Async backend sync
-      fetch("/api/community/posts", {
+      // Sunucu senkronu (Increment 1.13): başarıda yerel kimlik sunucu kimliğiyle değişir;
+      // 404/ağ hatasında gönderi "Yalnız bu cihazda" işaretlenir (dürüstlük).
+      const localId = newPost.id;
+      const deviceImage = typeof data.photo === "string" && data.photo.startsWith("data:");
+      apiFetch<{ post?: CommunityPost }>("/community/posts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        timeoutMs: 10000,
         body: JSON.stringify({
           content: cleanContent,
-          authorUsername: profile.username,
-          authorDisplayName: profile.fullName,
-          authorAvatar: profile.avatarUrl,
+          displayName: profile.fullName,
           category: cleanCategory,
           locationTag: cleanLocation,
           hashtags: cleanHashtags,
-          image: data.photo || undefined,
+          // Cihaz-yerel görsel sunucuya gönderilmez (yalnız medya alanı kabul edilir).
+          image: deviceImage ? undefined : data.photo || undefined,
           linkedRoute: data.linkedRoute,
         }),
-      }).catch((e) => console.warn("[webSocialSync] Backend createPost sync failed:", e));
+      })
+        .then((res) => {
+          if (res?.post?.id)
+            this.patchLocalPost(localId, {
+              id: res.post.id,
+              deviceOnly: deviceImage || undefined,
+            });
+          else this.patchLocalPost(localId, { deviceOnly: true });
+        })
+        .catch((e) => {
+          syncWarn("Paylaşım")(e);
+          this.patchLocalPost(localId, { deviceOnly: true });
+        });
     }
 
     return newPost;
@@ -322,11 +383,11 @@ export const webSocialSync = {
       userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: nextPosts }));
-        fetch(`/api/community/posts/${encodeURIComponent(postId)}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updates),
-        }).catch((e) => console.warn("[webSocialSync] Backend editPost sync failed:", e));
+        if (!isLocalPostId(postId))
+          apiFetch(`/community/posts/${encodeURIComponent(postId)}`, {
+            method: "PUT",
+            body: JSON.stringify(updates),
+          }).catch(syncWarn("Düzenleme"));
       }
     }
 
@@ -352,9 +413,10 @@ export const webSocialSync = {
 
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: nextPosts }));
-      fetch(`/api/community/posts/${encodeURIComponent(postId)}`, {
-        method: "DELETE",
-      }).catch((e) => console.warn("[webSocialSync] Backend deletePost sync failed:", e));
+      if (!isLocalPostId(postId))
+        apiFetch(`/community/posts/${encodeURIComponent(postId)}`, { method: "DELETE" }).catch(
+          syncWarn("Silme"),
+        );
     }
 
     return true;
@@ -362,7 +424,6 @@ export const webSocialSync = {
 
   toggleLike(postId: string): CommunityPost | null {
     const posts = this.getPosts();
-    const profile = this.getProfile();
     let updated: CommunityPost | null = null;
 
     const nextPosts = posts.map((post) => {
@@ -382,11 +443,12 @@ export const webSocialSync = {
       userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: nextPosts }));
-        fetch(`/api/community/posts/${encodeURIComponent(postId)}/like`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-          body: JSON.stringify({ username: profile.username }),
-        }).catch((e) => console.warn("[webSocialSync] Backend toggleLike sync failed:", e));
+        const liked = (updated as CommunityPost | null)?.likedByMe ?? false;
+        if (!isLocalPostId(postId))
+          apiFetch(`/community/posts/${encodeURIComponent(postId)}/like`, {
+            method: "POST",
+            body: JSON.stringify({ on: liked }),
+          }).catch(syncWarn("Beğeni"));
       }
     }
 
@@ -395,7 +457,6 @@ export const webSocialSync = {
 
   toggleBookmark(postId: string): CommunityPost | null {
     const posts = this.getPosts();
-    const profile = this.getProfile();
     let updated: CommunityPost | null = null;
 
     const nextPosts = posts.map((post) => {
@@ -417,11 +478,12 @@ export const webSocialSync = {
       userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: nextPosts }));
-        fetch(`/api/community/posts/${encodeURIComponent(postId)}/bookmark`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-          body: JSON.stringify({ username: profile.username }),
-        }).catch((e) => console.warn("[webSocialSync] Backend toggleBookmark sync failed:", e));
+        const saved = Boolean((updated as CommunityPost | null)?.savedByMe);
+        if (!isLocalPostId(postId))
+          apiFetch(`/community/posts/${encodeURIComponent(postId)}/bookmark`, {
+            method: "POST",
+            body: JSON.stringify({ on: saved }),
+          }).catch(syncWarn("Kaydetme"));
       }
     }
 
@@ -430,7 +492,6 @@ export const webSocialSync = {
 
   retweet(postId: string): CommunityPost | null {
     const posts = this.getPosts();
-    const profile = this.getProfile();
     let updated: CommunityPost | null = null;
 
     const nextPosts = posts.map((post) => {
@@ -452,11 +513,7 @@ export const webSocialSync = {
       userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: nextPosts }));
-        fetch(`/api/community/posts/${encodeURIComponent(postId)}/retweet`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-          body: JSON.stringify({ username: profile.username }),
-        }).catch((e) => console.warn("[webSocialSync] Backend retweet sync failed:", e));
+        // Yeniden paylaşımın sunucu ucu yok (Increment 1.13 kapsamı dışı): yalnız yerel.
       }
     }
 
@@ -492,15 +549,7 @@ export const webSocialSync = {
     userStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(nextPosts));
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("mapsbridge:posts_updated", { detail: nextPosts }));
-      fetch(`/api/community/posts/${encodeURIComponent(postId)}/comment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-        body: JSON.stringify({
-          username: profile.username,
-          displayName: profile.fullName,
-          text: text.trim(),
-        }),
-      }).catch((e) => console.warn("[webSocialSync] Backend addComment sync failed:", e));
+      // Yorumun sunucu ucu yok (Increment 1.13 kapsamı dışı): yalnız yerel.
     }
   },
 

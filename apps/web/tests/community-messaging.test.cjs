@@ -356,3 +356,39 @@ test("PostCard: yazar adı ve avatar profil bağlantısı; aria-label görünür
   assert.match(client, /new URLSearchParams\(window\.location\.search\)\.get\("u"\)/);
   assert.doesNotMatch(client, /import \{[^}]*useSearchParams/);
 });
+
+// ─── Increment 1.13 (M3): sunucu kalıcılığı + yerel fallback ───────────────
+test("social-sync: /community/posts apiFetch ile; göreli /api/community yolu kalmadı", () => {
+  const src = read("lib/social-sync.ts");
+  assert.doesNotMatch(src, /\/api\/community/);
+  assert.match(src, /apiFetch<\{ post\?: CommunityPost \}>\("\/community\/posts"/);
+  assert.match(
+    src,
+    /body: JSON\.stringify\(\{ on: liked \}\)/,
+    "beğeni istenen durumla (idempotent)",
+  );
+});
+
+test("social-sync: sunucu 404 → gönderi 'Yalnız bu cihazda' işaretlenir; sunucu akışı yerel taslağı silmez", async () => {
+  const { mod, store } = socialSyncEnv();
+  const post = mod.webSocialSync.createPost({ content: "Sunucusuz paylaşım" });
+  await new Promise((r) => setTimeout(r, 20));
+  const saved = [...store.entries()].find(([k]) => k.endsWith("mapsbridge.communityPosts"));
+  const posts = JSON.parse(saved[1]);
+  assert.equal(posts.find((p) => p.id === post.id).deviceOnly, true);
+  const merged = plain(
+    mod.mergeServerPosts(
+      [{ id: "srv1", content: "sunucu" }],
+      [
+        { id: "post-1", content: "yerel" },
+        { id: "srv1", content: "eski kopya" },
+        { id: "srv-old", content: "silinmiş sunucu gönderisi" },
+      ],
+    ),
+  );
+  assert.deepEqual(
+    merged.map((p) => p.id),
+    ["post-1", "srv1"],
+  );
+  assert.equal(merged[1].content, "sunucu");
+});
