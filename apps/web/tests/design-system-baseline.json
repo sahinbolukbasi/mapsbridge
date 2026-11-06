@@ -2,8 +2,7 @@
   "G1": {
     "app/maps/maps.css": 35,
     "app/operations.css": 9,
-    "app/styles.css": 6,
-    "app/travel-assistant/assistant.css": 4
+    "app/styles.css": 6
   },
   "G2": {},
   "G3": {},
@@ -20,8 +19,7 @@
     "app/lib/billing/billing-service.ts": 4,
     "app/lib/test-reset.ts": 1,
     "app/lib/trip/models.ts": 27,
-    "app/lib/trip/use-trip-workspace.ts": 15,
-    "app/travel-assistant/travel-affiliate-cards.tsx": 15
+    "app/lib/trip/use-trip-workspace.ts": 15
   },
   "G8": {
     "app/styles.css": 3
@@ -61,8 +59,7 @@
     "app/components/ui/ui.css": 1,
     "app/maps/maps.css": 23,
     "app/styles.css": 12,
-    "app/styles/base.css": 3,
-    "app/travel-assistant/assistant.css": 2
+    "app/styles/base.css": 3
   },
   "G25": {
     "app/operations.css": 2,
@@ -74,7 +71,7 @@
     "app/operations.css": 15,
     "app/styles.css": 42,
     "app/styles/base.css": 2,
-    "app/travel-assistant/assistant.css": 13
+    "app/travel-assistant/assistant.css": 2
   },
   "G27": {
     "app/styles/base.css": 1

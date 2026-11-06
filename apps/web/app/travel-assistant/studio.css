@@ -794,6 +794,92 @@
     font-weight: var(--font-weight-semibold);
   }
 
+  /* Hazırlık affiliate bağlantıları (travel-affiliate-cards.tsx; yalnız Hazırlık sekmesi, I8) */
+  .as-studio-affiliate,
+  .as-studio-affiliate-strip {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .as-studio-affiliate__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+  }
+  .as-studio-affiliate__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .as-studio-affiliate__card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    block-size: 100%;
+    box-sizing: border-box;
+    min-block-size: var(--touch-target);
+    padding: var(--space-3);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    background: var(--card-bg);
+    color: var(--card-fg);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--easing-standard);
+  }
+  .as-studio-affiliate__card:hover {
+    border-color: var(--color-border-strong);
+  }
+  .as-studio-affiliate__icon {
+    flex: none;
+    color: var(--color-text-accent);
+  }
+  .as-studio-affiliate__body {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+  .as-studio-affiliate__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+  }
+  .as-studio-affiliate__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-text-accent);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+  .as-studio-affiliate-strip__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .as-studio-affiliate-strip__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--touch-target);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-full);
+    background: var(--card-bg);
+    color: var(--card-fg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--easing-standard);
+  }
+  .as-studio-affiliate-strip__link:hover {
+    border-color: var(--color-border-strong);
+  }
+
   @media (min-width: 1024px) {
     .as-studio__switch,
     .as-studio__new-mobile {

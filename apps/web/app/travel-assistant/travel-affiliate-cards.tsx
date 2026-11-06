@@ -1,4 +1,6 @@
 "use client";
+// Hazırlık sekmesinin affiliate yüzeyi (I8: yalnız prep-panel.tsx render eder). FEAT-013:
+// Icon + studio.css token'ları, metinler t() üzerinden (I11); tıklama izleme değişmedi.
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -8,44 +10,61 @@ import {
   extractDateFromText,
   toIataPublic,
 } from "../lib/affiliate/travelpayouts";
-import type { AffiliateCard } from "../lib/affiliate/types";
+import type { AffiliateCard, AffiliateCardType } from "../lib/affiliate/types";
 import type { UnifiedRoutePlan } from "../lib/ai/types";
+import { useLocale } from "../lib/locale-context";
+import { Icon, type IconName } from "../components/ui";
+import { fill, type Translate } from "./studio-format";
 
 interface Props {
   route: UnifiedRoutePlan;
   onTrack?: (card: AffiliateCard) => void;
 }
 
-const ICON: Record<string, string> = {
-  flight: "flight_takeoff",
-  hotel: "hotel",
-  car: "directions_car",
+const ICON: Record<AffiliateCardType, IconName> = {
+  flight: "plane",
+  hotel: "bed",
+  car: "drive",
   insurance: "shield",
-  activity: "star",
+  activity: "sparkle",
 };
 
-const COLOR: Record<string, string> = {
-  flight: "rgba(14,165,233,0.12)",
-  hotel: "rgba(16,185,129,0.12)",
-  car: "rgba(251,146,60,0.12)",
-  insurance: "rgba(139,92,246,0.12)",
-};
+/** Kart başlığı/CTA kullanıcının dilinde (I11); lib metni yalnızca bilinmeyen tipte yedek. */
+function cardText(t: Translate, card: AffiliateCard): { title: string; cta: string } {
+  const destination = card.destination;
+  switch (card.type) {
+    case "flight":
+      return {
+        title: fill(t("studio.affiliate.flight.title", "{destination} Uçuş Arama"), {
+          destination,
+        }),
+        cta: t("studio.affiliate.flight.cta", "Uçuş Fiyatlarını Gör"),
+      };
+    case "hotel":
+      return {
+        title: fill(t("studio.affiliate.hotel.title", "{destination} Otel Arama"), { destination }),
+        cta: t("studio.affiliate.hotel.cta", "Otel Fiyatlarını Gör"),
+      };
+    case "car":
+      return {
+        title: fill(t("studio.affiliate.car.title", "{destination} Araç Kiralama"), {
+          destination,
+        }),
+        cta: t("studio.affiliate.car.cta", "Araç Fiyatlarını Karşılaştır"),
+      };
+    case "insurance":
+      return {
+        title: t("studio.affiliate.insurance.title", "Seyahat Sigortası"),
+        cta: t("studio.affiliate.insurance.cta", "Sigorta Fiyatlarını Gör"),
+      };
+    default:
+      return { title: card.title, cta: card.cta };
+  }
+}
 
-const BORDER_COLOR: Record<string, string> = {
-  flight: "rgba(14,165,233,0.3)",
-  hotel: "rgba(16,185,129,0.3)",
-  car: "rgba(251,146,60,0.3)",
-  insurance: "rgba(139,92,246,0.3)",
-};
-
-const ICON_COLOR: Record<string, string> = {
-  flight: "#0ea5e9",
-  hotel: "#10b981",
-  car: "#fb923c",
-  insurance: "#8b5cf6",
-};
-
+/** Hazırlık sekmesi (rota var): uçuş/otel/araç/sigorta bağlantıları. Yalnız PrepPanel'den (I8). */
 export function TravelAffiliateCards({ route, onTrack }: Props) {
+  const { t } = useLocale();
   const bundle = useMemo(() => {
     const dest = route.destination || route.title || "destination";
     return buildTripAffiliateBundle({ destination: dest });
@@ -72,50 +91,43 @@ export function TravelAffiliateCards({ route, onTrack }: Props) {
   }
 
   return (
-    <div className="tp-affiliate-bundle" aria-label="Seyahat fırsatları">
-      <div className="tp-bundle-header">
-        <span
-          className="material-symbols-outlined"
-          aria-hidden="true"
-          style={{ fontSize: "15px", color: "var(--color-text-accent)" }}
-        >
-          sell
-        </span>
-        <span>
-          <strong>{route.destination || "Rotanız"}</strong> için seyahat fırsatları
-        </span>
-      </div>
-      <div className="tp-cards-grid">
-        {cards.map((card) => (
-          <a
-            key={card.id}
-            href={card.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tp-card"
-            style={{
-              background: COLOR[card.type] || "rgba(100,100,100,0.06)",
-              borderColor: BORDER_COLOR[card.type] || "rgba(100,100,100,0.2)",
-            }}
-            onClick={() => handleClick(card)}
-            aria-label={card.title}
-          >
-            <span
-              className="material-symbols-outlined tp-card-icon"
-              aria-hidden="true"
-              style={{ color: ICON_COLOR[card.type] || "#64748b" }}
-            >
-              {ICON[card.type] || "open_in_new"}
-            </span>
-            <div className="tp-card-body">
-              <strong className="tp-card-title">{card.title}</strong>
-              <span className="tp-card-cta">{card.cta} →</span>
-            </div>
-          </a>
-        ))}
-      </div>
-      <p className="tp-attribution">
-        Travelpayouts ortaklık programı. Bağlantıya tıkladığınızda yönlendirilirsiniz.
+    <div className="as-studio-affiliate">
+      <p className="as-studio-affiliate__head">
+        <Icon name="coin" size={16} />
+        {fill(t("studio.affiliate.heading", "{destination} için seyahat fırsatları"), {
+          destination: route.destination || t("studio.affiliate.yourRoute", "Rotanız"),
+        })}
+      </p>
+      <ul className="as-studio-affiliate__grid">
+        {cards.map((card) => {
+          const text = cardText(t, card);
+          return (
+            <li key={card.id}>
+              <a
+                href={card.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="as-studio-affiliate__card"
+                onClick={() => handleClick(card)}
+              >
+                <Icon name={ICON[card.type]} className="as-studio-affiliate__icon" />
+                <span className="as-studio-affiliate__body">
+                  <strong className="as-studio-affiliate__title">{text.title}</strong>
+                  <span className="as-studio-affiliate__cta">
+                    {text.cta}
+                    <Icon name="arrow" size={16} />
+                  </span>
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="as-studio__meta">
+        {t(
+          "studio.affiliate.attribution",
+          "Travelpayouts ortaklık programı. Bağlantıya tıkladığınızda yönlendirilirsiniz.",
+        )}
       </p>
     </div>
   );
@@ -138,6 +150,7 @@ export function InlineAffiliateStrip({
   messageText?: string;
   authToken?: string;
 }) {
+  const { t } = useLocale();
   const departDate = useMemo(
     () => (messageText ? extractDateFromText(messageText) : undefined),
     [messageText],
@@ -243,67 +256,48 @@ export function InlineAffiliateStrip({
 
   const flightHref = livePrice?.flight?.link || flight.href;
   const hotelHref = livePrice?.hotel?.link || hotel.href;
+  const loadingText = t("studio.affiliate.loading", "Fiyat yükleniyor...");
 
   return (
-    <div className="tp-inline-strip" aria-label="Hızlı rezervasyon">
-      <span className="tp-inline-label">
-        <span
-          className="material-symbols-outlined"
-          aria-hidden="true"
-          style={{ fontSize: "13px", verticalAlign: "middle" }}
+    <div className="as-studio-affiliate-strip">
+      <p className="as-studio-affiliate__head">
+        <Icon name="coin" size={16} />
+        {fill(t("studio.affiliate.stripFor", "{destination} için:"), { destination })}
+      </p>
+      <div className="as-studio-affiliate-strip__links">
+        <a
+          href={flightHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="as-studio-affiliate-strip__link"
+          onClick={() => track(flight)}
         >
-          sell
-        </span>{" "}
-        <strong>{destination}</strong> için:
-      </span>
-      <a
-        href={flightHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="tp-inline-btn tp-inline-flight"
-        onClick={() => track(flight)}
-      >
-        <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: "14px" }}>
-          flight_takeoff
-        </span>
-        {livePrice?.flight ? (
-          <span>
-            Uçuş{" "}
-            <strong>
-              {livePrice.flight.amount} {livePrice.flight.currency}
-            </strong>
-            'dan
-          </span>
-        ) : priceLoading ? (
-          "Fiyat yükleniyor..."
-        ) : (
-          "Uçuş Ara"
-        )}
-      </a>
-      <a
-        href={hotelHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="tp-inline-btn tp-inline-hotel"
-        onClick={() => track(hotel)}
-      >
-        <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: "14px" }}>
-          hotel
-        </span>
-        {livePrice?.hotel ? (
-          <span>
-            Otel{" "}
-            <strong>
-              {livePrice.hotel.amount} {livePrice.hotel.currency}
-            </strong>
-            /gece
-          </span>
-        ) : priceLoading ? (
-          "..."
-        ) : (
-          "Otel Bul"
-        )}
-      </a>
+          <Icon name="plane" size={16} />
+          {livePrice?.flight
+            ? fill(t("studio.affiliate.flightFrom", "Uçuş {price}'dan"), {
+                price: `${livePrice.flight.amount} ${livePrice.flight.currency}`,
+              })
+            : priceLoading
+              ? loadingText
+              : t("studio.affiliate.searchFlights", "Uçuş Ara")}
+        </a>
+        <a
+          href={hotelHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="as-studio-affiliate-strip__link"
+          onClick={() => track(hotel)}
+        >
+          <Icon name="bed" size={16} />
+          {livePrice?.hotel
+            ? fill(t("studio.affiliate.hotelFrom", "Otel {price}/gece"), {
+                price: `${livePrice.hotel.amount} ${livePrice.hotel.currency}`,
+              })
+            : priceLoading
+              ? loadingText
+              : t("studio.affiliate.findHotel", "Otel Bul")}
+        </a>
+      </div>
     </div>
   );
 }

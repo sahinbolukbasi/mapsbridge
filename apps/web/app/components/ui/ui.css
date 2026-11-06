@@ -499,8 +499,7 @@
     gap: var(--space-2);
     pointer-events: none;
   }
-  /* Mobilde alt menünün üstünde (design §4.1). FEAT-003'e kadar eski alt nav 92px olduğundan
-     ikisinin büyüğü alınır; yeni alt nav --bottom-nav-height'e iner. */
+  /* Mobilde alt menünün üstünde (design §4.1); eski ve yeni alt nav boyunun büyüğü. */
   @media (max-width: 767.98px) {
     .ui-toaster {
       inset-block-end: calc(
@@ -650,6 +649,9 @@
   .ui-tabs--underline .ui-tabs__tab[aria-selected="true"] {
     border-block-end-color: var(--tabs-indicator);
     box-shadow: none;
+  }
+  .ui-tabs--wrap .ui-tabs__list {
+    flex-wrap: wrap;
   }
   .ui-tabs__panel {
     padding-block: var(--space-4);

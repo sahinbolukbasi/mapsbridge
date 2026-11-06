@@ -70,6 +70,22 @@
     align-items: center;
     gap: var(--space-1);
   }
+  /* <640: ek kontroller varsa alan tam genişlikte üst satırda, kontroller + gönder alt satırda
+     (alan dar bir sütuna sıkışmaz). */
+  @media (max-width: 639.98px) {
+    .as-composer--leading {
+      flex-wrap: wrap;
+      padding-inline-start: var(--space-2);
+    }
+    .as-composer--leading .as-composer__input {
+      flex-basis: 100%;
+      order: -1;
+      padding-inline: var(--space-2);
+    }
+    .as-composer--leading .as-composer__send {
+      margin-inline-start: auto;
+    }
+  }
   .as-composer__input {
     flex: 1 1 auto;
     min-inline-size: 0;

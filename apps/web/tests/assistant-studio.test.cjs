@@ -23,6 +23,7 @@ const SOURCES = [
   "contextual-followups.tsx",
   "thinking-steps.tsx",
   "prep-panel.tsx",
+  "travel-affiliate-cards.tsx",
   "loading.tsx",
 ];
 const read = (f) => fs.readFileSync(path.join(TA, f), "utf8");
@@ -84,6 +85,8 @@ test("Hazırlık sekmesi etiketi gerçek metin (R3): ai.prepTab emoji taşımaz"
   assert.match(client, /<Icon name="plane" size=\{16\} \/>\s*\{t\("ai\.prepTab", "Hazırlık"\)\}/);
   // I8: PrepPanel yalnız Hazırlık (flights) sekmesinin paneli ve rotasız şerit olarak.
   assert.equal((client.match(/<PrepPanel\b/g) || []).length, 2);
+  // Taslak sekmeleri dar panelde sarar: Tavsiye (uyarı rozeti) ve Güvenlik kaydırmada gizlenmez.
+  assert.match(client, /<Tabs\s+wrap\s+label=\{t\("studio\.draft\.tabs"/);
 });
 
 async function loadRender() {
@@ -122,6 +125,7 @@ async function loadRender() {
         import { SmartActions } from "./smart-actions";
         import { ContextualFollowups } from "./contextual-followups";
         import { ThinkingSteps } from "./thinking-steps";
+        import { TravelAffiliateCards, InlineAffiliateStrip } from "./travel-affiliate-cards";
         export function render(fx) {
           const noop = () => {};
           return renderToStaticMarkup(h("div", null,
@@ -135,6 +139,8 @@ async function loadRender() {
             h(SmartActions, { messages: fx.messages, route: fx.route, currentTrip: null, onAction: noop, busy: false }),
             h(ContextualFollowups, { message: fx.messages[1], route: fx.route, onAction: noop, busy: false }),
             h(ThinkingSteps, { isRoute: true, livePhase: { index: 4 } }),
+            h(TravelAffiliateCards, { route: fx.route }),
+            h(InlineAffiliateStrip, { destination: "Roma", messageText: "Roma" }),
           ));
         }`,
       resolveDir: TA,
@@ -272,6 +278,11 @@ test("taslak bölümleri + karşılama EN sözlükle render edilir: eksik anahta
   assert.deepEqual(enOut.misses, [], `EN'de eksik anahtar: ${enOut.misses.join(", ")}`);
   for (const s of ["Day 1", "Suggested visit: 2 saat", "Save this hotel to my route", "Police"])
     assert.ok(enOut.html.includes(s), `EN çıktısında "${s}" yok`);
+  // Hazırlık sekmesi affiliate yüzeyi (rotalı kartlar + rotasız şerit) de EN'dir (I11).
+  for (const s of ["Travel deals for Roma", "See flight prices", "Travel insurance", "For Roma:"])
+    assert.ok(enOut.html.includes(s), `EN çıktısında "${s}" yok`);
+  for (const s of ["seyahat fırsatları", "Fiyatlarını Gör", "Uçuş Ara", "Otel Bul", "ortaklık"])
+    assert.ok(!enOut.html.includes(s), `EN çıktısında Türkçe "${s}" var (I11)`);
   for (const s of ["Önerilen ziyaret", "Bu oteli rotama kaydet", "Polis", "Sohbette sor"])
     assert.ok(!enOut.html.includes(s), `EN çıktısında Türkçe "${s}" var (I11)`);
   const trOut = render("tr", FIXTURE);

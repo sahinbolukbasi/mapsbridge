@@ -21,6 +21,8 @@ type TabsProps = {
   activation?: "automatic" | "manual";
   /** underline: gün sekmeleri gibi yalın alt çizgi göstergesi (design §4.1). */
   variant?: "default" | "underline";
+  /** Dar kapta sekmeler yatay kaydırma yerine alt satıra sarar (hiçbir sekme görünmez kalmaz). */
+  wrap?: boolean;
   className?: string;
 };
 
@@ -31,6 +33,7 @@ function TabsView({
   select,
   activation = "automatic",
   variant = "default",
+  wrap = false,
   className,
 }: Omit<TabsProps, "value" | "onChange"> & { selected: string; select: (id: string) => void }) {
   const base = useId();
@@ -58,7 +61,14 @@ function TabsView({
   }
 
   return (
-    <div className={cx("ui-tabs", variant === "underline" && "ui-tabs--underline", className)}>
+    <div
+      className={cx(
+        "ui-tabs",
+        variant === "underline" && "ui-tabs--underline",
+        wrap && "ui-tabs--wrap",
+        className,
+      )}
+    >
       <div className="ui-tabs__list" role="tablist" aria-label={label} data-surface="default">
         {items.map((item, k) => (
           <button

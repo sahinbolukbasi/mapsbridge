@@ -1911,6 +1911,7 @@ export default function AIPage() {
                     <p className="as-studio__muted">{route.summary}</p>
                   </div>
                   <Tabs
+                    wrap
                     label={t("studio.draft.tabs", "Taslak bölümleri")}
                     value={draftTab}
                     onChange={(id) => setDraftTab(id as DraftTab)}

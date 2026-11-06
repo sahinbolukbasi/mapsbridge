@@ -72,7 +72,7 @@ export function ComposerBar({
   return (
     <div className={className ? `as-composer-wrap ${className}` : "as-composer-wrap"}>
       <form
-        className="as-composer"
+        className={leading ? "as-composer as-composer--leading" : "as-composer"}
         data-surface="default"
         onSubmit={(e) => {
           e.preventDefault();
