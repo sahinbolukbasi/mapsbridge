@@ -38,11 +38,62 @@ export function calculateDistanceKm(
 }
 
 // ── IRoutingProvider Interface ───────────────────────────────
+/** Sunucu OSRM vekili (girişli kullanıcı): profil + "lng,lat;lng,lat" → ham yanıt. */
+export type OsrmProxy = (
+  profile: "driving" | "walking" | "cycling",
+  coords: string,
+) => Promise<unknown>;
 export interface IRoutingProvider {
   getRoute(
     points: [number, number][], // [lat, lng][]
     mode: TransportMode,
+    opts?: { proxy?: OsrmProxy },
   ): Promise<RouteGeometry>;
+}
+const PROXY_PROFILE: Record<TransportMode, "driving" | "walking" | "cycling"> = {
+  walking: "walking",
+  driving: "driving",
+  cycling: "cycling",
+};
+/**
+ * Sunucu OSRM yanıtı (routes/osrm.ts: distance, duration, polyline GeoJSON, legs) → RouteGeometry.
+ * Şema tutmazsa ya da bacak sayısı nokta sayısının bir eksiği değilse bacaklar atılır; geometri
+ * yoksa null (çağıran sonraki katmana geçer). Süre tahmin edilmez.
+ */
+export function fromOsrmProxy(raw: unknown, pointCount: number): RouteGeometry | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as {
+    distance?: unknown;
+    duration?: unknown;
+    polyline?: { coordinates?: unknown };
+    legs?: unknown;
+  };
+  const coords = r.polyline?.coordinates;
+  if (!Array.isArray(coords) || coords.length < 2) return null;
+  if (!Number.isFinite(r.distance) || !Number.isFinite(r.duration)) return null;
+  const latLng: [number, number][] = [];
+  for (const c of coords) {
+    if (!Array.isArray(c) || !Number.isFinite(c[0]) || !Number.isFinite(c[1])) return null;
+    latLng.push([c[1] as number, c[0] as number]);
+  }
+  const legsRaw = Array.isArray(r.legs)
+    ? (r.legs as { distance?: unknown; duration?: unknown }[])
+    : [];
+  const legs =
+    legsRaw.length === pointCount - 1 &&
+    legsRaw.every((l) => Number.isFinite(l?.distance) && Number.isFinite(l?.duration))
+      ? legsRaw.map((l) => ({
+          distanceMeters: l.distance as number,
+          durationSeconds: l.duration as number,
+        }))
+      : undefined;
+  return {
+    coordinates: latLng,
+    distanceMeters: r.distance as number,
+    durationSeconds: r.duration as number,
+    isRealRoad: true,
+    ...(legs ? { legs } : {}),
+  };
 }
 
 /** Open Source Routing Machine (OSRM) Provider */
@@ -53,7 +104,11 @@ export class OsrmRoutingProvider implements IRoutingProvider {
     cycling: "bike",
   };
 
-  async getRoute(points: [number, number][], mode: TransportMode): Promise<RouteGeometry> {
+  async getRoute(
+    points: [number, number][],
+    mode: TransportMode,
+    opts: { proxy?: OsrmProxy } = {},
+  ): Promise<RouteGeometry> {
     // Filter out invalid, NaN, or out-of-range coordinates
     const validPoints = points.filter(
       ([lat, lng]) =>
@@ -79,6 +134,19 @@ export class OsrmRoutingProvider implements IRoutingProvider {
       }
     }
 
+    // 0. Katman (girişli): sunucu OSRM vekili; CSP connect-src'den bağımsız (P2).
+    if (opts.proxy) {
+      try {
+        const coords = validPoints
+          .map(([lat, lng]) => `${lng.toFixed(6)},${lat.toFixed(6)}`)
+          .join(";");
+        const viaServer = fromOsrmProxy(
+          await opts.proxy(PROXY_PROFILE[mode] || "walking", coords),
+          validPoints.length,
+        );
+        if (viaServer) return viaServer;
+      } catch {}
+    }
     try {
       const osrmProfile = this.profileMap[mode] || "foot";
       // OSRM expects coordinates in "lng,lat;lng,lat" order

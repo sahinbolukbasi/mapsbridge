@@ -271,3 +271,164 @@ test("başka sekmede kimlik değişirse bellekteki geziler yazılmaz (expectedOw
   const hook = fs.readFileSync(path.join(APP, "lib/trip/use-travel-planner.ts"), "utf8");
   assert.match(hook, /!session\?\.token \|\| !sameOwner\(\)/);
 });
+
+// ─── Increment 1.9 (P1, P2, P7) ─────────────────────────────────────────────
+test("P1: gezilen pin harita listesinde kalır; yalnız 'Gezilenleri gizle' açıkken düşer", () => {
+  const pins = [
+    { id: "a", visited: false },
+    { id: "b", visited: true },
+  ];
+  assert.deepEqual(
+    plain(L.pinsForMap(pins, false)).map((p) => p.id),
+    ["a", "b"],
+  );
+  assert.deepEqual(
+    plain(L.pinsForMap(pins, true)).map((p) => p.id),
+    ["a"],
+  );
+  const src = fs.readFileSync(path.join(APP, "lib/trip/use-travel-planner.ts"), "utf8");
+  assert.match(src, /useState<boolean>\(true\);/, "varsayılan: gezilenler haritada görünür");
+  const maps = fs.readFileSync(path.join(APP, "maps/maps-client.tsx"), "utf8");
+  assert.doesNotMatch(maps, /filter\(\(p\) => !p\.visited \|\| planner\.showVisitedOnMap\)/);
+  assert.match(maps, /planner-pin__check/, "gezilen pin onay işaretiyle çizilir");
+});
+
+test("P2: isRealRoad:false yedek geometrinin bacakları süreye girmez", () => {
+  const legs = [{ distanceMeters: 600, durationSeconds: 480 }];
+  assert.deepEqual(plain(L.routeLegMap(["a", "b"], { isRealRoad: false, legs })), {});
+  assert.deepEqual(plain(L.routeLegMap(["a", "b"], null)), {});
+  assert.deepEqual(
+    plain(L.routeLegMap(["a", "b"], { isRealRoad: true, legs }))[L.legKey("a", "b")],
+    legs[0],
+  );
+  assert.equal(
+    L.dayTimeline(
+      [{ id: "a" }, { id: "b" }],
+      L.routeLegMap(["a", "b"], { isRealRoad: false, legs }),
+    ),
+    null,
+  );
+});
+
+test("P7: gün seçili değilken (Tümü / 0) eklenen yer Kaydedilenler'e gider", () => {
+  assert.deepEqual(plain(L.addTargetFor(0)), { kind: "general" });
+  assert.deepEqual(plain(L.addTargetFor(null)), { kind: "general" });
+  assert.deepEqual(plain(L.addTargetFor(undefined)), { kind: "general" });
+  assert.deepEqual(plain(L.addTargetFor(3)), { kind: "day", day: 3 });
+  const maps = fs.readFileSync(path.join(APP, "maps/maps-client.tsx"), "utf8");
+  assert.doesNotMatch(maps, /planner\.activeDayIndex \|\| 1/, "1. güne düşme kaldırıldı");
+  const sidebar = fs.readFileSync(
+    path.join(APP, "components/trip/travel-planner-sidebar.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(
+    sidebar,
+    /workspaceMode === "edit" && generalPins\.length > 0/,
+    "Kaydedilenler hep görünür",
+  );
+});
+
+test("P2: sunucu OSRM yolu routed /routes/{id}/osrm/{profile}; yanıt RouteGeometry'ye çevrilir", () => {
+  const src = fs.readFileSync(path.join(APP, "lib/api-client.ts"), "utf8");
+  assert.match(src, /`\/routes\/\$\{encodeURIComponent\(routeId\)\}\/osrm\/\$\{profile\}\?coords=/);
+  assert.doesNotMatch(src, /`\/routes\/osrm\//);
+  const R = loadTs(path.join(APP, "lib/trip/routing-service.ts"));
+  const geom = plain(
+    R.fromOsrmProxy(
+      {
+        distance: 1500,
+        duration: 1200,
+        polyline: {
+          type: "LineString",
+          coordinates: [
+            [28.97, 41.0],
+            [28.98, 41.01],
+            [28.99, 41.02],
+          ],
+        },
+        legs: [
+          { distance: 700, duration: 560 },
+          { distance: 800, duration: 640 },
+        ],
+      },
+      3,
+    ),
+  );
+  assert.equal(geom.isRealRoad, true);
+  assert.deepEqual(geom.coordinates[0], [41.0, 28.97], "[lng,lat] → [lat,lng]");
+  assert.equal(geom.legs.length, 2);
+  assert.equal(
+    plain(R.fromOsrmProxy({ distance: 1, duration: 1, polyline: { coordinates: [] } }, 2)),
+    null,
+  );
+  const badLegs = plain(
+    R.fromOsrmProxy(
+      {
+        distance: 1,
+        duration: 1,
+        polyline: {
+          coordinates: [
+            [1, 2],
+            [3, 4],
+          ],
+        },
+        legs: [],
+      },
+      3,
+    ),
+  );
+  assert.equal(badLegs.legs, undefined, "bacak sayısı tutmazsa bacak yok (tahmin yok)");
+});
+
+test("P2: girişli kullanıcıda OSRM önce sunucu vekilinden; vekil düşerse sonraki katman", async () => {
+  const R = loadTs(path.join(APP, "lib/trip/routing-service.ts"), {
+    globals: {
+      fetch: async () => {
+        throw new TypeError("CSP");
+      },
+      AbortController,
+      setTimeout,
+      clearTimeout,
+      console: { ...console, warn: () => {} },
+    },
+  });
+  const calls = [];
+  const viaServer = await R.routingService.getRoute(
+    [
+      [41.0, 28.97],
+      [41.01, 28.98],
+    ],
+    "walking",
+    {
+      proxy: async (profile, coords) => {
+        calls.push([profile, coords]);
+        return {
+          distance: 900,
+          duration: 700,
+          polyline: {
+            coordinates: [
+              [28.97, 41.0],
+              [28.98, 41.01],
+            ],
+          },
+          legs: [{ distance: 900, duration: 700 }],
+        };
+      },
+    },
+  );
+  assert.equal(viaServer.isRealRoad, true);
+  assert.deepEqual(plain(calls), [["walking", "28.970000,41.000000;28.980000,41.010000"]]);
+  const fallback = await R.routingService.getRoute(
+    [
+      [41.0, 28.97],
+      [41.02, 28.99],
+    ],
+    "walking",
+    { proxy: async () => Promise.reject({ status: 401 }) },
+  );
+  assert.equal(
+    fallback.isRealRoad,
+    false,
+    "vekil + doğrudan OSRM düşerse yedek (süre gösterilmez)",
+  );
+});

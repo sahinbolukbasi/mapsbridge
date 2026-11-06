@@ -1,6 +1,6 @@
 // Planlayıcı için saf yardımcılar (FEAT-007, design §4.2, §6.3, §12.1). Değer UYDURMAZ: bacak
 // süresi/mesafesi yalnızca OSRM yanıtından gelir; yoksa çağıran "Süre hesaplanamadı" gösterir.
-import type { RouteLeg } from "./models";
+import type { RouteGeometry, RouteLeg } from "./models";
 
 /** OSRM demo sunucusuna tek istekte gönderilecek en fazla nokta (design §6.3). */
 export const MAX_ROUTE_POINTS = 25;
@@ -98,3 +98,34 @@ function clock(minutes: number): string {
 /** Planlayıcı görünümü (`?view=`): plan ya da kayıtlı rotalar ("Rotalarım"). */
 export const PLANNER_VIEWS = ["plan", "trips"] as const;
 export type PlannerView = (typeof PLANNER_VIEWS)[number];
+
+/**
+ * P2: zaman çizelgesine giren bacaklar yalnız GERÇEK yol rotasından (isRealRoad). Yedek
+ * (OSRM'e ulaşılamadı) geometri tahmini hız varsayımıyla üretilir; süresi gösterilmez,
+ * Connector "Süre hesaplanamadı" der (I1/I2).
+ */
+export function routeLegMap(
+  pinIds: readonly string[],
+  geom: Pick<RouteGeometry, "isRealRoad" | "legs"> | null | undefined,
+): Record<string, RouteLeg> {
+  if (!geom?.isRealRoad) return {};
+  return buildLegMap(pinIds, geom.legs);
+}
+/** P1: gezilen pin haritadan silinmez; yalnız kullanıcı "Gezilenleri gizle" derse gizlenir. */
+export function pinsForMap<T extends { visited?: boolean }>(
+  pins: readonly T[],
+  hideVisited: boolean,
+) {
+  return hideVisited ? pins.filter((p) => !p.visited) : [...pins];
+}
+/**
+ * P7: haritadan (çift tıklama / Google) eklenen yerin hedefi. Gün seçili değilken ("Tümü")
+ * eskiden 1. güne düşüyordu; artık Kaydedilenler'e (günsüz havuz) gider.
+ */
+export function addTargetFor(
+  activeDayIndex: number | null | undefined,
+): { kind: "day"; day: number } | { kind: "general" } {
+  return activeDayIndex && activeDayIndex > 0
+    ? { kind: "day", day: activeDayIndex }
+    : { kind: "general" };
+}

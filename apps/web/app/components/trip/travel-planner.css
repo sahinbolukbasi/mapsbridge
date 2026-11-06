@@ -284,7 +284,32 @@
     block-size: var(--space-2);
     accent-color: var(--color-success);
   }
-  /* Kayıtlı yerler */
+  /* Kayıtlı yerler (P7: her zaman görünür) */
+  .planner-pool {
+    display: grid;
+    gap: var(--space-2);
+    padding-block-start: var(--space-3);
+    border-block-start: 1px solid var(--color-border);
+  }
+  .planner-pool__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+  }
+  .planner-pool__empty {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .planner-pool__assign {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
   .planner-pool__list {
     display: grid;
     gap: var(--space-2);
@@ -294,8 +319,9 @@
   }
   .planner-pool__item {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2) var(--space-3);
   }
   .planner-pool__text {
     flex: 1;

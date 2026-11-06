@@ -44,6 +44,7 @@ import {
   Alert,
   Badge,
   Button,
+  Checkbox,
   ConfirmDialog,
   CostBadge,
   EmptyState,
@@ -312,6 +313,15 @@ export function TravelPlannerSidebar({
           />
         </div>
 
+        {allPins.some((p) => p.visited) && (
+          <Checkbox
+            variant="switch"
+            className="planner-list__visited"
+            label={t("planner.visited.hide", "Gezilenleri haritada gizle")}
+            checked={!planner.showVisitedOnMap}
+            onChange={(hide) => planner.setShowVisitedOnMap(!hide)}
+          />
+        )}
         <SegmentedControl
           className="planner-list__mode"
           label={t("planner.mode.label", "Görünüm")}
@@ -536,51 +546,44 @@ export function TravelPlannerSidebar({
           </section>
         ))}
 
-        {workspaceMode === "edit" && generalPins.length > 0 && (
-          <Accordion
-            className="planner-pool"
-            items={[
-              {
-                id: "planner-pool",
-                summary: t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
-                  "{n}",
-                  String(generalPins.length),
-                ),
-                content: (
-                  <ul className="planner-pool__list">
-                    {generalPins.map((p) => (
-                      <li key={p.id} className="planner-pool__item">
-                        <Icon name={CATEGORY_ICON[p.category] ?? "map"} size={20} />
-                        <span className="planner-pool__text">
-                          <span className="planner-pool__name">{p.label}</span>
-                          <span className="planner-pool__address">{p.address}</span>
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => {
-                            assignPinToTrip(p.id, activeTripId, targetDay);
-                            toast.show({
-                              tone: "success",
-                              message: t(
-                                "planner.toast.addedToDay",
-                                "“{name}” {day}. güne eklendi.",
-                              )
-                                .replace("{name}", p.label)
-                                .replace("{day}", String(targetDay)),
-                            });
-                          }}
-                        >
-                          {t("planner.pool.add", "Güne ekle")}
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                ),
-              },
-            ]}
-          />
-        )}
+        {/* P7: Kaydedilenler (günsüz yerler) her zaman görünür; her satırda gün seçimi. */}
+        <section className="planner-pool" aria-labelledby="planner-pool-title">
+          <h3 id="planner-pool-title" className="planner-pool__title">
+            <Icon name="bookmark" size={16} />
+            {t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
+              "{n}",
+              String(generalPins.length),
+            )}
+          </h3>
+          {generalPins.length === 0 ? (
+            <p className="planner-pool__empty">
+              {t(
+                "planner.pool.empty",
+                "Gün seçmeden eklediğin yerler burada bekler; istediğin güne buradan taşırsın.",
+              )}
+            </p>
+          ) : (
+            <ul className="planner-pool__list">
+              {generalPins.map((p) => (
+                <PoolRow
+                  key={p.id}
+                  pin={p}
+                  days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
+                  defaultDay={targetDay}
+                  onAssign={(day) => {
+                    assignPinToTrip(p.id, activeTripId, day);
+                    toast.show({
+                      tone: "success",
+                      message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
+                        .replace("{name}", p.label)
+                        .replace("{day}", String(day)),
+                    });
+                  }}
+                />
+              ))}
+            </ul>
+          )}
+        </section>
 
         {footer}
         <p className="planner-list__note">
@@ -605,6 +608,48 @@ export function TravelPlannerSidebar({
         />
       </div>
     </>
+  );
+}
+
+/** Kaydedilenler satırı: gün menüsü + "Güne ekle" (P7; sürükle-bırakın klavye alternatifi). */
+function PoolRow({
+  pin,
+  days,
+  defaultDay,
+  onAssign,
+}: {
+  pin: Pin;
+  days: number[];
+  defaultDay: number;
+  onAssign: (day: number) => void;
+}) {
+  const { t } = useLocale();
+  const options = days.length > 0 ? days : [1];
+  const [day, setDay] = useState(options.includes(defaultDay) ? defaultDay : options[0]);
+  return (
+    <li className="planner-pool__item">
+      <Icon name={CATEGORY_ICON[pin.category] ?? "map"} size={20} />
+      <span className="planner-pool__text">
+        <span className="planner-pool__name">{pin.label}</span>
+        {pin.address && <span className="planner-pool__address">{pin.address}</span>}
+      </span>
+      <span className="planner-pool__assign">
+        <Select
+          aria-label={t("planner.pool.dayFor", "{name} için gün").replace("{name}", pin.label)}
+          value={day}
+          onChange={(e) => setDay(Number(e.target.value))}
+        >
+          {options.map((d) => (
+            <option key={d} value={d}>
+              {t("planner.days.day", "{n}. Gün").replace("{n}", String(d))}
+            </option>
+          ))}
+        </Select>
+        <Button size="sm" variant="secondary" onClick={() => onAssign(day)}>
+          {t("planner.pool.add", "Güne ekle")}
+        </Button>
+      </span>
+    </li>
   );
 }
 

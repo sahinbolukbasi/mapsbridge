@@ -33,7 +33,7 @@ import {
   writePlannerStore,
   type TripOrigin,
 } from "./planner-store";
-import { buildLegMap, canRequestRoute, routeRequestKey } from "./planner-logic";
+import { canRequestRoute, routeLegMap, routeRequestKey } from "./planner-logic";
 
 const STORAGE_KEY = PLANNER_TRIPS_KEY;
 /** Yeni gezinin kökeni: oturumsuzken oluşturulanlar girişte hesaba aktarılabilir (§6.3). */
@@ -424,16 +424,22 @@ export function useTravelPlanner() {
       setIsRoutingLoading(true);
       const points: [number, number][] = routePins.map((p) => [p.lat, p.lng]);
       try {
-        const geom = await routingService.getRoute(points, transportMode);
+        // Girişli kullanıcıda OSRM önce sunucu üzerinden (CSP'den bağımsız; routed
+        // GET /routes/{id}/osrm/{profile}), sonra doğrudan, en son yedek çizim (P2).
+        const signedIn = Boolean(getStoredSession()?.token);
+        const geom = await routingService.getRoute(points, transportMode, {
+          proxy: signedIn
+            ? (profile, coords) =>
+                routesApi.getOsrmRoute(activeTripId || "planner", profile, coords)
+            : undefined,
+        });
         if (cancelled) return;
         setActiveRoadGeometry(geom);
         setActiveRouteLegs(
-          geom.isRealRoad
-            ? buildLegMap(
-                routePins.map((p) => p.id),
-                geom.legs,
-              )
-            : {},
+          routeLegMap(
+            routePins.map((p) => p.id),
+            geom,
+          ),
         );
       } catch (err) {
         console.warn("Route calculation error:", err);
@@ -774,7 +780,8 @@ export function useTravelPlanner() {
     mode: TransportMode;
   } | null>(null);
 
-  const [showVisitedOnMap, setShowVisitedOnMap] = useState<boolean>(false);
+  // P1: gezilen pinler varsayılan olarak haritada kalır; "Gezilenleri gizle" kapatır.
+  const [showVisitedOnMap, setShowVisitedOnMap] = useState<boolean>(true);
 
   const comparePins = useCallback(
     async (pinAId: string, pinBId: string) => {
@@ -791,6 +798,11 @@ export function useTravelPlanner() {
           ],
           transportMode,
         );
+        // P2: yedek (tahmini) geometrinin süresi gösterilmez.
+        if (!geom.isRealRoad) {
+          setTwoPinComparison(null);
+          return;
+        }
         setTwoPinComparison({
           pinA: pA,
           pinB: pB,

@@ -212,15 +212,18 @@ export const routesApi = {
     return apiFetch<unknown>(`/shares/${encodeURIComponent(code.trim())}`, { skipAuth: true });
   },
 
+  /**
+   * Sunucu üzerinden OSRM (P2). Routed uç `GET /routes/{id}/osrm/{profile}` oturum ister;
+   * `{id}` yalnız yol parçasıdır (handler kullanmaz). Eski /routes/osrm yolu API'de yoktu (404).
+   */
   async getOsrmRoute(
+    routeId: string,
     profile: "driving" | "walking" | "cycling",
     coordinatesStr: string,
   ): Promise<unknown> {
     return apiFetch<unknown>(
-      `/routes/osrm/${profile}?coords=${encodeURIComponent(coordinatesStr)}`,
-      {
-        skipAuth: true,
-      },
+      `/routes/${encodeURIComponent(routeId)}/osrm/${profile}?coords=${encodeURIComponent(coordinatesStr)}`,
+      { timeoutMs: 9000 },
     );
   },
 };

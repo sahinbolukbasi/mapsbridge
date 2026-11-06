@@ -39,7 +39,8 @@ import { dayColorIndex } from "../components/trip/trip-format";
 import { useTravelPlanner } from "../lib/trip/use-travel-planner";
 import { reverseGeocodeLocation } from "../lib/trip/geocoding-service";
 import { tripToMarkdown } from "../lib/trip/trip-markdown";
-import { PLANNER_VIEWS } from "../lib/trip/planner-logic";
+import { PLANNER_VIEWS, addTargetFor, pinsForMap } from "../lib/trip/planner-logic";
+import { iconPaths } from "../lib/icon-paths";
 import { dayPalette, mapLine } from "../lib/design-tokens";
 import { prefersReducedMotion } from "../lib/a11y/use-reduced-motion";
 import { useLocale } from "../lib/locale-context";
@@ -175,7 +176,7 @@ export default function Panel() {
   const addAt = async (lat: number, lng: number) => {
     const tripId = planner.activeTrip?.id || planner.trips[0]?.id;
     if (!tripId) return;
-    const day = planner.activeDayIndex || 1;
+    const target = addTargetFor(planner.activeDayIndex);
     let label = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     let address = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     let category: PinCategory = "genel";
@@ -185,26 +186,35 @@ export default function Panel() {
       address = place.address;
       category = (place.category as PinCategory) || "genel";
     } catch {}
-    planner.addPinDirectlyToTrip(
-      tripId,
-      {
-        label,
-        address,
-        lat,
-        lng,
-        category,
-        dayIndex: day,
-        group: "Genel",
-        visited: false,
-        durationMinutes: 60,
-      },
-      day,
-    );
+    const pin = {
+      label,
+      address,
+      lat,
+      lng,
+      category,
+      dayIndex: target.kind === "day" ? target.day : 0,
+      group: "Genel",
+      visited: false,
+      durationMinutes: 60,
+    };
+    if (target.kind === "general") {
+      // P7: gün seçili değilken ("Tümü") yer Kaydedilenler'e gider, 1. güne düşmez.
+      planner.addPinToGeneral(pin);
+      toast.show({
+        tone: "success",
+        message: t("planner.toast.addedToPool", "“{name}” kayıtlı yerlere eklendi.").replace(
+          "{name}",
+          label,
+        ),
+      });
+      return;
+    }
+    planner.addPinDirectlyToTrip(tripId, pin, target.day);
     toast.show({
       tone: "success",
       message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
         .replace("{name}", label)
-        .replace("{day}", String(day)),
+        .replace("{day}", String(target.day)),
     });
   };
 
@@ -289,7 +299,7 @@ export default function Panel() {
   const lastFocused = useRef("");
   const drawnRoute = useRef("");
   const pinsToRender = useMemo(
-    () => planner.pinsWithTime.filter((p) => !p.visited || planner.showVisitedOnMap),
+    () => pinsForMap(planner.pinsWithTime, !planner.showVisitedOnMap),
     [planner.pinsWithTime, planner.showVisitedOnMap],
   );
   useEffect(() => {
@@ -345,13 +355,20 @@ export default function Panel() {
       const number = pin.order || index + 1;
       const icon = L.divIcon({
         className: `planner-pin${selected ? " is-selected" : ""}${pin.visited ? " is-visited" : ""}`,
-        html: `<span class="planner-pin__head" style="--pin-color:${dayColor(pin.dayIndex)}">${number}</span>`,
+        // P1: gezilen pin kesik kenar + onay işaretiyle kalır (renk tek başına anlam taşımaz).
+        html: `<span class="planner-pin__head" style="--pin-color:${dayColor(pin.dayIndex)}">${number}</span>${
+          pin.visited
+            ? `<span class="planner-pin__check" aria-hidden="true"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${iconPaths.check}"/></svg></span>`
+            : ""
+        }`,
         iconSize: [32, 32],
         iconAnchor: [16, 16],
       });
       const marker = L.marker([pin.lat, pin.lng], {
         icon,
-        title: `${number}. ${pin.label}`,
+        title: pin.visited
+          ? `${number}. ${pin.label} (${t("planner.stop.done", "Tamamlandı")})`
+          : `${number}. ${pin.label}`,
         keyboard: true,
         riseOnHover: true,
         zIndexOffset: selected ? 1000 : 0,
@@ -634,23 +651,21 @@ export default function Panel() {
         onAddPlaceToTrip={(place) => {
           const tripId = planner.activeTrip?.id || planner.trips[0]?.id;
           if (!tripId) return;
-          const day = planner.activeDayIndex || 1;
-          planner.addPinDirectlyToTrip(
-            tripId,
-            {
-              label: place.label,
-              address: place.address,
-              lat: place.lat,
-              lng: place.lng,
-              category: (place.category || "genel") as PinCategory,
-              dayIndex: day,
-              group: "Genel",
-              visited: false,
-              durationMinutes: 60,
-              googlePlaceId: place.googlePlaceId,
-            },
-            day,
-          );
+          const target = addTargetFor(planner.activeDayIndex);
+          const pin = {
+            label: place.label,
+            address: place.address,
+            lat: place.lat,
+            lng: place.lng,
+            category: (place.category || "genel") as PinCategory,
+            dayIndex: target.kind === "day" ? target.day : 0,
+            group: "Genel",
+            visited: false,
+            durationMinutes: 60,
+            googlePlaceId: place.googlePlaceId,
+          };
+          if (target.kind === "general") planner.addPinToGeneral(pin);
+          else planner.addPinDirectlyToTrip(tripId, pin, target.day);
           setQuickPoint(null);
         }}
       />
