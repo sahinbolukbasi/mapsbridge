@@ -3,14 +3,28 @@
 import Link from "next/link";
 import React, { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import { signUp, handleGoogleCredentialResponse, getStoredSession } from "../lib/cognito";
-import { Alert, Button, Field, Input, Modal, PageShell } from "../components/ui";
+import {
+  Alert,
+  Button,
+  Celebrate,
+  Field,
+  Icon,
+  Input,
+  Modal,
+  PageHeader,
+  PageShell,
+} from "../components/ui";
 import {
   AuthCard,
+  AuthVisual,
   AuthErrorSummary,
   AuthPasswordInput,
   AuthPasswordRules,
   AuthSocialButtons,
 } from "../components/auth/auth-card";
+import { passwordCriteria } from "../lib/auth/password-criteria";
+import { AUTH_VISUALS } from "../components/auth/auth-visuals";
+import { WELCOME_CREDITS_DISPLAY } from "../lib/billing/credit-costs";
 import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 
 interface GoogleCredentialResponse {
@@ -41,6 +55,10 @@ export default function SignUpPage() {
   const [isAppleLoading, setIsAppleLoading] = useState(false);
 
   const [showAppleFallbackModal, setShowAppleFallbackModal] = useState(false);
+  // Kod gönderildi anı (direction register): Celebrate + "Kodu gir"; doğrulama sayfasına
+  // kısa süre sonra kendiliğinden geçilir (bugünkü akış korunur).
+  const [verifyHref, setVerifyHref] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState("");
 
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
@@ -50,18 +68,8 @@ export default function SignUpPage() {
       ? readNext(window.location.search, window.location.origin)
       : DEFAULT_NEXT;
 
-  // Şifre Güvenlik Kriterleri
-  const rules = [
-    { id: "rule-length", label: "En az 12 karakter", valid: password.length >= 12 },
-    { id: "rule-lower", label: "En az bir küçük harf", valid: /[a-zğüşıöç]/.test(password) },
-    { id: "rule-upper", label: "En az bir büyük harf", valid: /[A-ZĞÜŞİÖÇ]/.test(password) },
-    { id: "rule-number", label: "En az bir rakam", valid: /[0-9]/.test(password) },
-    {
-      id: "rule-symbol",
-      label: "En az bir sembol (ör. !, ?, #)",
-      valid: /[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ]/.test(password),
-    },
-  ];
+  // Şifre güvenlik kriterleri (lib/auth/password-criteria, reset-password ile ortak).
+  const rules = passwordCriteria(password);
 
   const isPasswordValid = rules.every((r) => r.valid);
   // İstemci doğrulaması gönderimde (design §6.2): alan hataları + özet + ilk hatalı alana odak.
@@ -302,9 +310,10 @@ export default function SignUpPage() {
     try {
       await signUp(cleanEmail, password, cleanName, cleanPhone);
       const nextParam = nextUrl !== DEFAULT_NEXT ? `&next=${encodeURIComponent(nextUrl)}` : "";
-      window.location.assign(
-        `/verify/?email=${encodeURIComponent(cleanEmail)}&phone=${encodeURIComponent(cleanPhone)}${nextParam}`,
-      );
+      const href = `/verify/?email=${encodeURIComponent(cleanEmail)}&phone=${encodeURIComponent(cleanPhone)}${nextParam}`;
+      setSentTo(cleanEmail);
+      setVerifyHref(href);
+      window.setTimeout(() => window.location.assign(href), 2400);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kayıt tamamlanamadı.");
     } finally {
@@ -313,146 +322,173 @@ export default function SignUpPage() {
   }
 
   return (
-    <PageShell className="auth-card-shell">
-      <AuthCard
-        description="E-posta ve şifreyle ücretsiz hesap aç; rotaların tüm cihazlarında seninle olsun."
-        footer={
-          <>
-            <p className="auth-card__footer-line">
-              Zaten hesabın var mı?{" "}
-              <Link
-                className="auth-card__link"
-                data-path="giris"
-                href={
-                  nextUrl !== DEFAULT_NEXT
-                    ? `/login/?next=${encodeURIComponent(nextUrl)}`
-                    : "/login/"
-                }
-              >
-                Giriş yap
-              </Link>
-            </p>
-            <p className="auth-card__legal">
-              Devam ederek{" "}
-              <Link className="auth-card__link" href="/privacy/">
-                Gizlilik Politikası
-              </Link>{" "}
-              ve{" "}
-              <Link className="auth-card__link" href="/terms/">
-                Kullanım Koşulları
-              </Link>
-              &apos;nı kabul edersin.
-            </p>
-          </>
-        }
-      >
-        <AuthSocialButtons
-          googleLabel="Google ile kayıt ol"
-          appleLabel="Apple ile kayıt ol"
-          googleLoading={isGoogleLoading}
-          appleLoading={isAppleLoading}
-          onGoogle={triggerGoogleSignUp}
-          onApple={triggerAppleSignUp}
-        />
-
-        <div ref={googleBtnContainerRef} hidden></div>
-
-        <Modal
-          open={showAppleFallbackModal}
-          onClose={() => setShowAppleFallbackModal(false)}
-          title="Apple ile kayıt"
-          description="Apple ile kayıt özelliği yakında kullanıma sunulacaktır."
-          size="sm"
-          footer={
-            <Button fullWidth onClick={() => setShowAppleFallbackModal(false)}>
-              Anladım, e-posta ile devam et
-            </Button>
-          }
-        >
-          <p className="auth-card__note">
-            Şimdilik e-posta ve şifre ile hızlıca hesap oluşturabilirsin.
-          </p>
-        </Modal>
-
-        <Modal
-          open={showGoogleFallbackModal}
-          onClose={() => setShowGoogleFallbackModal(false)}
-          title="Google ile kayıt"
-          description="Google ile kayıt şu anda gerçekleştirilemedi. Bu durum genellikle tarayıcınızın pop-up engelleyicisinden kaynaklanır."
-          size="sm"
-          footer={
-            <Button fullWidth onClick={() => setShowGoogleFallbackModal(false)}>
-              Anladım, e-posta ile devam et
-            </Button>
-          }
-        >
-          <ul className="auth-card__summary">
-            <li>Tarayıcınızda pop-up engelleyicisini kapatıp tekrar deneyin</li>
-            <li>Farklı bir tarayıcı kullanın</li>
-            <li>Veya e-posta ve şifre ile kayıt olun</li>
-          </ul>
-        </Modal>
-
-        <form className="auth-card__form" onSubmit={handleSubmit} noValidate>
-          <AuthErrorSummary
-            errors={errorList.map(([key, text]) => ({ id: key, label: FIELD_LABELS[key], text }))}
+    <PageShell className="auth-card-shell" aside={<AuthVisual {...AUTH_VISUALS.register} />}>
+      {verifyHref ? (
+        <section className="auth-card auth-card--done" aria-label="Doğrulama kodu gönderildi">
+          <PageHeader variant="hidden" />
+          <Celebrate
+            title="Kod e-postana gönderildi"
+            message={`${sentTo} adresine gelen 6 haneli kodu gir.`}
+            action={
+              <Button href={verifyHref} size="lg" iconEnd={<Icon name="arrow" size={20} />}>
+                Kodu gir
+              </Button>
+            }
           />
-          <Field id="email" label="E-posta" required error={fieldErrors.email}>
-            {(ids) => (
-              <Input
-                {...ids}
-                size="lg"
-                name="email"
-                placeholder="deniz@ornek.com"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            )}
-          </Field>
+        </section>
+      ) : (
+        <AuthCard
+          eyebrow="Güvenli başlangıç"
+          description="Rotalarını kaydet, kodla paylaş, gezginlerle mesajlaş."
+          note={
+            <>
+              <Icon name="coin" size={20} />
+              <span>
+                Yeni hesaba <mark className="auth-card__mark">{WELCOME_CREDITS_DISPLAY}</mark> hoş
+                geldin kredisi. Kredi yalnız AI işlemlerinde düşer.
+              </span>
+            </>
+          }
+          footer={
+            <>
+              <p className="auth-card__footer-line">
+                Zaten hesabın var mı?{" "}
+                <Link
+                  className="auth-card__link"
+                  data-path="giris"
+                  href={
+                    nextUrl !== DEFAULT_NEXT
+                      ? `/login/?next=${encodeURIComponent(nextUrl)}`
+                      : "/login/"
+                  }
+                >
+                  Giriş yap
+                </Link>
+              </p>
+              <p className="auth-card__legal">
+                Devam ederek{" "}
+                <Link className="auth-card__link" href="/privacy/">
+                  Gizlilik Politikası
+                </Link>{" "}
+                ve{" "}
+                <Link className="auth-card__link" href="/terms/">
+                  Kullanım Koşulları
+                </Link>
+                &apos;nı kabul edersin.
+              </p>
+            </>
+          }
+        >
+          <AuthSocialButtons
+            googleLabel="Google ile kayıt ol"
+            appleLabel="Apple ile kayıt ol"
+            googleLoading={isGoogleLoading}
+            appleLoading={isAppleLoading}
+            onGoogle={triggerGoogleSignUp}
+            onApple={triggerAppleSignUp}
+          />
 
-          <Field id="password" label="Şifre" required error={fieldErrors.password}>
-            {(ids) => (
-              <AuthPasswordInput
-                ids={ids}
-                name="password"
-                autoComplete="new-password"
-                placeholder="Güçlü bir şifre belirle"
-                value={password}
-                onChange={setPassword}
-                shown={showPassword}
-                onToggle={() => setShowPassword(!showPassword)}
-              />
-            )}
-          </Field>
+          <div ref={googleBtnContainerRef} hidden></div>
 
-          <AuthPasswordRules rules={rules} />
-
-          {/* Sunucu hatası (design §6.2: Alert danger assertive) */}
-          {message && (
-            <Alert tone="danger" live="assertive">
-              {message}
-            </Alert>
-          )}
-
-          <Button
-            type="submit"
-            size="lg"
-            fullWidth
-            loading={isLoading}
-            loadingLabel="Hesap oluşturuluyor…"
-            disabled={password.length > 0 && !isPasswordValid}
-            disabledReason={
-              password.length > 0 && !isPasswordValid
-                ? "Şifre kurallarının hepsi sağlanınca etkinleşir."
-                : undefined
+          <Modal
+            open={showAppleFallbackModal}
+            onClose={() => setShowAppleFallbackModal(false)}
+            title="Apple ile kayıt"
+            description="Apple ile kayıt özelliği yakında kullanıma sunulacaktır."
+            size="sm"
+            footer={
+              <Button fullWidth onClick={() => setShowAppleFallbackModal(false)}>
+                Anladım, e-posta ile devam et
+              </Button>
             }
           >
-            Hesap oluştur
-          </Button>
-        </form>
-      </AuthCard>
+            <p className="auth-card__note">
+              Şimdilik e-posta ve şifre ile hızlıca hesap oluşturabilirsin.
+            </p>
+          </Modal>
+
+          <Modal
+            open={showGoogleFallbackModal}
+            onClose={() => setShowGoogleFallbackModal(false)}
+            title="Google ile kayıt"
+            description="Google ile kayıt şu anda gerçekleştirilemedi. Bu durum genellikle tarayıcınızın pop-up engelleyicisinden kaynaklanır."
+            size="sm"
+            footer={
+              <Button fullWidth onClick={() => setShowGoogleFallbackModal(false)}>
+                Anladım, e-posta ile devam et
+              </Button>
+            }
+          >
+            <ul className="auth-card__summary">
+              <li>Tarayıcınızda pop-up engelleyicisini kapatıp tekrar deneyin</li>
+              <li>Farklı bir tarayıcı kullanın</li>
+              <li>Veya e-posta ve şifre ile kayıt olun</li>
+            </ul>
+          </Modal>
+
+          <form className="auth-card__form" onSubmit={handleSubmit} noValidate>
+            <AuthErrorSummary
+              errors={errorList.map(([key, text]) => ({ id: key, label: FIELD_LABELS[key], text }))}
+            />
+            <Field id="email" label="E-posta" required error={fieldErrors.email}>
+              {(ids) => (
+                <Input
+                  {...ids}
+                  size="lg"
+                  iconStart="inbox"
+                  name="email"
+                  placeholder="deniz@ornek.com"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              )}
+            </Field>
+
+            <Field id="password" label="Şifre" required error={fieldErrors.password}>
+              {(ids) => (
+                <AuthPasswordInput
+                  ids={ids}
+                  name="password"
+                  autoComplete="new-password"
+                  placeholder="Güçlü bir şifre belirle"
+                  value={password}
+                  onChange={setPassword}
+                  shown={showPassword}
+                  onToggle={() => setShowPassword(!showPassword)}
+                />
+              )}
+            </Field>
+
+            <AuthPasswordRules rules={rules} />
+
+            {/* Sunucu hatası (design §6.2: Alert danger assertive) */}
+            {message && (
+              <Alert tone="danger" live="assertive">
+                {message}
+              </Alert>
+            )}
+
+            <Button
+              type="submit"
+              size="lg"
+              fullWidth
+              loading={isLoading}
+              loadingLabel="Hesap oluşturuluyor…"
+              disabled={password.length > 0 && !isPasswordValid}
+              disabledReason={
+                password.length > 0 && !isPasswordValid
+                  ? "Şifre kurallarının hepsi sağlanınca etkinleşir."
+                  : undefined
+              }
+              iconEnd={<Icon name="arrow" size={20} />}
+            >
+              Hesap oluştur
+            </Button>
+          </form>
+        </AuthCard>
+      )}
     </PageShell>
   );
 }

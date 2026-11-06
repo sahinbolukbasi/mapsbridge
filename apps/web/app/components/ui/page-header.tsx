@@ -15,7 +15,8 @@ export type PageHeaderProps = {
   breadcrumb?: BreadcrumbItem[];
   actions?: ReactNode;
   eyebrow?: string;
-  variant?: "default" | "hero" | "hidden";
+  /** card: kart içi kompakt (boşluksuz) büyük başlık, kimlik sayfaları. */
+  variant?: "default" | "hero" | "hidden" | "card";
   surface?: "default" | "inverse";
   titleId?: string;
   titleClassName?: string;

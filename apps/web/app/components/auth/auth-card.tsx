@@ -1,29 +1,40 @@
 "use client";
-// Kimlik sayfalarının ortak düzeni (design §4.3 FocusForm, F13/F14): tek 440 px sütun. Layout
+// Kimlik sayfalarının ortak düzeni (Increment 3.2, direction login/register): ışık lekeli kart
+// (nabızlı eyebrow, büyük başlık, giriş koreografisi) + fotoğraflı cam panel (AuthVisual). Layout
 // registry'den `auth` (R12: 1200 içinde form ≤520 + isteğe bağlı görsel `aside`); chrome "focus"
 // (yalın header, alt menü ve footer yok). Sayfa kendi <PageShell className="auth-card-shell">
 // kökünü çizer (G4, layout prop'u yok — G30), AuthCard onun içindeki sütundur.
 // Yalnız görünüm: Cognito/Google/Apple çağrıları sayfalarda kalır, bu dosya hiçbirini çağırmaz.
-import { forwardRef, type ReactNode } from "react";
+import { forwardRef, type CSSProperties, type ReactNode } from "react";
 import {
   Alert,
   Button,
-  Card,
   GoogleLogo,
   Icon,
   IconButton,
   Input,
   PageHeader,
+  Progress,
   VisuallyHidden,
   cx,
   type FieldControlProps,
+  type IconName,
 } from "../ui";
+import {
+  passwordStrength,
+  strengthLabel,
+  type PasswordCriterion,
+} from "../../lib/auth/password-criteria";
 import "./auth-card.css";
+
+const order = (i: number) => ({ "data-enter": "", style: { "--i": i } as CSSProperties });
 
 export function AuthCard({
   title,
   titleText,
+  eyebrow,
   description,
+  note,
   children,
   footer,
   className,
@@ -31,19 +42,91 @@ export function AuthCard({
   /** Verilmezse route-registry başlığı (tek h1, PageHeader). */
   title?: ReactNode;
   titleText?: string;
+  /** Başlık üstü nabızlı hap ("Tekrar hoş geldin"). */
+  eyebrow?: string;
   description?: ReactNode;
+  /** Başlık altında vurgulu not (ör. hoş geldin kredisi). */
+  note?: ReactNode;
   children: ReactNode;
   /** Kart altındaki bağlantılar (ör. "Hesabın yok mu? Kayıt ol"). */
   footer?: ReactNode;
   className?: string;
 }) {
   return (
-    <div className={cx("auth-card", className)}>
-      <PageHeader title={title} titleText={titleText} description={description} />
-      <Card padding="lg" className="auth-card__panel">
+    <section className={cx("auth-card", className)} aria-labelledby="page-title">
+      <PageHeader
+        variant="card"
+        enter
+        eyebrowPulse={Boolean(eyebrow)}
+        eyebrow={eyebrow}
+        title={title}
+        titleText={titleText}
+        description={description}
+      />
+      {note && (
+        <div className="auth-card__note-box" {...order(3)}>
+          {note}
+        </div>
+      )}
+      <div className="auth-card__panel" {...order(4)}>
         {children}
-      </Card>
-      {footer && <div className="auth-card__footer">{footer}</div>}
+      </div>
+      {footer && (
+        <div className="auth-card__footer" {...order(5)}>
+          {footer}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/**
+ * Fotoğraflı görsel panel (R13 cam panel, data-surface="inverse"). Yalnız gerçek ürün
+ * yetenekleri; <1024'te kısa üst bant (yer etiketi + başlık), ≥1024 tam yükseklik + kartlar.
+ */
+export function AuthVisual({
+  src,
+  alt,
+  place,
+  heading,
+  features,
+}: {
+  src: string;
+  alt: string;
+  place: string;
+  heading: string;
+  features: readonly { icon: IconName; title: string; body: string }[];
+}) {
+  return (
+    <div className="auth-visual" data-surface="inverse">
+      <img className="auth-visual__img" src={src} alt={alt} />
+      <div className="auth-visual__inner" data-surface="inverse">
+        <span className="auth-visual__place auth-glass" data-surface="inverse" {...order(2)}>
+          <Icon name="compass" size={16} />
+          {place}
+        </span>
+        <div className="auth-visual__body">
+          <h2 className="auth-visual__heading" {...order(3)}>
+            {heading}
+          </h2>
+          <ul className="auth-visual__feats">
+            {features.map((f, i) => (
+              <li
+                key={f.title}
+                className="auth-visual__feat auth-glass"
+                data-surface="inverse"
+                {...order(4 + i)}
+              >
+                <span className="auth-visual__icon">
+                  <Icon name={f.icon} size={20} />
+                </span>
+                <strong className="auth-visual__feat-title">{f.title}</strong>
+                <span className="auth-visual__feat-body">{f.body}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
@@ -168,6 +251,7 @@ export const AuthPasswordInput = forwardRef<
         {...ids}
         ref={ref}
         size="lg"
+        iconStart="lock"
         className="auth-card__password-input"
         name={name}
         type={shown ? "text" : "password"}
@@ -189,21 +273,30 @@ export const AuthPasswordInput = forwardRef<
   );
 });
 
-/** Şifre kuralları; renk tek ipucu değil (ikon + görünmez durum metni). */
-export function AuthPasswordRules({
-  rules,
-}: {
-  rules: readonly { id: string; label: string; valid: boolean }[];
-}) {
+/**
+ * Şifre kuralları + güç çubuğu (direction register): karşılanan kriter tek tek "pop"la onaylanır
+ * (yalnız no-preference); renk tek ipucu değil (ikon + görünmez durum metni).
+ */
+export function AuthPasswordRules({ rules }: { rules: readonly PasswordCriterion[] }) {
+  const level = passwordStrength(rules);
   return (
-    <div className="auth-card__rules">
+    <div className="auth-card__rules" data-level={level}>
+      <Progress
+        variant="determinate"
+        value={level}
+        max={4}
+        label={strengthLabel(level)}
+        className="auth-card__strength"
+      />
       <p className="auth-card__rules-title" id="auth-password-rules">
-        Şifre kuralları
+        {strengthLabel(level)}
       </p>
       <ul className="auth-card__rules-list" aria-labelledby="auth-password-rules">
         {rules.map((r) => (
           <li key={r.id} className="auth-card__rule" data-valid={r.valid ? "true" : "false"}>
-            <Icon name={r.valid ? "check" : "minus"} size={16} className="auth-card__rule-icon" />
+            <span className="auth-card__tick" key={r.valid ? "on" : "off"}>
+              <Icon name="check" size={16} />
+            </span>
             <span>{r.label}</span>
             <VisuallyHidden>{r.valid ? " (karşılandı)" : " (karşılanmadı)"}</VisuallyHidden>
           </li>

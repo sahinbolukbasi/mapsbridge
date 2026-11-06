@@ -3,13 +3,16 @@
 import React, { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { signIn, handleGoogleCredentialResponse, getStoredSession } from "../lib/cognito";
-import { Alert, Button, Field, Input, Modal, PageShell } from "../components/ui";
+import { Alert, Button, Field, Icon, Input, Modal, PageShell } from "../components/ui";
 import {
   AuthCard,
+  AuthVisual,
   AuthErrorSummary,
   AuthPasswordInput,
   AuthSocialButtons,
 } from "../components/auth/auth-card";
+import { AUTH_VISUALS } from "../components/auth/auth-visuals";
+import { WELCOME_CREDITS_DISPLAY } from "../lib/billing/credit-costs";
 import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 
 interface GoogleCredentialResponse {
@@ -270,23 +273,30 @@ export default function LoginPage() {
   }
 
   return (
-    <PageShell className="auth-card-shell">
+    <PageShell className="auth-card-shell" aside={<AuthVisual {...AUTH_VISUALS.login} />}>
       <AuthCard
-        description="Rotalarına ve kayıtlı duraklarına kaldığın yerden devam et."
+        eyebrow="Tekrar hoş geldin"
+        description="Rotalarına, kayıtlı duraklarına ve yol arkadaşlarına kaldığın yerden devam et."
         footer={
-          <p className="auth-card__footer-line">
-            Hesabın yok mu?{" "}
-            <Link
-              className="auth-card__link"
-              href={
-                nextUrl !== DEFAULT_NEXT
-                  ? `/register/?next=${encodeURIComponent(nextUrl)}`
-                  : "/register/"
-              }
-            >
-              Ücretsiz kayıt ol
-            </Link>
-          </p>
+          <div className="auth-card__promo">
+            <div className="auth-card__promo-row">
+              <strong className="auth-card__promo-title">Hesabın yok mu?</strong>
+              <Link
+                className="auth-card__link auth-card__cta-link"
+                href={
+                  nextUrl !== DEFAULT_NEXT
+                    ? `/register/?next=${encodeURIComponent(nextUrl)}`
+                    : "/register/"
+                }
+              >
+                Ücretsiz kayıt ol <Icon name="arrow" size={16} />
+              </Link>
+            </div>
+            <p className="auth-card__promo-body">
+              Rotalarını kaydet, kodla paylaş, yeni hesaba {WELCOME_CREDITS_DISPLAY} hoş geldin
+              kredisi.
+            </p>
+          </div>
         }
       >
         <AuthSocialButtons
@@ -336,6 +346,7 @@ export default function LoginPage() {
                 {...ids}
                 ref={emailRef}
                 size="lg"
+                iconStart="inbox"
                 name="email"
                 placeholder="ornek@alanadi.com"
                 type="email"
@@ -387,7 +398,14 @@ export default function LoginPage() {
             </Alert>
           )}
 
-          <Button type="submit" size="lg" fullWidth loading={isLoading}>
+          <Button
+            type="submit"
+            size="lg"
+            fullWidth
+            loading={isLoading}
+            loadingLabel="Giriş yapılıyor…"
+            iconEnd={<Icon name="arrow" size={20} />}
+          >
             Giriş yap
           </Button>
         </form>

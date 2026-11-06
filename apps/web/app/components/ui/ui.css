@@ -185,19 +185,24 @@
   .ui-page-shell__auth-form {
     min-inline-size: 0;
   }
+  /* <1024: görsel formun üstünde kısa bant; ≥1024 formun yanında tam yükseklik. */
   .ui-page-shell__auth-aside {
-    display: none;
+    order: -1;
+    min-inline-size: 0;
+  }
+  .ui-page-shell__auth--split {
+    gap: var(--space-4);
   }
   @media (min-width: 1024px) {
     .ui-page-shell__auth--split {
       grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
       justify-content: stretch;
-      align-items: start;
+      align-items: stretch;
+      gap: var(--space-6);
     }
     .ui-page-shell__auth--split .ui-page-shell__auth-aside {
-      display: block;
-      position: sticky;
-      inset-block-start: calc(var(--app-header-height) + var(--space-6));
+      order: 0;
+      display: grid;
     }
   }
   .ui-page-shell--landing,
@@ -249,6 +254,24 @@
   }
   [data-surface="inverse"] .ui-page-header__eyebrow {
     color: var(--color-text-inverse-highlight);
+  }
+  .ui-page-header--card {
+    padding: 0;
+  }
+  .ui-page-header--card .ui-page-header__title {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+  /* Başlık sonu vurgu noktası (dekoratif; alternatif metni boş). */
+  .ui-page-header--card .ui-page-header__title::after {
+    content: "." / "";
+    color: var(--color-highlight);
+  }
+  @media (min-width: 640px) {
+    .ui-page-header--card .ui-page-header__title {
+      font-size: var(--font-size-5xl);
+    }
   }
   .ui-page-header__eyebrow--pill {
     display: inline-flex;
@@ -449,6 +472,32 @@
   .ui-textarea {
     min-block-size: calc(var(--control-height) * 2);
     resize: vertical;
+  }
+  /* Başta ikonlu alan: ikon dekoratif, odakta marka rengine döner. */
+  .ui-input-wrap {
+    position: relative;
+    display: block;
+    flex: 1;
+    min-inline-size: 0;
+  }
+  .ui-input-wrap__icon {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: var(--space-3);
+    translate: 0 -50%;
+    color: var(--color-text-subtle);
+    pointer-events: none;
+    transition: color var(--duration-fast) var(--easing-standard);
+  }
+  .ui-input-wrap:focus-within .ui-input-wrap__icon {
+    color: var(--color-brand);
+  }
+  .ui-input--with-icon {
+    padding-inline-start: calc(var(--space-3) * 2 + 20px);
+  }
+  .ui-input:focus-visible,
+  .ui-textarea:focus-visible {
+    border-color: var(--color-brand);
   }
   .ui-input::placeholder,
   .ui-textarea::placeholder {

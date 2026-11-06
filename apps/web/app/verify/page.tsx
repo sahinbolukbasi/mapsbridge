@@ -3,7 +3,8 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { confirmSignUp, resendConfirmationCode } from "../lib/cognito";
 import { Alert, Button, Celebrate, Field, Input, PageShell } from "../components/ui";
-import { AuthCard } from "../components/auth/auth-card";
+import { AuthCard, AuthVisual } from "../components/auth/auth-card";
+import { AUTH_VISUALS } from "../components/auth/auth-visuals";
 import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 
 export default function VerifyPage() {
@@ -78,8 +79,9 @@ export default function VerifyPage() {
   }
 
   return (
-    <PageShell className="auth-card-shell">
+    <PageShell className="auth-card-shell" aside={<AuthVisual {...AUTH_VISUALS.verify} />}>
       <AuthCard
+        eyebrow="E-posta doğrulama"
         description="E-postana gönderilen 6 haneli kodu gir."
         footer={
           <p className="auth-card__footer-line">

@@ -3,19 +3,216 @@
   /* AuthCard (design §4.3 FocusForm, F13/F14): giriş, kayıt, şifre sıfırlama, doğrulama ve
      callback için tek 440 px sütun. Yalnızca token; .ui-* sınıfları ezilmez. */
   .auth-card-shell {
-    padding-block: var(--space-8) var(--space-16);
+    padding-block: var(--space-6) var(--space-12);
   }
+  /* Kart: üst köşelerde marka/kil ışık lekeleri, gölgeli kağıt. */
   .auth-card {
+    position: relative;
+    isolation: isolate;
     display: grid;
-    gap: var(--space-6);
+    align-content: start;
+    gap: var(--space-5);
     box-sizing: border-box;
     inline-size: 100%;
-    max-inline-size: 440px;
-    margin-inline: auto;
+    overflow: hidden;
+    padding: var(--space-8) var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+  }
+  .auth-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    block-size: 220px;
+    background:
+      radial-gradient(80% 100% at 0% 0%, var(--color-surface-brand), transparent 70%),
+      radial-gradient(60% 80% at 100% 0%, var(--color-highlight-bg), transparent 70%);
+    pointer-events: none;
+  }
+  .auth-card > * {
+    position: relative;
+  }
+  @media (min-width: 640px) {
+    .auth-card {
+      padding: var(--space-10);
+    }
   }
   .auth-card__panel {
     display: grid;
     gap: var(--space-5);
+  }
+  .auth-card__note-box {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-highlight-bg);
+    color: var(--color-highlight-text);
+    font-size: var(--font-size-sm);
+  }
+  .auth-card__mark {
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-xs);
+    background: var(--color-warning-bg-strong);
+    color: var(--color-text);
+    font-weight: var(--font-weight-bold);
+  }
+  .auth-card__promo {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-sunken);
+    font-size: var(--font-size-sm);
+    text-align: start;
+  }
+  .auth-card__promo-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .auth-card__promo-title {
+    color: var(--color-text-brand);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-caps);
+    text-transform: uppercase;
+  }
+  .auth-card__promo-body {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+  .auth-card__cta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-block-size: var(--touch-target);
+  }
+
+  /* Görsel panel: fotoğraf + perde + cam kartlar (R13). */
+  .auth-visual {
+    position: relative;
+    overflow: hidden;
+    min-block-size: 200px;
+    border-radius: var(--radius-xl);
+    background: var(--color-surface-inverse);
+    box-shadow: var(--shadow-xl);
+  }
+  .auth-visual__img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .auth-visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface-inverse-strong) 35%, transparent) 0%,
+      transparent 35%,
+      color-mix(in srgb, var(--color-surface-inverse-strong) 85%, transparent) 100%
+    );
+    pointer-events: none;
+  }
+  .auth-visual__inner {
+    position: relative;
+    z-index: var(--z-raised);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-6);
+    box-sizing: border-box;
+    block-size: 100%;
+    min-block-size: inherit;
+    padding: var(--space-5);
+    color: var(--color-text);
+  }
+  .auth-glass {
+    border: 1px solid var(--color-white-a12);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-surface-inverse) 42%, transparent);
+    backdrop-filter: blur(18px) saturate(1.2);
+  }
+  .auth-visual__place {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-caps);
+    text-transform: uppercase;
+  }
+  .auth-visual__body {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .auth-visual__heading {
+    max-inline-size: 18ch;
+    margin: 0;
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-extrabold);
+    line-height: var(--line-height-heading);
+  }
+  .auth-visual__feats {
+    display: none;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .auth-visual__feat {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-1) var(--space-4);
+    padding: var(--space-4) var(--space-5);
+  }
+  .auth-visual__icon {
+    display: grid;
+    grid-row: span 2;
+    place-items: center;
+    inline-size: var(--touch-target);
+    block-size: var(--touch-target);
+    border-radius: var(--radius-md);
+    background: var(--color-white-a12);
+    color: var(--color-accent-strong);
+  }
+  .auth-visual__feat-title {
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-lg);
+  }
+  .auth-visual__feat-body {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  @media (min-width: 1024px) {
+    .auth-visual {
+      min-block-size: calc(100dvh - var(--app-header-height) - var(--space-12) * 1.5);
+    }
+    .auth-visual__inner {
+      position: absolute;
+      inset: 0;
+      padding: var(--space-8);
+    }
+    .auth-visual__heading {
+      font-size: var(--font-size-3xl);
+    }
+    .auth-visual__feats {
+      display: grid;
+    }
   }
   .auth-card__form {
     display: grid;
@@ -66,19 +263,21 @@
     gap: var(--space-2);
   }
   .auth-card__rules {
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-md);
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
     background: var(--color-surface-sunken);
   }
   .auth-card__rules-title {
-    margin: 0 0 var(--space-2);
+    margin: 0;
     color: var(--color-text);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
   }
   .auth-card__rules-list {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--space-2);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -91,7 +290,56 @@
     font-size: var(--font-size-sm);
   }
   .auth-card__rule[data-valid="true"] {
-    color: var(--color-success);
+    color: var(--color-text);
+  }
+  .auth-card__tick {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 20px;
+    block-size: 20px;
+    border: 2px solid var(--color-border-control);
+    border-radius: var(--radius-full);
+    color: transparent;
+    transition:
+      background-color var(--duration-base) var(--easing-standard),
+      border-color var(--duration-base) var(--easing-standard);
+  }
+  .auth-card__rule[data-valid="true"] .auth-card__tick {
+    border-color: var(--color-success);
+    background: var(--color-success);
+    color: var(--color-on-primary);
+  }
+  @media (min-width: 640px) {
+    .auth-card__rules-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .auth-card__rule[data-valid="true"] .auth-card__tick {
+      animation: auth-tick-pop var(--duration-slow) var(--easing-emphasized);
+    }
+    /* Fotoğraf çok yavaş yakınlaşır: dekoratif sonsuz döngü ≥ route × 6 (R15/G32). */
+    .auth-visual__img {
+      animation: auth-kenburns calc(var(--duration-route) * 22) var(--easing-standard) infinite
+        alternate;
+    }
+    @keyframes auth-tick-pop {
+      0% {
+        transform: scale(0.6);
+      }
+      60% {
+        transform: scale(1.15);
+      }
+    }
+    @keyframes auth-kenburns {
+      from {
+        transform: scale(1.02);
+      }
+      to {
+        transform: scale(1.12) translate(-1.5%, -1%);
+      }
+    }
   }
   .auth-card__note {
     margin: 0;

@@ -535,3 +535,27 @@ test("ShareModal (B2): kopyalama hatası modal içinde role=alert, toast'a gitme
   assert.match(modal, /role="status" data-share-copy-status/);
   assert.match(src, /Promise\.reject\(new Error\("clipboard unavailable"\)\)/);
 });
+test("password-criteria (3.2): Cognito kuralları, güç seviyesi 0–4, kayıt + sıfırlama ortak", () => {
+  const pc = loadTs(path.resolve(__dirname, "../app/lib/auth/password-criteria.ts"));
+  const met = (pw) =>
+    Array.from(
+      pc.passwordCriteria(pw).filter((c) => c.valid),
+      (c) => c.id,
+    );
+  assert.deepEqual(met(""), []);
+  assert.deepEqual(met("abc"), ["rule-lower"]);
+  assert.equal(met("Gezgin2026!xy").length, 5);
+  assert.deepEqual(met("ĞÜŞİÖÇ"), ["rule-upper"]);
+  assert.equal(pc.passwordStrength(pc.passwordCriteria("")), 0);
+  assert.equal(pc.passwordStrength(pc.passwordCriteria("a")), 1);
+  assert.equal(pc.passwordStrength(pc.passwordCriteria("aB")), 2);
+  assert.equal(pc.passwordStrength(pc.passwordCriteria("aB1")), 3);
+  assert.equal(pc.passwordStrength(pc.passwordCriteria("aB1!")), 3);
+  assert.equal(pc.passwordStrength(pc.passwordCriteria("aB1!aB1!aB1!")), 4);
+  assert.equal(pc.passwordStrength([]), 0);
+  assert.match(pc.strengthLabel(4), /güçlü/);
+  for (const page of ["register/page.tsx", "reset-password/page.tsx"]) {
+    const src = fs.readFileSync(path.resolve(__dirname, "../app", page), "utf8");
+    assert.match(src, /passwordCriteria\(/, `${page} ortak kriterleri kullanmalı`);
+  }
+});

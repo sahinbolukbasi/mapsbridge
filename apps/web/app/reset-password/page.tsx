@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import { forgotPassword, confirmForgotPassword, signIn } from "../lib/cognito";
 import Link from "next/link";
 import { Alert, Button, Field, Input, PageShell } from "../components/ui";
-import { AuthCard, AuthPasswordInput, AuthPasswordRules } from "../components/auth/auth-card";
+import {
+  AuthCard,
+  AuthPasswordInput,
+  AuthPasswordRules,
+  AuthVisual,
+} from "../components/auth/auth-card";
+import { AUTH_VISUALS } from "../components/auth/auth-visuals";
+import { passwordCriteria } from "../lib/auth/password-criteria";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -54,18 +61,8 @@ export default function ForgotPasswordPage() {
     }
   }, []);
 
-  const passwordRules = [
-    { id: "rule-length", label: "En az 12 karakter", valid: newPassword.length >= 12 },
-    { id: "rule-lower", label: "En az bir küçük harf", valid: /[a-zğüşıöç]/.test(newPassword) },
-    { id: "rule-upper", label: "En az bir büyük harf", valid: /[A-ZĞÜŞİÖÇ]/.test(newPassword) },
-    { id: "rule-number", label: "En az bir rakam", valid: /[0-9]/.test(newPassword) },
-    {
-      id: "rule-symbol",
-      label: "En az bir sembol (ör. !, ?, @, #)",
-      valid: /[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ]/.test(newPassword),
-    },
-  ];
-
+  // Ortak kriterler (lib/auth/password-criteria; kayıt ile aynı).
+  const passwordRules = passwordCriteria(newPassword);
   const isPasswordValid = passwordRules.every((r) => r.valid);
 
   // Adım 1: Sıfırlama kodu gönder
@@ -196,8 +193,9 @@ export default function ForgotPasswordPage() {
 
   if (step === "confirm") {
     return (
-      <PageShell className="auth-card-shell">
+      <PageShell className="auth-card-shell" aside={<AuthVisual {...AUTH_VISUALS.reset} />}>
         <AuthCard
+          eyebrow="Hesap kurtarma"
           title="Yeni şifreni belirle"
           titleText="Şifre sıfırlama"
           description="E-postana gelen 6 haneli kodu ve yeni şifreni gir."
@@ -307,8 +305,9 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <PageShell className="auth-card-shell">
+    <PageShell className="auth-card-shell" aside={<AuthVisual {...AUTH_VISUALS.reset} />}>
       <AuthCard
+        eyebrow="Hesap kurtarma"
         title="Şifreni mi unuttun?"
         titleText="Şifre sıfırlama"
         description="Kayıtlı e-posta adresini gir, şifre sıfırlama kodunu hemen gönderelim."
@@ -342,6 +341,7 @@ export default function ForgotPasswordPage() {
               <Input
                 {...ids}
                 size="lg"
+                iconStart="inbox"
                 name="email"
                 placeholder="ornek@alanadi.com"
                 type="email"
