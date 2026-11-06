@@ -34,8 +34,12 @@ resource "aws_cloudfront_function" "spa_router" {
       var cookies = request.cookies || {};
       var headers = request.headers || {};
 
-      // Auth-protected routes: require mb_session cookie
-      var protectedPrefixes = ['/maps', '/desk', '/haritalar', '/profile', '/messages', '/u/admin'];
+      // Auth-protected routes: require mb_session cookie.
+      // NOTE: /maps (and its aliases /desk, /haritalar) is intentionally NOT
+      // protected — the planner at /maps/ is a public guest surface (decision
+      // S7). Guests get the guest planner + AuthGate from the static export,
+      // not an edge redirect. Keep /profile, /messages and /u/admin protected.
+      var protectedPrefixes = ['/profile', '/messages', '/u/admin'];
       var isProtected = false;
       for (var i = 0; i < protectedPrefixes.length; i++) {
         if (uri === protectedPrefixes[i] || uri.startsWith(protectedPrefixes[i] + '/')) {

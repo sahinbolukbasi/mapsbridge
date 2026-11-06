@@ -100,7 +100,9 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     sitemap: true,
     // Bilinçli değer: bugünkü kod index + sitemap'te; GSC §3.6 noindex öneriyordu (F-16).
     robots: "index",
-    protected: true,
+    // /maps/ misafir planlayıcısıdır (S7): CloudFront protectedPrefixes'ten
+    // çıkarıldı, kenar yönlendirmesi yok. Misafir statik export'tan AuthGate +
+    // planlayıcıyı görür. Bu yüzden protected işaretli DEĞİL.
     chrome: "immersive",
     footer: "product",
     nav: t("Planla", "Plan"),
