@@ -26,8 +26,10 @@ import {
   serverError,
   handlePreflight as _handlePreflight,
   extractBearerToken,
+  jsonResponse,
   parseBody,
 } from "../shared/http";
+import { requestGate, threadRequest } from "../shared/thread-access";
 import type { TransactWriteItem } from "@aws-sdk/client-dynamodb";
 import { Router } from "../shared/router";
 import {
@@ -41,6 +43,27 @@ router.add("GET /chat/threads", handleListThreads);
 router.add("POST /chat/threads", handleCreateThread);
 router.add("GET /chat/threads/{id}/messages", handleGetMessages);
 router.add("POST /chat/threads/{id}/messages", handleSendMessage);
+router.add("POST /chat/threads/{id}/request", handleRespondRequest);
+
+/** Alıcı kayıtlı kullanıcı mı (USER#<id>/META ya da USER#<id>/CREDITS kaydı)? */
+async function isRegisteredUser(id: string) {
+  const { BatchGetItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall } = await import("@aws-sdk/util-dynamodb");
+  const r = await getDynamoClient().send(
+    new BatchGetItemCommand({
+      RequestItems: {
+        [getTableName()]: {
+          Keys: [
+            marshall({ PK: `USER#${id}`, SK: "META" }),
+            marshall({ PK: `USER#${id}`, SK: "CREDITS" }),
+          ],
+          ProjectionExpression: "PK",
+        },
+      },
+    }),
+  );
+  return (r.Responses?.[getTableName()] || []).length > 0;
+}
 
 export const handler = async (event: ApiGatewayEvent) => {
   try {
@@ -96,6 +119,12 @@ async function handleCreateThread(event: ApiGatewayEvent) {
 
   const body = parseBody<{ participantId?: string; initialMessage?: string }>(event);
   if (!body?.participantId) return badRequest("Alıcı kullanıcı ID'si zorunludur.");
+  if (body.participantId === userId) return badRequest("Kendine mesaj isteği gönderemezsin.");
+  if (
+    !/^[A-Za-z0-9_-]{1,128}$/.test(body.participantId) ||
+    !(await isRegisteredUser(body.participantId))
+  )
+    return notFound("Bu kullanıcı bulunamadı.");
 
   const threadId = crypto.randomUUID();
   const now = new Date().toISOString();
@@ -117,6 +146,21 @@ async function handleCreateThread(event: ApiGatewayEvent) {
           createdBy: userId,
           createdAt: now,
           lastMessageAt: now,
+        }),
+        ConditionExpression: "attribute_not_exists(PK)",
+      },
+    },
+    // M1/M2: mesaj isteği (alıcı kabul edene kadar gönderen tek mesajla sınırlı).
+    {
+      Put: {
+        TableName: getTableName(),
+        Item: marshall({
+          PK: `THREAD#${threadId}`,
+          SK: "REQUEST",
+          status: "pending",
+          from: userId,
+          to: body.participantId,
+          createdAt: now,
         }),
         ConditionExpression: "attribute_not_exists(PK)",
       },
@@ -155,7 +199,7 @@ async function handleCreateThread(event: ApiGatewayEvent) {
 
   await ddb.send(new TransactWriteItemsCommand({ TransactItems: transactItems }));
 
-  return created({ threadId });
+  return created({ threadId, request: "pending" });
 }
 
 // ─── Get Messages ─────────────────────────────────────────────────────────
@@ -229,6 +273,12 @@ async function handleSendMessage(event: ApiGatewayEvent) {
   if (!(await threadParticipants(getDynamoClient(), getTableName(), threadId, userId)))
     return notFound();
 
+  const gate = requestGate(
+    await threadRequest(getDynamoClient(), getTableName(), threadId),
+    userId,
+  );
+  if (gate) return jsonResponse(gate.status, { error: gate.error, code: gate.code });
+
   const body = parseBody<{ content?: string }>(event);
   if (typeof body?.content !== "string" || !body.content.trim())
     return badRequest("Mesaj içeriği zorunludur.");
@@ -267,4 +317,45 @@ async function handleSendMessage(event: ApiGatewayEvent) {
   );
 
   return created({ timestamp: now });
+}
+
+// ─── Respond Request (M1/M2) ──────────────────────────────────────────────
+async function handleRespondRequest(event: ApiGatewayEvent) {
+  const token = extractBearerToken(event);
+  if (!token) return unauthorized();
+  const userId = await verifiedUserId(token);
+  if (!userId) return unauthorized();
+  const threadId = event.pathParameters?.id;
+  if (!threadId) return badRequest("Thread ID gerekli.");
+  const body = parseBody<{ action?: string }>(event);
+  const next = ({ accept: "accepted", decline: "declined", block: "blocked" } as const)[
+    body?.action as "accept" | "decline" | "block"
+  ];
+  if (!next) return badRequest("Geçersiz işlem.");
+  const request = await threadRequest(getDynamoClient(), getTableName(), threadId);
+  if (!request || request.to !== userId) return notFound();
+  const { UpdateItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall } = await import("@aws-sdk/util-dynamodb");
+  try {
+    await getDynamoClient().send(
+      new UpdateItemCommand({
+        TableName: getTableName(),
+        Key: marshall({ PK: `THREAD#${threadId}`, SK: "REQUEST" }),
+        UpdateExpression: "SET #s = :next, respondedAt = :now",
+        ConditionExpression: "#s = :pending AND #to = :me",
+        ExpressionAttributeNames: { "#s": "status", "#to": "to" },
+        ExpressionAttributeValues: marshall({
+          ":next": next,
+          ":pending": "pending",
+          ":me": userId,
+          ":now": new Date().toISOString(),
+        }),
+      }),
+    );
+  } catch (e) {
+    if ((e as { name?: string }).name === "ConditionalCheckFailedException")
+      return jsonResponse(409, { error: "İstek zaten yanıtlanmış." });
+    throw e;
+  }
+  return ok({ threadId, request: next });
 }

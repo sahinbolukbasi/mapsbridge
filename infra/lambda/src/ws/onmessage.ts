@@ -16,7 +16,7 @@ import {
   DeleteItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { getDynamoClient } from "../shared/dynamo";
-import { threadParticipants } from "../shared/thread-access";
+import { requestGate, threadParticipants, threadRequest } from "../shared/thread-access";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import {
   ApiGatewayManagementApiClient,
@@ -116,7 +116,14 @@ async function handleEvent(event: WsEvent) {
   }
 
   switch (action) {
-    case "send_message":
+    case "send_message": {
+      // M1/M2: HTTP yoluyla aynı mesaj isteği kapısı (WS ile atlanamaz).
+      const gate = requestGate(await threadRequest(ddb, messagesTable, threadId), senderId);
+      if (gate)
+        return {
+          statusCode: gate.status,
+          body: JSON.stringify({ error: gate.error, code: gate.code }),
+        };
       return handleSendMessage(
         ddb,
         connectionsTable,
@@ -128,6 +135,7 @@ async function handleEvent(event: WsEvent) {
         content,
         recipientId,
       );
+    }
     case "typing":
       return handleTyping(ddb, connectionsTable, domain, stage, senderId, threadId, recipientId);
     case "mark_read":

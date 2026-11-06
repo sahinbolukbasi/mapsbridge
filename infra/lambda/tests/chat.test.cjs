@@ -49,6 +49,7 @@ function harness(options = {}) {
     "DeleteItemCommand",
     "ScanCommand",
     "TransactWriteItemsCommand",
+    "BatchGetItemCommand",
   ]) {
     commands[name] = class {
       constructor(input) {
@@ -246,8 +247,13 @@ test("POST /chat/threads returns 400 when participantId is missing", async () =>
   assert.equal(h.calls.data.filter((c) => c.name === "TransactWriteItemsCommand").length, 0);
 });
 
+// Alıcı kayıtlı (USER#<id>/META var) — 1.14 kayıtlı-kullanıcı kontrolü.
+const registered = (command) =>
+  command.name === "BatchGetItemCommand"
+    ? { Responses: { "test-data": [{ PK: "USER#x" }] } }
+    : { Items: [], Count: 0 };
 test("POST /chat/threads creates thread with sorted participants and returns 201", async () => {
-  const h = harness();
+  const h = harness({ data: registered });
   const result = await h
     .load("chat/index.ts")
     .handler(event("POST", "/chat/threads", token(), { participantId: "user-z" }));
@@ -268,7 +274,7 @@ test("POST /chat/threads creates thread with sorted participants and returns 201
 });
 
 test("POST /chat/threads includes initial message in the transaction when provided", async () => {
-  const h = harness();
+  const h = harness({ data: registered });
   const result = await h.load("chat/index.ts").handler(
     event("POST", "/chat/threads", token(), {
       participantId: "user-b",
@@ -355,4 +361,208 @@ test("GET /chat/threads/{id}/messages returns 200 with messages for a participan
   assert.ok(Array.isArray(body.messages));
   assert.equal(body.messages.length, 1);
   assert.equal(body.messages[0].senderId, "user-b");
+});
+
+// ─── Increment 1.14 (M1/M2): mesaj istekleri — HTTP + WebSocket kapısı ─────
+/** Durumlu bellek tablosu: GetItem/BatchGet/Put/Update/TransactWrite (koşullar dahil). */
+function store(seed = {}) {
+  const rows = new Map(Object.entries(seed));
+  const k = (key) => `${key.PK}|${key.SK}`;
+  return {
+    rows,
+    data(command) {
+      const i = command.input;
+      switch (command.name) {
+        case "GetItemCommand": {
+          if (i.TableName === "test-connections")
+            return {
+              Item: {
+                connectionId: i.Key.connectionId,
+                userId: i.Key.connectionId.replace("conn-", ""),
+                authVersion: 1,
+                expiresAt: Math.floor(Date.now() / 1000) + 600,
+              },
+            };
+          return { Item: rows.get(k(i.Key)) };
+        }
+        case "BatchGetItemCommand": {
+          const [t, req] = Object.entries(i.RequestItems)[0];
+          return { Responses: { [t]: req.Keys.map((x) => rows.get(k(x))).filter(Boolean) } };
+        }
+        case "TransactWriteItemsCommand":
+          for (const op of i.TransactItems) if (op.Put) rows.set(k(op.Put.Item), op.Put.Item);
+          return {};
+        case "PutItemCommand":
+          rows.set(k(i.Item), i.Item);
+          return {};
+        case "UpdateItemCommand": {
+          const row = rows.get(k(i.Key));
+          const v = i.ExpressionAttributeValues;
+          if (i.ConditionExpression?.includes(":pending")) {
+            if (!row || row.status !== v[":pending"] || row.to !== v[":me"])
+              throw Object.assign(new Error("c"), { name: "ConditionalCheckFailedException" });
+            rows.set(k(i.Key), { ...row, status: v[":next"] });
+          }
+          return {};
+        }
+        default:
+          return { Items: [] };
+      }
+    },
+  };
+}
+const tokenAs = (sub) =>
+  [
+    { alg: "RS256", typ: "JWT" },
+    {
+      sub,
+      iss: "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_test",
+      client_id: "test-client",
+      token_use: "access",
+      exp: Math.floor(Date.now() / 1000) + 300,
+    },
+  ]
+    .map((v) => Buffer.from(JSON.stringify(v)).toString("base64url"))
+    .join(".") + ".signature";
+function chatEnv(seed) {
+  const s = store({
+    "USER#user-b|META": { PK: "USER#user-b", SK: "META" },
+    "USER#user-a|META": { PK: "USER#user-a", SK: "META" },
+    ...seed,
+  });
+  const h = harness({
+    data: s.data,
+    fetch: async (_url, request) => {
+      const t = JSON.parse(request.body).AccessToken;
+      const sub = JSON.parse(Buffer.from(t.split(".")[1], "base64url").toString()).sub;
+      return { ok: true, json: async () => cognitoUser(sub) };
+    },
+  });
+  const chat = h.load("chat/index.ts");
+  const call = (sub, method, route, body) => chat.handler(event(method, route, tokenAs(sub), body));
+  return { s, h, call };
+}
+async function openThread(env) {
+  const res = await env.call("user-a", "POST", "/chat/threads", {
+    participantId: "user-b",
+    initialMessage: "Merhaba",
+  });
+  assert.equal(res.statusCode, 201);
+  return JSON.parse(res.body).threadId;
+}
+const send = (env, sub, id, content = "Selam") =>
+  env.call(sub, "POST", `/chat/threads/${id}/messages`, { content });
+
+test("1.14: kayıtsız alıcı 404, kendine istek 400", async () => {
+  const env = chatEnv();
+  const ghost = await env.call("user-a", "POST", "/chat/threads", { participantId: "nobody" });
+  assert.equal(ghost.statusCode, 404);
+  assert.match(JSON.parse(ghost.body).error, /bulunamadı/);
+  const self = await env.call("user-a", "POST", "/chat/threads", { participantId: "user-a" });
+  assert.equal(self.statusCode, 400);
+  assert.equal(
+    env.h.calls.data.filter((c) => c.name === "TransactWriteItemsCommand").length,
+    0,
+    "thread yazılmaz",
+  );
+});
+
+test("1.14: yeni thread pending; gönderenin ikinci mesajı 409, alıcı yanıtlamadan 409", async () => {
+  const env = chatEnv();
+  const id = await openThread(env);
+  const req = env.s.rows.get(`THREAD#${id}|REQUEST`);
+  assert.deepEqual([req.status, req.from, req.to], ["pending", "user-a", "user-b"]);
+  const second = await send(env, "user-a", id);
+  assert.equal(second.statusCode, 409);
+  assert.equal(JSON.parse(second.body).code, "REQUEST_PENDING");
+  assert.match(JSON.parse(second.body).error, /yanıt bekliyor/);
+  const early = await send(env, "user-b", id);
+  assert.equal(early.statusCode, 409);
+  assert.match(JSON.parse(early.body).error, /Önce mesaj isteğini yanıtla/);
+});
+
+test("1.14: yalnız alıcı yanıtlar; kabul mesajlaşmayı açar", async () => {
+  const env = chatEnv();
+  const id = await openThread(env);
+  const byOwner = await env.call("user-a", "POST", `/chat/threads/${id}/request`, {
+    action: "accept",
+  });
+  assert.equal(byOwner.statusCode, 404, "gönderen kendi isteğini kabul edemez");
+  const bad = await env.call("user-b", "POST", `/chat/threads/${id}/request`, { action: "x" });
+  assert.equal(bad.statusCode, 400);
+  const ok = await env.call("user-b", "POST", `/chat/threads/${id}/request`, {
+    action: "accept",
+  });
+  assert.equal(ok.statusCode, 200);
+  assert.equal(JSON.parse(ok.body).request, "accepted");
+  assert.equal((await send(env, "user-a", id)).statusCode, 201);
+  assert.equal((await send(env, "user-b", id)).statusCode, 201);
+  const again = await env.call("user-b", "POST", `/chat/threads/${id}/request`, {
+    action: "decline",
+  });
+  assert.equal(again.statusCode, 409, "yanıtlanmış istek tekrar değişmez");
+});
+
+test("1.14: reddet/engelle → mesaj 403", async () => {
+  for (const action of ["decline", "block"]) {
+    const env = chatEnv();
+    const id = await openThread(env);
+    await env.call("user-b", "POST", `/chat/threads/${id}/request`, { action });
+    const res = await send(env, "user-a", id);
+    assert.equal(res.statusCode, 403, action);
+    assert.equal((await send(env, "user-b", id)).statusCode, 403);
+  }
+});
+
+test("1.14: REQUEST kaydı olmayan eski thread mesaj atabilir; GSI1 anahtarları değişmez", async () => {
+  const env = chatEnv({
+    "THREAD#legacy|META": { PK: "THREAD#legacy", SK: "META", participants: ["user-a", "user-b"] },
+  });
+  assert.equal((await send(env, "user-a", "legacy")).statusCode, 201);
+  const id = await openThread(env);
+  const tx = env.h.calls.data.find((c) => c.name === "TransactWriteItemsCommand").input
+    .TransactItems;
+  const gsi = tx.filter((o) => o.Put.Item.GSI1PK);
+  assert.equal(gsi.length, 2);
+  for (const o of gsi) {
+    assert.match(o.Put.Item.GSI1PK, /^THREAD#user-[ab]$/);
+    assert.equal(typeof o.Put.Item.GSI1SK, "string");
+    assert.equal(o.Put.Item.SK.startsWith("PARTICIPANT#"), true);
+  }
+  assert.equal(tx.find((o) => o.Put.Item.SK === "REQUEST").Put.Item.GSI1PK, undefined);
+  const list = await env.call("user-a", "GET", "/chat/threads");
+  const q = env.h.calls.data.filter((c) => c.name === "QueryCommand").at(-1);
+  assert.equal(list.statusCode, 200);
+  assert.deepEqual([q.input.IndexName, q.input.KeyConditionExpression], ["GSI1", "GSI1PK = :pk"]);
+  assert.ok(id);
+});
+
+test("1.14 WS: pending 409, reddedilmiş 403, kabul edilmiş gönderilir (kapı atlanamaz)", async () => {
+  const wsSend = async (env, sub, id) => {
+    const ws = env.h.load("ws/onmessage.ts");
+    return ws.handler({
+      requestContext: { connectionId: `conn-${sub}`, domainName: "ws.example", stage: "prod" },
+      body: JSON.stringify({ action: "send_message", threadId: id, content: "WS selam" }),
+    });
+  };
+  const env = chatEnv();
+  const id = await openThread(env);
+  const pending = await wsSend(env, "user-a", id);
+  assert.equal(pending.statusCode, 409);
+  assert.equal(JSON.parse(pending.body).code, "REQUEST_PENDING");
+  const msgCount = () =>
+    [...env.s.rows.keys()].filter((k) => k.startsWith(`CHAT#${id}|MSG#`)).length;
+  const before = msgCount();
+  assert.equal((await wsSend(env, "user-b", id)).statusCode, 409);
+  assert.equal(msgCount(), before, "pending iken WS mesaj yazmaz");
+
+  const declinedEnv = chatEnv();
+  const d = await openThread(declinedEnv);
+  await declinedEnv.call("user-b", "POST", `/chat/threads/${d}/request`, { action: "decline" });
+  assert.equal((await wsSend(declinedEnv, "user-a", d)).statusCode, 403);
+
+  await env.call("user-b", "POST", `/chat/threads/${id}/request`, { action: "accept" });
+  const ok = await wsSend(env, "user-a", id);
+  assert.equal(ok.statusCode, 200);
+  assert.equal(JSON.parse(ok.body).status, "sent");
 });
