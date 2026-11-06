@@ -16,7 +16,7 @@ import {
 } from "./components/ui";
 import { SampleRoutePreview } from "./components/trip/sample-route-preview";
 import { HeroPrompt, ShareCodeForm } from "./home-prompt";
-import { useReveal } from "./lib/a11y/use-reveal";
+import { useReveal } from "./components/ui/hooks/use-reveal";
 import { getStoredSession } from "./lib/cognito";
 import { useLocale } from "./lib/locale-context";
 import { PLANNER_TRIPS_KEY, summarizeLastTrip, type LastTripSummary } from "./lib/trip/last-trip";
@@ -57,7 +57,7 @@ const FAQ = [
 
 const TRUST = ["home.hero.trust.ranking", "home.hero.trust.credits", "home.hero.trust.welcome"];
 
-/** Bölüm görünür alana girince bir kez belirir (lib/a11y/use-reveal; JS'siz baştan görünür). */
+/** Bölüm görünür alana girince bir kez belirir (components/ui/hooks/use-reveal; JS'siz baştan görünür). */
 function Reveal({ children }: { children: ReactNode }) {
   const ref = useReveal<HTMLDivElement>();
   return (

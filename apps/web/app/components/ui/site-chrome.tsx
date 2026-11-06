@@ -1,5 +1,5 @@
 "use client";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { findRoute } from "../../lib/route-registry";
 import { HeaderNav, MobileNav } from "../header-nav";
@@ -18,6 +18,10 @@ export function SiteChrome({ children }: { children: ReactNode }) {
   // Chrome varyantı (G19, R5) route-registry `chrome` alanından: immersive → footer yok;
   // focus → yalın header, alt menü ve footer yok.
   const chrome = findRoute(pathname)?.chrome ?? "default";
+  // R15: kaydırmada açılma gizlemesi yalnız JS çalışınca (html[data-js]); inline script yok.
+  useEffect(() => {
+    document.documentElement.dataset.js = "";
+  }, []);
   return (
     <Toaster>
       <SkipLink />

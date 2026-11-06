@@ -1,5 +1,17 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer primitives {
+  /* Ripple yarıçapı ve opaklığı (useRipple): kayıtlı özellik olarak canlanır; destek yoksa
+     yarıçap 0 kalır, ripple görünmez (ilerleyici iyileştirme). */
+  @property --ripple-r {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0px;
+  }
+  @property --ripple-a {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 0%;
+  }
   /* design §2.6/§3: yalnızca .ui-*; kökler dış margin/width/position/inset/grid-* tanımlamaz
      (istisna: üst katman primitive'leri Modal ve Toaster kendi yerleşimini taşır). */
 
@@ -26,7 +38,7 @@
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
-    transition-property: background-color, color, border-color, transform;
+    transition-property: background-color, color, border-color, box-shadow, transform;
     transition-duration: var(--duration-fast);
     transition-timing-function: var(--easing-standard);
   }
@@ -97,9 +109,34 @@
   .ui-button--link:hover {
     color: var(--button-link-fg-hover);
   }
+  /* Kalkık düğmeler hover'da gölge alır (renk/gölge her zaman; kayma yalnız no-preference). */
+  .ui-button:is(
+      .ui-button--primary,
+      .ui-button--brand,
+      .ui-button--secondary,
+      .ui-button--danger
+    ):not([aria-disabled="true"]):hover {
+    box-shadow: var(--shadow-md);
+  }
   .ui-button[aria-disabled="true"] {
     opacity: 0.55;
     cursor: not-allowed;
+  }
+  /* Disabled ≠ loading (direction §3): devre dışı gri; yükleniyor rengini korur. */
+  .ui-button[aria-disabled="true"]:not([aria-busy="true"], .ui-button--link, .ui-button--ghost) {
+    border-color: var(--color-border);
+    background: var(--color-surface-sunken);
+    color: var(--color-text-muted);
+    opacity: 1;
+  }
+  .ui-button__end {
+    display: inline-flex;
+  }
+  .ui-button__reason {
+    display: block;
+    margin-block-start: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
   }
   .ui-icon-button {
     padding: 0;
@@ -112,17 +149,9 @@
     border-inline-end-color: transparent;
     border-radius: var(--radius-full);
   }
-  /* Yüklenirken içerik yerinde kalır (genişlik sabit); spinner ortada üstüne biner. */
-  .ui-button[aria-busy="true"] {
-    contain: layout;
-  }
-  .ui-button[aria-busy="true"] > :not(.ui-button__spinner, .ui-visually-hidden) {
-    opacity: 0;
-  }
+  /* Yüklenirken spinner baştaki ikonun yerinde, etiket görünür ("Kaydediliyor…"). */
   .ui-button > .ui-button__spinner {
-    position: absolute;
-    inset: 0;
-    margin: auto;
+    flex: none;
   }
 
   /* Icon (SVG, svg-icon.tsx) */
@@ -317,7 +346,8 @@
     contain: layout;
   }
   .ui-card--interactive:hover {
-    box-shadow: var(--elevation-raised);
+    border-color: color-mix(in srgb, var(--color-brand) 45%, var(--card-border));
+    box-shadow: var(--shadow-lg);
   }
   .ui-card--interactive:has(.ui-card__link:focus-visible) {
     outline: var(--focus-ring-width) solid var(--focus-ring-color);
@@ -1415,6 +1445,16 @@
       transform: rotate(calc(var(--i) * 20deg)) translateY(calc(-1 * var(--space-12))) scale(1);
     }
   }
+  @keyframes ui-ripple {
+    from {
+      --ripple-r: 0px;
+      --ripple-a: 28%;
+    }
+    to {
+      --ripple-r: var(--ripple-size, 120px);
+      --ripple-a: 0%;
+    }
+  }
   @keyframes ui-sheet-in {
     from {
       transform: translateY(100%);
@@ -1434,8 +1474,50 @@
     .ui-page-shell--sidebar.ui-page-enter {
       animation-name: ui-fade-in;
     }
+    /* Hover 1 px kalkma, sondaki ikon 4 px; basma .97 (ikon düğmesi/çip .94); ripple. */
+    .ui-button:not(.ui-icon-button, .ui-button--link):hover:not([aria-disabled="true"]) {
+      transform: translateY(-1px);
+    }
     .ui-button:active:not([aria-disabled="true"]) {
-      transform: scale(0.98);
+      transform: scale(0.97);
+    }
+    .ui-icon-button:active:not([aria-disabled="true"]),
+    .ui-chip:active:not([aria-disabled="true"]) {
+      transform: scale(0.94);
+    }
+    .ui-button__end {
+      transition: transform var(--duration-base) var(--easing-emphasized);
+    }
+    .ui-button:hover:not([aria-disabled="true"]) .ui-button__end {
+      transform: translateX(4px);
+    }
+    .ui-button[data-ripple] {
+      background-image: radial-gradient(
+        circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
+        color-mix(in srgb, currentColor var(--ripple-a), transparent) var(--ripple-r),
+        transparent calc(var(--ripple-r) + 1px)
+      );
+      animation: ui-ripple var(--duration-deliberate) var(--easing-enter) forwards;
+    }
+    /* Kart 4 px kalkar; içindeki görsel 1,06 yakınlaşır. */
+    .ui-card--interactive:hover {
+      transform: translateY(-4px);
+    }
+    .ui-media__img {
+      transition: transform var(--duration-slow) var(--easing-standard);
+    }
+    :is(a, .ui-card--interactive):hover .ui-media__img {
+      transform: scale(1.06);
+    }
+    /* Kaydırmada açılma (R15): yalnız JS (html[data-js]) + useReveal pending yazdıysa gizli. */
+    html[data-js] .ui-reveal[data-reveal="pending"] {
+      opacity: 0;
+      transform: translateY(var(--motion-distance-lg));
+    }
+    .ui-reveal[data-reveal="shown"] {
+      transition:
+        opacity var(--duration-deliberate) var(--easing-enter),
+        transform var(--duration-deliberate) var(--easing-enter);
     }
     .ui-button__spinner,
     .ui-loading-state__spinner {
@@ -1445,14 +1527,15 @@
     .ui-accordion__icon,
     .ui-segmented__indicator {
       transition: var(--duration-base) var(--easing-standard);
-      transition-property: box-shadow, transform;
+      transition-property: box-shadow, transform, border-color;
     }
     .ui-chip {
       transition: var(--duration-fast) var(--easing-standard);
-      transition-property: background-color, border-color, color;
+      transition-property: background-color, border-color, color, transform;
     }
+    /* Seçilen çipte onay "pop". */
     .ui-chip__check {
-      animation: ui-fade-in var(--duration-fast) var(--easing-standard);
+      animation: ui-pop var(--duration-slow) var(--easing-emphasized);
     }
     .ui-bottom-sheet:not([data-dragging]) {
       transition: transform var(--duration-deliberate) var(--easing-enter);

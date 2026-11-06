@@ -411,3 +411,59 @@ test("Celebrate/Skeleton/Progress: süre tavanı ve hareket yalnız no-preferenc
   assert.match(prog, /role="progressbar"/);
   assert.match(prog, /aria-live="polite"/);
 });
+test("press-feedback: ripple basılan noktadan en uzak köşeye; klavyede merkez", () => {
+  const { rippleOrigin } = load("press-feedback");
+  const rect = { left: 100, top: 50, width: 120, height: 44 };
+  assert.deepEqual(plain(rippleOrigin(rect, 110, 60)), {
+    x: 10,
+    y: 10,
+    size: Math.ceil(Math.hypot(110, 34)),
+  });
+  assert.deepEqual(plain(rippleOrigin(rect, 0, 0)), {
+    x: 60,
+    y: 22,
+    size: Math.ceil(Math.hypot(60, 22)),
+  });
+  assert.deepEqual(plain(rippleOrigin(rect, 500, 500)), {
+    x: 60,
+    y: 22,
+    size: Math.ceil(Math.hypot(60, 22)),
+  });
+});
+test("press-feedback: reveal yalnız observer + hareket serbest + ilk ekran dışıyken gizli başlar (R15)", () => {
+  const { revealStartsHidden } = load("press-feedback");
+  assert.equal(
+    revealStartsHidden({ hasObserver: true, reducedMotion: false, inViewport: false }),
+    true,
+  );
+  assert.equal(
+    revealStartsHidden({ hasObserver: false, reducedMotion: false, inViewport: false }),
+    false,
+  );
+  assert.equal(
+    revealStartsHidden({ hasObserver: true, reducedMotion: true, inViewport: false }),
+    false,
+  );
+  assert.equal(
+    revealStartsHidden({ hasObserver: true, reducedMotion: false, inViewport: true }),
+    false,
+  );
+  const css = fs.readFileSync(path.resolve(__dirname, "../app/components/ui/ui.css"), "utf8");
+  const noPref = css.slice(css.indexOf("Hover 1 px kalkma"));
+  assert.match(noPref, /html\[data-js\] \.ui-reveal\[data-reveal="pending"\]/);
+  assert.ok(
+    css.indexOf("html[data-js] .ui-reveal") >
+      css.indexOf("@media (prefers-reduced-motion: no-preference)"),
+  );
+  const chrome = fs.readFileSync(
+    path.resolve(__dirname, "../app/components/ui/site-chrome.tsx"),
+    "utf8",
+  );
+  assert.match(chrome, /dataset\.js = ""/);
+});
+test("Button: loading görünür etiket + aria-busy, disabledReason aria-describedby, ripple", () => {
+  const src = fs.readFileSync(path.resolve(__dirname, "../app/components/ui/button.tsx"), "utf8");
+  assert.match(src, /loading && loadingLabel \? loadingLabel : children/);
+  assert.match(src, /"aria-describedby": showReason \? reasonId : undefined/);
+  assert.match(src, /useRipple/);
+});
