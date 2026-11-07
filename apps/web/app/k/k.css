@@ -40,11 +40,61 @@
     pointer-events: auto;
   }
 
+  /* Yüzen cam kod kartı (R13): fotoğraf/harita üstünde inverse cam, form açık kutuda. */
+  .share-lookup {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline: var(--space-4);
+    z-index: var(--z-overlay);
+    display: grid;
+    gap: var(--space-4);
+    box-sizing: border-box;
+    max-inline-size: 28rem;
+    margin-inline: auto;
+    padding: var(--space-5);
+    border: 1px solid var(--color-white-a12);
+    border-radius: var(--radius-xl);
+    background: color-mix(in srgb, var(--color-surface-inverse) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: var(--shadow-xl);
+    color: var(--color-text);
+    translate: 0 -50%;
+  }
+  .share-lookup__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+  }
+  .share-lookup__icon {
+    display: grid;
+    place-items: center;
+    inline-size: var(--touch-target);
+    block-size: var(--touch-target);
+    border-radius: var(--radius-full);
+    background: var(--color-white-a12);
+    color: var(--color-accent-strong);
+  }
+  .share-lookup__title {
+    margin: 0;
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-extrabold);
+  }
+  .share-lookup__body {
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
   .share-form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    margin-bottom: var(--space-4);
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: var(--color-text);
   }
 
   .share-status {
@@ -108,6 +158,16 @@
   @media (prefers-reduced-motion: no-preference) {
     .share-found {
       animation: share-found-in var(--duration-slow) var(--easing-enter);
+    }
+    /* .ui-shake (primitives katmanı) bu girişi ezer. */
+    .share-lookup {
+      animation: share-lookup-in var(--duration-deliberate) var(--easing-enter);
+    }
+    @keyframes share-lookup-in {
+      from {
+        opacity: 0;
+        transform: translateY(var(--motion-distance-lg)) scale(0.96);
+      }
     }
 
     @keyframes share-found-in {

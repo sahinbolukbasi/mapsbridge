@@ -10,7 +10,6 @@ import {
   Field,
   Icon,
   Input,
-  Modal,
   PageHeader,
   PageShell,
 } from "../components/ui";
@@ -78,6 +77,19 @@ export default function SharedLocationPage() {
   const [mapError, setMapError] = useState(false);
   const [share, setShare] = useState<ShareData | null>(null);
   const [lookupOpen, setLookupOpen] = useState(false);
+  const panelRef = useRef<HTMLElement>(null);
+  // Hata (alan ya da sunucu) gelince kart sallanır.
+  useEffect(() => {
+    if (!fieldError && !error) return;
+    const el = panelRef.current;
+    if (!el) return;
+    el.classList.remove("ui-shake");
+    void el.offsetWidth;
+    el.classList.add("ui-shake");
+  }, [fieldError, error]);
+  useEffect(() => {
+    if (lookupOpen) codeRef.current?.focus({ preventScroll: true });
+  }, [lookupOpen]);
 
   function renderShare(data: ShareData) {
     const L = leaflet();
@@ -217,15 +229,17 @@ export default function SharedLocationPage() {
       />
       <div ref={mapRef} className="share-map" role="region" aria-label={t("share.map", "Harita")} />
 
-      <div className="share-toolbar">
-        <Button
-          variant="secondary"
-          onClick={() => setLookupOpen(true)}
-          iconStart={<Icon name="search" size={16} />}
-        >
-          {t("share.newCode", "Yeni kod gir")}
-        </Button>
-      </div>
+      {!lookupOpen && (
+        <div className="share-toolbar">
+          <Button
+            variant="secondary"
+            onClick={() => setLookupOpen(true)}
+            iconStart={<Icon name="search" size={16} />}
+          >
+            {t("share.newCode", "Yeni kod gir")}
+          </Button>
+        </div>
+      )}
 
       {mapError && (
         <div className="share-map-error">
@@ -238,50 +252,83 @@ export default function SharedLocationPage() {
         </div>
       )}
 
-      <Modal
-        open={lookupOpen}
-        onClose={() => setLookupOpen(false)}
-        title={t("share.lookup.title", "Paylaşım kodu")}
-        description={t(
-          "share.lookup.body",
-          "Sana gönderilen kodu gir; süresi dolmamış ve onaylanmışsa konum haritada açılır. Görüntülemek için hesap gerekmez.",
-        )}
-        size="sm"
-        initialFocus={codeRef}
-      >
-        <form onSubmit={submit} className="share-form" noValidate>
-          <Field label={t("share.lookup.label", "Paylaşım kodu")} error={fieldError} required>
-            {(ids) => (
-              <Input
-                {...ids}
-                ref={codeRef}
-                type="text"
-                inputMode="text"
-                autoComplete="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                maxLength={80}
-                value={code}
-                onChange={(e) => {
-                  setCode(e.target.value);
-                  if (fieldError && readShareCode(normalizeShareCode(e.target.value)))
-                    setFieldError(null);
-                }}
-              />
+      {lookupOpen && (
+        // Yüzen cam kod kartı (Increment 3.7, R13): harita üstünde, data-surface="inverse".
+        // Hatalı kodda kart sallanır (yalnız no-preference); Esc bulunan konuma geri döner.
+        <section
+          ref={panelRef}
+          className="share-lookup"
+          data-surface="inverse"
+          aria-labelledby="share-lookup-title"
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) e.currentTarget.classList.remove("ui-shake");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" && share) setLookupOpen(false);
+          }}
+        >
+          <div className="share-lookup__head">
+            <span className="share-lookup__icon" aria-hidden="true">
+              <Icon name="key" size={20} />
+            </span>
+            <div>
+              <h2 id="share-lookup-title" className="share-lookup__title">
+                {t("share.lookup.title", "Paylaşım kodu")}
+              </h2>
+              <p className="share-lookup__body">
+                {t(
+                  "share.lookup.body",
+                  "Sana gönderilen kodu gir; süresi dolmamış ve onaylanmışsa konum haritada açılır. Görüntülemek için hesap gerekmez.",
+                )}
+              </p>
+            </div>
+          </div>
+          <form onSubmit={submit} className="share-form" noValidate data-surface="default">
+            <Field label={t("share.lookup.label", "Paylaşım kodu")} error={fieldError} required>
+              {(ids) => (
+                <Input
+                  {...ids}
+                  ref={codeRef}
+                  size="lg"
+                  iconStart="key"
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  maxLength={80}
+                  value={code}
+                  onChange={(e) => {
+                    setCode(e.target.value);
+                    if (fieldError && readShareCode(normalizeShareCode(e.target.value)))
+                      setFieldError(null);
+                  }}
+                />
+              )}
+            </Field>
+            <Button
+              type="submit"
+              fullWidth
+              size="lg"
+              loading={loading}
+              loadingLabel={t("share.lookup.loading", "Konum aranıyor…")}
+              iconEnd={<Icon name="arrow" size={20} />}
+            >
+              {t("share.lookup.submit", "Konumu göster")}
+            </Button>
+            {error && (
+              <Alert tone="danger" live="assertive">
+                {error}
+              </Alert>
             )}
-          </Field>
-          <Button type="submit" fullWidth size="lg" loading={loading} disabled={!code.trim()}>
-            {loading
-              ? t("share.lookup.loading", "Konum aranıyor…")
-              : t("share.lookup.submit", "Konumu göster")}
-          </Button>
-        </form>
-        {error && (
-          <Alert tone="danger" live="assertive">
-            {error}
-          </Alert>
-        )}
-      </Modal>
+            {share && (
+              <Button variant="ghost" fullWidth onClick={() => setLookupOpen(false)}>
+                {t("share.lookup.back", "Bulunan konuma dön")}
+              </Button>
+            )}
+          </form>
+        </section>
+      )}
 
       {loading && !lookupOpen && (
         <p className="share-status" role="status" data-surface="default">

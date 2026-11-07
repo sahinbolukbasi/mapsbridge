@@ -1297,5 +1297,6 @@
   "studio.ready.review": "Review first",
   "publicProfile.posts": "Posts",
   "publicProfile.posts.empty": "No posts yet",
-  "publicProfile.posts.toCommunity": "Go to community"
+  "publicProfile.posts.toCommunity": "Go to community",
+  "share.lookup.back": "Back to the found location"
 }

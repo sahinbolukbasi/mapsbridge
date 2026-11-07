@@ -1297,5 +1297,6 @@
   "studio.ready.review": "Önce incele",
   "publicProfile.posts": "Paylaşımları",
   "publicProfile.posts.empty": "Henüz paylaşım yok",
-  "publicProfile.posts.toCommunity": "Topluluğa git"
+  "publicProfile.posts.toCommunity": "Topluluğa git",
+  "share.lookup.back": "Bulunan konuma dön"
 }
