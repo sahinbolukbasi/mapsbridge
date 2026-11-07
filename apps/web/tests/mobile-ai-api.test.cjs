@@ -17,9 +17,12 @@ function harness(response) {
       exports: module.exports,
       console,
       crypto: require("node:crypto").webcrypto,
+      AbortController,
+      setTimeout,
+      clearTimeout,
       require: () => ({ storage: { getItem: async () => null } }),
       fetch: async (url, init) => {
-        calls.push({ url, body: JSON.parse(init.body) });
+        calls.push({ url, body: JSON.parse(init.body), signal: init.signal });
         if (response instanceof Error) throw response;
         return {
           ok: response.status === 200,
@@ -101,9 +104,21 @@ test("4.1: mobil API varsayılanı canlı host; ölü eski host repoda yok, app.
   const cfg = fs.readFileSync(path.resolve(__dirname, "../../mobile/app.config.ts"), "utf8");
   assert.match(
     cfg,
-    /apiBaseUrl:\s*process\.env\.EXPO_PUBLIC_API_BASE_URL \|\| "https:\/\/pwi1j8mq0j/,
+    /apiBaseUrl:\s*process\.env\.EXPO_PUBLIC_API_BASE_URL \|\|\s*"https:\/\/pwi1j8mq0j/,
   );
   const web = fs.readFileSync(path.resolve(__dirname, "../app/lib/api-client.ts"), "utf8");
   assert.match(web, /pwi1j8mq0j/);
   assert.doesNotMatch(web + cfg, /0duy2hfjd2/);
+});
+test("4.4: AI isteği 40 sn zaman aşımı sinyali taşır; ağ hatası AI_UNREACHABLE olur", async () => {
+  const h = harness({ status: 200, body: { responseMode: "clarify", orchestratorSummary: "?" } });
+  await h.api.ask("Roma");
+  assert.ok(h.calls[0].signal, "AbortSignal gönderilir");
+  assert.equal(h.mod.AI_TIMEOUT_MS, 40000);
+  const web = fs.readFileSync(path.resolve(__dirname, "../app/lib/ai/chat.ts"), "utf8");
+  assert.match(web, /AI_CHAT_TIMEOUT_MS = 40000/);
+  await assert.rejects(
+    () => harness(new Error("network")).api.ask("Roma"),
+    (err) => err.code === "AI_UNREACHABLE" && err.status === 0,
+  );
 });

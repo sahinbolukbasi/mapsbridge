@@ -877,3 +877,26 @@ test("4.3: ModalFrame ≥768 dp her sunumu ortalı dialog yapar, <768 sheet altt
   const press = fs.readFileSync(path.join(MOBILE, "ui/usePressScale.ts"), "utf8");
   assert.match(press, /PRESSED_SCALE = 0\.97/);
 });
+test("4.4: asistan aşamaları web ThinkingSteps ile aynı anahtar/gecikme; metinler tr.json", () => {
+  const web = fs.readFileSync(path.join(WEB, "travel-assistant/thinking-steps.tsx"), "utf8");
+  const webPhases = [...web.matchAll(/key: "(studio\.think\.[a-z]+)",[\s\S]*?delay: (\d+)/g)].map(
+    (m) => ({ key: m[1], delay: Number(m[2]) }),
+  );
+  const mob = loadTs(path.join(MOBILE, "ui/logic/thinking-phases.ts"));
+  assert.deepEqual(plain(mob.THINKING_PHASES), webPhases);
+  for (const p of mob.THINKING_PHASES) assert.equal(mobileUi.UI_TR[p.key], TR[p.key], p.key);
+  assert.match(
+    web,
+    /isRoute=\{input\.length > 20 \|\| \(session\?\.messages\.length \|\| 0\) >= 2\}|THINKING_PHASES\[0\], THINKING_PHASES\[4\]/,
+  );
+  assert.equal(mob.thinkingIsRoute(21, 0), true);
+  assert.equal(mob.thinkingIsRoute(5, 2), true);
+  assert.equal(mob.thinkingIsRoute(5, 1), false);
+  assert.equal(mob.currentPhase(true, 3), 2);
+  assert.equal(mob.currentPhase(false, 5), 1);
+  assert.equal(mob.visiblePhaseCount(7500), 3);
+  const ai = fs.readFileSync(path.join(MOBILE, "screens/AIScreen.tsx"), "utf8");
+  assert.match(ai, /<ThinkingSteps isRoute=\{thinkingRoute\}/);
+  assert.match(ai, /tr\("studio\.err\.timeoutRetry"\)/);
+  assert.match(ai, /openRoute\(item\.id, plan\)/, "rota hazır toast'u haritayı açar");
+});

@@ -11,6 +11,8 @@ import {
 } from "../guest/guest-draft";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import { RouteLoadingModal } from "../components/RouteLoadingModal";
+import { ThinkingSteps } from "../components/ThinkingSteps";
+import { thinkingIsRoute } from "../ui/logic/thinking-phases";
 import {
   Button,
   Card,
@@ -25,6 +27,7 @@ import {
   SegmentedControl,
   StopRow,
   Txt,
+  useToast,
   type CardQuestions,
 } from "../ui";
 import { tr } from "../i18n/ui";
@@ -63,6 +66,8 @@ interface ChatItem {
   warnings?: string[];
   assumptions?: string[];
   upgrade?: boolean;
+  /** Zaman aşımı / bağlantı hatası: aynı metin aynı requestId ile yeniden gönderilir. */
+  retry?: string;
 }
 interface PrepCard {
   title: string;
@@ -160,6 +165,8 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
   const [messages, setMessages] = useState<ChatItem[]>([WELCOME]);
   const [busy, setBusy] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
+  const [thinkingRoute, setThinkingRoute] = useState(false);
+  const toast = useToast();
   const [tab, setTab] = useState<"chat" | "prep">("chat");
   const [prep, setPrep] = useState<PrepCard[]>([]);
   const [guestDraft, setGuestDraft] = useState<GuestDraft | null>(null);
@@ -238,6 +245,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
       const text = raw.trim();
       if (!text || sending.current) return;
       sending.current = true;
+      setThinkingRoute(opts.fromDraft === true || thinkingIsRoute(text.length, messages.length));
       setBusy(true);
       if (opts.fromDraft) setRouteLoading(true);
       setMessages((prev) => [...prev, { id: `user-${Date.now()}`, sender: "user", text }]);
@@ -279,14 +287,24 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
         const nextPrep = toPrep(res);
         if (nextPrep.length) setPrep(nextPrep);
         setMessages((prev) => [...prev, item]);
+        if (item.route) {
+          const plan = item.route;
+          toast.show({
+            tone: "success",
+            title: tr("studio.ready.title"),
+            message: plan.title,
+            action: { label: tr("home.lastTrip.open"), onPress: () => openRoute(item.id, plan) },
+          });
+        }
         if (opts.fromDraft) {
           await clearDraft(storage);
           setGuestDraft(null);
         }
       } catch (error: unknown) {
-        const err = error as { status?: number; message?: string };
+        const err = error as { status?: number; code?: string; message?: string };
         if (err?.status && err.status < 500 && ![408, 409].includes(err.status))
           pendingTurn.current = null;
+        const retryable = err?.code === "AI_TIMEOUT" || err?.code === "AI_UNREACHABLE";
         setMessages((prev) => [
           ...prev,
           {
@@ -295,8 +313,13 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
             text:
               err?.status === 402
                 ? tr("upgrade.description")
-                : err?.message || tr("native.ai.noReply"),
+                : err?.code === "AI_TIMEOUT"
+                  ? tr("studio.err.timeoutRetry")
+                  : err?.code === "AI_UNREACHABLE"
+                    ? tr("studio.err.unreachable")
+                    : err?.message || tr("native.ai.noReply"),
             upgrade: err?.status === 402,
+            retry: retryable ? text : undefined,
           },
         ]);
       } finally {
@@ -305,7 +328,8 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
         setRouteLoading(false);
       }
     },
-    [conversationId],
+    // openRoute/toast yalnız ref ve kararlı API okur.
+    [conversationId, messages.length],
   );
 
   const newChat = () => {
@@ -383,7 +407,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
         <MessageLog
           label={tr("assistant.log.label")}
           busy={busy}
-          typing={busy}
+          typing={false}
           announcement={announcement}
         >
           {messages.map((msg) =>
@@ -427,6 +451,14 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
                       />
                     </View>
                   </Card>
+                ) : null}
+                {msg.retry && msg.id === lastBotId ? (
+                  <Button
+                    label={tr("ui.retry")}
+                    variant="secondary"
+                    disabled={busy}
+                    onPress={() => send(msg.retry!)}
+                  />
                 ) : null}
                 {msg.upgrade ? (
                   <Button label={tr("upgrade.compare")} variant="secondary" onPress={onOpenPlans} />
@@ -473,6 +505,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
               }
             />
           ) : null}
+          {busy && !routeLoading ? <ThinkingSteps isRoute={thinkingRoute} /> : null}
           {prep.length && tab === "chat" ? (
             <Button label={tr("ai.prepLink")} variant="ghost" onPress={() => setTab("prep")} />
           ) : null}

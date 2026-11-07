@@ -477,6 +477,11 @@ export interface AIAskResponse {
   conversationId?: string;
 }
 
+/** Web apps/web/app/lib/ai/chat.ts AI_CHAT_TIMEOUT_MS ile aynı (mobile-parity testi). */
+export const AI_TIMEOUT_MS = 40000;
+/** Web studio.err.timeoutRetry ile aynı metin. */
+export const AI_TIMEOUT_MESSAGE = "AI yanıtı zaman aşımına uğradı. Lütfen tekrar deneyin.";
+
 export const aiService = {
   async ask(prompt: string, context?: AIAskContext): Promise<AIAskResponse> {
     const conversationId = context?.conversationId || generateUUID();
@@ -507,22 +512,36 @@ export const aiService = {
       ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
     };
 
-    let res = await fetch(`${API_BASE}/ai/route-planner`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    });
+    // Zaman aşımı (web AI_CHAT_TIMEOUT_MS ile aynı 40 sn): sunucu bütçesi ≈24,5 sn + alt ajanlar.
+    // Aşılırsa AI_TIMEOUT, bağlantı yoksa AI_UNREACHABLE; aynı requestId ile yeniden denenir.
+    const post = async (): Promise<Response> => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+      try {
+        return await fetch(`${API_BASE}/ai/route-planner`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+      } catch {
+        const timedOut = controller.signal.aborted;
+        throw Object.assign(
+          new Error(timedOut ? AI_TIMEOUT_MESSAGE : "AI servisine ulaşılamadı."),
+          { status: 0, code: timedOut ? "AI_TIMEOUT" : "AI_UNREACHABLE" },
+        );
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+    let res = await post();
 
     // Handle 401 silent retry
     if (res.status === 401) {
       const refreshedToken = await authService.refreshToken();
       if (refreshedToken) {
         headers["Authorization"] = `Bearer ${refreshedToken}`;
-        res = await fetch(`${API_BASE}/ai/route-planner`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(body),
-        });
+        res = await post();
       }
     }
 
