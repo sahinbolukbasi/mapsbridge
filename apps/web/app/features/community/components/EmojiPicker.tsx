@@ -17,7 +17,9 @@ export function EmojiPicker({ onPick }: { onPick: (emoji: string) => void }) {
           aria-label={t(`community.emoji.${key}`, key)}
           onClick={() => onPick(emoji)}
         >
-          <span aria-hidden="true">{emoji}</span>
+          <span className="cm-emoji__glyph" aria-hidden="true">
+            {emoji}
+          </span>
         </button>
       ))}
     </div>

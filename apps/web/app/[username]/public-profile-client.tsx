@@ -8,13 +8,19 @@ import {
   Badge,
   Button,
   Card,
+  EmptyState,
   Icon,
   Media,
   PageHeader,
   PageShell,
+  Reveal,
   Section,
+  revealItem,
   useToast,
 } from "../components/ui";
+import type { CommunityPost } from "../features/community/types";
+import { sameUser } from "../lib/community/feed";
+import { webSocialSync } from "../lib/social-sync";
 import { apiFetch } from "../lib/api-client";
 import { getStoredSession } from "../lib/cognito";
 import { isFollowingUser, toggleFollowUser } from "../lib/follow-system";
@@ -54,6 +60,15 @@ export default function PublicProfileClient({
   const [avatar, setAvatar] = useState<string | null>(null);
   const [following, setFollowing] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
+  // Kullanıcının paylaşımları: topluluk akışıyla aynı kaynak (webSocialSync); yalnız gerçek
+  // gönderiler, sayaç/istatistik uydurulmaz.
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  useEffect(() => {
+    const pick = (all: CommunityPost[]) =>
+      setPosts(all.filter((p) => sameUser(p.authorUsername, username)));
+    pick(webSocialSync.getPosts());
+    return webSocialSync.subscribePosts(pick);
+  }, [username]);
 
   useEffect(() => {
     const session = getStoredSession();
@@ -125,7 +140,15 @@ export default function PublicProfileClient({
 
   return (
     <PageShell className="pub-profile">
+      <div className="pub-profile__cover" aria-hidden="true">
+        <svg className="pub-profile__contours" viewBox="0 0 1200 200" preserveAspectRatio="none">
+          <path d="M-50 140 C 200 90, 380 180, 620 120 S 1000 40, 1260 90" />
+          <path d="M-50 170 C 220 120, 400 210, 640 150 S 1010 70, 1260 120" />
+          <path d="M-50 60 C 160 20, 360 110, 580 50 S 960 -10, 1260 30" />
+        </svg>
+      </div>
       <PageHeader
+        enter
         title={name}
         titleText={name}
         eyebrow={`@${username}`}
@@ -187,8 +210,10 @@ export default function PublicProfileClient({
         }
       />
 
-      <Card className="pub-profile__card">
-        <Avatar src={avatar} name={name} size="lg" />
+      <Card className="pub-profile__card" variant="raised">
+        <span className="pub-profile__avatar">
+          <Avatar src={avatar} name={name} size="lg" />
+        </span>
         <div className="pub-profile__text">
           {sample && <Badge tone="example">{t("publicProfile.sampleBadge", "Örnek profil")}</Badge>}
           {sample ? (
@@ -249,6 +274,45 @@ export default function PublicProfileClient({
         </Section>
       )}
 
+      {!sample && (
+        <Section title={t("publicProfile.posts", "Paylaşımları")}>
+          {posts.length === 0 ? (
+            <EmptyState
+              icon="users"
+              contour
+              level={3}
+              title={t("publicProfile.posts.empty", "Henüz paylaşım yok")}
+              action={
+                <Button href="/community/" variant="secondary">
+                  {t("publicProfile.posts.toCommunity", "Topluluğa git")}
+                </Button>
+              }
+            />
+          ) : (
+            <Reveal as="ul" stagger className="pub-profile__posts">
+              {posts.slice(0, 12).map((p, i) => (
+                <li key={p.id} className="pub-post" {...revealItem(i)}>
+                  {p.image && (
+                    <Media src={p.image} alt="" ratio="16/9" className="pub-post__media" />
+                  )}
+                  <p className="pub-post__text">{p.content}</p>
+                  <p className="pub-post__meta">
+                    {p.locationTag && (
+                      <span className="pub-post__place">
+                        <Icon name="map" size={16} />
+                        {p.locationTag}
+                      </span>
+                    )}
+                    <time dateTime={p.createdAt}>
+                      {new Date(p.createdAt).toLocaleDateString(locale === "en" ? "en-GB" : "tr-TR")}
+                    </time>
+                  </p>
+                </li>
+              ))}
+            </Reveal>
+          )}
+        </Section>
+      )}
       {own && (
         <Alert tone="info">
           {t(

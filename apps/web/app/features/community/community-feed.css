@@ -1,6 +1,10 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
   /* Topluluk gönderi kartı ve formları (design F17, F20). Topluluk ve profil sayfaları paylaşır. */
+  .cm-post:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 35%, var(--card-border));
+    box-shadow: var(--shadow-lg);
+  }
   .cm-post {
     display: flex;
     flex-direction: column;
@@ -250,11 +254,41 @@
       pointer-events: none;
       animation: cm-burst var(--duration-deliberate) var(--easing-exit) forwards;
     }
-    .cm-emoji__item {
-      transition: transform var(--duration-fast) var(--easing-standard);
+    /* Emoji üzerine gelince/odakta sallanır. */
+    .cm-emoji__item:is(:hover, :focus-visible) .cm-emoji__glyph {
+      display: inline-block;
+      animation: cm-wiggle var(--duration-deliberate) var(--easing-emphasized);
     }
-    .cm-emoji__item:hover {
-      transform: scale(1.2);
+    /* Kart 2 px kalkar; sürükleme bölgesinde ikon zıplar. */
+    .cm-post {
+      transition:
+        transform var(--duration-base) var(--easing-standard),
+        box-shadow var(--duration-base) var(--easing-standard),
+        border-color var(--duration-fast) var(--easing-standard);
+    }
+    .cm-post:hover {
+      transform: translateY(-2px);
+    }
+    .cm-drop {
+      transition:
+        border-color var(--duration-fast) var(--easing-standard),
+        background-color var(--duration-fast) var(--easing-standard),
+        transform var(--duration-base) var(--easing-emphasized);
+    }
+    .cm-drop[data-dragging] {
+      transform: scale(1.02);
+    }
+    @keyframes cm-wiggle {
+      0%,
+      100% {
+        transform: none;
+      }
+      25% {
+        transform: rotate(-14deg) scale(1.2);
+      }
+      60% {
+        transform: rotate(10deg) scale(1.25);
+      }
     }
   }
   @keyframes cm-pop {

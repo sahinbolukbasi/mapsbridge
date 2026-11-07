@@ -35,4 +35,77 @@
       inset-block-start: calc(var(--app-header-height) + var(--space-4));
     }
   }
+  .community-aside {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+  .community-aside__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-weight: var(--font-weight-semibold);
+  }
+  .community-prompt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-md);
+  }
+  .community-prompt__icon {
+    display: grid;
+    place-items: center;
+    inline-size: var(--touch-target);
+    block-size: var(--touch-target);
+    border-radius: var(--radius-full);
+    background: var(--color-highlight-bg);
+    color: var(--color-highlight-text);
+  }
+  .community-prompt__field {
+    flex: 1;
+    min-inline-size: 10rem;
+    min-block-size: var(--touch-target);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius-full);
+    background: var(--field-bg);
+    color: var(--color-text-muted);
+    font: inherit;
+    text-align: start;
+    cursor: text;
+  }
+  .community-prompt__field:hover {
+    border-color: var(--color-brand);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* Akış kartları sırayla yükselir (ilk 6). */
+    .community-feed > * {
+      animation: community-rise var(--duration-deliberate) var(--easing-enter) backwards;
+    }
+    .community-feed > :nth-child(2) {
+      animation-delay: calc(var(--stagger-step) * 2);
+    }
+    .community-feed > :nth-child(3) {
+      animation-delay: calc(var(--stagger-step) * 4);
+    }
+    .community-feed > :nth-child(4) {
+      animation-delay: calc(var(--stagger-step) * 5);
+    }
+    .community-feed > :nth-child(n + 5) {
+      animation-delay: var(--stagger-max);
+    }
+    @keyframes community-rise {
+      from {
+        opacity: 0;
+        transform: translateY(var(--motion-distance-lg));
+      }
+    }
+  }
 }

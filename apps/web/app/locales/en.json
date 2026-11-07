@@ -1294,5 +1294,8 @@
   "planner.firstSave.body": "It opens in every session now, and you can share it with a code.",
   "studio.draft.empty.examples": "Example sentences",
   "studio.ready.title": "Your route is ready",
-  "studio.ready.review": "Review first"
+  "studio.ready.review": "Review first",
+  "publicProfile.posts": "Posts",
+  "publicProfile.posts.empty": "No posts yet",
+  "publicProfile.posts.toCommunity": "Go to community"
 }

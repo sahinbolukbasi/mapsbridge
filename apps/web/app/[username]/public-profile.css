@@ -1,6 +1,102 @@
 @layer tokens, base, legacy, chrome, pages, primitives;
 @layer pages {
   /* Gezgin profili (design F2, F20). */
+  /* Kapak bandı: kenardan kenara ışık lekeleri + kontur (dekoratif). */
+  .pub-profile__cover {
+    position: relative;
+    overflow: hidden;
+    block-size: 140px;
+    margin-block-start: var(--space-4);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(
+        60% 120% at 100% 0%,
+        color-mix(in srgb, var(--color-highlight-bg-strong) 80%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        60% 120% at 0% 100%,
+        color-mix(in srgb, var(--color-surface-brand-strong) 80%, transparent),
+        transparent 70%
+      ),
+      var(--color-surface-sunken);
+  }
+  .pub-profile__contours {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    color: var(--color-brand);
+    opacity: 0.18;
+  }
+  .pub-profile__contours path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+  }
+  .pub-profile__avatar {
+    display: inline-flex;
+    padding: var(--space-1);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-md);
+  }
+  .pub-profile__posts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pub-post {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    background: var(--card-bg);
+    transition:
+      box-shadow var(--duration-base) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard);
+  }
+  .pub-post:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 35%, var(--card-border));
+    box-shadow: var(--shadow-lg);
+  }
+  .pub-post__text {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    white-space: pre-line;
+  }
+  .pub-post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .pub-post__place {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .pub-profile__contours path {
+      animation: pub-contour calc(var(--duration-route) * 40) var(--easing-linear) infinite
+        alternate;
+    }
+    @keyframes pub-contour {
+      to {
+        transform: translate(-40px, 10px);
+      }
+    }
+  }
   .pub-profile__card {
     display: flex;
     flex-wrap: wrap;

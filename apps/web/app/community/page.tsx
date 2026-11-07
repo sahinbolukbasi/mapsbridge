@@ -159,6 +159,22 @@ export default function CommunityPage() {
           </ChipGroup>
         </aside>
         <div className="community-main">
+          {/* Satır içi composer daveti: dokununca paylaşım penceresi açılır (misafirde AuthGate). */}
+          <div className="community-prompt" data-enter="">
+            <span className="community-prompt__icon" aria-hidden="true">
+              <Icon name="camera" size={20} />
+            </span>
+            <button type="button" className="community-prompt__field" onClick={openComposer}>
+              {t("community.compose.placeholder", "Nereyi keşfettin?")}
+            </button>
+            <Button
+              variant="secondary"
+              onClick={openComposer}
+              iconStart={<Icon name="image" size={16} />}
+            >
+              {t("community.compose.chooseImage", "Fotoğraf seç")}
+            </Button>
+          </div>
           <SegmentedControl<FeedMode>
             label={t("community.mode.label", "Akış")}
             value={mode}
@@ -183,6 +199,7 @@ export default function CommunityPage() {
             {visible.length === 0 ? (
               <EmptyState
                 icon="users"
+                contour
                 title={t("community.empty.title", "Henüz paylaşım yok")}
                 description={
                   mode === "following"

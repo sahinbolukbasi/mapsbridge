@@ -318,7 +318,11 @@ test("createPost görsel alanını taşır; composer görseli ve emoji seçiciyi
   assert.match(modal, /accept=\{IMAGE_TYPES\.join\(","\)\}/);
   assert.match(modal, /onDrop=\{onDrop\}/);
   assert.match(modal, /fileRef\.current\?\.click\(\)/, "sürükle-bırakın düğme alternatifi");
-  assert.match(modal, /<progress/);
+  assert.match(
+    modal,
+    /<Progress\s+variant="determinate"/,
+    "yükleme ilerlemesi Progress primitive (3.5)",
+  );
   assert.match(modal, /<EmojiPicker onPick=\{addEmoji\} \/>/);
 });
 

@@ -1,6 +1,16 @@
 "use client";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
-import { Badge, Button, Field, Icon, Input, Modal, Select, Textarea } from "../../../components/ui";
+import {
+  Badge,
+  Button,
+  Field,
+  Icon,
+  Input,
+  Modal,
+  Progress,
+  Select,
+  Textarea,
+} from "../../../components/ui";
 import { mediaApi } from "../../../lib/api-client";
 import { EmojiPicker, insertAt } from "./EmojiPicker";
 import { IMAGE_TYPES, prepareImage, uploadPostImage, validateImage } from "../media";
@@ -73,6 +83,7 @@ export function NewPostModal({
   const [emojiOpen, setEmojiOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
     if (open) setTrips(readPlannerTrips());
   }, [open]);
@@ -137,6 +148,14 @@ export function NewPostModal({
     const text = content.trim();
     if (!text) {
       setError(t("community.compose.required", "Paylaşım metni boş olamaz."));
+      // Boş gönderim: composer sallanır (yalnız no-preference, ui.css .ui-shake), odak metinde.
+      const form = formRef.current;
+      if (form) {
+        form.classList.remove("ui-shake");
+        void form.offsetWidth;
+        form.classList.add("ui-shake");
+      }
+      textRef.current?.focus();
       return;
     }
     const trip = trips.find((x) => x.id === tripId);
@@ -168,7 +187,16 @@ export function NewPostModal({
         </>
       }
     >
-      <form id="cm-new-post-form" className="cm-form" onSubmit={submit} noValidate>
+      <form
+        ref={formRef}
+        id="cm-new-post-form"
+        className="cm-form"
+        onSubmit={submit}
+        onAnimationEnd={(e) => {
+          if (e.target === e.currentTarget) e.currentTarget.classList.remove("ui-shake");
+        }}
+        noValidate
+      >
         <Field
           label={t("community.compose.content", "Paylaşım metni")}
           hint={t("community.compose.contentHint", "#etiket yazarsan gönderiye eklenir.")}
@@ -261,11 +289,12 @@ export function NewPostModal({
                 </div>
               ) : progress !== null ? (
                 <div className="cm-drop__progress">
-                  <progress
-                    className="cm-drop__bar"
-                    aria-label={t("community.compose.uploading", "Fotoğraf yükleniyor")}
+                  <Progress
+                    variant="determinate"
+                    label={t("community.compose.uploading", "Fotoğraf yükleniyor")}
                     max={100}
                     value={Math.round(progress * 100)}
+                    showValue
                   />
                   <p className="cm-drop__hint">
                     {t("community.compose.uploading", "Fotoğraf yükleniyor")}

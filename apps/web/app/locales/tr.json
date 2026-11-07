@@ -1294,5 +1294,8 @@
   "planner.firstSave.body": "Artık her oturumda açılır; kodla paylaşabilirsin.",
   "studio.draft.empty.examples": "Örnek cümleler",
   "studio.ready.title": "Rotan hazır",
-  "studio.ready.review": "Önce incele"
+  "studio.ready.review": "Önce incele",
+  "publicProfile.posts": "Paylaşımları",
+  "publicProfile.posts.empty": "Henüz paylaşım yok",
+  "publicProfile.posts.toCommunity": "Topluluğa git"
 }
