@@ -1,6 +1,5 @@
-import { Platform } from "react-native";
 import { storage } from "./storage";
-import { authService, RouteStop } from "./api";
+import { API_BASE, authService, RouteStop } from "./api";
 import { stripLegacyProfileDefaults } from "../profile/legacy-defaults";
 
 export interface MobileUserProfile {
@@ -27,6 +26,8 @@ export interface MobileCommunityComment {
 }
 
 export interface MobileCommunityPost {
+  /** Sunucuya yazılamadı (ya da görsel cihaz-yerel): kartta "Yalnız bu cihazda" rozeti. */
+  deviceOnly?: boolean;
   id: string;
   authorName: string;
   authorHandle: string;
@@ -114,10 +115,42 @@ interface RawServerPost {
 // ve takipçi sayıları kullanılmaz. Görsel yoksa arayüz ad baş harflerini çizer; konum yoksa yazılmaz.
 const DEFAULT_AVATAR = "";
 
-// Base URL for sync backend
-const COMMUNITY_API_BASE =
-  process.env.EXPO_PUBLIC_COMMUNITY_API ||
-  (Platform.OS === "android" ? "http://10.0.2.2:3000" : "http://localhost:3000");
+// Topluluk uçları (Increment 4.4, web social-sync ile aynı): canlı API `/community/posts`
+// (infra-changes.md §1.13). Eski geliştirme sunucusu adresi canlı cihazda hiç
+// çalışmıyordu. Oturum belirteci Authorization başlığında; kimlik sunucuda doğrulanır (istemci
+// beyanı X-User-Identity kaldırıldı). Hata/404'te gönderi cihazda kalır ve "Yalnız bu cihazda".
+const COMMUNITY_TIMEOUT_MS = 10000;
+async function communityFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const session = await authService.getSession();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), COMMUNITY_TIMEOUT_MS);
+  try {
+    return await fetch(`${API_BASE}${path}`, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
+        ...((init.headers as Record<string, string>) || {}),
+      },
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+const isLocalPostId = (id: string) => id.startsWith("post-");
+/** Sunucu akışı + yalnız bu cihazdaki gönderiler (web mergePosts ile aynı kural). */
+export function mergePosts(
+  server: MobileCommunityPost[],
+  local: MobileCommunityPost[],
+): MobileCommunityPost[] {
+  const ids = new Set(server.map((p) => p.id));
+  const localOnly = local.filter((p) => !ids.has(p.id) && (p.deviceOnly || isLocalPostId(p.id)));
+  return [...localOnly, ...server];
+}
+/** Cihaz-yerel görsel (file:// ya da data:) sunucuya gönderilmez. */
+export const isDeviceImage = (uri: string | undefined) =>
+  !!uri && (uri.startsWith("file:") || uri.startsWith("data:") || uri.startsWith("ph:"));
 
 type PostListener = (posts: MobileCommunityPost[]) => void;
 type ProfileListener = (profile: MobileUserProfile) => void;
@@ -140,7 +173,9 @@ function mapServerPostToMobile(post: RawServerPost): MobileCommunityPost {
     authorAvatar: post.authorAvatar || DEFAULT_AVATAR,
     authorEmail: post.authorEmail,
     verified: post.verified ?? false,
-    timeAgo: post.createdAt || "Az önce",
+    timeAgo: post.createdAt
+      ? new Date(post.createdAt).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })
+      : "Az önce",
     content: post.content || "",
     hashtags: post.hashtags || post.tags || [],
     locationTag: post.locationTag,
@@ -174,7 +209,8 @@ function mapServerPostToMobile(post: RawServerPost): MobileCommunityPost {
       text: c.text || c.content || "",
       time: c.createdAt || c.time || "Az önce",
     })),
-    createdAtMs: post.createdAtMs || Date.now(),
+    createdAtMs:
+      post.createdAtMs || (post.createdAt ? Date.parse(post.createdAt) : 0) || Date.now(),
   };
 }
 
@@ -273,43 +309,81 @@ class SocialSyncService {
 
   // ─── Community Posts Operations (Backend Synchronized) ─────────────────────────
   async getPosts(): Promise<MobileCommunityPost[]> {
-    // 1. Fetch from live backend API
+    const local = await this.localPosts();
+    // 1. Canlı API; yalnız bu cihazdaki gönderiler korunur.
     try {
-      const profile = await this.getUserProfile();
-      const response = await fetch(
-        `${COMMUNITY_API_BASE}/api/community/posts?username=${encodeURIComponent(profile.username)}`,
-        {
-          headers: {
-            "X-User-Identity": profile.username,
-          },
-        },
-      );
-
+      const response = await communityFetch("/community/posts");
       if (response.ok) {
         const data = await response.json();
         if (data.success && Array.isArray(data.posts)) {
-          const mapped = data.posts.map(mapServerPostToMobile);
-          await storage.setItem(STORAGE_KEY_POSTS, JSON.stringify(mapped));
-          this.postListeners.forEach((fn) => fn(mapped));
-          return mapped;
+          const merged = mergePosts(data.posts.map(mapServerPostToMobile), local);
+          await storage.setItem(STORAGE_KEY_POSTS, JSON.stringify(merged));
+          this.postListeners.forEach((fn) => fn(merged));
+          return merged;
         }
       }
     } catch (e) {
       console.warn("[socialSyncService] Backend fetch failed, falling back to local storage:", e);
     }
+    // 2. Çevrimdışı: yalnız cihazdaki kayıt (uydurma içerik yok).
+    return local;
+  }
 
-    // 2. Offline fallback: load from local storage (Zero dummy data fallback)
+  private async localPosts(): Promise<MobileCommunityPost[]> {
     try {
       const stored = await storage.getItem(STORAGE_KEY_POSTS);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          return parsed;
-        }
-      }
-    } catch {}
+      const parsed: unknown = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? (parsed as MobileCommunityPost[]) : [];
+    } catch {
+      return [];
+    }
+  }
 
-    return [];
+  private async patchLocalPost(id: string, patch: Partial<MobileCommunityPost>) {
+    const posts = await this.localPosts();
+    const next = posts.map((p) => (p.id === id ? { ...p, ...patch } : p));
+    await storage.setItem(STORAGE_KEY_POSTS, JSON.stringify(next));
+    this.postListeners.forEach((fn) => fn(next));
+  }
+
+  /**
+   * Görseli medya alanına yükler (web mediaApi: GET /media/presign-upload → PUT). Başarısızsa
+   * null döner; çağıran görseli cihaz-yerel tutar ve "Yalnız bu cihazda" gösterir (M3).
+   */
+  async uploadImage(
+    uri: string,
+    mimeType: string,
+    onProgress?: (fraction: number) => void,
+  ): Promise<string | null> {
+    try {
+      const ext = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
+      const params = new URLSearchParams({
+        fileName: `community-${Date.now()}.${ext}`,
+        contentType: mimeType,
+        category: "traveler-photos",
+      });
+      const presign = await communityFetch(`/media/presign-upload?${params.toString()}`);
+      if (!presign.ok) return null;
+      const { uploadUrl, publicUrl } = (await presign.json()) as {
+        uploadUrl?: string;
+        publicUrl?: string;
+      };
+      if (!uploadUrl || !publicUrl) return null;
+      onProgress?.(0.2);
+      const blob = await (await fetch(uri)).blob();
+      onProgress?.(0.5);
+      const put = await fetch(uploadUrl, {
+        method: "PUT",
+        body: blob,
+        headers: { "Content-Type": mimeType },
+      });
+      if (!put.ok) return null;
+      onProgress?.(1);
+      return publicUrl;
+    } catch (e) {
+      console.warn("[socialSyncService] Media upload failed:", e);
+      return null;
+    }
   }
 
   async createPost(data: {
@@ -356,37 +430,51 @@ class SocialSyncService {
     await storage.setItem(STORAGE_KEY_POSTS, JSON.stringify(nextPosts));
     this.postListeners.forEach((fn) => fn(nextPosts));
 
-    // Backend sync
+    // Sunucu senkronu (web ile aynı): başarıda yerel kimlik sunucu kimliğiyle değişir; 404/ağ
+    // hatasında gönderi "Yalnız bu cihazda" işaretlenir. Cihaz-yerel görsel sunucuya gitmez.
+    const deviceImage = isDeviceImage(data.mediaImage);
     try {
-      await fetch(`${COMMUNITY_API_BASE}/api/community/posts`, {
+      const res = await communityFetch("/community/posts", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-User-Identity": profile.username,
-        },
         body: JSON.stringify({
           content: cleanContent,
-          authorUsername: profile.username,
-          authorDisplayName: profile.fullName,
-          authorAvatar: profile.avatarUrl || DEFAULT_AVATAR,
+          displayName: profile.fullName,
+          category: "genel",
           locationTag: cleanLocation,
           hashtags: cleanHashtags,
-          image: data.mediaImage,
+          image: deviceImage ? undefined : data.mediaImage,
           linkedRoute: data.routeAttachment
             ? {
                 title: data.routeAttachment.title,
                 stopCount: data.routeAttachment.stops?.length || 0,
-                destination: cleanLocation,
-                stops: data.routeAttachment.stops,
+                destination: cleanLocation || data.routeAttachment.title,
+                stops: data.routeAttachment.stops.map((st) => ({
+                  label: st.name,
+                  lat: st.lat,
+                  lng: st.lng,
+                  address: st.address,
+                  category: st.category,
+                })),
               }
             : undefined,
         }),
       });
+      const body = res.ok
+        ? ((await res.json().catch(() => null)) as { post?: { id?: string } } | null)
+        : null;
+      if (body?.post?.id) {
+        await this.patchLocalPost(newPost.id, {
+          id: body.post.id,
+          deviceOnly: deviceImage || undefined,
+        });
+        return { ...newPost, id: body.post.id, deviceOnly: deviceImage || undefined };
+      }
+      await this.patchLocalPost(newPost.id, { deviceOnly: true });
     } catch (e) {
       console.warn("[socialSyncService] Backend createPost sync failed:", e);
+      await this.patchLocalPost(newPost.id, { deviceOnly: true });
     }
-
-    return newPost;
+    return { ...newPost, deviceOnly: true };
   }
 
   async editPost(
@@ -406,9 +494,7 @@ class SocialSyncService {
 
     const isOwner =
       target.authorHandle === `@${profile.username}` ||
-      target.authorName.toLowerCase() === profile.fullName.toLowerCase() ||
-      target.authorHandle === "@canberk" ||
-      target.authorHandle === "@gezgin";
+      target.authorName.toLowerCase() === profile.fullName.toLowerCase();
     if (!isOwner) return null;
 
     let updatedPost: MobileCommunityPost | null = null;
@@ -439,10 +525,14 @@ class SocialSyncService {
       this.postListeners.forEach((fn) => fn(nextPosts));
 
       try {
-        await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}`, {
+        await communityFetch(`/community/posts/${encodeURIComponent(postId)}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-          body: JSON.stringify(updates),
+          body: JSON.stringify({
+            content: updates.content,
+            hashtags: updates.hashtags,
+            locationTag: updates.locationTag,
+            image: isDeviceImage(updates.mediaImage) ? undefined : updates.mediaImage,
+          }),
         });
       } catch (e) {
         console.warn("[socialSyncService] Backend editPost sync failed:", e);
@@ -459,9 +549,7 @@ class SocialSyncService {
 
     const isOwner =
       target.authorHandle === `@${profile.username}` ||
-      target.authorName.toLowerCase() === profile.fullName.toLowerCase() ||
-      target.authorHandle === "@canberk" ||
-      target.authorHandle === "@gezgin";
+      target.authorName.toLowerCase() === profile.fullName.toLowerCase();
     if (!isOwner) return false;
 
     const nextPosts = posts.filter((p) => p.id !== postId);
@@ -469,10 +557,7 @@ class SocialSyncService {
     this.postListeners.forEach((fn) => fn(nextPosts));
 
     try {
-      await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}`, {
-        method: "DELETE",
-        headers: { "X-User-Identity": profile.username },
-      });
+      await communityFetch(`/community/posts/${encodeURIComponent(postId)}`, { method: "DELETE" });
     } catch (e) {
       console.warn("[socialSyncService] Backend deletePost sync failed:", e);
     }
@@ -482,7 +567,6 @@ class SocialSyncService {
 
   async toggleLike(postId: string): Promise<MobileCommunityPost | null> {
     const posts = await this.getPosts();
-    const profile = await this.getUserProfile();
     let updatedPost: MobileCommunityPost | null = null;
 
     const nextPosts = posts.map((post) => {
@@ -502,10 +586,9 @@ class SocialSyncService {
     this.postListeners.forEach((fn) => fn(nextPosts));
 
     try {
-      await fetch(`${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/like`, {
+      await communityFetch(`/community/posts/${encodeURIComponent(postId)}/like`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-        body: JSON.stringify({ username: profile.username }),
+        body: JSON.stringify({ on: (updatedPost as MobileCommunityPost | null)?.isLiked ?? true }),
       });
     } catch (e) {
       console.warn("[socialSyncService] Backend toggleLike sync failed:", e);
@@ -516,7 +599,6 @@ class SocialSyncService {
 
   async toggleBookmark(postId: string): Promise<MobileCommunityPost | null> {
     const posts = await this.getPosts();
-    const profile = await this.getUserProfile();
     let updatedPost: MobileCommunityPost | null = null;
 
     const nextPosts = posts.map((post) => {
@@ -538,14 +620,12 @@ class SocialSyncService {
     this.postListeners.forEach((fn) => fn(nextPosts));
 
     try {
-      await fetch(
-        `${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/bookmark`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-          body: JSON.stringify({ username: profile.username }),
-        },
-      );
+      await communityFetch(`/community/posts/${encodeURIComponent(postId)}/bookmark`, {
+        method: "POST",
+        body: JSON.stringify({
+          on: (updatedPost as MobileCommunityPost | null)?.isBookmarked ?? true,
+        }),
+      });
     } catch (e) {
       console.warn("[socialSyncService] Backend toggleBookmark sync failed:", e);
     }
@@ -555,7 +635,6 @@ class SocialSyncService {
 
   async retweet(postId: string): Promise<MobileCommunityPost | null> {
     const posts = await this.getPosts();
-    const profile = await this.getUserProfile();
     let updatedPost: MobileCommunityPost | null = null;
 
     const nextPosts = posts.map((post) => {
@@ -572,19 +651,7 @@ class SocialSyncService {
     await storage.setItem(STORAGE_KEY_POSTS, JSON.stringify(nextPosts));
     this.postListeners.forEach((fn) => fn(nextPosts));
 
-    try {
-      await fetch(
-        `${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/retweet`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-          body: JSON.stringify({ username: profile.username }),
-        },
-      );
-    } catch (e) {
-      console.warn("[socialSyncService] Backend retweet sync failed:", e);
-    }
-
+    // Sunucuda yeniden paylaşım ucu yok: yalnız bu cihazda sayılır.
     return updatedPost;
   }
 
@@ -615,23 +682,7 @@ class SocialSyncService {
     await storage.setItem(STORAGE_KEY_POSTS, JSON.stringify(nextPosts));
     this.postListeners.forEach((fn) => fn(nextPosts));
 
-    try {
-      await fetch(
-        `${COMMUNITY_API_BASE}/api/community/posts/${encodeURIComponent(postId)}/comment`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-User-Identity": profile.username },
-          body: JSON.stringify({
-            username: profile.username,
-            displayName: profile.fullName,
-            text: text.trim(),
-          }),
-        },
-      );
-    } catch (e) {
-      console.warn("[socialSyncService] Backend addComment sync failed:", e);
-    }
-
+    // Sunucuda yorum ucu yok (infra-changes.md §1.13): yorum yalnız bu cihazda saklanır.
     return newComment;
   }
 }

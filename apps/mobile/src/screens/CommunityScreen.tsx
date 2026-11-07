@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ScrollView, Share, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, Share, StyleSheet, View } from "react-native";
 import { tripStore, type TripStop } from "../services/tripStore";
 import {
   socialSyncService,
@@ -8,6 +8,8 @@ import {
 } from "../services/socialSync";
 import { chatStore, type ChatContact } from "../services/chatStore";
 import { EditPostModal } from "../components/EditPostModal";
+import { PostComposer } from "../components/PostComposer";
+import { LikeButton } from "../components/LikeButton";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import {
   AuthGate,
@@ -16,15 +18,17 @@ import {
   Card,
   Chip,
   ChipGroup,
+  EmptyState,
   IconButton,
   Media,
   ModalFrame,
-  Notice,
   Screen,
   ScreenHeader,
   SegmentedControl,
+  Skeleton,
   TextField,
   Txt,
+  useToast,
   type AuthGateReason,
 } from "../ui";
 import { PublicProfileView, type PublicProfileUser } from "./PublicProfileView";
@@ -36,6 +40,9 @@ import { tokens } from "../theme";
 // "messages". Akış socialSyncService'ten (değişmedi). Kaldırılanlar (uydurma/işlevsiz): yeniden
 // paylaş, "Paylaşımı bildir" ve "Sessize al" (yalnız Alert), yazara uydurma takipçi sayılı profil,
 // sabit "@canberk/@gezgin" sahiplik istisnası. Kategori çipleri akıştaki gerçek etiketlerden.
+// Increment 4.4 (web paritesi): satır içi paylaşım daveti, PostComposer (fotoğraf + yükleme
+// ilerlemesi + "Yalnız bu cihazda", emoji seçici, boşta sallanma), beğenide kalp/halka animasyonu,
+// yazar adı ve avatarı → PublicProfileView, geri bildirim Toast ile, yüklenirken iskelet.
 export interface CommunityScreenProps {
   onOpenMap: () => void;
   guest?: boolean;
@@ -69,11 +76,7 @@ export function CommunityScreen({
   const [comment, setComment] = useState("");
   const [commentError, setCommentError] = useState<string | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
-  const [content, setContent] = useState("");
-  const [locationTag, setLocationTag] = useState("");
-  const [attachRoute, setAttachRoute] = useState(false);
-  const [composeError, setComposeError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     let alive = true;
@@ -138,48 +141,6 @@ export function CommunityScreen({
       onOpenChat?.(contact);
     });
 
-  const publish = async () => {
-    if (!content.trim()) {
-      setComposeError(tr("community.compose.required"));
-      return;
-    }
-    const active = tripStore.getActiveRoute();
-    try {
-      await socialSyncService.createPost({
-        content: content.trim(),
-        locationTag: locationTag.trim() || undefined,
-        routeAttachment:
-          attachRoute && active.stops.length
-            ? {
-                id: `rt_user_${Date.now()}`,
-                title: active.name,
-                stats: tr("community.post.stops", { n: active.stops.length }),
-                icon: "",
-                stops: active.stops.map((s) => ({
-                  id: s.id,
-                  name: s.name,
-                  category: s.category,
-                  lat: s.lat,
-                  lng: s.lng,
-                  address: s.address,
-                  duration: s.duration,
-                })),
-              }
-            : undefined,
-      });
-    } catch {
-      // Metin korunur; kullanıcı tekrar gönderebilir.
-      setComposeError(tr("native.community.publishFailed"));
-      return;
-    }
-    setContent("");
-    setLocationTag("");
-    setAttachRoute(false);
-    setComposeError(null);
-    setComposeOpen(false);
-    setNotice(tr("community.toast.posted"));
-  };
-
   if (profile) {
     return (
       <PublicProfileView
@@ -214,11 +175,21 @@ export function CommunityScreen({
         <Txt variant="small" tone="muted">
           {tr("community.description")}
         </Txt>
-        {notice ? (
-          <Notice tone="success" action={{ label: tr("ui.close"), onPress: () => setNotice(null) }}>
-            {notice}
-          </Notice>
-        ) : null}
+        <Card
+          variant="bordered"
+          label={tr("community.compose.title")}
+          onPress={() => requireMember("save", () => setComposeOpen(true))}
+        >
+          <View style={styles.row}>
+            <Avatar name={me?.fullName ?? tr("native.user.fallback")} uri={me?.avatarUrl} />
+            <View style={styles.flex}>
+              <Txt variant="label">{tr("community.compose.title")}</Txt>
+              <Txt variant="caption" tone="muted">
+                {tr("community.compose.placeholder")}
+              </Txt>
+            </View>
+          </View>
+        </Card>
         <SegmentedControl
           label={tr("community.mode.label")}
           options={[
@@ -239,24 +210,22 @@ export function CommunityScreen({
         ) : null}
 
         {!loaded ? (
-          <Txt variant="small" tone="muted">
-            {tr("ui.loading")}
-          </Txt>
+          <View accessible accessibilityLabel={tr("ui.loading")}>
+            <Skeleton variant="card" count={2} />
+          </View>
         ) : visible.length === 0 ? (
-          <Card variant="bordered">
-            <View style={styles.body}>
-              <Txt variant="heading" header>
-                {tr("community.empty.title")}
-              </Txt>
-              <Txt variant="small" tone="muted">
-                {tr("community.empty.body")}
-              </Txt>
+          <EmptyState
+            icon="users"
+            contour
+            title={tr("community.empty.title")}
+            description={tr("community.empty.body")}
+            action={
               <Button
                 label={tr("community.empty.cta")}
                 onPress={() => requireMember("save", () => setComposeOpen(true))}
               />
-            </View>
-          </Card>
+            }
+          />
         ) : (
           visible.map((post) => {
             const own = isOwnPost(post, me);
@@ -269,7 +238,15 @@ export function CommunityScreen({
               <Card key={post.id} variant="bordered">
                 <View style={styles.body}>
                   <View style={styles.row}>
-                    <Avatar name={post.authorName} uri={post.authorAvatar} />
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={post.authorName}
+                      accessibilityHint={post.authorHandle}
+                      onPress={() => setProfile(author)}
+                      hitSlop={4}
+                    >
+                      <Avatar name={post.authorName} uri={post.authorAvatar} />
+                    </Pressable>
                     <View style={styles.flex}>
                       <Button
                         label={post.authorName}
@@ -294,6 +271,11 @@ export function CommunityScreen({
                     ) : null}
                   </View>
                   <Txt>{post.content}</Txt>
+                  {post.deviceOnly ? (
+                    <Txt variant="caption" tone="warning">
+                      {tr("community.post.deviceOnly")}
+                    </Txt>
+                  ) : null}
                   {post.hashtags?.length ? (
                     <Txt variant="caption" tone="muted">
                       {post.hashtags.join(" ")}
@@ -321,10 +303,10 @@ export function CommunityScreen({
                     </Card>
                   ) : null}
                   <View style={styles.actions}>
-                    <Button
-                      label={`${tr("community.post.like")} · ${post.likesCount}`}
-                      variant={post.isLiked ? "secondary" : "ghost"}
-                      size="sm"
+                    <LikeButton
+                      liked={!!post.isLiked}
+                      count={post.likesCount}
+                      label={tr("community.post.like")}
                       onPress={() =>
                         requireMember("save", () => socialSyncService.toggleLike(post.id))
                       }
@@ -432,46 +414,27 @@ export function CommunityScreen({
         </ScrollView>
       </ModalFrame>
 
-      <ModalFrame
+      <PostComposer
         visible={composeOpen}
-        variant="sheet"
-        title={tr("community.newPost")}
-        onRequestClose={() => setComposeOpen(false)}
-      >
-        <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-          <TextField
-            label={tr("community.compose.content")}
-            value={content}
-            onChangeText={(t) => {
-              setContent(t);
-              if (composeError) setComposeError(null);
-            }}
-            error={composeError ?? undefined}
-            multiline
-            maxLength={2000}
-          />
-          <TextField
-            label={tr("edit.location")}
-            hint={tr("ui.optional")}
-            value={locationTag}
-            onChangeText={setLocationTag}
-            maxLength={80}
-          />
-          {activeRoute.stops.length ? (
-            <Chip icon="route" pressed={attachRoute} onPress={() => setAttachRoute((v) => !v)}>
-              {`${activeRoute.name} · ${tr("community.post.stops", { n: activeRoute.stops.length })}`}
-            </Chip>
-          ) : null}
-          <Button label={tr("community.newPost")} size="lg" onPress={publish} />
-        </ScrollView>
-      </ModalFrame>
+        onClose={() => setComposeOpen(false)}
+        activeRoute={activeRoute}
+        onPublished={(post) => {
+          setComposeOpen(false);
+          toast.show({
+            tone: post.deviceOnly ? "warning" : "success",
+            message: post.deviceOnly
+              ? `${tr("community.toast.posted")} · ${tr("community.post.deviceOnly")}`
+              : tr("community.toast.posted"),
+          });
+        }}
+      />
 
       <EditPostModal
         visible={!!editing}
         post={editing}
         onClose={() => setEditing(null)}
-        onSaved={() => setNotice(tr("community.toast.updated"))}
-        onDeleted={() => setNotice(tr("community.toast.deleted"))}
+        onSaved={() => toast.show({ tone: "success", message: tr("community.toast.updated") })}
+        onDeleted={() => toast.show({ tone: "info", message: tr("community.toast.deleted") })}
       />
 
       {gate ? (

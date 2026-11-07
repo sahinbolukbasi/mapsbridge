@@ -1041,3 +1041,66 @@ test("4.4: pin popup yalnız kayıttaki alanlar; gezildi pini kalır; günsüz y
   );
   assert.equal("affiliateUrl" in r1[1].place, false, "I8: para kazanma alanı atılır");
 });
+// ── Increment 4.4: topluluk (canlı uçlar, fotoğraf, emoji, tepki, yazar profili) ──
+test("4.4: topluluk canlı /community/posts uçlarını kullanır; yerel gönderi 'Yalnız bu cihazda'", () => {
+  const emojiBody = fs
+    .readFileSync(path.join(MOBILE, "community/emoji.ts"), "utf8")
+    .split("\n")
+    .slice(2)
+    .join("\n");
+  assert.equal(emojiBody, fs.readFileSync(path.join(WEB, "features/community/emoji.ts"), "utf8"));
+  const webEmoji = loadTs(path.join(WEB, "features/community/emoji.ts"));
+  const mobEmoji = loadTs(path.join(MOBILE, "community/emoji.ts"));
+  for (const args of [
+    ["ab", "😍", 1],
+    ["", "🔥", null],
+    ["abc", "✈", 0, 2],
+    ["x", "☕", 9],
+  ])
+    assert.deepEqual(plain(mobEmoji.insertAt(...args)), plain(webEmoji.insertAt(...args)));
+  for (const [, key] of mobEmoji.EMOJIS)
+    assert.equal(mobileUi.UI_TR[`community.emoji.${key}`], TR[`community.emoji.${key}`], key);
+  const sync = fs.readFileSync(path.join(MOBILE, "services/socialSync.ts"), "utf8");
+  assert.doesNotMatch(sync, /localhost|10\.0\.2\.2|\/api\/community|X-User-Identity"\s*:|@canberk/);
+  assert.match(sync, /communityFetch\("\/community\/posts"/);
+  assert.match(sync, /\/media\/presign-upload\?/);
+  assert.match(sync, /JSON\.stringify\(\{ on: /, "like/bookmark gövdesi sunucu sözleşmesi { on }");
+  const social = loadTs(path.join(MOBILE, "services/socialSync.ts"), {
+    stubs: {
+      [path.join(MOBILE, "services/api.ts")]: path.join(__dirname, "stubs/mobile-api.stub.cjs"),
+      [path.join(MOBILE, "services/storage.ts")]: path.join(
+        __dirname,
+        "stubs/mobile-storage.stub.cjs",
+      ),
+    },
+    globals: { console: quiet },
+  });
+  const server = [{ id: "srv1" }];
+  const local = [{ id: "post-1" }, { id: "srv1" }, { id: "old", deviceOnly: true }, { id: "gone" }];
+  assert.deepEqual(
+    plain(social.mergePosts(server, local)).map((p) => p.id),
+    ["post-1", "old", "srv1"],
+  );
+  assert.equal(social.isDeviceImage("file:///x.jpg"), true);
+  assert.equal(social.isDeviceImage("https://cdn/x.jpg"), false);
+});
+test("4.4: composer görsel doğrulaması (JPG/PNG/WEBP ≤10 MB), emoji metne, beğeni animasyonu, yazar → profil", () => {
+  const composer = fs.readFileSync(path.join(MOBILE, "components/PostComposer.tsx"), "utf8");
+  assert.match(composer, /MAX_IMAGE_BYTES = 10 \* 1024 \* 1024/);
+  assert.match(composer, /"image\/jpeg", "image\/png", "image\/webp"/);
+  assert.match(composer, /socialSyncService\.uploadImage\(/);
+  assert.match(composer, /<Progress\s+variant="determinate"/);
+  assert.match(composer, /tr\("community\.post\.deviceOnly"\)/);
+  assert.match(composer, /insertAt\(content, emoji/);
+  assert.match(composer, /runShake\(\)/);
+  const like = fs.readFileSync(path.join(MOBILE, "components/LikeButton.tsx"), "utf8");
+  assert.match(like, /motion\s*\.parallel\(/);
+  assert.match(like, /haptic\("selection"\)/);
+  const screen = fs.readFileSync(path.join(MOBILE, "screens/CommunityScreen.tsx"), "utf8");
+  assert.match(screen, /<PublicProfileView/);
+  assert.match(
+    screen,
+    /accessibilityLabel=\{post\.authorName\}[\s\S]*?onPress=\{\(\) => setProfile\(author\)\}/,
+  );
+  assert.match(screen, /<LikeButton/);
+});
