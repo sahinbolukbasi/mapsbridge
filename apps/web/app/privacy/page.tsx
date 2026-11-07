@@ -7,18 +7,19 @@ export default function Privacy() {
       className="legal"
       header={
         <PageHeader
+          enter
           breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Gizlilik politikası" }]}
         />
       }
     >
       <p className="legal-meta">Son güncelleme: 24 Eylül 2026</p>
-      <Section title="Hangi verileri işleriz?">
+      <Section reveal title="Hangi verileri işleriz?">
         <p>
           MapsBridge hesabı için ad-soyad, e-posta ve telefon numarası; haritada işaretleyip
           kaydettiğin adresler ve güvenlik oturum kayıtları işlenir.
         </p>
       </Section>
-      <Section title="Google Maps ve mekan bilgileri">
+      <Section reveal title="Google Maps ve mekan bilgileri">
         <p>
           Google haritasını, mekan aramasını veya mekan bilgilerini kullandığında arama metni,
           görüntülenen konum ve bağlantı bilgileri Google tarafından işlenebilir. Bu hizmetlerde{" "}
@@ -29,7 +30,7 @@ export default function Privacy() {
           bunlardan ayrı tutulur.
         </p>
       </Section>
-      <Section title="Kontrol sende">
+      <Section reveal title="Kontrol sende">
         <p>
           Paylaştığın konumu dilediğin an silebilir, süresini sonlandırabilir veya kayıtlı
           adreslerini liste üzerinden silebilirsin.

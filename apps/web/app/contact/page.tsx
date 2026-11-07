@@ -19,6 +19,7 @@ export default function Contact() {
       className="legal"
       header={
         <PageHeader
+          enter
           description="Soru, öneri, iş birliği ya da destek talebin için bize yaz."
           breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "İletişim" }]}
         />
@@ -56,7 +57,7 @@ export default function Contact() {
           </div>
         </Card>
       </ul>
-      <Section title="Mesaj gönder">
+      <Section reveal title="Mesaj gönder">
         <p>
           Bu form varsayılan e-posta uygulamanı açarak mesajını hazırlar. E-posta uygulaman yoksa
           yukarıdaki adrese doğrudan yazabilirsin.

@@ -93,6 +93,7 @@ export default function Cookies() {
       className="legal"
       header={
         <PageHeader
+          enter
           description="MapsBridge'in tarayıcında sakladığı çerezler ve yerel depolama kayıtları."
           breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Çerez politikası" }]}
         />
@@ -102,7 +103,7 @@ export default function Cookies() {
         MapsBridge oturum güvenliği, dil tercihin, planlama ve hesap işlevleri için çerez ve yerel
         depolama (localStorage) kullanır. Başlıca kayıtlar aşağıda listelenir.
       </p>
-      <Section title="Saklananlar">
+      <Section reveal title="Saklananlar">
         <ul className="legal-storage">
           {ROWS.map((row) => (
             <Card as="li" key={row.keys} className="legal-storage__item">
@@ -131,7 +132,7 @@ export default function Cookies() {
           ))}
         </ul>
       </Section>
-      <Section title="Üçüncü taraf takibi">
+      <Section reveal title="Üçüncü taraf takibi">
         <p>
           Reklam veya pazarlama çerezleri kullanılmaz. Harita verileri açık kaynak OpenStreetMap
           üzerinden sunulur.

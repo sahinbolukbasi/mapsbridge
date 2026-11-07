@@ -36,6 +36,7 @@ export default function MobileAppsClient() {
       className="mobile-apps"
       header={
         <PageHeader
+          enter
           description={t("mobileApps.lead")}
           breadcrumb={[
             { label: t("ui.breadcrumb.home", "Ana sayfa"), href: "/" },
@@ -44,7 +45,7 @@ export default function MobileAppsClient() {
         />
       }
     >
-      <Section id="parite" title={t("mobileApps.parity.title")}>
+      <Section reveal id="parite" title={t("mobileApps.parity.title")}>
         <Card className="mobile-apps__parity">
           <div className="mobile-apps__parity-inner">
             <span className="mobile-apps__icon">
@@ -59,6 +60,7 @@ export default function MobileAppsClient() {
       </Section>
 
       <Section
+        reveal
         id="bugun"
         title={t("mobileApps.today.title")}
         description={t("mobileApps.today.sub")}

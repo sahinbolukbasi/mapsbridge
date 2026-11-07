@@ -2,7 +2,7 @@
 // Kaydırmaya bağlı açılma kabı (direction §2, R15). `stagger` iken kap görünür kalır ve
 // içindeki [data-reveal-item] öğeleri --i sırasıyla yükselir; aksi hâlde kabın tamamı açılır.
 // JS yoksa ya da hareket azaltılmışsa içerik baştan görünür (gizleme yalnız ui.css no-preference).
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { cx } from "./cx";
 import { useReveal } from "./hooks/use-reveal";
 import "./ui.css";
@@ -12,12 +12,13 @@ export function Reveal({
   stagger = false,
   className,
   children,
+  ...rest
 }: {
   as?: "div" | "section" | "ul" | "ol";
   stagger?: boolean;
   className?: string;
   children: ReactNode;
-}) {
+} & Omit<HTMLAttributes<HTMLElement>, "className" | "children">) {
   const ref = useReveal<HTMLDivElement>();
   return (
     // Etiket türü değişse de ref yalnız HTMLElement olarak kullanılır.

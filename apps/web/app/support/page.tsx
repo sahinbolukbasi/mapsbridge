@@ -104,6 +104,7 @@ export default function SupportPage() {
       className="support-page-shell"
       header={
         <PageHeader
+          enter
           description="Hesap, rota veya ödeme konularında destek ekibimizle iletişime geçin."
           breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Yardım ve destek" }]}
         />
@@ -151,7 +152,7 @@ export default function SupportPage() {
       ) : (
         <div className="support-layout">
           <Card className="support-panel">
-            <Section title="Yeni talep">
+            <Section reveal title="Yeni talep">
               <form className="support-form" onSubmit={(event) => void send(event)}>
                 <Field label="Kategori">
                   {(ids) => (
@@ -207,6 +208,7 @@ export default function SupportPage() {
           </Card>
           <Card className="support-panel">
             <Section
+              reveal
               title="Taleplerim"
               actions={
                 <Button
@@ -252,6 +254,7 @@ export default function SupportPage() {
       {ticket && (
         <Card className="support-panel">
           <Section
+            reveal
             title={ticket.subject}
             description={statuses[ticket.status]}
             actions={

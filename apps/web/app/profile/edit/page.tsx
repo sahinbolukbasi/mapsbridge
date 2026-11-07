@@ -141,7 +141,7 @@ export default function EditProfilePage() {
   if (authed === null) {
     return (
       <PageShell>
-        <PageHeader />
+        <PageHeader enter />
         <LoadingState />
       </PageShell>
     );
@@ -226,7 +226,7 @@ export default function EditProfilePage() {
         </Button>
       </Card>
 
-      <Section title={t("edit.basic", "Temel bilgiler")} level={2}>
+      <Section reveal title={t("edit.basic", "Temel bilgiler")} level={2}>
         <div className="edit-grid">
           <Field label={t("edit.fullName", "Ad soyad")}>
             {(ids) => (
@@ -300,7 +300,7 @@ export default function EditProfilePage() {
         </Field>
       </Section>
 
-      <Section title={t("edit.languages", "Konuştuğun diller")} level={2}>
+      <Section reveal title={t("edit.languages", "Konuştuğun diller")} level={2}>
         {details.languages.length > 0 && (
           <ul className="edit-tags">
             {details.languages.map((lang) => (
@@ -344,7 +344,7 @@ export default function EditProfilePage() {
         </div>
       </Section>
 
-      <Section title={t("edit.interests", "İlgi alanların")} level={2}>
+      <Section reveal title={t("edit.interests", "İlgi alanların")} level={2}>
         <ChipGroup label={t("edit.interests.label", "Sana uyanları seç")} mode="multi">
           {AVAILABLE_INTERESTS.map((item) => {
             const on = details.interests.includes(item.label);
@@ -368,7 +368,7 @@ export default function EditProfilePage() {
         </ChipGroup>
       </Section>
 
-      <Section title={t("edit.links", "Bağlantılar")} level={2}>
+      <Section reveal title={t("edit.links", "Bağlantılar")} level={2}>
         <div className="edit-grid">
           <Field label="Instagram" optionalLabel={t("ui.optional", "isteğe bağlı")}>
             {(ids) => (
@@ -473,6 +473,7 @@ export default function EditProfilePage() {
   return (
     <PageShell className="edit-page">
       <PageHeader
+        enter
         breadcrumb={[
           { label: t("nav.profile", "Profil"), href: "/profile/" },
           { label: t("edit.pageTitle", "Profili düzenle") },
@@ -556,7 +557,7 @@ function PasswordForm() {
   }
 
   return (
-    <Section title={t("edit.pw.title", "Şifreyi değiştir")} level={2}>
+    <Section reveal title={t("edit.pw.title", "Şifreyi değiştir")} level={2}>
       <form className="edit-form" onSubmit={submit} noValidate>
         {error && (
           <Alert tone="danger" live="assertive">

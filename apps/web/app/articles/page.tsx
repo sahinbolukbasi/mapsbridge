@@ -88,6 +88,7 @@ export default function ArticlesPage() {
       className="articles"
       header={
         <PageHeader
+          enter
           description={t("articles.lead", "Seyahat rehberleri ve MapsBridge ekibinin yazıları.")}
           breadcrumb={[
             { label: t("ui.breadcrumb.home", "Ana sayfa"), href: "/" },
@@ -128,7 +129,7 @@ export default function ArticlesPage() {
           />
         )
       ) : (
-        <Section title={t("articles.listTitle", "Tüm yazılar")}>
+        <Section reveal title={t("articles.listTitle", "Tüm yazılar")}>
           <ul className="articles-list">
             {rows.map((row) => {
               const id = blogIdOf(row) ?? row.title;

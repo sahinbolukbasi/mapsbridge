@@ -35,12 +35,13 @@ export default function About() {
       className="legal"
       header={
         <PageHeader
+          enter
           description="MapsBridge bir rezervasyon motoru değil, seyahatin kendisi için bir yol arkadaşı."
           breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Hakkımızda" }]}
         />
       }
     >
-      <Section title="Seyahat için, satın alma anı için değil">
+      <Section reveal title="Seyahat için, satın alma anı için değil">
         <p>
           MapsBridge, yapay zeka destekli bir seyahat planlama ve güvenli konum paylaşımı
           platformudur. Amacımız satın alma anını değil, seyahat deneyiminin tamamını
@@ -62,7 +63,7 @@ export default function About() {
           ))}
         </ul>
       </Section>
-      <Section title="Bize ulaş">
+      <Section reveal title="Bize ulaş">
         <p>Soruların ve önerilerin için iletişim sayfamızdan yazabilirsin.</p>
         <div>
           <Button href="/contact/" variant="secondary" iconEnd={<Icon name="arrow" size={16} />}>

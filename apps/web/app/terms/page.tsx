@@ -7,6 +7,7 @@ export default function Terms() {
       className="legal"
       header={
         <PageHeader
+          enter
           breadcrumb={[{ label: "Ana sayfa", href: "/" }, { label: "Kullanım koşulları" }]}
         />
       }
@@ -15,7 +16,7 @@ export default function Terms() {
         MapsBridge yalnızca kendi adresini veya paylaşmaya yetkili olduğun bir adresi açık rızayla
         paylaşmak içindir.
       </p>
-      <Section title="Google Maps hizmetleri">
+      <Section reveal title="Google Maps hizmetleri">
         <p>
           Google Maps kullanılan özelliklerde{" "}
           <a
@@ -29,7 +30,7 @@ export default function Terms() {
           açılış saatleri ve işletme bilgileri değişebilir.
         </p>
       </Section>
-      <Section title="Yasak kullanımlar">
+      <Section reveal title="Yasak kullanımlar">
         <p>
           Gizli takip, izinsiz konum paylaşımı, taciz veya hukuka aykırı herhangi bir kullanım
           kesinlikle yasaktır.

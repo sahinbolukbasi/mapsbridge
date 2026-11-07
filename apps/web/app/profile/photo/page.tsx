@@ -106,7 +106,7 @@ export default function ProfilePhotoPage() {
   if (authed === null) {
     return (
       <PageShell>
-        <PageHeader />
+        <PageHeader enter />
         <LoadingState />
       </PageShell>
     );
@@ -162,6 +162,7 @@ export default function ProfilePhotoPage() {
   return (
     <PageShell className="photo-page">
       <PageHeader
+        enter
         breadcrumb={[
           { label: t("nav.profile", "Profil"), href: "/profile/" },
           { label: t("photo.title", "Profil fotoğrafı") },
@@ -197,7 +198,7 @@ export default function ProfilePhotoPage() {
         </Alert>
       )}
 
-      <Section title={t("photo.upload", "Kendi fotoğrafını yükle")} level={2}>
+      <Section reveal title={t("photo.upload", "Kendi fotoğrafını yükle")} level={2}>
         <div
           className="photo-drop"
           data-dragging={dragging || undefined}
@@ -234,7 +235,7 @@ export default function ProfilePhotoPage() {
         </div>
       </Section>
 
-      <Section title={t("photo.presets", "Hazır avatarlar")} level={2}>
+      <Section reveal title={t("photo.presets", "Hazır avatarlar")} level={2}>
         <ul className="photo-presets">
           {PRESETS.map((p) => {
             const url = presetDataUrl(p.icon, p.bg);

@@ -1,5 +1,6 @@
-import { useId, type ReactNode } from "react";
+import { useId, type ComponentProps, type ReactNode } from "react";
 import { cx } from "./cx";
+import { Reveal } from "./reveal";
 import "./ui.css";
 
 export type SectionSurface = "default" | "sunken" | "inverse" | "brand";
@@ -13,9 +14,12 @@ export function Section({
   id,
   surface = "default",
   size = "default",
+  reveal = false,
   className,
   children,
 }: {
+  /** Kaydırınca bir kez açılır (R15; JS'siz/azaltmada baştan görünür). */
+  reveal?: boolean;
   /** "display": vitrin bölümleri için büyük başlık + geniş açıklama (direction home.html). */
   size?: "default" | "display";
   title?: string;
@@ -30,8 +34,9 @@ export function Section({
   const autoId = useId();
   const headingId = `${id ?? autoId}-title`;
   const Heading = level === 3 ? "h3" : "h2";
+  const Root = reveal ? RevealSection : "section";
   return (
-    <section
+    <Root
       id={id}
       className={cx(
         "ui-section",
@@ -56,6 +61,14 @@ export function Section({
         </div>
       )}
       {children}
-    </section>
+    </Root>
+  );
+}
+function RevealSection(props: ComponentProps<"section">) {
+  const { className, children, ...rest } = props;
+  return (
+    <Reveal as="section" className={className} {...rest}>
+      {children as ReactNode}
+    </Reveal>
   );
 }
