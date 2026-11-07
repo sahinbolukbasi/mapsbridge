@@ -53,6 +53,22 @@
     border-radius: var(--radius-lg);
     background: var(--card-bg);
     color: var(--card-fg);
+    transition:
+      box-shadow var(--duration-base) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard);
+  }
+  .pricing__pack:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 35%, var(--card-border));
+    box-shadow: var(--shadow-md);
+  }
+  .pricing__pack-icon {
+    display: grid;
+    place-items: center;
+    inline-size: var(--touch-target);
+    block-size: var(--touch-target);
+    border-radius: var(--radius-full);
+    background: var(--cost-bg);
+    color: var(--cost-fg);
   }
   .pricing__pack-credits {
     margin: 0;

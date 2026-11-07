@@ -15,10 +15,32 @@
     padding: var(--space-6);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
-    background: var(--color-surface);
+    background:
+      radial-gradient(
+        70% 140% at 100% 0%,
+        color-mix(in srgb, var(--color-highlight-bg-strong) 70%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        60% 140% at 0% 100%,
+        color-mix(in srgb, var(--color-surface-brand-strong) 60%, transparent),
+        transparent 70%
+      ),
+      var(--color-surface);
+    box-shadow: var(--shadow-lg);
     color: var(--color-text);
   }
+  .checkout-balance__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 56px;
+    block-size: 56px;
+    border-radius: var(--radius-full);
+    background: var(--cost-bg);
+    color: var(--cost-fg);
+  }
   .checkout-balance__main {
+    flex: 1;
     display: grid;
     gap: var(--space-1);
   }

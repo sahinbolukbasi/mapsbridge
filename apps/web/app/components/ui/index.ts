@@ -53,3 +53,5 @@ export { useReveal } from "./hooks/use-reveal";
 export { Reveal, revealItem, enterItem } from "./reveal";
 export { useRipple } from "./hooks/use-ripple";
 export { clampProgress, stepState, type StepState } from "./logic/progress";
+export { useCountUp } from "./hooks/use-count-up";
+export { countUpValue } from "./logic/count-up";

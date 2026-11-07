@@ -11,8 +11,61 @@
     padding: var(--space-6);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-xl);
+    position: relative;
+    overflow: hidden;
     background: var(--card-bg);
+    box-shadow: var(--shadow-xs);
     color: var(--card-fg);
+    transition:
+      box-shadow var(--duration-base) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard);
+  }
+  /* Kademe şeridi: üst kenarda kademe tonu (renk tek ipucu değil; ad + ikon). */
+  .bl-plan-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    block-size: 4px;
+    background: var(--plan-tone, var(--color-border-strong));
+  }
+  .bl-plan-card[data-tier="explorer"] {
+    --plan-tone: var(--color-accent);
+  }
+  .bl-plan-card[data-tier="pro"] {
+    --plan-tone: var(--color-brand);
+  }
+  .bl-plan-card[data-tier="agency"] {
+    --plan-tone: var(--color-highlight);
+  }
+  .bl-plan-card:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 35%, var(--card-border));
+    box-shadow: var(--shadow-lg);
+  }
+  .bl-plan-card__icon {
+    display: grid;
+    place-items: center;
+    inline-size: var(--touch-target);
+    block-size: var(--touch-target);
+    border-radius: var(--radius-lg);
+    background: var(--color-highlight-bg);
+    color: var(--color-highlight-text);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bl-plan-card {
+      transition:
+        transform var(--duration-base) var(--easing-standard),
+        box-shadow var(--duration-base) var(--easing-standard),
+        border-color var(--duration-fast) var(--easing-standard);
+    }
+    .bl-plan-card:hover {
+      transform: translateY(-4px);
+    }
+    .bl-plan-card__icon {
+      transition: transform var(--duration-slow) var(--easing-emphasized);
+    }
+    .bl-plan-card:hover .bl-plan-card__icon {
+      transform: rotate(-8deg) scale(1.08);
+    }
   }
   /* Mevcut plan: kenarlık vurgusu ek ipucudur; anlamı "Mevcut planın" rozeti taşır. */
   .bl-plan-card--current {

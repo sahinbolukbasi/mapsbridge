@@ -559,3 +559,14 @@ test("password-criteria (3.2): Cognito kuralları, güç seviyesi 0–4, kayıt 
     assert.match(src, /passwordCriteria\(/, `${page} ortak kriterleri kullanmalı`);
   }
 });
+test("countUpValue (3.6): ease-out, sınırlar, son karede hedef", () => {
+  const { countUpValue } = load("count-up");
+  assert.equal(countUpValue(0, 100, 0), 0);
+  assert.equal(countUpValue(0, 100, 1), 100);
+  assert.equal(countUpValue(0, 100, 2), 100);
+  assert.equal(countUpValue(0, 100, -1), 0);
+  assert.ok(countUpValue(0, 100, 0.5) > 50, "ease-out yarıda yarıyı geçer");
+  assert.equal(countUpValue(100, 40, 1), 40);
+  assert.equal(countUpValue(5, 9, Number.NaN), 9);
+  assert.equal(Number.isInteger(countUpValue(0, 7, 0.33)), true);
+});

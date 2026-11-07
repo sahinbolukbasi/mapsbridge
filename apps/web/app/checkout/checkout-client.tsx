@@ -22,6 +22,7 @@ import {
   PageShell,
   Section,
   SegmentedControl,
+  useCountUp,
   useUrlParam,
   VisuallyHidden,
 } from "../components/ui";
@@ -232,10 +233,13 @@ export default function CheckoutClient() {
         data-surface="default"
         aria-label={t("checkout.balance.region")}
       >
+        <span className="checkout-balance__icon" aria-hidden="true">
+          <Icon name="coin" size={24} />
+        </span>
         <div className="checkout-balance__main">
           <p className="checkout-balance__label">{t("checkout.balance.label")}</p>
           {signedIn ? (
-            <p className="checkout-balance__value">{num(wallet.credits)}</p>
+            <BalanceValue value={wallet.credits} format={num} />
           ) : (
             <p className="checkout-balance__value">
               <span aria-hidden="true">—</span>
@@ -451,5 +455,16 @@ export default function CheckoutClient() {
         <p className="checkout-muted">{t("checkout.costs.payment")}</p>
       </Section>
     </PageShell>
+  );
+}
+
+/** Bakiye: görünür sayı eski değerden yeniye sayar (no-preference); erişilebilir ad son değer. */
+function BalanceValue({ value, format }: { value: number; format: (n: number) => string }) {
+  const shown = useCountUp(value);
+  return (
+    <p className="checkout-balance__value">
+      <span aria-hidden="true">{format(shown)}</span>
+      <VisuallyHidden>{format(value)}</VisuallyHidden>
+    </p>
   );
 }

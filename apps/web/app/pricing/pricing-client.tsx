@@ -14,8 +14,10 @@ import {
   Icon,
   PageHeader,
   PageShell,
+  Reveal,
   Section,
   SegmentedControl,
+  revealItem,
   useUrlParam,
 } from "../components/ui";
 import { billingService } from "../lib/billing/billing-service";
@@ -107,7 +109,7 @@ export default function PricingClient() {
   return (
     <PageShell
       className="pricing"
-      header={<PageHeader description={route?.description?.[locale]} />}
+      header={<PageHeader enter description={route?.description?.[locale]} />}
     >
       {catalog !== "loading" && catalog.status === "unavailable" && (
         <Alert
@@ -141,25 +143,27 @@ export default function PricingClient() {
           ]}
         />
       </div>
-      <ul className="pricing__plans" aria-label={t("pricing.plans.label")}>
-        {planInfos().map((info) => {
-          const mine = signedIn ? current : null;
-          const offer = planOffer(info.tier, period, catalog, mine?.tier ?? null, mine?.period);
-          return (
-            <li key={info.tier} className="pricing__plan">
-              <PlanCard
-                tier={info.tier}
-                credits={offer.credits?.n ?? info.credits}
-                creditsKind={offer.credits?.kind ?? info.kind}
-                price={offer.price}
-                discount={offer.discount}
-                current={offer.purchase === "current"}
-                cta={ctaFor(info.tier, offer)}
-              />
-            </li>
-          );
-        })}
-      </ul>
+      <Reveal stagger>
+        <ul className="pricing__plans" aria-label={t("pricing.plans.label")}>
+          {planInfos().map((info, i) => {
+            const mine = signedIn ? current : null;
+            const offer = planOffer(info.tier, period, catalog, mine?.tier ?? null, mine?.period);
+            return (
+              <li key={info.tier} className="pricing__plan" {...revealItem(i)}>
+                <PlanCard
+                  tier={info.tier}
+                  credits={offer.credits?.n ?? info.credits}
+                  creditsKind={offer.credits?.kind ?? info.kind}
+                  price={offer.price}
+                  discount={offer.discount}
+                  current={offer.purchase === "current"}
+                  cta={ctaFor(info.tier, offer)}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </Reveal>
       <p className="pricing__note">
         {t("pricing.note.equivalents")} {t("pricing.note.payment")}
       </p>
@@ -190,6 +194,9 @@ export default function PricingClient() {
                 const buyable = !!ok?.enabled && pack.available;
                 return (
                   <li key={pack.id} className="pricing__pack" data-surface="default">
+                    <span className="pricing__pack-icon" aria-hidden="true">
+                      <Icon name="coin" size={20} />
+                    </span>
                     <p className="pricing__pack-credits">
                       {t("credits.other").replace(
                         "{n}",

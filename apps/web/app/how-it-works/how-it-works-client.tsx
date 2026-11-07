@@ -11,7 +11,9 @@ import {
   Icon,
   PageHeader,
   PageShell,
+  Reveal,
   Section,
+  revealItem,
   type IconName,
 } from "../components/ui";
 import { useLocale } from "../lib/locale-context";
@@ -60,10 +62,10 @@ const FAQ = [
 function PointList({ items }: { items: readonly Point[] }) {
   const { t } = useLocale();
   return (
-    <ul className="hiw-points">
-      {items.map((p) => (
+    <Reveal as="ul" stagger className="hiw-points">
+      {items.map((p, i) => (
         <Card as="li" key={p.title} className="hiw-points__item">
-          <div className="hiw-points__inner">
+          <div className="hiw-points__inner" {...revealItem(i)}>
             <span className="hiw-points__icon">
               <Icon name={p.icon} size={24} />
             </span>
@@ -74,7 +76,7 @@ function PointList({ items }: { items: readonly Point[] }) {
           </div>
         </Card>
       ))}
-    </ul>
+    </Reveal>
   );
 }
 
@@ -85,6 +87,7 @@ export function HowItWorksClient() {
       className="hiw"
       header={
         <PageHeader
+          enter
           description={t("how.lead")}
           breadcrumb={[
             { label: t("ui.breadcrumb.home", "Ana sayfa"), href: "/" },
@@ -94,11 +97,11 @@ export function HowItWorksClient() {
       }
     >
       <Section id="konusma" title={t("how.talk.title")} description={t("how.talk.sub")}>
-        <ol className="hiw-turns">
-          {TURNS.map((turn) => (
+        <Reveal as="ol" stagger className="hiw-turns">
+          {TURNS.map((turn, i) => (
             <Card as="li" key={turn.n} className="hiw-turns__item">
-              <div className="hiw-turns__inner">
-                <span className="hiw-turns__num" aria-hidden="true">
+              <div className="hiw-turns__inner" {...revealItem(i)}>
+                <span className="hiw-turns__num" data-surface="inverse" aria-hidden="true">
                   {turn.n}
                 </span>
                 <div>
@@ -108,7 +111,7 @@ export function HowItWorksClient() {
               </div>
             </Card>
           ))}
-        </ol>
+        </Reveal>
       </Section>
 
       <Section id="planlayici" title={t("how.planner.title")} description={t("how.planner.sub")}>
@@ -144,7 +147,12 @@ export function HowItWorksClient() {
         />
       </Section>
 
-      <Section id="basla" title={t("how.final.title")} description={t("how.final.sub")}>
+      <Section
+        id="basla"
+        title={t("how.final.title")}
+        description={t("how.final.sub")}
+        className="hiw-final"
+      >
         <div className="hiw-actions">
           <Button href="/travel-assistant/" size="lg" iconEnd={<Icon name="arrow" size={20} />}>
             {t("how.final.assistant")}

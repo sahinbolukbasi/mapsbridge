@@ -7,7 +7,7 @@ import {
   type PlanPriceState,
   type PlanTier,
 } from "../../lib/billing/catalog";
-import { Badge, Button, Skeleton, VisuallyHidden } from "../ui";
+import { Badge, Button, Icon, Skeleton, VisuallyHidden, type IconName } from "../ui";
 import "./plan-card.css";
 
 export type { CatalogPrice, PlanPriceState } from "../../lib/billing/catalog";
@@ -23,6 +23,13 @@ export type PlanCta = {
  * Plan kartı (design §4.2, §7.2): kredi birincil satır, maliyet tablosundan türetilmiş "≈" satırı,
  * fiyat yalnızca katalogdan. Popülerlik rozeti ve deneme vaadi YOK (§7.1).
  */
+/** Kademe ikonu (dekoratif; ad metinde). Popülerlik rozeti yok (§7.1). */
+const TIER_ICON: Record<PlanTier, IconName> = {
+  free: "compass",
+  explorer: "route",
+  pro: "sparkle",
+  agency: "users",
+};
 export function PlanCard({
   tier,
   credits,
@@ -57,8 +64,12 @@ export function PlanCard({
     <article
       className={current ? "bl-plan-card bl-plan-card--current" : "bl-plan-card"}
       data-surface="default"
+      data-tier={tier}
       aria-labelledby={titleId}
     >
+      <span className="bl-plan-card__icon" aria-hidden="true">
+        <Icon name={TIER_ICON[tier] ?? "compass"} size={24} />
+      </span>
       <div className="bl-plan-card__head">
         <h2 id={titleId} className="bl-plan-card__name">
           {name}

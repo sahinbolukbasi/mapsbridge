@@ -37,13 +37,49 @@
   }
   /* Ana sayfa adım numarasıyla aynı dil (home.css .home-steps__num). */
   .hiw-turns__num {
-    min-inline-size: var(--space-8);
-    color: var(--color-highlight-text);
+    display: grid;
+    place-items: center;
+    inline-size: 48px;
+    block-size: 48px;
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
     font-family: var(--font-family-display);
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-xl);
     font-weight: var(--font-weight-extrabold);
-    line-height: var(--line-height-tight);
     font-variant-numeric: tabular-nums;
+  }
+  .hiw-turns__item,
+  .hiw-points__item {
+    transition:
+      box-shadow var(--duration-base) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard);
+  }
+  .hiw-turns__item:hover,
+  .hiw-points__item:hover {
+    border-color: color-mix(in srgb, var(--color-brand) 35%, var(--card-border));
+    box-shadow: var(--shadow-lg);
+  }
+  /* Son çağrı: ışık lekeli kart bandı, içerik ortalı. */
+  .hiw-final {
+    margin-block-start: var(--space-8);
+    padding: var(--space-8) var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(
+        60% 120% at 100% 0%,
+        color-mix(in srgb, var(--color-highlight-bg-strong) 70%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        60% 120% at 0% 100%,
+        color-mix(in srgb, var(--color-surface-brand-strong) 60%, transparent),
+        transparent 70%
+      ),
+      var(--color-surface);
+    justify-items: center;
+    text-align: center;
   }
   .hiw-points__icon {
     display: inline-grid;
@@ -64,6 +100,7 @@
     inline-size: 100%;
   }
   .hiw-actions {
+    justify-content: center;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
