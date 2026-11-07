@@ -900,3 +900,144 @@ test("4.4: asistan aşamaları web ThinkingSteps ile aynı anahtar/gecikme; meti
   assert.match(ai, /tr\("studio\.err\.timeoutRetry"\)/);
   assert.match(ai, /openRoute\(item\.id, plan\)/, "rota hazır toast'u haritayı açar");
 });
+// ── Increment 4.4: planlayıcı (arama, popup, keşif) web ile aynı saf mantık ──
+test("4.4: place-search-logic / discovery-rank birebir, pin-popup yalnız IconName yolu farklı", () => {
+  const body = (rel) =>
+    fs.readFileSync(path.join(MOBILE, rel), "utf8").split("\n").slice(2).join("\n");
+  const web = (rel) => fs.readFileSync(path.join(WEB, rel), "utf8");
+  assert.equal(body("trip/place-search-logic.ts"), web("lib/trip/place-search-logic.ts"));
+  assert.equal(body("trip/discovery-rank.ts"), web("lib/trip/discovery-rank.ts"));
+  assert.equal(
+    body("trip/pin-popup.ts"),
+    web("lib/trip/pin-popup.ts").replace('from "../icon-paths"', 'from "../theme/icon-paths"'),
+  );
+  // PinCategory birebir.
+  const cats = (src) =>
+    [...src.match(/export type PinCategory =([\s\S]*?);/)[1].matchAll(/"([a-z]+)"/g)].map(
+      (m) => m[1],
+    );
+  assert.deepEqual(
+    cats(fs.readFileSync(path.join(MOBILE, "trip/models.ts"), "utf8")),
+    cats(web("lib/trip/models.ts")),
+  );
+});
+test("4.4: places proxy yolu ve yanıt doğrulaması web ile aynı; istemcide Google anahtarı yok (K2)", () => {
+  const webApi = loadTs(path.join(WEB, "lib/trip/places-api.ts"), { stubs, globals: webGlobals });
+  const mobApi = loadTs(path.join(MOBILE, "trip/places-api.ts"), { globals: { URLSearchParams } });
+  const cases = [
+    ["search", { q: "Galata", lat: 41, lng: 28.9, lang: "tr" }],
+    ["reverse", { lat: 0, lng: 0 }],
+    ["detail", { id: "a b", provider: "google", reviews: true }],
+    ["nearby", { lat: 1, lng: 2, radius: 1500, category: "museum", lang: undefined }],
+    ["detail", { id: "x", reviews: false }],
+  ];
+  for (const [action, params] of cases)
+    assert.equal(mobApi.placesPath(action, params), webApi.placesPath(action, params));
+  assert.deepEqual(plain(mobApi.PLACE_CATEGORY_IDS), plain(webApi.PLACE_CATEGORY_IDS));
+  const raw = {
+    status: "ok",
+    provider: "google",
+    places: [
+      { id: "1", provider: "google", name: "A", lat: 1, lng: 2, attribution: "Google" },
+      { id: "2", provider: "x", name: "B", lat: 1, lng: 2, attribution: "" },
+      { id: "3", provider: "amazon", name: " ", lat: 1, lng: 2, attribution: "" },
+      { id: "4", provider: "amazon", name: "C", lat: "1", lng: 2, attribution: "" },
+    ],
+  };
+  assert.deepEqual(plain(mobApi.parsePlacesResponse(raw)), plain(webApi.parsePlacesResponse(raw)));
+  assert.throws(() => mobApi.parsePlacesResponse({ status: "error" }));
+  for (const status of [429, 400, 500, 503, 404]) assert.ok(mobApi.errorKindOf(status));
+  assert.equal(mobApi.errorKindOf(429), "limited");
+  const places = fs.readFileSync(path.join(MOBILE, "map/places.ts"), "utf8");
+  assert.doesNotMatch(places, /googleapis\.com|EXPO_PUBLIC_GOOGLE_MAPS_API_KEY|X-Goog-Api-Key/);
+  assert.match(places, /placesApi\.search\(/);
+  // Arama hatası boş sonuç diye gösterilmez.
+  const map = fs.readFileSync(path.join(MOBILE, "screens/MapScreen.tsx"), "utf8");
+  assert.match(map, /dispatchSearch\(\{ type: "failure", requestId \}\)/);
+  assert.match(map, /search\.status === "error"/);
+  assert.match(map, /parseCoordinates\(q\)/);
+  assert.match(map, /pushRecent\(/);
+});
+test("4.4: pin popup yalnız kayıttaki alanlar; gezildi pini kalır; günsüz yer Kaydedilenler'e; Keşfet sıralaması deterministik", () => {
+  const mobPopup = loadTs(path.join(MOBILE, "trip/pin-popup.ts"));
+  const models = loadTs(path.join(MOBILE, "trip/models.ts"));
+  const pin = models.stopToPin(
+    {
+      id: "s1",
+      name: "Ayasofya",
+      category: "Müze",
+      time: "",
+      duration: "",
+      address: "",
+      lat: 41,
+      lng: 28.9,
+      notes: "\n İlk satır \nikinci",
+      visited: true,
+    },
+    2,
+  );
+  const m = plain(mobPopup.pinPopupModel(pin));
+  assert.deepEqual(m, {
+    id: "s1",
+    title: "Ayasofya",
+    icon: "landmark",
+    category: "muze",
+    visited: true,
+    day: 2,
+    noteLine: "İlk satır",
+  });
+  assert.equal("address" in m, false, "boş adres modele girmez (I10)");
+  assert.equal(models.pinCategoryOf("Kahve ve mola"), "kahve");
+  assert.equal(models.pinCategoryOf(undefined), "genel");
+  const html = fs.readFileSync(path.join(MOBILE, "map/leaflet-html.ts"), "utf8");
+  assert.match(html, /bindPopup\(html/);
+  assert.match(html, /type: "POPUP_ACTION"/);
+  assert.match(html, /\.pin-done \.pin-num \{[^}]*border-style: dashed/);
+  assert.doesNotMatch(
+    html,
+    /visited\s*\?\s*null|filter\([^)]*visited/,
+    "gezildi pini filtrelenmez",
+  );
+  const store = fs.readFileSync(path.join(MOBILE, "services/tripStore.ts"), "utf8");
+  assert.match(store, /public addToPool\(stop: TripStop\)/);
+  assert.doesNotMatch(store, /rating: 4\.8|"~8 dk yürüyüş"|"15:30"/, "uydurma süre/puan yok (I1)");
+  const disc = fs.readFileSync(path.join(MOBILE, "components/DiscoverPanel.tsx"), "utf8");
+  assert.match(disc, /rankCandidates\(/);
+  assert.match(disc, /placesApi\s*\.nearby\(/);
+  assert.doesNotMatch(disc, /affiliate|commission|sponsor/i, "I8");
+  const rank = loadTs(path.join(MOBILE, "trip/discovery-rank.ts"));
+  const pool = [
+    {
+      id: "b",
+      provider: "amazon",
+      name: "B",
+      lat: 41.001,
+      lng: 28.9,
+      attribution: "",
+      queriedCategory: "museum",
+      affiliateUrl: "x",
+    },
+    {
+      id: "a",
+      provider: "amazon",
+      name: "A",
+      lat: 41.001,
+      lng: 28.9,
+      attribution: "",
+      queriedCategory: "museum",
+    },
+  ];
+  const opts = {
+    interests: ["museum"],
+    anchor: { lat: 41, lng: 28.9 },
+    existingPins: [],
+    dayPins: [],
+  };
+  const r1 = plain(rank.rankCandidates(pool, opts));
+  assert.deepEqual(
+    r1.map((r) => r.place.id),
+    ["a", "b"],
+    "eşit skorda id sırası",
+  );
+  assert.equal("affiliateUrl" in r1[1].place, false, "I8: para kazanma alanı atılır");
+});

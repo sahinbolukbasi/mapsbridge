@@ -25,6 +25,9 @@ export interface TripStop {
   openHours?: string;
   walkTimeFromPrev?: string;
   distanceFromPrev?: string;
+  /** Yer proxy'sinden eklendiyse sağlayıcı kimliği (ayrıntı ve tekrar önerilmeme için). */
+  placeId?: string;
+  placeProvider?: "amazon" | "google";
 }
 
 export interface ActiveRoute {
@@ -166,8 +169,6 @@ class TripStore {
     this.routes = [];
     this.activeRouteId = "";
     this.savedPool = [];
-    this.pendingAddStopFlag = false;
-    this.pendingAddStopLocation = null;
   }
 
   private async applyOwner(next: string) {
@@ -448,24 +449,39 @@ class TripStore {
     }
   }
 
-  public addFromPool(poolId: string) {
-    const item = this.savedPool.find((p) => p.id === poolId);
-    if (!item) return;
+  /** Günsüz yer → Kaydedilenler (web planner pool karşılığı). Aynı yer iki kez eklenmez. */
+  public addToPool(stop: TripStop): boolean {
+    const dup = this.savedPool.some(
+      (p) =>
+        (stop.placeId && p.placeId === stop.placeId) ||
+        (Math.abs(p.lat - stop.lat) < 1e-5 && Math.abs(p.lng - stop.lng) < 1e-5),
+    );
+    if (dup) return false;
+    this.savedPool = [...this.savedPool, stop];
+    this.notify();
+    return true;
+  }
+
+  public removeFromPool(poolId: string) {
     this.savedPool = this.savedPool.filter((p) => p.id !== poolId);
-    const newStop: TripStop = {
-      ...item,
-      id: `stop-${Date.now()}`,
-      time: "15:30",
-      duration: item.duration || "60 dk",
-      walkTimeFromPrev: "~8 dk yürüyüş",
-      distanceFromPrev: "500m",
-    };
+    this.notify();
+  }
+
+  /**
+   * Kaydedilenler → aktif rota. Zaman/mesafe uydurulmaz (I1/I2): `time` yalnız gün öneki
+   * (çok günlü rotada) ya da boş; bağlantı süreleri OSRM'den hesaplanır.
+   */
+  public addFromPool(poolId: string, time = "") {
+    const item = this.savedPool.find((p) => p.id === poolId);
     const current = this.getActiveRoute();
-    if (current && current.id) {
-      current.stops = [...current.stops, newStop];
-      this.notify();
-      this.scheduleServerSync();
-    }
+    if (!item || !current || !current.id) return;
+    this.savedPool = this.savedPool.filter((p) => p.id !== poolId);
+    const { walkTimeFromPrev: _w, distanceFromPrev: _d, ...rest } = item;
+    void _w;
+    void _d;
+    current.stops = [...current.stops, { ...rest, id: `stop-${Date.now()}`, time }];
+    this.notify();
+    this.scheduleServerSync();
   }
 
   public clearSavedPool() {
@@ -474,110 +490,8 @@ class TripStore {
     this.notify();
   }
 
-  public optimizeRoute() {
-    const current = this.getActiveRoute();
-    if (!current || current.stops.length <= 2) return;
-
-    const stops = [...current.stops];
-    const optimized: TripStop[] = [stops[0]];
-    const remaining = stops.slice(1);
-
-    while (remaining.length > 0) {
-      const curr = optimized[optimized.length - 1];
-      let nearestIdx = 0;
-      let minDistance = Infinity;
-
-      for (let i = 0; i < remaining.length; i++) {
-        const dLat = remaining[i].lat - curr.lat;
-        const dLng = remaining[i].lng - curr.lng;
-        const dist = dLat * dLat + dLng * dLng;
-        if (dist < minDistance) {
-          minDistance = dist;
-          nearestIdx = i;
-        }
-      }
-
-      const next = remaining.splice(nearestIdx, 1)[0];
-      optimized.push(next);
-    }
-
-    const startHour = 9;
-    current.stops = optimized.map((s, idx) => {
-      const hour = startHour + Math.floor(idx * 1.2);
-      const min = (idx * 25) % 60;
-      return {
-        ...s,
-        time: `${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`,
-        walkTimeFromPrev: idx === 0 ? "0 dk" : `~${4 + (idx % 4) * 2} dk yürüyüş`,
-        distanceFromPrev: idx === 0 ? "0m" : `${300 + (idx % 5) * 80}m`,
-      };
-    });
-
-    this.notify();
-    this.scheduleServerSync();
-  }
-
   public loadRouteFromExternal(name: string, stops: TripStop[]) {
     this.createRoute(name, stops);
-  }
-
-  // Pending add stop from map selection
-  private pendingAddStopFlag: boolean = false;
-  private pendingAddStopLocation: {
-    lat: number;
-    lng: number;
-    name?: string;
-    address?: string;
-  } | null = null;
-
-  public setPendingAddStop(
-    flag: boolean,
-    location?: { lat: number; lng: number; name?: string; address?: string },
-  ) {
-    this.pendingAddStopFlag = flag;
-    this.pendingAddStopLocation = location || null;
-  }
-
-  public getPendingAddStop(): boolean {
-    return this.pendingAddStopFlag;
-  }
-
-  public getPendingAddStopLocation(): {
-    lat: number;
-    lng: number;
-    name?: string;
-    address?: string;
-  } | null {
-    return this.pendingAddStopLocation;
-  }
-
-  public clearPendingAddStop() {
-    this.pendingAddStopFlag = false;
-    this.pendingAddStopLocation = null;
-  }
-
-  public addStopFromMapSelection(
-    lat: number,
-    lng: number,
-    name: string = "Seçilen Konum",
-    address: string = "",
-  ) {
-    const newStop: TripStop = {
-      id: `stop-${Date.now()}`,
-      name,
-      category: "MEKAN",
-      time: "15:00",
-      duration: "45 dk",
-      address: address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-      lat,
-      lng,
-      rating: 4.8,
-      walkTimeFromPrev: "~6 dk yürüyüş",
-      distanceFromPrev: "400m",
-    };
-    this.addStop(newStop);
-    this.clearPendingAddStop();
-    return newStop;
   }
 }
 

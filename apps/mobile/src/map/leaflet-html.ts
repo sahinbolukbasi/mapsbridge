@@ -4,6 +4,31 @@
 // RN'e iletilir (ROUTE_LEGS); yanıt yoksa ya da 25 noktayı aşıyorsa `legs: null` gider ve bağlantı
 // satırı "Süre hesaplanamadı" yazar (I1/I2). Saf modül: React Native yok.
 import { tokens, withAlpha } from "../theme";
+import { iconPaths } from "../theme/icon-paths";
+
+/**
+ * Pin popup'ı (Increment 4.4, web pin-popup modeli): metinler RN'de hazırlanır (I11), WebView
+ * yalnızca kaçışlayarak çizer. Alanlar yalnız durak kaydından (I1); boş alan gönderilmez (I10).
+ */
+export type MapPopupPayload = {
+  category: string;
+  day?: string;
+  title: string;
+  address?: string;
+  note?: string;
+  /** Gezildi ise görünen etiket ("Tamamlandı"). */
+  visited?: string;
+  details: string;
+  toggle: string;
+};
+
+export type MapPoolPayload = {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  popup: MapPopupPayload;
+};
 
 export type MapStopPayload = {
   id: string;
@@ -14,6 +39,7 @@ export type MapStopPayload = {
   color: string;
   isSelected: boolean;
   visited: boolean;
+  popup?: MapPopupPayload;
 };
 
 /** OSRM demo sunucusuna tek istekte gönderilen en fazla nokta (design §6.3). */
@@ -55,7 +81,22 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
     color: ${c.text}; font: 600 10px -apple-system, Roboto, sans-serif; white-space: nowrap;
     max-width: 120px; overflow: hidden; text-overflow: ellipsis;
   }
-  .pin-done .pin-num { opacity: 0.6; }
+  /* Gezildi pini haritada kalır: kesik kenar + onay rozeti (renk tek başına anlam taşımaz). */
+  .pin-done .pin-num { opacity: 0.75; border-style: dashed; border-color: ${c.text}; }
+  .pin-check { position: absolute; margin-left: 26px; margin-top: -4px; width: 16px; height: 16px;
+    border-radius: 8px; background: ${c.surface}; display: flex; align-items: center; justify-content: center; }
+  .pin-pool .pin-num { background: ${c.surface}; color: ${c.text}; border: 2px dashed ${c.textMuted}; }
+  .leaflet-popup-content-wrapper { border-radius: 14px; }
+  .leaflet-popup-content { margin: 12px 14px; min-width: 200px; }
+  .pp p { margin: 0 0 4px; color: ${c.text}; font: 400 13px -apple-system, Roboto, sans-serif; }
+  .pp .pp-cat { color: ${c.textMuted}; font-size: 12px; font-weight: 600; }
+  .pp .pp-title { font-size: 15px; font-weight: 700; }
+  .pp .pp-addr, .pp .pp-note { color: ${c.textMuted}; }
+  .pp .pp-done { display: flex; align-items: center; gap: 4px; color: ${c.success}; font-weight: 600; }
+  .pp-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .pp-actions button { min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid ${c.buttonSecondaryBorder};
+    background: ${c.buttonSecondaryBg}; color: ${c.buttonSecondaryFg}; font: 700 13px -apple-system, Roboto, sans-serif; }
+  .pp-actions button.pp-primary { background: ${c.buttonPrimaryBg}; color: ${c.buttonPrimaryFg}; border-color: ${c.buttonPrimaryBg}; }
   .pin-temp .pin-num { background: ${c.surfaceInverse}; color: ${c.textInverse}; }
 </style>
 </head>
@@ -70,6 +111,19 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
   function post(msg) { if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify(msg)); }
   function fail() { if (!failed) { failed = true; post({ type: "MAP_LOAD_FAILED" }); } }
   function esc(s) { return String(s).replace(/[&<>"']/g, function(ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
+  var CHECK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="${iconPaths.check}" stroke="${c.success}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var pool, byId = {};
+  function popupHtml(id, p) {
+    if (!p) return null;
+    var h = '<div class="pp"><p class="pp-cat">' + esc(p.category) + (p.day ? " · " + esc(p.day) : "") + "</p>" +
+      '<p class="pp-title">' + esc(p.title) + "</p>";
+    if (p.address) h += '<p class="pp-addr">' + esc(p.address) + "</p>";
+    if (p.note) h += '<p class="pp-note">' + esc(p.note) + "</p>";
+    if (p.visited) h += '<p class="pp-done">' + CHECK + esc(p.visited) + "</p>";
+    h += '<div class="pp-actions"><button type="button" class="pp-primary" data-act="details" data-id="' + esc(id) + '">' + esc(p.details) + "</button>" +
+      '<button type="button" data-act="toggle" data-id="' + esc(id) + '">' + esc(p.toggle) + "</button></div></div>";
+    return h;
+  }
   function focus(lat, lng, zoom) {
     if (!map) return;
     if (REDUCED) map.setView([lat, lng], zoom); else map.flyTo([lat, lng], zoom, { duration: 0.6 });
@@ -87,7 +141,32 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
       .on("tileerror", function() { if (!tileLoaded) fail(); })
       .addTo(map);
     markers = L.layerGroup().addTo(map);
+    pool = L.layerGroup().addTo(map);
     map.on("click", function(e) { post({ type: "MAP_CLICK", lat: e.latlng.lat, lng: e.latlng.lng }); });
+    map.on("moveend", function() { var ctr = map.getCenter(); post({ type: "MAP_MOVED", lat: ctr.lat, lng: ctr.lng }); });
+    map.on("popupopen", function(e) {
+      var el = e.popup.getElement();
+      if (!el) return;
+      Array.prototype.forEach.call(el.querySelectorAll("button[data-act]"), function(b) {
+        b.addEventListener("click", function(ev) {
+          ev.stopPropagation();
+          post({ type: "POPUP_ACTION", act: b.getAttribute("data-act"), id: b.getAttribute("data-id") });
+          map.closePopup();
+        });
+      });
+    });
+    window.openPopup = function(id) { var m = byId[id]; if (m && m.getPopup()) m.openPopup(); };
+    window.updatePool = function(list) {
+      pool.clearLayers();
+      (list || []).forEach(function(s) {
+        var m = L.marker([s.lat, s.lng], { icon: L.divIcon({ className: "", iconSize: [120, 60], iconAnchor: [60, 20],
+          html: '<div class="pin pin-pool"><div class="pin-num">+</div><div class="pin-label">' + esc(s.name) + "</div></div>" }) });
+        var html = popupHtml(s.id, s.popup);
+        if (html) m.bindPopup(html, { maxWidth: 260, autoPan: true });
+        m.on("click", function(e) { L.DomEvent.stopPropagation(e); });
+        m.addTo(pool);
+      });
+    };
     window.focusStop = function(lat, lng, zoom) { focus(lat, lng, zoom || 16); };
     window.fitAll = function() {
       var pts = [];
@@ -103,15 +182,20 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
     };
     window.updateStops = function(stops) {
       markers.clearLayers();
+      byId = {};
       if (line) { map.removeLayer(line); line = null; }
       var pts = [];
       (stops || []).forEach(function(s) {
         pts.push([s.lat, s.lng]);
         var cls = "pin" + (s.isSelected ? " pin-sel" : "") + (s.visited ? " pin-done" : "");
         var m = L.marker([s.lat, s.lng], { icon: L.divIcon({ className: "", iconSize: [120, 60], iconAnchor: [60, 20],
-          html: '<div class="' + cls + '"><div class="pin-num" style="background:' + s.color + '">' + s.index + '</div><div class="pin-label">' + esc(s.name) + "</div></div>" }) });
+          html: '<div class="' + cls + '"><div class="pin-num" style="background:' + s.color + '">' + s.index + "</div>" +
+            (s.visited ? '<div class="pin-check">' + CHECK + "</div>" : "") + '<div class="pin-label">' + esc(s.name) + "</div></div>" }) });
+        var html = popupHtml(s.id, s.popup);
+        if (html) m.bindPopup(html, { maxWidth: 260, autoPan: true });
         m.on("click", function(e) { L.DomEvent.stopPropagation(e); post({ type: "PIN_SELECT", id: s.id }); });
         m.addTo(markers);
+        byId[s.id] = m;
       });
       if (pts.length > 1) {
         line = L.polyline(pts, { color: "${c.mapRoute}", weight: 4, opacity: 0.5, dashArray: "6 6" }).addTo(map);
