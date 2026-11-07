@@ -92,6 +92,22 @@ test("AC-23: ModalFrame accessibilityViewIsModal + onRequestClose taşır", () =
   assert.ok(roots >= 2, "overlay ve sayfa kökleri accessibilityViewIsModal taşır");
 });
 
+test("K4: ModalFrame biyometrik kilit durumunu tüketir; App kilidi okunmadan içerik çizmez", () => {
+  // RN <Modal> ayrı yerel pencerede LockScreen'in üstünde çizilir; kilitliyken gizlenmeli.
+  const frame = read("src/ui/ModalFrame.tsx").replace(/^\s*\/\/.*$/gm, "");
+  assert.match(frame, /useAppLocked\(\)/, "ModalFrame useAppLocked() okur");
+  assert.match(
+    frame,
+    /visible\s*=\s*requested\s*&&\s*!locked/,
+    "Modal yalnız kilitli değilken görünür",
+  );
+  const [modal] = openingTags(frame, "Modal");
+  assert.match(modal.text, /visible=\{visible\}/, "<Modal visible> kilit süzgecinden geçer");
+  const app = read("App.tsx");
+  assert.match(app, /<LockContext\.Provider value=\{locked\}>/, "App kilit durumunu sağlar");
+  assert.match(app, /useState<boolean \| null>\(null\)/, "kilit durumu bilinmiyorla başlar");
+  assert.match(app, /locked === null\)/, "kilit ayarı okunana kadar açılış ekranı kalır");
+});
 test("AC-22: her <WebView accessibilityLabel taşır", () => {
   const missing = [];
   let count = 0;

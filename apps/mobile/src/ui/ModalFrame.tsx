@@ -20,6 +20,7 @@ import { useReducedMotion } from "./useReducedMotion";
 import { animate } from "./motion";
 import { modalPresentation, type ModalPresentation } from "./logic/modal-presentation";
 import { modalClosed, modalOpened } from "./modal-registry";
+import { useAppLocked } from "./lock-context";
 // Modal çerçevesi (design §7.3, R10 / approval ruleChanges a). RN <Modal> yalnızca burada.
 // Sunum logic/modal-presentation.ts (web ile birebir): sheet yalnız dar ekranda (<768 dp) alttan
 // kayar; ≥768 dp (tablet) her modal ortalı dialogdur: solma + kart translateY(8) scale(.96) → 1
@@ -60,7 +61,7 @@ export function framePresentation(variant: ModalVariant, width: number): ModalPr
   return modalPresentation("sheet", width < TABLET_MIN_WIDTH);
 }
 export function ModalFrame({
-  visible,
+  visible: requested,
   onRequestClose,
   title,
   variant,
@@ -69,6 +70,9 @@ export function ModalFrame({
   style,
   children,
 }: ModalFrameProps) {
+  // Biyometrik kilit açıkken modal yerel pencerede kilidin üstünde kalmasın diye gizlenir.
+  const locked = useAppLocked();
+  const visible = requested && !locked;
   const reduced = useReducedMotion();
   const { width } = useWindowDimensions();
   const titleRef = useRef<Text>(null);

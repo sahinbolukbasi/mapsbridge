@@ -22,6 +22,7 @@ import {
 } from "./src/navigation/tab-stack";
 import {
   HAPTICS_KEY,
+  LockContext,
   ScreenFocusContext,
   Toaster,
   motion,
@@ -166,7 +167,8 @@ export function App() {
   // K4: derin bağlantı hedefleri, biyometrik kilit, yerel bildirim/karo önbelleği kurulumu.
   const [sharedCode, setSharedCode] = useState<string | null>(null);
   const [openTraveler, setOpenTraveler] = useState<{ username: string; nonce: number }>();
-  const [locked, setLocked] = useState(false);
+  // null = kilit ayarı henüz okunmadı (açılış ekranı kalır); true ise içerikten önce kilit çizilir.
+  const [locked, setLocked] = useState<boolean | null>(null);
   const toastRef = useRef<ToastApi | null>(null);
   const pendingLink = useRef<DeepLink | null>(null);
   const backgroundedAt = useRef<number | null>(null);
@@ -177,9 +179,9 @@ export function App() {
       .getItem(HAPTICS_KEY)
       .then((v) => setHapticsEnabled(v !== "false"))
       .catch(() => undefined);
-    lockEnabled().then((on) => {
-      if (on) setLocked(true);
-    });
+    lockEnabled()
+      .then((on) => setLocked(on))
+      .catch(() => setLocked(false));
     const sub = AppState.addEventListener("change", (state) => {
       if (state === "background") backgroundedAt.current = Date.now();
       else if (state === "active") {
@@ -566,7 +568,7 @@ export function App() {
   };
 
   // Açılış ekranı yalnızca gerçek yükleme sürerken (yazı tipleri + oturum; F38, J6).
-  if (loadingSession || !fontsSettled || onboardingSeen === null) {
+  if (loadingSession || !fontsSettled || onboardingSeen === null || locked === null) {
     return (
       <View style={styles.appShell}>
         <StatusBar barStyle="dark-content" backgroundColor={tokens.color.bg} />
@@ -673,68 +675,70 @@ export function App() {
   });
 
   return (
-    <Toaster bottomOffset={tabBarHeight}>
-      <View style={styles.appShell}>
-        <StatusBar barStyle="light-content" backgroundColor={tokens.color.surfaceInverseStrong} />
+    <LockContext.Provider value={locked}>
+      <Toaster bottomOffset={tabBarHeight}>
+        <View style={styles.appShell}>
+          <StatusBar barStyle="light-content" backgroundColor={tokens.color.surfaceInverseStrong} />
 
-        {/* Sekme ekranları unmount edilmez (display none); yığındaki ekran kökün yerine çizilir. */}
-        <View
-          style={styles.screenContainer}
-          key={signedIn ? "member" : "guest"}
-          accessibilityElementsHidden={locked}
-          importantForAccessibility={locked ? "no-hide-descendants" : "auto"}
-        >
-          {tabs
-            .filter((tab) => mountedTabs.current.tabs.has(tab))
-            .map((tab) => {
-              const active = tab === nav.tab;
-              const top = topScreen(nav, tab);
-              return (
-                <Animated.View
-                  key={tab}
-                  style={[
-                    styles.tabScreen,
-                    active ? { opacity: tabEnter, transform: [{ translateY }] } : styles.hidden,
-                  ]}
-                  accessibilityElementsHidden={!active}
-                  importantForAccessibility={active ? "auto" : "no-hide-descendants"}
-                >
-                  <ScreenFocusContext.Provider value={active && !top}>
-                    <View style={[styles.tabScreen, top ? styles.hidden : null]}>
-                      {renderTab(tab)}
-                    </View>
-                  </ScreenFocusContext.Provider>
-                  {top ? (
-                    <ScreenFocusContext.Provider value={active}>
-                      <View style={styles.tabScreen}>{renderStackScreen(top)}</View>
+          {/* Sekme ekranları unmount edilmez (display none); yığındaki ekran kökün yerine çizilir. */}
+          <View
+            style={styles.screenContainer}
+            key={signedIn ? "member" : "guest"}
+            accessibilityElementsHidden={locked}
+            importantForAccessibility={locked ? "no-hide-descendants" : "auto"}
+          >
+            {tabs
+              .filter((tab) => mountedTabs.current.tabs.has(tab))
+              .map((tab) => {
+                const active = tab === nav.tab;
+                const top = topScreen(nav, tab);
+                return (
+                  <Animated.View
+                    key={tab}
+                    style={[
+                      styles.tabScreen,
+                      active ? { opacity: tabEnter, transform: [{ translateY }] } : styles.hidden,
+                    ]}
+                    accessibilityElementsHidden={!active}
+                    importantForAccessibility={active ? "auto" : "no-hide-descendants"}
+                  >
+                    <ScreenFocusContext.Provider value={active && !top}>
+                      <View style={[styles.tabScreen, top ? styles.hidden : null]}>
+                        {renderTab(tab)}
+                      </View>
                     </ScreenFocusContext.Provider>
-                  ) : null}
-                </Animated.View>
-              );
-            })}
-        </View>
+                    {top ? (
+                      <ScreenFocusContext.Provider value={active}>
+                        <View style={styles.tabScreen}>{renderStackScreen(top)}</View>
+                      </ScreenFocusContext.Provider>
+                    ) : null}
+                  </Animated.View>
+                );
+              })}
+          </View>
 
-        <View onLayout={(e) => setTabBarHeight(e.nativeEvent.layout.height)}>
-          <BottomTabBar tabs={tabs} activeTab={nav.tab} onSelectTab={selectTab} />
-        </View>
+          <View onLayout={(e) => setTabBarHeight(e.nativeEvent.layout.height)}>
+            <BottomTabBar tabs={tabs} activeTab={nav.tab} onSelectTab={selectTab} />
+          </View>
 
-        {/* Planlar (design §7.2 madde 8): misafirde bilgi + kayıt, üyede RevenueCat satın alma. */}
-        <PaywallModal
-          visible={plansOpen}
-          guest={!signedIn}
-          placement="assistant"
-          onClose={() => setPlansOpen(false)}
-          onRequireAuth={(mode) => openAuth(mode)}
-        />
-        <FirstRouteReminder
-          enabled={signedIn && ownerReady}
-          onGranted={() => void scheduleRouteReminders(tripStore.getActiveRoute())}
-        />
-        <SharedRouteView code={sharedCode} onClose={() => setSharedCode(null)} />
-        <ToastBridge onReady={(api) => (toastRef.current = api)} />
-        {locked ? <LockScreen onUnlocked={() => setLocked(false)} /> : null}
-      </View>
-    </Toaster>
+          {/* Planlar (design §7.2 madde 8): misafirde bilgi + kayıt, üyede RevenueCat satın alma. */}
+          <PaywallModal
+            visible={plansOpen}
+            guest={!signedIn}
+            placement="assistant"
+            onClose={() => setPlansOpen(false)}
+            onRequireAuth={(mode) => openAuth(mode)}
+          />
+          <FirstRouteReminder
+            enabled={signedIn && ownerReady}
+            onGranted={() => void scheduleRouteReminders(tripStore.getActiveRoute())}
+          />
+          <SharedRouteView code={sharedCode} onClose={() => setSharedCode(null)} />
+          <ToastBridge onReady={(api) => (toastRef.current = api)} />
+          {locked ? <LockScreen onUnlocked={() => setLocked(false)} /> : null}
+        </View>
+      </Toaster>
+    </LockContext.Provider>
   );
 }
 

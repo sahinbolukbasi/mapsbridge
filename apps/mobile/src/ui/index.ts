@@ -3,6 +3,7 @@
 export { SafeArea, type SafeAreaProps } from "./SafeArea";
 export { Screen, type ScreenProps } from "./Screen";
 export { ScreenFocusContext } from "./screen-focus";
+export { LockContext, useAppLocked } from "./lock-context";
 export { ScreenHeader, type ScreenHeaderProps } from "./ScreenHeader";
 export {
   ModalFrame,
