@@ -480,3 +480,43 @@ test("FEAT-012 (I1/I2): rota görünümü bağlantı değerlerini yalnız OSRM'd
   assert.match(html, /type: "ROUTE_LEGS"/);
   assert.match(html, /OSRM_MAX_POINTS/);
 });
+// ── Increment 4.2: bağımlılıklar tam sürüm; app.config.ts kaynak, app.json eşit; izinler TR + EN ──
+test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin metinleri TR + EN", () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(mobile, "package.json"), "utf8"));
+  const pinned = {
+    "expo-haptics": "57.0.3",
+    "expo-notifications": "57.0.25",
+    "expo-sharing": "57.0.25",
+    "expo-linking": "57.0.13",
+    "expo-location": "57.0.23",
+    "expo-file-system": "57.0.7",
+    "expo-local-authentication": "57.0.3",
+  };
+  for (const [name, version] of Object.entries(pinned))
+    assert.equal(pkg.dependencies[name], version, `${name} tam sürüm`);
+  for (const name of ["react-native-purchases", "react-native-purchases-ui"])
+    assert.match(pkg.dependencies[name], /^\d+\.\d+\.\d+$/, `${name} aralık değil tam sürüm`);
+  const { loadTs } = require("./helpers/load-ts.cjs");
+  const cfg = loadTs(path.join(mobile, "app.config.ts"), { globals: { process: { env: {} } } });
+  const json = JSON.parse(fs.readFileSync(path.join(mobile, "app.json"), "utf8"));
+  assert.deepEqual(json, JSON.parse(JSON.stringify(cfg.APP_CONFIG)), "app.json = app.config.ts");
+  const keys = [
+    "NSLocationWhenInUseUsageDescription",
+    "NSCameraUsageDescription",
+    "NSPhotoLibraryUsageDescription",
+    "NSPhotoLibraryAddUsageDescription",
+    "NSFaceIDUsageDescription",
+  ];
+  const expo = json.expo;
+  for (const lang of ["tr", "en"]) {
+    const strings = JSON.parse(fs.readFileSync(path.join(mobile, expo.locales[lang]), "utf8"));
+    for (const k of keys) assert.ok(strings[k] && strings[k].length > 20, `${lang} ${k}`);
+  }
+  for (const k of keys) assert.ok(expo.ios.infoPlist[k], `infoPlist ${k}`);
+  // Arka plan konumu istenmez (yalnız uygulama açıkken "Yakınımda").
+  assert.ok(!expo.ios.infoPlist.NSLocationAlwaysUsageDescription);
+  assert.ok(!expo.android.permissions.includes("ACCESS_BACKGROUND_LOCATION"));
+  assert.ok(
+    expo.android.blockedPermissions.includes("android.permission.ACCESS_BACKGROUND_LOCATION"),
+  );
+});
