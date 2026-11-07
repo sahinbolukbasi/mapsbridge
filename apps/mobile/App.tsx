@@ -20,6 +20,8 @@ import { PlanScreen } from "./src/screens/PlanScreen";
 import { AIScreen } from "./src/screens/AIScreen";
 import { CommunityScreen } from "./src/screens/CommunityScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
+import { ONBOARDING_KEY, OnboardingScreen } from "./src/screens/OnboardingScreen";
+import { FirstRouteReminder } from "./src/components/FirstRouteReminder";
 import { BottomTabBar } from "./src/components/BottomTabBar";
 import { PaywallModal } from "./src/components/PaywallModal";
 import { SplashScreen } from "./src/components/SplashScreen";
@@ -127,6 +129,15 @@ export function App() {
   const [plansOpen, setPlansOpen] = useState(false);
   // Toast'lar alt menünün üstünde (direction §3: mobil alt menünün üstü).
   const [tabBarHeight, setTabBarHeight] = useState(0);
+  // N1: ilk açılış tanıtımı (görüldü bayrağı cihazda); okunana kadar açılış ekranı kalır.
+  const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
+  const [ownerReady, setOwnerReady] = useState(false);
+  useEffect(() => {
+    storage
+      .getItem(ONBOARDING_KEY)
+      .then((v) => setOnboardingSeen(v === "true"))
+      .catch(() => setOnboardingSeen(true));
+  }, []);
   // Kapıdan girişte dönülecek sekme (web `next` karşılığı; ör. misafir asistan → Asistan).
   const authReturnTab = useRef<MobileTab | null>(null);
   // Yazı tipleri (karar S13): yüklenemezse sistem yazı tipiyle devam edilir.
@@ -202,7 +213,11 @@ export function App() {
   const tripOwner = ownerFromEmail(session?.email);
   useEffect(() => {
     if (loadingSession) return;
-    tripStore.setOwner(tripOwner).catch((err: unknown) => console.warn("Route sync error:", err));
+    setOwnerReady(false);
+    tripStore
+      .setOwner(tripOwner)
+      .catch((err: unknown) => console.warn("Route sync error:", err))
+      .finally(() => setOwnerReady(true));
   }, [loadingSession, tripOwner]);
 
   // Session refresh interval ref
@@ -463,7 +478,7 @@ export function App() {
   };
 
   // Açılış ekranı yalnızca gerçek yükleme sürerken (yazı tipleri + oturum; F38, J6).
-  if (loadingSession || !fontsSettled) {
+  if (loadingSession || !fontsSettled || onboardingSeen === null) {
     return (
       <View style={styles.appShell}>
         <StatusBar barStyle="dark-content" backgroundColor={tokens.color.bg} />
@@ -471,6 +486,8 @@ export function App() {
       </View>
     );
   }
+
+  if (!onboardingSeen) return <OnboardingScreen onDone={() => setOnboardingSeen(true)} />;
 
   const selectTab = (tab: MobileTab) => dispatch({ type: "select", tab });
 
@@ -615,6 +632,7 @@ export function App() {
           onClose={() => setPlansOpen(false)}
           onRequireAuth={(mode) => openAuth(mode)}
         />
+        <FirstRouteReminder enabled={signedIn && ownerReady} />
       </View>
     </Toaster>
   );

@@ -388,6 +388,8 @@ export const UI_TR = {
   "community.compose.submit": "Paylaş",
   "community.compose.title": "Seyahat deneyimini paylaş",
   "community.compose.contentHint": "#etiket yazarsan gönderiye eklenir.",
+  "ui.next": "Sonraki",
+  "nav.settings": "Ayarlar",
 } as const;
 
 // Yalnız native'de olan metinler (web tr.json'da karşılığı yok). Anahtarlar `native.` ile başlar,
@@ -470,6 +472,28 @@ export const NATIVE_TR = {
   "native.auth.google.errorGeneric": "Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.",
   "native.auth.google.noEmail":
     "Google hesabından e-posta adresi alınamadı. Lütfen tekrar deneyin.",
+  "native.onboarding.label": "Maps Bridge tanıtımı",
+  "native.onboarding.step": "{n} / {total}",
+  "native.onboarding.skip": "Atla",
+  "native.onboarding.start": "Başlayalım",
+  "native.onboarding.next": "Sonraki tanıtım",
+  "native.onboarding.1.title": "Gezini anlat, rotan haritada belirsin.",
+  "native.onboarding.1.body": "Birkaç dokunuşla gün gün rota. Yolda yanında, çevrimdışı da.",
+  "native.onboarding.2.title": "Asistan sorar, sen dokunursun.",
+  "native.onboarding.2.body": "Her turda en fazla iki soru. Mekan bilgisi veriden gelir, uydurulmaz.",
+  "native.onboarding.3.title": "Rotanı süreli bağlantıyla paylaş.",
+  "native.onboarding.3.body": "Kodu sen verirsin; konumun yalnız senin onayınla ve süre boyunca görünür.",
+  "native.perm.notNow": "Şimdi değil",
+  "native.perm.location.title": "Yakınındaki yerleri göstermek için konumunu kullanalım mı?",
+  "native.perm.location.allow": "Konuma izin ver",
+  "native.perm.location.p1": "Yalnız uygulama açıkken",
+  "native.perm.location.p2": "Konumun kimseyle paylaşılmaz; paylaşım ayrı, süreli ve onaylı",
+  "native.perm.location.p3": "Ayarlardan istediğin zaman kapatırsın",
+  "native.perm.notifications.title": "Rota hatırlatmaları açılsın mı?",
+  "native.perm.notifications.body": "Günün ilk durağından önce kısa bir hatırlatma. Pazarlama bildirimi yok.",
+  "native.perm.notifications.allow": "Bildirimlere izin ver",
+  "native.perm.denied": "İzin kapalı. Ayarlardan açabilirsin.",
+  "native.perm.openSettings": "Ayarları aç",
 } as const;
 
 export type UiKey = keyof typeof UI_TR | keyof typeof NATIVE_TR;

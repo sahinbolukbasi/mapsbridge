@@ -343,7 +343,7 @@ test("App: misafir göz atma açık, Splash yapay süre taşımaz, BackHandler +
   assert.match(app, /GUEST_TABS/);
   // Misafir modu (design §6.3/§6.4; FEAT-011 review #1/#2): gezi kaydı sahibe bağlı, çıkışta
   // geziler ve satın alma kimliği bırakılır; misafirin Pro tetikleyicisi paywall değil kapı açar.
-  assert.match(app, /tripStore\.setOwner\(tripOwner\)/);
+  assert.match(app, /tripStore\s*\.setOwner\(tripOwner\)/);
   assert.match(app, /tripStore\.clearForSignOut\(\)/);
   assert.match(app, /resetRevenueCat\(\)/);
   assert.doesNotMatch(app, /tripStore\s*\.syncWithServer\(/, "eşitleme yalnız setOwner üzerinden");
@@ -519,4 +519,44 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
   assert.ok(
     expo.android.blockedPermissions.includes("android.permission.ACCESS_BACKGROUND_LOCATION"),
   );
+});
+// ── Increment 4.5: N1 onboarding + bağlamsal izinler ──
+test("4.5 (N1): 3 tanıtım, her ekranda Atla, uydurma istatistik yok; görüldü bayrağı turları katlar", () => {
+  const src = code("src/screens/OnboardingScreen.tsx");
+  assert.equal((src.match(/native\.onboarding\.[123]\.title/g) ?? []).length, 3);
+  assert.match(src, /tr\("native\.onboarding\.skip"\)/);
+  assert.match(src, /useBackHandler\(page > 0/, "Android geri önceki sayfaya");
+  assert.match(src, /android_ripple=/);
+  assert.match(src, /pagingEnabled/, "yatay kaydırma ile geri/ileri");
+  assert.match(src, /haptic\("selection"\)/);
+  assert.match(src, /animated: !reduced/, "hareket azaltmada animasyonsuz");
+  assert.match(src, /mb_tour_seen_\$\{s\}/, "ekran turları tanıtıma katlanır");
+  assert.doesNotMatch(
+    src,
+    /requestPermission|requestForegroundPermissionsAsync/,
+    "izin tanıtımda istenmez",
+  );
+  const { NATIVE_TR } = require("./helpers/load-ts.cjs").loadTs(
+    path.join(mobile, "src/i18n/ui.ts"),
+  );
+  for (const k of Object.keys(NATIVE_TR).filter((k) => k.startsWith("native.onboarding.")))
+    assert.doesNotMatch(
+      NATIVE_TR[k],
+      /\d+\s*(bin|k\+|%|kullanıcı|yorum|puan)/i,
+      `${k} uydurma sayı`,
+    );
+  const app = read("App.tsx");
+  assert.match(app, /if \(!onboardingSeen\) return <OnboardingScreen/);
+  assert.match(app, /<FirstRouteReminder enabled=\{signedIn && ownerReady\}/);
+});
+test("4.5 (N1): izin önce gerekçe ekranıyla, 'Şimdi değil' her zaman; arka plan konumu yok", () => {
+  const prompt = code("src/components/PermissionPrompt.tsx");
+  assert.match(prompt, /tr\("native\.perm\.notNow"\)/);
+  assert.match(prompt, /wasExplained\(kind\)/);
+  assert.match(prompt, /openSystemSettings/);
+  const perms = code("src/services/permissions.ts");
+  assert.match(perms, /requestForegroundPermissionsAsync/);
+  assert.doesNotMatch(perms, /requestBackgroundPermissionsAsync/);
+  const reminder = code("src/components/FirstRouteReminder.tsx");
+  assert.match(reminder, /usePermission\("notifications"\)/);
 });
