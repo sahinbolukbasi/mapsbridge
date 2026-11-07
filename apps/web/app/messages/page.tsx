@@ -7,6 +7,7 @@ import {
   Alert,
   Avatar,
   Button,
+  Celebrate,
   EmptyState,
   Field,
   Icon,
@@ -16,6 +17,8 @@ import {
   Modal,
   PageHeader,
   PageShell,
+  Reveal,
+  Tabs,
   cx,
 } from "../components/ui";
 import { MessageRequests } from "./message-requests";
@@ -176,6 +179,10 @@ export default function MessagesPage() {
   );
   const active = conversations.find((c) => c.id === activeId) ?? null;
   const requests = useMemo(() => groupThreads(serverThreads, mySub), [serverThreads, mySub]);
+  // Sohbetler / İstekler sekmesi (Increment 3.8); sayı rozeti sunucudaki gelen istek sayısı.
+  const [listTab, setListTab] = useState<"chats" | "requests">("chats");
+  // Kabul edilen istek: sohbet açılınca kısa kutlama (role=status), kapatılabilir.
+  const [acceptedId, setAcceptedId] = useState<string | null>(null);
   function open(id: string) {
     setActiveId(id);
     setPane("thread");
@@ -204,6 +211,8 @@ export default function MessagesPage() {
           messages: [],
         };
         setConversations((prev) => [conv, ...prev.filter((c) => c.id !== threadId)]);
+        setAcceptedId(threadId);
+        setListTab("chats");
         open(threadId);
       }
     } catch (err) {
@@ -340,57 +349,86 @@ export default function MessagesPage() {
               />
             )}
           </Field>
-          <MessageRequests
-            incoming={requests.incoming}
-            outgoing={requests.outgoing}
-            busyId={busyRequest}
-            onRespond={(id, action) => void respond(id, action)}
+          <Tabs
+            className="msg-list__tabs"
+            label={t("messages.tabs.label", "Mesaj kutusu")}
+            value={listTab}
+            onChange={(id) => setListTab(id as "chats" | "requests")}
+            items={[
+              {
+                id: "chats",
+                label: t("messages.tabs.chats", "Sohbetler"),
+                panel: (
+                  <>
+                    {visible.length === 0 ? (
+                      <EmptyState
+                        icon="message"
+                        contour
+                        level={3}
+                        title={
+                          query
+                            ? t("messages.empty.search", "Sohbet bulunamadı")
+                            : t("messages.empty.title", "Henüz mesajın yok")
+                        }
+                        description={
+                          query
+                            ? t("messages.empty.searchBody", "Farklı bir arama dene.")
+                            : t("messages.empty.body", "Bir gezgine yazarak başla.")
+                        }
+                        action={
+                          query ? undefined : (
+                            <Button variant="secondary" onClick={() => setNewChatOpen(true)}>
+                              {t("messages.new", "Yeni mesaj")}
+                            </Button>
+                          )
+                        }
+                      />
+                    ) : (
+                      <ul className="msg-list__items">
+                        {visible.map((c) => (
+                          <li key={c.id}>
+                            <button
+                              type="button"
+                              className={cx("msg-item", c.id === activeId && "is-active")}
+                              aria-current={c.id === activeId ? "true" : undefined}
+                              onClick={() => open(c.id)}
+                            >
+                              <Avatar name={c.title} size="sm" decorative />
+                              <span className="msg-item__text">
+                                <span className="msg-item__title">{c.title}</span>
+                                <span className="msg-item__last">
+                                  {c.lastMessage || t("messages.noMessages", "Henüz mesaj yok")}
+                                </span>
+                              </span>
+                              {c.lastTime && <span className="msg-item__time">{c.lastTime}</span>}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                ),
+              },
+              {
+                id: "requests",
+                label: t("messages.tabs.requests", "İstekler"),
+                badge:
+                  requests.incoming.length > 0 ? (
+                    <span className="msg-list__badge">{requests.incoming.length}</span>
+                  ) : undefined,
+                panel: (
+                  <Reveal stagger>
+                    <MessageRequests
+                      incoming={requests.incoming}
+                      outgoing={requests.outgoing}
+                      busyId={busyRequest}
+                      onRespond={(id, action) => void respond(id, action)}
+                    />
+                  </Reveal>
+                ),
+              },
+            ]}
           />
-          {visible.length === 0 ? (
-            <EmptyState
-              icon="message"
-              level={3}
-              title={
-                query
-                  ? t("messages.empty.search", "Sohbet bulunamadı")
-                  : t("messages.empty.title", "Henüz mesajın yok")
-              }
-              description={
-                query
-                  ? t("messages.empty.searchBody", "Farklı bir arama dene.")
-                  : t("messages.empty.body", "Bir gezgine yazarak başla.")
-              }
-              action={
-                query ? undefined : (
-                  <Button variant="secondary" onClick={() => setNewChatOpen(true)}>
-                    {t("messages.new", "Yeni mesaj")}
-                  </Button>
-                )
-              }
-            />
-          ) : (
-            <ul className="msg-list__items">
-              {visible.map((c) => (
-                <li key={c.id}>
-                  <button
-                    type="button"
-                    className={cx("msg-item", c.id === activeId && "is-active")}
-                    aria-current={c.id === activeId ? "true" : undefined}
-                    onClick={() => open(c.id)}
-                  >
-                    <Avatar name={c.title} size="sm" decorative />
-                    <span className="msg-item__text">
-                      <span className="msg-item__title">{c.title}</span>
-                      <span className="msg-item__last">
-                        {c.lastMessage || t("messages.noMessages", "Henüz mesaj yok")}
-                      </span>
-                    </span>
-                    {c.lastTime && <span className="msg-item__time">{c.lastTime}</span>}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
         </aside>
 
         <section className="msg-thread" aria-labelledby={active ? "msg-thread-title" : undefined}>
@@ -414,6 +452,22 @@ export default function MessagesPage() {
                   <p className="msg-thread__sub">@{active.title}</p>
                 </div>
               </div>
+              {acceptedId === active.id && (
+                <div className="msg-thread__celebrate">
+                  <Celebrate
+                    title={t("messages.req.acceptedTitle", "İstek kabul edildi")}
+                    message={t(
+                      "messages.req.acceptedBody",
+                      "Artık {name} ile mesajlaşabilirsin.",
+                    ).replace("{name}", active.title)}
+                    action={
+                      <Button size="sm" variant="ghost" onClick={() => setAcceptedId(null)}>
+                        {t("ui.close", "Kapat")}
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
               <MessageLog
                 className="msg-thread__log"
                 label={t("messages.log", "{name} ile sohbet").replace("{name}", active.title)}
@@ -454,11 +508,18 @@ export default function MessagesPage() {
                 value={draft}
                 onChange={setDraft}
                 onSubmit={(text) => void send(text)}
+                disabled={Boolean(active.pendingOut)}
+                disabledReason={
+                  active.pendingOut
+                    ? t("messages.req.waitAccept", "Kabul edilince yazabilirsin.")
+                    : undefined
+                }
               />
             </>
           ) : (
             <EmptyState
               icon="message"
+              contour
               level={2}
               title={t("messages.pick.title", "Bir sohbet seç")}
               description={t(

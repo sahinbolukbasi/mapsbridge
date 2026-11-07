@@ -1298,5 +1298,14 @@
   "publicProfile.posts": "Posts",
   "publicProfile.posts.empty": "No posts yet",
   "publicProfile.posts.toCommunity": "Go to community",
-  "share.lookup.back": "Back to the found location"
+  "share.lookup.back": "Back to the found location",
+  "messages.tabs.label": "Inbox",
+  "messages.tabs.chats": "Chats",
+  "messages.tabs.requests": "Requests",
+  "messages.req.empty": "No pending requests",
+  "messages.req.emptyBody": "Requests from travellers who want to message you for the first time appear here.",
+  "messages.req.wants": "Wants to message you",
+  "messages.req.acceptedTitle": "Request accepted",
+  "messages.req.acceptedBody": "You can now message {name}.",
+  "messages.req.waitAccept": "You can write once it's accepted."
 }

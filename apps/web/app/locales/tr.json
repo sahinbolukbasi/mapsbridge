@@ -1298,5 +1298,14 @@
   "publicProfile.posts": "Paylaşımları",
   "publicProfile.posts.empty": "Henüz paylaşım yok",
   "publicProfile.posts.toCommunity": "Topluluğa git",
-  "share.lookup.back": "Bulunan konuma dön"
+  "share.lookup.back": "Bulunan konuma dön",
+  "messages.tabs.label": "Mesaj kutusu",
+  "messages.tabs.chats": "Sohbetler",
+  "messages.tabs.requests": "İstekler",
+  "messages.req.empty": "Bekleyen istek yok",
+  "messages.req.emptyBody": "Seninle ilk kez yazışmak isteyen gezginlerin istekleri burada görünür.",
+  "messages.req.wants": "Seninle yazışmak istiyor",
+  "messages.req.acceptedTitle": "İstek kabul edildi",
+  "messages.req.acceptedBody": "Artık {name} ile mesajlaşabilirsin.",
+  "messages.req.waitAccept": "Kabul edilince yazabilirsin."
 }
