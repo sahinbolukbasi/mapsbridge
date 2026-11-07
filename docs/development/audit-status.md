@@ -116,7 +116,7 @@ Her madde güncel kodda tek tek doğrulandı. Durum etiketleri:
   - **Bunlar bu spec'ten ÖNCE de vardı; web build'i hâlâ bu 93 hatadan kırık.** Ayrı bir "web-typecheck-zero" spec'i önerilir.
 
 - **Görev 7 (AWS canary) — BAŞARISIZ (altyapı drift):** 5 canary de `ENOTFOUND` ile düştü. Teşhis: yerel DNS çalışıyor (google.com, mapsbridge.com çözülüyor) AMA:
-  - `0duy2hfjd2.execute-api.eu-central-1.amazonaws.com` (hardcoded API GW fallback — kodun HER yerinde) **artık çözülmüyor.**
+  - eski (ölü) API GW host'u (hardcoded API GW fallback — kodun HER yerinde) **artık çözülmüyor.**
   - `dzofhz77g8a7j.cloudfront.net` (synthetics config) **çözülmüyor.**
   - **Sonuç:** Synthetics config'i ve kodun hardcoded API endpoint'i güncel değil. Bu, "AWS üzerinde çalışıyor mu" sorusunun KRİTİK cevabı: şu an bu makineden bilinen endpoint'lere erişilemiyor. Gerçek canlı endpoint'in (API GW ID + CloudFront domain) doğrulanıp hem synthetics config'ine hem `NEXT_PUBLIC_API_BASE_URL`'e yazılması gerekir. **Kod düzeltmesi değil, doğru endpoint bilgisi + config güncellemesi gerektirir — kullanıcı/altyapı kararı.**
 
@@ -130,7 +130,7 @@ Her madde güncel kodda tek tek doğrulandı. Durum etiketleri:
 
 Doğrulanan gerçekler:
 
-- **API Gateway:** `0duy2hfjd2` yok (`NotFoundException`). Hesapta sadece alakasız API'ler var (FulgoraOrdersApi, kurek-kulubu-api, ai-software-factory-api).
+- **API Gateway:** eski (ölü) API GW kimliği yok (`NotFoundException`). Hesapta sadece alakasız API'ler var (FulgoraOrdersApi, kurek-kulubu-api, ai-software-factory-api).
 - **Cognito:** User Pool yok (boş liste).
 - **S3:** mapsbridge bucket'ı yok.
 - **DynamoDB:** `{env}-data` tablosu yok (sadece FulgoraOrders, kurek-* tabloları).
@@ -157,7 +157,7 @@ Doğrulanan gerçekler:
 MapsBridge'in GERÇEKTE nerede çalıştığını netleştir:
 
 1. **Eğer bu hesapta deploy edilecekse:** `cd infra/terraform && terraform apply` ile altyapıyı kur; sonra gerçek API GW ID + CloudFront domain'i `NEXT_PUBLIC_API_BASE_URL` ve synthetics env'lerine yaz.
-2. **Eğer farklı hesap/altyapıda çalışıyorsa:** O ortamın gerçek endpoint'lerini `SYNTHETICS_WEB_URL`/`SYNTHETICS_API_URL` olarak ayarla. Kodun her yerindeki hardcoded `0duy2hfjd2` fallback'i de gerçek değerle güncellenmeli.
+2. **Eğer farklı hesap/altyapıda çalışıyorsa:** O ortamın gerçek endpoint'lerini `SYNTHETICS_WEB_URL`/`SYNTHETICS_API_URL` olarak ayarla. Kodun her yerindeki hardcoded eski (ölü) API GW kimliği fallback'i de gerçek değerle güncellenmeli.
 
 ### Komut örneği (doğru endpoint'lerle)
 

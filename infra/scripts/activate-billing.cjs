@@ -10,7 +10,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const ssm = new SSMClient({ region: "eu-central-1" });
 const prefix = "/mapsbridge/prod/stripe";
-const endpoint = "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com/stripe/webhook";
+const endpoint = "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com/stripe/webhook";
 async function parameter(name) {
   try {
     return (

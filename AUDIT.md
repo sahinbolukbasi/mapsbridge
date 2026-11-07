@@ -256,7 +256,7 @@ Her adım: ayrı PR, tek konu, commit sonrası build + lint + test.
 
 ## 6. Açık Sorular
 
-1. **`handler.py` hala herhangi bir endpoint'te serve ediliyor mu?** Eski API GW URL (`0duy2hfjd2.execute-api.eu-central-1.amazonaws.com`) nereye bağlı?
+1. **`handler.py` hala herhangi bir endpoint'te serve ediliyor mu?** Eski API GW URL (eski (ölü) API GW host'u) nereye bağlı?
 2. **`infra/admin-runtime/` ile `infra/terraform/` deployment'ı nasıl ayrışıyor?** Admin Lambda'ları çift tanımlı mı?
 3. **`services/identity-billing/` gelecekte kullanılacak mı?** Yoksa silinmeli mi?
 4. **`apps/web/app/ai-asistan/` ile `app/ai/` arasındaki fark nedir?** `/ai-asistan` route'u aktif mi?

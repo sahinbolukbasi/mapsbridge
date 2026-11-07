@@ -2,7 +2,7 @@
 const { execFileSync } = require("node:child_process");
 const args = ["--region", "eu-central-1"];
 const api = JSON.parse(
-  execFileSync("aws", ["apigatewayv2", "get-api", "--api-id", "0duy2hfjd2", ...args], {
+  execFileSync("aws", ["apigatewayv2", "get-api", "--api-id", "pwi1j8mq0j", ...args], {
     encoding: "utf8",
   }),
 );

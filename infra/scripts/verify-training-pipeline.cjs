@@ -67,7 +67,7 @@ async function main() {
     const token = auth.AuthenticationResult.AccessToken;
     async function request(path, body) {
       const response = await fetch(
-        "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com" + path,
+        "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com" + path,
         {
           method: body ? "POST" : "GET",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },

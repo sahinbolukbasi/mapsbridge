@@ -29,7 +29,7 @@ function harness(response) {
       },
     },
   );
-  return { api: module.exports.aiService, calls };
+  return { api: module.exports.aiService, calls, mod: module.exports };
 }
 test("mobile forwards the exact user request, consent and stable retry ID to the shared backend", async () => {
   const h = harness({
@@ -91,4 +91,19 @@ test("mobile retains zero coordinates, day and suggested duration from the verif
   assert.equal(response.stops[0].lat, 0);
   assert.equal(response.stops[0].day, 2);
   assert.equal(response.stops[0].duration, "45 dakika");
+});
+test("4.1: mobil API varsayılanı canlı host; ölü eski host repoda yok, app.config extra.apiBaseUrl eşit", async () => {
+  const h = harness({ status: 200, body: { responseMode: "clarify", orchestratorSummary: "?" } });
+  const live = "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com";
+  assert.equal(h.mod.API_BASE, live);
+  await h.api.ask("Roma");
+  assert.ok(h.calls[0].url.startsWith(live), h.calls[0].url);
+  const cfg = fs.readFileSync(path.resolve(__dirname, "../../mobile/app.config.ts"), "utf8");
+  assert.match(
+    cfg,
+    /apiBaseUrl:\s*process\.env\.EXPO_PUBLIC_API_BASE_URL \|\| "https:\/\/pwi1j8mq0j/,
+  );
+  const web = fs.readFileSync(path.resolve(__dirname, "../app/lib/api-client.ts"), "utf8");
+  assert.match(web, /pwi1j8mq0j/);
+  assert.doesNotMatch(web + cfg, /0duy2hfjd2/);
 });

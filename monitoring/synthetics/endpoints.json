@@ -1,7 +1,7 @@
 {
   "_comment": "Canlı değerler önce SYNTHETICS_WEB_URL / SYNTHETICS_API_URL ortam değişkenlerinden okunur. webBaseUrl kanonik canlı adrestir; apiBaseUrl gerçek API Gateway adresidir (eu-central-1). Deploy sonrası farklı bir ortamı ölçmek için env ile override edin.",
   "webBaseUrl": "https://mapsbridge.com",
-  "apiBaseUrl": "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com",
+  "apiBaseUrl": "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com",
   "checks": [
     {
       "name": "Live Web Desk Page",

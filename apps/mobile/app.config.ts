@@ -65,6 +65,10 @@ export default {
       favicon: "./assets/favicon.png",
     },
     extra: {
+      // Mobil istemcinin API tabanı (src/services/api.ts aynı env'i derleme anında okur).
+      apiBaseUrl:
+        process.env.EXPO_PUBLIC_API_BASE_URL ||
+        "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com",
       eas: {
         projectId: "1d5b0238-eed2-450a-9777-06eed2a42303",
       },

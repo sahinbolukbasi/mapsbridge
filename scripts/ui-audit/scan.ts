@@ -13,7 +13,7 @@ import { isAdminRoute, routeSlug } from "./routes.ts";
 
 const LEAFLET_DIST = fileURLToPath(new URL("../../node_modules/leaflet/dist/", import.meta.url));
 
-export const PROD_API_ORIGIN = "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com";
+export const PROD_API_ORIGIN = "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com";
 const IMPACTS = ["critical", "serious", "moderate", "minor"] as const;
 type Impact = (typeof IMPACTS)[number];
 type ImpactCounts = Record<Impact, number>;

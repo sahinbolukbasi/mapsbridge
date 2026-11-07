@@ -1,6 +1,6 @@
 account_id         = "996270854731"
 prefix             = "adreskopru-prod"
-api_id             = "0duy2hfjd2"
+api_id             = "pwi1j8mq0j"
 application_table  = "adreskopru-prod-data"
 ai_role_name       = "adreskopru-prod-ai-runtime"
 cognito_pool_id    = "eu-central-1_TKABiLn5f"

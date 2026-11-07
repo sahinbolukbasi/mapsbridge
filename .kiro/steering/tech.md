@@ -9,7 +9,7 @@ inclusion: always
 | Katman      | Teknoloji                                                 |
 | ----------- | --------------------------------------------------------- |
 | Bölge       | `eu-central-1` (Frankfurt) — tüm servisler                |
-| API         | Amazon API Gateway v2 (HTTP + WebSocket), ID `0duy2hfjd2` |
+| API         | Amazon API Gateway v2 (HTTP + WebSocket), ID `pwi1j8mq0j` |
 | Hesaplama   | AWS Lambda `nodejs22.x`, per-route handler'lar            |
 | Veritabanı  | Amazon DynamoDB — single-table design, tablo `{env}-data` |
 | Kimlik      | Amazon Cognito + Google/Apple OAuth (JWKS doğrulama)      |

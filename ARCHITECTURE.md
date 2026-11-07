@@ -11,7 +11,7 @@
 | Katman        | Teknoloji                  | Notlar                                                               |
 | ------------- | -------------------------- | -------------------------------------------------------------------- |
 | Bölge         | `eu-central-1` (Frankfurt) | Tüm servisler                                                        |
-| API           | Amazon API Gateway         | ID: `0duy2hfjd2`, endpoint: `execute-api.eu-central-1.amazonaws.com` |
+| API           | Amazon API Gateway         | ID: `pwi1j8mq0j`, endpoint: `execute-api.eu-central-1.amazonaws.com` |
 | Hesaplama     | AWS Lambda (`nodejs22.x`)  | Serverless, per-route Lambda'lar                                     |
 | Veritabanı    | Amazon DynamoDB            | Single-table design, tablo adı: `{env}-data`                         |
 | Kimlik        | Amazon Cognito             | + Google/Apple OAuth JWKS doğrulama                                  |
@@ -27,7 +27,7 @@
 ```
 Tarayıcı → CloudFront → S3 (Next.js)
            │
-           └──→ API Gateway (0duy2hfjd2) → Lambda fonksiyonları
+           └──→ API Gateway (pwi1j8mq0j) → Lambda fonksiyonları
                     │
                     └──→ Cognito (direkt, Lambda bypass)
 

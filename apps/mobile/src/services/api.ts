@@ -1,6 +1,12 @@
 import { storage } from "./storage";
 
-export const API_BASE = "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com";
+// Canlı API Gateway. Derleme anında EXPO_PUBLIC_API_BASE_URL ile ezilir (app.config.ts
+// extra.apiBaseUrl aynı değeri taşır). Eski varsayılan host NXDOMAIN veriyordu (diagnosis LB §8).
+export const LIVE_API_BASE = "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com";
+export const API_BASE = (
+  (typeof process !== "undefined" ? process.env.EXPO_PUBLIC_API_BASE_URL : undefined) ||
+  LIVE_API_BASE
+).replace(/\/$/, "");
 const COGNITO_REGION = "eu-central-1";
 const COGNITO_CLIENT_ID = "62t35qsehl3o9cdc6i4mg01tqt";
 const COGNITO_ENDPOINT = `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/`;

@@ -272,7 +272,7 @@ export async function changePasswordDirect(newPassword: string) {
     throw new Error("Oturumunuz bulunamadı. Lütfen tekrar giriş yapın.");
   }
 
-  const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://0duy2hfjd2.execute-api.eu-central-1.amazonaws.com"}/auth/change-password`;
+  const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com"}/auth/change-password`;
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
