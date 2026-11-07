@@ -7,7 +7,6 @@
 "use client";
 
 import {
-  Fragment,
   useEffect,
   useMemo,
   useReducer,
@@ -37,9 +36,13 @@ import { apiFetch } from "../../lib/api-client";
 import type { MultiAgentResponse } from "../../lib/ai/types";
 import { interactionTracker } from "../../lib/analytics/tracker";
 import { exportTripToGoogleMaps } from "../../features/trip-planner/google-maps-exporter";
-import { dayTimeline, legKey } from "../../lib/trip/planner-logic";
+import { dayBufferRatio, dayTimeline, legKey } from "../../lib/trip/planner-logic";
+import { isTextFieldTarget, plannerShortcut, SHORTCUT_HELP } from "../../lib/trip/shortcuts";
+import { MotionProvider, Reorder, useDragControls } from "../../lib/motion";
+import { prefersReducedMotion } from "../../lib/a11y/use-reduced-motion";
 import { useLocale } from "../../lib/locale-context";
 import {
+  Accordion,
   Alert,
   Badge,
   Button,
@@ -241,6 +244,67 @@ export function TravelPlannerSidebar({
     });
   };
 
+  // P8: sürükle-bırak bırakılınca günün sırası tek güncellemeyle yazılır; "Geri al" eylemli toast.
+  const [dragOrder, setDragOrder] = useState<{ day: number; ids: string[] } | null>(null);
+  const commitDrag = (day: number, before: readonly string[]) => {
+    const ids = dragOrder?.day === day ? dragOrder.ids : null;
+    setDragOrder(null);
+    if (!ids || ids.join() === before.join()) return;
+    planner.reorderDay(day, ids);
+    toast.show({
+      tone: "success",
+      message: t("planner.toast.reordered", "{day}. günün sırası değişti.").replace(
+        "{day}",
+        String(day),
+      ),
+      action: { label: t("planner.undo", "Geri al"), onClick: planner.undo },
+      actionAlsoAt: "planner-toolbar undo IconButton",
+    });
+  };
+
+  // Seçili durağa yumuşak odak: liste satırı görünür alana kayar (azaltmada anında).
+  useEffect(() => {
+    if (!selectedPinId) return;
+    const el = document.querySelector(`[data-stop-id="${CSS.escape(selectedPinId)}"]`);
+    el?.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  }, [selectedPinId]);
+
+  // Klavye kısayolları (lib/trip/shortcuts): / ve N aramaya, Esc ayrıntıyı kapatır,
+  // Alt+↑/↓ seçili durağı taşır (sürükle-bırakın klavye alternatifi, R9).
+  const shortcutState = useRef({ selectedPin, pinsWithTime, workspaceMode, showDetail, moveStop });
+  shortcutState.current = { selectedPin, pinsWithTime, workspaceMode, showDetail, moveStop };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented) return;
+      if (document.querySelector("dialog[open]")) return;
+      const action = plannerShortcut({
+        key: e.key,
+        altKey: e.altKey,
+        ctrlKey: e.ctrlKey,
+        metaKey: e.metaKey,
+        shiftKey: e.shiftKey,
+        inTextField: isTextFieldTarget(e.target as HTMLElement | null),
+      });
+      if (!action) return;
+      const st = shortcutState.current;
+      if (action === "search" || action === "newStop") {
+        e.preventDefault();
+        setShowDetail(false);
+        setWorkspaceMode("edit");
+        window.setTimeout(() => document.getElementById("planner-search-input")?.focus(), 0);
+      } else if (action === "closeDetail") {
+        if (st.showDetail) setShowDetail(false);
+      } else if (st.selectedPin && st.workspaceMode === "edit") {
+        const dayPins = st.pinsWithTime.filter((p) => p.dayIndex === st.selectedPin?.dayIndex);
+        if (!dayPins.some((p) => p.id === st.selectedPin?.id)) return;
+        e.preventDefault();
+        st.moveStop(dayPins, st.selectedPin, action === "moveUp" ? "up" : "down");
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   // Gösterilecek günler: tek gün ya da "Tümü" görünümünde her gün kendi başlığıyla.
   const sections = useMemo(() => {
     if (!activeTrip) return [];
@@ -255,7 +319,13 @@ export function TravelPlannerSidebar({
           : activeTrip.pins
               .filter((p) => p.dayIndex === d.dayIndex)
               .sort((a, b) => a.order - b.order);
-      return { day: d, pins, timeline: dayTimeline(pins, activeRouteLegs, d.startTime) };
+      return {
+        day: d,
+        pins,
+        timeline: dayTimeline(pins, activeRouteLegs, d.startTime),
+        // I9: yalnız tüm bacaklar gerçekse oran; eksikse null ("hesaplanamadı").
+        buffer: pins.length > 0 ? dayBufferRatio(pins, activeRouteLegs, d.startTime) : undefined,
+      };
     });
   }, [activeTrip, activeDayIndex, pinsWithTime, activeRouteLegs]);
 
@@ -452,7 +522,7 @@ export function TravelPlannerSidebar({
           />
         )}
 
-        {sections.map(({ day, pins, timeline }) => (
+        {sections.map(({ day, pins, timeline, buffer }) => (
           <section
             key={day.dayIndex}
             className="planner-day"
@@ -470,6 +540,7 @@ export function TravelPlannerSidebar({
                       pins.reduce((sum, p) => sum + (p.durationMinutes ?? 60), 0)
                     : undefined
                 }
+                bufferRatio={buffer}
                 offline={planner.deviceSaved}
               />
             </div>
@@ -484,30 +555,57 @@ export function TravelPlannerSidebar({
                 )}
               />
             ) : (
-              <ol className="planner-stops">
-                {pins.map((pin, index) => {
-                  const prev = index > 0 ? pins[index - 1] : null;
-                  const leg = prev ? activeRouteLegs[legKey(prev.id, pin.id)] : undefined;
-                  const meta = DEFAULT_CATEGORY_META[pin.category] ?? DEFAULT_CATEGORY_META.genel;
-                  return (
-                    <Fragment key={pin.id}>
-                      {prev && (
-                        <li className="planner-stops__connector">
-                          <Connector
-                            mode={connectorMode}
-                            minutes={leg ? Math.round(leg.durationSeconds / 60) : undefined}
-                            meters={leg ? leg.distanceMeters : undefined}
-                          />
-                        </li>
-                      )}
-                      <li
+              <MotionProvider>
+                <Reorder.Group
+                  as="ol"
+                  axis="y"
+                  className="planner-stops"
+                  values={dragOrder?.day === day.dayIndex ? dragOrder.ids : pins.map((p) => p.id)}
+                  onReorder={(ids: string[]) => setDragOrder({ day: day.dayIndex, ids })}
+                >
+                  {(dragOrder?.day === day.dayIndex
+                    ? dragOrder.ids
+                        .map((id) => pins.find((p) => p.id === id))
+                        .filter((p): p is Pin => Boolean(p))
+                    : pins
+                  ).map((pin, index, list) => {
+                    const prev = index > 0 ? list[index - 1] : null;
+                    const leg = prev ? activeRouteLegs[legKey(prev.id, pin.id)] : undefined;
+                    const meta = DEFAULT_CATEGORY_META[pin.category] ?? DEFAULT_CATEGORY_META.genel;
+                    const dragging = dragOrder?.day === day.dayIndex;
+                    return (
+                      <DraggableStop
+                        key={pin.id}
+                        id={pin.id}
+                        enabled={workspaceMode === "edit" && pins.length > 1}
                         className={cx("planner-stop", pin.visited && "is-visited")}
-                        data-selected={pin.id === selectedPinId || undefined}
+                        selected={pin.id === selectedPinId}
+                        gripLabel={t("planner.stop.drag", "Sürükleyerek sırala")}
+                        onDragStart={() =>
+                          setDragOrder({ day: day.dayIndex, ids: pins.map((p) => p.id) })
+                        }
+                        onDragEnd={() =>
+                          commitDrag(
+                            day.dayIndex,
+                            pins.map((p) => p.id),
+                          )
+                        }
+                        connector={
+                          prev && !dragging ? (
+                            <div className="planner-stops__connector">
+                              <Connector
+                                mode={connectorMode}
+                                minutes={leg ? Math.round(leg.durationSeconds / 60) : undefined}
+                                meters={leg ? leg.distanceMeters : undefined}
+                              />
+                            </div>
+                          ) : null
+                        }
                       >
                         <StopRow
                           index={index + 1}
                           day={day.dayIndex}
-                          time={timeline?.times[index]}
+                          time={dragging ? undefined : timeline?.times[index]}
                           name={pin.label}
                           category={CATEGORY_ICON[pin.category] ?? "map"}
                           categoryLabel={meta.label}
@@ -519,7 +617,7 @@ export function TravelPlannerSidebar({
                               : undefined
                           }
                           isFirst={index === 0}
-                          isLast={index === pins.length - 1}
+                          isLast={index === list.length - 1}
                         />
                         <div className="planner-stop__actions">
                           {workspaceMode === "travel" ? (
@@ -554,11 +652,11 @@ export function TravelPlannerSidebar({
                             />
                           )}
                         </div>
-                      </li>
-                    </Fragment>
-                  );
-                })}
-              </ol>
+                      </DraggableStop>
+                    );
+                  })}
+                </Reorder.Group>
+              </MotionProvider>
             )}
           </section>
         ))}
@@ -603,6 +701,24 @@ export function TravelPlannerSidebar({
         </section>
 
         {footer}
+        <Accordion
+          items={[
+            {
+              id: "planner-shortcuts",
+              summary: t("planner.shortcuts.title", "Klavye kısayolları"),
+              content: (
+                <ul className="planner-shortcuts__list">
+                  {SHORTCUT_HELP.map((s) => (
+                    <li key={s.id} className="planner-shortcuts__item">
+                      <span>{t(`planner.shortcuts.${s.id}`, s.label)}</span>
+                      <kbd className="planner-shortcuts__key">{s.keys}</kbd>
+                    </li>
+                  ))}
+                </ul>
+              ),
+            },
+          ]}
+        />
         <p className="planner-list__note">
           {t(
             "planner.note.osrm",
@@ -627,6 +743,72 @@ export function TravelPlannerSidebar({
         />
       </div>
     </>
+  );
+}
+
+/**
+ * P8 sürüklenebilir durak satırı (lib/motion Reorder.Item). Sürükleme yalnız tutamaktan başlar
+ * (düğmeler normal çalışır); tutamak dekoratiftir, klavye alternatifi taşı düğmeleri + Alt+↑/↓.
+ * Azaltılmış harekette MotionProvider düzen animasyonunu kapatır.
+ */
+function DraggableStop({
+  id,
+  enabled,
+  className,
+  selected,
+  gripLabel,
+  connector,
+  onDragStart,
+  onDragEnd,
+  children,
+}: {
+  id: string;
+  enabled: boolean;
+  className?: string;
+  selected: boolean;
+  gripLabel: string;
+  connector: ReactNode;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  children: ReactNode;
+}) {
+  const controls = useDragControls();
+  const [dragging, setDragging] = useState(false);
+  return (
+    <Reorder.Item
+      as="li"
+      value={id}
+      dragListener={false}
+      dragControls={controls}
+      drag={enabled ? "y" : false}
+      className={className}
+      data-stop-id={id}
+      data-selected={selected || undefined}
+      data-dragging={dragging || undefined}
+      onDragStart={() => {
+        setDragging(true);
+        onDragStart();
+      }}
+      onDragEnd={() => {
+        setDragging(false);
+        onDragEnd();
+      }}
+    >
+      {connector}
+      <div className="planner-stop__row">
+        {enabled && (
+          <span
+            className="planner-stop__grip"
+            title={gripLabel}
+            aria-hidden="true"
+            onPointerDown={(e) => controls.start(e)}
+          >
+            <Icon name="grip" size={16} />
+          </span>
+        )}
+        {children}
+      </div>
+    </Reorder.Item>
   );
 }
 
@@ -753,6 +935,7 @@ function PlaceSearch({
     <div className="planner-search">
       <form className="planner-search__form" role="search" onSubmit={submit} noValidate>
         <Field
+          id="planner-search-input"
           className="planner-search__field"
           label={t("planner.search.label", "Mekan ya da adres ara")}
           hint={t(

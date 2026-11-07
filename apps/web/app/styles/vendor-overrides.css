@@ -70,8 +70,23 @@
     stroke-dasharray: 1;
     animation: trip-route-draw var(--duration-route) var(--easing-enter) both;
   }
-  .planner-pin.is-selected .planner-pin__head {
-    transition: transform var(--duration-fast) var(--easing-standard);
+  .planner-pin .planner-pin__head,
+  .planner-pool-pin .planner-pool-pin__dot {
+    transition:
+      transform var(--duration-fast) var(--easing-emphasized),
+      box-shadow var(--duration-base) var(--easing-standard);
+  }
+  /* Increment 3.3: üzerine gelince 1,12 büyür; seçili pin 1,25 + halka (yukarıda). */
+  .leaflet-marker-icon.planner-pin:hover:not(.is-selected) .planner-pin__head,
+  .leaflet-marker-icon.planner-pin:focus-visible:not(.is-selected) .planner-pin__head,
+  .leaflet-marker-icon.planner-pool-pin:hover .planner-pool-pin__dot,
+  .leaflet-marker-icon.planner-pool-pin:focus-visible .planner-pool-pin__dot {
+    transform: scale(1.12);
+  }
+  /* Popup ölçek + solma ile açılır. */
+  .leaflet-popup.planner-popup .leaflet-popup-content-wrapper {
+    /* Anahtar kare ui.css ui-dialog-in (layer dışı dosyada @keyframes yok, G22). */
+    animation: ui-dialog-in var(--duration-slow) var(--easing-enter) both;
   }
 }
 /* OSM karolarına hafif sepya (S12): yalnız OSM tabanlı katmanlarda (MapCanvas data-tiles="osm");

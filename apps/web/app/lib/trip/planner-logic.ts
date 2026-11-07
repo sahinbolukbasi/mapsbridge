@@ -89,6 +89,30 @@ export function dayTimeline(
   return { times, travelMinutes: Math.round(travelSeconds / 60), travelMeters };
 }
 
+/** Aktif gün sonu (scheduler.ts ACTIVE_DAY_END_MINUTES ile aynı: 21:00). */
+export const ACTIVE_DAY_END_MINUTES = 21 * 60;
+
+/**
+ * I9 tampon oranı (deterministik, I2): aktif pencere (gün başlangıcı → 21:00) içinde ziyaret +
+ * yol dışında kalan pay. YALNIZ tüm bacaklar gerçek yol rotasından geliyorsa hesaplanır; bir
+ * bacak eksikse ya da durak yoksa null ("hesaplanamadı", sayı uydurulmaz). 0–1 aralığına kırpılır.
+ */
+export function dayBufferRatio(
+  stops: readonly { id: string; durationMinutes?: number }[],
+  legs: Readonly<Record<string, RouteLeg>>,
+  startTime = "09:00",
+): number | null {
+  const timeline = dayTimeline(stops, legs, startTime);
+  if (!timeline) return null;
+  const [h, m] = startTime.split(":").map(Number);
+  const start = (Number.isFinite(h) ? h : 9) * 60 + (Number.isFinite(m) ? m : 0);
+  const window = ACTIVE_DAY_END_MINUTES - start;
+  if (window <= 0) return null;
+  const load =
+    timeline.travelMinutes + stops.reduce((sum, s) => sum + (s.durationMinutes ?? 60), 0);
+  return Math.min(1, Math.max(0, (window - load) / window));
+}
+
 function clock(minutes: number): string {
   const h = Math.floor(minutes / 60) % 24;
   const m = Math.round(minutes % 60);
@@ -162,5 +186,51 @@ export function undoSnapshots<T extends UndoTrip>(
 export function restoreSnapshot<T extends UndoTrip>(trips: readonly T[], entry: UndoEntry<T>): T[] {
   return trips.map((t) =>
     t.id === entry.tripId ? { ...t, pins: entry.pins, days: entry.days } : t,
+  );
+}
+
+/** P4 "Yeni rota" gün sayısı sınırları (Stepper). */
+export const NEW_TRIP_MIN_DAYS = 1;
+export const NEW_TRIP_MAX_DAYS = 14;
+
+/** P4: yeni rota için 1…N gün iskeleti (kırpılmış); renk/etiket kancada eklenir. */
+export function newTripDayIndexes(count: number): number[] {
+  const n = Math.min(
+    NEW_TRIP_MAX_DAYS,
+    Math.max(NEW_TRIP_MIN_DAYS, Number.isFinite(count) ? Math.round(count) : 1),
+  );
+  return Array.from({ length: n }, (_, i) => i + 1);
+}
+
+/** Başlangıç tarihi (YYYY-MM-DD) + gün sayısı → bitiş tarihi; geçersiz tarihte undefined. */
+export function tripEndDate(startDate: string | undefined, days: number): string | undefined {
+  if (!startDate || !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) return undefined;
+  const d = new Date(`${startDate}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return undefined;
+  d.setUTCDate(d.getUTCDate() + Math.max(0, newTripDayIndexes(days).length - 1));
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * P8 sürükle-bırak: bir günün durak sırasını verilen kimlik sırasına yazar (order 1…n).
+ * Diğer günlerin pinleri aynı referansla kalır; kimlik kümesi günle eşleşmezse dizi aynen döner
+ * (yarım bırakılmış sürüklemede veri bozulmaz). Tek çağrı = tek geri alma kaydı.
+ */
+export function reorderDayPins<T extends { id: string; dayIndex: number; order: number }>(
+  pins: readonly T[],
+  dayIndex: number,
+  orderedIds: readonly string[],
+): T[] {
+  const dayIds = pins.filter((p) => p.dayIndex === dayIndex).map((p) => p.id);
+  if (
+    dayIds.length !== orderedIds.length ||
+    new Set(orderedIds).size !== orderedIds.length ||
+    !orderedIds.every((id) => dayIds.includes(id))
+  )
+    return pins as T[];
+  const rank = new Map(orderedIds.map((id, i) => [id, i + 1]));
+  if (pins.every((p) => p.dayIndex !== dayIndex || p.order === rank.get(p.id))) return pins as T[];
+  return pins.map((p) =>
+    p.dayIndex === dayIndex ? { ...p, order: rank.get(p.id) ?? p.order } : p,
   );
 }

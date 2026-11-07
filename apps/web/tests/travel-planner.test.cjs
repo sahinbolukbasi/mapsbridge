@@ -257,3 +257,39 @@ test("tripToRoute converts trip to UnifiedRoutePlan and back with routeToTrip", 
   assert.equal(converted.stops[2].name, "Galata Kulesi");
   assert.equal(converted.stops[2].day, 2);
 });
+
+// Increment 3.3: kısayol eşlemesi (lib/trip/shortcuts) ve yeni rota → günler.
+const { loadTs: loadTs33 } = require("./helpers/load-ts.cjs");
+const SC = loadTs33(path.join(WEB_ROOT, "app/lib/trip/shortcuts.ts"));
+test("planner kısayolları: / ve N yazı alanı dışında; Esc ve Alt+↑/↓ her yerde", () => {
+  assert.equal(SC.plannerShortcut({ key: "/" }), "search");
+  assert.equal(SC.plannerShortcut({ key: "n" }), "newStop");
+  assert.equal(SC.plannerShortcut({ key: "N", shiftKey: true }), "newStop");
+  assert.equal(SC.plannerShortcut({ key: "/", inTextField: true }), null);
+  assert.equal(SC.plannerShortcut({ key: "n", inTextField: true }), null);
+  assert.equal(SC.plannerShortcut({ key: "Escape", inTextField: true }), "closeDetail");
+  assert.equal(SC.plannerShortcut({ key: "ArrowUp", altKey: true }), "moveUp");
+  assert.equal(
+    SC.plannerShortcut({ key: "ArrowDown", altKey: true, inTextField: true }),
+    "moveDown",
+  );
+  assert.equal(SC.plannerShortcut({ key: "ArrowUp" }), null);
+  assert.equal(SC.plannerShortcut({ key: "n", ctrlKey: true }), null);
+  assert.equal(SC.plannerShortcut({ key: "n", metaKey: true }), null);
+  assert.equal(SC.isTextFieldTarget({ tagName: "input" }), true);
+  assert.equal(SC.isTextFieldTarget({ tagName: "DIV", isContentEditable: true }), true);
+  assert.equal(SC.isTextFieldTarget({ tagName: "BUTTON" }), false);
+  assert.equal(SC.isTextFieldTarget(null), false);
+  assert.equal(SC.SHORTCUT_HELP.length, 5);
+});
+test("yeni rota modalı: createTrip gün sayısı + tarih alır; günler newTripDayIndexes'ten", () => {
+  const fs = require("node:fs");
+  const hook = fs.readFileSync(path.join(WEB_ROOT, "app/lib/trip/use-travel-planner.ts"), "utf8");
+  assert.match(hook, /opts\?: \{ days\?: number; startDate\?: string \}/);
+  assert.match(hook, /newTripDayIndexes\(opts\?\.days \?\? 1\)/);
+  const maps = fs.readFileSync(path.join(WEB_ROOT, "app/maps/maps-client.tsx"), "utf8");
+  assert.match(maps, /<NewTripModal/);
+  assert.match(maps, /days: input\.days/);
+  const L = loadTs33(path.join(WEB_ROOT, "app/lib/trip/planner-logic.ts"));
+  assert.equal(L.newTripDayIndexes(4).length, 4);
+});

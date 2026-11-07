@@ -484,3 +484,52 @@ test("B1: use-travel-planner *Anywhere mutatörleri mapTripPins kullanır (tüm 
   }
   assert.match(src, /undoSnapshots\(prev, trips\)/);
 });
+
+test("dayBufferRatio (I9, Increment 3.3): yalnız gerçek bacaklarla; eksik bacakta null", () => {
+  const stops = [
+    { id: "a", durationMinutes: 120 },
+    { id: "b", durationMinutes: 90 },
+  ];
+  const legs = { [L.legKey("a", "b")]: { distanceMeters: 1200, durationSeconds: 1800 } };
+  // 09:00–21:00 = 720 dk; yük 120 + 90 + 30 = 240 → (720 - 240) / 720.
+  assert.equal(L.ACTIVE_DAY_END_MINUTES, 21 * 60);
+  assert.equal(L.dayBufferRatio(stops, legs, "09:00"), 480 / 720);
+  assert.ok(L.dayBufferRatio(stops, legs, "09:00") >= 0.2);
+  assert.equal(L.dayBufferRatio(stops, {}, "09:00"), null, "bacak eksik → hesaplanamadı");
+  assert.equal(L.dayBufferRatio([], {}, "09:00"), null);
+  // Aşırı yüklü gün 0'a kırpılır, 20 % altı uyarı eşiği.
+  const heavy = [{ id: "x", durationMinutes: 800 }];
+  assert.equal(L.dayBufferRatio(heavy, {}, "09:00"), 0);
+  assert.ok(L.dayBufferRatio([{ id: "y", durationMinutes: 600 }], {}, "09:00") < 0.2);
+  assert.equal(L.dayBufferRatio([{ id: "z" }], {}, "22:00"), null, "pencere yoksa null");
+});
+
+test("reorderDayPins (P8): yalnız o günün sırası; geçersiz kimlik kümesinde dokunulmaz", () => {
+  const pins = [
+    { id: "a", dayIndex: 1, order: 1 },
+    { id: "b", dayIndex: 1, order: 2 },
+    { id: "c", dayIndex: 1, order: 3 },
+    { id: "z", dayIndex: 2, order: 1 },
+  ];
+  const next = L.reorderDayPins(pins, 1, ["c", "a", "b"]);
+  assert.deepEqual(
+    plain(next).map((p) => `${p.id}${p.order}`),
+    ["a2", "b3", "c1", "z1"],
+  );
+  assert.equal(next[3], pins[3], "diğer gün aynı referans");
+  assert.equal(L.reorderDayPins(pins, 1, ["a", "b"]), pins, "eksik kimlik");
+  assert.equal(L.reorderDayPins(pins, 1, ["a", "a", "b"]), pins, "yinelenen kimlik");
+  assert.equal(L.reorderDayPins(pins, 1, ["a", "b", "z"]), pins, "başka günün kimliği");
+  assert.equal(L.reorderDayPins(pins, 1, ["a", "b", "c"]), pins, "sıra aynı → değişiklik yok");
+});
+
+test("newTripDayIndexes / tripEndDate (P4 Yeni rota)", () => {
+  assert.deepEqual(plain(L.newTripDayIndexes(3)), [1, 2, 3]);
+  assert.deepEqual(plain(L.newTripDayIndexes(0)), [1]);
+  assert.equal(L.newTripDayIndexes(99).length, L.NEW_TRIP_MAX_DAYS);
+  assert.deepEqual(plain(L.newTripDayIndexes(Number.NaN)), [1]);
+  assert.equal(L.tripEndDate("2026-11-30", 3), "2026-12-02");
+  assert.equal(L.tripEndDate("2026-11-30", 1), "2026-11-30");
+  assert.equal(L.tripEndDate("30.11.2026", 3), undefined);
+  assert.equal(L.tripEndDate(undefined, 3), undefined);
+});

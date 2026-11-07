@@ -66,12 +66,16 @@
     list-style: none;
   }
   .planner-stop {
+    position: relative;
+    display: grid;
+  }
+  .planner-stop__row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-1);
   }
-  .planner-stop > .trip-stop {
+  .planner-stop__row > .trip-stop {
     flex: 1 1 calc(var(--space-20) * 3);
     min-inline-size: 0;
   }
@@ -595,5 +599,123 @@
       opacity: 0;
       transform: translateY(var(--space-2));
     }
+  }
+
+  /* P4 Yeni rota penceresi */
+  .new-trip {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .new-trip__city {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .new-trip__status {
+    min-block-size: 1.25em;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .new-trip__hits {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: var(--space-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    list-style: none;
+  }
+  .new-trip__hit {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    inline-size: 100%;
+    min-block-size: var(--touch-target);
+    padding: var(--space-2);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .new-trip__hit:hover {
+    background: var(--color-surface-sunken);
+  }
+  .new-trip__hit-text {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+  .new-trip__hit-name {
+    font-weight: var(--font-weight-semibold);
+  }
+  .new-trip__hit-address {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  .new-trip__row {
+    display: grid;
+    gap: var(--space-4);
+    align-items: end;
+  }
+  .new-trip__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+    inline-size: 100%;
+  }
+  @media (min-width: 640px) {
+    .new-trip__row {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+  }
+
+  /* P8 sürükle tutamağı (yalnız işaretçi; klavye alternatifi taşı düğmeleri + Alt+↑/↓). */
+  .planner-stop__grip {
+    display: grid;
+    place-items: center;
+    inline-size: var(--space-6);
+    min-block-size: var(--touch-target);
+    color: var(--color-text-subtle);
+    cursor: grab;
+    touch-action: none;
+  }
+  .planner-stop__grip:active {
+    cursor: grabbing;
+  }
+  .planner-stop[data-dragging] {
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+  }
+  .planner-shortcuts__list {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--font-size-sm);
+  }
+  .planner-shortcuts__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .planner-shortcuts__key {
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-sunken);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+  }
+  .planner-celebrate {
+    position: relative;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
   }
 }

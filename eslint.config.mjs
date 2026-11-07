@@ -108,7 +108,8 @@ export default tseslint.config(
                 "Header/footer yalnızca SiteChrome'dan render edilir (components/ui/site-chrome.tsx; bkz. .kiro/steering/design-system.md §Chrome).",
             },
             {
-              group: ["motion", "motion/*", "framer-motion", "framer-motion/*"],
+              // Yalnız paket adı (regex): göreli "../lib/motion" sarmalayıcısı serbest kalır.
+              regex: "^(motion|framer-motion)(/.*)?$",
               message:
                 "motion yalnız apps/web/app/lib/motion/index.ts sarmalayıcısından (reduced-motion tek yerden; approval motion@14.9.1 yalnız sürükle-bırak ve paylaşılan öğe geçişleri).",
             },
@@ -140,7 +141,8 @@ export default tseslint.config(
                 "Header/footer yalnızca SiteChrome'dan render edilir (components/ui/site-chrome.tsx; bkz. .kiro/steering/design-system.md §Chrome).",
             },
             {
-              group: ["motion", "motion/*", "framer-motion", "framer-motion/*"],
+              // Yalnız paket adı (regex): göreli "../lib/motion" sarmalayıcısı serbest kalır.
+              regex: "^(motion|framer-motion)(/.*)?$",
               message:
                 "motion yalnız apps/web/app/lib/motion/index.ts sarmalayıcısından (reduced-motion tek yerden; approval motion@14.9.1 yalnız sürükle-bırak ve paylaşılan öğe geçişleri).",
             },
@@ -159,7 +161,8 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ["motion", "motion/*", "framer-motion", "framer-motion/*"],
+              // Yalnız paket adı (regex): göreli "../lib/motion" sarmalayıcısı serbest kalır.
+              regex: "^(motion|framer-motion)(/.*)?$",
               message:
                 "motion yalnız apps/web/app/lib/motion/index.ts sarmalayıcısından (reduced-motion tek yerden; approval motion@14.9.1 yalnız sürükle-bırak ve paylaşılan öğe geçişleri).",
             },

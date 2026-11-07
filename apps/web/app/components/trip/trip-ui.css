@@ -217,6 +217,31 @@
     font-weight: var(--font-weight-bold);
   }
 
+  /* I9 tampon çubuğu: dolu = ziyaret + yol, taralı = programsız zaman (metin rozetinde). */
+  .trip-day__buffer {
+    display: flex;
+    overflow: hidden;
+    block-size: 6px;
+    margin-block-start: var(--space-2);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-sunken);
+  }
+  .trip-day__buffer-load {
+    background: var(--color-brand);
+    transition: inline-size var(--duration-slow) var(--easing-standard);
+  }
+  .trip-day__buffer[data-low] .trip-day__buffer-load {
+    background: var(--color-warning-icon);
+  }
+  .trip-day__buffer-free {
+    flex: 1;
+    background: repeating-linear-gradient(
+      135deg,
+      var(--color-success-bg) 0 4px,
+      var(--color-success-border) 4px 6px
+    );
+  }
+
   /* Hero sahnesi (SampleRouteStage, direction home.html): eğik fotoğraf + harita kartı + yüzen
      kartlar. Konumlar sahneye görelidir; <640'ta soru kartı gizlenir. */
   .trip-stage {

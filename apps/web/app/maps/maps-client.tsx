@@ -35,6 +35,7 @@ import { DISCOVERY_POOL_EVENT, type DiscoveryPoolDetail } from "../components/tr
 import { openPinEffects, pinPopupModel } from "../lib/trip/pin-popup";
 import { takeFlash } from "../lib/navigation/flash";
 import { TripPicker } from "../components/trip/trip-picker";
+import { NewTripModal } from "../components/trip/new-trip-modal";
 import { ShareModal, type ShareTarget } from "../components/trip/share-modal";
 import { dayColorIndex } from "../components/trip/trip-format";
 import { useTravelPlanner } from "../lib/trip/use-travel-planner";
@@ -49,6 +50,7 @@ import {
   Badge,
   BottomSheet,
   Button,
+  Celebrate,
   Icon,
   IconButton,
   Modal,
@@ -92,6 +94,7 @@ export default function Panel() {
   const compact = useCompact();
   const [mode, setMode] = useState<PlannerMode>("guest");
   const [view, setView] = useUrlParam("view", { allowed: PLANNER_VIEWS, fallback: "plan" });
+  const [newTripOpen, setNewTripOpen] = useState(false);
   const [gate, setGate] = useState<"ai" | "save" | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -601,6 +604,14 @@ export default function Panel() {
           disabled={!planner.canUndo}
           onClick={planner.undo}
         />
+        <Button
+          size="sm"
+          variant="primary"
+          iconStart={<Icon name="plus" size={16} />}
+          onClick={() => setNewTripOpen(true)}
+        >
+          {t("planner.trips.new", "Yeni rota")}
+        </Button>
       </div>
       <div className="planner-toolbar__row" role="status">
         {mode === "guest" ? (
@@ -626,6 +637,22 @@ export default function Panel() {
   const panel = (
     <>
       {toolbar}
+      {planner.firstRouteSaved && (
+        <div className="planner-celebrate">
+          <Celebrate
+            title={t("planner.firstSave.title", "İlk rotan hesabına kaydedildi")}
+            message={t(
+              "planner.firstSave.body",
+              "Artık her oturumda açılır; kodla paylaşabilirsin.",
+            )}
+            action={
+              <Button size="sm" variant="secondary" onClick={planner.dismissFirstRouteSaved}>
+                {t("ui.close", "Kapat")}
+              </Button>
+            }
+          />
+        </div>
+      )}
       {view === "trips" ? (
         <TripPicker planner={planner} mode={mode} onOpen={() => setView("plan")} />
       ) : (
@@ -774,6 +801,26 @@ export default function Panel() {
         open={gate !== null}
         next="/maps/"
         onClose={() => setGate(null)}
+      />
+      <NewTripModal
+        open={newTripOpen}
+        onClose={() => setNewTripOpen(false)}
+        onCreate={(input) => {
+          planner.createTrip(input.title, input.destination, {
+            days: input.days,
+            startDate: input.startDate,
+          });
+          setNewTripOpen(false);
+          setView("plan");
+          if (input.center) focus(input.center.lat, input.center.lng);
+          toast.show({
+            tone: "success",
+            message: t("planner.toast.tripCreated", "“{name}” oluşturuldu.").replace(
+              "{name}",
+              input.title,
+            ),
+          });
+        }}
       />
       <ShareModal open={shareOpen} target={shareTarget} onClose={() => setShareOpen(false)} />
       <Modal

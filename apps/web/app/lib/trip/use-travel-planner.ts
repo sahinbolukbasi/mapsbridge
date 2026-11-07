@@ -38,9 +38,12 @@ import {
 import {
   canRequestRoute,
   mapTripPins,
+  newTripDayIndexes,
+  reorderDayPins,
   restoreSnapshot,
   routeLegMap,
   routeRequestKey,
+  tripEndDate,
   undoSnapshots,
 } from "./planner-logic";
 
@@ -304,6 +307,9 @@ export function useTravelPlanner() {
   const serverSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Araç çubuğu durumu (design F46 "Kaydedildi"): yalnızca oturumlu sunucu eşitlemesini yansıtır.
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [firstRouteSaved, setFirstRouteSaved] = useState(false);
+  const tripsRef = useRef(trips);
+  tripsRef.current = trips;
   const syncedOnce = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined" || !activeTrip) return;
@@ -318,6 +324,8 @@ export function useTravelPlanner() {
       try {
         const stops = tripToRouteStops(activeTrip);
         if (isUnsyncedTripId(activeTrip.id)) {
+          // İlk rota kaydı: hesapta başka sunucu rotası yokken ilk create başarısı kutlanır.
+          const firstEver = tripsRef.current.every((t) => isUnsyncedTripId(t.id));
           const res = await routesApi.create({
             name: activeTrip.title || "Yeni Rota",
             stops,
@@ -328,6 +336,7 @@ export function useTravelPlanner() {
               prev.map((t) => (t.id === activeTrip.id ? { ...t, id: res.routeId } : t)),
             );
             setActiveTripId(res.routeId);
+            if (firstEver) setFirstRouteSaved(true);
           }
         } else {
           await routesApi.update(activeTrip.id, {
@@ -474,32 +483,39 @@ export function useTravelPlanner() {
 
   // ── Trip Actions ─────────────────────────────────────────────
 
-  const createTrip = useCallback((title: string, destination?: string) => {
-    const newTripId = "trip-" + Date.now();
-    const newTrip: Trip = {
-      id: newTripId,
-      origin: newTripOrigin(),
-      title: title.trim() || "Yeni Seyahat",
-      destination: destination?.trim(),
-      transportMode: "walking",
-      isPublic: false,
-      groups: [],
-      days: [
-        {
-          dayIndex: 1,
-          label: "1. Gün",
-          color: DAY_COLORS[0],
-          subtitle: "Keşif Başlangıcı",
+  const createTrip = useCallback(
+    (title: string, destination?: string, opts?: { days?: number; startDate?: string }) => {
+      const newTripId = "trip-" + Date.now();
+      // P4: "Yeni rota" penceresi gün sayısı + isteğe bağlı başlangıç tarihi verir.
+      const dayIndexes = newTripDayIndexes(opts?.days ?? 1);
+      const startDate =
+        opts?.startDate && tripEndDate(opts.startDate, 1) ? opts.startDate : undefined;
+      const newTrip: Trip = {
+        id: newTripId,
+        origin: newTripOrigin(),
+        title: title.trim() || "Yeni Seyahat",
+        destination: destination?.trim(),
+        ...(startDate ? { startDate, endDate: tripEndDate(startDate, dayIndexes.length) } : {}),
+        transportMode: "walking",
+        isPublic: false,
+        groups: [],
+        days: dayIndexes.map((d) => ({
+          dayIndex: d,
+          label: `${d}. Gün`,
+          color: DAY_COLORS[(d - 1) % DAY_COLORS.length],
+          subtitle: d === 1 ? "Keşif Başlangıcı" : `${d}. Gün Rotası`,
+          startTime: "09:00",
           pins: [],
-        },
-      ],
-      pins: [],
-    };
-    setTrips((prev) => [...prev, newTrip]);
-    setActiveTripId(newTripId);
-    setActiveDayIndex(1);
-    setSelectedPinId(null);
-  }, []);
+        })),
+        pins: [],
+      };
+      setTrips((prev) => [...prev, newTrip]);
+      setActiveTripId(newTripId);
+      setActiveDayIndex(1);
+      setSelectedPinId(null);
+    },
+    [],
+  );
 
   const switchTrip = useCallback((tripId: string) => {
     setActiveTripId(tripId);
@@ -1233,6 +1249,20 @@ export function useTravelPlanner() {
     [selectedPinId],
   );
 
+  // P8: sürükle-bırak bırakıldığında günün sırası tek güncellemeyle (tek geri alma kaydı).
+  const reorderDay = useCallback(
+    (dayIndex: number, orderedIds: readonly string[]) => {
+      setTrips((prev) =>
+        prev.map((t) => {
+          if (t.id !== activeTripId) return t;
+          const pins = reorderDayPins(t.pins, dayIndex, orderedIds);
+          return pins === t.pins ? t : { ...t, pins };
+        }),
+      );
+    },
+    [activeTripId],
+  );
+
   const togglePinVisitedAnywhere = useCallback((pinId: string) => {
     setGeneralPins((prev) => prev.map((p) => (p.id === pinId ? { ...p, visited: !p.visited } : p)));
     setTrips((prev) =>
@@ -1273,6 +1303,9 @@ export function useTravelPlanner() {
     setActiveDayIndex,
     setSelectedPinId,
     createTrip,
+    reorderDay,
+    firstRouteSaved,
+    dismissFirstRouteSaved: () => setFirstRouteSaved(false),
     deleteTrip,
     switchTrip,
     updateTripInfo,

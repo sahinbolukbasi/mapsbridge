@@ -27,7 +27,8 @@ export function DayHeader({
   stops: number;
   meters?: number;
   minutes?: number;
-  bufferRatio?: number;
+  /** undefined: çizilmez (I10) · null: bacak eksik, "hesaplanamadı" · sayı: tampon çubuğu. */
+  bufferRatio?: number | null;
   offline: boolean;
   /** Sayfanın başlık hiyerarşisine göre; başlık seviyesi atlanmaz. */
   titleAs?: "h2" | "h3" | "p";
@@ -37,8 +38,9 @@ export function DayHeader({
     "{n}",
     String(stops),
   );
-  const pct = bufferRatio === undefined ? null : Math.round(bufferRatio * 100);
-  const lowBuffer = bufferRatio !== undefined && bufferRatio < MIN_BUFFER_RATIO;
+  const known = typeof bufferRatio === "number";
+  const pct = known ? Math.round(bufferRatio * 100) : null;
+  const lowBuffer = known && bufferRatio < MIN_BUFFER_RATIO;
   return (
     <div className="trip-day">
       {eyebrow && <p className="trip-day__eyebrow">{eyebrow}</p>}
@@ -62,6 +64,9 @@ export function DayHeader({
             ).replace("{n}", String(pct))}
           </Badge>
         )}
+        {bufferRatio === null && (
+          <Badge>{t("trip.day.bufferUnknown", "Tampon hesaplanamadı")}</Badge>
+        )}
         {offline && (
           <Badge>
             <Icon name="offline" size={16} />
@@ -69,6 +74,12 @@ export function DayHeader({
           </Badge>
         )}
       </div>
+      {pct !== null && (
+        <div className="trip-day__buffer" data-low={lowBuffer || undefined} aria-hidden="true">
+          <span className="trip-day__buffer-load" style={{ inlineSize: `${100 - pct}%` }} />
+          <span className="trip-day__buffer-free" />
+        </div>
+      )}
     </div>
   );
 }
