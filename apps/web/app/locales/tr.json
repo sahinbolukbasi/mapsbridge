@@ -401,9 +401,9 @@
   "planner.map.transit": "Raylı sistem hatları",
   "planner.map.zoomIn": "Yakınlaştır",
   "planner.map.zoomOut": "Uzaklaştır",
-  "planner.mode.edit": "Düzenle",
+  "planner.mode.edit": "Plan",
   "planner.mode.label": "Görünüm",
-  "planner.mode.travel": "Gezi modu",
+  "planner.mode.travel": "Gezide",
   "planner.note.osrm": "Süre ve mesafeler OSRM yol ağı tahminidir; hesaplanamayan bacaklar boş kalır.",
   "planner.optimize": "Rotayı optimize et",
   "planner.optimize.done": "Durak sırası güncellendi: yaklaşık {km} km daha kısa.",
@@ -1307,5 +1307,12 @@
   "messages.req.wants": "Seninle yazışmak istiyor",
   "messages.req.acceptedTitle": "İstek kabul edildi",
   "messages.req.acceptedBody": "Artık {name} ile mesajlaşabilirsin.",
-  "messages.req.waitAccept": "Kabul edilince yazabilirsin."
+  "messages.req.waitAccept": "Kabul edilince yazabilirsin.",
+  "planner.search.placeholder": "Mekan, adres ya da koordinat",
+  "planner.save.draft": "Cihazda taslak",
+  "planner.save.guestLabel": "Kaydet: kaydetmek için hesap aç",
+  "planner.shortcuts.scope": "Tek tuşlu kısayollar (/ ve N) yalnız plan paneli ya da harita odaktayken çalışır.",
+  "publicProfile.posts.loading": "Paylaşımlar yükleniyor…",
+  "planner.search.labelShort": "Yer ara",
+  "planner.search.hintShort": "En az 3 harf; haritaya dokunarak da ekleyebilirsin."
 }

@@ -277,6 +277,14 @@ test("review düzeltmeleri: örnek profilde takip/mesaj yok, yorum taslağı kap
   assert.match(read("components/ui/media.tsx"), /naturalWidth/);
 });
 
+test("profil paylaşımları yazar kapsamlı sorgudan gelir; genel akış önbelleği süzülmez (review-pages P2)", () => {
+  const client = read("[username]/public-profile-client.tsx");
+  assert.match(client, /\/community\/posts\?author=\$\{encodeURIComponent\(username\)\}/);
+  assert.doesNotMatch(client, /webSocialSync\.getPosts\(\)|subscribePosts/);
+  // Yükleniyor ve hata durumları: sahte "Henüz paylaşım yok" gösterilmez.
+  assert.match(client, /postsState === "loading"/);
+  assert.match(client, /<ErrorState error=\{postsError\} onRetry=/);
+});
 test("mesajlar (S21): grup oluşturma ve sohbet türü süzgeci yok; uydurma grup thread'i gönderilmez", () => {
   const src = read("messages/page.tsx");
   assert.doesNotMatch(src, /NewGroupModal|startGroup|newGroup|SegmentedControl|group-\$\{/);

@@ -47,7 +47,6 @@ import { dayPalette, mapLine } from "../lib/design-tokens";
 import { prefersReducedMotion } from "../lib/a11y/use-reduced-motion";
 import { useLocale } from "../lib/locale-context";
 import {
-  Badge,
   BottomSheet,
   Button,
   Celebrate,
@@ -579,57 +578,65 @@ export default function Panel() {
       : planner.saveState === "error"
         ? t("planner.save.error", "Kaydedilemedi")
         : t("planner.save.saved", "Kaydedildi");
+  // Sıkı araç çubuğu (direction planner.html, review P3): 1. satır başlık + kayıt durumu,
+  // 2. satır Rotalarım / geri al / (misafirde Kaydet) / Yeni rota. 256 px panele sığar.
   const toolbar = (
     <div className="planner-toolbar">
-      <div className="planner-toolbar__row">
+      <div className="planner-toolbar__row planner-toolbar__row--head">
         <h2 className="planner-toolbar__title">
           {view === "trips"
             ? t("planner.trips.title", "Rotalarım")
             : planner.activeTrip?.title || t("planner.untitled", "Yeni rota")}
         </h2>
-        <Button
-          size="sm"
-          variant={view === "trips" ? "secondary" : "ghost"}
-          iconStart={<Icon name={view === "trips" ? "map" : "route"} size={16} />}
-          onClick={() => setView(view === "trips" ? "plan" : "trips")}
+        <span
+          className="planner-toolbar__state"
+          data-tone={
+            mode === "guest" ? "draft" : planner.saveState === "error" ? "danger" : "saved"
+          }
+          role="status"
         >
-          {view === "trips"
-            ? t("planner.backToPlan", "Plana dön")
-            : t("planner.trips.title", "Rotalarım")}
-        </Button>
+          <Icon
+            name={mode === "guest" ? "offline" : planner.saveState === "error" ? "alert" : "check"}
+            size={16}
+          />
+          {mode === "guest" ? t("planner.save.draft", "Cihazda taslak") : saveText}
+        </span>
+      </div>
+      <div className="planner-toolbar__row planner-toolbar__row--actions">
+        <IconButton
+          icon={view === "trips" ? "map" : "route"}
+          variant="secondary"
+          label={
+            view === "trips"
+              ? t("planner.backToPlan", "Plana dön")
+              : t("planner.trips.title", "Rotalarım")
+          }
+          pressed={view === "trips"}
+          onClick={() => setView(view === "trips" ? "plan" : "trips")}
+        />
         <IconButton
           icon="undo"
-          size="sm"
           label={t("planner.undo", "Geri al")}
           disabled={!planner.canUndo}
           onClick={planner.undo}
         />
-        <Button
-          size="sm"
-          variant="primary"
-          iconStart={<Icon name="plus" size={16} />}
-          onClick={() => setNewTripOpen(true)}
-        >
-          {t("planner.trips.new", "Yeni rota")}
-        </Button>
-      </div>
-      <div className="planner-toolbar__row" role="status">
-        {mode === "guest" ? (
-          <>
-            <Badge tone="example">
-              <Icon name="offline" size={16} />
-              {t("gate.banner", "Cihazında taslak · Kaydetmek için hesap aç")}
-            </Badge>
-            <Button size="sm" variant="primary" onClick={() => setGate("save")}>
-              {t("planner.save", "Kaydet")}
-            </Button>
-          </>
-        ) : (
-          <Badge tone={planner.saveState === "error" ? "danger" : "neutral"}>
-            <Icon name={planner.saveState === "error" ? "alert" : "check"} size={16} />
-            {saveText}
-          </Badge>
+        <span className="planner-toolbar__spacer" />
+        {mode === "guest" && (
+          <Button
+            size="sm"
+            variant="secondary"
+            aria-label={t("planner.save.guestLabel", "Kaydet: kaydetmek için hesap aç")}
+            onClick={() => setGate("save")}
+          >
+            {t("planner.save", "Kaydet")}
+          </Button>
         )}
+        <IconButton
+          icon="plus"
+          variant="primary"
+          label={t("planner.trips.new", "Yeni rota")}
+          onClick={() => setNewTripOpen(true)}
+        />
       </div>
     </div>
   );
@@ -749,7 +756,7 @@ export default function Panel() {
     <PageShell className="planner">
       {/* AC-34: tek h1 "Rota planlayıcı" (registry, görsel olarak gizli). */}
       <PageHeader variant="hidden" />
-      <div className="planner__split" data-compact={compact || undefined}>
+      <div className="planner__split" data-compact={compact || undefined} data-planner-scope="">
         {compact ? (
           <BottomSheet
             className="planner__sheet"

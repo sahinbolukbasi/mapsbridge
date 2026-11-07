@@ -22,7 +22,11 @@ export function Reveal({
   const ref = useReveal<HTMLDivElement>();
   return (
     // Etiket türü değişse de ref yalnız HTMLElement olarak kullanılır.
-    <Tag ref={ref as never} className={cx("ui-reveal", stagger && "ui-reveal--stagger", className)}>
+    <Tag
+      {...rest}
+      ref={ref as never}
+      className={cx("ui-reveal", stagger && "ui-reveal--stagger", className)}
+    >
       {children}
     </Tag>
   );

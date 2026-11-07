@@ -4,10 +4,11 @@
      .trip-day-color üzerinden (--trip-day). */
   .planner-list {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-4);
   }
   .planner-list__mode {
-    justify-self: start;
+    inline-size: 100%;
   }
   .planner-list__note {
     margin: 0;
@@ -69,15 +70,27 @@
     position: relative;
     display: grid;
   }
+  /* Durak satırı (direction planner.html): 1. satır numara + ad/meta + sağda tutamak,
+     2. satır ada hizalı araç şeridi. 256 px panelde ad kırpılmadan okunur. */
   .planner-stop__row {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--space-1);
+    column-gap: var(--space-1);
   }
   .planner-stop__row > .trip-stop {
-    flex: 1 1 calc(var(--space-20) * 3);
+    grid-column: 1;
+    grid-row: 1;
     min-inline-size: 0;
+  }
+  .planner-stop__row > .planner-stop__grip {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .planner-stop__row > .planner-stop__actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-inline-start: calc(var(--space-8) + var(--space-3) * 2);
   }
   .planner-stop.is-visited .trip-stop__name {
     color: var(--color-text-muted);
@@ -85,19 +98,19 @@
   }
   .planner-stop__actions {
     display: flex;
-    flex: none;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--space-1);
   }
   /* Arama */
   .planner-search {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-2);
   }
   .planner-search__form {
-    display: flex;
-    align-items: flex-end;
-    gap: var(--space-2);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
   .planner-search__field {
     flex: 1;

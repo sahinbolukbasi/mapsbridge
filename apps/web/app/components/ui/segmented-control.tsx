@@ -20,12 +20,18 @@ export function SegmentedControl<V extends string>({
   value,
   onChange,
   className,
+  size = "md",
+  block = false,
 }: {
   label: string;
   options: Options<V>;
   value: V;
   onChange: (value: V) => void;
   className?: string;
+  /** "sm": dar panellerde (planlayıcı 256 px) etiketlerin sığması için sıkı dolgu + küçük yazı. */
+  size?: "md" | "sm";
+  /** Kabın tüm satırı doldurması (eşit sütunlar). */
+  block?: boolean;
 }) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
   // value hiçbir seçenekle eşleşmezse hiçbiri seçili gösterilmez (yanlış aria-checked yok);
@@ -46,7 +52,12 @@ export function SegmentedControl<V extends string>({
   const style = { "--segment-count": options.length, "--segment-index": tabbable } as CSSProperties;
   return (
     <div
-      className={cx("ui-segmented", className)}
+      className={cx(
+        "ui-segmented",
+        size === "sm" && "ui-segmented--sm",
+        block && "ui-segmented--block",
+        className,
+      )}
       role="radiogroup"
       aria-label={label}
       data-surface="default"

@@ -56,7 +56,7 @@ export default function SignUpPage() {
 
   const [showAppleFallbackModal, setShowAppleFallbackModal] = useState(false);
   // Kod gönderildi anı (direction register): Celebrate + "Kodu gir"; doğrulama sayfasına
-  // kısa süre sonra kendiliğinden geçilir (bugünkü akış korunur).
+  // kullanıcı düğmeyle geçer (süreli yönlendirme yok, WCAG 2.2.1).
   const [verifyHref, setVerifyHref] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState("");
 
@@ -312,8 +312,8 @@ export default function SignUpPage() {
       const nextParam = nextUrl !== DEFAULT_NEXT ? `&next=${encodeURIComponent(nextUrl)}` : "";
       const href = `/verify/?email=${encodeURIComponent(cleanEmail)}&phone=${encodeURIComponent(cleanPhone)}${nextParam}`;
       setSentTo(cleanEmail);
+      // Süreli yönlendirme yok (WCAG 2.2.1): kullanıcı "Kodu gir" ile kendi geçer.
       setVerifyHref(href);
-      window.setTimeout(() => window.location.assign(href), 2400);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kayıt tamamlanamadı.");
     } finally {

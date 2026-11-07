@@ -9,14 +9,18 @@ import {
   Button,
   Card,
   EmptyState,
+  ErrorState,
   Icon,
+  LoadingState,
   Media,
   PageHeader,
   PageShell,
   Reveal,
   Section,
   revealItem,
+  toUiError,
   useToast,
+  type UiError,
 } from "../components/ui";
 import type { CommunityPost } from "../features/community/types";
 import { sameUser } from "../lib/community/feed";
@@ -60,15 +64,39 @@ export default function PublicProfileClient({
   const [avatar, setAvatar] = useState<string | null>(null);
   const [following, setFollowing] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
-  // Kullanıcının paylaşımları: topluluk akışıyla aynı kaynak (webSocialSync); yalnız gerçek
-  // gönderiler, sayaç/istatistik uydurulmaz.
+  // Kullanıcının paylaşımları yazar kapsamlı sorgudan gelir (GET /community/posts?author=);
+  // genel akış önbelleği süzülmez, aksi hâlde ilk sayfa dışındaki yazarlar yanlışlıkla "Henüz
+  // paylaşım yok" görür. Yalnız gerçek gönderiler; sayaç/istatistik uydurulmaz (I1).
   const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [postsState, setPostsState] = useState<"loading" | "ready" | "error">("loading");
+  const [postsError, setPostsError] = useState<UiError | null>(null);
+  const [postsAttempt, setPostsAttempt] = useState(0);
   useEffect(() => {
-    const pick = (all: CommunityPost[]) =>
-      setPosts(all.filter((p) => sameUser(p.authorUsername, username)));
-    pick(webSocialSync.getPosts());
-    return webSocialSync.subscribePosts(pick);
-  }, [username]);
+    if (isSampleProfile(username) || !/^[a-z0-9_.-]{1,40}$/.test(username)) {
+      setPostsState("ready");
+      return;
+    }
+    let alive = true;
+    setPostsState("loading");
+    apiFetch<{ success?: boolean; posts?: CommunityPost[] }>(
+      `/community/posts?author=${encodeURIComponent(username)}`,
+      { timeoutMs: 8000, skipAuth: !webSocialSync.hasSession() },
+    )
+      .then((data) => {
+        if (!alive) return;
+        const list = Array.isArray(data?.posts) ? data.posts : [];
+        setPosts(list.filter((p) => sameUser(p.authorUsername, username)));
+        setPostsState("ready");
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setPostsError(toUiError(err));
+        setPostsState("error");
+      });
+    return () => {
+      alive = false;
+    };
+  }, [username, postsAttempt]);
 
   useEffect(() => {
     const session = getStoredSession();
@@ -276,7 +304,11 @@ export default function PublicProfileClient({
 
       {!sample && (
         <Section title={t("publicProfile.posts", "Paylaşımları")}>
-          {posts.length === 0 ? (
+          {postsState === "loading" ? (
+            <LoadingState label={t("publicProfile.posts.loading", "Paylaşımlar yükleniyor…")} />
+          ) : postsState === "error" && postsError ? (
+            <ErrorState error={postsError} onRetry={() => setPostsAttempt((n) => n + 1)} />
+          ) : posts.length === 0 ? (
             <EmptyState
               icon="users"
               contour

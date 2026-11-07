@@ -1,6 +1,6 @@
 // Planlayıcı klavye kısayolları (Increment 3.3): saf eşleme, travel-planner.test.cjs ile sınanır.
-// Yazı alanında (input/textarea/select/contenteditable) tek tuşlu kısayollar çalışmaz; Esc ve
-// Alt+↑/↓ her yerde. Yardım listesi aynı tablodan üretilir (tek kaynak).
+// Yazı alanında (input/textarea/select/contenteditable) ve odak plan paneli/harita dışındayken
+// tek tuşlu kısayollar çalışmaz (WCAG 2.1.4: yalnız bileşen odaktayken); Esc ve Alt+↑/↓ her yerde. Yardım listesi aynı tablodan üretilir (tek kaynak).
 
 export type PlannerShortcut = "search" | "newStop" | "closeDetail" | "moveUp" | "moveDown";
 
@@ -12,6 +12,8 @@ export type ShortcutKeyEvent = {
   shiftKey?: boolean;
   /** Olayın hedefi bir yazı alanı mı (çağıran hesaplar). */
   inTextField?: boolean;
+  /** Odak plan paneli/harita kapsamı dışında mı (çağıran hesaplar). */
+  outsidePlanner?: boolean;
 };
 
 export const SHORTCUT_HELP: ReadonlyArray<{ id: PlannerShortcut; keys: string; label: string }> = [
@@ -30,7 +32,7 @@ export function plannerShortcut(e: ShortcutKeyEvent): PlannerShortcut | null {
     if (e.key === "ArrowDown") return "moveDown";
     return null;
   }
-  if (e.inTextField || e.altKey) return null;
+  if (e.inTextField || e.outsidePlanner || e.altKey) return null;
   if (e.key === "/") return "search";
   if (e.key === "n" || e.key === "N") return "newStop";
   return null;

@@ -284,6 +284,8 @@ export function TravelPlannerSidebar({
         metaKey: e.metaKey,
         shiftKey: e.shiftKey,
         inTextField: isTextFieldTarget(e.target as HTMLElement | null),
+        // Tek tuşlu kısayollar yalnız plan paneli ya da harita odaktayken (WCAG 2.1.4).
+        outsidePlanner: !(e.target instanceof Element && e.target.closest("[data-planner-scope]")),
       });
       if (!action) return;
       const st = shortcutState.current;
@@ -411,11 +413,13 @@ export function TravelPlannerSidebar({
         )}
         <SegmentedControl
           className="planner-list__mode"
+          size="sm"
+          block
           label={t("planner.mode.label", "Görünüm")}
           options={[
-            { value: "edit", label: t("planner.mode.edit", "Düzenle") },
+            { value: "edit", label: t("planner.mode.edit", "Plan") },
             { value: "discover", label: t("planner.mode.discover", "Keşfet") },
-            { value: "travel", label: t("planner.mode.travel", "Gezi modu") },
+            { value: "travel", label: t("planner.mode.travel", "Gezide") },
           ]}
           value={workspaceMode}
           onChange={setWorkspaceMode}
@@ -611,15 +615,28 @@ export function TravelPlannerSidebar({
                           categoryLabel={meta.label}
                           duration={pin.durationMinutes ?? 60}
                           selected={pin.id === selectedPinId}
-                          onMove={
-                            workspaceMode === "edit"
-                              ? (direction) => moveStop(pins, pin, direction)
-                              : undefined
-                          }
-                          isFirst={index === 0}
-                          isLast={index === list.length - 1}
                         />
+                        {/* Satır altı araç şeridi (direction planner.html): taşı (sürüklemenin
+                            klavye alternatifi, R9), ayrıntı, sil; ad tam genişlikte kalır. */}
                         <div className="planner-stop__actions">
+                          {workspaceMode === "edit" && (
+                            <>
+                              <IconButton
+                                icon="chevron-up"
+                                size="sm"
+                                label={`${t("trip.stop.moveUp", "Yukarı taşı")}: ${pin.label}`}
+                                disabled={index === 0}
+                                onClick={() => moveStop(pins, pin, "up")}
+                              />
+                              <IconButton
+                                icon="chevron"
+                                size="sm"
+                                label={`${t("trip.stop.moveDown", "Aşağı taşı")}: ${pin.label}`}
+                                disabled={index === list.length - 1}
+                                onClick={() => moveStop(pins, pin, "down")}
+                              />
+                            </>
+                          )}
                           {workspaceMode === "travel" ? (
                             <Button
                               size="sm"
@@ -714,6 +731,12 @@ export function TravelPlannerSidebar({
                       <kbd className="planner-shortcuts__key">{s.keys}</kbd>
                     </li>
                   ))}
+                  <li className="planner-shortcuts__item planner-shortcuts__item--note">
+                    {t(
+                      "planner.shortcuts.scope",
+                      "Tek tuşlu kısayollar (/ ve N) yalnız plan paneli ya da harita odaktayken çalışır.",
+                    )}
+                  </li>
                 </ul>
               ),
             },
@@ -934,19 +957,25 @@ function PlaceSearch({
   return (
     <div className="planner-search">
       <form className="planner-search__form" role="search" onSubmit={submit} noValidate>
+        {/* Hap arama (direction planner.html): görünür kısa etiket (§10), başta arama ikonu;
+            yazarken 400 ms sonra kendiliğinden arar, Enter hemen gönderir. */}
         <Field
           id="planner-search-input"
           className="planner-search__field"
-          label={t("planner.search.label", "Mekan ya da adres ara")}
+          label={t("planner.search.labelShort", "Yer ara")}
           hint={t(
-            "planner.search.hint",
-            "En az 3 harf yaz; haritaya dokunarak da durak ekleyebilirsin.",
+            "planner.search.hintShort",
+            "En az 3 harf; haritaya dokunarak da ekleyebilirsin.",
           )}
         >
           {(ids) => (
             <Input
               {...ids}
               type="search"
+              shape="pill"
+              iconStart="search"
+              enterKeyHint="search"
+              placeholder={t("planner.search.placeholder", "Mekan, adres ya da koordinat")}
               value={query}
               maxLength={120}
               autoComplete="off"
@@ -954,9 +983,6 @@ function PlaceSearch({
             />
           )}
         </Field>
-        <Button type="submit" variant="secondary" loading={search.status === "loading"}>
-          {t("planner.search.submit", "Ara")}
-        </Button>
       </form>
       <div role="status" className="planner-search__status">
         {search.status === "empty" && t("planner.search.empty", "Sonuç bulunamadı.")}

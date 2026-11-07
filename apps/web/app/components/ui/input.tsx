@@ -10,20 +10,28 @@ type Base = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
   invalid?: boolean;
   /** Alanın başında dekoratif ikon (direction login/register "leading ikonlu alan"). */
   iconStart?: IconName;
+  /** "pill": tam yuvarlak arama alanı (direction planner arama hapı). */
+  shape?: "default" | "pill";
 };
 /** Field dışında kullanımda erişilebilir ad zorunludur (aria-label ya da aria-labelledby). */
 export type InputProps = Base &
   ({ id: string } | { "aria-label": string } | { "aria-labelledby": string });
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { size = "md", invalid = false, iconStart, className, ...rest },
+  { size = "md", invalid = false, iconStart, shape = "default", className, ...rest },
   ref,
 ) {
   const input = (
     <input
       ref={ref}
       {...rest}
-      className={cx("ui-input", `ui-input--${size}`, iconStart && "ui-input--with-icon", className)}
+      className={cx(
+        "ui-input",
+        `ui-input--${size}`,
+        iconStart && "ui-input--with-icon",
+        shape === "pill" && "ui-input--pill",
+        className,
+      )}
       data-surface="default"
       aria-invalid={invalid || rest["aria-invalid"] || undefined}
     />

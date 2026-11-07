@@ -492,6 +492,9 @@
   .ui-input-wrap:focus-within .ui-input-wrap__icon {
     color: var(--color-brand);
   }
+  .ui-input--pill {
+    border-radius: var(--radius-full);
+  }
   .ui-input--with-icon {
     padding-inline-start: calc(var(--space-3) * 2 + 20px);
   }
@@ -1285,6 +1288,13 @@
     font-weight: var(--font-weight-semibold);
     white-space: nowrap;
     cursor: pointer;
+  }
+  .ui-segmented--block {
+    display: grid;
+  }
+  .ui-segmented--sm .ui-segmented__option {
+    padding: 0 var(--space-2);
+    font-size: var(--font-size-sm);
   }
   .ui-segmented__option::before {
     content: "";

@@ -267,6 +267,10 @@ test("planner kısayolları: / ve N yazı alanı dışında; Esc ve Alt+↑/↓ 
   assert.equal(SC.plannerShortcut({ key: "N", shiftKey: true }), "newStop");
   assert.equal(SC.plannerShortcut({ key: "/", inTextField: true }), null);
   assert.equal(SC.plannerShortcut({ key: "n", inTextField: true }), null);
+  // WCAG 2.1.4: tek tuşlu kısayollar yalnız planlayıcı odaktayken.
+  assert.equal(SC.plannerShortcut({ key: "/", outsidePlanner: true }), null);
+  assert.equal(SC.plannerShortcut({ key: "n", outsidePlanner: true }), null);
+  assert.equal(SC.plannerShortcut({ key: "Escape", outsidePlanner: true }), "closeDetail");
   assert.equal(SC.plannerShortcut({ key: "Escape", inTextField: true }), "closeDetail");
   assert.equal(SC.plannerShortcut({ key: "ArrowUp", altKey: true }), "moveUp");
   assert.equal(
