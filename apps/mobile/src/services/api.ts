@@ -790,7 +790,19 @@ export const chatRequestApi = {
 // Web /pricing/ ile aynı uç: GET /revenuecat/plans (oturumsuz). Ham gövde döner; doğrulama
 // src/billing/catalog.ts parseCatalog'dadır. Fiyat yalnızca buradan gösterilir.
 export const CATALOG_TIMEOUT_MS = 8000;
+export type WalletSnapshot = { credits: number; tier: string };
 export const billingService = {
+  /** Sunucu bakiyesi (web refreshWallet ile aynı uç: GET /revenuecat/wallet). İstemci hesaplamaz. */
+  async getWallet(): Promise<WalletSnapshot | null> {
+    try {
+      const data = await apiRequest<{ credits?: unknown; tier?: unknown }>("/revenuecat/wallet");
+      return typeof data?.credits === "number" && Number.isFinite(data.credits)
+        ? { credits: data.credits, tier: typeof data.tier === "string" ? data.tier : "free" }
+        : null;
+    } catch {
+      return null;
+    }
+  },
   async getPlans(): Promise<unknown> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), CATALOG_TIMEOUT_MS);

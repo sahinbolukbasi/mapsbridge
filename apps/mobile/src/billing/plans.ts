@@ -34,7 +34,14 @@ export type CatalogPrice = { amount: number; period: PlanPeriod; credits: number
  * loading: iskelet · unavailable: katalog yüklenemedi ("ödeme adımında") · free: ücretsiz plan ·
  * none: katalogda bu tier/dönem için ürün yok (fiyat satırı çizilmez, I10).
  */
-export type PlanPriceState = CatalogPrice | "loading" | "unavailable" | "free" | "none";
+export type PlanPriceState =
+  | CatalogPrice
+  /** Mağaza (RevenueCat `priceString`) fiyatı; native Paywall yalnız bunu gösterir (N2). */
+  | { storePrice: string; period: PlanPeriod }
+  | "loading"
+  | "unavailable"
+  | "free"
+  | "none";
 
 /** 2500 → "2.500" (tr-TR gruplama; Hermes Intl'e bağımlı değil). */
 export function groupThousands(n: number): string {

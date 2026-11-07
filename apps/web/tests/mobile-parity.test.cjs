@@ -705,7 +705,18 @@ test("native Paywall mağaza paketini katalogun packageId/productId alanıyla e�
   assert.deepEqual(plain(mob.parseStoreIds({ products: [{ id: "a", packageId: 3 }] })), {});
   const paywall = fs.readFileSync(path.join(MOBILE, "components/PaywallModal.tsx"), "utf8");
   assert.match(paywall, /matchesStoreIds\(p, ids\)/);
-  assert.match(paywall, /native\.paywall\.storePrice/, "mağaza fiyatı notu (karar C2)");
+  // N2 (Increment 4.6): fiyat doğrudan mağaza paketinin priceString'i (karar C2'nin notu gereksiz).
+  assert.match(paywall, /pkg\.product\.priceString/, "fiyat yalnız mağazadan");
+  const packs = plain(mob.creditPacks(parsed.products).map((p) => p.id));
+  const webPacks = plain(webCatalog.creditPacks(parsed.products).map((p) => p.id));
+  assert.deepEqual([...packs].sort(), [...webPacks].sort(), "paket süzgeci web ile aynı");
+  assert.deepEqual(packs, ["pack-30", "pack-100", "pack-300"]);
+  assert.equal(mob.sellState("loading", undefined, false), "loading");
+  assert.equal(mob.sellState({ status: "unavailable" }, undefined, false), "unavailable");
+  assert.equal(mob.sellState({ status: "ok", enabled: false, products: [] }, pro, true), "disabled");
+  assert.equal(mob.sellState(parsed, pro, false), "notDefined", "mağaza paketi yoksa satılmaz");
+  assert.equal(mob.sellState(parsed, pro, true), "ok");
+  assert.deepEqual(plain(mob.PAID_TIERS), ["explorer", "pro", "agency"]);
 });
 
 test("native yalnız metinleri web anahtarı ya da değeriyle çakışmaz (review #10)", () => {

@@ -91,3 +91,25 @@ export function findMonthlyProduct(
   if (tier === "free") return undefined;
   return products.find((p) => p.mode === "subscription" && p.id === tier);
 }
+
+/** Native'de satılan abonelik kademeleri (aylık; yıllık kapalı, S29). */
+export const PAID_TIERS = ["explorer", "pro", "agency"] as const;
+/** Katalogdaki kredi paketleri (`pack-*`, web creditPacks ile aynı süzgeç), krediye göre artan. */
+export function creditPacks(products: readonly CatalogProduct[]): CatalogProduct[] {
+  return products.filter((p) => p.mode === "credit_pack").sort((a, b) => a.credits - b.credits);
+}
+/**
+ * Satın alınabilir seçenek: satış açık + katalog ürünü available + mağaza teklifinde eşleşen paket.
+ * Değilse neden döner (CTA "Şu an satın alınamıyor" + açıklama).
+ */
+export function sellState(
+  catalog: Catalog | "loading",
+  product: CatalogProduct | undefined,
+  hasStorePackage: boolean,
+): "ok" | "loading" | "unavailable" | "disabled" | "notDefined" {
+  if (catalog === "loading") return "loading";
+  if (catalog.status === "unavailable") return "unavailable";
+  if (!catalog.enabled) return "disabled";
+  if (!product || !product.available || !hasStorePackage) return "notDefined";
+  return "ok";
+}

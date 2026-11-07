@@ -120,7 +120,7 @@ function PriceLine({ price }: { price: PlanPriceState }) {
     price === "free"
       ? tr("pricing.price.free")
       : tr(price.period === "yearly" ? "pricing.price.yearly" : "pricing.price.monthly", {
-          price: formatPrice(price.amount),
+          price: "storePrice" in price ? price.storePrice : formatPrice(price.amount),
         });
   return (
     <Text

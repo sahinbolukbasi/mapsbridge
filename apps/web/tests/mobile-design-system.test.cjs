@@ -452,20 +452,30 @@ test("FEAT-012 (§6.4): Topluluk yazma eylemleri misafirde AuthGate", () => {
   assert.doesNotMatch(c, /retweet|Bildir|Sessize|@canberk/);
 });
 
-test("FEAT-012 (S2/S18): Paywall 4 plan, fiyat yalnız katalogdan, satın alma revenuecat ile", () => {
+test("N2 (Increment 4.6; S2/S18/S29): Paywall aylık 3 plan + paketler, fiyat yalnız mağaza priceString, satın alma revenuecat ile", () => {
   const pw = code("src/components/PaywallModal.tsx");
-  assert.match(pw, /PLAN_TIERS\.map/);
+  assert.match(pw, /PAID_TIERS\.map/);
+  assert.match(pw, /creditPacks\(products\)/);
   assert.match(pw, /billingService\.getPlans\(\)/);
+  assert.match(pw, /billingService\.getWallet\(\)/, "bakiye sunucudan");
   assert.match(
     pw,
     /import \{ getOfferings, purchasePackage, restorePurchases \} from "\.\.\/services\/revenuecat"/,
   );
   assert.match(pw, /findMonthlyProduct/);
-  assert.doesNotMatch(pw, /priceString|\$rc_annual|\$rc_lifetime|yearly/);
+  // Fiyat yalnız mağazadan (N2); katalog tutarı (formatPrice/amount) çizilmez; yıllık/ömür boyu satılmaz.
+  assert.match(pw, /pkg\.product\.priceString/);
+  assert.doesNotMatch(pw, /formatPrice|\.amount\b|\$rc_annual|\$rc_lifetime|yearly/);
+  assert.match(pw, /<SegmentedControl/);
+  assert.match(pw, /<CreditCostTable \/>/);
+  assert.match(pw, /tr\("native\.paywall\.restore"\)/);
+  assert.match(pw, /native\.paywall\.renewIos|native\.paywall\.renewAndroid/);
+  assert.match(pw, /TERMS_URL[\s\S]*PRIVACY_URL/);
+  assert.match(pw, /<Celebrate/);
+  assert.match(pw, /tr\("pricing\.unavailable"\)/, "paket yoksa CTA Şu an satın alınamıyor");
   // Misafirde RevenueCat çağrılmaz.
-  assert.match(pw, /loadCatalog\(\);\s*if \(guest\) return;\s*getOfferings\(\)/);
+  assert.match(pw, /loadCatalog\(\);\s*if \(guest\) return;[\s\S]{0,40}getOfferings\(\)/);
 });
-
 test("FEAT-012 (I1/I2): rota görünümü bağlantı değerlerini yalnız OSRM'den alır", () => {
   const map = code("src/screens/MapScreen.tsx");
   assert.doesNotMatch(map, /walkTimeFromPrev|distanceFromPrev|rating: 4\.8|optimizeRoute\(\)/);
