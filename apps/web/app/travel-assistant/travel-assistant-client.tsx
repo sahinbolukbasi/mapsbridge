@@ -37,6 +37,9 @@ import {
   Alert,
   Badge,
   Button,
+  Celebrate,
+  Chip,
+  ChipGroup,
   EmptyState,
   Icon,
   IconButton,
@@ -79,7 +82,7 @@ import {
   DraftStops,
   type PlaceInput,
 } from "./draft-sections";
-import { ROUTE_STYLES, type RouteStyleKey } from "./studio-starters";
+import { POPULAR_DESTINATIONS, ROUTE_STYLES, type RouteStyleKey } from "./studio-starters";
 import { dateLocale, daysLabel, fill, stopsLabel, type Translate } from "./studio-format";
 import { extractDestinationFromText } from "../lib/affiliate/travelpayouts";
 import { useUserMemory } from "../lib/ai/user-memory-hook";
@@ -240,6 +243,8 @@ export default function AIPage() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [authModal, setAuthModal] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  // Rota hazır anı (Increment 3.4): yeni rota gelince Celebrate + "Haritada aç" birincil eylem.
+  const [routeReady, setRouteReady] = useState(false);
   const [panelWide, setPanelWide] = useState(false);
   const [day, setDay] = useState(1);
   const [draftTab, setDraftTab] = useState<DraftTab>("route");
@@ -532,6 +537,7 @@ export default function AIPage() {
     setSessions((s) => [next, ...s]);
     setActiveId(next.id);
     setPanelOpen(false);
+    setRouteReady(false);
     setMobileTab("chat");
     setError("");
     setErrorCode("");
@@ -544,6 +550,7 @@ export default function AIPage() {
     if (inFlight.current) return;
     setActiveId(id);
     setPanelOpen(false);
+    setRouteReady(false);
     setMobileTab("chat");
     setDay(1);
     setError("");
@@ -870,8 +877,10 @@ export default function AIPage() {
         setDay(1);
         setDraftTab("route");
         setPanelOpen(true);
+        setRouteReady(true);
       } else if (result.responseMode !== "chat") {
         setPanelOpen(false);
+        setRouteReady(false);
         setMobileTab("chat");
       }
 
@@ -1006,6 +1015,7 @@ export default function AIPage() {
         s.map((x) => (x.id === request.conversationId ? { ...x, route: null } : x)),
       );
       setPanelOpen(false);
+      setRouteReady(false);
       setMobileTab("chat");
       if (!shouldRecheckRequest(err)) {
         pending.current = null;
@@ -1050,6 +1060,7 @@ export default function AIPage() {
       ),
     );
     setDay(1);
+    setRouteReady(false);
     setPanelOpen(true);
     setMobileTab("draft");
   }
@@ -1920,6 +1931,7 @@ export default function AIPage() {
                     aria-label={t("studio.draft.closeLabel", "Rota panelini kapat")}
                     onClick={() => {
                       setPanelOpen(false);
+                      setRouteReady(false);
                       setMobileTab("chat");
                     }}
                   >
@@ -1931,17 +1943,65 @@ export default function AIPage() {
                 <div className="as-studio__draft-body">
                   <EmptyState
                     icon="map"
+                    contour
                     level={3}
                     title={t("studio.draft.empty.title", "Henüz rota yok")}
                     description={t(
                       "studio.draft.empty.text",
                       "Tercihlerini konuştuktan sonra oluşturduğumuz rota burada görünecek.",
                     )}
+                    action={
+                      // Örnek cümle yalnız yazma alanına gelir; gönderim (ve kredi) kullanıcıda.
+                      <ChipGroup
+                        mode="single"
+                        label={t("studio.draft.empty.examples", "Örnek cümleler")}
+                        className="as-studio__examples"
+                      >
+                        {POPULAR_DESTINATIONS.slice(0, 3).map((d) => {
+                          const prompt = t(d.prompt[0], d.prompt[1]);
+                          return (
+                            <Chip
+                              key={d.id}
+                              pressed={input === prompt}
+                              onPress={() => {
+                                setInput(prompt);
+                                setPanelOpen(false);
+                                setRouteReady(false);
+                                setMobileTab("chat");
+                              }}
+                            >
+                              {t(d.city[0], d.city[1])}
+                            </Chip>
+                          );
+                        })}
+                      </ChipGroup>
+                    }
                   />
                   {prepContext.kind === "strip" && <PrepPanel context={prepContext} />}
                 </div>
               ) : (
                 <div className="as-studio__draft-body">
+                  {routeReady && (
+                    <div className="as-studio__ready">
+                      <Celebrate
+                        title={t("studio.ready.title", "Rotan hazır")}
+                        message={`${route.title} · ${stopsLabel(t, route.stops.length)}`}
+                        action={
+                          <div className="as-studio__ready-actions">
+                            <Button
+                              iconStart={<Icon name="map" size={16} />}
+                              onClick={() => void openMap()}
+                            >
+                              {t("studio.msg.openMap", "Haritada aç")}
+                            </Button>
+                            <Button variant="ghost" onClick={() => setRouteReady(false)}>
+                              {t("studio.ready.review", "Önce incele")}
+                            </Button>
+                          </div>
+                        }
+                      />
+                    </div>
+                  )}
                   <div className="as-studio__route-head">
                     <h3 className="as-studio__route-title">{route.title}</h3>
                     <p className="as-studio__meta">

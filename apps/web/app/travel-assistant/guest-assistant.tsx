@@ -9,7 +9,19 @@ import { ComposerBar } from "../components/assistant/composer-bar";
 import { MessageBubble, MessageLog } from "../components/assistant/message-log";
 import { QuestionCard, type QuestionAnswers } from "../components/assistant/question-card";
 import type { CardQuestions, LooseQuestion } from "../components/assistant/logic/question-limits";
-import { Alert, Button, Field, Icon, Input, PageHeader, PageShell } from "../components/ui";
+import {
+  Alert,
+  Button,
+  Chip,
+  ChipGroup,
+  EmptyState,
+  Field,
+  Icon,
+  Input,
+  PageHeader,
+  PageShell,
+} from "../components/ui";
+import { POPULAR_DESTINATIONS } from "./studio-starters";
 import {
   buildGuestSummaryMessage,
   createDraft,
@@ -401,14 +413,41 @@ export function GuestAssistant() {
         </section>
         <aside className="as-guest__map" aria-label={t("guest.map.label", "Rota önizlemesi")}>
           <div className="as-guest__map-inner">
-            <Icon name="map" size={24} />
-            <p className="as-guest__map-title">{t("guest.map.title", "Rotan burada görünecek")}</p>
-            <p className="as-guest__map-text">
-              {t(
+            <EmptyState
+              icon="map"
+              contour
+              level={2}
+              title={t("guest.map.title", "Rotan burada görünecek")}
+              description={t(
                 "guest.map.text",
                 "Hesap açıp taslağını oluşturduğunda duraklar gün gün haritada çizilir.",
               )}
-            </p>
+              action={
+                !draft.q ? (
+                  // Örnek cümle hedef olarak yazılır (ücretsiz netleştirme turu başlar).
+                  <ChipGroup
+                    mode="single"
+                    label={t("studio.draft.empty.examples", "Örnek cümleler")}
+                    className="as-guest__examples"
+                  >
+                    {POPULAR_DESTINATIONS.slice(0, 3).map((d) => {
+                      const prompt = t(d.prompt[0], d.prompt[1]);
+                      return (
+                        <Chip
+                          key={d.id}
+                          onPress={() => {
+                            const q = sanitizePrompt(prompt);
+                            if (q) persist({ ...draft, q });
+                          }}
+                        >
+                          {t(d.city[0], d.city[1])}
+                        </Chip>
+                      );
+                    })}
+                  </ChipGroup>
+                ) : undefined
+              }
+            />
           </div>
         </aside>
       </div>

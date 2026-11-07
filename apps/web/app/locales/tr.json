@@ -1291,5 +1291,8 @@
   "planner.newTrip.days": "Gün sayısı",
   "planner.newTrip.start": "Başlangıç tarihi",
   "planner.firstSave.title": "İlk rotan hesabına kaydedildi",
-  "planner.firstSave.body": "Artık her oturumda açılır; kodla paylaşabilirsin."
+  "planner.firstSave.body": "Artık her oturumda açılır; kodla paylaşabilirsin.",
+  "studio.draft.empty.examples": "Örnek cümleler",
+  "studio.ready.title": "Rotan hazır",
+  "studio.ready.review": "Önce incele"
 }

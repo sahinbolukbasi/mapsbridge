@@ -1291,5 +1291,8 @@
   "planner.newTrip.days": "Number of days",
   "planner.newTrip.start": "Start date",
   "planner.firstSave.title": "Your first route is saved to your account",
-  "planner.firstSave.body": "It opens in every session now, and you can share it with a code."
+  "planner.firstSave.body": "It opens in every session now, and you can share it with a code.",
+  "studio.draft.empty.examples": "Example sentences",
+  "studio.ready.title": "Your route is ready",
+  "studio.ready.review": "Review first"
 }
