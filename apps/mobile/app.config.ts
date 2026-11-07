@@ -16,7 +16,7 @@ export const APP_CONFIG = {
     name: "Maps Bridge",
     slug: "mapsbridge",
     scheme: "mapsbridge",
-    version: "1.0.1",
+    version: "1.1.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "dark",
@@ -30,7 +30,7 @@ export const APP_CONFIG = {
       // Evrensel bağlantılar (K4): /k/, /traveler/, /maps/. Doğrulama için mapsbridge.com
       // /.well-known/apple-app-site-association gerekir (Team ID ile; infra-changes.md §4.7).
       associatedDomains: ["applinks:mapsbridge.com", "applinks:www.mapsbridge.com"],
-      buildNumber: "1",
+      buildNumber: "2",
       userInterfaceStyle: "dark",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
@@ -48,7 +48,7 @@ export const APP_CONFIG = {
     },
     android: {
       package: "com.mapsbridge.mobile",
-      versionCode: 1,
+      versionCode: 2,
       userInterfaceStyle: "dark",
       adaptiveIcon: {
         foregroundImage: "./assets/android-icon-foreground.png",
@@ -95,11 +95,16 @@ export const APP_CONFIG = {
         "expo-location",
         {
           locationWhenInUsePermission: PERMISSIONS_TR.location,
+          // Yalnız uygulama açıkken: "Always" ve hareket izni metinleri Info.plist'e yazılmaz.
+          locationAlwaysAndWhenInUsePermission: false,
+          locationAlwaysPermission: false,
+          motionUsagePermission: false,
           isIosBackgroundLocationEnabled: false,
           isAndroidBackgroundLocationEnabled: false,
         },
       ],
-      "expo-notifications",
+      // Yalnız yerel bildirim (push yok); TestFlight/App Store imzası için üretim ortamı.
+      ["expo-notifications", { mode: "production" }],
       [
         "expo-local-authentication",
         {

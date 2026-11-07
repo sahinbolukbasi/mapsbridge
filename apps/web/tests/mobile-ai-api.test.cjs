@@ -108,7 +108,7 @@ test("4.1: mobil API varsayılanı canlı host; ölü eski host repoda yok, app.
   );
   const web = fs.readFileSync(path.resolve(__dirname, "../app/lib/api-client.ts"), "utf8");
   assert.match(web, /pwi1j8mq0j/);
-  assert.doesNotMatch(web + cfg, /0duy2hfjd2/);
+  assert.doesNotMatch(web + cfg, new RegExp(["0duy", "2hfjd2"].join("")), "ölü eski host");
 });
 test("4.4: AI isteği 40 sn zaman aşımı sinyali taşır; ağ hatası AI_UNREACHABLE olur", async () => {
   const h = harness({ status: 200, body: { responseMode: "clarify", orchestratorSummary: "?" } });
