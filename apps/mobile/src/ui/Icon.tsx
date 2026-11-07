@@ -7,7 +7,7 @@ import { iconPaths, iconStroke, type IconName } from "../theme/icon-paths";
 // icons.ts → theme/icon-paths.ts, üretilmiş). Etiket yoksa dekoratiftir ve erişilebilirlik
 // ağacından gizlenir; etiket verilirse image rolü + erişilebilir ad taşır.
 export type { IconName };
-export type IconSize = 16 | 20 | 24;
+export type IconSize = 16 | 20 | 24 | 32 | 48 | 96;
 
 export interface IconProps {
   name: IconName;

@@ -10,7 +10,7 @@ import {
   type TabNavAction,
   type TabNavState,
 } from "./src/navigation/tab-stack";
-import { ScreenFocusContext, motion } from "./src/ui";
+import { ScreenFocusContext, Toaster, motion } from "./src/ui";
 import { ChatScreen } from "./src/screens/ChatScreen";
 import { ExploreScreen } from "./src/screens/ExploreScreen";
 import { GuestAssistantView } from "./src/screens/GuestAssistantView";
@@ -125,6 +125,8 @@ export function App() {
   const [assistantPrompt, setAssistantPrompt] = useState<{ text: string; nonce: number }>();
   const [chatOpen, setChatOpen] = useState<{ contact: ChatContact; nonce: number }>();
   const [plansOpen, setPlansOpen] = useState(false);
+  // Toast'lar alt menünün üstünde (direction §3: mobil alt menünün üstü).
+  const [tabBarHeight, setTabBarHeight] = useState(0);
   // Kapıdan girişte dönülecek sekme (web `next` karşılığı; ör. misafir asistan → Asistan).
   const authReturnTab = useRef<MobileTab | null>(null);
   // Yazı tipleri (karar S13): yüklenemezse sistem yazı tipiyle devam edilir.
@@ -565,52 +567,56 @@ export function App() {
   });
 
   return (
-    <View style={styles.appShell}>
-      <StatusBar barStyle="light-content" backgroundColor={tokens.color.surfaceInverseStrong} />
+    <Toaster bottomOffset={tabBarHeight}>
+      <View style={styles.appShell}>
+        <StatusBar barStyle="light-content" backgroundColor={tokens.color.surfaceInverseStrong} />
 
-      {/* Sekme ekranları unmount edilmez (display none); yığındaki ekran kökün yerine çizilir. */}
-      <View style={styles.screenContainer} key={signedIn ? "member" : "guest"}>
-        {tabs
-          .filter((tab) => mountedTabs.current.tabs.has(tab))
-          .map((tab) => {
-            const active = tab === nav.tab;
-            const top = topScreen(nav, tab);
-            return (
-              <Animated.View
-                key={tab}
-                style={[
-                  styles.tabScreen,
-                  active ? { opacity: tabEnter, transform: [{ translateY }] } : styles.hidden,
-                ]}
-                accessibilityElementsHidden={!active}
-                importantForAccessibility={active ? "auto" : "no-hide-descendants"}
-              >
-                <ScreenFocusContext.Provider value={active && !top}>
-                  <View style={[styles.tabScreen, top ? styles.hidden : null]}>
-                    {renderTab(tab)}
-                  </View>
-                </ScreenFocusContext.Provider>
-                {top ? (
-                  <ScreenFocusContext.Provider value={active}>
-                    <View style={styles.tabScreen}>{renderStackScreen(top)}</View>
+        {/* Sekme ekranları unmount edilmez (display none); yığındaki ekran kökün yerine çizilir. */}
+        <View style={styles.screenContainer} key={signedIn ? "member" : "guest"}>
+          {tabs
+            .filter((tab) => mountedTabs.current.tabs.has(tab))
+            .map((tab) => {
+              const active = tab === nav.tab;
+              const top = topScreen(nav, tab);
+              return (
+                <Animated.View
+                  key={tab}
+                  style={[
+                    styles.tabScreen,
+                    active ? { opacity: tabEnter, transform: [{ translateY }] } : styles.hidden,
+                  ]}
+                  accessibilityElementsHidden={!active}
+                  importantForAccessibility={active ? "auto" : "no-hide-descendants"}
+                >
+                  <ScreenFocusContext.Provider value={active && !top}>
+                    <View style={[styles.tabScreen, top ? styles.hidden : null]}>
+                      {renderTab(tab)}
+                    </View>
                   </ScreenFocusContext.Provider>
-                ) : null}
-              </Animated.View>
-            );
-          })}
+                  {top ? (
+                    <ScreenFocusContext.Provider value={active}>
+                      <View style={styles.tabScreen}>{renderStackScreen(top)}</View>
+                    </ScreenFocusContext.Provider>
+                  ) : null}
+                </Animated.View>
+              );
+            })}
+        </View>
+
+        <View onLayout={(e) => setTabBarHeight(e.nativeEvent.layout.height)}>
+          <BottomTabBar tabs={tabs} activeTab={nav.tab} onSelectTab={selectTab} />
+        </View>
+
+        {/* Planlar (design §7.2 madde 8): misafirde bilgi + kayıt, üyede RevenueCat satın alma. */}
+        <PaywallModal
+          visible={plansOpen}
+          guest={!signedIn}
+          placement="assistant"
+          onClose={() => setPlansOpen(false)}
+          onRequireAuth={(mode) => openAuth(mode)}
+        />
       </View>
-
-      <BottomTabBar tabs={tabs} activeTab={nav.tab} onSelectTab={selectTab} />
-
-      {/* Planlar (design §7.2 madde 8): misafirde bilgi + kayıt, üyede RevenueCat satın alma. */}
-      <PaywallModal
-        visible={plansOpen}
-        guest={!signedIn}
-        placement="assistant"
-        onClose={() => setPlansOpen(false)}
-        onRequireAuth={(mode) => openAuth(mode)}
-      />
-    </View>
+    </Toaster>
   );
 }
 

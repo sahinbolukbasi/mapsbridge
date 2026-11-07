@@ -789,3 +789,91 @@ test("çok günlü rota: gün durak öneki ile; harita yükleme hatası RN'e ile
   assert.match(html, /MAP_LOAD_TIMEOUT_MS/);
   assert.match(html, /tileerror/);
 });
+// ── Increment 4.3: modal sunumu, toast süresi/bekletme ve ilerleme mantığı web ile birebir ──
+const LOGIC_COPIES = ["modal-presentation", "toast-timing", "toast-hold", "progress"];
+/** Kopyanın ilk iki satırı kaynak notudur; geri kalanı web dosyasıyla birebir aynıdır. */
+function copyBody(rel) {
+  return fs.readFileSync(path.join(MOBILE, rel), "utf8").split("\n").slice(2).join("\n");
+}
+test("4.3: ui/logic kopyaları (modal-presentation, toast-timing, toast-hold, progress) web ile birebir", () => {
+  for (const name of LOGIC_COPIES) {
+    const web = fs.readFileSync(path.join(WEB, `components/ui/logic/${name}.ts`), "utf8");
+    assert.equal(copyBody(`ui/logic/${name}.ts`), web, `${name}.ts web kaynağından farklı`);
+  }
+  const webModal = loadTs(path.join(WEB, "components/ui/logic/modal-presentation.ts"));
+  const mobModal = loadTs(path.join(MOBILE, "ui/logic/modal-presentation.ts"));
+  for (const size of ["sheet", "md", "sm", "lg"])
+    for (const mobile of [true, false])
+      assert.equal(
+        mobModal.modalPresentation(size, mobile),
+        webModal.modalPresentation(size, mobile),
+      );
+  const webToast = loadTs(path.join(WEB, "components/ui/logic/toast-timing.ts"));
+  const mobToast = loadTs(path.join(MOBILE, "ui/logic/toast-timing.ts"));
+  for (const tone of ["info", "success", "warning", "danger"])
+    for (const hasAction of [true, false])
+      for (const durationMs of [undefined, 0, 3000, Number.NaN])
+        assert.equal(
+          mobToast.toastDuration({ tone, hasAction, durationMs }),
+          webToast.toastDuration({ tone, hasAction, durationMs }),
+        );
+  const t0 = mobToast.startTimer(6000, 1000);
+  const paused = mobToast.pauseTimer(t0, 3000);
+  assert.deepEqual(
+    plain(paused),
+    plain(webToast.pauseTimer(webToast.startTimer(6000, 1000), 3000)),
+  );
+  assert.equal(mobToast.timerProgress(paused, 6000, 9999), 4000 / 6000);
+  const webHold = loadTs(path.join(WEB, "components/ui/logic/toast-hold.ts"));
+  const mobHold = loadTs(path.join(MOBILE, "ui/logic/toast-hold.ts"));
+  for (const open of [true, false]) {
+    assert.equal(mobHold.admitToast(open), webHold.admitToast(open));
+    assert.deepEqual(
+      plain(mobHold.releaseHeld([1, 2], open)),
+      plain(webHold.releaseHeld([1, 2], open)),
+    );
+  }
+  const webProg = loadTs(path.join(WEB, "components/ui/logic/progress.ts"));
+  const mobProg = loadTs(path.join(MOBILE, "ui/logic/progress.ts"));
+  for (const [v, m] of [
+    [50, 100],
+    [3, 4],
+    [-1, 10],
+    [200, 100],
+    [Number.NaN, 100],
+    [1, 0],
+  ])
+    assert.equal(mobProg.clampProgress(v, m), webProg.clampProgress(v, m));
+  for (const i of [0, 1, 2])
+    for (const c of [0, 1, 3]) assert.equal(mobProg.stepState(i, c), webProg.stepState(i, c));
+  assert.equal(
+    mobProg.stepAnnouncement(mobileUi.UI_TR["ui.progress.step"], 1, ["A", "B", "C"]),
+    webProg.stepAnnouncement(TR["ui.progress.step"], 1, ["A", "B", "C"]),
+  );
+});
+test("4.3: ModalFrame ≥768 dp her sunumu ortalı dialog yapar, <768 sheet alttan; RN primitive'leri web adlarıyla", () => {
+  const src = fs.readFileSync(path.join(MOBILE, "ui/ModalFrame.tsx"), "utf8");
+  assert.match(src, /TABLET_MIN_WIDTH = 768/);
+  assert.match(src, /modalPresentation\("sheet", width < TABLET_MIN_WIDTH\)/);
+  assert.match(src, /reduced\s*\?\s*"none"/, "hareket azaltmada animationType none");
+  assert.match(src, /outputRange: \[0\.96, 1\]/, "ölçek .96 → 1");
+  const index = fs.readFileSync(path.join(MOBILE, "ui/index.ts"), "utf8");
+  for (const name of [
+    "Toaster",
+    "useToast",
+    "Progress",
+    "Celebrate",
+    "Skeleton",
+    "EmptyState",
+    "haptic",
+  ])
+    assert.match(index, new RegExp(`\\b${name}\\b`), `ui/index.ts ${name}`);
+  const toast = fs.readFileSync(path.join(MOBILE, "ui/Toast.tsx"), "utf8");
+  assert.match(toast, /admitToast\(openModalCount\(\) > 0\)/, "açık modalda toast bekletilir");
+  const button = fs.readFileSync(path.join(MOBILE, "ui/Button.tsx"), "utf8");
+  assert.match(button, /disabledReason/);
+  assert.match(button, /loadingLabel/);
+  assert.match(button, /android_ripple=/);
+  const press = fs.readFileSync(path.join(MOBILE, "ui/usePressScale.ts"), "utf8");
+  assert.match(press, /PRESSED_SCALE = 0\.97/);
+});
