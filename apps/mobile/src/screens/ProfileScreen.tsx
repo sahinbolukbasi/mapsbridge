@@ -11,6 +11,7 @@ import { EditProfileModal } from "../components/EditProfileModal";
 import { EditPostModal } from "../components/EditPostModal";
 import { PaywallModal } from "../components/PaywallModal";
 import { ScreenTourModal } from "../components/ScreenTourModal";
+import { AppSettings } from "../components/AppSettings";
 import { Avatar, Button, Card, ConfirmDialog, Screen, ScreenHeader, Txt } from "../ui";
 import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
@@ -154,6 +155,7 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
           )}
         </View>
 
+        <AppSettings />
         <Button label={tr("nav.logout")} variant="danger" onPress={() => setConfirmOut(true)} />
       </ScrollView>
 

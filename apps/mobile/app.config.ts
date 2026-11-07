@@ -27,6 +27,9 @@ export const APP_CONFIG = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.mapsbridge.mobile",
+      // Evrensel bağlantılar (K4): /k/, /traveler/, /maps/. Doğrulama için mapsbridge.com
+      // /.well-known/apple-app-site-association gerekir (Team ID ile; infra-changes.md §4.7).
+      associatedDomains: ["applinks:mapsbridge.com", "applinks:www.mapsbridge.com"],
       buildNumber: "1",
       userInterfaceStyle: "dark",
       infoPlist: {
@@ -67,6 +70,21 @@ export const APP_CONFIG = {
         "VIBRATE",
       ],
       blockedPermissions: ["android.permission.ACCESS_BACKGROUND_LOCATION"],
+      // App Links (K4): doğrulama için /.well-known/assetlinks.json (imza SHA-256; infra-changes.md §4.7).
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: ["mapsbridge.com", "www.mapsbridge.com"].flatMap((host) =>
+            ["/k/", "/traveler/", "/maps/"].map((pathPrefix) => ({
+              scheme: "https",
+              host,
+              pathPrefix,
+            })),
+          ),
+          category: ["BROWSABLE", "DEFAULT"],
+        },
+      ],
       predictiveBackGestureEnabled: true,
     },
     plugins: [

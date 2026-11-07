@@ -23,6 +23,7 @@ import {
   ConfirmDialog,
   Connector,
   DayHeader,
+  Icon,
   IconButton,
   ModalFrame,
   Notice,
@@ -60,6 +61,14 @@ import { pinPopupModel } from "../trip/pin-popup";
 import { stopToPin } from "../trip/models";
 import { centroid } from "../trip/discovery-rank";
 import { DiscoverPanel, type DiscoverAdd } from "../components/DiscoverPanel";
+import { usePermission } from "../components/PermissionPrompt";
+import { readTile, storeTile } from "../services/tile-cache";
+import { currentPosition } from "../services/nearby";
+import { appleMapsUrl, googleMapsUrl } from "../services/directions";
+import { gpxFileName, routeToGpx } from "../services/route-export";
+import { scheduleRouteReminders } from "../services/notifications";
+import { File, Paths } from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { optimizeStopOrder } from "../trip/optimize";
 import { categoryIcon } from "../trip/category";
 import { spansSeveralDays, stopDay } from "../trip/days";
@@ -165,6 +174,9 @@ export function MapScreen({
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const searchSeq = useRef(0);
   const toast = useToast();
+  const locationPerm = usePermission("location");
+  const notifyPerm = usePermission("notifications");
+  const [nearMeKey, setNearMeKey] = useState(0);
   const [gate, setGate] = useState<AuthGateReason | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<TripStop | null>(null);
   const [editing, setEditing] = useState<TripStop | null>(null);
@@ -320,9 +332,42 @@ export function MapScreen({
         `window.updateStops && window.updateStops(${JSON.stringify(stopsPayload(route, selectedId))})`,
       );
       inject(`window.updatePool && window.updatePool(${JSON.stringify(poolPayload())})`);
+    } else if (
+      data.type === "TILE_SAVE" &&
+      typeof data.key === "string" &&
+      typeof data.data === "string"
+    ) {
+      storeTile(data.key, data.data);
+    } else if (data.type === "TILE_MISS" && typeof data.key === "string") {
+      const key = data.key;
+      readTile(key).then((uri) =>
+        inject(
+          `window.provideTile && window.provideTile(${JSON.stringify(key)}, ${JSON.stringify(uri)})`,
+        ),
+      );
     } else if (data.type === "LOCATION_ERROR") {
       toast.show({ tone: "warning", message: tr("planner.locate.failed") });
     }
+  };
+
+  // Konumum / Yakınımda (K4): önce gerekçe (PermissionPrompt), sonra expo-location (when-in-use).
+  const locate = async (): Promise<{ lat: number; lng: number } | null> => {
+    if (!(await locationPerm.ensure())) return null;
+    const pos = await currentPosition();
+    if (!pos) {
+      toast.show({ tone: "warning", message: tr("planner.locate.failed") });
+      return null;
+    }
+    inject(`window.showUser && window.showUser(${pos.lat}, ${pos.lng})`);
+    setMapCenter(pos);
+    return pos;
+  };
+
+  const nearMe = async () => {
+    const pos = await locate();
+    if (!pos) return;
+    setMode("discover");
+    setNearMeKey((n) => n + 1);
   };
 
   const showCandidate = (place: PlaceCandidate) => {
@@ -514,12 +559,49 @@ export function MapScreen({
     }).catch(() => undefined);
   };
 
-  const openExternal = (stop?: TripStop) => {
-    const url = stop
-      ? `https://www.google.com/maps/dir/?api=1&destination=${stop.lat},${stop.lng}&travelmode=walking`
-      : `https://www.google.com/maps/dir/${route.stops.map((s) => `${s.lat},${s.lng}`).join("/")}`;
+  // Yol tarifi (K4): iOS'ta Apple Haritalar, her iki platformda Google Haritalar (bağımlılık yok).
+  const openExternal = (stop?: TripStop, app: "google" | "apple" = "google") => {
+    const points = stop ? [stop] : route.stops;
+    const url = app === "apple" ? appleMapsUrl(points) : googleMapsUrl(points);
+    if (!url) return;
     Linking.openURL(url).catch(() =>
       Alert.alert(tr("planner.travel.googleMaps"), tr("ui.unexpectedError")),
+    );
+  };
+
+  // Rotayı GPX dosyası olarak paylaş (expo-sharing); yalnız ad + koordinat (I1).
+  const shareGpx = async () => {
+    if (guest) {
+      setGate("save");
+      return;
+    }
+    if (!route.stops.length) return;
+    try {
+      const file = new File(Paths.cache, gpxFileName(route.name));
+      if (file.exists) file.delete();
+      file.write(routeToGpx(route.name, route.stops));
+      if (!(await Sharing.isAvailableAsync())) throw new Error("sharing");
+      await Sharing.shareAsync(file.uri, {
+        mimeType: "application/gpx+xml",
+        UTI: "com.topografix.gpx",
+        dialogTitle: route.name,
+      });
+    } catch {
+      toast.show({ tone: "danger", message: tr("ui.unexpectedError") });
+    }
+  };
+
+  const remind = async () => {
+    if (guest) {
+      setGate("save");
+      return;
+    }
+    if (!(await notifyPerm.ensure())) return;
+    const n = await scheduleRouteReminders(tripStore.getActiveRoute());
+    toast.show(
+      n > 0
+        ? { tone: "success", message: tr("native.reminder.done", { n }) }
+        : { tone: "warning", message: tr("native.reminder.none") },
     );
   };
 
@@ -563,7 +645,7 @@ export function MapScreen({
       <WebView
         ref={webRef}
         originWhitelist={["*"]}
-        source={{ html, baseUrl: "https://unpkg.com" }}
+        source={{ html, baseUrl: "https://mapsbridge.com" }}
         style={styles.map}
         accessible={true}
         accessibilityLabel={mapLabel(route.stops.length)}
@@ -605,7 +687,7 @@ export function MapScreen({
           <IconButton
             icon="locate"
             label={tr("planner.map.locate")}
-            onPress={() => inject("window.requestUserLocation && window.requestUserLocation()")}
+            onPress={() => void locate()}
             style={styles.floating}
           />
         </View>
@@ -781,7 +863,16 @@ export function MapScreen({
           ) : null}
 
           {mode === "discover" ? (
+            <Button
+              label={tr("native.nearMe")}
+              variant="secondary"
+              icon={<Icon name="locate" size={16} />}
+              onPress={() => void nearMe()}
+            />
+          ) : null}
+          {mode === "discover" ? (
             <DiscoverPanel
+              refreshKey={nearMeKey}
               dayPins={route.stops.map((st) => stopToPin(st, multiDay ? stopDay(st, day) : day))}
               allPins={[
                 ...route.stops.map((st) => stopToPin(st, multiDay ? stopDay(st, day) : day)),
@@ -868,6 +959,14 @@ export function MapScreen({
                     ) : null}
                     {selected.notes ? <Txt variant="small">{selected.notes}</Txt> : null}
                     <View style={styles.actions}>
+                      {Platform.OS === "ios" ? (
+                        <Button
+                          label={tr("native.directions.apple")}
+                          variant="secondary"
+                          size="sm"
+                          onPress={() => openExternal(selected, "apple")}
+                        />
+                      ) : null}
                       <Button
                         label={tr("planner.travel.googleMaps")}
                         variant="secondary"
@@ -905,6 +1004,19 @@ export function MapScreen({
                   <View style={styles.actions}>
                     <Button label={tr("planner.share")} variant="secondary" onPress={share} />
                     <Button label={tr("planner.ask")} variant="secondary" onPress={askAssistant} />
+                    <Button label={tr("native.share.gpx")} variant="secondary" onPress={shareGpx} />
+                    <Button
+                      label={tr("native.reminder.set")}
+                      variant="secondary"
+                      onPress={remind}
+                    />
+                    {Platform.OS === "ios" ? (
+                      <Button
+                        label={tr("native.directions.apple")}
+                        variant="ghost"
+                        onPress={() => openExternal(undefined, "apple")}
+                      />
+                    ) : null}
                     <Button
                       label={tr("planner.travel.googleMaps")}
                       variant="ghost"
@@ -1029,6 +1141,8 @@ export function MapScreen({
           }}
         />
       ) : null}
+      {locationPerm.element}
+      {notifyPerm.element}
       <ScreenTourModal screen="map" />
     </View>
   );

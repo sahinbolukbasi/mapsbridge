@@ -53,6 +53,8 @@ export interface DiscoverPanelProps {
   mapCenter: { lat: number; lng: number } | null;
   onAdd: (place: DiscoverAdd, target: "trip" | "pool") => void;
   onFocus: (lat: number, lng: number, label: string) => void;
+  /** Değişince "Haritadaki alan" kapsamında yeniden sorgulanır ("Yakınımda"). */
+  refreshKey?: number;
   /** Sonuçlar değişince haritadaki havuz pinleri için (sıralı, eklenebilir biçimde). */
   onResults?: (places: DiscoverAdd[]) => void;
 }
@@ -99,6 +101,7 @@ export function DiscoverPanel({
   onAdd,
   onFocus,
   onResults,
+  refreshKey = 0,
 }: DiscoverPanelProps) {
   const [interests, setInterests] = useState<PlaceCategoryId[]>(["museum"]);
   const dayCenter = useMemo(() => centroid(dayPins), [dayPins]);
@@ -164,9 +167,13 @@ export function DiscoverPanel({
     setState("ok");
   };
   useEffect(() => {
+    if (refreshKey > 0 && scope !== "map") {
+      setScope("map");
+      return;
+    }
     void run();
     // Kapsam ya da ilgi değişince yeniden sorgulanır; pin değişimi yalnız "yeniden tara" ile.
-  }, [scope, interests.join(","), dayCenter?.lat, dayCenter?.lng]);
+  }, [scope, interests.join(","), dayCenter?.lat, dayCenter?.lng, refreshKey]);
   useEffect(() => {
     onResults?.(state === "ok" ? ranked.map(addOf) : []);
   }, [state, ranked]);

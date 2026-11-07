@@ -5,6 +5,10 @@
 // satırı "Süre hesaplanamadı" yazar (I1/I2). Saf modül: React Native yok.
 import { tokens, withAlpha } from "../theme";
 import { iconPaths } from "../theme/icon-paths";
+import { TILE_CACHE } from "../services/tile-logic";
+
+/** OSM standart karoları (web planlayıcı "Standart" katmanıyla aynı kaynak; atıf zorunlu). */
+export const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
 /**
  * Pin popup'ı (Increment 4.4, web pin-popup modeli): metinler RN'de hazırlanır (I11), WebView
@@ -68,6 +72,7 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body, #map { width: 100%; height: 100%; background: ${c.surfaceSunken}; }
   .leaflet-control-zoom { display: none !important; }
+  .leaflet-control-attribution { font: 400 10px -apple-system, Roboto, sans-serif; }
   .pin { display: flex; flex-direction: column; align-items: center; }
   .pin-num {
     width: 32px; height: 32px; border-radius: 16px; color: ${c.onDay};
@@ -135,10 +140,38 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
       return;
     }
     map = L.map("map", { zoomControl: false }).setView([41.0082, 28.9784], 13);
-    L.tileLayer("https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=tr", {
-      maxZoom: 20, subdomains: ["0", "1", "2", "3"]
-    }).on("tileload", function() { tileLoaded = true; })
-      .on("tileerror", function() { if (!tileLoaded) fail(); })
+    map.attributionControl.setPrefix(false);
+    // Çevrimdışı karo önbelleği (I12, OSM politikası): yalnız GÖRÜLEN karo, zaten indirilmiş
+    // görüntüden (ek istek yok) RN'e iletilir; ağ yokken hata olan karo RN önbelleğinden döner.
+    var saved = {}, pending = {};
+    function keyOf(c) { return c.z + "-" + c.x + "-" + c.y; }
+    window.provideTile = function(key, uri) {
+      var img = pending[key];
+      delete pending[key];
+      if (uri && img) { img.src = uri; tileLoaded = true; failed = false; }
+      else if (!tileLoaded) fail();
+    };
+    L.tileLayer("${TILE_URL}", {
+      maxZoom: 19, crossOrigin: true,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).on("tileload", function(e) {
+        tileLoaded = true;
+        var c = e.coords, img = e.tile, key = keyOf(c);
+        if (saved[key] || c.z > ${TILE_CACHE.maxZoom} || !img || String(img.src).indexOf("data:") === 0) return;
+        saved[key] = true;
+        try {
+          var cv = document.createElement("canvas");
+          cv.width = img.naturalWidth || 256; cv.height = img.naturalHeight || 256;
+          cv.getContext("2d").drawImage(img, 0, 0);
+          var data = cv.toDataURL("image/png").split(",")[1];
+          if (data) post({ type: "TILE_SAVE", key: key, data: data });
+        } catch (err) {}
+      })
+      .on("tileerror", function(e) {
+        var key = keyOf(e.coords);
+        pending[key] = e.tile;
+        post({ type: "TILE_MISS", key: key });
+      })
       .addTo(map);
     markers = L.layerGroup().addTo(map);
     pool = L.layerGroup().addTo(map);
@@ -221,6 +254,13 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
           }) });
         })
         .catch(function() { if (key === legsKey) post({ type: "ROUTE_LEGS", key: key, legs: null }); });
+    };
+    // Konum RN'den (expo-location, izin gerekçesiyle) gelir; WebView geolocation yalnız yedek.
+    window.showUser = function(lat, lng) {
+      var ll = [lat, lng];
+      if (userMarker) userMarker.setLatLng(ll);
+      else userMarker = L.circleMarker(ll, { radius: 8, color: "${c.surface}", weight: 3, fillColor: "${c.infoIcon}", fillOpacity: 1 }).addTo(map);
+      focus(lat, lng, 15);
     };
     window.requestUserLocation = function() {
       if (!navigator.geolocation) { post({ type: "LOCATION_ERROR" }); return; }

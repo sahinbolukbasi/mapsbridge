@@ -6,10 +6,12 @@ import { isReducedMotion } from "./useReducedMotion";
 // Haptik hiçbir zaman tek bilgi taşıyıcı değildir: her durum ekranda da görünür.
 export type HapticKind = "selection" | "success" | "warning" | "error" | "impact";
 let enabled = true;
-/** Uygulama içi ayar (Profil → Ayarlar). Varsayılan açık. */
+/** Uygulama içi ayar (Profil → Ayarlar). Varsayılan açık; kalıcılığı çağıran sağlar. */
 export function setHapticsEnabled(value: boolean): void {
   enabled = value;
 }
+/** Ayarın cihazdaki anahtarı (App açılışta okur, Profil yazar). */
+export const HAPTICS_KEY = "mb_haptics_enabled";
 export function hapticsEnabled(): boolean {
   return enabled && !isReducedMotion();
 }

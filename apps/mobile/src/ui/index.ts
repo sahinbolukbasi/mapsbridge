@@ -12,12 +12,12 @@ export {
   type ModalFrameProps,
   type ModalVariant,
 } from "./ModalFrame";
-export { Toaster, useToast, type ToastInput, type ToastTone } from "./Toast";
+export { Toaster, useToast, type ToastApi, type ToastInput, type ToastTone } from "./Toast";
 export { Progress, type ProgressProps } from "./Progress";
 export { Celebrate, CELEBRATE_BITS, type CelebrateProps } from "./Celebrate";
 export { Skeleton, type SkeletonProps, type SkeletonVariant } from "./Skeleton";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
-export { haptic, hapticsEnabled, setHapticsEnabled, type HapticKind } from "./haptics";
+export { HAPTICS_KEY, haptic, hapticsEnabled, setHapticsEnabled, type HapticKind } from "./haptics";
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog";
 export { Notice, type NoticeProps, type NoticeTone } from "./Notice";
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from "./Button";

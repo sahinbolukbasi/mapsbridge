@@ -49,6 +49,8 @@ export interface CommunityScreenProps {
   onRequireAuth?: (mode: "register" | "login") => void;
   /** Oturumlu: yazarla birebir sohbeti Mesajlar sekmesinde açar. */
   onOpenChat?: (contact: ChatContact) => void;
+  /** Derin bağlantı /traveler/?u= (K4): bu gezginin profilini açar. */
+  openTraveler?: { username: string; nonce: number };
 }
 
 type Mode = "latest" | "popular";
@@ -63,6 +65,7 @@ export function CommunityScreen({
   guest = false,
   onRequireAuth,
   onOpenChat,
+  openTraveler,
 }: CommunityScreenProps) {
   const [posts, setPosts] = useState<MobileCommunityPost[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -91,6 +94,19 @@ export function CommunityScreen({
       unsub();
     };
   }, [guest]);
+
+  // Derin bağlantıdan gelen profil: ad/görsel yalnız akıştaki gerçek gönderiden; yoksa kullanıcı adı.
+  useEffect(() => {
+    if (!openTraveler) return;
+    const handle = `@${openTraveler.username}`;
+    const post = posts.find((p) => p.authorHandle.toLowerCase() === handle);
+    setProfile({
+      name: post?.authorName || openTraveler.username,
+      handle,
+      avatar: post?.authorAvatar,
+    });
+    // Yalnız yeni bağlantıda (nonce).
+  }, [openTraveler?.nonce]);
 
   const tags = useMemo(() => {
     const counts = new Map<string, number>();

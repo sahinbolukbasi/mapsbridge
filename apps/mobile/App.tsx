@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { Animated, BackHandler, StyleSheet, View, StatusBar, Alert, Linking } from "react-native";
+import {
+  Animated,
+  AppState,
+  BackHandler,
+  StyleSheet,
+  View,
+  StatusBar,
+  Alert,
+  Linking,
+} from "react-native";
 import { useFonts } from "expo-font";
+import * as ExpoLinking from "expo-linking";
 import { GUEST_TABS, MEMBER_TABS, type MobileStackScreen, type MobileTab } from "./src/types";
 import {
   initialNav,
@@ -10,7 +20,21 @@ import {
   type TabNavAction,
   type TabNavState,
 } from "./src/navigation/tab-stack";
-import { ScreenFocusContext, Toaster, motion } from "./src/ui";
+import {
+  HAPTICS_KEY,
+  ScreenFocusContext,
+  Toaster,
+  motion,
+  setHapticsEnabled,
+  useToast,
+  type ToastApi,
+} from "./src/ui";
+import { parseDeepLink, type DeepLink } from "./src/services/deep-links";
+import { SharedRouteView } from "./src/components/SharedRouteView";
+import { LockScreen } from "./src/components/LockScreen";
+import { lockEnabled, shouldLock } from "./src/services/biometric";
+import { configureNotifications, scheduleRouteReminders } from "./src/services/notifications";
+import { sweepTiles } from "./src/services/tile-cache";
 import { ChatScreen } from "./src/screens/ChatScreen";
 import { ExploreScreen } from "./src/screens/ExploreScreen";
 import { GuestAssistantView } from "./src/screens/GuestAssistantView";
@@ -114,6 +138,12 @@ function decodeJwtPayload(
 }
 
 type Nav = TabNavState<MobileTab, MobileStackScreen>;
+/** Toaster bağlamını App'e açar (App, Toaster'ın üstünde çizilir). */
+function ToastBridge({ onReady }: { onReady: (api: ToastApi) => void }) {
+  const api = useToast();
+  useEffect(() => onReady(api), [api, onReady]);
+  return null;
+}
 
 /** Android geri tuşunda son çare sekmesi (design §12.1: … → Planla → çıkış). */
 const BACK_HOME: MobileTab = "plan";
@@ -131,7 +161,40 @@ export function App() {
   const [tabBarHeight, setTabBarHeight] = useState(0);
   // N1: ilk açılış tanıtımı (görüldü bayrağı cihazda); okunana kadar açılış ekranı kalır.
   const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
+  const [linkNonce, setLinkNonce] = useState(0);
   const [ownerReady, setOwnerReady] = useState(false);
+  // K4: derin bağlantı hedefleri, biyometrik kilit, yerel bildirim/karo önbelleği kurulumu.
+  const [sharedCode, setSharedCode] = useState<string | null>(null);
+  const [openTraveler, setOpenTraveler] = useState<{ username: string; nonce: number }>();
+  const [locked, setLocked] = useState(false);
+  const toastRef = useRef<ToastApi | null>(null);
+  const pendingLink = useRef<DeepLink | null>(null);
+  const backgroundedAt = useRef<number | null>(null);
+  useEffect(() => {
+    configureNotifications();
+    const t = setTimeout(() => sweepTiles(), 3000);
+    storage
+      .getItem(HAPTICS_KEY)
+      .then((v) => setHapticsEnabled(v !== "false"))
+      .catch(() => undefined);
+    lockEnabled().then((on) => {
+      if (on) setLocked(true);
+    });
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "background") backgroundedAt.current = Date.now();
+      else if (state === "active") {
+        const since = backgroundedAt.current;
+        backgroundedAt.current = null;
+        lockEnabled().then((on) => {
+          if (shouldLock(on, since, Date.now())) setLocked(true);
+        });
+      }
+    });
+    return () => {
+      clearTimeout(t);
+      sub.remove();
+    };
+  }, []);
   useEffect(() => {
     storage
       .getItem(ONBOARDING_KEY)
@@ -169,6 +232,26 @@ export function App() {
     setAuthInitialMode(mode);
     dispatch({ type: "select", tab: "login" });
   };
+
+  // Derin bağlantı (K4): /k/?code= uygulama içi görüntüleyici, /traveler/?u= Topluluk profili,
+  // /maps/?tripId= cihazdaki rota. Açılış/tanıtım bitene kadar bekler.
+  useEffect(() => {
+    const link = pendingLink.current;
+    if (!link || loadingSession || !onboardingSeen) return;
+    pendingLink.current = null;
+    if (link.kind === "share") setSharedCode(link.code);
+    else if (link.kind === "traveler") {
+      setOpenTraveler({ username: link.username, nonce: Date.now() });
+      dispatch({ type: "select", tab: "community" });
+    } else if (link.kind === "trip") {
+      const target = tripStore.getAllRoutes().find((r) => r.id === link.tripId);
+      if (target) {
+        tripStore.switchActiveRoute(target.id);
+        openMap();
+      } else
+        toastRef.current?.show({ tone: "warning", message: tr("native.deeplink.tripMissing") });
+    }
+  }, [linkNonce, loadingSession, onboardingSeen]);
 
   // Oturum açılınca/kapanınca sekme seti değişir: misafir Keşfet'te, üye Planla'da başlar (J6).
   // Layout effect: boyamadan önce çalışır, eski sekme setiyle boş bir kare görünmez.
@@ -308,17 +391,22 @@ export function App() {
     checkAuth();
 
     // Listen for deep links when OAuth redirects to the app
-    const urlSub = Linking.addEventListener("url", ({ url }) => {
-      if (url && (url.includes("token") || url.includes("callback") || url.includes("#"))) {
+    const onUrl = (url: string | null) => {
+      if (!url) return;
+      const link = parseDeepLink(url);
+      if (link && link.kind !== "oauth") {
+        // Oturum/tanıtım hazır değilse bekletilir (derin bağlantı etkisi uygular).
+        pendingLink.current = link;
+        setLinkNonce((n) => n + 1);
+        return;
+      }
+      if (url.includes("token") || url.includes("callback") || url.includes("#")) {
         handleGoogleIntercept(url);
       }
-    });
-
-    Linking.getInitialURL().then((url) => {
-      if (url && (url.includes("token") || url.includes("callback") || url.includes("#"))) {
-        handleGoogleIntercept(url);
-      }
-    });
+    };
+    // expo-linking: uygulama şeması (mapsbridge://) ve evrensel/App Links aynı akıştan.
+    const urlSub = ExpoLinking.addEventListener("url", ({ url }) => onUrl(url));
+    ExpoLinking.getInitialURL().then(onUrl);
 
     return () => {
       urlSub.remove();
@@ -533,6 +621,7 @@ export function App() {
             onOpenMap={() => openMap()}
             guest={!signedIn}
             onRequireAuth={(mode) => openAuth(mode, "community")}
+            openTraveler={openTraveler}
             onOpenChat={(contact) => {
               setChatOpen({ contact, nonce: Date.now() });
               selectTab("messages");
@@ -589,7 +678,12 @@ export function App() {
         <StatusBar barStyle="light-content" backgroundColor={tokens.color.surfaceInverseStrong} />
 
         {/* Sekme ekranları unmount edilmez (display none); yığındaki ekran kökün yerine çizilir. */}
-        <View style={styles.screenContainer} key={signedIn ? "member" : "guest"}>
+        <View
+          style={styles.screenContainer}
+          key={signedIn ? "member" : "guest"}
+          accessibilityElementsHidden={locked}
+          importantForAccessibility={locked ? "no-hide-descendants" : "auto"}
+        >
           {tabs
             .filter((tab) => mountedTabs.current.tabs.has(tab))
             .map((tab) => {
@@ -632,7 +726,13 @@ export function App() {
           onClose={() => setPlansOpen(false)}
           onRequireAuth={(mode) => openAuth(mode)}
         />
-        <FirstRouteReminder enabled={signedIn && ownerReady} />
+        <FirstRouteReminder
+          enabled={signedIn && ownerReady}
+          onGranted={() => void scheduleRouteReminders(tripStore.getActiveRoute())}
+        />
+        <SharedRouteView code={sharedCode} onClose={() => setSharedCode(null)} />
+        <ToastBridge onReady={(api) => (toastRef.current = api)} />
+        {locked ? <LockScreen onUnlocked={() => setLocked(false)} /> : null}
       </View>
     </Toaster>
   );

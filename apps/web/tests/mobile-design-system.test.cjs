@@ -557,7 +557,7 @@ test("4.5 (N1): 3 tanıtım, her ekranda Atla, uydurma istatistik yok; görüld�
     );
   const app = read("App.tsx");
   assert.match(app, /if \(!onboardingSeen\) return <OnboardingScreen/);
-  assert.match(app, /<FirstRouteReminder enabled=\{signedIn && ownerReady\}/);
+  assert.match(app, /<FirstRouteReminder\s+enabled=\{signedIn && ownerReady\}/);
 });
 test("4.5 (N1): izin önce gerekçe ekranıyla, 'Şimdi değil' her zaman; arka plan konumu yok", () => {
   const prompt = code("src/components/PermissionPrompt.tsx");
@@ -569,4 +569,49 @@ test("4.5 (N1): izin önce gerekçe ekranıyla, 'Şimdi değil' her zaman; arka 
   assert.doesNotMatch(perms, /requestBackgroundPermissionsAsync/);
   const reminder = code("src/components/FirstRouteReminder.tsx");
   assert.match(reminder, /usePermission\("notifications"\)/);
+});
+// ── Increment 4.7: K4 native özellikleri ──
+test("4.7 (K4): derin bağlantı, paylaşım, Yakınımda, yerel bildirim, karo önbelleği, kilit, yol tarifi bağlı", () => {
+  const app = code("App.tsx");
+  assert.match(app, /parseDeepLink\(url\)/);
+  assert.match(app, /<SharedRouteView/);
+  assert.match(app, /<LockScreen/);
+  assert.match(app, /configureNotifications\(\)/);
+  assert.match(app, /sweepTiles\(\)/);
+  const map = code("src/screens/MapScreen.tsx");
+  assert.match(map, /Sharing\.shareAsync\(/);
+  assert.match(map, /locationPerm\.ensure\(\)/, "konum önce gerekçeyle");
+  assert.match(map, /scheduleRouteReminders\(/);
+  assert.match(map, /storeTile\(/);
+  assert.match(map, /readTile\(/);
+  assert.match(map, /appleMapsUrl\(/);
+  assert.match(map, /googleMapsUrl\(/);
+  assert.match(map, /baseUrl: "https:\/\/mapsbridge\.com"/, "OSM Referer uygulama alan adı");
+  const settings = code("src/components/AppSettings.tsx");
+  assert.match(
+    settings,
+    /if \(next && !\(await authenticate\(\)\)\) return;/,
+    "kilidi açarken doğrulama",
+  );
+  const pkg = JSON.parse(fs.readFileSync(path.join(mobile, "package.json"), "utf8"));
+  // Onaylı 7 paket kullanılıyor (ölü bağımlılık yok).
+  const all = FILES.map(read).join("\n");
+  for (const name of [
+    "expo-haptics",
+    "expo-notifications",
+    "expo-sharing",
+    "expo-location",
+    "expo-file-system",
+    "expo-local-authentication",
+    "expo-linking",
+  ])
+    assert.match(all, new RegExp(`from "${name}"`), `${name} kullanılmıyor`);
+  assert.ok(
+    pkg.dependencies["expo-linking"],
+    "expo-linking (Expo Router olmadan Linking için kurulu)",
+  );
+  const cfg = JSON.parse(fs.readFileSync(path.join(mobile, "app.json"), "utf8")).expo;
+  assert.equal(cfg.scheme, "mapsbridge");
+  assert.ok(cfg.ios.associatedDomains.includes("applinks:mapsbridge.com"));
+  assert.ok(cfg.android.intentFilters[0].autoVerify);
 });

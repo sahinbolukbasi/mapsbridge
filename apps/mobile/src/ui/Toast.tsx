@@ -55,7 +55,7 @@ type ToastItem = {
   action?: ToastAction;
   duration: number | null;
 };
-type ToastApi = { show: (t: ToastInput) => number; dismiss: (id: number) => void };
+export type ToastApi = { show: (t: ToastInput) => number; dismiss: (id: number) => void };
 const ToastContext = createContext<ToastApi | null>(null);
 /** Toaster yoksa çağrılar sessizce yok sayılır. */
 export function useToast(): ToastApi {
