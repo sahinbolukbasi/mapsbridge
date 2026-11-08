@@ -76,6 +76,7 @@ import {
 import { GooglePlaceInfo } from "./google-place-info";
 import { PlaceFacts } from "./place-facts";
 import { DiscoverPanel } from "./discover-panel";
+import { NearbyList, type NearbyAddPlace } from "./nearby-list";
 import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
 import { StopRow } from "./stop-row";
 import { Connector, type ConnectorMode } from "./connector";
@@ -366,6 +367,10 @@ export function TravelPlannerSidebar({
             planner={planner}
             pin={selectedPin}
             mode={mode}
+            days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
+            activeDayIndex={activeDayIndex}
+            onAddNearby={addPlace}
+            onFlyToCoords={onFlyToCoords}
             onBack={() => setShowDetail(false)}
             onRequireAuth={onRequireAuth}
           />
@@ -541,6 +546,9 @@ export function TravelPlannerSidebar({
               onClearSelectedMapPoint?.();
             }}
             onClose={() => onClearSelectedMapPoint?.()}
+            onFlyToCoords={onFlyToCoords}
+            showNearby
+            onAddNearby={(place, target) => addPlace(place, target)}
           />
         )}
 
@@ -1137,6 +1145,9 @@ function PlaceCard({
   activeDayIndex,
   onAdd,
   onClose,
+  onFlyToCoords,
+  showNearby,
+  onAddNearby,
 }: {
   eyebrow: string;
   place: Place;
@@ -1144,6 +1155,12 @@ function PlaceCard({
   activeDayIndex: number | null | undefined;
   onAdd: (target: AddTarget) => void;
   onClose: () => void;
+  /** Yakın yerden "haritada göster"; map-point kartında bağlanır. */
+  onFlyToCoords?: (lat: number, lng: number, label: string) => void;
+  /** U1: haritadan seçilen noktada "yakında ne var" listesini de göster. */
+  showNearby?: boolean;
+  /** Yakın yer ekleme: kartı kapatmaz, doğrudan rotaya/kayıtlıya ekler. */
+  onAddNearby?: (place: NearbyAddPlace, target: AddTarget) => void;
 }) {
   const { t } = useLocale();
   const [target, setTarget] = useState(() => defaultAddTargetValue(activeDayIndex, days));
@@ -1179,6 +1196,16 @@ function PlaceCard({
           {t("planner.place.add", "Ekle")}
         </Button>
       </div>
+      {showNearby && onAddNearby && (
+        <NearbyList
+          lat={place.lat}
+          lng={place.lng}
+          days={days}
+          activeDayIndex={activeDayIndex}
+          onFocus={onFlyToCoords}
+          onAdd={onAddNearby}
+        />
+      )}
     </div>
   );
 }
@@ -1188,12 +1215,20 @@ function PinDetail({
   planner,
   pin,
   mode,
+  days,
+  activeDayIndex,
+  onAddNearby,
+  onFlyToCoords,
   onBack,
   onRequireAuth,
 }: {
   planner: Planner;
   pin: Pin;
   mode: PlannerMode;
+  days: number[];
+  activeDayIndex: number | null | undefined;
+  onAddNearby: (place: NearbyAddPlace, target: AddTarget) => void;
+  onFlyToCoords?: (lat: number, lng: number, label: string) => void;
   onBack: () => void;
   onRequireAuth: (reason: "ai" | "save") => void;
 }) {
@@ -1507,6 +1542,15 @@ function PinDetail({
           </section>
 
           <PlaceFacts pin={pin} />
+
+          <NearbyList
+            lat={pin.lat}
+            lng={pin.lng}
+            days={days}
+            activeDayIndex={activeDayIndex}
+            onFocus={onFlyToCoords}
+            onAdd={onAddNearby}
+          />
 
           <section className="planner-detail__section" aria-labelledby="planner-detail-ask">
             <h4 id="planner-detail-ask" className="planner-detail__title">
