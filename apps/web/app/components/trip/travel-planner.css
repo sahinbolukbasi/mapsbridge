@@ -251,6 +251,13 @@
     display: grid;
     gap: var(--space-2);
   }
+  /* U6: gün dolu/boş önerisi (Alert) — eylem yuvasındaki gün seçimi + düğme hizası. */
+  .planner-day__suggest-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
   /* Seçilen yer kartı (arama sonucu / haritadan seçilen nokta) */
   .planner-place {
     display: grid;

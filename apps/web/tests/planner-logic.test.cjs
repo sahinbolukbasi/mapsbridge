@@ -520,6 +520,52 @@ test("dayBufferRatio (I9, Increment 3.3): yalnız gerçek bacaklarla; eksik baca
   assert.equal(L.dayBufferRatio([{ id: "z" }], {}, "22:00"), null, "pencere yoksa null");
 });
 
+test("dayFullSuggestion (U6, I2/I9): boş/gezilmiş → addExtra, dolu → shiftStop, bacak eksik → null", () => {
+  // Gün dolu: yük tampon eşiğini (%20) altına indirir → son durağı kaydır.
+  const full = [
+    { id: "a", durationMinutes: 300 },
+    { id: "b", durationMinutes: 300 },
+  ];
+  const fullLegs = { [L.legKey("a", "b")]: { distanceMeters: 1200, durationSeconds: 1800 } };
+  // 720 dk pencere; yük 300+300+30 = 630 → tampon 90/720 ≈ 0.125 < 0.2.
+  assert.ok(L.dayBufferRatio(full, fullLegs, "09:00") <= L.DAY_FULL_BUFFER_THRESHOLD);
+  assert.deepEqual(plain(L.dayFullSuggestion(full, fullLegs, "09:00")), {
+    kind: "shiftStop",
+    pinId: "b",
+  });
+
+  // Tampon bol gün → öneri yok (null).
+  const light = [
+    { id: "a", durationMinutes: 60 },
+    { id: "b", durationMinutes: 60 },
+  ];
+  const lightLegs = { [L.legKey("a", "b")]: { distanceMeters: 600, durationSeconds: 600 } };
+  assert.ok(L.dayBufferRatio(light, lightLegs, "09:00") > L.DAY_FULL_BUFFER_THRESHOLD);
+  assert.equal(L.dayFullSuggestion(light, lightLegs, "09:00"), null);
+
+  // Boş gün → ekstra yer ekle (bacak gerekmez).
+  assert.deepEqual(plain(L.dayFullSuggestion([], {}, "09:00")), { kind: "addExtra" });
+
+  // Tüm duraklar gezilmiş → ekstra yer ekle.
+  assert.deepEqual(
+    plain(
+      L.dayFullSuggestion(
+        [
+          { id: "a", visited: true },
+          { id: "b", visited: true },
+        ],
+        {},
+        "09:00",
+      ),
+    ),
+    { kind: "addExtra" },
+  );
+
+  // Bacak eksik (gezilmemiş durak var ama rota yok) → null (tahmin yok).
+  assert.equal(L.dayFullSuggestion([{ id: "a" }, { id: "b" }], {}, "09:00"), null);
+  assert.equal(L.DAY_FULL_BUFFER_THRESHOLD, 0.2);
+});
+
 test("reorderDayPins (P8): yalnız o günün sırası; geçersiz kimlik kümesinde dokunulmaz", () => {
   const pins = [
     { id: "a", dayIndex: 1, order: 1 },

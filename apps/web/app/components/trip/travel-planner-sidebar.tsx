@@ -43,11 +43,13 @@ import {
   ADD_TARGET_GENERAL,
   addTargetFor,
   dayBufferRatio,
+  dayFullSuggestion,
   dayTimeline,
   defaultAddTargetValue,
   legKey,
   parseAddTarget,
   type AddTarget,
+  type DayFullSuggestion,
 } from "../../lib/trip/planner-logic";
 import { isTextFieldTarget, plannerShortcut, SHORTCUT_HELP } from "../../lib/trip/shortcuts";
 import { MotionProvider, Reorder, useDragControls } from "../../lib/motion";
@@ -164,6 +166,7 @@ export function TravelPlannerSidebar({
     addPinToGeneral,
     addPinDirectlyToTrip,
     assignPinToTrip,
+    movePinToDay,
     updatePinAnywhere,
     deletePinAnywhere,
     togglePinVisitedAnywhere,
@@ -341,6 +344,8 @@ export function TravelPlannerSidebar({
         timeline: dayTimeline(pins, activeRouteLegs, d.startTime),
         // I9: yalnız tüm bacaklar gerçekse oran; eksikse null ("hesaplanamadı").
         buffer: pins.length > 0 ? dayBufferRatio(pins, activeRouteLegs, d.startTime) : undefined,
+        // U6: deterministik "gün doldu / boş" önerisi (I2); bacak eksikse null (öneri çizilmez).
+        fullSuggestion: dayFullSuggestion(pins, activeRouteLegs, d.startTime),
       };
     });
   }, [activeTrip, activeDayIndex, pinsWithTime, activeRouteLegs]);
@@ -552,7 +557,7 @@ export function TravelPlannerSidebar({
           />
         )}
 
-        {sections.map(({ day, pins, timeline, buffer }) => (
+        {sections.map(({ day, pins, timeline, buffer, fullSuggestion }) => (
           <section
             key={day.dayIndex}
             className="planner-day"
@@ -574,6 +579,34 @@ export function TravelPlannerSidebar({
                 offline={planner.deviceSaved}
               />
             </div>
+            {/* U6: gün dolu/boş ise deterministik öneri — ekstra yer ekle (Keşfet'i o güne açar)
+                ya da son durağı başka güne kaydır (movePinToDay). Yalnız düzenleme kipinde. */}
+            {workspaceMode === "edit" && fullSuggestion && pins.length > 0 && (
+              <DayFullBanner
+                suggestion={fullSuggestion}
+                dayIndex={day.dayIndex}
+                otherDays={(activeTrip?.days ?? [])
+                  .map((d) => d.dayIndex)
+                  .filter((d) => d !== day.dayIndex)}
+                pins={pins}
+                onAddExtra={() => {
+                  setActiveDayIndex(day.dayIndex);
+                  setWorkspaceMode("discover");
+                }}
+                onShift={(pinId, targetDay) => {
+                  movePinToDay(pinId, targetDay);
+                  const moved = pins.find((p) => p.id === pinId);
+                  toast.show({
+                    tone: "success",
+                    message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
+                      .replace("{name}", moved?.label ?? t("planner.stop.new", "Yeni durak"))
+                      .replace("{day}", String(targetDay)),
+                    action: { label: t("planner.undo", "Geri al"), onClick: planner.undo },
+                    actionAlsoAt: "planner-toolbar undo IconButton",
+                  });
+                }}
+              />
+            )}
             {pins.length === 0 ? (
               <EmptyState
                 icon="map"
@@ -904,6 +937,100 @@ function PoolRow({
         </Button>
       </span>
     </li>
+  );
+}
+
+/**
+ * U6: gün dolu/boş önerisi. addExtra → "buraya ekstra bir yer ekle" (Keşfet'i bu güne açar);
+ * shiftStop → bir durağı başka güne kaydır (movePinToDay). Öneri deterministik planner-logic'ten
+ * gelir (I2); burada yalnız sunulur. R9: hareket yok; başka gün yoksa kaydırma kontrolü çizilmez.
+ */
+function DayFullBanner({
+  suggestion,
+  dayIndex,
+  otherDays,
+  pins,
+  onAddExtra,
+  onShift,
+}: {
+  suggestion: DayFullSuggestion;
+  dayIndex: number;
+  otherDays: number[];
+  pins: Pin[];
+  onAddExtra: () => void;
+  onShift: (pinId: string, targetDay: number) => void;
+}) {
+  const { t } = useLocale();
+  const shiftPin =
+    suggestion.kind === "shiftStop" ? pins.find((p) => p.id === suggestion.pinId) : undefined;
+  const [targetDay, setTargetDay] = useState<number>(otherDays[0] ?? 0);
+
+  if (suggestion.kind === "addExtra") {
+    return (
+      <Alert
+        tone="info"
+        className="planner-day__suggest"
+        title={t("planner.dayFull.addTitle", "Bu gün boş görünüyor")}
+        action={
+          <Button size="sm" variant="secondary" onClick={onAddExtra}>
+            {t("planner.dayFull.addExtra", "Bu güne yakından yer ekle")}
+          </Button>
+        }
+      >
+        {t("planner.dayFull.addBody", "Keşfet'ten bu güne yakındaki yerleri ekleyebilirsin.")}
+      </Alert>
+    );
+  }
+
+  // shiftStop: başka gün yoksa kaydıracak yer yok → yalnız bilgi + ekstra ekleme yönlendirmesi.
+  if (otherDays.length === 0 || !shiftPin) {
+    return (
+      <Alert
+        tone="warning"
+        className="planner-day__suggest"
+        title={t("planner.dayFull.fullTitle", "Bu gün oldukça dolu")}
+      >
+        {t(
+          "planner.dayFull.fullBodyNoDay",
+          "Rahat bir tempo için yeni bir gün ekleyip durak kaydırabilirsin.",
+        )}
+      </Alert>
+    );
+  }
+
+  return (
+    <Alert
+      tone="warning"
+      className="planner-day__suggest"
+      title={t("planner.dayFull.fullTitle", "Bu gün oldukça dolu")}
+      action={
+        <span className="planner-day__suggest-actions">
+          <Select
+            size="sm"
+            aria-label={t("planner.dayFull.shiftDayFor", "{name} için hedef gün").replace(
+              "{name}",
+              shiftPin.label,
+            )}
+            value={targetDay}
+            onChange={(e) => setTargetDay(Number(e.target.value))}
+          >
+            {otherDays.map((d) => (
+              <option key={d} value={d}>
+                {t("planner.days.day", "{n}. Gün").replace("{n}", String(d))}
+              </option>
+            ))}
+          </Select>
+          <Button size="sm" variant="secondary" onClick={() => onShift(shiftPin.id, targetDay)}>
+            {t("planner.dayFull.shiftStop", "Durağı kaydır")}
+          </Button>
+        </span>
+      }
+    >
+      {t(
+        "planner.dayFull.fullBody",
+        "“{name}” durağını başka güne kaydırarak tamponu artırabilirsin.",
+      ).replace("{name}", shiftPin.label)}
+    </Alert>
   );
 }
 
