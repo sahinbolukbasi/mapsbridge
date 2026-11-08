@@ -1,0 +1,148 @@
+name: Live smoke cleanup (prod test residue)
+# live-smoke-release.yml koşularının mapsbridge-prod-data / AI hafıza tablosunda bıraktığı
+# test kayıtlarını siler. Yalnız elle tetiklenir; varsayılan dry_run=true (yalnız listeler).
+# Güvenlik kapıları (hepsi geçmeden hiçbir şey silinmez):
+#   1. Kullanıcı, USER#<sub>/CREDITS kaydındaki welcomeGift.grantedAt değerinin girilen
+#      kesin zaman damgalarından biriyle eşleşmesiyle bulunur (smoke loglarındaki değerler).
+#   2. Bulunan sub sayısı expected_count'a tam eşit olmalı.
+#   3. Her sub artık Cognito'da OLMAMALI (smoke kullanıcısı silinmiş; gerçek hesap değil).
+#   4. Yalnız PK = USER#<sub> bölümü silinir; ANALYTICS#AI'da en fazla 1 kayıt, yalnız
+#      verilen pencerede tam 1 rota olayı varsa silinir. SYSTEM#AI günlük sayacına dokunulmaz.
+# Silinmeden önce tüm kayıtlar artifact olarak yedeklenir (7 gün).
+on:
+  workflow_dispatch:
+    inputs:
+      granted_at:
+        description: "welcomeGift.grantedAt değerleri (virgülle)"
+        required: true
+        default: "2026-11-08T13:51:14.260Z,2026-11-08T13:57:32.530Z,2026-11-08T14:10:22.729Z,2026-11-08T14:12:11.661Z,2026-11-08T17:16:13.851Z,2026-11-08T17:22:12.761Z"
+      expected_count:
+        description: "Beklenen test kullanıcısı sayısı"
+        required: true
+        default: "6"
+      analytics_window:
+        description: "ANALYTICS#AI createdAt penceresi 'başlangıç,bitiş' (boş = atla)"
+        required: false
+        default: "2026-11-08T17:22:13Z,2026-11-08T17:23:01Z"
+      dry_run:
+        description: "true = yalnız listele, false = sil"
+        required: true
+        default: "true"
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: live-smoke-cleanup
+  cancel-in-progress: false
+jobs:
+  cleanup:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_REGION: eu-central-1
+      POOL: ${{ secrets.COGNITO_USER_POOL_ID }}
+      GRANTED_AT: ${{ inputs.granted_at }}
+      EXPECTED: ${{ inputs.expected_count }}
+      WINDOW: ${{ inputs.analytics_window }}
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+      - name: Identify, back up and (optionally) delete test residue
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          aws lambda get-function-configuration --function-name mapsbridge-prod-ai \
+            --query 'Environment.Variables' --output json > env.json
+          DATA=$(jq -r '.DYNAMODB_TABLE // empty' env.json)
+          MEM=$(jq -r '.AI_MEMORY_TABLE // empty' env.json)
+          [ -n "$DATA" ] || { echo "::error::DYNAMODB_TABLE not found"; exit 1; }
+          echo "data table: $DATA   memory table: ${MEM:-<unset>}   dry_run: $DRY_RUN"
+          for T in "$DATA" ${MEM:+"$MEM"}; do
+            KS=$(aws dynamodb describe-table --table-name "$T" --query 'Table.KeySchema[].AttributeName' --output json | jq -r 'join(",")')
+            [ "$KS" = "PK,SK" ] || { echo "::error::$T key schema is '$KS', expected PK,SK"; exit 1; }
+          done
+
+          # Gate 1: exact welcomeGift.grantedAt match
+          VALS=$(jq -nc --arg csv "$GRANTED_AT" '
+            ($csv | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))) as $t
+            | reduce range(0; $t|length) as $i ({":c": {S: "CREDITS"}}; . + {(":t\($i)"): {S: $t[$i]}})')
+          IN_LIST=$(jq -r 'keys | map(select(startswith(":t"))) | join(", ")' <<<"$VALS")
+          aws dynamodb scan --table-name "$DATA" \
+            --filter-expression "#sk = :c AND #wg.#ga IN ($IN_LIST)" \
+            --projection-expression "PK, #wg" \
+            --expression-attribute-names '{"#sk":"SK","#wg":"welcomeGift","#ga":"grantedAt"}' \
+            --expression-attribute-values "$VALS" --output json > scan.json
+          jq -r '.Items[] | "\(.PK.S)  grantedAt=\(.welcomeGift.M.grantedAt.S)"' scan.json
+          mapfile -t PKS < <(jq -r '.Items[].PK.S' scan.json | sort -u)
+
+          # Gate 2: exact count
+          if [ "${#PKS[@]}" -ne "$EXPECTED" ]; then
+            echo "::error::found ${#PKS[@]} matching users, expected $EXPECTED — nothing deleted"; exit 1
+          fi
+
+          # Gate 3: every sub must be gone from Cognito
+          for PK in "${PKS[@]}"; do
+            case "$PK" in USER#*) ;; *) echo "::error::unexpected PK $PK"; exit 1;; esac
+            SUB="${PK#USER#}"
+            N=$(aws cognito-idp list-users --user-pool-id "$POOL" --filter "sub = \"$SUB\"" --query 'length(Users)' --output text)
+            [ "$N" = "0" ] || { echo "::error::$SUB still exists in Cognito — nothing deleted"; exit 1; }
+            echo "$SUB: not in Cognito (deleted smoke user) ✓"
+          done
+
+          # Back up every item that would be deleted
+          : > keys.tsv
+          for T in "$DATA" ${MEM:+"$MEM"}; do
+            for PK in "${PKS[@]}"; do
+              F="backup/$(echo "$T-$PK" | tr '#/' '__').json"
+              aws dynamodb query --table-name "$T" --key-condition-expression "PK = :pk" \
+                --expression-attribute-values "$(jq -nc --arg pk "$PK" '{":pk":{S:$pk}}')" --output json > "$F"
+              jq -r --arg t "$T" '.Items[] | [$t, .PK.S, .SK.S] | @tsv' "$F" >> keys.tsv
+            done
+          done
+          if [ -n "$WINDOW" ]; then
+            A="${WINDOW%%,*}"; B="${WINDOW##*,}"; DAY="${A:0:10}"
+            aws dynamodb query --table-name "$DATA" \
+              --key-condition-expression "PK = :pk AND begins_with(SK, :d)" \
+              --filter-expression "createdAt BETWEEN :a AND :b" \
+              --expression-attribute-values "$(jq -nc --arg d "$DAY#" --arg a "$A" --arg b "$B" \
+                '{":pk":{S:"ANALYTICS#AI"},":d":{S:$d},":a":{S:$a},":b":{S:$b}}')" \
+              --output json > backup/analytics.json
+            AN=$(jq '.Items|length' backup/analytics.json)
+            echo "ANALYTICS#AI items in window $A..$B: $AN"
+            jq -c '.Items[] | {SK: .SK.S, createdAt: .createdAt.S, hasRoute: .hasRoute.BOOL, destination: .destination.S}' backup/analytics.json
+            if [ "$AN" = "1" ] && [ "$(jq -r '.Items[0].hasRoute.BOOL' backup/analytics.json)" = "true" ]; then
+              jq -r --arg t "$DATA" '.Items[] | [$t, .PK.S, .SK.S] | @tsv' backup/analytics.json >> keys.tsv
+            else
+              echo "::warning::analytics window does not contain exactly one route event — analytics left untouched"
+            fi
+          fi
+          echo "=== items to delete: $(wc -l < keys.tsv)"
+          awk -F'\t' '{print $1"  "$2"  "$3}' keys.tsv
+
+          if [ "$DRY_RUN" != "false" ]; then echo "dry run — nothing deleted"; exit 0; fi
+          DELETED=0
+          while IFS=$'\t' read -r T PK SK; do
+            aws dynamodb delete-item --table-name "$T" \
+              --key "$(jq -nc --arg pk "$PK" --arg sk "$SK" '{PK:{S:$pk},SK:{S:$sk}}')" \
+              --condition-expression "attribute_exists(PK)"
+            DELETED=$((DELETED+1))
+          done < keys.tsv
+          echo "deleted $DELETED items"
+          # Verify
+          for PK in "${PKS[@]}"; do
+            C=$(aws dynamodb query --table-name "$DATA" --key-condition-expression "PK = :pk" \
+              --expression-attribute-values "$(jq -nc --arg pk "$PK" '{":pk":{S:$pk}}')" --select COUNT --query Count --output text)
+            echo "$PK remaining in $DATA: $C"
+          done
+      - name: Upload backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-residue-backup
+          path: backup/
+          retention-days: 7
+          if-no-files-found: ignore

@@ -1,11 +1,16 @@
 name: Live smoke (release, authenticated)
 # Yayın doğrulaması: canlı API'ye girişli uçtan uca istek (rota üretimi + yer proxy'si).
-# Geçici Cognito test kullanıcısı (e-posta gönderilmez, example.com) oluşturulur ve iş sonunda
-# her durumda silinir. Kod/altyapı değiştirmez; yalnız log okur ve canlı uçları çağırır.
+# DİKKAT — PRODUCTION'A YAZAR:
+#   - prod Cognito havuzunda geçici kullanıcı (release-smoke-<runId>@example.com) oluşturur;
+#     Cognito kullanıcısı iş sonunda silinir.
+#   - GET /ai/chat deneme kredisini başlatır (USER#<sub>/CREDITS = 100) ve POST /ai/chat
+#     gerçek, ücretli AI turları koşar (AI#<requestId> makbuzları, AI_DAY# sayaçları,
+#     AI_CHAT#/AI_LATEST, SYSTEM#AI günlük sayacı, rota turunda ANALYTICS#AI olayı).
+#   - mapsbridge-prod-data kayıtları SİLİNMEZ; her koşudan sonra
+#     .github/workflows/live-smoke-cleanup.yml ile temizlenmelidir.
+# Yalnız elle tetiklenir (push tetikleyicisi kaldırıldı).
 on:
   workflow_dispatch:
-  push:
-    branches: [release-smoke]
 permissions:
   contents: read
   id-token: write
