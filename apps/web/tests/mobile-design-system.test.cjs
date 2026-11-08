@@ -407,8 +407,12 @@ test("FEAT-012: eski karşılama, ikon seti ve uydurma kaynaklar kaldırıldı",
 });
 
 test("FEAT-012 (S6, S1, §7.1): mağaza/indir/yakında, EN POPÜLER, deneme ve kredi kartı vaadi yok", () => {
+  // "yakında" burada pazarlama anlamında ("çok yakında / coming soon") yasak. Kelime sınırı (\b)
+  // "yakındaki"/"yakından" (nearby anlamı) eşleşmelerini dışlar; "Yakında ne var" (FEAT-004 nearby
+  // başlığı, web tr.json ile birebir) negative lookahead ile ayrıca hariç tutulur. Diğer pazarlama
+  // vaatleri (indir, app store, en popüler, ücretsiz deneme, …) yasak kalır.
   const banned =
-    /yakında|uygulamayı indir|app store|google play|en popüler|ücretsiz deneme|kredi kartı gerekmez|botanical atelier/i;
+    /\byakında\b(?! ne var)|uygulamayı indir|app store|google play|en popüler|ücretsiz deneme|kredi kartı gerekmez|botanical atelier/i;
   const offenders = FILES.filter((rel) => banned.test(code(rel)));
   assert.deepEqual(offenders, [], offenders.join(", "));
 });

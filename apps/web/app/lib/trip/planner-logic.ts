@@ -113,6 +113,37 @@ export function dayBufferRatio(
   return Math.min(1, Math.max(0, (window - load) / window));
 }
 
+/**
+ * U6 "gün doldu / boş" önerisi (deterministik, I2; yalnız dayBufferRatio/dayTimeline'dan türetilir,
+ * veri uydurulmaz). Gün boş ya da tüm duraklar gezilmişse "ekstra yer ekle"; aktif pencere tamponu
+ * eşiğin altındaysa (I9'un ≥%20 tamponu korunamıyorsa) günün son durağını başka güne kaydırmayı
+ * önerir. Bacaklar eksik (saat/süre hesaplanamıyor) ise null döner: öneri tahmine dayanmaz.
+ *
+ * Eşik I9 ile aynı (%20): tampon bunun altına inince gün "dolu" sayılır. shiftStop için seçilen
+ * durak günün SON durağıdır (sıra listenin verildiği sıradır) — deterministik ve geri alınabilir.
+ */
+export type DayFullSuggestion =
+  | { kind: "addExtra" }
+  | { kind: "shiftStop"; pinId: string };
+
+/** U6/I9 eşiği: aktif pencere tamponu bunun altındaysa gün "dolu". */
+export const DAY_FULL_BUFFER_THRESHOLD = 0.2;
+
+export function dayFullSuggestion(
+  stops: readonly { id: string; durationMinutes?: number; visited?: boolean }[],
+  legs: Readonly<Record<string, RouteLeg>>,
+  startTime = "09:00",
+): DayFullSuggestion | null {
+  // Boş gün ya da tüm duraklar gezilmiş: ekstra yer ekle (bacak gerekmez).
+  if (stops.length === 0 || stops.every((s) => s.visited)) return { kind: "addExtra" };
+  const buffer = dayBufferRatio(stops, legs, startTime);
+  // Bacak eksik / pencere yok → hesaplanamaz, öneri yok (I1/I2).
+  if (buffer === null) return null;
+  // Tampon eşiğin altındaysa son durağı başka güne kaydır; değilse öneri yok.
+  if (buffer <= DAY_FULL_BUFFER_THRESHOLD) return { kind: "shiftStop", pinId: stops[stops.length - 1].id };
+  return null;
+}
+
 function clock(minutes: number): string {
   const h = Math.floor(minutes / 60) % 24;
   const m = Math.round(minutes % 60);
@@ -143,15 +174,45 @@ export function pinsForMap<T extends { visited?: boolean }>(
   return hideVisited ? pins.filter((p) => !p.visited) : [...pins];
 }
 /**
+ * Bir yerin ekleneceği hedef: gezinin belirli bir günü ya da günsüz "Kaydedilenler" havuzu.
+ */
+export type AddTarget = { kind: "day"; day: number } | { kind: "general" };
+
+/**
  * P7: haritadan (çift tıklama / Google) eklenen yerin hedefi. Gün seçili değilken ("Tümü")
  * eskiden 1. güne düşüyordu; artık Kaydedilenler'e (günsüz havuz) gider.
  */
-export function addTargetFor(
-  activeDayIndex: number | null | undefined,
-): { kind: "day"; day: number } | { kind: "general" } {
+export function addTargetFor(activeDayIndex: number | null | undefined): AddTarget {
   return activeDayIndex && activeDayIndex > 0
     ? { kind: "day", day: activeDayIndex }
     : { kind: "general" };
+}
+
+/** U3 ekleme anı gün seçimi Select değeri için sabit: Kaydedilenler = günsüz havuz. */
+export const ADD_TARGET_GENERAL = "general";
+
+/**
+ * U3: ekleme kartındaki gün <Select>'inin seçili değeri → ekleme hedefi. "general" ve geçersiz
+ * (bilinmeyen / gün listesinde olmayan) değerler Kaydedilenler'e düşer; sayı bir güne eşlenir.
+ */
+export function parseAddTarget(value: string, days: readonly number[]): AddTarget {
+  if (value === ADD_TARGET_GENERAL) return { kind: "general" };
+  const day = Number(value);
+  return Number.isInteger(day) && days.includes(day) ? { kind: "day", day } : { kind: "general" };
+}
+
+/**
+ * U3: ekleme kartı Select'inin başlangıç değeri. Aktif gün (>0) varsa o gün, yoksa Kaydedilenler.
+ * Dönen değer `days` içinde yoksa (ör. gün silinmiş) Kaydedilenler'e düşer.
+ */
+export function defaultAddTargetValue(
+  activeDayIndex: number | null | undefined,
+  days: readonly number[],
+): string {
+  const target = addTargetFor(activeDayIndex);
+  return target.kind === "day" && days.includes(target.day)
+    ? String(target.day)
+    : ADD_TARGET_GENERAL;
 }
 /**
  * Pini içeren geziye `update` uygular; içermeyen gezi AYNI referansla döner. Böylece geri alma

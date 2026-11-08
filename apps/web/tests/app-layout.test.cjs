@@ -33,8 +33,8 @@ function ruleBody(block, selector) {
 const panelVar = (src, selector) =>
   (ruleBody(src, selector).match(/(?:^|;|\n)\s*--app-panel:\s*([^;]+);/) ?? [])[1]?.trim();
 
-test("üç app paneli --app-panel ile: maps 20vw, asistan 34vw, mesajlar 26vw", () => {
-  assert.equal(panelVar(css, ".planner"), "clamp(16rem, 20vw, 24rem)");
+test("üç app paneli --app-panel ile: maps 24vw (U7), asistan 34vw, mesajlar 26vw", () => {
+  assert.equal(panelVar(css, ".planner"), "clamp(18rem, 24vw, 28rem)");
   assert.equal(
     panelVar(read("travel-assistant/assistant.css"), ".as-guest"),
     "clamp(22rem, 34vw, 32rem)",

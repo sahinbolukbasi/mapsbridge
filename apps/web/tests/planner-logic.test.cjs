@@ -310,6 +310,22 @@ test("P2: isRealRoad:false yedek geometrinin bacakları süreye girmez", () => {
   );
 });
 
+test("U3: parseAddTarget — Select değeri ekleme hedefine çevrilir, geçersiz Kaydedilenler'e düşer", () => {
+  assert.deepEqual(plain(L.parseAddTarget("general", [1, 2])), { kind: "general" });
+  assert.deepEqual(plain(L.parseAddTarget("2", [1, 2, 3])), { kind: "day", day: 2 });
+  // gün listesinde olmayan sayı ve bilinmeyen değer Kaydedilenler'e düşer (I10: olmayan gün yazılmaz).
+  assert.deepEqual(plain(L.parseAddTarget("5", [1, 2])), { kind: "general" });
+  assert.deepEqual(plain(L.parseAddTarget("abc", [1, 2])), { kind: "general" });
+});
+
+test("U3: defaultAddTargetValue — aktif gün varsa o gün, yoksa/geçersizse Kaydedilenler", () => {
+  assert.equal(L.defaultAddTargetValue(2, [1, 2, 3]), "2");
+  assert.equal(L.defaultAddTargetValue(0, [1, 2]), L.ADD_TARGET_GENERAL);
+  assert.equal(L.defaultAddTargetValue(null, [1, 2]), L.ADD_TARGET_GENERAL);
+  // aktif gün listede yoksa (ör. gün silinmiş) Kaydedilenler.
+  assert.equal(L.defaultAddTargetValue(4, [1, 2]), L.ADD_TARGET_GENERAL);
+});
+
 test("P7: gün seçili değilken (Tümü / 0) eklenen yer Kaydedilenler'e gider", () => {
   assert.deepEqual(plain(L.addTargetFor(0)), { kind: "general" });
   assert.deepEqual(plain(L.addTargetFor(null)), { kind: "general" });
@@ -502,6 +518,52 @@ test("dayBufferRatio (I9, Increment 3.3): yalnız gerçek bacaklarla; eksik baca
   assert.equal(L.dayBufferRatio(heavy, {}, "09:00"), 0);
   assert.ok(L.dayBufferRatio([{ id: "y", durationMinutes: 600 }], {}, "09:00") < 0.2);
   assert.equal(L.dayBufferRatio([{ id: "z" }], {}, "22:00"), null, "pencere yoksa null");
+});
+
+test("dayFullSuggestion (U6, I2/I9): boş/gezilmiş → addExtra, dolu → shiftStop, bacak eksik → null", () => {
+  // Gün dolu: yük tampon eşiğini (%20) altına indirir → son durağı kaydır.
+  const full = [
+    { id: "a", durationMinutes: 300 },
+    { id: "b", durationMinutes: 300 },
+  ];
+  const fullLegs = { [L.legKey("a", "b")]: { distanceMeters: 1200, durationSeconds: 1800 } };
+  // 720 dk pencere; yük 300+300+30 = 630 → tampon 90/720 ≈ 0.125 < 0.2.
+  assert.ok(L.dayBufferRatio(full, fullLegs, "09:00") <= L.DAY_FULL_BUFFER_THRESHOLD);
+  assert.deepEqual(plain(L.dayFullSuggestion(full, fullLegs, "09:00")), {
+    kind: "shiftStop",
+    pinId: "b",
+  });
+
+  // Tampon bol gün → öneri yok (null).
+  const light = [
+    { id: "a", durationMinutes: 60 },
+    { id: "b", durationMinutes: 60 },
+  ];
+  const lightLegs = { [L.legKey("a", "b")]: { distanceMeters: 600, durationSeconds: 600 } };
+  assert.ok(L.dayBufferRatio(light, lightLegs, "09:00") > L.DAY_FULL_BUFFER_THRESHOLD);
+  assert.equal(L.dayFullSuggestion(light, lightLegs, "09:00"), null);
+
+  // Boş gün → ekstra yer ekle (bacak gerekmez).
+  assert.deepEqual(plain(L.dayFullSuggestion([], {}, "09:00")), { kind: "addExtra" });
+
+  // Tüm duraklar gezilmiş → ekstra yer ekle.
+  assert.deepEqual(
+    plain(
+      L.dayFullSuggestion(
+        [
+          { id: "a", visited: true },
+          { id: "b", visited: true },
+        ],
+        {},
+        "09:00",
+      ),
+    ),
+    { kind: "addExtra" },
+  );
+
+  // Bacak eksik (gezilmemiş durak var ama rota yok) → null (tahmin yok).
+  assert.equal(L.dayFullSuggestion([{ id: "a" }, { id: "b" }], {}, "09:00"), null);
+  assert.equal(L.DAY_FULL_BUFFER_THRESHOLD, 0.2);
 });
 
 test("reorderDayPins (P8): yalnız o günün sırası; geçersiz kimlik kümesinde dokunulmaz", () => {

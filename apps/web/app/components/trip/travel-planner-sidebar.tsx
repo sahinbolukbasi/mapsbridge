@@ -39,7 +39,18 @@ import { apiFetch } from "../../lib/api-client";
 import type { MultiAgentResponse } from "../../lib/ai/types";
 import { interactionTracker } from "../../lib/analytics/tracker";
 import { exportTripToGoogleMaps } from "../../features/trip-planner/google-maps-exporter";
-import { dayBufferRatio, dayTimeline, legKey } from "../../lib/trip/planner-logic";
+import {
+  ADD_TARGET_GENERAL,
+  addTargetFor,
+  dayBufferRatio,
+  dayFullSuggestion,
+  dayTimeline,
+  defaultAddTargetValue,
+  legKey,
+  parseAddTarget,
+  type AddTarget,
+  type DayFullSuggestion,
+} from "../../lib/trip/planner-logic";
 import { isTextFieldTarget, plannerShortcut, SHORTCUT_HELP } from "../../lib/trip/shortcuts";
 import { MotionProvider, Reorder, useDragControls } from "../../lib/motion";
 import { prefersReducedMotion } from "../../lib/a11y/use-reduced-motion";
@@ -67,6 +78,7 @@ import {
 import { GooglePlaceInfo } from "./google-place-info";
 import { PlaceFacts } from "./place-facts";
 import { DiscoverPanel } from "./discover-panel";
+import { NearbyList, type NearbyAddPlace } from "./nearby-list";
 import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
 import { StopRow } from "./stop-row";
 import { Connector, type ConnectorMode } from "./connector";
@@ -154,6 +166,7 @@ export function TravelPlannerSidebar({
     addPinToGeneral,
     addPinDirectlyToTrip,
     assignPinToTrip,
+    movePinToDay,
     updatePinAnywhere,
     deletePinAnywhere,
     togglePinVisitedAnywhere,
@@ -193,14 +206,15 @@ export function TravelPlannerSidebar({
     return () => window.removeEventListener("mapsbridge:show-pin-detail", open);
   }, []);
 
-  const addPlace = (place: Place, target: "trip" | "general") => {
+  // U3: ekleme hedefi artık kullanıcının seçtiği gün ya da Kaydedilenler (günsüz havuz).
+  const addPlace = (place: Place, target: AddTarget) => {
     const pin = {
       label: place.label || place.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
       address: place.address,
       lat: place.lat,
       lng: place.lng,
       category: place.category ?? ("genel" as PinCategory),
-      dayIndex: target === "trip" ? targetDay : 0,
+      dayIndex: target.kind === "day" ? target.day : 0,
       group: "Genel",
       visited: false,
       durationMinutes: 60,
@@ -210,13 +224,13 @@ export function TravelPlannerSidebar({
         ? { placeId: place.placeId, placeProvider: "amazon" as const }
         : {}),
     };
-    if (target === "trip") {
-      addPinDirectlyToTrip(activeTripId, pin, targetDay);
+    if (target.kind === "day") {
+      addPinDirectlyToTrip(activeTripId, pin, target.day);
       toast.show({
         tone: "success",
         message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
           .replace("{name}", pin.label)
-          .replace("{day}", String(targetDay)),
+          .replace("{day}", String(target.day)),
       });
     } else {
       addPinToGeneral(pin);
@@ -330,6 +344,8 @@ export function TravelPlannerSidebar({
         timeline: dayTimeline(pins, activeRouteLegs, d.startTime),
         // I9: yalnız tüm bacaklar gerçekse oran; eksikse null ("hesaplanamadı").
         buffer: pins.length > 0 ? dayBufferRatio(pins, activeRouteLegs, d.startTime) : undefined,
+        // U6: deterministik "gün doldu / boş" önerisi (I2); bacak eksikse null (öneri çizilmez).
+        fullSuggestion: dayFullSuggestion(pins, activeRouteLegs, d.startTime),
       };
     });
   }, [activeTrip, activeDayIndex, pinsWithTime, activeRouteLegs]);
@@ -356,6 +372,10 @@ export function TravelPlannerSidebar({
             planner={planner}
             pin={selectedPin}
             mode={mode}
+            days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
+            activeDayIndex={activeDayIndex}
+            onAddNearby={addPlace}
+            onFlyToCoords={onFlyToCoords}
             onBack={() => setShowDetail(false)}
             onRequireAuth={onRequireAuth}
           />
@@ -434,12 +454,16 @@ export function TravelPlannerSidebar({
             allPins={[...allPins, ...generalPins]}
             activeDay={activeDayIndex && activeDayIndex > 0 ? activeDayIndex : undefined}
             mapCenter={mapCenter}
-            onAdd={addPlace}
+            onAdd={(place, target) =>
+              addPlace(place, target === "trip" ? addTargetFor(activeDayIndex) : { kind: "general" })
+            }
             onFocus={(lat, lng, label) => onFlyToCoords?.(lat, lng, label)}
           />
         ) : workspaceMode === "edit" ? (
           <PlaceSearch
             near={searchBias}
+            days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
+            activeDayIndex={activeDayIndex}
             onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}
             onAdd={addPlace}
           />
@@ -513,7 +537,8 @@ export function TravelPlannerSidebar({
               ...selectedMapPoint,
               label: selectedMapPoint.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
             }}
-            day={targetDay}
+            days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
+            activeDayIndex={activeDayIndex}
             onAdd={(target) => {
               addPlace(
                 {
@@ -526,10 +551,13 @@ export function TravelPlannerSidebar({
               onClearSelectedMapPoint?.();
             }}
             onClose={() => onClearSelectedMapPoint?.()}
+            onFlyToCoords={onFlyToCoords}
+            showNearby
+            onAddNearby={(place, target) => addPlace(place, target)}
           />
         )}
 
-        {sections.map(({ day, pins, timeline, buffer }) => (
+        {sections.map(({ day, pins, timeline, buffer, fullSuggestion }) => (
           <section
             key={day.dayIndex}
             className="planner-day"
@@ -551,6 +579,33 @@ export function TravelPlannerSidebar({
                 offline={planner.deviceSaved}
               />
             </div>
+            {/* U6: gün dolu/boş ise deterministik öneri — ekstra yer ekle (Keşfet'i o güne açar)
+                ya da son durağı başka güne kaydır (movePinToDay). Yalnız düzenleme kipinde. */}
+            {workspaceMode === "edit" && fullSuggestion && pins.length > 0 && (
+              <DayFullBanner
+                suggestion={fullSuggestion}
+                otherDays={(activeTrip?.days ?? [])
+                  .map((d) => d.dayIndex)
+                  .filter((d) => d !== day.dayIndex)}
+                pins={pins}
+                onAddExtra={() => {
+                  setActiveDayIndex(day.dayIndex);
+                  setWorkspaceMode("discover");
+                }}
+                onShift={(pinId, targetDay) => {
+                  movePinToDay(pinId, targetDay);
+                  const moved = pins.find((p) => p.id === pinId);
+                  toast.show({
+                    tone: "success",
+                    message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
+                      .replace("{name}", moved?.label ?? t("planner.stop.new", "Yeni durak"))
+                      .replace("{day}", String(targetDay)),
+                    action: { label: t("planner.undo", "Geri al"), onClick: planner.undo },
+                    actionAlsoAt: "planner-toolbar undo IconButton",
+                  });
+                }}
+              />
+            )}
             {pins.length === 0 ? (
               <EmptyState
                 icon="map"
@@ -681,15 +736,19 @@ export function TravelPlannerSidebar({
           </section>
         ))}
 
-        {/* P7: Kaydedilenler (günsüz yerler) her zaman görünür; her satırda gün seçimi. */}
-        <section className="planner-pool" aria-labelledby="planner-pool-title">
-          <h3 id="planner-pool-title" className="planner-pool__title">
-            <Icon name="bookmark" size={16} />
-            {t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
-              "{n}",
-              String(generalPins.length),
-            )}
-          </h3>
+        {/* U4: Kaydedilenler (günsüz yerler) varsayılan kapalı disclosure; başlıkta sayı. Açılınca
+            liste görünür; her satırda gün seçimi + "Güne ekle" (sürükle-bırakın klavye alternatifi). */}
+        <details className="planner-pool" aria-labelledby="planner-pool-title">
+          <summary className="planner-pool__summary">
+            <span id="planner-pool-title" className="planner-pool__title">
+              <Icon name="bookmark" size={16} />
+              {t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
+                "{n}",
+                String(generalPins.length),
+              )}
+            </span>
+            <Icon name="chevron" className="planner-pool__chevron" />
+          </summary>
           {generalPins.length === 0 ? (
             <p className="planner-pool__empty">
               {t(
@@ -718,7 +777,7 @@ export function TravelPlannerSidebar({
               ))}
             </ul>
           )}
-        </section>
+        </details>
 
         {footer}
         <Accordion
@@ -881,6 +940,98 @@ function PoolRow({
 }
 
 /**
+ * U6: gün dolu/boş önerisi. addExtra → "buraya ekstra bir yer ekle" (Keşfet'i bu güne açar);
+ * shiftStop → bir durağı başka güne kaydır (movePinToDay). Öneri deterministik planner-logic'ten
+ * gelir (I2); burada yalnız sunulur. R9: hareket yok; başka gün yoksa kaydırma kontrolü çizilmez.
+ */
+function DayFullBanner({
+  suggestion,
+  otherDays,
+  pins,
+  onAddExtra,
+  onShift,
+}: {
+  suggestion: DayFullSuggestion;
+  otherDays: number[];
+  pins: Pin[];
+  onAddExtra: () => void;
+  onShift: (pinId: string, targetDay: number) => void;
+}) {
+  const { t } = useLocale();
+  const shiftPin =
+    suggestion.kind === "shiftStop" ? pins.find((p) => p.id === suggestion.pinId) : undefined;
+  const [targetDay, setTargetDay] = useState<number>(otherDays[0] ?? 0);
+
+  if (suggestion.kind === "addExtra") {
+    return (
+      <Alert
+        tone="info"
+        className="planner-day__suggest"
+        title={t("planner.dayFull.addTitle", "Bu gün boş görünüyor")}
+        action={
+          <Button size="sm" variant="secondary" onClick={onAddExtra}>
+            {t("planner.dayFull.addExtra", "Bu güne yakından yer ekle")}
+          </Button>
+        }
+      >
+        {t("planner.dayFull.addBody", "Keşfet'ten bu güne yakındaki yerleri ekleyebilirsin.")}
+      </Alert>
+    );
+  }
+
+  // shiftStop: başka gün yoksa kaydıracak yer yok → yalnız bilgi + ekstra ekleme yönlendirmesi.
+  if (otherDays.length === 0 || !shiftPin) {
+    return (
+      <Alert
+        tone="warning"
+        className="planner-day__suggest"
+        title={t("planner.dayFull.fullTitle", "Bu gün oldukça dolu")}
+      >
+        {t(
+          "planner.dayFull.fullBodyNoDay",
+          "Rahat bir tempo için yeni bir gün ekleyip durak kaydırabilirsin.",
+        )}
+      </Alert>
+    );
+  }
+
+  return (
+    <Alert
+      tone="warning"
+      className="planner-day__suggest"
+      title={t("planner.dayFull.fullTitle", "Bu gün oldukça dolu")}
+      action={
+        <span className="planner-day__suggest-actions">
+          <Select
+            size="sm"
+            aria-label={t("planner.dayFull.shiftDayFor", "{name} için hedef gün").replace(
+              "{name}",
+              shiftPin.label,
+            )}
+            value={targetDay}
+            onChange={(e) => setTargetDay(Number(e.target.value))}
+          >
+            {otherDays.map((d) => (
+              <option key={d} value={d}>
+                {t("planner.days.day", "{n}. Gün").replace("{n}", String(d))}
+              </option>
+            ))}
+          </Select>
+          <Button size="sm" variant="secondary" onClick={() => onShift(shiftPin.id, targetDay)}>
+            {t("planner.dayFull.shiftStop", "Durağı kaydır")}
+          </Button>
+        </span>
+      }
+    >
+      {t(
+        "planner.dayFull.fullBody",
+        "“{name}” durağını başka güne kaydırarak tamponu artırabilirsin.",
+      ).replace("{name}", shiftPin.label)}
+    </Alert>
+  );
+}
+
+/**
  * Mekan/adres arama (bug 4): yazarken 400 ms sonra (≥3 karakter) öneri; otomatik yeniden deneme
  * yok. Durum makinesi `place-search-logic`: hata "Sonuç bulunamadı" değil `role="alert"` uyarısı
  * + "Tekrar dene"; yüklenirken iskelet satırları; koordinat yapıştırılınca "Bu koordinata pin
@@ -888,12 +1039,16 @@ function PoolRow({
  */
 function PlaceSearch({
   near,
+  days,
+  activeDayIndex,
   onPick,
   onAdd,
 }: {
   near?: { lat: number; lng: number };
+  days: number[];
+  activeDayIndex: number | null | undefined;
   onPick: (place: Place) => void;
-  onAdd: (place: Place, target: "trip" | "general") => void;
+  onAdd: (place: Place, target: AddTarget) => void;
 }) {
   const { t } = useLocale();
   const [query, setQuery] = useState("");
@@ -1090,6 +1245,8 @@ function PlaceSearch({
         <PlaceCard
           eyebrow={t("planner.search.found", "Arama sonucu")}
           place={picked}
+          days={days}
+          activeDayIndex={activeDayIndex}
           onAdd={(target) => {
             onAdd(picked, target);
             setPicked(null);
@@ -1101,20 +1258,36 @@ function PlaceSearch({
     </div>
   );
 }
+/**
+ * U3: ekleme kartı. Tek + eylemi, yanındaki gün <Select> ile seçilen hedefe (gezinin bir günü ya
+ * da Kaydedilenler) ekler. Varsayılan aktif gün (>0), yoksa Kaydedilenler (defaultAddTargetValue).
+ */
 function PlaceCard({
   eyebrow,
   place,
-  day,
+  days,
+  activeDayIndex,
   onAdd,
   onClose,
+  onFlyToCoords,
+  showNearby,
+  onAddNearby,
 }: {
   eyebrow: string;
   place: Place;
-  day?: number;
-  onAdd: (target: "trip" | "general") => void;
+  days: number[];
+  activeDayIndex: number | null | undefined;
+  onAdd: (target: AddTarget) => void;
   onClose: () => void;
+  /** Yakın yerden "haritada göster"; map-point kartında bağlanır. */
+  onFlyToCoords?: (lat: number, lng: number, label: string) => void;
+  /** U1: haritadan seçilen noktada "yakında ne var" listesini de göster. */
+  showNearby?: boolean;
+  /** Yakın yer ekleme: kartı kapatmaz, doğrudan rotaya/kayıtlıya ekler. */
+  onAddNearby?: (place: NearbyAddPlace, target: AddTarget) => void;
 }) {
   const { t } = useLocale();
+  const [target, setTarget] = useState(() => defaultAddTargetValue(activeDayIndex, days));
   return (
     <div className="planner-place" data-surface="default">
       <div className="planner-place__head">
@@ -1124,25 +1297,39 @@ function PlaceCard({
       <p className="planner-place__name">{place.label}</p>
       <p className="planner-place__address">{place.address}</p>
       <div className="planner-place__actions">
+        <Select
+          aria-label={t("planner.place.targetLabel", "Nereye eklensin")}
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+        >
+          {days.map((d) => (
+            <option key={d} value={d}>
+              {t("planner.days.day", "{n}. Gün").replace("{n}", String(d))}
+            </option>
+          ))}
+          <option value={ADD_TARGET_GENERAL}>
+            {t("planner.detail.inPool", "Kayıtlı yerler")}
+          </option>
+        </Select>
         <Button
           size="sm"
           variant="primary"
           iconStart={<Icon name="plus" size={16} />}
-          onClick={() => onAdd("trip")}
+          onClick={() => onAdd(parseAddTarget(target, days))}
         >
-          {day
-            ? t("planner.place.addToDayN", "{n}. güne ekle").replace("{n}", String(day))
-            : t("planner.place.addToDay", "Güne ekle")}
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          iconStart={<Icon name="bookmark" size={16} />}
-          onClick={() => onAdd("general")}
-        >
-          {t("planner.place.addToPool", "Kayıtlı yerlere ekle")}
+          {t("planner.place.add", "Ekle")}
         </Button>
       </div>
+      {showNearby && onAddNearby && (
+        <NearbyList
+          lat={place.lat}
+          lng={place.lng}
+          days={days}
+          activeDayIndex={activeDayIndex}
+          onFocus={onFlyToCoords}
+          onAdd={onAddNearby}
+        />
+      )}
     </div>
   );
 }
@@ -1152,12 +1339,20 @@ function PinDetail({
   planner,
   pin,
   mode,
+  days,
+  activeDayIndex,
+  onAddNearby,
+  onFlyToCoords,
   onBack,
   onRequireAuth,
 }: {
   planner: Planner;
   pin: Pin;
   mode: PlannerMode;
+  days: number[];
+  activeDayIndex: number | null | undefined;
+  onAddNearby: (place: NearbyAddPlace, target: AddTarget) => void;
+  onFlyToCoords?: (lat: number, lng: number, label: string) => void;
   onBack: () => void;
   onRequireAuth: (reason: "ai" | "save") => void;
 }) {
@@ -1471,6 +1666,15 @@ function PinDetail({
           </section>
 
           <PlaceFacts pin={pin} />
+
+          <NearbyList
+            lat={pin.lat}
+            lng={pin.lng}
+            days={days}
+            activeDayIndex={activeDayIndex}
+            onFocus={onFlyToCoords}
+            onAdd={onAddNearby}
+          />
 
           <section className="planner-detail__section" aria-labelledby="planner-detail-ask">
             <h4 id="planner-detail-ask" className="planner-detail__title">

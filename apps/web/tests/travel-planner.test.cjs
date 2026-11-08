@@ -297,3 +297,132 @@ test("yeni rota modalı: createTrip gün sayısı + tarih alır; günler newTrip
   const L = loadTs33(path.join(WEB_ROOT, "app/lib/trip/planner-logic.ts"));
   assert.equal(L.newTripDayIndexes(4).length, 4);
 });
+
+// ── FEAT-003 U6: gün ataması reducer anlamı (assignPinToTrip / movePinToDay / movePinToGeneral)
+//    ve her birinin geri alınması. useTravelPlanner React hook'u olduğundan burada reducer
+//    dönüşümleri hook'un gerçek anlamıyla birebir modellenir; geri alma gerçek planner-logic
+//    undoSnapshots/restoreSnapshot ilkelerini kullanır. Hook'un bu ilkeleri kullandığı ayrıca
+//    doğrulanır (planner-logic.test.cjs B1 mapTripPins/undoSnapshots'u kapsar).
+const L3 = loadTs33(path.join(WEB_ROOT, "app/lib/trip/planner-logic.ts"));
+// useTravelPlanner.movePinToDay ile birebir: pini aktif gezide hedef güne taşır, sıra = o gündeki
+// durak sayısı + 1 (sona eklenir); diğer günlerin sırası korunur.
+function movePinToDay(trip, pinId, targetDayIndex) {
+  const targetCount = trip.pins.filter((p) => p.dayIndex === targetDayIndex).length;
+  return {
+    ...trip,
+    pins: trip.pins.map((p) =>
+      p.id === pinId ? { ...p, dayIndex: targetDayIndex, order: targetCount + 1 } : p,
+    ),
+  };
+}
+// assignPinToTrip (Kayıtlı → gün): pin generalPins'ten çıkar, geziye hedef güne sona eklenir.
+function assignFromGeneral(generalPins, trip, pinId, targetDayIndex) {
+  const moving = generalPins.find((p) => p.id === pinId);
+  const targetCount = trip.pins.filter((p) => p.dayIndex === targetDayIndex).length;
+  return {
+    generalPins: generalPins.filter((p) => p.id !== pinId),
+    trip: {
+      ...trip,
+      pins: [
+        ...trip.pins,
+        { ...moving, tripId: trip.id, dayIndex: targetDayIndex, order: targetCount + 1 },
+      ],
+    },
+  };
+}
+// movePinToGeneral: pin geziden çıkar, günsüz havuza (dayIndex 0) başa eklenir.
+function moveToGeneral(generalPins, trip, pinId) {
+  const moving = trip.pins.find((p) => p.id === pinId);
+  return {
+    generalPins: [{ ...moving, tripId: undefined, dayIndex: 0, group: "Genel" }, ...generalPins],
+    trip: { ...trip, pins: trip.pins.filter((p) => p.id !== pinId) },
+  };
+}
+
+test("assignPinToTrip: Kayıtlı yer seçilen güne eklenir, o günün sırası korunur; undo geri getirir", () => {
+  const generalPins = [{ id: "g1", label: "Galata", dayIndex: 0, group: "Genel", order: 1 }];
+  const before = {
+    id: "trip-a",
+    pins: [
+      { id: "p1", dayIndex: 2, order: 1 },
+      { id: "p2", dayIndex: 2, order: 2 },
+    ],
+    days: [{ dayIndex: 1 }, { dayIndex: 2 }],
+  };
+  const { generalPins: genAfter, trip: after } = assignFromGeneral(generalPins, before, "g1", 2);
+  assert.equal(genAfter.length, 0, "Kayıtlı yerden çıkar");
+  const day2 = after.pins.filter((p) => p.dayIndex === 2).sort((a, b) => a.order - b.order);
+  assert.deepEqual(
+    day2.map((p) => `${p.id}@${p.order}`),
+    ["p1@1", "p2@2", "g1@3"],
+    "sona eklenir, mevcut sıra korunur",
+  );
+  // undo: tek geziyi etkiler → tek anlık görüntü; geri yazınca eski pins döner.
+  const stack = L3.undoSnapshots([before], [after]);
+  assert.equal(stack.length, 1);
+  assert.equal(stack[0].tripId, "trip-a");
+  const restored = L3.restoreSnapshot([after], stack[0]);
+  assert.deepEqual(
+    restored[0].pins.map((p) => p.id),
+    ["p1", "p2"],
+    "undo pini geziden çıkarır",
+  );
+});
+
+test("movePinToDay: günler arası taşıma hedef günün sonuna ekler, diğer günü bozmaz; undo geri alır", () => {
+  const before = {
+    id: "trip-a",
+    pins: [
+      { id: "p1", dayIndex: 1, order: 1 },
+      { id: "p2", dayIndex: 2, order: 1 },
+      { id: "p3", dayIndex: 2, order: 2 },
+    ],
+    days: [{ dayIndex: 1 }, { dayIndex: 2 }],
+  };
+  const after = movePinToDay(before, "p3", 1);
+  const moved = after.pins.find((p) => p.id === "p3");
+  assert.equal(moved.dayIndex, 1);
+  assert.equal(moved.order, 2, "1. günün sonuna eklenir (p1'den sonra)");
+  assert.equal(after.pins.find((p) => p.id === "p2").order, 1, "2. gün sırası bozulmaz");
+  const stack = L3.undoSnapshots([before], [after]);
+  const restored = L3.restoreSnapshot([after], stack[0]);
+  assert.equal(restored[0].pins.find((p) => p.id === "p3").dayIndex, 2, "undo geri taşır");
+});
+
+test("movePinToGeneral: durak geziden çıkar, Kayıtlı yerlere (dayIndex 0) döner; undo geri alır", () => {
+  const generalPins = [];
+  const before = {
+    id: "trip-a",
+    pins: [
+      { id: "p1", dayIndex: 1, order: 1 },
+      { id: "p2", dayIndex: 1, order: 2 },
+    ],
+    days: [{ dayIndex: 1 }],
+  };
+  const { generalPins: genAfter, trip: after } = moveToGeneral(generalPins, before, "p2");
+  assert.deepEqual(
+    after.pins.map((p) => p.id),
+    ["p1"],
+    "pin geziden çıkar",
+  );
+  assert.equal(genAfter.length, 1);
+  assert.equal(genAfter[0].dayIndex, 0, "günsüz havuza döner");
+  assert.equal(genAfter[0].tripId, undefined);
+  const stack = L3.undoSnapshots([before], [after]);
+  const restored = L3.restoreSnapshot([after], stack[0]);
+  assert.deepEqual(
+    restored[0].pins.map((p) => p.id),
+    ["p1", "p2"],
+    "undo durağı geziye geri koyar",
+  );
+});
+
+test("use-travel-planner: gün ataması mutatörleri ve undo yığını bağlı", () => {
+  const fs = require("node:fs");
+  const hook = fs.readFileSync(path.join(WEB_ROOT, "app/lib/trip/use-travel-planner.ts"), "utf8");
+  for (const name of ["assignPinToTrip", "movePinToDay", "movePinToGeneral"])
+    assert.match(hook, new RegExp(`const ${name} = useCallback`), name);
+  // undo, planner-logic undoSnapshots/restoreSnapshot üzerinden çalışır.
+  assert.match(hook, /undoSnapshots\(prev, trips\)/);
+  assert.match(hook, /restoreSnapshot\(prev, entry\)/);
+});

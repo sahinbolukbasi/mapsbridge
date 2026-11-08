@@ -16,6 +16,7 @@ import { trainingService } from "../services/api";
 import { storage } from "../services/storage";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import {
+  Accordion,
   AuthGate,
   BottomSheet,
   Button,
@@ -30,6 +31,7 @@ import {
   SafeArea,
   SegmentedControl,
   Skeleton,
+  Stepper,
   StopRow,
   TextField,
   Txt,
@@ -64,6 +66,7 @@ import { pinPopupModel } from "../trip/pin-popup";
 import { stopToPin } from "../trip/models";
 import { centroid } from "../trip/discovery-rank";
 import { DiscoverPanel, type DiscoverAdd } from "../components/DiscoverPanel";
+import { NearbyList, type NearbyAddPlace } from "../components/NearbyList";
 import { usePermission } from "../components/PermissionPrompt";
 import { readTile, storeTile } from "../services/tile-cache";
 import { currentPosition } from "../services/nearby";
@@ -75,6 +78,7 @@ import * as Sharing from "expo-sharing";
 import { optimizeStopOrder } from "../trip/optimize";
 import { categoryIcon } from "../trip/category";
 import { spansSeveralDays, stopDay } from "../trip/days";
+import { dayFullSuggestion } from "../trip/day-full";
 import { tr } from "../i18n/ui";
 import { fontFamily, tokens } from "../theme";
 
@@ -154,6 +158,76 @@ function parseMinutes(text: string | undefined): number | undefined {
   return (h ? Number(h[1]) * 60 : 0) + (m ? Number(m[1]) : 0);
 }
 
+/** U6 öneri bandı (web DayFullBanner karşılığı): boş/bitmiş günde "ekstra yer", dolu günde son
+ * durağı başka güne kaydır. Kaydırma hedefi başka gün varsa gün düğmeleriyle seçilir; yoksa
+ * yalnızca yönlendirme gösterilir. Motion yok (R9). */
+function DayFullBanner({
+  suggestion,
+  stops,
+  otherDays,
+  onAddExtra,
+  onShift,
+}: {
+  suggestion: ReturnType<typeof dayFullSuggestion>;
+  stops: readonly TripStop[];
+  otherDays: number[];
+  onAddExtra: () => void;
+  onShift: (stopId: string, targetDay: number) => void;
+}) {
+  const [target, setTarget] = useState<number | null>(otherDays[0] ?? null);
+  if (!suggestion) return null;
+  if (suggestion.kind === "addExtra") {
+    return (
+      <Notice
+        tone="info"
+        title={tr("planner.dayFull.addTitle")}
+        action={{ label: tr("planner.dayFull.addExtra"), onPress: onAddExtra }}
+      >
+        {tr("planner.dayFull.addBody")}
+      </Notice>
+    );
+  }
+  const stop = stops.find((s) => s.id === suggestion.stopId);
+  const name = stop?.name ?? "";
+  if (otherDays.length === 0) {
+    return (
+      <Notice tone="warning" title={tr("planner.dayFull.fullTitle")}>
+        {tr("planner.dayFull.fullBodyNoDay")}
+      </Notice>
+    );
+  }
+  const current = target ?? otherDays[0];
+  // Hedef yalnız başka günlerden biri olabilir (kaydırılan günün kendisi hariç); Stepper komşu
+  // güne geçerken o günü atlar.
+  const nearestOther = (value: number, delta: number): number => {
+    let next = value + delta;
+    while (next >= otherDays[0] && next <= otherDays[otherDays.length - 1]) {
+      if (otherDays.includes(next)) return next;
+      next += delta;
+    }
+    return value;
+  };
+  return (
+    <View style={styles.suggest}>
+      <Notice tone="warning" title={tr("planner.dayFull.fullTitle")}>
+        {tr("planner.dayFull.fullBody", { name })}
+      </Notice>
+      <Stepper
+        label={tr("planner.dayFull.shiftDayFor", { name })}
+        value={current}
+        min={otherDays[0]}
+        max={otherDays[otherDays.length - 1]}
+        onChange={(v) => setTarget(nearestOther(current, v > current ? 1 : -1))}
+      />
+      <Button
+        size="sm"
+        label={tr("planner.dayFull.shiftStop")}
+        onPress={() => onShift(suggestion.stopId, current)}
+      />
+    </View>
+  );
+}
+
 export function MapScreen({
   focusedStopId,
   onClearFocus,
@@ -170,6 +244,8 @@ export function MapScreen({
   const [recent, setRecent] = useState<RecentSearch[]>([]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [candidate, setCandidate] = useState<PlaceCandidate | null>(null);
+  // U3: ekleme anı gün seçimi (çok günlü rotada); null → varsayılan addDay.
+  const [candidateDay, setCandidateDay] = useState<number | null>(null);
   const [looking, setLooking] = useState(false);
   const [mode, setMode] = useState<"edit" | "discover">("edit");
   const [pool, setPool] = useState<TripStop[]>(tripStore.getSavedPool());
@@ -322,6 +398,7 @@ export function MapScreen({
       lookupPoint(data.lat, data.lng)
         .then((place) => {
           setCandidate(place);
+          setCandidateDay(null);
           inject(
             `window.setTempPin && window.setTempPin(${place.lat}, ${place.lng}, ${JSON.stringify(place.name)})`,
           );
@@ -381,6 +458,7 @@ export function MapScreen({
 
   const showCandidate = (place: PlaceCandidate) => {
     setCandidate(place);
+    setCandidateDay(null);
     resetSearch();
     inject(
       `window.setTempPin && window.setTempPin(${place.lat}, ${place.lng}, ${JSON.stringify(place.name)})`,
@@ -436,13 +514,15 @@ export function MapScreen({
     showCandidate(place);
   };
 
-  const addPlace = (place: PlaceCandidate, target: "trip" | "pool" = "trip") => {
+  // U3: hedef gün açıkça seçilebilir (varsayılan addDay = son/etkin gün). target "pool" ise
+  // Kaydedilenler'e; "trip" ise toDay (çok günlü rotada o günün önekiyle) eklenir.
+  const addPlace = (place: PlaceCandidate, target: "trip" | "pool" = "trip", toDay = addDay) => {
     const stop: TripStop = {
       id: `stop-${Date.now()}`,
       name: place.name,
       category: place.category,
-      // Çok günlü rotada yeni durak son güne eklenir (düğme metniyle aynı gün).
-      time: target === "trip" && multiDay ? `${addDay}. gün` : "",
+      // Çok günlü rotada yeni durak seçilen güne eklenir (düğme metniyle aynı gün).
+      time: target === "trip" && multiDay ? `${toDay}. gün` : "",
       duration: "",
       address: place.address,
       lat: place.lat,
@@ -461,7 +541,7 @@ export function MapScreen({
       record(stop, "route_add");
       toast.show({
         tone: "success",
-        message: tr("planner.toast.addedToDay", { name: stop.name, day: addDay }),
+        message: tr("planner.toast.addedToDay", { name: stop.name, day: toDay }),
       });
     }
     setCandidate(null);
@@ -484,6 +564,21 @@ export function MapScreen({
       target,
     );
 
+  // U1: "yakında ne var" öğesini ekle (trip = N. güne, pool = Kaydedilenler'e).
+  const addNearby = (place: NearbyAddPlace, target: "trip" | "pool") =>
+    addPlace(
+      {
+        name: place.name,
+        address: place.address,
+        category: place.category,
+        lat: place.lat,
+        lng: place.lng,
+        placeId: place.placeId,
+        provider: place.provider,
+      },
+      target,
+    );
+
   const toggleVisited = (stop: TripStop) => {
     tripStore.toggleVisited(stop.id);
     const done = tripStore.getActiveRoute().stops;
@@ -496,6 +591,24 @@ export function MapScreen({
     toast.show({
       tone: "success",
       message: tr("planner.toast.addedToDay", { name: item.name, day: addDay }),
+    });
+  };
+
+  // U6: boş/bitmiş günde ekstra yer eklemek için Keşfet'i aç (web DayFullBanner addExtra ile aynı).
+  const openDiscoverForDay = () => {
+    setSelectedId(null);
+    setMode("discover");
+  };
+
+  // U6: günün son durağını başka güne kaydır (web movePinToDay ile aynı; geri alınabilir toast).
+  const shiftStopToDay = (stopId: string, targetDay: number) => {
+    const before = [...route.stops];
+    const stop = route.stops.find((s) => s.id === stopId);
+    tripStore.updateStop(stopId, { time: `${targetDay}. gün` });
+    toast.show({
+      tone: "success",
+      message: tr("planner.toast.addedToDay", { name: stop?.name ?? "", day: targetDay }),
+      action: { label: tr("planner.undo"), onPress: () => tripStore.setStops(before) },
     });
   };
 
@@ -653,6 +766,25 @@ export function MapScreen({
     ? Math.round(currentLegs.reduce((a, l) => a + l.duration, 0) / 60)
     : undefined;
   const selected = route.stops.find((s) => s.id === selectedId) ?? null;
+  // U6: "gün doldu / boş" önerisi (deterministik, I2). Tek günlü rotada OSRM bacaklarından tampon
+  // hesaplanır; çok günlüde bacak günlere ayrılmadığından yalnız boş/gezilmiş → "ekstra yer".
+  const suggestionStops = multiDay
+    ? route.stops.filter((s) => stopDay(s, day) === addDay)
+    : route.stops;
+  const suggestionLegs = !multiDay && legsKnown ? currentLegs : null;
+  const suggestion = dayFullSuggestion(
+    suggestionStops.map((s) => ({
+      id: s.id,
+      visited: !!s.visited,
+      durationMinutes: parseMinutes(s.duration),
+    })),
+    suggestionLegs,
+  );
+  // "Durağı kaydır" için hedef günler (çok günlü rotada mevcut gün dışındakiler).
+  const routeDays = multiDay
+    ? Array.from(new Set(route.stops.map((s) => stopDay(s, day)))).sort((a, b) => a - b)
+    : [day];
+  const otherDays = routeDays.filter((d) => d !== addDay);
 
   return (
     <View style={styles.root}>
@@ -819,10 +951,20 @@ export function MapScreen({
                     {candidate.category}
                   </Txt>
                 ) : null}
+                {/* U3: çok günlü rotada hedef günü ekleme anında seç (varsayılan son gün). */}
+                {multiDay && routeDays.length > 1 ? (
+                  <Stepper
+                    label={tr("planner.place.targetLabel")}
+                    value={candidateDay ?? addDay}
+                    min={routeDays[0]}
+                    max={routeDays[routeDays.length - 1]}
+                    onChange={setCandidateDay}
+                  />
+                ) : null}
                 <View style={styles.actions}>
                   <Button
-                    label={tr("planner.place.addToDayN", { n: addDay })}
-                    onPress={() => addPlace(candidate)}
+                    label={tr("planner.place.addToDayN", { n: candidateDay ?? addDay })}
+                    onPress={() => addPlace(candidate, "trip", candidateDay ?? addDay)}
                   />
                   <Button
                     label={tr("planner.place.addToPool")}
@@ -843,6 +985,18 @@ export function MapScreen({
                     {tr("planner.facts.source", { name: candidate.attribution })}
                   </Txt>
                 ) : null}
+                {/* U1: tıklanan noktada ne var + yakında ne var. */}
+                <NearbyList
+                  lat={candidate.lat}
+                  lng={candidate.lng}
+                  addDay={addDay}
+                  onAdd={addNearby}
+                  onFocus={(lat, lng, label) =>
+                    inject(
+                      `window.setTempPin && window.setTempPin(${lat}, ${lng}, ${JSON.stringify(label)})`,
+                    )
+                  }
+                />
               </View>
             </Card>
           ) : null}
@@ -914,6 +1068,17 @@ export function MapScreen({
                 minutes={totalMinutes}
                 offline={route.stops.length > 0}
               />
+
+              {/* U6: gün boş/bitmiş → ekstra yer; dolu → son durağı başka güne kaydır. */}
+              {suggestion && suggestionStops.length > 0 ? (
+                <DayFullBanner
+                  suggestion={suggestion}
+                  stops={suggestionStops}
+                  otherDays={otherDays}
+                  onAddExtra={openDiscoverForDay}
+                  onShift={shiftStopToDay}
+                />
+              ) : null}
 
               {route.stops.length === 0 ? (
                 <View style={styles.cardBody}>
@@ -1008,6 +1173,18 @@ export function MapScreen({
                         onPress={() => setConfirmDelete(selected)}
                       />
                     </View>
+                    {/* U2: durak ayrıntısında yakında ne var. */}
+                    <NearbyList
+                      lat={selected.lat}
+                      lng={selected.lng}
+                      addDay={addDay}
+                      onAdd={addNearby}
+                      onFocus={(lat, lng, label) =>
+                        inject(
+                          `window.setTempPin && window.setTempPin(${lat}, ${lng}, ${JSON.stringify(label)})`,
+                        )
+                      }
+                    />
                   </View>
                 </Card>
               ) : null}
@@ -1043,42 +1220,50 @@ export function MapScreen({
                 </View>
               ) : null}
 
-              <View style={styles.cardBody}>
-                <Txt variant="heading" header>
-                  {tr("planner.pool.title", { n: pool.length })}
-                </Txt>
-                {pool.length === 0 ? (
-                  <Txt variant="caption" tone="muted">
-                    {tr("planner.pool.empty")}
-                  </Txt>
-                ) : (
-                  pool.map((item) => (
-                    <Card key={item.id} variant="bordered">
-                      <View style={styles.poolRow}>
-                        <View style={styles.poolText}>
-                          <Txt variant="label">{item.name}</Txt>
-                          {item.address ? (
-                            <Txt variant="caption" tone="muted">
-                              {item.address}
-                            </Txt>
-                          ) : null}
-                        </View>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          label={tr("planner.place.addToDayN", { n: addDay })}
-                          onPress={() => addPoolToDay(item)}
-                        />
-                        <IconButton
-                          icon="trash"
-                          label={tr("planner.stop.delete")}
-                          onPress={() => tripStore.removeFromPool(item.id)}
-                        />
+              {/* U4: Kaydedilen yerler varsayılan kapalı; dokununca açılır (Accordion). */}
+              <Accordion
+                items={[
+                  {
+                    id: "pool",
+                    summary: tr("planner.pool.title", { n: pool.length }),
+                    content: (
+                      <View style={styles.cardBody}>
+                        {pool.length === 0 ? (
+                          <Txt variant="caption" tone="muted">
+                            {tr("planner.pool.empty")}
+                          </Txt>
+                        ) : (
+                          pool.map((item) => (
+                            <Card key={item.id} variant="bordered">
+                              <View style={styles.poolRow}>
+                                <View style={styles.poolText}>
+                                  <Txt variant="label">{item.name}</Txt>
+                                  {item.address ? (
+                                    <Txt variant="caption" tone="muted">
+                                      {item.address}
+                                    </Txt>
+                                  ) : null}
+                                </View>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  label={tr("planner.place.addToDayN", { n: addDay })}
+                                  onPress={() => addPoolToDay(item)}
+                                />
+                                <IconButton
+                                  icon="trash"
+                                  label={tr("planner.stop.delete")}
+                                  onPress={() => tripStore.removeFromPool(item.id)}
+                                />
+                              </View>
+                            </Card>
+                          ))
+                        )}
                       </View>
-                    </Card>
-                  ))
-                )}
-              </View>
+                    ),
+                  },
+                ]}
+              />
             </>
           ) : null}
         </ScrollView>
@@ -1196,6 +1381,7 @@ const styles = StyleSheet.create({
   sheet: { padding: tokens.space["4"], paddingBottom: tokens.space["16"], gap: tokens.space["3"] },
   cardBody: { gap: tokens.space["2"] },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["2"] },
+  suggest: { gap: tokens.space["2"] },
   poolRow: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },
   poolText: { flex: 1, gap: tokens.space["1"] },
   form: { padding: tokens.space["5"], gap: tokens.space["4"] },
