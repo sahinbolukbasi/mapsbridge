@@ -46,6 +46,24 @@ export function groupThreads<T extends ServerThread>(
 }
 export type RequestAction = "accept" | "decline" | "block";
 export const REQUEST_ACTIONS: readonly RequestAction[] = ["accept", "decline", "block"];
+
+/**
+ * Alıcıyı çözme sonucu (B5, FEAT-005): yeni mesaj formu gönderildiğinde `createThread` ya
+ * başarılı olur (istek açıldı → "pending") ya da sunucu alıcıyı reddeder. 404 USER_NOT_FOUND →
+ * "notFound" (yazışma kutusu AÇILMAZ, satır içi uyarı). 403 REQUEST_CLOSED → "closed",
+ * 409 REQUEST_PENDING → "waiting". Diğer her şey (ağ, uç henüz canlı değil) → "error":
+ * çağıran yerel davranışa düşmeden önce genel uyarı gösterebilir. Saf: ağ/DOM yok (parite).
+ */
+export type ResolveOutcome = "pending" | "notFound" | "closed" | "waiting" | "error";
+export function resolveOutcome(
+  err: { status?: number; code?: string } | null | undefined,
+): ResolveOutcome {
+  if (!err) return "pending";
+  if (err.status === 404 && err.code === "USER_NOT_FOUND") return "notFound";
+  if (err.status === 403 && err.code === "REQUEST_CLOSED") return "closed";
+  if (err.status === 409 && err.code === "REQUEST_PENDING") return "waiting";
+  return "error";
+}
 /**
  * Sunucu hatası → i18n anahtarı. 404 USER_NOT_FOUND (kayıtsız alıcı), 409 REQUEST_PENDING
  * (gönderen bekliyor / alıcı yanıtlamadı), 403 REQUEST_CLOSED (reddedildi/engellendi).

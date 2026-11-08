@@ -7,7 +7,13 @@ import {
   type ChatApiError,
   type ServerChatThread,
 } from "../services/api";
-import { chatErrorKey, groupThreads, jwtSub, type RequestAction } from "../ui/logic/chat-requests";
+import {
+  chatErrorKey,
+  groupThreads,
+  jwtSub,
+  resolveOutcome,
+  type RequestAction,
+} from "../ui/logic/chat-requests";
 import { chatStore, type ChatBubbleItem, type ChatContact } from "../services/chatStore";
 import {
   Avatar,
@@ -46,7 +52,9 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
   const [me, setMe] = useState("gezgin");
   const [newOpen, setNewOpen] = useState(false);
   const [newUser, setNewUser] = useState("");
+  const [newMessage, setNewMessage] = useState("");
   const [newError, setNewError] = useState<string | undefined>(undefined);
+  const [newBusy, setNewBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Mesaj istekleri (Increment 1.14): sunucu thread'leri + kişi → sunucu thread eşlemesi.
   const [mySub, setMySub] = useState("");
@@ -150,17 +158,45 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
     return contacts.filter((c) => `${c.name} ${c.username}`.toLocaleLowerCase("tr-TR").includes(q));
   }, [contacts, query]);
 
+  /**
+   * Yeni mesaj (B5, FEAT-005): önce-çöz-sonra-yaz. İlk mesaj `createThread` ile istek olarak
+   * gönderilir; bu sunucudaki çözme kapısıdır. 404 USER_NOT_FOUND → alıcı yok: sohbet AÇILMAZ,
+   * satır içi uyarı gösterilir. Başarı → sohbet bekleyen (pendingOut) durumda açılır.
+   */
   const startNew = async () => {
     const handle = newUser.trim().replace(/^@/, "");
+    const text = newMessage.trim();
     if (!/[a-z0-9]/i.test(handle)) {
       setNewError(tr("messages.newChat.required"));
       return;
     }
-    const { contact } = await chatStore.startOrGetDirectThread({ name: handle, handle });
-    setNewOpen(false);
-    setNewUser("");
+    if (!text) {
+      setNewError(tr("messages.newChat.messageRequired"));
+      return;
+    }
+    setNewBusy(true);
     setNewError(undefined);
-    setActive(contact);
+    try {
+      const res = await chatRequestApi.createThread(handle, text);
+      const { contact } = await chatStore.startOrGetDirectThread({ name: handle, handle });
+      setServerIds((m) => ({ ...m, [contact.id]: { id: res.threadId, pendingOut: true } }));
+      await chatStore.sendMessage(contact.id, { text, senderId: "me", senderName: me });
+      void loadServerThreads();
+      setNewOpen(false);
+      setNewUser("");
+      setNewMessage("");
+      setActive(contact);
+    } catch (err) {
+      const e = err as Partial<ChatApiError>;
+      const outcome = resolveOutcome({ status: e?.status, code: e?.code });
+      if (outcome === "notFound") {
+        setNewError(tr("messages.req.userNotFound"));
+      } else {
+        setNewError(errorText(err, true) ?? tr("messages.newChat.failed"));
+      }
+    } finally {
+      setNewBusy(false);
+    }
   };
 
   const openRouteEmbed = (title: string, stops: TripStop[]) => {
@@ -432,12 +468,27 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
               setNewUser(text);
               if (newError) setNewError(undefined);
             }}
-            error={newError}
             autoCapitalize="none"
             autoCorrect={false}
             maxLength={40}
           />
-          <Button label={tr("messages.newChat.start")} size="lg" onPress={startNew} />
+          <TextField
+            label={tr("messages.newChat.message")}
+            hint={tr("messages.newChat.messageHint")}
+            value={newMessage}
+            onChangeText={(text) => {
+              setNewMessage(text);
+              if (newError) setNewError(undefined);
+            }}
+            error={newError}
+            maxLength={2000}
+          />
+          <Button
+            label={tr("messages.newChat.start")}
+            size="lg"
+            loading={newBusy}
+            onPress={startNew}
+          />
         </View>
       </ModalFrame>
     </Screen>

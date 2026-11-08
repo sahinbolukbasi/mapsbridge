@@ -29,7 +29,12 @@ import {
   type ChatThreadSummary,
 } from "../lib/api-client";
 import { decodeJwtPayload } from "../lib/cognito";
-import { chatErrorKey, groupThreads, type RequestAction } from "../features/messaging/requests";
+import {
+  chatErrorKey,
+  groupThreads,
+  resolveOutcome,
+  type RequestAction,
+} from "../features/messaging/requests";
 import {
   DIRECT_MESSAGES_KEY,
   cleanHandle,
@@ -46,6 +51,9 @@ import { useWS } from "../lib/ws-context";
 import "./messages.css";
 
 const NEXT = "/messages/";
+
+/** Yeni mesaj formunun sonucu: başarısızsa satır içi hata anahtarı, kutuyu açık tutabilir. */
+type ResolveResult = { ok: true } | { ok: false; errorKey: string; keepOpen?: boolean };
 
 function clock(date: Date = new Date()): string {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -343,26 +351,57 @@ export default function MessagesPage() {
     setDraft("");
   }
 
-  function startDirect(rawName: string) {
+  /**
+   * Yeni mesaj (B5, FEAT-005): önce-çöz-sonra-yaz. Zaten açık bir sohbet varsa onu açar.
+   * Değilse ilk mesaj `chatApi.createThread` ile gönderilir — bu sunucudaki çözme kapısıdır
+   * (profileOwner/isRegisteredUser). 404 USER_NOT_FOUND → alıcı yok: yazışma kutusu AÇILMAZ,
+   * modal satır içi uyarı gösterir. Başarı → sohbet "pendingOut" (bekleyen) durumda açılır,
+   * composer kabul edilene kadar kapalı. Dönüş: başarılıysa modal kapatılabilir.
+   */
+  async function startDirect(rawName: string, firstMessage: string): Promise<ResolveResult> {
     const name = cleanHandle(rawName);
-    if (!name) return;
+    const text = firstMessage.trim();
+    if (!name) return { ok: false, errorKey: "messages.newChat.required" };
+    if (!text) return { ok: false, errorKey: "messages.newChat.messageRequired" };
     setThreadError(null);
     const existing = conversations.find((c) => c.title.toLowerCase() === name.toLowerCase());
     if (existing) {
       open(existing.id);
-    } else {
+      return { ok: true };
+    }
+    try {
+      const res = await chatApi.createThread(name, text);
+      const sent: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        senderName: me.name,
+        time: clock(),
+        text,
+        isOutgoing: true,
+      };
       const conv: ChatConversation = {
         id: directConversationId(name),
+        serverId: res.threadId,
         type: "direct",
         title: name,
-        lastMessage: "",
-        lastTime: "",
-        messages: [],
+        lastMessage: text,
+        lastTime: sent.time,
+        messages: [sent],
+        pendingOut: true,
       };
-      setConversations((prev) => [conv, ...prev]);
+      setConversations((prev) => [conv, ...prev.filter((c) => c.id !== conv.id)]);
       open(conv.id);
+      void loadServerThreads();
+      return { ok: true };
+    } catch (err) {
+      const e = err as Partial<ApiResponseError>;
+      const outcome = resolveOutcome({ status: e?.status, code: e?.code });
+      if (outcome === "notFound")
+        return { ok: false, errorKey: "messages.req.userNotFound", keepOpen: true };
+      const key = chatErrorKey(e?.status, e?.code, true);
+      if (key) return { ok: false, errorKey: key, keepOpen: true };
+      // Uç henüz canlı değil ya da ağ hatası: alıcı adını doğrulayamadık, kutu açılmaz.
+      return { ok: false, errorKey: "messages.newChat.failed", keepOpen: true };
     }
-    setNewChatOpen(false);
   }
 
   if (authed === false) return <AuthGate variant="page" reason="messages" next={NEXT} />;
@@ -592,36 +631,64 @@ export default function MessagesPage() {
         open={newChatOpen}
         onClose={() => setNewChatOpen(false)}
         onStart={startDirect}
+        onDone={() => setNewChatOpen(false)}
       />
     </PageShell>
   );
 }
 
+/**
+ * Yeni mesaj (B5, FEAT-005): kullanıcı adı + ilk mesaj. Gönderim önce alıcıyı sunucuda çözer
+ * (`onStart` → createThread). Alıcı yoksa (404) kutu AÇILMAZ, hata satır içi gösterilir ve modal
+ * açık kalır. Takip edilenler bilinen-geçerli kısayollardır: adı doldurur, mesaj hâlâ gereklidir.
+ */
 function NewChatModal({
   open,
   onClose,
   onStart,
+  onDone,
 }: {
   open: boolean;
   onClose: () => void;
-  onStart: (name: string) => void;
+  onStart: (name: string, firstMessage: string) => Promise<ResolveResult>;
+  onDone: () => void;
 }) {
   const { t } = useLocale();
   const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [followed, setFollowed] = useState<string[]>([]);
   useEffect(() => {
-    if (open) setFollowed(getFollowedUsers());
+    if (open) {
+      setFollowed(getFollowedUsers());
+      setName("");
+      setMessage("");
+      setError(null);
+      setBusy(false);
+    }
   }, [open]);
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (!cleanHandle(name)) {
       setError(t("messages.newChat.required", "Bir kullanıcı adı yaz."));
       return;
     }
-    onStart(name);
-    setName("");
+    if (!message.trim()) {
+      setError(t("messages.newChat.messageRequired", "Bir mesaj yaz."));
+      return;
+    }
+    setBusy(true);
     setError(null);
+    const res = await onStart(name, message);
+    setBusy(false);
+    if (res.ok) {
+      setName("");
+      setMessage("");
+      onDone();
+    } else {
+      setError(t(res.errorKey));
+    }
   }
   return (
     <Modal
@@ -631,10 +698,10 @@ function NewChatModal({
       size="sm"
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={onClose} disabled={busy}>
             {t("ui.cancel", "İptal")}
           </Button>
-          <Button type="submit" form="msg-new-chat">
+          <Button type="submit" form="msg-new-chat" loading={busy}>
             {t("messages.newChat.start", "Sohbeti başlat")}
           </Button>
         </>
@@ -656,6 +723,25 @@ function NewChatModal({
             />
           )}
         </Field>
+        <Field
+          label={t("messages.newChat.message", "İlk mesaj")}
+          hint={t("messages.newChat.messageHint", "İlk mesaj bir istek olarak gönderilir.")}
+          required
+        >
+          {(ids) => (
+            <Input
+              {...ids}
+              value={message}
+              maxLength={2000}
+              autoComplete="off"
+              placeholder={t("messages.composer", "Mesaj yaz")}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                if (error) setError(null);
+              }}
+            />
+          )}
+        </Field>
         {followed.length > 0 && (
           <div className="msg-form__quick">
             <p className="msg-form__quick-label">
@@ -664,7 +750,15 @@ function NewChatModal({
             <ul className="msg-form__quick-list">
               {followed.slice(0, 12).map((u) => (
                 <li key={u}>
-                  <Button size="sm" variant="secondary" onClick={() => onStart(u)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={busy}
+                    onClick={() => {
+                      setName(u);
+                      if (error) setError(null);
+                    }}
+                  >
                     @{u}
                   </Button>
                 </li>
