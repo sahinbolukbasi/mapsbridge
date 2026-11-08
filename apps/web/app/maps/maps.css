@@ -9,13 +9,21 @@
   .planner {
     /* --app-panel: sayfa katmanında yerleşim değişkeni (token değil; R11). U7: genişletildi. */
     --app-panel: clamp(18rem, 24vw, 28rem);
+    /* B1: yükseklik kıstlama. Panel içeriği taştığında (arama sonuçları, Keşfet, pin
+       detayı) sayfa kökü uzamasın; taşma yalnızca .planner__panel içinde kaydırılsın.
+       PageShell kökü primitives layer'dan yalnızca min-block-size alır; burada sert
+       bir blok yükseklik tavanı veriyoruz (overflow:hidden zaten vardı). */
+    block-size: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
+    max-block-size: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
+    min-block-size: 0;
     overflow: hidden;
     background: var(--color-bg);
   }
   .planner__split {
     position: relative;
     display: grid;
-    block-size: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
+    /* B1: bağımsız ikinci 100dvh yerine kıstlı ebeveynden yükseklik devral. */
+    block-size: 100%;
     min-block-size: 0;
     grid-template-rows: 45% minmax(0, 1fr);
     grid-template-columns: minmax(0, 1fr);
