@@ -131,6 +131,19 @@ jobs:
             echo "No stale lock found"
           fi
 
+      # Ana stack ağır drift'li: hedefsiz apply VPC'yi siler ve eksik Stripe
+      # secret'ları yüzünden TF_VAR_stripe_* değerlerini boşaltabilir. Hedefsiz
+      # apply imkânsız olmalı; hedefsiz plan_only=true (teşhis) serbest kalır.
+      - name: Guard — untargeted main apply is forbidden
+        if: github.event.inputs.plan_only != 'true'
+        env:
+          TF_TARGETS: ${{ github.event.inputs.target }}
+        run: |
+          if [ -z "$(printf '%s' "$TF_TARGETS" | tr -d ',[:space:]')" ]; then
+            echo "::error::stack=main apply için -f target=… zorunlu (hedefsiz apply yasak). Hedefsiz yalnız plan_only=true koşulabilir."
+            exit 1
+          fi
+
       # plan_only=true koşusu salt-okunur kalır: bu adım gerçek bir apply'dır
       # (deploy rolü policy'sini sil-yeniden-yaz). Hedefli koşuda yalnız hedef
       # listesi github_deploy'u içeriyorsa çalışır; aksi halde -replace incelenmemiş
@@ -281,6 +294,11 @@ jobs:
               t="$(printf '%s' "$t" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
               if [ -n "$t" ]; then TARGET_ARGS+=("-target=$t"); fi
             done
+          fi
+          # Derinlemesine savunma: hedefsiz apply (ve hedefsiz yeniden deneme) yasak.
+          if [ "${#TARGET_ARGS[@]}" -eq 0 ]; then
+            echo "::error::stack=main apply için -f target=… zorunlu (hedefsiz apply yasak)."
+            exit 1
           fi
           set -o pipefail
           if ! terraform apply -auto-approve tfplan 2>&1 | tee apply.log; then
