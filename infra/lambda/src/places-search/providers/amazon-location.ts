@@ -1,7 +1,8 @@
-// Amazon Location (geo-places v2) adaptörü. Bugünkü ai rolü IAM'i: Geocode + SearchText
-// (travel-rag.tf). ReverseGeocode / GetPlace / SearchNearby IAM eklenene kadar AccessDenied →
-// ProviderUnavailable (infra-changes.md §1.5). Hata asla uydurma sonuca dönüşmez.
+// Amazon Location (geo-places v2) adaptörü. ai rolü IAM'i (travel-rag.tf `place_research`):
+// Geocode, SearchText, ReverseGeocode, GetPlace, SearchNearby. Sağlayıcı hatası →
+// ProviderUnavailable (503); hata asla uydurma sonuca dönüşmez (I1).
 import {
+  GeocodeCommand,
   GeoPlacesClient,
   GetPlaceCommand,
   ReverseGeocodeCommand,
@@ -70,18 +71,41 @@ export const amazonLocation: PlacesProvider = {
   async run(query: PlacesQuery): Promise<Place[]> {
     try {
       if (query.op === "search") {
-        const text = query.category ? `${CATEGORY_QUERY[query.category]} ${query.q}` : query.q;
+        const text = (
+          query.category ? `${CATEGORY_QUERY[query.category]} ${query.q}` : query.q
+        ).slice(0, 150);
+        // SearchText tam olarak bir konum bağlamı ister (BiasPosition ya da Filter); yoksa
+        // ValidationException → 503 (canlı hata: konumsuz arama). Konum yoksa önce Geocode
+        // (konum gerektirmez) ile metnin yerini bul, SearchText'i oraya yönlendir.
+        let bias = query.near ? [query.near[1], query.near[0]] : undefined;
+        let geocoded: Place[] = [];
+        if (!bias) {
+          const geo = await client().send(
+            new GeocodeCommand({
+              QueryText: text,
+              MaxResults: LIMITS.maxResults,
+              Language: query.lang,
+              IntendedUse: "Storage",
+            }),
+            opts(),
+          );
+          geocoded = (geo.ResultItems || []).map((i) => fromAmazon(i as AmazonItem) as Place);
+          const first = geo.ResultItems?.find((i) => Array.isArray(i.Position))?.Position;
+          if (!first) return geocoded;
+          bias = [first[0], first[1]];
+        }
         const res = await client().send(
           new SearchTextCommand({
-            QueryText: text.slice(0, 150),
-            ...(query.near ? { BiasPosition: [query.near[1], query.near[0]] } : {}),
+            QueryText: text,
+            BiasPosition: bias,
             MaxResults: LIMITS.maxResults,
             Language: query.lang,
             IntendedUse: "Storage",
           }),
           opts(),
         );
-        return (res.ResultItems || []).map((i) => fromAmazon(i as AmazonItem) as Place);
+        const found = (res.ResultItems || []).map((i) => fromAmazon(i as AmazonItem) as Place);
+        return found.length ? found : geocoded;
       }
       if (query.op === "nearby") {
         // Kategorili keşif bugünkü IAM'le (SearchText) çalışır; kategorisiz yakın arama

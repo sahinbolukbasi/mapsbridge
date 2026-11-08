@@ -1,0 +1,108 @@
+name: Live smoke (release, authenticated)
+# Yayın doğrulaması: canlı API'ye girişli uçtan uca istek (rota üretimi + yer proxy'si).
+# Geçici Cognito test kullanıcısı (e-posta gönderilmez, example.com) oluşturulur ve iş sonunda
+# her durumda silinir. Kod/altyapı değiştirmez; yalnız log okur ve canlı uçları çağırır.
+on:
+  workflow_dispatch:
+  push:
+    branches: [release-smoke]
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: live-smoke-release
+  cancel-in-progress: false
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_REGION: eu-central-1
+      API: https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com
+      POOL: ${{ secrets.COGNITO_USER_POOL_ID }}
+      CLIENT: ${{ secrets.COGNITO_CLIENT_ID }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - name: AI lambda error logs (last 6h, read-only)
+        continue-on-error: true
+        run: |
+          START=$(( ($(date +%s) - 6*3600) * 1000 ))
+          for g in /aws/lambda/mapsbridge-prod-ai /aws/lambda/mapsbridge-prod-ai-stream; do
+            echo "=== $g"
+            aws logs filter-log-events --log-group-name "$g" --start-time "$START" \
+              --filter-pattern '?ERROR ?Error ?"Task timed out" ?exception ?failed ?status=5' \
+              --max-items 60 --query 'events[].message' --output text 2>&1 \
+              | sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/<email>/g' | cut -c1-600 | tail -60
+          done
+
+      - name: Authenticated end-to-end (temporary user)
+        run: |
+          set -u
+          EMAIL="release-smoke-${GITHUB_RUN_ID}@example.com"
+          PASS="Rs-$(openssl rand -hex 12)-Aa1!"
+          echo "::add-mask::$PASS"
+          cleanup() {
+            aws cognito-idp admin-delete-user --user-pool-id "$POOL" --username "$EMAIL" \
+              && echo "test user deleted" || echo "::warning::test user delete failed ($EMAIL)"
+          }
+          if ! aws cognito-idp admin-create-user --user-pool-id "$POOL" --username "$EMAIL" \
+               --user-attributes Name=email,Value="$EMAIL" Name=email_verified,Value=true \
+               --message-action SUPPRESS > /dev/null; then
+            echo "::error::admin-create-user denied — authenticated E2E not possible from CI"
+            exit 1
+          fi
+          trap cleanup EXIT
+          aws cognito-idp admin-set-user-password --user-pool-id "$POOL" --username "$EMAIL" \
+            --password "$PASS" --permanent
+          TOKEN=$(aws cognito-idp initiate-auth --client-id "$CLIENT" --auth-flow USER_PASSWORD_AUTH \
+            --auth-parameters "USERNAME=$EMAIL,PASSWORD=$PASS" \
+            --query AuthenticationResult.AccessToken --output text)
+          echo "::add-mask::$TOKEN"
+          [ -n "$TOKEN" ] && [ "$TOKEN" != "None" ] || { echo "::error::no token"; exit 1; }
+          H=(-H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -H "Origin: https://mapsbridge.com")
+
+          echo "=== GET /ai/chat (credits/bootstrap)"
+          curl -s -o b.json -w "HTTP %{http_code} %{time_total}s\n" "${H[@]}" "$API/ai/chat"
+          jq -c '{credits, plan: .billing.plan, keys: (keys|.[0:8])}' b.json 2>/dev/null || head -c 300 b.json; echo
+
+          CONV="smoke$(openssl rand -hex 12)"
+          i=0
+          for P in "İstanbul'da 2 günlük yürüyerek rota planla: tarih ve kültür, orta tempo, 12-13 Aralık." \
+                   "Tarih ve kültür, orta tempo, yürüyerek. Taslak rotayı şimdi oluştur." \
+                   "Evet, rotayı oluştur."; do
+            i=$((i+1))
+            jq -n --arg p "$P" --arg c "$CONV" --arg r "$(cat /proc/sys/kernel/random/uuid)" \
+              '{prompt:$p, routeMode:"walking", requestId:$r, conversationId:$c}' > req.json
+            echo "=== POST /ai/chat turn $i"
+            curl -s -o r.json -w "HTTP %{http_code} %{time_total}s\n" -X POST "${H[@]}" \
+              --data @req.json "$API/ai/chat"
+            jq -c '{responseMode, error, code, days: .route.estimatedDays, dest: .route.destination,
+                    stops: (.route.stops|length? // 0),
+                    firstStops: [(.route.stops // [])[:6][] | {day, name, lat, lng}],
+                    billing, summary: ((.orchestratorSummary // "")[:220])}' r.json 2>/dev/null \
+              || head -c 500 r.json
+            echo
+            if jq -e '.route.stops|length > 0' r.json > /dev/null 2>&1; then
+              echo "ROUTE_OK turn=$i"; break
+            fi
+          done
+
+          echo "=== places (authed)"
+          for q in "action=search&q=Galata" "action=search&q=Galata%20Kulesi" \
+                   "action=search&q=Ayasofya&lat=41.0086&lng=28.9802" \
+                   "action=reverse&lat=41.0256&lng=28.9742" \
+                   "action=nearby&lat=41.0256&lng=28.9742&radius=500" \
+                   "action=nearby&lat=41.0256&lng=28.9742&radius=1500&category=museum"; do
+            curl -s -o p.json -w "HTTP %{http_code} %{time_total}s  $q\n" "${H[@]}" "$API/ai/chat?op=places&$q"
+            jq -c '{status, provider, n: (.places|length? // 0), first: (.places[0] // {} | {name, category, address})}' p.json
+          done
+          ID=$(jq -r '.places[0].id // empty' p.json)
+          if [ -n "$ID" ]; then
+            curl -s -o d.json -w "HTTP %{http_code} %{time_total}s  action=detail\n" "${H[@]}" \
+              "$API/ai/chat?op=places&action=detail&provider=amazon&id=$(jq -rn --arg v "$ID" '$v|@uri')"
+            jq -c '{status, n: (.places|length? // 0), first: (.places[0] // {} | {name, category, address, openingHours, phone, website})}' d.json
+          fi

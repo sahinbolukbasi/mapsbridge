@@ -68,6 +68,12 @@ interface Event {
   requestContext?: { http?: { method?: string; path?: string; sourceIp?: string } };
 }
 const reply = jsonResponse;
+/** Teşhis için hata adı + kısa mesaj (≤120 karakter, e-posta maskeli). Kullanıcı istemi loglanmaz. */
+export function errorLabel(err: unknown): string {
+  if (!(err instanceof Error)) return "Error";
+  const msg = (err.message || "").replace(/[^\s@]+@[^\s@]+/g, "<email>").slice(0, 120);
+  return msg ? `${err.name}: ${msg}` : err.name;
+}
 const resolveUser = getVerifiedUser;
 
 function getAuthHeader(headers?: Record<string, string>): string | undefined {
@@ -389,7 +395,7 @@ async function handleRequest(event: Event) {
         },
         operationKey,
       );
-    console.error("AI handler error", err instanceof Error ? err.name : "Error");
+    console.error("AI handler error", errorLabel(err));
     if (reservation && !completed) {
       try {
         await finishAI(reservation, false);
@@ -691,7 +697,7 @@ async function handleStreamRequest(
       }
     });
   } catch (err) {
-    console.error("Stream handler error", err instanceof Error ? err.name : "Error");
+    console.error("Stream handler error", errorLabel(err));
     try {
       writeSse(meta, "error", { message: "Bir hata oluştu.", code: "SERVER_ERROR" });
     } catch (err) {

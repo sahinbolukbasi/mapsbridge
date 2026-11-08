@@ -505,3 +505,163 @@ test("K3: isGoogleDerived Google içeriğini ve yer önbelleği anahtarlarını 
   assert.equal(isGoogleDerived({ prompt: "Roma 3 gün", provider: "amazon" }), false);
   assert.equal(isGoogleDerived("Google Haritalar'da gördüğüm yer"), false, "salt kelime yetmez");
 });
+
+// ── Sağlayıcı dalları (en küçük birim): her işlem doğru geo-places komutuna, doğru girdiyle ──
+const SEARCH = { op: "search", q: "Galata Kulesi", lang: "tr" };
+test("search konumsuz: önce Geocode (konum istemez), SearchText Geocode konumuna yönlenir", async () => {
+  const { load, calls } = harness({
+    geo: (c) =>
+      c.name === "GeocodeCommand"
+        ? { ResultItems: [{ PlaceId: "g1", Title: "Galata", Position: [28.977, 41.0267] }] }
+        : {
+            ResultItems: [{ PlaceId: "s1", Title: "Galata Kulesi", Position: [28.9741, 41.0256] }],
+          },
+  });
+  const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+  const out = await amazonLocation.run(SEARCH);
+  assert.deepEqual(
+    calls.geo.map((c) => c.name),
+    ["GeocodeCommand", "SearchTextCommand"],
+  );
+  assert.equal(calls.geo[0].input.QueryText, "Galata Kulesi");
+  assert.equal(calls.geo[0].input.BiasPosition, undefined, "Geocode konum almaz");
+  assert.deepEqual(calls.geo[1].input.BiasPosition, [28.977, 41.0267], "[lng, lat]");
+  assert.equal(calls.geo[1].input.Filter, undefined, "BiasPosition ile Filter birlikte yok");
+  assert.equal(out[0].name, "Galata Kulesi");
+});
+test("search konumlu: yalnız SearchText + BiasPosition [lng, lat]; Geocode çağrılmaz", async () => {
+  const { load, calls } = harness();
+  const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+  await amazonLocation.run({ ...SEARCH, near: [41.0086, 28.9802] });
+  assert.deepEqual(
+    calls.geo.map((c) => c.name),
+    ["SearchTextCommand"],
+  );
+  assert.deepEqual(calls.geo[0].input.BiasPosition, [28.9802, 41.0086]);
+});
+test("search konumsuz: Geocode boşsa SearchText çağrılmaz, boş liste (uydurma yok)", async () => {
+  const { load, calls } = harness({ geo: () => ({ ResultItems: [] }) });
+  const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+  assert.deepEqual(await amazonLocation.run(SEARCH), []);
+  assert.deepEqual(
+    calls.geo.map((c) => c.name),
+    ["GeocodeCommand"],
+  );
+});
+test("search konumsuz: SearchText boşsa Geocode sonucu döner", async () => {
+  const { load } = harness({
+    geo: (c) =>
+      c.name === "GeocodeCommand"
+        ? { ResultItems: [{ PlaceId: "g1", Title: "Galata", Position: [28.977, 41.0267] }] }
+        : { ResultItems: [] },
+  });
+  const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+  const out = await amazonLocation.run(SEARCH);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].id, "g1");
+});
+test("search kategorili: sorgu metni kategori terimiyle başlar, 150 karakterle kesilir", async () => {
+  const { load, calls } = harness();
+  const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+  await amazonLocation.run({
+    op: "search",
+    q: "x".repeat(300),
+    lang: "en",
+    category: "museum",
+    near: [41, 29],
+  });
+  assert.equal(calls.geo[0].input.QueryText.length, 150);
+  assert.ok(calls.geo[0].input.QueryText.startsWith("museum "));
+  assert.equal(calls.geo[0].input.Language, "en");
+});
+test("reverse: ReverseGeocode QueryPosition [lng, lat], MaxResults 1", async () => {
+  const { load, calls } = harness();
+  const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+  await amazonLocation.run({ op: "reverse", lat: 41.0256, lng: 28.9742, lang: "tr" });
+  assert.equal(calls.geo[0].name, "ReverseGeocodeCommand");
+  assert.deepEqual(calls.geo[0].input.QueryPosition, [28.9742, 41.0256]);
+  assert.equal(calls.geo[0].input.MaxResults, 1);
+});
+test("detail: GetPlace PlaceId + Contact; tek sonuç", async () => {
+  const { load, calls } = harness({
+    geo: () => ({ PlaceId: "d1", Title: "Galata Kulesi", Position: [28.9741, 41.0256] }),
+  });
+  const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+  const out = await amazonLocation.run({
+    op: "detail",
+    id: "d1",
+    provider: "amazon",
+    lang: "tr",
+    reviews: false,
+  });
+  assert.equal(calls.geo[0].name, "GetPlaceCommand");
+  assert.equal(calls.geo[0].input.PlaceId, "d1");
+  assert.deepEqual(calls.geo[0].input.AdditionalFeatures, ["Contact"]);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].name, "Galata Kulesi");
+});
+test("nearby kategorisiz: SearchNearby QueryPosition [lng, lat] + QueryRadius", async () => {
+  const { load, calls } = harness();
+  const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+  await amazonLocation.run({ op: "nearby", lat: 41.0256, lng: 28.9742, radius: 500, lang: "tr" });
+  assert.equal(calls.geo[0].name, "SearchNearbyCommand");
+  assert.deepEqual(calls.geo[0].input.QueryPosition, [28.9742, 41.0256]);
+  assert.equal(calls.geo[0].input.QueryRadius, 500);
+});
+test("fromAmazon: birincil kategori, saatler, telefon, web; olmayan alan undefined (I1)", async () => {
+  const { load } = harness();
+  const { fromAmazon } = load("places-search/providers/amazon-location.ts");
+  const full = fromAmazon({
+    PlaceId: "a",
+    Title: "Müze",
+    Position: [29, 41],
+    Address: { Label: "Adres" },
+    Categories: [
+      { Name: "Other", LocalizedName: "Diğer" },
+      { Name: "Museum", LocalizedName: "Müze", Primary: true },
+    ],
+    OpeningHours: [{ Display: ["Pzt-Cum 09:00-17:00"] }, { Display: [] }],
+    Contacts: { Phones: [{ Value: "+90 212" }], Websites: [{ Value: "https://ornek.test" }] },
+  });
+  assert.equal(full.category, "Müze");
+  assert.deepEqual(full.openingHours, ["Pzt-Cum 09:00-17:00"]);
+  assert.equal(full.phone, "+90 212");
+  assert.equal(full.website, "https://ornek.test");
+  assert.equal(full.lat, 41);
+  assert.equal(full.lng, 29);
+  const bare = fromAmazon({ PlaceId: "b", Title: "Yer" });
+  for (const k of ["lat", "lng", "address", "category", "openingHours", "phone", "website"])
+    assert.equal(bare[k], undefined, k);
+});
+test("sağlayıcı hata eşlemesi: zaman aşımı / doğrulama → unavailable (503), sonuç uydurulmaz", async () => {
+  for (const name of ["TimeoutError", "ValidationException"]) {
+    const { load } = harness({
+      geo: () => {
+        throw Object.assign(new Error(name), { name });
+      },
+    });
+    const svc = load("places-search/places.service.ts");
+    const { amazonLocation } = load("places-search/providers/amazon-location.ts");
+    const res = await svc.runPlaces({ action: "search", q: "Galata" }, user, {
+      repo: memoryRepo(),
+      providers: { amazon: amazonLocation },
+      googleConfigured: false,
+      now: () => NOW,
+    });
+    assert.equal(res.status, 503, name);
+    assert.equal(res.body.status, "unavailable");
+    assert.equal(res.body.places, undefined);
+  }
+});
+test("handler: girişli kullanıcı kotası user#<sub> anahtarıyla sayılır", async () => {
+  const { load } = harness();
+  const { handlePlacesRequest } = load("places-search/handler.ts");
+  const repo = memoryRepo();
+  const res = await handlePlacesRequest(
+    { queryStringParameters: { op: "places", action: "reverse", lat: "41", lng: "29" } },
+    { sub: "u-42" },
+    { repo, providers: { amazon: fakeProvider("amazon", [PLACE()]) }, googleConfigured: false },
+  );
+  assert.equal(res.statusCode, 200);
+  assert.ok([...repo.counters.keys()][0].startsWith("user#u-42|"));
+});
