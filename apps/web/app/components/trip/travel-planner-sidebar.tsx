@@ -77,6 +77,7 @@ import {
 } from "../ui";
 import { GooglePlaceInfo } from "./google-place-info";
 import { PlaceFacts } from "./place-facts";
+import { PinShareModal } from "./pin-share-modal";
 import { DiscoverPanel } from "./discover-panel";
 import { NearbyList, type NearbyAddPlace } from "./nearby-list";
 import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
@@ -1419,6 +1420,7 @@ function PinDetail({
   const [answer, setAnswer] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const meta = DEFAULT_CATEGORY_META[pin.category] ?? DEFAULT_CATEGORY_META.genel;
   const inPool = generalPins.some((p) => p.id === pin.id || p.label === pin.label);
   const trip = pin.tripId ? trips.find((x) => x.id === pin.tripId) : null;
@@ -1596,6 +1598,14 @@ function PinDetail({
         </Button>
         <Button
           size="sm"
+          variant="secondary"
+          iconStart={<Icon name="qr" size={16} />}
+          onClick={() => setShareOpen(true)}
+        >
+          {t("planner.pinShare.action", "Bu durağı paylaş")}
+        </Button>
+        <Button
+          size="sm"
           variant="ghost"
           iconStart={<Icon name="trash" size={16} />}
           onClick={() => setConfirmDelete(true)}
@@ -1603,6 +1613,12 @@ function PinDetail({
           {t("planner.stop.delete", "Durağı sil")}
         </Button>
       </div>
+
+      <PinShareModal
+        open={shareOpen}
+        target={{ lat: pin.lat, lng: pin.lng, label: pin.label }}
+        onClose={() => setShareOpen(false)}
+      />
 
       {editing ? (
         <form className="planner-detail__form" onSubmit={save} noValidate>

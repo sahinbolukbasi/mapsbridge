@@ -71,6 +71,7 @@ import { usePermission } from "../components/PermissionPrompt";
 import { readTile, storeTile } from "../services/tile-cache";
 import { currentPosition } from "../services/nearby";
 import { appleMapsUrl, googleMapsUrl } from "../services/directions";
+import { encodePinCode } from "../share/pin-link";
 import { gpxFileName, routeToGpx } from "../services/route-export";
 import { scheduleRouteReminders } from "../services/notifications";
 import { File, Paths } from "expo-file-system";
@@ -696,6 +697,20 @@ export function MapScreen({
     );
   };
 
+  // Durağı paylaş (D3): sunucusuz kod + /p/ bağlantısı; karşı taraf kendi konumundan yol tarifi
+  // açar. Hesapsız, misafir de kullanır (paylaşılan veri açık varış noktasıdır). QR, /p/ sayfası
+  // WebView'de açıldığında görünür; burada bağlantı Share ile paylaşılır.
+  const shareStop = async (stop: TripStop) => {
+    if (!Number.isFinite(stop.lat) || !Number.isFinite(stop.lng)) return;
+    const code = encodePinCode({ lat: stop.lat, lng: stop.lng, label: stop.name });
+    const url = `https://mapsbridge.com/p/?c=${code}`;
+    await Share.share({
+      message: `${stop.name}\n${url}`,
+      url,
+      title: tr("planner.pinShare.title"),
+    }).catch(() => undefined);
+  };
+
   // Rotayı GPX dosyası olarak paylaş (expo-sharing); yalnız ad + koordinat (I1).
   const shareGpx = async () => {
     if (guest) {
@@ -1165,6 +1180,12 @@ export function MapScreen({
                         variant="secondary"
                         size="sm"
                         onPress={() => openEdit(selected)}
+                      />
+                      <Button
+                        label={tr("planner.pinShare.action")}
+                        variant="secondary"
+                        size="sm"
+                        onPress={() => shareStop(selected)}
                       />
                       <Button
                         label={tr("planner.stop.delete")}

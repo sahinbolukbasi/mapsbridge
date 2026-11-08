@@ -1118,3 +1118,37 @@ test("4.4: composer görsel doğrulaması (JPG/PNG/WEBP ≤10 MB), emoji metne, 
   );
   assert.match(screen, /<LikeButton/);
 });
+
+// ── D3: pin paylaşım codec'i + harita derin bağlantıları web ↔ mobil paritesi ──
+test("D3: pin-link ve map-directions mobil kopyaları web ile birebir (bayt) ve davranışça aynı", () => {
+  for (const rel of ["share/pin-link.ts", "share/map-directions.ts"]) {
+    const web = fs.readFileSync(path.join(WEB, "lib", rel), "utf8");
+    const mob = fs.readFileSync(path.join(MOBILE, rel), "utf8");
+    assert.equal(mob, web, `${rel} web kopyasıyla birebir olmalı`);
+  }
+  const webPin = loadTs(path.join(WEB, "lib/share/pin-link.ts"));
+  const mobPin = loadTs(path.join(MOBILE, "share/pin-link.ts"));
+  for (const pin of [
+    { lat: 41.008237, lng: 28.978359, label: "Ayasofya" },
+    { lat: -33.8, lng: 151.2, label: "A|B" },
+    { lat: 0, lng: 0, label: "" },
+  ]) {
+    const code = webPin.encodePinCode(pin);
+    assert.equal(mobPin.encodePinCode(pin), code);
+    assert.deepEqual(plain(mobPin.decodePinCode(code)), plain(webPin.decodePinCode(code)));
+  }
+  assert.equal(mobPin.decodePinCode("a_bc"), webPin.decodePinCode("a_bc"));
+  const webDir = loadTs(path.join(WEB, "lib/share/map-directions.ts"));
+  const mobDir = loadTs(path.join(MOBILE, "share/map-directions.ts"));
+  const dest = { lat: 41.0, lng: 29.0 };
+  const origin = { lat: 40.9, lng: 29.1 };
+  for (const provider of ["apple", "google", "yandex"])
+    for (const o of [origin, null]) {
+      assert.equal(
+        mobDir.buildDirections({ dest, origin: o, provider }),
+        webDir.buildDirections({ dest, origin: o, provider }),
+      );
+    }
+  for (const ua of ["iPhone", "MacIntel", "Android", "Win32", null])
+    assert.equal(mobDir.defaultProvider(ua), webDir.defaultProvider(ua));
+});

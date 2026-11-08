@@ -1,0 +1,143 @@
+@layer tokens, base, legacy, chrome, pages, primitives;
+@layer pages {
+  /* Durağa yol tarifi (D3): hesapsız açık, sunucusuz. /k/ ile aynı yüzen cam kart dili (R13). */
+  .pin-page {
+    position: relative;
+    width: 100%;
+    min-height: calc(100dvh - var(--app-header-height) - var(--mobile-nav-height));
+    display: grid;
+    place-items: center;
+    padding: var(--space-6) var(--space-4);
+    box-sizing: border-box;
+    background: var(--color-surface-sunken);
+  }
+
+  /* Kod giriş kartı: inverse cam, form açık kutuda (R13). */
+  .pin-lookup {
+    display: grid;
+    gap: var(--space-4);
+    box-sizing: border-box;
+    inline-size: 100%;
+    max-inline-size: 28rem;
+    padding: var(--space-5);
+    border: 1px solid var(--color-white-a12);
+    border-radius: var(--radius-xl);
+    background: color-mix(in srgb, var(--color-surface-inverse) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: var(--shadow-xl);
+    color: var(--color-text);
+  }
+  .pin-lookup__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+  }
+  .pin-lookup__icon {
+    display: grid;
+    place-items: center;
+    inline-size: var(--touch-target);
+    block-size: var(--touch-target);
+    border-radius: var(--radius-full);
+    background: var(--color-white-a12);
+    color: var(--color-accent-strong);
+  }
+  .pin-lookup__title {
+    margin: 0;
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-extrabold);
+  }
+  .pin-lookup__body {
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+  .pin-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  /* Varış görünümü. */
+  .pin-view {
+    inline-size: 100%;
+    max-inline-size: 32rem;
+  }
+  .pin-dest {
+    inline-size: 100%;
+  }
+  .pin-dest__head {
+    margin-bottom: var(--space-3);
+  }
+  .pin-dest__label {
+    margin: 0 0 var(--space-1);
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-heading);
+    color: var(--color-text);
+  }
+  .pin-dest__coords {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+
+  .pin-geo {
+    margin-bottom: var(--space-4);
+  }
+  .pin-geo__line {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+  .pin-geo__line--ok {
+    color: var(--color-success);
+  }
+
+  .pin-providers__hint {
+    margin: 0 0 var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+  }
+  .pin-providers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .pin-dest__retry {
+    margin-top: var(--space-3);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pin-lookup {
+      animation: pin-lookup-in var(--duration-deliberate) var(--easing-enter);
+    }
+    .pin-dest {
+      animation: pin-dest-in var(--duration-slow) var(--easing-enter);
+    }
+    @keyframes pin-lookup-in {
+      from {
+        opacity: 0;
+        transform: translateY(var(--motion-distance-lg)) scale(0.96);
+      }
+    }
+    @keyframes pin-dest-in {
+      from {
+        opacity: 0;
+        transform: translateY(var(--space-4));
+      }
+    }
+  }
+}

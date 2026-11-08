@@ -338,6 +338,15 @@ export const CANONICAL_ROUTES: readonly CanonicalRoute[] = [
     robots: "noindex",
   },
   {
+    // Durağa yol tarifi (D3): ?c=<kod> ile pin koordinatını sunucusuz çözer; hesapsız açık.
+    path: "/p/",
+    file: "app/p/page.tsx",
+    layout: "app",
+    title: t("Durağa yol tarifi", "Directions to stop"),
+    sitemap: false,
+    robots: "noindex",
+  },
+  {
     path: "/login/",
     file: "app/login/page.tsx",
     layout: "auth",

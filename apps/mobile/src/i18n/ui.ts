@@ -240,6 +240,8 @@ export const UI_TR = {
   "planner.search.results": "Arama sonuçları",
   "planner.search.submit": "Ara",
   "planner.share": "Paylaş",
+  "planner.pinShare.action": "Bu durağı paylaş",
+  "planner.pinShare.title": "Bu durağı paylaş",
   "planner.sheet.collapse": "Listeyi daralt",
   "planner.sheet.expand": "Listeyi genişlet",
   "planner.sheet.label": "Rota listesi",
