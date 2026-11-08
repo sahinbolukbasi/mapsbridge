@@ -459,6 +459,47 @@
   .planner-facts__review-text {
     margin: 0;
   }
+  /* B2: ayrıntıdaki fotoğraf şeridi (yalnız kaynakta foto varsa; SKU: ayrıntı açılışında). */
+  .planner-facts__photos {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 60%);
+    gap: var(--space-2);
+    margin: 0 0 var(--space-2);
+    padding: 0;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+  }
+  .planner-facts__photo {
+    display: grid;
+    gap: var(--space-1);
+    scroll-snap-align: start;
+  }
+  .planner-facts__photo-credit {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+  }
+  /* B2: kompakt puan rozeti (keşfet/yakın/durak). Renk tek bilgi taşıyıcı değil; metin erişilebilir. */
+  .planner-rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-sunken);
+    color: var(--color-text);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+  /* B2: keşfet kartındaki tek küçük küçük resim (yalnız kaynakta foto varsa). */
+  .planner-discover__thumb {
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
   .planner-detail__head {
     display: grid;
     gap: var(--space-2);

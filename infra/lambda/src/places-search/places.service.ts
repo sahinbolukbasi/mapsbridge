@@ -54,6 +54,8 @@ export type PlacesQuery =
     };
 
 export type PlaceReview = { author?: string; rating?: number; text?: string; time?: string };
+/** Yer fotoğrafı (yalnız ayrıntı açılışında, kaynakta varsa). `url` çözümlenmiş medya adresi. */
+export type PlacePhoto = { url: string; attribution?: string; width?: number; height?: number };
 /** Normalize yer. Opsiyonel alanlar yalnız kaynakta varsa bulunur. */
 export type Place = {
   id: string;
@@ -69,6 +71,7 @@ export type Place = {
   rating?: number;
   userRatingCount?: number;
   reviews?: PlaceReview[];
+  photos?: PlacePhoto[];
   attribution: string;
 };
 

@@ -22,6 +22,7 @@ import {
   type PlaceCategoryId,
 } from "../../lib/trip/places-api";
 import type { IconName } from "../../lib/icon-paths";
+import { RatingBadge } from "./rating-badge";
 import {
   Accordion,
   Button,
@@ -316,8 +317,26 @@ export function DiscoverPanel({
                   {r.category && <Icon name={CATEGORY_ICON[r.category]} size={16} />}
                   <span>{r.place.name}</span>
                 </button>
+                {r.place.photos?.[0] && (
+                  <img
+                    className="planner-discover__thumb"
+                    src={r.place.photos[0].url}
+                    alt={t("planner.facts.photoAlt", "{name} fotoğrafı {n}")
+                      .replace("{name}", r.place.name)
+                      .replace("{n}", "1")}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
                 <p className="planner-discover__meta">
                   {[r.place.category, distance(r.distanceMeters)].filter(Boolean).join(" · ")}
+                  {typeof r.place.rating === "number" && (
+                    <RatingBadge
+                      rating={r.place.rating}
+                      count={r.place.userRatingCount}
+                      format={num}
+                    />
+                  )}
                 </p>
                 {r.place.address && <p className="planner-discover__address">{r.place.address}</p>}
                 <Accordion

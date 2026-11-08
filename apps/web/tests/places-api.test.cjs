@@ -91,6 +91,46 @@ test("parsePlacesResponse: geçerli yer kalır, bozuk atılır (alan tamamlanmaz
   assert.equal(api.parsePlacesResponse(OK([], "osm")).provider, "amazon");
 });
 
+test("parsePlacesResponse: fotoğraf — geçerli http(s) korunur, bozuk atılır, hiç foto yoksa anahtar yok (B2/I1)", () => {
+  const { api } = loadApi(() => OK([]));
+  const out = plain(
+    api.parsePlacesResponse(
+      OK(
+        [
+          {
+            ...GALATA,
+            id: "g1",
+            provider: "google",
+            attribution: "Google",
+            photos: [
+              { url: "https://lh3.googleusercontent.com/a", attribution: "Ali", width: 800, height: 600 },
+              { url: "http://ornek.test/b" }, // http da kabul
+              { url: "ftp://x/c" }, // geçersiz şema → atılır
+              { url: 42 }, // url string değil → atılır
+              { attribution: "yok" }, // url yok → atılır
+              null, // bozuk → atılır
+            ],
+          },
+          { ...GALATA, id: "a1", photos: "nope" }, // dizi değil → photos anahtarı düşer
+          { ...GALATA, id: "a2" }, // hiç foto yok → anahtar yok
+        ],
+        "google",
+      ),
+    ),
+  );
+  const g1 = out.places.find((p) => p.id === "g1");
+  assert.equal(g1.photos.length, 2, "yalnız iki geçerli http(s) foto");
+  assert.equal(g1.photos[0].url, "https://lh3.googleusercontent.com/a");
+  assert.equal(g1.photos[0].attribution, "Ali");
+  assert.equal(g1.photos[0].width, 800);
+  assert.equal(g1.photos[1].url, "http://ornek.test/b");
+  assert.equal("attribution" in g1.photos[1], false, "atıf yoksa anahtar yok");
+  const a1 = out.places.find((p) => p.id === "a1");
+  assert.equal("photos" in a1, false, "dizi olmayan photos düşer");
+  const a2 = out.places.find((p) => p.id === "a2");
+  assert.equal("photos" in a2, false, "foto yoksa anahtar yok (I1)");
+});
+
 test("parsePlacesResponse: ok olmayan/şema dışı yanıt PlacesApiError('unavailable') fırlatır", () => {
   const { api } = loadApi(() => OK([]));
   for (const bad of [

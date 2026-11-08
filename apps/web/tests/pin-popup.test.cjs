@@ -68,6 +68,38 @@ test("ayrıntı: yalnız dönen alanlar; geçersiz puan/web atılır; puan yoksa
   assert.equal(m.address, "Bereketzade, Beyoğlu", "kullanıcı adresi önce");
 });
 
+test("ayrıntı fotoğrafları: yalnız http(s) adresli foto modele girer; yoksa anahtar yok (B2/I10)", () => {
+  const withPhotos = {
+    id: "g1",
+    provider: "google",
+    name: "Kahve",
+    lat: 41,
+    lng: 29,
+    attribution: "Google",
+    photos: [
+      { url: "https://lh3.googleusercontent.com/a", attribution: "Ali" },
+      { url: "javascript:alert(1)" }, // atılır
+      { url: 5 }, // atılır
+    ],
+  };
+  const m = plain(popup.pinPopupModel(PIN(), withPhotos));
+  assert.equal(m.photos.length, 1, "yalnız geçerli http(s) foto");
+  assert.equal(m.photos[0].url, "https://lh3.googleusercontent.com/a");
+  const none = plain(popup.pinPopupModel(PIN(), { ...withPhotos, photos: [] }));
+  assert.equal("photos" in none, false, "boş foto dizisi modele girmez");
+  const amazon = plain(
+    popup.pinPopupModel(PIN(), {
+      id: "a1",
+      provider: "amazon",
+      name: "Yer",
+      lat: 41,
+      lng: 29,
+      attribution: "Amazon Location Service",
+    }),
+  );
+  assert.equal("photos" in amazon, false, "foto yoksa anahtar yok");
+});
+
 test("Google atfı yalnız provider google iken", () => {
   const g = {
     id: "g1",

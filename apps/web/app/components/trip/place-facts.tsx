@@ -8,7 +8,7 @@ import { useLocale } from "../../lib/locale-context";
 import type { Pin } from "../../lib/trip/models";
 import { pinPopupModel, showsGoogleAttribution } from "../../lib/trip/pin-popup";
 import { placesApi, type ApiPlace, type PlaceProvider } from "../../lib/trip/places-api";
-import { Button, GoogleLogo, Icon, Skeleton } from "../ui";
+import { Button, GoogleLogo, Icon, Media, Skeleton } from "../ui";
 
 /** Pinin yer kaynağı; yoksa null (ayrıntı istenmez, alan uydurulmaz). */
 export function placeRefOf(pin: Pin): { id: string; provider: PlaceProvider } | null {
@@ -76,6 +76,33 @@ export function PlaceFacts({ pin }: { pin: Pin }) {
       <h4 id="planner-detail-facts" className="planner-detail__title">
         {t("planner.facts.title", "Yer bilgisi")}
       </h4>
+      {m.photos && m.photos.length > 0 && (
+        <ul
+          className="planner-facts__photos"
+          aria-label={t("planner.facts.photos", "Fotoğraflar")}
+        >
+          {m.photos.map((photo, i) => (
+            <li key={photo.url} className="planner-facts__photo">
+              <Media
+                src={photo.url}
+                ratio="4/3"
+                alt={
+                  photo.attribution
+                    ? t("planner.facts.photoAltBy", "{name} fotoğrafı: {author}")
+                        .replace("{name}", m.title)
+                        .replace("{author}", photo.attribution)
+                    : t("planner.facts.photoAlt", "{name} fotoğrafı {n}")
+                        .replace("{name}", m.title)
+                        .replace("{n}", String(i + 1))
+                }
+              />
+              {photo.attribution && (
+                <span className="planner-facts__photo-credit">{photo.attribution}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
       {hasFacts ? (
         <dl className="planner-facts">
           {m.rating !== undefined && (

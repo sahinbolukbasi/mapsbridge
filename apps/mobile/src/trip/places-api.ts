@@ -16,6 +16,7 @@ export const PLACE_CATEGORY_IDS: readonly PlaceCategoryId[] = [
   "nightlife",
 ];
 export type ApiPlaceReview = { author?: string; rating?: number; text?: string; time?: string };
+export type ApiPlacePhoto = { url: string; attribution?: string; width?: number; height?: number };
 /** Sunucunun normalize ettiği yer; opsiyonel alanlar yalnız kaynakta varsa gelir. */
 export type ApiPlace = {
   id: string;
@@ -31,6 +32,7 @@ export type ApiPlace = {
   rating?: number;
   userRatingCount?: number;
   reviews?: ApiPlaceReview[];
+  photos?: ApiPlacePhoto[];
   attribution: string;
 };
 export type PlacesOk = { provider: PlaceProvider; places: ApiPlace[] };
@@ -59,22 +61,49 @@ export function placesPath(action: "search" | "reverse" | "detail" | "nearby", p
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+/** Yalnız http(s) adresli fotoğrafı korur; bozuk girdi atılır (alan tamamlanmaz, I1). */
+function sanitizePhotos(value: unknown): ApiPlacePhoto[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const photos: ApiPlacePhoto[] = [];
+  for (const p of value) {
+    if (!isRecord(p) || typeof p.url !== "string" || !/^https?:\/\//.test(p.url)) continue;
+    photos.push({
+      url: p.url,
+      ...(typeof p.attribution === "string" && p.attribution.trim() !== ""
+        ? { attribution: p.attribution }
+        : {}),
+      ...(finite(p.width) ? { width: p.width } : {}),
+      ...(finite(p.height) ? { height: p.height } : {}),
+    });
+  }
+  return photos.length ? photos : undefined;
+}
 /** Yanıtı doğrular; şemaya uymayan yer atılır (alan tamamlanmaz). */
 export function parsePlacesResponse(raw: unknown): PlacesOk {
   if (!isRecord(raw) || raw.status !== "ok" || !Array.isArray(raw.places))
     throw new PlacesApiError("unavailable", "Yer servisi beklenmeyen yanıt verdi.");
   const provider: PlaceProvider = raw.provider === "google" ? "google" : "amazon";
-  const places = raw.places.filter(
-    (p): p is ApiPlace =>
-      isRecord(p) &&
-      typeof p.id === "string" &&
-      typeof p.name === "string" &&
-      p.name.trim() !== "" &&
-      finite(p.lat) &&
-      finite(p.lng) &&
-      (p.provider === "amazon" || p.provider === "google") &&
-      typeof p.attribution === "string",
-  );
+  const places = raw.places
+    .filter(
+      (p): p is ApiPlace =>
+        isRecord(p) &&
+        typeof p.id === "string" &&
+        typeof p.name === "string" &&
+        p.name.trim() !== "" &&
+        finite(p.lat) &&
+        finite(p.lng) &&
+        (p.provider === "amazon" || p.provider === "google") &&
+        typeof p.attribution === "string",
+    )
+    .map((p) => {
+      const photos = sanitizePhotos((p as Record<string, unknown>).photos);
+      if (photos) return { ...p, photos };
+      if ("photos" in p) {
+        const { photos: _dropped, ...rest } = p as ApiPlace;
+        return rest as ApiPlace;
+      }
+      return p;
+    });
   return { provider, places };
 }
 /** HTTP durumundan hata türü (web toError ile aynı eşleme). */

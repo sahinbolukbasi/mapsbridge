@@ -357,6 +357,173 @@ test("Google sağlayıcı: FieldMask dar küme; reviews yalnız reviews=1; anaht
   );
 });
 
+test("Google ayrıntı: sınırlı fotoğraf (≤3) çözülür, atıf/boyut taşınır; arama/yakın maskesinde foto/puan yok", async () => {
+  const seen = [];
+  const { load } = harness({
+    env: { GOOGLE_PLACES_SECRET_ID: "google-places-key" },
+    fetch: async (url, init) => {
+      seen.push({ url, mask: init.headers["X-Goog-FieldMask"] });
+      if (url.includes("/media"))
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ photoUri: `https://lh3.googleusercontent.com/${url.length}` }),
+        };
+      return {
+        ok: true,
+        status: 200,
+        json: async () =>
+          url.includes(":search") || url.includes(":searchNearby")
+            ? {
+                places: [
+                  {
+                    id: "g1",
+                    displayName: { text: "Kahve" },
+                    location: { latitude: 41, longitude: 29 },
+                  },
+                ],
+              }
+            : {
+                id: "g1",
+                displayName: { text: "Kahve" },
+                location: { latitude: 41, longitude: 29 },
+                rating: 4.5,
+                userRatingCount: 1200,
+                reviews: [{ rating: 5, text: { text: "Harika" } }],
+                photos: [
+                  { name: "places/g1/photos/a", widthPx: 800, heightPx: 600, authorAttributions: [{ displayName: "Ali" }] },
+                  { name: "places/g1/photos/b" },
+                  { name: "places/g1/photos/c" },
+                  { name: "places/g1/photos/d" },
+                  { name: "places/g1/photos/e" },
+                ],
+              },
+      };
+    },
+  });
+  const { googlePlaces, SEARCH_FIELD_MASK, DETAIL_FIELD_MASK, MAX_DETAIL_PHOTOS } = load(
+    "places-search/providers/google-places.ts",
+  );
+  assert.equal(MAX_DETAIL_PHOTOS, 3);
+  assert.ok(DETAIL_FIELD_MASK.includes("photos"), "ayrıntı maskesinde photos var");
+  assert.ok(!/photos|rating|reviews/.test(SEARCH_FIELD_MASK), "arama maskesinde foto/puan/yorum yok");
+
+  // Ayrıntı: puan + yorum + sınırlı foto döner.
+  const detail = await googlePlaces.run({
+    op: "detail",
+    id: "g1",
+    provider: "google",
+    lang: "tr",
+    reviews: true,
+  });
+  assert.equal(detail.length, 1);
+  assert.equal(detail[0].rating, 4.5);
+  assert.equal(detail[0].reviews.length, 1);
+  assert.equal(detail[0].photos.length, MAX_DETAIL_PHOTOS, "≤3 foto çözülür");
+  assert.match(detail[0].photos[0].url, /^https:\/\/lh3\.googleusercontent\.com\//);
+  assert.equal(detail[0].photos[0].attribution, "Ali");
+  assert.equal(detail[0].photos[0].width, 800);
+  assert.equal(detail[0].photos[1].attribution, undefined, "atıf yoksa anahtar yok");
+  const mediaCalls = seen.filter((s) => s.url.includes("/media"));
+  assert.equal(mediaCalls.length, MAX_DETAIL_PHOTOS, "yalnız 3 foto medya isteği");
+
+  // Arama/yakın arama: foto medya isteği YOK (SKU maliyeti).
+  seen.length = 0;
+  await googlePlaces.run({ op: "search", q: "kahve", lang: "tr" });
+  await googlePlaces.run({ op: "nearby", lat: 41, lng: 29, radius: 800, lang: "tr" });
+  assert.equal(seen.filter((s) => s.url.includes("/media")).length, 0, "arama/yakın foto çözmez");
+  assert.ok(seen.every((s) => s.mask === SEARCH_FIELD_MASK), "arama/yakın dar maske");
+});
+
+test("Google ayrıntı: fotoğraf alanı yoksa photos anahtarı hiç yazılmaz (I1/I10)", async () => {
+  const { load } = harness({
+    env: { GOOGLE_PLACES_SECRET_ID: "google-places-key" },
+    fetch: async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: "g1",
+        displayName: { text: "Kahve" },
+        location: { latitude: 41, longitude: 29 },
+      }),
+    }),
+  });
+  const { googlePlaces } = load("places-search/providers/google-places.ts");
+  const [place] = await googlePlaces.run({
+    op: "detail",
+    id: "g1",
+    provider: "google",
+    lang: "tr",
+    reviews: false,
+  });
+  assert.equal("photos" in place, false, "foto yoksa anahtar yok");
+});
+
+test("Google ayrıntısı akışı: puan+yorum+foto döner; Amazon (googleConfigured=false) hiçbirini döndürmez", async () => {
+  // Google yapılandırılmış + kill switch açık: detay zenginleşir.
+  const google = fakeProvider("google", [
+    PLACE({
+      id: "g1",
+      provider: "google",
+      attribution: "Google",
+      rating: 4.7,
+      userRatingCount: 500,
+      reviews: [{ author: "Ece", rating: 5, text: "Güzel" }],
+      photos: [{ url: "https://lh3.googleusercontent.com/x", attribution: "Ece", width: 800, height: 600 }],
+    }),
+  ]);
+  const { load } = harness();
+  const svc = load("places-search/places.service.ts");
+  const repo = memoryRepo({
+    control: { googleEnabled: true, userDailyLimit: 300, monthlyGoogleCalls: 10 },
+  });
+  const deps = { repo, providers: { google }, googleConfigured: true, now: () => NOW };
+  const res = await svc.runPlaces(
+    { action: "detail", id: "g1", provider: "google" },
+    user,
+    deps,
+  );
+  assert.equal(res.body.provider, "google");
+  assert.equal(res.body.places[0].rating, 4.7);
+  assert.equal(res.body.places[0].reviews.length, 1);
+  assert.equal(res.body.places[0].photos.length, 1);
+
+  // Cache isabetinde sağlayıcı tekrar çağrılmaz, zengin satır geri döner.
+  const cached = await svc.runPlaces(
+    { action: "detail", id: "g1", provider: "google" },
+    user,
+    deps,
+  );
+  assert.equal(cached.body.cached, true);
+  assert.equal(cached.body.places[0].photos.length, 1);
+  assert.equal(google.calls.length, 1, "önbellek isabetinde sağlayıcı yeniden çağrılmaz");
+
+  // Amazon ayrıntısı (googleConfigured=false): puan/yorum/foto yok.
+  const amazon = fakeProvider("amazon", [PLACE({ id: "a1", provider: "amazon" })]);
+  const res2 = await svc.runPlaces(
+    { action: "detail", id: "a1", provider: "amazon" },
+    user,
+    { repo: memoryRepo(), providers: { amazon }, googleConfigured: false, now: () => NOW },
+  );
+  assert.equal(res2.body.provider, "amazon");
+  assert.equal(res2.body.places[0].rating, undefined);
+  assert.equal(res2.body.places[0].reviews, undefined);
+  assert.equal(res2.body.places[0].photos, undefined, "Amazon foto döndürmez");
+});
+
+test("K3: foto taşıyan Google satırı hâlâ Google kaynaklı sayılır (korpusa alınmaz)", async () => {
+  const { load } = harness();
+  const { isGoogleDerived } = load("places-search/google-content.ts");
+  assert.equal(
+    isGoogleDerived({
+      provider: "google",
+      name: "Kahve",
+      photos: [{ url: "https://lh3.googleusercontent.com/x", attribution: "Ece" }],
+    }),
+    true,
+  );
+});
+
 test("Google önbellek satırı ≤ 24 saat; Amazon ≤ 7 gün", async () => {
   const { load } = harness();
   const svc = load("places-search/places.service.ts");

@@ -1,6 +1,7 @@
 "use client";
 import { IconButton, Icon, cx, type IconName } from "../ui";
 import { useLocale } from "../../lib/locale-context";
+import { RatingBadge } from "./rating-badge";
 import { dayColorIndex, formatMinutes } from "./trip-format";
 import "./trip-ui.css";
 
@@ -17,6 +18,8 @@ export function StopRow({
   category,
   categoryLabel,
   duration,
+  rating,
+  ratingCount,
   selected = false,
   onMove,
   isFirst = false,
@@ -33,12 +36,16 @@ export function StopRow({
   categoryLabel?: string;
   /** Dakika. */
   duration?: number;
+  /** Yer kaydına bağlı durakta ayrıntı yüklendiyse kaynak puanı (I10; foto satırda çekilmez). */
+  rating?: number;
+  ratingCount?: number;
   selected?: boolean;
   onMove?: (direction: "up" | "down") => void;
   isFirst?: boolean;
   isLast?: boolean;
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const num = (n: number) => n.toLocaleString(locale === "en" ? "en-GB" : "tr-TR");
   const stopLabel = t("trip.stop.label", "{n}. durak").replace("{n}", String(index));
   return (
     <div
@@ -59,6 +66,9 @@ export function StopRow({
           </span>
           {duration !== undefined && (
             <span className="trip-stop__duration">{formatMinutes(duration, t)}</span>
+          )}
+          {typeof rating === "number" && (
+            <RatingBadge rating={rating} count={ratingCount} format={num} />
           )}
         </span>
       </div>

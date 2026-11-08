@@ -2,7 +2,7 @@
 // kaydından ve yer proxy'sinin döndürdüğü ayrıntıdan gelir (I1). Boş alan modele girmez (I10);
 // puan/saat/telefon kaynakta yoksa çizilmez. Google atfı yalnız Google kaynaklı ayrıntıda.
 import type { IconName } from "../icon-paths";
-import type { ApiPlace } from "./places-api";
+import type { ApiPlace, ApiPlacePhoto } from "./places-api";
 import type { Pin, PinCategory } from "./models";
 
 /** Kategori ikonla kodlanır (renk tek bilgi taşıyıcı değil, WCAG 1.4.1; design F45). */
@@ -45,6 +45,8 @@ export type PinPopupModel = {
   website?: string;
   rating?: number;
   userRatingCount?: number;
+  /** Yalnız ayrıntıda, kaynakta http(s) adresli fotoğraf varsa (SKU: yalnız ayrıntı açılışında). */
+  photos?: ApiPlacePhoto[];
   /** Ayrıntı kaynağının atfı (Google ise GoogleLogo gösterilir). */
   attribution?: { provider: "amazon" | "google"; text: string };
 };
@@ -104,6 +106,11 @@ export function pinPopupModel(pin: Pin, detail?: ApiPlace | null): PinPopupModel
     const count = finite(detail.userRatingCount);
     if (count !== undefined && count >= 0 && model.rating !== undefined)
       model.userRatingCount = Math.round(count);
+    const photos = (detail.photos || []).filter(
+      (p): p is ApiPlacePhoto =>
+        !!p && typeof p.url === "string" && /^https?:\/\//.test(p.url),
+    );
+    if (photos.length) model.photos = photos;
     const attr = text(detail.attribution);
     if (attr) model.attribution = { provider: detail.provider, text: attr };
   }

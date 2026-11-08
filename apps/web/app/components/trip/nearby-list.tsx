@@ -13,6 +13,7 @@ import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
 import type { AddTarget } from "../../lib/trip/planner-logic";
 import { defaultAddTargetValue, parseAddTarget, ADD_TARGET_GENERAL } from "../../lib/trip/planner-logic";
 import type { PinCategory } from "../../lib/trip/models";
+import { RatingBadge } from "./rating-badge";
 import { Button, EmptyState, ErrorState, Icon, Select, Skeleton } from "../ui";
 
 /** NearbyList'in ekleme çağrısına verdiği yer (sidebar addPlace Place biçimiyle uyumlu). */
@@ -157,7 +158,8 @@ function NearbyRow({
   onFocus?: (lat: number, lng: number, label: string) => void;
   onAdd: (place: NearbyAddPlace, target: AddTarget) => void;
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const num = (n: number) => n.toLocaleString(locale === "en" ? "en-GB" : "tr-TR");
   const [target, setTarget] = useState(() => defaultAddTargetValue(activeDayIndex, days));
   const pinCategory = detectCategoryFromText(`${item.name} ${item.category ?? ""}`);
   const place: NearbyAddPlace = {
@@ -181,6 +183,9 @@ function NearbyRow({
       </button>
       <p className="planner-discover__meta">
         {[item.category, distanceLabel].filter(Boolean).join(" · ")}
+        {typeof item.rating === "number" && (
+          <RatingBadge rating={item.rating} count={item.userRatingCount} format={num} />
+        )}
       </p>
       {item.address && <p className="planner-discover__address">{item.address}</p>}
       <div className="planner-discover__actions">

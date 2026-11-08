@@ -7,6 +7,7 @@ import {
   LIMITS,
   ProviderUnavailable,
   type Place,
+  type PlacePhoto,
   type PlaceReview,
   type PlacesProvider,
   type PlacesQuery,
@@ -30,7 +31,13 @@ export const DETAIL_FIELD_MASK = [
   "websiteUri",
   "rating",
   "userRatingCount",
+  "photos",
 ].join(",");
+
+/** Ayrıntıda çözülen en çok fotoğraf (Places Photo SKU maliyeti sınırlı tutulur). */
+export const MAX_DETAIL_PHOTOS = 3;
+/** Photo media isteğinde istenen en büyük genişlik (px). */
+const PHOTO_MAX_WIDTH = 800;
 
 const BASE = "https://places.googleapis.com/v1";
 
@@ -53,6 +60,12 @@ async function apiKey(): Promise<string> {
   return value;
 }
 
+type GooglePhoto = {
+  name?: string;
+  widthPx?: number;
+  heightPx?: number;
+  authorAttributions?: Array<{ displayName?: string }>;
+};
 type GooglePlace = {
   id?: string;
   displayName?: { text?: string };
@@ -70,7 +83,35 @@ type GooglePlace = {
     relativePublishTimeDescription?: string;
     authorAttribution?: { displayName?: string };
   }>;
+  photos?: GooglePhoto[];
 };
+
+/**
+ * Fotoğraf çözücü: Google photo `name`'ini medya URL'sine dönüştürür. Yalnız ayrıntı açılışında
+ * ve sınırlı sayıda çağrılır (SKU maliyeti); arama/yakın aramada verilmez (photos atılır).
+ */
+export type PhotoResolver = (name: string) => Promise<string | null>;
+
+/** Google fotoğraflarını sınırlı sayıda (≤MAX_DETAIL_PHOTOS) çözer; URL alınamazsa atlanır (I1). */
+async function resolvePhotos(
+  photos: GooglePhoto[] | undefined,
+  resolve: PhotoResolver,
+): Promise<PlacePhoto[]> {
+  const out: PlacePhoto[] = [];
+  for (const ph of (photos || []).slice(0, MAX_DETAIL_PHOTOS)) {
+    if (!ph.name) continue;
+    const url = await resolve(ph.name).catch(() => null);
+    if (!url) continue;
+    const attribution = ph.authorAttributions?.find((a) => a.displayName)?.displayName;
+    out.push({
+      url,
+      ...(attribution ? { attribution } : {}),
+      ...(typeof ph.widthPx === "number" ? { width: ph.widthPx } : {}),
+      ...(typeof ph.heightPx === "number" ? { height: ph.heightPx } : {}),
+    });
+  }
+  return out;
+}
 
 export function fromGoogle(p: GooglePlace): Partial<Place> {
   const reviews: PlaceReview[] | undefined = p.reviews
@@ -100,6 +141,31 @@ export function fromGoogle(p: GooglePlace): Partial<Place> {
     attribution: ATTRIBUTION.google,
   };
 }
+
+/**
+ * Places Photo (New) medya adresi: `GET {BASE}/{photo.name}/media?maxWidthPx=…&skipHttpRedirect=true`
+ * JSON `{ photoUri }` döndürür. Yalnız ayrıntı açılışında çağrılır. Hata/boşsa null (uydurma yok).
+ */
+const resolvePhotoUrl: PhotoResolver = async (name) => {
+  const key = await apiKey();
+  let res: Response;
+  try {
+    res = await fetch(
+      `${BASE}/${name}/media?maxWidthPx=${PHOTO_MAX_WIDTH}&skipHttpRedirect=true`,
+      {
+        method: "GET",
+        headers: { "X-Goog-Api-Key": key },
+        signal: AbortSignal.timeout(3500),
+      },
+    );
+  } catch {
+    return null;
+  }
+  if (!res.ok) return null;
+  const body = (await res.json().catch(() => null)) as { photoUri?: string } | null;
+  const uri = body?.photoUri;
+  return typeof uri === "string" && /^https:\/\//.test(uri) ? uri : null;
+};
 
 async function call(url: string, init: RequestInit, mask: string): Promise<unknown> {
   const key = await apiKey();
@@ -133,7 +199,11 @@ export const googlePlaces: PlacesProvider = {
         { method: "GET" },
         mask,
       )) as GooglePlace;
-      return [fromGoogle(body) as Place];
+      const place = fromGoogle(body) as Place;
+      // Fotoğraf URL'leri yalnız ayrıntı açılışında, sınırlı sayıda çözülür (SKU maliyeti).
+      const photos = await resolvePhotos(body.photos, resolvePhotoUrl);
+      if (photos.length) place.photos = photos;
+      return [place];
     }
     if (query.op === "nearby" && !query.category) {
       const body = (await call(
