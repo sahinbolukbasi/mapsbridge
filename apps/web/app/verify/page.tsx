@@ -16,20 +16,26 @@ export default function VerifyPage() {
   const [busy, setBusy] = useState(false);
   // Kayıt başarısı (Increment 2.8): doğrulanınca Celebrate, kısa süre sonra girişe geçilir.
   const [verifiedHref, setVerifiedHref] = useState<string | null>(null);
-  const email =
-    typeof window === "undefined" ? "" : (new URLSearchParams(location.search).get("email") ?? "");
-  const phone =
-    typeof window === "undefined" ? "" : (new URLSearchParams(location.search).get("phone") ?? "");
+  // Sorgu parametreleri mount sonrası okunur: render sırasında `location` okumak statik HTML ile
+  // hidrasyon uyuşmazlığı (React #418) üretiyordu. `ready` öncesi "adres bulunamadı" çizilmez.
+  const [params, setParams] = useState<{ email: string; phone: string; next: string } | null>(null);
+  const email = params?.email ?? "";
+  const phone = params?.phone ?? "";
   // Kayıt ekranına dönüşte `next` korunur (login/register ile aynı desen, design §5.4).
-  const nextUrl =
-    typeof window === "undefined" ? DEFAULT_NEXT : readNext(location.search, location.origin);
+  const nextUrl = params?.next ?? DEFAULT_NEXT;
   const registerHref =
     nextUrl !== DEFAULT_NEXT ? `/register/?next=${encodeURIComponent(nextUrl)}` : "/register/";
 
   // Doğrulama e-postası bağlantısı (/dogrula/ → /verify/, karar S20) `?code=` taşır: yalnız
   // 6 haneli ise alana doldurulur. Statik HTML ile eşleşmesi için mount sonrası yazılır.
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("code")?.trim() ?? "";
+    const search = new URLSearchParams(window.location.search);
+    setParams({
+      email: search.get("email") ?? "",
+      phone: search.get("phone") ?? "",
+      next: readNext(window.location.search, window.location.origin),
+    });
+    const code = search.get("code")?.trim() ?? "";
     if (/^\d{6}$/.test(code) && codeRef.current && !codeRef.current.value) {
       codeRef.current.value = code;
     }
@@ -89,7 +95,7 @@ export default function VerifyPage() {
           </p>
         }
       >
-        {!email && !phone ? (
+        {!params ? null : !email && !phone ? (
           <Alert
             tone="danger"
             title="E-posta adresi bulunamadı."

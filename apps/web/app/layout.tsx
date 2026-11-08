@@ -80,8 +80,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <WSProvider>
             <IconFontReady />
             <GoogleOneTap />
-            <UpgradeModal />
             <LocaleProvider>
+              {/* LocaleProvider içinde: dışında t() anahtarı döndürüyordu (kredi yükleme sheet'i). */}
+              <UpgradeModal />
               <MobilePlatformProvider>
                 {/* design §4.1: SkipLink + Header + OperationsBanner + sayfa + Footer + MobileNav + Toaster */}
                 <SiteChrome>{children}</SiteChrome>

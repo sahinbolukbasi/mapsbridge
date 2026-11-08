@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { MessageBubble, MessageLog } from "../components/assistant/message-log";
 import { ComposerBar } from "../components/assistant/composer-bar";
 import { AuthGate } from "../components/auth-gate";
@@ -22,7 +22,12 @@ import {
   cx,
 } from "../components/ui";
 import { MessageRequests } from "./message-requests";
-import { chatApi, type ApiResponseError, type ChatThreadSummary } from "../lib/api-client";
+import {
+  chatApi,
+  type ApiResponseError,
+  type ChatMessageItem,
+  type ChatThreadSummary,
+} from "../lib/api-client";
 import { decodeJwtPayload } from "../lib/cognito";
 import { chatErrorKey, groupThreads, type RequestAction } from "../features/messaging/requests";
 import {
@@ -179,6 +184,57 @@ export default function MessagesPage() {
   );
   const active = conversations.find((c) => c.id === activeId) ?? null;
   const requests = useMemo(() => groupThreads(serverThreads, mySub), [serverThreads, mySub]);
+  // Kabul edilmiş sunucu sohbetleri "Sohbetler" listesine girer (yeniden yüklemede kaybolmaz).
+  useEffect(() => {
+    if (requests.active.length === 0) return;
+    setConversations((prev) => {
+      const known = new Set(prev.flatMap((c) => [c.id, c.serverId ?? ""]));
+      const added: ChatConversation[] = requests.active
+        .filter((x) => !known.has(x.threadId))
+        .map((x) => ({
+          id: x.threadId,
+          serverId: x.threadId,
+          type: "direct",
+          title: x.otherParticipant || x.threadId,
+          lastMessage: "",
+          lastTime: x.lastMessageAt ? clock(new Date(x.lastMessageAt)) : "",
+          messages: [],
+        }));
+      return added.length ? [...prev, ...added] : prev;
+    });
+  }, [requests.active]);
+  // Açılan sunucu sohbetinin geçmişi GET /chat/threads/{id}/messages'tan gelir (sunucu kaynak).
+  const loadedThreads = useRef(new Set<string>());
+  const activeServerId = conversations.find((c) => c.id === activeId)?.serverId;
+  useEffect(() => {
+    if (!activeServerId || loadedThreads.current.has(activeServerId)) return;
+    loadedThreads.current.add(activeServerId);
+    chatApi
+      .getMessages(activeServerId)
+      .then((r) => {
+        const items = Array.isArray(r?.messages) ? r.messages : [];
+        if (items.length === 0) return;
+        setConversations((prev) =>
+          prev.map((c) => {
+            if (c.serverId !== activeServerId) return c;
+            const messages: ChatMessage[] = items.map((m, i) => {
+              const raw = m as ChatMessageItem & { SK?: string };
+              const outgoing = Boolean(mySub) && raw.senderId === mySub;
+              return {
+                id: raw.id || raw.SK || `${activeServerId}-${i}`,
+                senderName: raw.senderName || (outgoing ? me.name : c.title),
+                time: raw.timestamp ? clock(new Date(raw.timestamp)) : "",
+                text: raw.content,
+                isOutgoing: outgoing || undefined,
+              };
+            });
+            const last = messages[messages.length - 1];
+            return { ...c, messages, lastMessage: last?.text ?? "", lastTime: last?.time ?? "" };
+          }),
+        );
+      })
+      .catch(() => loadedThreads.current.delete(activeServerId));
+  }, [activeServerId, mySub, me.name]);
   // Sohbetler / İstekler sekmesi (Increment 3.8); sayı rozeti sunucudaki gelen istek sayısı.
   const [listTab, setListTab] = useState<"chats" | "requests">("chats");
   // Kabul edilen istek: sohbet açılınca kısa kutlama (role=status), kapatılabilir.
