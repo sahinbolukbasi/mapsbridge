@@ -12,7 +12,7 @@ import { detectCategoryFromText } from "../../lib/trip/geocoding-service";
 import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
 import type { AddTarget } from "../../lib/trip/planner-logic";
 import { defaultAddTargetValue, parseAddTarget, ADD_TARGET_GENERAL } from "../../lib/trip/planner-logic";
-import type { Pin, PinCategory } from "../../lib/trip/models";
+import type { PinCategory } from "../../lib/trip/models";
 import { Button, EmptyState, ErrorState, Icon, Select, Skeleton } from "../ui";
 
 /** NearbyList'in ekleme çağrısına verdiği yer (sidebar addPlace Place biçimiyle uyumlu). */

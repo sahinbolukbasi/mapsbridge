@@ -584,7 +584,6 @@ export function TravelPlannerSidebar({
             {workspaceMode === "edit" && fullSuggestion && pins.length > 0 && (
               <DayFullBanner
                 suggestion={fullSuggestion}
-                dayIndex={day.dayIndex}
                 otherDays={(activeTrip?.days ?? [])
                   .map((d) => d.dayIndex)
                   .filter((d) => d !== day.dayIndex)}
@@ -947,14 +946,12 @@ function PoolRow({
  */
 function DayFullBanner({
   suggestion,
-  dayIndex,
   otherDays,
   pins,
   onAddExtra,
   onShift,
 }: {
   suggestion: DayFullSuggestion;
-  dayIndex: number;
   otherDays: number[];
   pins: Pin[];
   onAddExtra: () => void;
