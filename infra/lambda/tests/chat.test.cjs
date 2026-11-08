@@ -620,6 +620,47 @@ test("1.14: yayınlanmış profil kullanıcı adıyla istek; 404 USER_NOT_FOUND 
   assert.equal(list.threads[0].request.from, "user-a");
 });
 
+test("review-final #4: liste BatchGet UnprocessedKeys bir kez yeniden dener; kalan thread 'unknown'", async () => {
+  const req = (id, status) => ({
+    PK: `THREAD#${id}`,
+    SK: "REQUEST",
+    status,
+    from: "user-b",
+    to: "user-a",
+  });
+  const key = (id) => ({ PK: `THREAD#${id}`, SK: "REQUEST" });
+  let batch = 0;
+  const h = harness({
+    data: (c) => {
+      if (c.name === "QueryCommand")
+        return { Items: [{ threadId: "t1" }, { threadId: "t2" }, { threadId: "t3" }] };
+      if (c.name !== "BatchGetItemCommand") return {};
+      batch++;
+      // 1. deneme: t1 döner, t2+t3 işlenmedi. 2. deneme: t2 döner, t3 yine işlenmedi.
+      return batch === 1
+        ? {
+            Responses: { "test-data": [req("t1", "pending")] },
+            UnprocessedKeys: { "test-data": { Keys: [key("t2"), key("t3")] } },
+          }
+        : {
+            Responses: { "test-data": [req("t2", "pending")] },
+            UnprocessedKeys: { "test-data": { Keys: [key("t3")] } },
+          };
+    },
+  });
+  const res = await h.load("chat/index.ts").handler(event("GET", "/chat/threads", token()));
+  assert.equal(res.statusCode, 200);
+  const list = JSON.parse(res.body);
+  assert.equal(batch, 2, "yalnız bir yeniden deneme");
+  const retry = h.calls.data.filter((c) => c.name === "BatchGetItemCommand")[1];
+  assert.deepEqual(retry.input.RequestItems["test-data"].Keys, [key("t2"), key("t3")]);
+  assert.deepEqual(
+    list.threads.map((x) => x.request.status),
+    ["pending", "pending", "unknown"],
+    "okunamayan REQUEST accepted varsayılmaz",
+  );
+});
+
 test("1.14: alıcı çözümleme — noktalı ve @'li kullanıcı adı, yayınlanmamış/geçersiz 404, ham kimlik", async () => {
   const profile = (name, extra) => ({
     [`PROFILE#${name}|PUBLIC`]: { PK: `PROFILE#${name}`, SK: "PUBLIC", owner: "user-b", ...extra },

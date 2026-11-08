@@ -24,8 +24,11 @@ import {
   parseCoordinates,
   parseRecent,
   pushRecent,
+  searchKey,
   searchReducer,
+  shouldSendSearch,
   type RecentSearch,
+  type SentSearch,
 } from "../../lib/trip/place-search-logic";
 import {
   PLANNER_RECENT_SEARCHES_KEY,
@@ -898,9 +901,16 @@ function PlaceSearch({
   const [picked, setPicked] = useState<Place | null>(null);
   const [recent, setRecent] = useState<RecentSearch[]>([]);
   const request = useRef(0);
+  // review-final #3: bekleyen debounce zamanlayıcısı ve son gönderilen sorgu; Enter debounce'u
+  // iptal eder, aynı sorgu ikinci kez gönderilmez (bir sorgu = bir kota birimi).
+  const debounce = useRef<number | undefined>(undefined);
+  const lastSent = useRef<SentSearch | null>(null);
   useEffect(() => setRecent(parseRecent(readPlannerStore(PLANNER_RECENT_SEARCHES_KEY))), []);
   const coords = parseCoordinates(query);
   const run = async (q: string) => {
+    if (!shouldSendSearch(lastSent.current, q)) return;
+    const sent: SentSearch = { key: searchKey(q), status: "loading" };
+    lastSent.current = sent;
     const id = ++request.current;
     dispatch({ type: "start", requestId: id });
     try {
@@ -913,9 +923,11 @@ function PlaceSearch({
         placeId: p.placeId,
         provider: p.provider,
       }));
+      sent.status = list.length > 0 ? "results" : "empty";
       dispatch({ type: "success", requestId: id, results: list });
     } catch (err) {
       if (process.env.NODE_ENV !== "production") console.warn("Arama başarısız", err);
+      sent.status = "error";
       dispatch({ type: "failure", requestId: id });
     }
   };
@@ -924,10 +936,12 @@ function PlaceSearch({
     const q = query.trim();
     if (q.length < SEARCH_MIN || parseCoordinates(q)) {
       request.current++;
+      lastSent.current = null;
       dispatch({ type: "reset" });
       return;
     }
     const timer = window.setTimeout(() => void run(q), SEARCH_DEBOUNCE_MS);
+    debounce.current = timer;
     return () => window.clearTimeout(timer);
   }, [query]);
   const submit = (e: FormEvent) => {
@@ -937,11 +951,13 @@ function PlaceSearch({
       return;
     }
     const q = query.trim();
+    window.clearTimeout(debounce.current);
     if (q.length >= SEARCH_MIN && !parseCoordinates(q)) void run(q);
   };
   const pick = (place: Place) => {
     setPicked(place);
     request.current++;
+    lastSent.current = null;
     dispatch({ type: "reset" });
     const next = pushRecent(recent, {
       label: place.label,

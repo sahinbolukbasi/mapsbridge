@@ -49,6 +49,11 @@
     padding: 0;
     list-style: none;
   }
+  .pub-profile__more {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-4);
+  }
   .pub-post {
     display: grid;
     align-content: start;

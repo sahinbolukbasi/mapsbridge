@@ -12,16 +12,19 @@ import { profileHref } from "../lib/navigation/profile-href";
 export function MessageRequests({
   incoming,
   outgoing,
+  unknown = [],
   busyId,
   onRespond,
 }: {
   incoming: readonly ChatThreadSummary[];
   outgoing: readonly ChatThreadSummary[];
+  /** review-final #4: istek durumu okunamayan sohbetler (nötr; kabul edilmiş sayılmaz). */
+  unknown?: readonly ChatThreadSummary[];
   busyId: string | null;
   onRespond: (threadId: string, action: RequestAction) => void;
 }) {
   const { t, locale } = useLocale();
-  if (incoming.length === 0 && outgoing.length === 0)
+  if (incoming.length === 0 && outgoing.length === 0 && unknown.length === 0)
     return (
       <EmptyState
         icon="inbox"
@@ -122,6 +125,19 @@ export function MessageRequests({
                 <Icon name="clock" size={16} />
                 {t("messages.req.pending", "Yanıt bekleniyor")}
               </Badge>
+            </li>
+          ))}
+        </ul>
+      )}
+      {unknown.length > 0 && (
+        <ul className="msg-requests__list">
+          {unknown.map((x) => (
+            <li key={x.threadId} className="msg-requests__item" data-surface="default">
+              <div className="msg-requests__head">
+                <Avatar name={who(x)} size="sm" decorative />
+                <p className="msg-requests__who">{who(x)}</p>
+              </div>
+              <Badge tone="neutral">{t("messages.req.unknown", "Durum şu an doğrulanamadı")}</Badge>
             </li>
           ))}
         </ul>

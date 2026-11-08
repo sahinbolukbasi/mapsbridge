@@ -285,6 +285,75 @@ test("profil paylaşımları yazar kapsamlı sorgudan gelir; genel akış önbel
   assert.match(client, /postsState === "loading"/);
   assert.match(client, /<ErrorState error=\{postsError\} onRetry=/);
 });
+// ─── review-final #2: profil gönderileri 404 → boş/yerel, sahibin cihaz gönderileri, sayfalama ──
+test("profil gönderileri: 404 route yok → hata değil; 5xx/ağ hatası hâlâ hata", () => {
+  assert.equal(feed.isMissingRoute({ status: 404, message: "Not Found" }), true);
+  assert.equal(feed.isMissingRoute({ status: 500, message: "x" }), false);
+  assert.equal(feed.isMissingRoute({ status: 503 }), false);
+  assert.equal(feed.isMissingRoute(new Error("Sunucuya erişilemedi.")), false);
+  assert.equal(feed.isMissingRoute(null), false);
+  const client = read("[username]/public-profile-client.tsx");
+  const onCatch = client.slice(
+    client.indexOf(".catch((err) => {"),
+    client.indexOf('setPostsState("error")'),
+  );
+  assert.ok(onCatch.indexOf("isMissingRoute(err)") >= 0, "404 ErrorState'ten önce ayıklanır");
+  assert.ok(onCatch.indexOf("isMissingRoute(err)") < onCatch.indexOf("setPostsError"));
+  // Route yokken sunucu listesi boş: ziyaretçi EmptyState görür.
+  assert.deepEqual(plain(feed.profilePosts([], [], "ayse", false)), []);
+});
+test("profil gönderileri: sahibin cihazdaki gönderileri 'Yalnız bu cihazda' ile birleşir; ziyaretçide eklenmez", () => {
+  const server = [
+    { id: "s1", authorUsername: "ayse", content: "a" },
+    { id: "s2", authorUsername: "baska", content: "b" },
+  ];
+  const local = [
+    { id: "post-1", authorUsername: "@Ayse", content: "yerel" },
+    { id: "x9", authorUsername: "ayse", content: "eski senkron", deviceOnly: true },
+    { id: "s1", authorUsername: "ayse", content: "a (önbellek)" },
+    { id: "cached", authorUsername: "ayse", content: "sunucudan önbellek" },
+    { id: "post-2", authorUsername: "baska", content: "başkası" },
+  ];
+  const own = plain(feed.profilePosts(server, local, "ayse", true));
+  assert.deepEqual(
+    own.map((p) => p.id),
+    ["post-1", "x9", "s1"],
+  );
+  assert.deepEqual(
+    own.map((p) => Boolean(p.deviceOnly)),
+    [true, true, false],
+  );
+  assert.deepEqual(
+    plain(feed.profilePosts(server, local, "ayse", false)).map((p) => p.id),
+    ["s1"],
+  );
+  const client = read("[username]/public-profile-client.tsx");
+  assert.match(client, /own \? webSocialSync\.readLocalPosts\(\) : \[\]/);
+  assert.match(client, /p\.deviceOnly && \(/);
+  assert.match(client, /community\.post\.deviceOnly/);
+});
+test("profil gönderileri: 12'şer gösterilir; 'Daha fazla' önce yüklenmişleri, sonra cursor sayfasını açar", () => {
+  assert.equal(feed.PROFILE_POSTS_PAGE, 12);
+  assert.equal(feed.canShowMorePosts(12, 12, undefined), false);
+  assert.equal(feed.canShowMorePosts(20, 12, undefined), true);
+  assert.equal(feed.canShowMorePosts(12, 12, "c1"), true);
+  assert.equal(feed.canShowMorePosts(20, 24, undefined), false);
+  const page1 = [{ id: "a" }, { id: "b" }];
+  assert.deepEqual(
+    plain(feed.appendPostPage(page1, [{ id: "b" }, { id: "c" }])).map((p) => p.id),
+    ["a", "b", "c"],
+  );
+  const client = read("[username]/public-profile-client.tsx");
+  assert.match(client, /posts\.slice\(0, visible\)/);
+  assert.match(client, /&cursor=\$\{encodeURIComponent\(after\)\}/);
+  assert.match(client, /canShowMorePosts\(posts\.length, visible, cursor\)/);
+  assert.match(client, /publicProfile\.posts\.more/);
+  const tr = require("../app/locales/tr.json");
+  const en = require("../app/locales/en.json");
+  for (const k of ["publicProfile.posts.more", "publicProfile.posts.moreFailed"])
+    assert.ok(tr[k] && en[k], k);
+  assert.equal(tr["publicProfile.posts.more"], "Daha fazla");
+});
 test("mesajlar (S21): grup oluşturma ve sohbet türü süzgeci yok; uydurma grup thread'i gönderilmez", () => {
   const src = read("messages/page.tsx");
   assert.doesNotMatch(src, /NewGroupModal|startGroup|newGroup|SegmentedControl|group-\$\{/);
@@ -433,6 +502,35 @@ test("mesaj istekleri: gelen / giden / aktif gruplama; reddedilen listelenmez", 
   assert.deepEqual(
     g.active.map((t) => t.threadId),
     ["old", "ok"],
+  );
+});
+test("mesaj istekleri (review-final #4): 'unknown' durum nötr grupta; kabul edilmiş sayılmaz", () => {
+  const g = plain(
+    reqs.groupThreads(
+      [
+        { threadId: "u", otherParticipant: "ali", request: { status: "unknown" } },
+        { threadId: "old" },
+      ],
+      "me",
+    ),
+  );
+  assert.deepEqual(
+    g.unknown.map((t) => t.threadId),
+    ["u"],
+  );
+  assert.deepEqual(
+    g.active.map((t) => t.threadId),
+    ["old"],
+  );
+  assert.equal(reqs.requestStatus({ threadId: "u", request: { status: "unknown" } }), "unknown");
+  const tr = require("../app/locales/tr.json");
+  const en = require("../app/locales/en.json");
+  assert.ok(tr["messages.req.unknown"] && en["messages.req.unknown"]);
+  assert.match(read("messages/page.tsx"), /unknown=\{requests\.unknown\}/);
+  assert.match(read("messages/message-requests.tsx"), /messages\.req\.unknown/);
+  assert.match(
+    fs.readFileSync(path.join(MOBILE_SRC, "screens/ChatScreen.tsx"), "utf8"),
+    /requests\.unknown\.map/,
   );
 });
 test("mesaj istekleri: 404/409/403 sunucu kodları metne; diğerleri null (yerel davranış)", () => {

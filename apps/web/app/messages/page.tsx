@@ -477,6 +477,7 @@ export default function MessagesPage() {
                     <MessageRequests
                       incoming={requests.incoming}
                       outgoing={requests.outgoing}
+                      unknown={requests.unknown}
                       busyId={busyRequest}
                       onRespond={(id, action) => void respond(id, action)}
                     />

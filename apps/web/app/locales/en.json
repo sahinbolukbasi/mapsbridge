@@ -1313,6 +1313,9 @@
   "planner.save.guestLabel": "Save: create an account to save",
   "planner.shortcuts.scope": "Single-key shortcuts (/ and N) work only while the plan panel or map has focus.",
   "publicProfile.posts.loading": "Loading posts…",
+  "publicProfile.posts.more": "Show more",
+  "publicProfile.posts.moreFailed": "More posts couldn't be loaded right now.",
+  "messages.req.unknown": "Status couldn't be checked right now",
   "planner.search.labelShort": "Find a place",
   "planner.search.hintShort": "3+ letters; you can also tap the map."
 }

@@ -7,6 +7,7 @@
 import { userStorage } from "./user-storage";
 import { apiFetch } from "./api-client";
 import type { CommunityPost } from "../features/community/types";
+import { isLocalPostId } from "./community/feed";
 
 export interface WebUserProfile {
   fullName: string;
@@ -28,8 +29,7 @@ const STORAGE_POSTS_KEY = "mapsbridge.communityPosts";
 /** Sunucu senkronu (Increment 1.13): GET en sık 30 sn'de bir; 404/ağ hatası yerel kayda düşer. */
 const REFRESH_MIN_MS = 30_000;
 let lastRefresh = 0;
-/** Sunucuda kimliği olmayan (yalnız yerel) gönderi kimliği. */
-export const isLocalPostId = (id: string) => id.startsWith("post-");
+export { isLocalPostId };
 /**
  * Sunucu akışı + yalnız bu cihazdaki gönderiler (deviceOnly ya da yerel kimlikli) birleşir;
  * sunucu yanıtı yerel taslakları silmez.

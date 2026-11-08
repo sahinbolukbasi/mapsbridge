@@ -1313,6 +1313,9 @@
   "planner.save.guestLabel": "Kaydet: kaydetmek için hesap aç",
   "planner.shortcuts.scope": "Tek tuşlu kısayollar (/ ve N) yalnız plan paneli ya da harita odaktayken çalışır.",
   "publicProfile.posts.loading": "Paylaşımlar yükleniyor…",
+  "publicProfile.posts.more": "Daha fazla",
+  "publicProfile.posts.moreFailed": "Daha fazla paylaşım şu an yüklenemedi.",
+  "messages.req.unknown": "Durum şu an doğrulanamadı",
   "planner.search.labelShort": "Yer ara",
   "planner.search.hintShort": "En az 3 harf; haritaya dokunarak da ekleyebilirsin."
 }

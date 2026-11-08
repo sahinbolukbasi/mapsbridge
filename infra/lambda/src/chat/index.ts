@@ -134,21 +134,24 @@ async function handleListThreads(event: ApiGatewayEvent) {
   // M1/M2: her thread'e istek durumu (REQUEST kaydı; yoksa eski thread → accepted).
   const ids = [...new Set(threads.map((x) => String(x.threadId || "")).filter(Boolean))];
   const requests = new Map<string, Record<string, unknown>>();
+  const unknown = new Set<string>();
   if (ids.length) {
     const { BatchGetItemCommand } = await import("@aws-sdk/client-dynamodb");
-    const got = await ddb.send(
-      new BatchGetItemCommand({
-        RequestItems: {
-          [getTableName()]: {
-            Keys: ids.map((id) => marshall({ PK: `THREAD#${id}`, SK: "REQUEST" })),
-          },
-        },
-      }),
-    );
-    for (const item of got.Responses?.[getTableName()] || []) {
-      const r = unmarshall(item);
-      requests.set(String(r.PK).slice("THREAD#".length), r);
+    const table = getTableName();
+    let keys = ids.map((id) => marshall({ PK: `THREAD#${id}`, SK: "REQUEST" }));
+    // review-final #4: UnprocessedKeys bir kez yeniden denenir; hâlâ okunamayan thread'in durumu
+    // "unknown" döner (accepted varsayılmaz). Gönderim kapısı yine sunucuda (thread-access).
+    for (let attempt = 0; attempt < 2 && keys.length; attempt++) {
+      const got = await ddb.send(
+        new BatchGetItemCommand({ RequestItems: { [table]: { Keys: keys } } }),
+      );
+      for (const item of got.Responses?.[table] || []) {
+        const r = unmarshall(item);
+        requests.set(String(r.PK).slice("THREAD#".length), r);
+      }
+      keys = got.UnprocessedKeys?.[table]?.Keys || [];
     }
+    for (const key of keys) unknown.add(String(unmarshall(key).PK).slice("THREAD#".length));
   }
   return ok({
     threads: threads.map((x) => {
@@ -158,7 +161,9 @@ async function handleListThreads(event: ApiGatewayEvent) {
         request:
           r && typeof r.status === "string"
             ? { status: r.status, from: r.from, to: r.to }
-            : { status: "accepted" },
+            : unknown.has(String(x.threadId))
+              ? { status: "unknown" }
+              : { status: "accepted" },
       };
     }),
   });

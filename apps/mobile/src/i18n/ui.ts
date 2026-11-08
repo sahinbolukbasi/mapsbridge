@@ -184,6 +184,7 @@ export const UI_TR = {
   "messages.req.waiting": "Mesaj isteğin yanıt bekliyor. Kabul edilince yazışabilirsiniz.",
   "messages.req.respondFirst": "Önce mesaj isteğini yanıtla.",
   "messages.req.closed": "Bu sohbet kapatıldı; mesaj gönderilemez.",
+  "messages.req.unknown": "Durum şu an doğrulanamadı",
   "messages.back": "Sohbet listesine dön",
   "messages.composer": "Mesaj yaz",
   "messages.empty.body": "Bir gezgine yazarak başla.",

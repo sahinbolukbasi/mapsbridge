@@ -311,7 +311,9 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
           maxFontSizeMultiplier={tokens.font.maxScale.body}
           style={[styles.search, { fontFamily: fontFamily("regular") }]}
         />
-        {requests.incoming.length > 0 || requests.outgoing.length > 0 ? (
+        {requests.incoming.length > 0 ||
+        requests.outgoing.length > 0 ||
+        requests.unknown.length > 0 ? (
           <View style={styles.requests} accessibilityRole="summary">
             <Txt variant="heading" header>
               {tr("messages.req.title", { n: requests.incoming.length })}
@@ -360,6 +362,18 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
                   </Txt>
                   <Txt variant="caption" tone="muted">
                     {tr("messages.req.pending")}
+                  </Txt>
+                </View>
+              </Card>
+            ))}
+            {requests.unknown.map((x) => (
+              <Card key={x.threadId} variant="bordered">
+                <View style={styles.row}>
+                  <Txt variant="label" style={styles.flex}>
+                    {x.otherParticipant || tr("messages.req.someone")}
+                  </Txt>
+                  <Txt variant="caption" tone="muted">
+                    {tr("messages.req.unknown")}
                   </Txt>
                 </View>
               </Card>

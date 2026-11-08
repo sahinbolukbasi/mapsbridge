@@ -1,7 +1,8 @@
 // Mesaj istekleri saf mantığı (Increment 1.14, M1/M2). Sunucu GET /chat/threads her thread'e
-// `request: {status, from, to}` ekler (REQUEST kaydı yoksa "accepted"). Ağ/DOM yok; web ve
+// `request: {status, from, to}` ekler (REQUEST kaydı yoksa "accepted"; kayıt okunamadıysa
+// "unknown", review-final #4). Ağ/DOM yok; web ve
 // mobil aynı kopyayı kullanır (mobile-parity testi eşitliği zorlar).
-export type RequestStatus = "pending" | "accepted" | "declined" | "blocked";
+export type RequestStatus = "pending" | "accepted" | "declined" | "blocked" | "unknown";
 export type ServerThread = {
   threadId: string;
   otherParticipant?: string;
@@ -15,8 +16,10 @@ export type ThreadGroups<T extends ServerThread> = {
   outgoing: T[];
   /** Kabul edilmiş ya da eski (istek kaydı olmayan) sohbetler. */
   active: T[];
+  /** Durumu sunucuda şu an okunamayan sohbetler: nötr gösterilir, kabul edilmiş sayılmaz. */
+  unknown: T[];
 };
-const STATUSES: readonly string[] = ["pending", "accepted", "declined", "blocked"];
+const STATUSES: readonly string[] = ["pending", "accepted", "declined", "blocked", "unknown"];
 export function requestStatus(t: ServerThread): RequestStatus {
   const s = t.request?.status;
   return s && STATUSES.includes(s) ? (s as RequestStatus) : "accepted";
@@ -26,10 +29,11 @@ export function groupThreads<T extends ServerThread>(
   threads: readonly T[],
   me: string,
 ): ThreadGroups<T> {
-  const out: ThreadGroups<T> = { incoming: [], outgoing: [], active: [] };
+  const out: ThreadGroups<T> = { incoming: [], outgoing: [], active: [], unknown: [] };
   for (const t of threads) {
     const status = requestStatus(t);
     if (status === "accepted") out.active.push(t);
+    else if (status === "unknown") out.unknown.push(t);
     else if (status === "pending")
       (t.request?.to === me
         ? out.incoming

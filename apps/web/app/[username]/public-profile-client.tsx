@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AuthGate } from "../components/auth-gate";
 import { CopyRouteButton } from "../components/copy-route-button";
 import {
@@ -23,7 +23,13 @@ import {
   type UiError,
 } from "../components/ui";
 import type { CommunityPost } from "../features/community/types";
-import { sameUser } from "../lib/community/feed";
+import {
+  PROFILE_POSTS_PAGE,
+  appendPostPage,
+  canShowMorePosts,
+  isMissingRoute,
+  profilePosts,
+} from "../lib/community/feed";
 import { webSocialSync } from "../lib/social-sync";
 import { apiFetch } from "../lib/api-client";
 import { getStoredSession } from "../lib/cognito";
@@ -67,29 +73,46 @@ export default function PublicProfileClient({
   // Kullanıcının paylaşımları yazar kapsamlı sorgudan gelir (GET /community/posts?author=);
   // genel akış önbelleği süzülmez, aksi hâlde ilk sayfa dışındaki yazarlar yanlışlıkla "Henüz
   // paylaşım yok" görür. Yalnız gerçek gönderiler; sayaç/istatistik uydurulmaz (I1).
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [serverPosts, setServerPosts] = useState<CommunityPost[]>([]);
   const [postsState, setPostsState] = useState<"loading" | "ready" | "error">("loading");
   const [postsError, setPostsError] = useState<UiError | null>(null);
   const [postsAttempt, setPostsAttempt] = useState(0);
+  // review-final #2: sunucu sayfası 20'lik; ekranda 12'şer gösterilir, cursor varsa sonraki sayfa.
+  const [cursor, setCursor] = useState<string | undefined>();
+  const [visible, setVisible] = useState(PROFILE_POSTS_PAGE);
+  const [moreBusy, setMoreBusy] = useState(false);
+  const postsUrl = (after?: string) =>
+    `/community/posts?author=${encodeURIComponent(username)}` +
+    (after ? `&cursor=${encodeURIComponent(after)}` : "");
+  const fetchPosts = (after?: string) =>
+    apiFetch<{ success?: boolean; posts?: CommunityPost[]; cursor?: string }>(postsUrl(after), {
+      timeoutMs: 8000,
+      skipAuth: !webSocialSync.hasSession(),
+    });
   useEffect(() => {
+    setServerPosts([]);
+    setCursor(undefined);
+    setVisible(PROFILE_POSTS_PAGE);
     if (isSampleProfile(username) || !/^[a-z0-9_.-]{1,40}$/.test(username)) {
       setPostsState("ready");
       return;
     }
     let alive = true;
     setPostsState("loading");
-    apiFetch<{ success?: boolean; posts?: CommunityPost[] }>(
-      `/community/posts?author=${encodeURIComponent(username)}`,
-      { timeoutMs: 8000, skipAuth: !webSocialSync.hasSession() },
-    )
+    fetchPosts()
       .then((data) => {
         if (!alive) return;
-        const list = Array.isArray(data?.posts) ? data.posts : [];
-        setPosts(list.filter((p) => sameUser(p.authorUsername, username)));
+        setServerPosts(Array.isArray(data?.posts) ? data.posts : []);
+        setCursor(typeof data?.cursor === "string" && data.cursor ? data.cursor : undefined);
         setPostsState("ready");
       })
       .catch((err) => {
         if (!alive) return;
+        // Uç henüz yayında değil (404): hata değil, boş sunucu listesi (akışla aynı davranış).
+        if (isMissingRoute(err)) {
+          setPostsState("ready");
+          return;
+        }
         setPostsError(toUiError(err));
         setPostsState("error");
       });
@@ -97,6 +120,31 @@ export default function PublicProfileClient({
       alive = false;
     };
   }, [username, postsAttempt]);
+  // Sahibin kendi profilinde cihazdaki (sunucuda olmayan) gönderiler "Yalnız bu cihazda" ile eklenir.
+  const posts = useMemo(
+    () => profilePosts(serverPosts, own ? webSocialSync.readLocalPosts() : [], username, own),
+    [serverPosts, own, username],
+  );
+  async function showMore() {
+    if (posts.length > visible || !cursor) {
+      setVisible((n) => n + PROFILE_POSTS_PAGE);
+      return;
+    }
+    setMoreBusy(true);
+    try {
+      const data = await fetchPosts(cursor);
+      setServerPosts((prev) => appendPostPage(prev, Array.isArray(data?.posts) ? data.posts : []));
+      setCursor(typeof data?.cursor === "string" && data.cursor ? data.cursor : undefined);
+      setVisible((n) => n + PROFILE_POSTS_PAGE);
+    } catch {
+      toast.show({
+        tone: "danger",
+        message: t("publicProfile.posts.moreFailed", "Daha fazla paylaşım şu an yüklenemedi."),
+      });
+    } finally {
+      setMoreBusy(false);
+    }
+  }
 
   useEffect(() => {
     const session = getStoredSession();
@@ -321,29 +369,44 @@ export default function PublicProfileClient({
               }
             />
           ) : (
-            <Reveal as="ul" stagger className="pub-profile__posts">
-              {posts.slice(0, 12).map((p, i) => (
-                <li key={p.id} className="pub-post" {...revealItem(i)}>
-                  {p.image && (
-                    <Media src={p.image} alt="" ratio="16/9" className="pub-post__media" />
-                  )}
-                  <p className="pub-post__text">{p.content}</p>
-                  <p className="pub-post__meta">
-                    {p.locationTag && (
-                      <span className="pub-post__place">
-                        <Icon name="map" size={16} />
-                        {p.locationTag}
-                      </span>
+            <>
+              <Reveal as="ul" stagger className="pub-profile__posts">
+                {posts.slice(0, visible).map((p, i) => (
+                  <li key={p.id} className="pub-post" {...revealItem(i)}>
+                    {p.image && (
+                      <Media src={p.image} alt="" ratio="16/9" className="pub-post__media" />
                     )}
-                    <time dateTime={p.createdAt}>
-                      {new Date(p.createdAt).toLocaleDateString(
-                        locale === "en" ? "en-GB" : "tr-TR",
+                    <p className="pub-post__text">{p.content}</p>
+                    <p className="pub-post__meta">
+                      {p.deviceOnly && (
+                        <Badge tone="example">
+                          <Icon name="offline" size={16} />
+                          {t("community.post.deviceOnly", "Yalnız bu cihazda")}
+                        </Badge>
                       )}
-                    </time>
-                  </p>
-                </li>
-              ))}
-            </Reveal>
+                      {p.locationTag && (
+                        <span className="pub-post__place">
+                          <Icon name="map" size={16} />
+                          {p.locationTag}
+                        </span>
+                      )}
+                      <time dateTime={p.createdAt}>
+                        {new Date(p.createdAt).toLocaleDateString(
+                          locale === "en" ? "en-GB" : "tr-TR",
+                        )}
+                      </time>
+                    </p>
+                  </li>
+                ))}
+              </Reveal>
+              {canShowMorePosts(posts.length, visible, cursor) && (
+                <div className="pub-profile__more">
+                  <Button variant="secondary" loading={moreBusy} onClick={() => void showMore()}>
+                    {t("publicProfile.posts.more", "Daha fazla")}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </Section>
       )}

@@ -96,6 +96,39 @@ test("durum makinesi: boş → empty, hata → error; eski yanıt yok sayılır"
   assert.equal(logic.searchReducer(ok, { type: "reset" }).status, "idle");
 });
 
+test("arama tekilleştirme (review-final #3): aynı sorgu yüklenirken/sonuçtayken tekrar gönderilmez", () => {
+  assert.equal(logic.searchKey("  Ayasofya   Camii "), "ayasofya camii");
+  assert.equal(logic.searchKey("İSTANBUL"), logic.searchKey("istanbul"));
+  assert.equal(logic.shouldSendSearch(null, "Ayasofya"), true);
+  const sent = { key: logic.searchKey("Ayasofya"), status: "loading" };
+  assert.equal(logic.shouldSendSearch(sent, "Ayasofya"), false, "debounce + Enter → tek istek");
+  assert.equal(logic.shouldSendSearch(sent, "ayasofya "), false);
+  assert.equal(logic.shouldSendSearch({ ...sent, status: "results" }, "Ayasofya"), false);
+  assert.equal(logic.shouldSendSearch({ ...sent, status: "empty" }, "Ayasofya"), false);
+  assert.equal(
+    logic.shouldSendSearch({ ...sent, status: "error" }, "Ayasofya"),
+    true,
+    "Tekrar dene",
+  );
+  assert.equal(logic.shouldSendSearch(sent, "Galata"), true);
+  const fs = require("node:fs");
+  const web = fs.readFileSync(path.join(APP, "components/trip/travel-planner-sidebar.tsx"), "utf8");
+  const submit = web.slice(
+    web.indexOf("const submit = (e: FormEvent)"),
+    web.indexOf("const pick ="),
+  );
+  assert.ok(
+    submit.indexOf("clearTimeout(debounce.current)") >= 0,
+    "Enter bekleyen debounce'u iptal eder",
+  );
+  assert.ok(submit.indexOf("clearTimeout(debounce.current)") < submit.indexOf("void run(q)"));
+  assert.match(web, /if \(!shouldSendSearch\(lastSent\.current, q\)\) return;/);
+  const native = fs.readFileSync(
+    path.resolve(APP, "../../mobile/src/screens/MapScreen.tsx"),
+    "utf8",
+  );
+  assert.match(native, /if \(!shouldSendSearch\(lastSent\.current, q\)\) return;/);
+});
 test("searchPlaces: proxy 200 → sonuçlar (doğrudan sağlayıcı çağrılmaz), sorgu ?op=places", async () => {
   const { geo, apiStub, fetchCalls } = loadGeo({
     respond: () => PROXY_OK([GALATA]),

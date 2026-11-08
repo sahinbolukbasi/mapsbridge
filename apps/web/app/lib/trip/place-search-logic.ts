@@ -90,3 +90,18 @@ export function searchReducer<T>(state: SearchState<T>, event: SearchEvent<T>): 
       return { status: "error", results: [], requestId: state.requestId };
   }
 }
+/** Son gönderilen arama: normalize sorgu + sonucu (review-final #3). */
+export type SentSearch = { key: string; status: SearchStatus };
+/** Kota anahtarı: büyük/küçük harf ve fazla boşluk farkı aynı sorgudur. */
+export function searchKey(q: string): string {
+  return q.trim().replace(/\s+/g, " ").toLocaleLowerCase("tr-TR");
+}
+/**
+ * review-final #3: bir sorgu bir kota birimi. Debounce + Enter (ya da çift dokunma) aynı sorguyu
+ * yeniden göndermez: aynı anahtar yükleniyorsa ya da sonucu (dolu/boş) hazırsa gönderilmez.
+ * Farklı sorgu ve hata sonrası "Tekrar dene" her zaman gider.
+ */
+export function shouldSendSearch(last: SentSearch | null, q: string): boolean {
+  if (!last || last.key !== searchKey(q)) return true;
+  return last.status === "error";
+}

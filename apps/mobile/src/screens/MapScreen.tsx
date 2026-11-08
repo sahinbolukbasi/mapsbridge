@@ -52,8 +52,11 @@ import {
   parseCoordinates,
   parseRecent,
   pushRecent,
+  searchKey,
   searchReducer,
+  shouldSendSearch,
   type RecentSearch,
+  type SentSearch,
   type SearchEvent,
   type SearchState,
 } from "../trip/place-search-logic";
@@ -173,6 +176,12 @@ export function MapScreen({
   const [discovered, setDiscovered] = useState<DiscoverAdd[]>([]);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const searchSeq = useRef(0);
+  // review-final #3: Enter + düğme (ya da çift dokunma) aynı sorguyu ikinci kez göndermez.
+  const lastSent = useRef<SentSearch | null>(null);
+  const resetSearch = () => {
+    lastSent.current = null;
+    dispatchSearch({ type: "reset" });
+  };
   const toast = useToast();
   const locationPerm = usePermission("location");
   const notifyPerm = usePermission("notifications");
@@ -309,7 +318,7 @@ export function MapScreen({
     ) {
       setLooking(true);
       setSelectedId(null);
-      dispatchSearch({ type: "reset" });
+      resetSearch();
       lookupPoint(data.lat, data.lng)
         .then((place) => {
           setCandidate(place);
@@ -372,7 +381,7 @@ export function MapScreen({
 
   const showCandidate = (place: PlaceCandidate) => {
     setCandidate(place);
-    dispatchSearch({ type: "reset" });
+    resetSearch();
     inject(
       `window.setTempPin && window.setTempPin(${place.lat}, ${place.lng}, ${JSON.stringify(place.name)})`,
     );
@@ -398,14 +407,19 @@ export function MapScreen({
       toast.show({ tone: "info", message: tr("planner.search.hint") });
       return;
     }
+    if (!shouldSendSearch(lastSent.current, q)) return;
+    const sent: SentSearch = { key: searchKey(q), status: "loading" };
+    lastSent.current = sent;
     const requestId = ++searchSeq.current;
     setCandidate(null);
     dispatchSearch({ type: "start", requestId });
     try {
       const near = mapCenter ?? centroid(route.stops) ?? undefined;
       const results = await searchPlaces(q, near);
+      sent.status = results.length > 0 ? "results" : "empty";
       dispatchSearch({ type: "success", requestId, results });
     } catch {
+      sent.status = "error";
       dispatchSearch({ type: "failure", requestId });
     }
   };
@@ -451,7 +465,7 @@ export function MapScreen({
       });
     }
     setCandidate(null);
-    dispatchSearch({ type: "reset" });
+    resetSearch();
     setQuery("");
     inject("window.setTempPin && window.setTempPin(null)");
   };
