@@ -59,6 +59,7 @@ import {
 import { createHash } from "node:crypto";
 import { jsonResponse } from "../shared/http";
 import { handlePlacesRequest } from "../places-search/handler";
+import { persistable } from "./persistable";
 interface Event {
   body?: string;
   isBase64Encoded?: boolean;
@@ -315,40 +316,44 @@ async function handleRequest(event: Event) {
       preferences: { ...preferences, ...updates },
       cost: actualCost,
     };
-    await finishAI(reservation, true, {
-      response,
-      ...(trainingJob ? { trainingJob } : {}),
-      preferences: { ...updates },
-      finalCost: actualCost,
-      ...(memoryTable()
-        ? {
-            memory: {
-              settings: personal.settings,
-              job: writeJob(
-                user.sub,
-                personal.settings,
-                body.requestId,
-                body.conversationId || body.requestId,
-                updates,
-                result.tripContext,
-              ),
-            },
-          }
-        : {}),
-      ...(body.conversationId && conversationState
-        ? {
-            conversation: {
-              id: body.conversationId,
-              expectedVersion: storedConversation?.version || 0,
-              value: {
-                ...conversationState,
-                updatedAt: new Date().toISOString(),
-                expiresAt: Math.floor(Date.now() / 1000) + 30 * 86400,
-              } as unknown as Record<string, unknown>,
-            },
-          }
-        : {}),
-    });
+    await finishAI(
+      reservation,
+      true,
+      persistable({
+        response,
+        ...(trainingJob ? { trainingJob } : {}),
+        preferences: { ...updates },
+        finalCost: actualCost,
+        ...(memoryTable()
+          ? {
+              memory: {
+                settings: personal.settings,
+                job: writeJob(
+                  user.sub,
+                  personal.settings,
+                  body.requestId,
+                  body.conversationId || body.requestId,
+                  updates,
+                  result.tripContext,
+                ),
+              },
+            }
+          : {}),
+        ...(body.conversationId && conversationState
+          ? {
+              conversation: {
+                id: body.conversationId,
+                expectedVersion: storedConversation?.version || 0,
+                value: {
+                  ...conversationState,
+                  updatedAt: new Date().toISOString(),
+                  expiresAt: Math.floor(Date.now() / 1000) + 30 * 86400,
+                } as unknown as Record<string, unknown>,
+              },
+            }
+          : {}),
+      }),
+    );
     completed = true;
     const interactionEvent = createInteractionEvent({
       userId: user.sub,
@@ -632,40 +637,44 @@ async function handleStreamRequest(
           cost: actualCost,
         };
 
-        await finishAI(reservation, true, {
-          response,
-          ...(trainingJob ? { trainingJob } : {}),
-          preferences: updates as Record<string, unknown>,
-          finalCost: actualCost,
-          ...(memoryTable()
-            ? {
-                memory: {
-                  settings: personal.settings,
-                  job: writeJob(
-                    user.sub,
-                    personal.settings,
-                    body.requestId,
-                    body.conversationId || body.requestId,
-                    updates,
-                    result.tripContext,
-                  ),
-                },
-              }
-            : {}),
-          ...(body.conversationId && conversationState
-            ? {
-                conversation: {
-                  id: body.conversationId,
-                  expectedVersion: storedConversation?.version || 0,
-                  value: {
-                    ...conversationState,
-                    updatedAt: new Date().toISOString(),
-                    expiresAt: Math.floor(Date.now() / 1000) + 30 * 86400,
-                  } as unknown as Record<string, unknown>,
-                },
-              }
-            : {}),
-        });
+        await finishAI(
+          reservation,
+          true,
+          persistable({
+            response,
+            ...(trainingJob ? { trainingJob } : {}),
+            preferences: updates as Record<string, unknown>,
+            finalCost: actualCost,
+            ...(memoryTable()
+              ? {
+                  memory: {
+                    settings: personal.settings,
+                    job: writeJob(
+                      user.sub,
+                      personal.settings,
+                      body.requestId,
+                      body.conversationId || body.requestId,
+                      updates,
+                      result.tripContext,
+                    ),
+                  },
+                }
+              : {}),
+            ...(body.conversationId && conversationState
+              ? {
+                  conversation: {
+                    id: body.conversationId,
+                    expectedVersion: storedConversation?.version || 0,
+                    value: {
+                      ...conversationState,
+                      updatedAt: new Date().toISOString(),
+                      expiresAt: Math.floor(Date.now() / 1000) + 30 * 86400,
+                    } as unknown as Record<string, unknown>,
+                  },
+                }
+              : {}),
+          }),
+        );
         completed = true;
 
         await recordAIOperation(
