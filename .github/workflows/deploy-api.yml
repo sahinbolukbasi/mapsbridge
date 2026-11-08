@@ -108,6 +108,9 @@ jobs:
             ["billing-reconcile"]="$LAMBDA_ROOT/src/billing/reconcile.ts"
             ["conversion-forwarder"]="$LAMBDA_ROOT/src/billing/conversion-forwarder.ts"
             ["community"]="$LAMBDA_ROOT/src/community/index.ts"
+            # AgentCore gateway araçları (infra/agentcore-gateway, handler index.handler)
+            ["agentcore-places"]="apps/web/server/ai/gateway-handler.ts"
+            ["agentcore-data"]="infra/agentcore-gateway/src/data-tools/index.js"
           )
 
           for name in "${!ENTRIES[@]}"; do
@@ -180,6 +183,8 @@ jobs:
             ["billing-reconcile"]="${PREFIX}-billing-reconcile"
             ["conversion-forwarder"]="${PREFIX}-conversion-forwarder"
             ["community"]="${PREFIX}-community"
+            ["agentcore-places"]="${PREFIX}-agentcore-places"
+            ["agentcore-data"]="${PREFIX}-agentcore-data"
             ["rag-fill"]="${PREFIX}-rag-fill"
           )
 

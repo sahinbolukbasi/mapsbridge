@@ -476,11 +476,16 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Create Lambda zip placeholders
+      # source_code_hash ignore edilmez: placeholder zip apply'da araç lambdalarını
+      # "Cannot find module 'index'" ile bozuyordu (2026-10-19 → 2026-11-08 canlı kesinti).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Build Lambda bundles
         run: |
-          mkdir -p infra/agentcore-gateway/.build
-          echo "placeholder" | zip -q infra/agentcore-gateway/.build/tools.zip -
-          echo "placeholder" | zip -q infra/agentcore-gateway/.build/data-tools.zip -
+          npm ci
+          node infra/scripts/build-agentcore-gateway.cjs
 
       - name: Terraform Init
         working-directory: infra/agentcore-gateway
@@ -519,11 +524,16 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Create Lambda zip placeholders
+      # source_code_hash ignore edilmez: placeholder zip apply'da araç lambdalarını
+      # "Cannot find module 'index'" ile bozuyordu (2026-10-19 → 2026-11-08 canlı kesinti).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Build Lambda bundles
         run: |
-          mkdir -p infra/agentcore-gateway/.build
-          echo "placeholder" | zip -q infra/agentcore-gateway/.build/tools.zip -
-          echo "placeholder" | zip -q infra/agentcore-gateway/.build/data-tools.zip -
+          npm ci
+          node infra/scripts/build-agentcore-gateway.cjs
 
       - name: Terraform Init
         working-directory: infra/agentcore-gateway
