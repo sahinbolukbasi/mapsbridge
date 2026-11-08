@@ -1,6 +1,7 @@
 name: RevenueCat API probe (read-only)
 on:
-  workflow_dispatch:
+  push:
+    branches: [rc-probe]
 permissions:
   contents: read
 jobs:
