@@ -628,6 +628,8 @@ test("4.7 (K4): derin bağlantı, paylaşım, Yakınımda, yerel bildirim, karo 
   );
   const cfg = JSON.parse(fs.readFileSync(path.join(mobile, "app.json"), "utf8")).expo;
   assert.equal(cfg.scheme, "mapsbridge");
-  assert.ok(cfg.ios.associatedDomains.includes("applinks:mapsbridge.com"));
+  // iOS evrensel bağlantı geçici kapalı (profilde Associated Domains yok; AASA ile geri gelir).
+  assert.equal(cfg.ios.associatedDomains, undefined);
+  assert.ok(cfg.plugins.includes("./plugins/without-push-entitlement.js"));
   assert.ok(cfg.android.intentFilters[0].autoVerify);
 });

@@ -14,7 +14,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mapsbridge.mobile",
-      "associatedDomains": ["applinks:mapsbridge.com", "applinks:www.mapsbridge.com"],
       "buildNumber": "2",
       "userInterfaceStyle": "dark",
       "infoPlist": {
@@ -110,6 +109,7 @@
           "isAndroidBackgroundLocationEnabled": false
         }
       ],
+      "./plugins/without-push-entitlement.js",
       [
         "expo-notifications",
         {

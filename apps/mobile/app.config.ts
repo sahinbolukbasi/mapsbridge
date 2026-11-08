@@ -27,9 +27,12 @@ export const APP_CONFIG = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.mapsbridge.mobile",
-      // Evrensel bağlantılar (K4): /k/, /traveler/, /maps/. Doğrulama için mapsbridge.com
-      // /.well-known/apple-app-site-association gerekir (Team ID ile; infra-changes.md §4.7).
-      associatedDomains: ["applinks:mapsbridge.com", "applinks:www.mapsbridge.com"],
+      // Evrensel bağlantılar (K4) GEÇİCİ KAPALI: mevcut App Store provisioning profilinde
+      // Associated Domains yeteneği yok; etkileşimsiz EAS derlemesi imzada düşüyordu. AASA
+      // (/.well-known/apple-app-site-association, Team ID ile; infra-changes.md §4.7) yayınlanıp
+      // yetenek Apple Developer'da açılınca birlikte geri eklenecek:
+      //   associatedDomains: ["applinks:mapsbridge.com", "applinks:www.mapsbridge.com"],
+      // O zamana kadar `mapsbridge://` şema bağlantıları çalışır.
       buildNumber: "2",
       userInterfaceStyle: "dark",
       infoPlist: {
@@ -104,6 +107,10 @@ export const APP_CONFIG = {
         },
       ],
       // Yalnız yerel bildirim (push yok); TestFlight/App Store imzası için üretim ortamı.
+      // Yerel bildirim push yetkisi istemez; `aps-environment` silinir (profilde Push yeteneği yok).
+      // expo-notifications'tan ÖNCE listelenir: Expo mod zincirinde sonra eklenen mod önce koşar,
+      // yani bu eklentinin silmesi expo-notifications yetkiyi yazdıktan sonra çalışır.
+      "./plugins/without-push-entitlement.js",
       ["expo-notifications", { mode: "production" }],
       [
         "expo-local-authentication",
