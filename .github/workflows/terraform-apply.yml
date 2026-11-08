@@ -132,9 +132,13 @@ jobs:
           fi
 
       # plan_only=true koşusu salt-okunur kalır: bu adım gerçek bir apply'dır
-      # (deploy rolü policy'sini sil-yeniden-yaz). Apply job'u kendi bootstrap'ını yapar.
+      # (deploy rolü policy'sini sil-yeniden-yaz). Hedefli koşuda yalnız hedef
+      # listesi github_deploy'u içeriyorsa çalışır; aksi halde -replace incelenmemiş
+      # bir destroy+create olur ve kaydedilen planı bayatlatır.
       - name: Bootstrap deploy role permissions
-        if: github.event.inputs.plan_only != 'true'
+        if: |
+          github.event.inputs.plan_only != 'true' &&
+          (github.event.inputs.target == '' || contains(github.event.inputs.target, 'aws_iam_role_policy.github_deploy'))
         working-directory: infra/terraform
         continue-on-error: true
         run: terraform apply -auto-approve -replace=aws_iam_role_policy.github_deploy -target=aws_iam_role_policy.github_deploy
@@ -233,7 +237,11 @@ jobs:
         working-directory: infra/terraform
         run: terraform init -input=false
 
+      # Hedefli koşuda (hedef github_deploy'u içermiyorsa) atlanır: bu -replace
+      # state'i yazar → kaydedilen tfplan "Saved plan is stale" ile reddedilir ve
+      # incelenen plan hiç uygulanmaz.
       - name: Bootstrap deploy role permissions (apply job)
+        if: github.event.inputs.target == '' || contains(github.event.inputs.target, 'aws_iam_role_policy.github_deploy')
         working-directory: infra/terraform
         continue-on-error: true
         run: |
@@ -242,6 +250,7 @@ jobs:
           # penceresini apply'a yetiştiremiyordu → AccessDenied).
           terraform apply -auto-approve -replace=aws_iam_role_policy.github_deploy -target=aws_iam_role_policy.github_deploy
       - name: Await IAM propagation and refresh credentials
+        if: github.event.inputs.target == '' || contains(github.event.inputs.target, 'aws_iam_role_policy.github_deploy')
         run: |
           echo "IAM policy propagation icin 150s bekleniyor..."
           sleep 150
@@ -273,7 +282,14 @@ jobs:
               if [ -n "$t" ]; then TARGET_ARGS+=("-target=$t"); fi
             done
           fi
-          if ! terraform apply -auto-approve tfplan; then
+          set -o pipefail
+          if ! terraform apply -auto-approve tfplan 2>&1 | tee apply.log; then
+            # Bayat plan = state plan'dan sonra değişti; yeniden plan incelenmemiş
+            # bir değişiklik setini onaysız uygular. Düş, operatör plan_only ile yeniden planlasın.
+            if grep -q "Saved plan is stale" apply.log; then
+              echo "::error::Kaydedilen plan bayat; yeniden plan uygulanmadı. plan_only=true ile yeniden planlayıp inceleyin."
+              exit 1
+            fi
             echo "::warning::İlk apply başarısız (ENI detach/IAM propagation olası). 60s sonra yeniden deneniyor..."
             sleep 60
             terraform apply -auto-approve "${TARGET_ARGS[@]}"
