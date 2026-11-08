@@ -537,6 +537,10 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
   for (const lang of ["tr", "en"]) {
     const strings = JSON.parse(fs.readFileSync(path.join(mobile, expo.locales[lang]), "utf8"));
     for (const k of keys) assert.ok(strings[k] && strings[k].length > 20, `${lang} ${k}`);
+    // Expo InfoPlist.strings'e değerleri kaçışsız yazar: düz " dosyayı bozar ve Xcode
+    // "Couldn't parse property list" ile düşer (EAS iOS 6092b87a). Tipografik tırnak kullanılır.
+    for (const [k, v] of Object.entries(strings))
+      assert.ok(!/["\\]/.test(v), `${lang} ${k}: düz tırnak/ters bölü InfoPlist.strings'i bozar`);
   }
   for (const k of keys) assert.ok(expo.ios.infoPlist[k], `infoPlist ${k}`);
   // Arka plan konumu istenmez (yalnız uygulama açıkken "Yakınımda").

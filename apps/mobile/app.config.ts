@@ -3,7 +3,7 @@
 // (I11); iOS yerelleştirmesi `locales/{tr,en}.json` (InfoPlist.strings) dosyalarından gelir.
 const PERMISSIONS_TR = {
   location:
-    'Maps Bridge, "Yakınımda" ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.',
+    "Maps Bridge, “Yakınımda” ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
   camera: "Topluluk paylaşımına fotoğraf çekebilmen için kamera erişimi gerekir.",
   photos:
     "Topluluk paylaşımına ve profil fotoğrafına görsel ekleyebilmen için fotoğraflarına erişilir.",

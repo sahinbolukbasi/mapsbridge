@@ -20,7 +20,7 @@
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleAllowMixedLocalizations": true,
         "CFBundleDevelopmentRegion": "tr",
-        "NSLocationWhenInUseUsageDescription": "Maps Bridge, \"Yakınımda\" ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
+        "NSLocationWhenInUseUsageDescription": "Maps Bridge, “Yakınımda” ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
         "NSCameraUsageDescription": "Topluluk paylaşımına fotoğraf çekebilmen için kamera erişimi gerekir.",
         "NSPhotoLibraryUsageDescription": "Topluluk paylaşımına ve profil fotoğrafına görsel ekleyebilmen için fotoğraflarına erişilir.",
         "NSPhotoLibraryAddUsageDescription": "Rota ve harita görsellerini galerine kaydedebilmen için izin gerekir.",
@@ -101,7 +101,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Maps Bridge, \"Yakınımda\" ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
+          "locationWhenInUsePermission": "Maps Bridge, “Yakınımda” ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
           "locationAlwaysAndWhenInUsePermission": false,
           "locationAlwaysPermission": false,
           "motionUsagePermission": false,
