@@ -108,3 +108,32 @@ jobs:
               --max-items 120 --query 'events[].message' --output text 2>&1 \
               | sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/<email>/g' | cut -c1-600 | grep -v NodeVersionSupportWarning | grep -vE '^(versions published|will require|To continue|and security|More information|\(Use)' | tail -80
           done
+
+      - name: AgentCore gateway diagnostics (read-only)
+        if: always()
+        continue-on-error: true
+        run: |
+          echo "=== ai lambda env (names; gateway host)"
+          aws lambda get-function-configuration --function-name mapsbridge-prod-ai \
+            --query 'Environment.Variables' --output json > env.json 2>&1 || cat env.json
+          jq -r 'keys|join(" ")' env.json 2>/dev/null
+          GW=$(jq -r '.AGENTCORE_GATEWAY_URL // empty' env.json 2>/dev/null)
+          echo "gateway: ${GW:-<unset>}"
+          echo "places tool: $(jq -r '.AGENTCORE_PLACES_TOOL // "<default>"' env.json 2>/dev/null)"
+          [ -n "$GW" ] && curl -s -o /dev/null -w "unsigned POST gateway → HTTP %{http_code}\n" -X POST -H 'content-type: application/json' -d '{}' "$GW"
+          echo "=== gateways"
+          aws bedrock-agentcore-control list-gateways --query 'items[].{id:gatewayId,name:name,status:status}' --output json 2>&1 | head -20
+          echo "=== tool lambdas"
+          for f in mapsbridge-prod-agentcore-places mapsbridge-prod-agentcore-data; do
+            aws lambda get-function-configuration --function-name "$f" --query '{n:FunctionName,s:State,u:LastUpdateStatus,m:LastModified}' --output json 2>&1 | tr -d '\n'; echo
+          done
+          echo "=== ai role inline policies"
+          aws iam list-role-policies --role-name mapsbridge-prod-ai-runtime --output json 2>&1 | tr -d '\n '; echo
+          aws iam get-role-policy --role-name mapsbridge-prod-ai-runtime --policy-name travel-agentcore-gateway --query PolicyDocument --output json 2>&1 | tr -d '\n '; echo
+          echo "=== tool lambda errors (2h)"
+          START=$(( ($(date +%s) - 2*3600) * 1000 ))
+          for g in /aws/lambda/mapsbridge-prod-agentcore-places /aws/lambda/mapsbridge-prod-agentcore-data; do
+            echo "--- $g"
+            aws logs filter-log-events --log-group-name "$g" --start-time "$START" --filter-pattern '?ERROR ?WARN ?Task' \
+              --max-items 20 --query 'events[].message' --output text 2>&1 | cut -c1-300 | tail -20
+          done

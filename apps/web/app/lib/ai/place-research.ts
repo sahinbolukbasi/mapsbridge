@@ -124,7 +124,9 @@ export async function researchPlaces(
     // Do not bypass Gateway authorization/policy failures with a direct AWS call.
     const errName = error instanceof Error ? error.name : "Error";
     if (["TimeoutError", "AbortError"].includes(errName)) emitResearchTimeoutMetric();
-    console.warn("GatewayPlaceResearchUnavailable", errName);
+    // Teşhis: ad + kısa mesaj (≤120; istem/kişisel veri içermez — hedef ve sorgular loglanmaz).
+    const errMsg = error instanceof Error ? (error.message || "").slice(0, 120) : "";
+    console.warn("GatewayPlaceResearchUnavailable", errMsg ? `${errName}: ${errMsg}` : errName);
     return {
       status: "unavailable",
       places: [],
