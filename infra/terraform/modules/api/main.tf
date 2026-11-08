@@ -423,6 +423,29 @@ resource "aws_iam_role_policy" "marketplace_data" {
     }]
   })
 }
+# chat Lambda: thread/mesaj CRUD (GSI1 sorgusu), mesaj isteği kapısı (BatchGetItem ile
+# kayıtlı-kullanıcı + istek durumu, GetItem ile PROFILE#<ad> çözümleme) ve yeni thread
+# TransactWriteItems (koşullu Put/Update).
+resource "aws_iam_role_policy" "chat_data" {
+  count = contains(keys(var.lambda_domains), "chat") ? 1 : 0
+  name  = "chat-data"
+  role  = aws_iam_role.lambda["chat"].id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "dynamodb:GetItem",
+        "dynamodb:BatchGetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:Query",
+        "dynamodb:ConditionCheckItem",
+      ]
+      Resource = [var.billing_table_arn, "${var.billing_table_arn}/index/*"]
+    }]
+  })
+}
 resource "aws_iam_role_policy" "account_status_read" {
   for_each = var.lambda_domains
   name     = "account-status-read"

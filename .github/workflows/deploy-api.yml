@@ -87,7 +87,7 @@ jobs:
 
           # Map: bundle-name → entry point (relative to repo root)
           # auth, chat, marketplace → main terraform stack (mapsbridge-prod-api-*)
-          # ai, ai-stream, routes, admin, stripe, operations, background-monitor, kb-ingest, places → admin-runtime (mapsbridge-prod-*)
+          # ai, ai-stream, routes, admin, stripe, operations, revenuecat, community, background-monitor, kb-ingest, places → admin-runtime (mapsbridge-prod-*)
           # ws-onconnect, ws-onmessage, ws-ondisconnect → messaging (mapsbridge-prod-*)
           declare -A ENTRIES=(
             ["auth"]="$LAMBDA_ROOT/src/auth/index.ts"
@@ -107,6 +107,7 @@ jobs:
             ["revenuecat"]="$LAMBDA_ROOT/src/revenuecat/index.ts"
             ["billing-reconcile"]="$LAMBDA_ROOT/src/billing/reconcile.ts"
             ["conversion-forwarder"]="$LAMBDA_ROOT/src/billing/conversion-forwarder.ts"
+            ["community"]="$LAMBDA_ROOT/src/community/index.ts"
           )
 
           for name in "${!ENTRIES[@]}"; do
@@ -178,6 +179,7 @@ jobs:
             ["revenuecat"]="${PREFIX}-revenuecat"
             ["billing-reconcile"]="${PREFIX}-billing-reconcile"
             ["conversion-forwarder"]="${PREFIX}-conversion-forwarder"
+            ["community"]="${PREFIX}-community"
             ["rag-fill"]="${PREFIX}-rag-fill"
           )
 

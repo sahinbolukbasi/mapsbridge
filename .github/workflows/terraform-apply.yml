@@ -23,7 +23,7 @@ on:
         default: false
         type: boolean
       target:
-        description: "Terraform -target (e.g. module.api). Leave empty for full apply."
+        description: "Terraform -target, comma-separated (main + admin-runtime). Leave empty for full apply."
         required: false
         default: ""
         type: string
@@ -133,20 +133,26 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infra/terraform
+        env:
+          # Girdi env üzerinden okunur (script enjeksiyonu yok); adresler boşluk/tırnak
+          # içerebilir (ör. aws_apigatewayv2_route.domain["GET /community/posts"]).
+          TF_TARGETS: ${{ github.event.inputs.target }}
+          TF_REFRESH: ${{ github.event.inputs.refresh }}
         run: |
-          TARGET_ARGS=""
-          if [ -n "${{ github.event.inputs.target }}" ]; then
-            IFS=',' read -ra TARGETS <<< "${{ github.event.inputs.target }}"
+          TARGET_ARGS=()
+          if [ -n "$TF_TARGETS" ]; then
+            IFS=',' read -ra TARGETS <<< "$TF_TARGETS"
             for t in "${TARGETS[@]}"; do
-              t=$(echo "$t" | xargs)
-              TARGET_ARGS="$TARGET_ARGS -target=$t"
+              t="$(printf '%s' "$t" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+              if [ -n "$t" ]; then TARGET_ARGS+=("-target=$t"); fi
             done
           fi
-          REFRESH_ARG=""
-          if [ "${{ github.event.inputs.refresh }}" = "false" ]; then
-            REFRESH_ARG="-refresh=false"
+          REFRESH_ARGS=()
+          if [ "$TF_REFRESH" = "false" ]; then
+            REFRESH_ARGS+=("-refresh=false")
           fi
-          terraform plan -out=tfplan $TARGET_ARGS $REFRESH_ARG
+          printf 'target: %s\n' "${TARGET_ARGS[@]}"
+          terraform plan -out=tfplan "${TARGET_ARGS[@]}" "${REFRESH_ARGS[@]}"
 
       - name: Upload plan
         uses: actions/upload-artifact@v4
@@ -240,13 +246,24 @@ jobs:
 
       - name: Terraform Apply
         working-directory: infra/terraform
+        env:
+          TF_TARGETS: ${{ github.event.inputs.target }}
         run: |
           # İlk deneme kaydedilmiş planı uygular. ENI detach / IAM propagation
-          # kaynaklı geçici hatada güncel değişkenlerle yeniden plan+apply denenir.
+          # kaynaklı geçici hatada yeniden denenir — AYNI -target'larla: ana stack
+          # drift'li, hedefsiz apply VPC dahil kaynakları silmek ister.
+          TARGET_ARGS=()
+          if [ -n "$TF_TARGETS" ]; then
+            IFS=',' read -ra TARGETS <<< "$TF_TARGETS"
+            for t in "${TARGETS[@]}"; do
+              t="$(printf '%s' "$t" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+              if [ -n "$t" ]; then TARGET_ARGS+=("-target=$t"); fi
+            done
+          fi
           if ! terraform apply -auto-approve tfplan; then
             echo "::warning::İlk apply başarısız (ENI detach/IAM propagation olası). 60s sonra yeniden deneniyor..."
             sleep 60
-            terraform apply -auto-approve
+            terraform apply -auto-approve "${TARGET_ARGS[@]}"
           fi
 
       - name: Show Outputs
@@ -273,6 +290,10 @@ jobs:
       TF_VAR_protected_admin_sub: ${{ secrets.ADMIN_SUB }}
       TF_VAR_slack_admin_user_ids: ${{ secrets.SLACK_ADMIN_USER_IDS }}
       TF_VAR_deploy_targets: '{"routes":{"type":"lambda","name":"mapsbridge-prod-routes"},"admin":{"type":"lambda","name":"mapsbridge-prod-admin"},"ai":{"type":"lambda","name":"mapsbridge-prod-ai"}}'
+      # Gizli olmayan değerler (repo Variables): ürün/paket kimlikleri, gösterim fiyatları,
+      # BILLING_ENABLED; tanımsızsa {} (bugünkü davranış). Bkz. billing.auto.tfvars.json.example.
+      TF_VAR_billing_environment: ${{ vars.BILLING_ENVIRONMENT_JSON || '{}' }}
+      TF_VAR_media_public_base_url: ${{ vars.MEDIA_PUBLIC_BASE_URL || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -281,12 +302,17 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Create Lambda zip placeholders
+      # admin-runtime aws_lambda_function'larında source_code_hash ignore edilmez:
+      # placeholder zip apply'da canlı kodu ezerdi. Gerçek paketler üretilir.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Build Lambda bundles
         run: |
-          mkdir -p infra/admin-runtime/.build
-          for name in admin routes operations ai stripe ai-stream background-monitor rag-fill; do
-            echo "placeholder" | zip -q infra/admin-runtime/.build/${name}.zip -
-          done
+          npm ci
+          npm ci --prefix infra/lambda --ignore-scripts
+          node infra/scripts/build-admin-runtime.cjs
 
       - name: Terraform Init
         working-directory: infra/admin-runtime
@@ -294,7 +320,26 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infra/admin-runtime
-        run: terraform plan -out=tfplan
+        env:
+          # Girdi env üzerinden okunur (script enjeksiyonu yok); adresler boşluk/tırnak
+          # içerebilir (ör. aws_apigatewayv2_route.domain["GET /community/posts"]).
+          TF_TARGETS: ${{ github.event.inputs.target }}
+          TF_REFRESH: ${{ github.event.inputs.refresh }}
+        run: |
+          TARGET_ARGS=()
+          if [ -n "$TF_TARGETS" ]; then
+            IFS=',' read -ra TARGETS <<< "$TF_TARGETS"
+            for t in "${TARGETS[@]}"; do
+              t="$(printf '%s' "$t" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+              if [ -n "$t" ]; then TARGET_ARGS+=("-target=$t"); fi
+            done
+          fi
+          REFRESH_ARGS=()
+          if [ "$TF_REFRESH" = "false" ]; then
+            REFRESH_ARGS+=("-refresh=false")
+          fi
+          printf 'target: %s\n' "${TARGET_ARGS[@]}"
+          terraform plan -out=tfplan "${TARGET_ARGS[@]}" "${REFRESH_ARGS[@]}"
 
       - name: Upload plan
         uses: actions/upload-artifact@v4
@@ -323,6 +368,10 @@ jobs:
       TF_VAR_protected_admin_sub: ${{ secrets.ADMIN_SUB }}
       TF_VAR_slack_admin_user_ids: ${{ secrets.SLACK_ADMIN_USER_IDS }}
       TF_VAR_deploy_targets: '{"routes":{"type":"lambda","name":"mapsbridge-prod-routes"},"admin":{"type":"lambda","name":"mapsbridge-prod-admin"},"ai":{"type":"lambda","name":"mapsbridge-prod-ai"}}'
+      # Gizli olmayan değerler (repo Variables): ürün/paket kimlikleri, gösterim fiyatları,
+      # BILLING_ENABLED; tanımsızsa {} (bugünkü davranış). Bkz. billing.auto.tfvars.json.example.
+      TF_VAR_billing_environment: ${{ vars.BILLING_ENVIRONMENT_JSON || '{}' }}
+      TF_VAR_media_public_base_url: ${{ vars.MEDIA_PUBLIC_BASE_URL || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -331,12 +380,17 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Create Lambda zip placeholders
+      # admin-runtime aws_lambda_function'larında source_code_hash ignore edilmez:
+      # placeholder zip apply'da canlı kodu ezerdi. Gerçek paketler üretilir.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Build Lambda bundles
         run: |
-          mkdir -p infra/admin-runtime/.build
-          for name in admin routes operations ai stripe ai-stream background-monitor rag-fill; do
-            echo "placeholder" | zip -q infra/admin-runtime/.build/${name}.zip -
-          done
+          npm ci
+          npm ci --prefix infra/lambda --ignore-scripts
+          node infra/scripts/build-admin-runtime.cjs
 
       - name: Terraform Init
         working-directory: infra/admin-runtime

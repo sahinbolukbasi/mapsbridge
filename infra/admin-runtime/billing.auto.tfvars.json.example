@@ -1,0 +1,21 @@
+{
+  "billing_environment": {
+    "BILLING_ENABLED": "false",
+    "RC_BILLING_CHECKOUT_URL": "",
+    "RC_PRODUCT_EXPLORER": "mapsbridge_explorer_monthly",
+    "RC_PRODUCT_AGENCY": "mapsbridge_agency_monthly",
+    "RC_PRODUCT_PACK_30": "mapsbridge_pack_30",
+    "RC_PRODUCT_PACK_100": "mapsbridge_pack_100",
+    "RC_PRODUCT_PACK_300": "mapsbridge_pack_300",
+    "RC_PACKAGE_EXPLORER": "explorer_monthly",
+    "RC_PACKAGE_AGENCY": "agency_monthly",
+    "RC_PACKAGE_PACK_30": "pack_30",
+    "RC_PACKAGE_PACK_100": "pack_100",
+    "RC_PACKAGE_PACK_300": "pack_300",
+    "RC_PRICE_EXPLORER": "14900",
+    "RC_PRICE_AGENCY": "199900",
+    "RC_PRICE_PACK_30": "7900",
+    "RC_PRICE_PACK_100": "19900",
+    "RC_PRICE_PACK_300": "49900"
+  }
+}

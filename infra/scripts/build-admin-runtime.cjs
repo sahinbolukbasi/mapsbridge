@@ -1,83 +1,52 @@
+// infra/admin-runtime/.build/*.zip paketlerini üretir (terraform plan/apply ve CI için).
+// Giriş noktaları deploy-api.yml ENTRIES ile aynıdır; yalnız paketlenmiş handler zip'e girer
+// (bağımlılık katmanı ya da kimlik bilgisi yok).
+// routes.json elle yönetilir (revenuecat, /ai/chat, community… gibi uçlar kaynak taramasıyla
+// bulunamaz); bu betik onu artık yeniden yazmaz.
 const path = require("node:path");
 const fs = require("node:fs");
 const { execFileSync } = require("node:child_process");
-const { buildSync } = require("esbuild");
 const root = path.resolve(__dirname, "../..");
+// esbuild kökte ya da infra/lambda altında kurulu olabilir.
+const { buildSync } = require(
+  require.resolve("esbuild", { paths: [root, path.join(root, "infra/lambda")] }),
+);
 const destination = path.join(root, "infra/admin-runtime/.build");
 fs.mkdirSync(destination, { recursive: true });
-for (const domain of ["admin", "routes", "operations", "ai", "stripe"]) {
-  const directory = path.join(destination, domain);
+const src = (file) => path.join(root, "infra/lambda/src", file);
+const bundles = {
+  // local.domains (main.tf)
+  admin: src("admin/index.ts"),
+  routes: src("routes/index.ts"),
+  operations: src("operations/index.ts"),
+  ai: src("ai/index.ts"),
+  stripe: src("stripe/index.ts"),
+  revenuecat: src("revenuecat/index.ts"),
+  community: src("community/index.ts"),
+  // tekil fonksiyonlar (ai-stream ai.zip'i kullanır)
+  "background-monitor": src("background-monitor/index.ts"),
+  "billing-reconcile": src("billing/reconcile.ts"),
+  "conversion-forwarder": src("billing/conversion-forwarder.ts"),
+  "rag-fill": path.join(root, "agents/rag-fill/index.ts"),
+};
+// Sabit zaman damgası: aynı kaynak aynı zip'i (aynı source_code_hash) üretir.
+const fixedTime = new Date("2020-01-01T00:00:00Z");
+for (const [name, entry] of Object.entries(bundles)) {
+  const directory = path.join(destination, name);
+  const outfile = path.join(directory, "index.js");
   buildSync({
-    entryPoints: [path.join(root, `infra/lambda/src/${domain}/index.ts`)],
+    entryPoints: [entry],
     bundle: true,
     platform: "node",
-    target: "node22",
+    target: "node20", // aws_lambda_function runtime = nodejs20.x
     format: "cjs",
-    outfile: path.join(directory, "index.js"),
+    minify: true,
+    outfile,
+    nodePaths: [path.join(root, "infra/lambda/node_modules")],
   });
-  // Only the bundled handler is included; no dependency layer or credentials.
-  execFileSync("zip", [
-    "-q",
-    "-j",
-    path.join(destination, `${domain}.zip`),
-    path.join(directory, "index.js"),
-  ]);
-  console.log(`Built ${domain}.zip`);
+  fs.utimesSync(outfile, fixedTime, fixedTime);
+  const zip = path.join(destination, `${name}.zip`);
+  fs.rmSync(zip, { force: true });
+  execFileSync("zip", ["-q", "-j", "-X", zip, outfile]);
+  console.log(`Built ${name}.zip`);
 }
-
-const routeMap = Object.fromEntries(
-  [
-    "GET /stripe/plans",
-    "GET /stripe/session",
-    "GET /stripe/subscription",
-    "POST /stripe/checkout",
-    "POST /stripe/portal",
-    "POST /stripe/webhook",
-    "OPTIONS /stripe/{proxy+}",
-  ].map((route) => [route, "stripe"]),
-);
-Object.assign(routeMap, {
-  "POST /ai/route-planner": "ai",
-  "GET /stripe/wallet": "ai",
-  "OPTIONS /ai/{proxy+}": "ai",
-  "OPTIONS /stripe/wallet": "ai",
-});
-for (const [domain, files] of Object.entries({
-  admin: ["admin/index.ts", "admin/management.ts"],
-  routes: ["routes/index.ts"],
-  operations: ["operations/index.ts"],
-})) {
-  for (const file of files) {
-    const source = fs.readFileSync(path.join(root, "infra/lambda/src", file), "utf8");
-    const pattern =
-      domain === "admin"
-        ? /"((?:GET|POST|PUT|DELETE) \/admin\/[^"\n]+)":/g
-        : /router\.add\("((?:GET|POST|PUT|DELETE) [^"\n]+)"/g;
-    for (const [, route] of source.matchAll(pattern)) {
-      if (domain === "routes" && !route.split(" ")[1].startsWith("/routes")) continue;
-      routeMap[route] = domain;
-    }
-  }
-}
-for (const [route, domain] of Object.entries({
-  "OPTIONS /routes": "routes",
-  "OPTIONS /routes/{proxy+}": "routes",
-  "OPTIONS /admin/{proxy+}": "admin",
-  "OPTIONS /support/{proxy+}": "operations",
-  "OPTIONS /system/{proxy+}": "operations",
-  "OPTIONS /marketplace/{proxy+}": "operations",
-  "OPTIONS /tracker": "operations",
-  "OPTIONS /tracker/{proxy+}": "operations",
-}))
-  routeMap[route] = domain;
-fs.writeFileSync(
-  path.join(root, "infra/admin-runtime/routes.json"),
-  JSON.stringify(routeMap, null, 2) + "\n",
-);
-
-execFileSync("zip", [
-  "-q",
-  "-j",
-  path.join(destination, "legacy-api.zip"),
-  path.join(root, "infra/lambda/handler.py"),
-]);

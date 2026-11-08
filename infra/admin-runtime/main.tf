@@ -63,7 +63,7 @@ locals {
   group     = "mapsbridge-admin"
   table_arn = "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${var.dynamodb_table}"
   pool_arn  = "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.cognito_user_pool_id}"
-  domains   = toset(["admin", "routes", "operations", "ai", "stripe", "revenuecat"])
+  domains   = toset(["admin", "routes", "operations", "ai", "stripe", "revenuecat", "community"])
   routes    = jsondecode(file("${path.module}/routes.json"))
 }
 resource "aws_cognito_user_group" "admins" {
@@ -95,6 +95,8 @@ resource "aws_iam_role_policy" "data" {
     { Effect = "Allow", Action = ["bedrock:CreateModelCustomizationJob", "bedrock:ListModelCustomizationJobs", "bedrock:GetModelCustomizationJob"], Resource = ["*"] }
     ] : [], contains(["admin", "operations", "ai", "stripe", "revenuecat"], each.key) ? [
     { Effect = "Allow", Action = ["dynamodb:Scan", "dynamodb:TransactWriteItems"], Resource = [local.table_arn] }
+    ] : [], each.key == "community" ? [
+    { Effect = "Allow", Action = ["dynamodb:BatchGetItem", "dynamodb:TransactWriteItems", "dynamodb:ConditionCheckItem"], Resource = [local.table_arn] }
     ] : [], each.key == "routes" ? [
     { Effect = "Allow", Action = ["secretsmanager:GetSecretValue"], Resource = ["arn:aws:secretsmanager:${var.region}:${var.account_id}:secret:mapsbridge/*"] },
     { Effect = "Allow", Action = ["ecs:UpdateService", "ecs:DescribeServices"], Resource = ["*"] },
@@ -120,7 +122,7 @@ resource "aws_lambda_function" "domain" {
   source_code_hash = filebase64sha256("${path.module}/.build/${each.key}.zip")
   tags             = { Workload = each.key == "ai" ? "travel-ai" : "core-backend" }
   environment {
-    variables = merge({ ENVIRONMENT = "prod", DYNAMODB_TABLE = var.dynamodb_table, COGNITO_USER_POOL_ID = var.cognito_user_pool_id, COGNITO_CLIENT_ID = var.cognito_client_id }, each.key == "admin" ? { ADMIN_GROUP_NAME = local.group, COGNITO_USER_MANAGEMENT = "true", MODERATOR_GROUP_NAME = "mapsbridge-moderator", SUPPORT_GROUP_NAME = "mapsbridge-support", PROTECTED_ADMIN_SUB = var.protected_admin_sub, AI_TRAINING_BUCKET = "${var.prefix}-training-${var.account_id}", BEDROCK_TRAINING_REGION = "us-east-1", BEDROCK_TRAINING_ROLE_ARN = "arn:aws:iam::${var.account_id}:role/${var.prefix}-bedrock-finetune" } : {}, each.key == "routes" ? { SLACK_SIGNING_SECRET = "secret://mapsbridge/slack/signing-secret", SLACK_BOT_TOKEN = "secret://mapsbridge/slack/bot-token", GH_TOKEN = "secret://mapsbridge/github/token", ALLOWED_USERS = "", ALLOWED_CHANNELS = "", SLACK_ADMIN_USER_IDS = var.slack_admin_user_ids, DEPLOY_TARGETS = var.deploy_targets, OSRM_BASE_URL = "https://router.project-osrm.org", MEDIA_BUCKET = "${var.prefix}-storage-media-${var.account_id}" } : {}, each.key == "ai" ? { BEDROCK_MODEL_ID = "eu.anthropic.claude-haiku-4-5-20251001-v1:0", AI_DAILY_REQUEST_LIMIT = "200", TRAVEL_KNOWLEDGE_BASE_ID = var.travel_knowledge_base_id, PLACE_RESEARCH_ENABLED = "true" } : {}, each.key == "ai" ? var.ai_memory_environment : {}, each.key == "ai" ? var.ai_gateway_environment : {}, each.key == "ai" ? { AI_TRAINING_COLLECTION_ENABLED = tostring(var.ai_training_collection_enabled) } : {}, each.key == "ai" ? var.ai_finops_environment : {}, each.key == "stripe" ? merge({ APP_ORIGIN = var.frontend_origin, BILLING_ENABLED = "false" }, var.billing_environment) : {}, each.key == "revenuecat" ? merge({ APP_ORIGIN = var.frontend_origin, RC_WEBHOOK_AUTH_SECRET = "secret:/${var.prefix}/revenuecat/webhook-secret", RC_SECRET_API_KEY = "secret:/${var.prefix}/revenuecat/api-key", BILLING_CONVERSIONS_TOPIC_ARN = aws_sns_topic.billing_conversions.arn }, var.billing_environment) : {})
+    variables = merge({ ENVIRONMENT = "prod", DYNAMODB_TABLE = var.dynamodb_table, COGNITO_USER_POOL_ID = var.cognito_user_pool_id, COGNITO_CLIENT_ID = var.cognito_client_id }, each.key == "admin" ? { ADMIN_GROUP_NAME = local.group, COGNITO_USER_MANAGEMENT = "true", MODERATOR_GROUP_NAME = "mapsbridge-moderator", SUPPORT_GROUP_NAME = "mapsbridge-support", PROTECTED_ADMIN_SUB = var.protected_admin_sub, AI_TRAINING_BUCKET = "${var.prefix}-training-${var.account_id}", BEDROCK_TRAINING_REGION = "us-east-1", BEDROCK_TRAINING_ROLE_ARN = "arn:aws:iam::${var.account_id}:role/${var.prefix}-bedrock-finetune" } : {}, each.key == "routes" ? { SLACK_SIGNING_SECRET = "secret://mapsbridge/slack/signing-secret", SLACK_BOT_TOKEN = "secret://mapsbridge/slack/bot-token", GH_TOKEN = "secret://mapsbridge/github/token", ALLOWED_USERS = "", ALLOWED_CHANNELS = "", SLACK_ADMIN_USER_IDS = var.slack_admin_user_ids, DEPLOY_TARGETS = var.deploy_targets, OSRM_BASE_URL = "https://router.project-osrm.org", MEDIA_BUCKET = "${var.prefix}-storage-media-${var.account_id}" } : {}, each.key == "ai" ? { BEDROCK_MODEL_ID = "eu.anthropic.claude-haiku-4-5-20251001-v1:0", AI_DAILY_REQUEST_LIMIT = "200", TRAVEL_KNOWLEDGE_BASE_ID = var.travel_knowledge_base_id, PLACE_RESEARCH_ENABLED = "true", GOOGLE_PLACES_SECRET_ID = aws_secretsmanager_secret.google_places_key.name } : {}, contains(["routes", "community"], each.key) && var.media_public_base_url != "" ? { MEDIA_PUBLIC_BASE_URL = var.media_public_base_url } : {}, each.key == "ai" ? var.ai_memory_environment : {}, each.key == "ai" ? var.ai_gateway_environment : {}, each.key == "ai" ? { AI_TRAINING_COLLECTION_ENABLED = tostring(var.ai_training_collection_enabled) } : {}, each.key == "ai" ? var.ai_finops_environment : {}, each.key == "stripe" ? merge({ APP_ORIGIN = var.frontend_origin, BILLING_ENABLED = "false" }, var.billing_environment) : {}, each.key == "revenuecat" ? merge({ APP_ORIGIN = var.frontend_origin, RC_WEBHOOK_AUTH_SECRET = "secret:/${var.prefix}/revenuecat/webhook-secret", RC_SECRET_API_KEY = "secret:/${var.prefix}/revenuecat/api-key", BILLING_CONVERSIONS_TOPIC_ARN = aws_sns_topic.billing_conversions.arn }, var.billing_environment) : {})
   }
   depends_on = [aws_iam_role_policy.data, aws_iam_role_policy_attachment.logs]
 }
@@ -160,7 +162,7 @@ resource "aws_cognito_user_group" "staff" {
 variable "billing_environment" {
   type        = map(string)
   default     = {}
-  description = "Stripe price IDs and secret: SSM references only; no plaintext credentials."
+  description = "Stripe price IDs, RevenueCat product/package IDs, display prices and BILLING_ENABLED (merged into stripe + revenuecat). Non-secret values only; secrets stay as secret: SSM references. Example: billing.auto.tfvars.json.example."
 }
 
 variable "kb_source_bucket" {

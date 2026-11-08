@@ -43,6 +43,7 @@ locals {
       "GET /chat/threads/{id}/messages",
       "POST /chat/threads/{id}/messages",
       "POST /chat/threads",
+      "POST /chat/threads/{id}/request",
     ]
   }
 

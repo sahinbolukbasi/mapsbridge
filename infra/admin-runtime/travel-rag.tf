@@ -21,7 +21,7 @@ resource "aws_iam_role_policy" "place_research" {
   name = "travel-place-research"
   role = aws_iam_role.domain["ai"].id
   policy = jsonencode({ Version = "2012-10-17", Statement = [{
-    Effect   = "Allow", Action = ["geo-places:Geocode", "geo-places:SearchText"],
+    Effect   = "Allow", Action = ["geo-places:Geocode", "geo-places:SearchText", "geo-places:ReverseGeocode", "geo-places:GetPlace", "geo-places:SearchNearby"],
     Resource = "arn:aws:geo-places:${var.region}::provider/default"
   }] })
 }

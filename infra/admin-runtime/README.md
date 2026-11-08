@@ -18,7 +18,7 @@ terraform -chdir=infra/admin-runtime apply deployment.tfplan
 npm run build
 ```
 
-Eski Python API: derleme `.build/legacy-api.zip` oluşturur. Mevcut kodun yedeğini aldıktan sonra `aws lambda update-function-code --region eu-central-1 --function-name adreskopru-prod-api --zip-file fileb://infra/admin-runtime/.build/legacy-api.zip` ile yayımlayın. Bu işlev ayrı altyapı sahipliğinde kalır; çalışma ortamı ve ayarlarını değiştirmeyin.
+Derleme `.build/` altında tüm admin-runtime paketlerini (local.domains + background-monitor, billing-reconcile, conversion-forwarder, rag-fill) sabit zaman damgalı üretir. `routes.json` elle yönetilir; betik onu yeniden yazmaz. Eski Python API (`legacy-api.zip`) artık bu betikle üretilmez (`infra/lambda/handler.py` depoda yok).
 
 Web yayını: önce `apps/web/out/_next/` dosyalarını mevcut web kovasına immutable cache ile, ardından `apps/web/out/` içeriğini `_next/*` hariç `no-cache` ile yükleyin. Eski varlıkları silmeyin. Ortak layout değiştiğinden yalnız admin klasörlerini yüklemek yeterli değildir. Ardından CloudFront `/*` yollarını invalidate edin.
 
