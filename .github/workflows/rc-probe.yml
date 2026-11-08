@@ -8,20 +8,41 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe RevenueCat API v2 with RC_SECRET_API_KEY (no secret printed)
+      - name: Read RevenueCat project state (GET only, no secret printed)
         env:
           RC_KEY: ${{ secrets.RC_SECRET_API_KEY }}
+          RC_PROJECT: projb29ddf07
         run: |
-          code=$(curl -s -o /tmp/p.json -w "%{http_code}" -H "Authorization: Bearer $RC_KEY" https://api.revenuecat.com/v2/projects)
-          echo "v2 /projects HTTP $code"
           python3 - <<'PY'
-          import json
-          try:
-            d=json.load(open('/tmp/p.json'))
-          except Exception as e:
-            print("unparseable", e); raise SystemExit
-          if 'items' in d:
-            for p in d['items']: print("project", p.get('id'), p.get('name'))
-          else:
-            print({k:d.get(k) for k in ('type','code','message','doc_url')})
+          import json, os, urllib.request, urllib.error
+          KEY = os.environ["RC_KEY"]; P = os.environ["RC_PROJECT"]
+          BASE = "https://api.revenuecat.com"
+          def get(path):
+              req = urllib.request.Request(BASE + path, headers={"Authorization": "Bearer " + KEY})
+              try:
+                  with urllib.request.urlopen(req) as r: return r.status, json.load(r)
+              except urllib.error.HTTPError as e:
+                  try: body = json.load(e)
+                  except Exception: body = {}
+                  return e.code, {k: body.get(k) for k in ("type", "code", "message")}
+          def items(path):
+              out = []; nxt = path
+              while nxt:
+                  code, d = get(nxt)
+                  if code != 200: print("ERR", path, code, d); return out
+                  out += d.get("items", []); nxt = d.get("next_page")
+              return out
+          def dump(label, obj): print(label, json.dumps(obj, ensure_ascii=False, sort_keys=True))
+          for a in items(f"/v2/projects/{P}/apps"): dump("APP", a)
+          for p in items(f"/v2/projects/{P}/products?limit=100"): dump("PRODUCT", p)
+          for e in items(f"/v2/projects/{P}/entitlements?limit=100"):
+              dump("ENTITLEMENT", e)
+              for p in items(f"/v2/projects/{P}/entitlements/{e['id']}/products?limit=100"):
+                  print("  ENT_PRODUCT", e["id"], p.get("id"), p.get("store_identifier"), p.get("app_id"))
+          for o in items(f"/v2/projects/{P}/offerings?limit=100"):
+              dump("OFFERING", o)
+              for k in items(f"/v2/projects/{P}/offerings/{o['id']}/packages?limit=100"):
+                  dump("  PACKAGE", k)
+                  for p in items(f"/v2/projects/{P}/packages/{k['id']}/products?limit=100"):
+                      dump("    PKG_PRODUCT", p)
           PY
