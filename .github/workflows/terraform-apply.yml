@@ -126,7 +126,10 @@ jobs:
             echo "No stale lock found"
           fi
 
+      # plan_only=true koşusu salt-okunur kalır: bu adım gerçek bir apply'dır
+      # (deploy rolü policy'sini sil-yeniden-yaz). Apply job'u kendi bootstrap'ını yapar.
       - name: Bootstrap deploy role permissions
+        if: github.event.inputs.plan_only != 'true'
         working-directory: infra/terraform
         continue-on-error: true
         run: terraform apply -auto-approve -replace=aws_iam_role_policy.github_deploy -target=aws_iam_role_policy.github_deploy
