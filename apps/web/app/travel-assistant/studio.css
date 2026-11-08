@@ -23,8 +23,11 @@
     background: var(--color-surface);
   }
   .as-studio {
-    /* --app-panel: sohbet sütunu (R11; sayfa katmanı yerleşim değişkeni, token değil). */
+    /* --app-panel: sohbet sütununun okunabilir alt genişliği (R11; sayfa katmanı yerleşim
+       değişkeni, token değil). FEAT-004 B4: sohbet baskın sütun (minmax(--app-panel, 1fr)),
+       rota/taslak sütunu daha dar bir clamp (--app-draft) olur. */
     --app-panel: clamp(22rem, 34vw, 32rem);
+    --app-draft: clamp(20rem, 26vw, 28rem);
   }
   .as-studio {
     flex: 1 1 auto;
@@ -81,6 +84,25 @@
     padding: var(--space-4);
     border-inline-end: 1px solid var(--color-border);
     background: var(--color-surface-sunken);
+  }
+  .as-studio__sessions-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .as-studio__sessions-top > :first-child {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+  /* Daraltılmış ray: dikey + ve aç düğmeleri. */
+  .as-studio__sessions-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .as-studio__sessions[data-collapsed] {
+    padding: var(--space-3) var(--space-2);
   }
   .as-studio__sessions-head {
     display: flex;
@@ -569,6 +591,52 @@
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+  /* Taslak üstü statik mini harita (FEAT-004; gerçek koordinatlardan, Leaflet yok). Gün renkleri
+     yalnız components/trip ve maps altında serbest (G23); burada semantik token kullanılır. */
+  .as-studio__minimap {
+    position: relative;
+    margin: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-sunken);
+  }
+  .as-studio__minimap-svg {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 16 / 9;
+  }
+  .as-studio__minimap-bg {
+    fill: var(--color-surface-sunken);
+  }
+  .as-studio__minimap-casing {
+    stroke: var(--color-surface);
+  }
+  .as-studio__minimap-line {
+    stroke: var(--color-primary);
+  }
+  .as-studio__minimap-dot {
+    fill: var(--color-primary);
+    stroke: var(--color-surface);
+    stroke-width: 2;
+  }
+  .as-studio__minimap-num {
+    fill: var(--color-on-primary);
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-bold);
+  }
+  .as-studio__minimap-caption {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    color: var(--color-text-inverse);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    background: color-mix(in srgb, var(--color-surface-inverse) 72%, transparent);
+  }
   .as-studio__route-head {
     display: grid;
     gap: var(--space-1);
@@ -874,13 +942,24 @@
     .as-studio {
       grid-template-columns: 280px minmax(0, 1fr);
     }
-    /* Taslak/harita açıkken sohbet okunabilir sütun (--app-panel), tuval kalan alan; geniş
-       taslakta sohbet alt sınıra (22rem) iner. */
+    /* Taslak/rota açıkken sohbet baskın sütun (minmax(--app-panel, 1fr) = en geniş yüzey),
+       rota/taslak daha dar (--app-draft); "büyüt" ile rota bir basamak genişler ama sohbet
+       baskın kalır (1fr sohbette). */
     .as-studio[data-panel="open"] {
-      grid-template-columns: 280px var(--app-panel) minmax(0, 1fr);
+      grid-template-columns: 280px minmax(var(--app-panel), 1fr) var(--app-draft);
     }
     .as-studio[data-panel="open"][data-wide] {
-      grid-template-columns: 280px 22rem minmax(0, 1fr);
+      grid-template-columns: 280px minmax(var(--app-panel), 1fr) clamp(26rem, 34vw, 36rem);
+    }
+    /* Daraltılmış sohbet geçmişi: yalnız dar bir ray (+ ve aç düğmeleri). */
+    .as-studio[data-collapsed] {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+    .as-studio[data-collapsed][data-panel="open"] {
+      grid-template-columns: auto minmax(var(--app-panel), 1fr) var(--app-draft);
+    }
+    .as-studio[data-collapsed][data-panel="open"][data-wide] {
+      grid-template-columns: auto minmax(var(--app-panel), 1fr) clamp(26rem, 34vw, 36rem);
     }
     .as-studio__sessions {
       display: flex;

@@ -82,6 +82,8 @@ import {
   DraftStops,
   type PlaceInput,
 } from "./draft-sections";
+import { MiniRouteMap } from "./mini-route-map";
+import { optimizeAssistantRoute } from "./route-optimize";
 import { POPULAR_DESTINATIONS, ROUTE_STYLES, type RouteStyleKey } from "./studio-starters";
 import { dateLocale, daysLabel, fill, stopsLabel, type Translate } from "./studio-format";
 import { extractDestinationFromText } from "../lib/affiliate/travelpayouts";
@@ -96,6 +98,8 @@ import {
 } from "../lib/ai/conversation-flow";
 
 const STORAGE_KEY = "mapsbridge.ai.sessions.v5";
+/** Sohbet geçmişi paneli daraltma tercihi (FEAT-004). Cihaza özel, kredi/oturumla ilgisiz. */
+const SESSIONS_COLLAPSED_KEY = "mapsbridge.ai.sessionsCollapsed.v1";
 /** İşlem başı kredi notu (S22): kenar kartı ve sohbet girişi aynı metni gösterir. */
 const CREDIT_NOTE_TR =
   "Tercih soruları ücretsiz · Sohbet 1 kredi · Rota oluşturma / düzenleme 5 kredi";
@@ -255,6 +259,9 @@ export default function AIPage() {
   const [streamText, setStreamText] = useState("");
   const [streamPhase, setStreamPhase] = useState<LivePhase | null>(null);
   const [retryAvailable, setRetryAvailable] = useState(false);
+  // Sohbet geçmişi paneli daraltma durumu (FEAT-004): daraltılınca yalnız + düğmesi görünür.
+  // Yüklemede localStorage'tan okunur (SSR hidrasyon güvenli: ilk render false).
+  const [sessionsCollapsed, setSessionsCollapsed] = useState(false);
   // ?resume=1 (J1 adım 6): kayıt öncesi misafir taslağı. Otomatik ücretli istek YOK.
   const [resumeDraft, setResumeDraft] = useState<GuestDraft | null>(null);
   const lastPromptRef = useRef<string>("");
@@ -512,8 +519,22 @@ export default function AIPage() {
     } else {
       setIsAuthenticated(false);
     }
+    try {
+      setSessionsCollapsed(userStorage.getItem(SESSIONS_COLLAPSED_KEY) === "1");
+    } catch {
+      /* Daraltma tercihi okunamazsa varsayılan açık kalır. */
+    }
     setReady(true);
   }, []);
+  // Daraltma tercihini kalıcılaştır (yalnız ilk render sonrası; SSR hidrasyonu bozmaz).
+  useEffect(() => {
+    if (!ready) return;
+    try {
+      userStorage.setItem(SESSIONS_COLLAPSED_KEY, sessionsCollapsed ? "1" : "0");
+    } catch {
+      /* Kalıcılaştırılamazsa sessizce geç; oturum içi durum çalışır. */
+    }
+  }, [sessionsCollapsed, ready]);
   useEffect(() => {
     if (ready && getStoredSession()?.token) {
       try {
@@ -1164,6 +1185,24 @@ export default function AIPage() {
       () => setNotice(t("studio.composer.locationDenied", "Konum izni alınamadı.")),
     );
   }
+  // Karar S19 / I2: asistan içinden deterministik istemci 2-opt; kredi yok, sunucu yok.
+  // Planlayıcıyla AYNI algoritmayı (optimizeRouteOrder) gün gün uygular.
+  function optimizeRoute() {
+    if (!route) return;
+    const result = optimizeAssistantRoute(route);
+    if (!result) {
+      setNotice(t("studio.optimize.none", "Rota sırası zaten en kısa sıraya yakın."));
+      return;
+    }
+    setSessions((s) =>
+      s.map((x) => (x.id === activeId ? { ...x, route: result.route } : x)),
+    );
+    setNotice(
+      fill(t("studio.optimize.done", "Durak sırası güncellendi: yaklaşık {km} km daha kısa."), {
+        km: String(result.savedDistanceKm).replace(".", ","),
+      }),
+    );
+  }
   function download() {
     if (!route) return;
     const url = URL.createObjectURL(
@@ -1276,8 +1315,26 @@ export default function AIPage() {
         >
           <aside
             className="as-studio__sessions"
+            data-collapsed={sessionsCollapsed ? "true" : undefined}
             aria-label={t("studio.sessions.label", "Sohbetler")}
           >
+            {sessionsCollapsed ? (
+              <div className="as-studio__sessions-rail">
+                <IconButton
+                  icon="plus"
+                  label={t("studio.new", "Yeni seyahat planla")}
+                  onClick={startNew}
+                  disabled={busy}
+                />
+                <IconButton
+                  icon="menu"
+                  label={t("studio.sessions.expand", "Sohbet geçmişini göster")}
+                  onClick={() => setSessionsCollapsed(false)}
+                />
+              </div>
+            ) : (
+              <>
+            <div className="as-studio__sessions-top">
             <Button
               variant="primary"
               fullWidth
@@ -1287,6 +1344,12 @@ export default function AIPage() {
             >
               {t("studio.new", "Yeni seyahat planla")}
             </Button>
+            <IconButton
+              icon="chevron-left"
+              label={t("studio.sessions.collapse", "Sohbet geçmişini gizle")}
+              onClick={() => setSessionsCollapsed(true)}
+            />
+            </div>
             <div className="as-studio__sessions-head">
               <p className="as-studio__eyebrow">{t("studio.sessions.title", "Sohbet geçmişi")}</p>
               {sessions.length > 0 && (
@@ -1362,6 +1425,8 @@ export default function AIPage() {
                 </p>
               )}
             </div>
+              </>
+            )}
           </aside>
 
           <section
@@ -2002,6 +2067,7 @@ export default function AIPage() {
                       />
                     </div>
                   )}
+                  <MiniRouteMap route={route} />
                   <div className="as-studio__route-head">
                     <h3 className="as-studio__route-title">{route.title}</h3>
                     <p className="as-studio__meta">
@@ -2124,6 +2190,14 @@ export default function AIPage() {
                       {t("studio.msg.openMap", "Haritada aç")}
                     </Button>
                     <div className="as-studio__head-actions">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        iconStart={<Icon name="sparkle" size={16} />}
+                        onClick={optimizeRoute}
+                      >
+                        {t("studio.optimize", "Rotayı optimize et")}
+                      </Button>
                       <Button
                         variant="secondary"
                         size="sm"

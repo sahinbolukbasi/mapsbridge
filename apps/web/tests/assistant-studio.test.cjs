@@ -18,6 +18,7 @@ const en = require(path.join(APP, "locales/en.json"));
 const SOURCES = [
   "travel-assistant-client.tsx",
   "draft-sections.tsx",
+  "mini-route-map.tsx",
   "studio-welcome.tsx",
   "smart-actions.tsx",
   "contextual-followups.tsx",
@@ -316,6 +317,116 @@ test("düşünme aşamaları gerçek boru hattı adımları; yapılmayan iş idd
     assert.ok(src.includes(`studio.think.${key}"`), key);
   assert.doesNotMatch(src, /QUICK_FACTS|Travelpayouts|FCDO|AgentCore Gateway|Uçuş fiyat/);
   assert.doesNotMatch(src, /\d+\s*(sn|saniye|dk|seconds?)\b/i, "süre metni uydurulmaz");
+});
+
+// ── FEAT-004 B4: dar rota sütunu, daraltılabilir geçmiş, mini harita, asistan içi optimize ──
+
+test("FEAT-004: yeni i18n anahtarları tr/en'de var ve TR değeri koddaki yedeğe eşit", () => {
+  const keys = {
+    "studio.sessions.collapse": "Sohbet geçmişini gizle",
+    "studio.sessions.expand": "Sohbet geçmişini göster",
+    "studio.map.caption": "{title} · {days} gün · {stops} durak",
+    "studio.optimize": "Rotayı optimize et",
+    "studio.optimize.done": "Durak sırası güncellendi: yaklaşık {km} km daha kısa.",
+    "studio.optimize.none": "Rota sırası zaten en kısa sıraya yakın.",
+  };
+  for (const [key, trVal] of Object.entries(keys)) {
+    assert.equal(tr[key], trVal, `${key} TR değeri`);
+    assert.ok(key in en, `${key} en.json'da yok`);
+  }
+});
+
+test("FEAT-004: sohbet geçmişi daraltma — daraltılınca yalnız + (ve aç) düğmesi, açılınca liste", () => {
+  const client = read("travel-assistant-client.tsx");
+  // Daraltma durumu + cihaza özel kalıcılık.
+  assert.match(client, /const \[sessionsCollapsed, setSessionsCollapsed\] = useState/);
+  assert.match(client, /SESSIONS_COLLAPSED_KEY/);
+  // Daraltılmış dalda yalnız IconButton'lar (yeni + aç); "Yeni seyahat planla" metin düğmesi YOK.
+  const collapsed = client.slice(
+    client.indexOf('data-collapsed={sessionsCollapsed'),
+    client.indexOf('<div className="as-studio__sessions-head">'),
+  );
+  assert.match(collapsed, /sessionsCollapsed \?/);
+  assert.match(collapsed, /icon="plus"/);
+  assert.match(collapsed, /setSessionsCollapsed\(false\)/);
+  assert.match(collapsed, /icon="menu"/);
+  // Açık dal: tam "Yeni seyahat planla" düğmesi + geçmiş listesi + daralt düğmesi.
+  assert.match(client, /\{t\("studio\.new", "Yeni seyahat planla"\)\}/);
+  assert.match(client, /setSessionsCollapsed\(true\)/);
+  assert.match(client, /className="as-studio-history"/);
+});
+
+test("FEAT-004: mini harita ve asistan içi optimize kontrolü client'ta bağlı", () => {
+  const client = read("travel-assistant-client.tsx");
+  assert.match(client, /import \{ MiniRouteMap \} from "\.\/mini-route-map"/);
+  assert.match(client, /import \{ optimizeAssistantRoute \} from "\.\/route-optimize"/);
+  assert.match(client, /<MiniRouteMap route=\{route\} \/>/);
+  // Optimize butonu + kredi/sunucu YOK (S19/I2): ne reserveAI ne apiFetch optimize akışında.
+  assert.match(client, /\{t\("studio\.optimize", "Rotayı optimize et"\)\}/);
+  const fn = client.slice(client.indexOf("function optimizeRoute()"));
+  const body = fn.slice(0, fn.indexOf("\n  function download"));
+  assert.match(body, /optimizeAssistantRoute\(route\)/);
+  assert.doesNotMatch(body, /apiFetch|reserveAI|credit|kredi/i);
+});
+
+test("FEAT-004: mini-route-map koyu zeminli başlık data-surface=inverse ve Leaflet/ağ yok (I1/I12)", () => {
+  const src = read("mini-route-map.tsx");
+  assert.match(src, /data-surface="inverse"/);
+  // Yorumları çıkarıp yalnız kodda Leaflet/ağ/dinamik import olmadığını doğrula.
+  const code = src.replace(/\/\/[^\n]*/g, "");
+  assert.doesNotMatch(code, /leaflet|apiFetch|\bfetch\(|import\(/i);
+  // Koordinat türetimi saf deriver'a devredilir (uydurma yok).
+  assert.match(src, /routeMiniMap\(route\)/);
+  assert.match(src, /if \(!model\) return null/);
+});
+
+test("FEAT-004: DraftStops günleri sekmelere böler (FIXTURE'da gün 1 ve gün 2)", async () => {
+  const render = await loadRender();
+  const trOut = render("tr", FIXTURE);
+  // İki gün sekmesi (tablist) ve seçili gün içeriği.
+  assert.match(trOut.html, /role="tablist"/);
+  assert.ok(trOut.html.includes("1. Gün") && trOut.html.includes("2. Gün"), "gün sekmeleri yok");
+});
+
+test("FEAT-004: asistan içi optimize bilinen kötü sırayı düzeltir; optimalde no-op (I2)", () => {
+  const mod = loadTs(path.join(TA, "route-optimize.ts"));
+  const stop = (id, lat, lng, day) => ({
+    id,
+    name: id,
+    lat,
+    lng,
+    day,
+    description: "",
+    suggestedDuration: "1 saat",
+  });
+  const plan = (stops) => ({
+    title: "T",
+    summary: "",
+    estimatedDays: 1,
+    theme: "x",
+    destination: "D",
+    stops,
+  });
+  // Bilinen kötü sıra: A(0,0) → C(0,2) → B(0,1) → D(0,3). En kısa: A,B,C,D.
+  const bad = plan([
+    stop("A", 0, 0, 1),
+    stop("C", 0, 2, 1),
+    stop("B", 0, 1, 1),
+    stop("D", 0, 3, 1),
+  ]);
+  const res = mod.optimizeAssistantRoute(bad);
+  assert.ok(res, "iyileşme bulunmalı");
+  assert.ok(res.savedDistanceKm > 0, "tasarruf > 0");
+  // vm bağlamından dönen dizi prototipi farklı; sıralamayı string olarak karşılaştır.
+  assert.equal(res.route.stops.map((s) => s.id).join(","), "A,B,C,D");
+  // Zaten optimal sıra → null (no-op).
+  const good = plan([
+    stop("A", 0, 0, 1),
+    stop("B", 0, 1, 1),
+    stop("C", 0, 2, 1),
+    stop("D", 0, 3, 1),
+  ]);
+  assert.equal(mod.optimizeAssistantRoute(good), null);
 });
 
 test("openMap: girişli kullanıcıda rota sunucuya yazılır (routesApi.create) ve dönen kimlikle açılır", () => {
