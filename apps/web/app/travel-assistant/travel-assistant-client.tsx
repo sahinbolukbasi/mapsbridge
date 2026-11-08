@@ -974,6 +974,16 @@ export default function AIPage() {
             "Bugünlük 20 mesaj sınırına ulaştınız. Sayaç her gece saat 03:00'te (Türkiye saati) sıfırlanır.",
           ),
         );
+      } else if (code === "CONTEXT_TOO_LARGE" || err?.status === 413) {
+        // Sohbet modelin bağlam sınırını aştı — tekrar denemek işe yaramaz; kurtarma yolu:
+        // yeni bir seyahat başlat. Günlük/kredi sınırlarıyla karıştırılmamalı.
+        setError(
+          t(
+            "studio.err.contextTooLarge",
+            "Bu sohbet çok uzadı ve modelin bağlam sınırını aştı. Yeni bir seyahat başlatarak devam edebilirsin.",
+          ),
+        );
+        setRetryAvailable(false);
       } else if (code === "SERVICE_DAILY_LIMIT") {
         setError(
           t(
@@ -1023,6 +1033,16 @@ export default function AIPage() {
       } else if (code === "AI_TIMEOUT") {
         setError(
           t("studio.err.timeoutRetry", "AI yanıtı zaman aşımına uğradı. Lütfen tekrar deneyin."),
+        );
+        setRetryAvailable(true);
+        lastPromptRef.current = promptToSend;
+      } else if (code === "AI_RESULT_UNCONFIRMED") {
+        // Belirsiz 503 yerine: ne olduğunu ve iki eylemi (tekrar dene / yeni seyahat) anlat.
+        setError(
+          t(
+            "studio.err.unconfirmed",
+            "Yanıt doğrulanamadı. Aynı isteği tekrar deneyebilir ya da sohbet uzadıysa yeni bir seyahat başlatabilirsin.",
+          ),
         );
         setRetryAvailable(true);
         lastPromptRef.current = promptToSend;

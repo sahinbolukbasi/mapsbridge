@@ -995,6 +995,8 @@
   "studio.err.connection": "Bağlantı sorunu oluştu. İsteğiniz kaydedildi, tekrar deneyin.",
   "studio.err.blocked": "AI servisine şu anda erişilemiyor (erişim engellendi). Bu geçici bir sunucu/ağ ayarı sorunudur, kredinizle ilgili değildir. Lütfen birazdan tekrar deneyin; sorun sürerse destek ekibine bildirin.",
   "studio.err.timeoutRetry": "AI yanıtı zaman aşımına uğradı. Lütfen tekrar deneyin.",
+  "studio.err.contextTooLarge": "Bu sohbet çok uzadı ve modelin bağlam sınırını aştı. Yeni bir seyahat başlatarak devam edebilirsin.",
+  "studio.err.unconfirmed": "Yanıt doğrulanamadı. Aynı isteği tekrar deneyebilir ya da sohbet uzadıysa yeni bir seyahat başlatabilirsin.",
   "studio.err.generic": "Yanıt alınamadı. Tekrar deneyebilirsin.",
   "studio.err.mapRead": "Harita kayıtları okunamadı; mevcut veriler değiştirilmedi.",
   "studio.err.mapTransfer": "Rota aktarılamadı.",

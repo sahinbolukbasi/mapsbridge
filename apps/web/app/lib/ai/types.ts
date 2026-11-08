@@ -284,6 +284,11 @@ export interface MultiAgentResponse {
   currentFocus?: import("./focus-manager").ThreadFocus;
   provider: "aws_bedrock" | "intelligent_synthesizer";
   modelUsed?: string;
+  /**
+   * Kararlı AI hata kodu (ör. CONTEXT_TOO_LARGE). Yalnızca kurtarma gerektiren durumlarda
+   * doldurulur; handler bunu istemciye taşır ki belirsiz 503 yerine net mesaj gösterilsin.
+   */
+  errorCode?: string;
 }
 
 export interface ConversationFlowSnapshot {

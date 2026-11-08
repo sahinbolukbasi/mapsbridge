@@ -9,6 +9,7 @@ import {
   recordAIOperation,
 } from "../../../../../infra/lambda/src/shared/ai-operations";
 import { modelMessages, type DialogueMessage } from "./model-history";
+import { classifyAIError } from "./error-classifier";
 import {
   BedrockRuntimeClient,
   ConverseCommand,
@@ -38,7 +39,7 @@ export function getBedrockClient() {
 export async function invokeBedrockJSON<T>(
   userPrompt: string,
   options: BedrockInvokeOptions = {},
-): Promise<{ success: boolean; data: T | null; model: string; error?: string }> {
+): Promise<{ success: boolean; data: T | null; model: string; error?: string; code?: string }> {
   let model = options.modelId || process.env.BEDROCK_MODEL_ID || "";
   const runtime = getBedrockClient();
   if (!runtime) return { success: false, data: null, model, error: "AI servisi yapılandırılmadı." };
@@ -141,7 +142,7 @@ export async function invokeBedrockJSON<T>(
     succeeded = true;
     return { success: true, data, model };
   } catch (error: unknown) {
-    const e = error as { name?: string; message?: string };
+    const e = error as { name?: string; message?: string; code?: string };
     console.warn("AI model request failed", e?.name || "Error");
     timedOut = ["ModelTimeoutException", "TimeoutError", "AbortError"].includes(e?.name ?? "");
     errorCode = [
@@ -164,7 +165,10 @@ export async function invokeBedrockJSON<T>(
           ].includes(e?.name ?? "")
         ? e.name
         : "MODEL_INVOCATION_FAILED";
-    return { success: false, data: null, model, error: "Model yanıtı alınamadı." };
+    // Girdi çok büyük (ValidationException / ContextBudgetError) belirsiz 503'e düşmesin;
+    // çağırana kararlı kod taşınır (teşhis Öncelik A).
+    const classified = classifyAIError(error);
+    return { success: false, data: null, model, error: "Model yanıtı alınamadı.", code: classified.code };
   } finally {
     const durationMs = Date.now() - started;
     const cost = recordModelUsage(
@@ -197,7 +201,7 @@ export async function invokeBedrockJSON<T>(
 export async function invokeBedrockChatStream(
   userPrompt: string,
   options: BedrockInvokeOptions & { onToken?: (text: string) => void } = {},
-): Promise<{ success: boolean; text: string; model: string; error?: string }> {
+): Promise<{ success: boolean; text: string; model: string; error?: string; code?: string }> {
   let model = options.modelId || process.env.BEDROCK_MODEL_ID || "";
   const runtime = getBedrockClient();
   if (!runtime) return { success: false, text: "", model, error: "AI servisi yapılandırılmadı." };
@@ -273,7 +277,14 @@ export async function invokeBedrockChatStream(
           ].includes(e?.name ?? "")
         ? e.name
         : "MODEL_INVOCATION_FAILED";
-    return { success: false, text: chunks.join(""), model, error: "Model yanıtı alınamadı." };
+    const classified = classifyAIError(error);
+    return {
+      success: false,
+      text: chunks.join(""),
+      model,
+      error: "Model yanıtı alınamadı.",
+      code: classified.code,
+    };
   } finally {
     const durationMs = Date.now() - started;
     const cost = recordModelUsage(model, "answer", usage, succeeded, durationMs, invoked, timedOut);

@@ -4,6 +4,18 @@ export interface DialogueMessage {
 }
 export const HISTORY_LIMIT = 12;
 
+/**
+ * Girdi, modelin bağlam bütçesini aştığında atılır. `code` alanı bedrock-client ve supervisor
+ * tarafından okunur ve kullanıcıya belirsiz 503 yerine net `CONTEXT_TOO_LARGE` mesajı döner.
+ */
+export class ContextBudgetError extends Error {
+  readonly code = "CONTEXT_TOO_LARGE" as const;
+  constructor(message = "Current request exceeds context budget") {
+    super(message);
+    this.name = "ContextBudgetError";
+  }
+}
+
 export function boundedHistory(messages: DialogueMessage[] = []): DialogueMessage[] {
   return messages
     .filter(
@@ -23,7 +35,7 @@ export function modelMessages(prompt: string, history: DialogueMessage[] = []) {
   const bytes = (value: string) => new TextEncoder().encode(value).length;
   const budget = 32000;
   // Keep the current structured request intact; shed oldest turns before crossing the budget.
-  if (bytes(prompt) > budget) throw new Error("Current request exceeds context budget");
+  if (bytes(prompt) > budget) throw new ContextBudgetError();
   while (
     turns.length &&
     bytes(prompt) + turns.reduce((sum, turn) => sum + bytes(turn.content), 0) > budget

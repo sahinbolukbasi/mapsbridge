@@ -70,6 +70,8 @@ import {
 import { buildCuratedActivityCards } from "../affiliate/getyourguide";
 import { isExpired, type AffiliateCard } from "../affiliate/types";
 import { boundedHistory } from "./model-history";
+import { budgetHistory, capManifesto } from "./token-budget";
+import { isContextSizeError } from "./error-classifier";
 import { routeEdit, validateRouteEdit } from "./route-edit";
 
 /** Intake model response shape — fields accessed in the supervisor */
@@ -119,6 +121,10 @@ export async function runMultiAgentSupervisor(
   const [request, currentTripOptions] = payload.prompt.split("\nTercihler:");
   const previous = payload.conversationState;
   const conversation = boundedHistory(previous?.messages || payload.conversationHistory || []);
+  // Sunucu-taraflı girdi-token bütçesi (teşhis Öncelik B/C): modele giden geçmişi son N tur +
+  // eski turların deterministik yuvarlanan özetiyle sınırla. `conversation` (saklanan) ham kalır.
+  // keepTurns'ü düşürerek ikinci (CONTEXT_TOO_LARGE) denemeyi daha agresif budamak için kullanırız.
+  const modelHistory = (keepTurns: number) => budgetHistory(conversation, 7000, keepTurns).messages;
   const base = cleanContext((previous?.context ?? {}) as Record<string, unknown>);
   const baseProfile = previous?.profile
     ? cleanTripProfile(previous.profile as unknown as Record<string, unknown>)
@@ -217,13 +223,11 @@ export async function runMultiAgentSupervisor(
         : undefined,
       preferences: sanitizePreferences(payload.preferences),
       profile: baseProfile,
-      activeTripManifesto: payload.tripManifestoMarkdown
-        ? payload.tripManifestoMarkdown.slice(0, 3000)
-        : undefined,
+      activeTripManifesto: capManifesto(payload.tripManifestoMarkdown, 3000),
     }),
     {
       systemPrompt: INTAKE_PROMPT,
-      history: conversation,
+      history: modelHistory(6),
       maxTokens: 1300,
       temperature: 0,
       timeoutMs: 7500,
@@ -525,9 +529,7 @@ export async function runMultiAgentSupervisor(
     editContract: edit,
     places: research?.places.map((p, i) => ({ ...p, id: `P${i + 1}` })),
     travelEvidence: evidence.passages,
-    activeTripManifesto: payload.tripManifestoMarkdown
-      ? payload.tripManifestoMarkdown.slice(0, 4000)
-      : undefined,
+    activeTripManifesto: capManifesto(payload.tripManifestoMarkdown, 4000),
     ...(flightHint ? { flightData: flightHint } : {}),
     ...(travelAdvisory && travelAdvisory.level
       ? {
@@ -670,11 +672,11 @@ export async function runMultiAgentSupervisor(
     }
   }
 
-  const generate = (repair?: string) => {
+  const generate = (repair?: string, keepTurns = 6) => {
     if (mode === "chat" && !repair && onStreamToken) {
       return invokeBedrockChatStream(JSON.stringify(input), {
         systemPrompt: streamSystemPrompt,
-        history: conversation,
+        history: modelHistory(keepTurns),
         maxTokens: 1600,
         temperature: 0.2,
         timeoutMs: Math.max(1000, Math.min(18000, 24500 - (Date.now() - started))),
@@ -683,6 +685,7 @@ export async function runMultiAgentSupervisor(
         success: r.success,
         data: { orchestratorSummary: r.text, decisionSummary: [], citedSourceIds: [] },
         model: r.model,
+        code: r.code,
       }));
     }
     return invokeBedrockJSON<AnswerData>(
@@ -700,7 +703,7 @@ export async function runMultiAgentSupervisor(
       }),
       {
         systemPrompt: answerSystemPrompt,
-        history: conversation,
+        history: modelHistory(keepTurns),
         maxTokens: mode === "route" ? Math.min(4200, 1400 + (context.days || 1) * 450) : 1600,
         temperature: 0.2,
         timeoutMs: Math.max(1000, Math.min(18000, 24500 - (Date.now() - started))),
@@ -709,7 +712,40 @@ export async function runMultiAgentSupervisor(
       },
     );
   };
+  // Net kurtarma yolu olan, belirsiz 503 yerine CONTEXT_TOO_LARGE döndüren yanıt (teşhis Öncelik A).
+  const contextTooLargeResponse = () =>
+    complete(
+      {
+        responseMode: "clarify",
+        orchestratorSummary:
+          "Bu sohbet çok uzadı ve modelin bağlam sınırını aştı. Son konuşmayı özetleyip devam edebilir ya da yeni bir seyahat başlatabilirsin.",
+        errorCode: "CONTEXT_TOO_LARGE",
+        decisionSummary: [
+          "Konuşma geçmişi modelin bağlam sınırını aştı.",
+          "Yeni bir seyahat başlatmak sorunu çözer.",
+        ],
+        sources: [],
+        retrievalStatus: evidence.status,
+        ...(previous?.route ? { route: previous.route } : {}),
+        clarification: {
+          isUnderspecified: false,
+          message:
+            "Sohbet çok uzadı. Yeni bir seyahat başlatabilir ya da isteğini daha kısa yazabilirsin.",
+          guidingQuestions: [],
+          quickOptions: [],
+          nearbyPins: [],
+        },
+      },
+      previous?.route,
+    );
   let output = await generate();
+  // Girdi bağlam sınırını aştıysa önce agresif budama ile bir kez daha dene; yine aşarsa net
+  // CONTEXT_TOO_LARGE yanıtı dön (belirsiz 503 yerine).
+  if (!output.success && isContextSizeError({ code: output.code })) {
+    if (Date.now() - started < 18500) output = await generate(undefined, 2);
+    if (!output.success && isContextSizeError({ code: output.code }))
+      return contextTooLargeResponse();
+  }
   let route: UnifiedRoutePlan | undefined;
   const validate = () => {
     if (

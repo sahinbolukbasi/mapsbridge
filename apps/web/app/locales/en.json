@@ -995,6 +995,8 @@
   "studio.err.connection": "A connection problem occurred. Your request was saved; try again.",
   "studio.err.blocked": "The AI service can't be reached right now (access blocked). This is a temporary server or network issue and has nothing to do with your credits. Please try again shortly; if it continues, let support know.",
   "studio.err.timeoutRetry": "The AI response timed out. Please try again.",
+  "studio.err.contextTooLarge": "This conversation has grown too long and exceeded the model's context limit. You can start a new trip to continue.",
+  "studio.err.unconfirmed": "The response couldn't be verified. You can retry the same request, or start a new trip if the conversation has grown long.",
   "studio.err.generic": "No response was received. You can try again.",
   "studio.err.mapRead": "Map records could not be read; your existing data was not changed.",
   "studio.err.mapTransfer": "The route could not be transferred.",

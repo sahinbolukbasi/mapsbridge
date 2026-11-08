@@ -41,6 +41,7 @@ import {
   recordInteraction,
 } from "../billing/store";
 import { sanitizePreferences } from "../../../../apps/web/app/lib/ai/preferences";
+import { classifyAIError, isContextSizeError } from "../../../../apps/web/app/lib/ai/error-classifier";
 import type { ConversationState } from "../../../../apps/web/app/lib/ai/planning";
 import {
   buildPersonalContext,
@@ -410,6 +411,11 @@ async function handleRequest(event: Event) {
     }
     if (err instanceof BillingError)
       return reply(err.status, { error: err.message, code: err.code });
+    // Girdi bağlam sınırını aşan hatalar belirsiz 503'e düşmesin; net kod + kurtarma yolu dön.
+    if (isContextSizeError(err)) {
+      const { message } = classifyAIError(err);
+      return reply(413, { error: message, code: "CONTEXT_TOO_LARGE" });
+    }
     return reply(503, {
       error: "Yapay zeka yanıtı doğrulanamadı. Aynı isteği tekrar kontrol edin.",
       code: "AI_RESULT_UNCONFIRMED",
@@ -708,7 +714,12 @@ async function handleStreamRequest(
   } catch (err) {
     console.error("Stream handler error", errorLabel(err));
     try {
-      writeSse(meta, "error", { message: "Bir hata oluştu.", code: "SERVER_ERROR" });
+      if (isContextSizeError(err))
+        writeSse(meta, "error", {
+          message: classifyAIError(err).message,
+          code: "CONTEXT_TOO_LARGE",
+        });
+      else writeSse(meta, "error", { message: "Bir hata oluştu.", code: "SERVER_ERROR" });
     } catch (err) {
       console.error("[ai] writeSse error failed:", (err as Error).message);
     }
