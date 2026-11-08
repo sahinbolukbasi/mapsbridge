@@ -12,7 +12,7 @@ export default function Privacy() {
         />
       }
     >
-      <p className="legal-meta">Son güncelleme: 24 Eylül 2026</p>
+      <p className="legal-meta">Son güncelleme: 9 Kasım 2026</p>
       <Section reveal title="Hangi verileri işleriz?">
         <p>
           MapsBridge hesabı için ad-soyad, e-posta ve telefon numarası; haritada işaretleyip
@@ -28,6 +28,43 @@ export default function Privacy() {
           </a>{" "}
           da geçerlidir. Google fotoğrafları ve yorumları anlık görüntülenir; kişisel notların
           bunlardan ayrı tutulur.
+        </p>
+      </Section>
+      <Section reveal title="Mobil uygulama izinleri ve rızan (KVKK/GDPR)">
+        <p>
+          Maps Bridge mobil uygulamasında aşağıdaki izinler yalnızca ilgili özelliği ilk
+          kullandığında, önce Türkçe bir açıklama gösterilerek ve senin onayınla istenir. Her izni
+          cihaz ayarlarından dilediğin an kapatabilirsin; izni vermemen uygulamayı kullanmana engel
+          olmaz.
+        </p>
+        <ul>
+          <li>
+            <strong>Konum (yalnız uygulama açıkken):</strong> “Yakınımda” ve haritada yerini
+            göstermek için kullanılır. Arka planda konum toplanmaz ve konumun sunucularımızda
+            saklanmaz.
+          </li>
+          <li>
+            <strong>Kamera ve fotoğraflar:</strong> topluluk paylaşımlarına ve profil fotoğrafına
+            görsel ekleyebilmen için erişilir. Yalnızca senin seçtiğin görseller işlenir.
+          </li>
+          <li>
+            <strong>Face ID / parmak izi (uygulama kilidi):</strong> isteğe bağlıdır ve varsayılan
+            olarak kapalıdır. Kimlik doğrulaması cihazında yapılır; hiçbir biyometrik veri uygulamaya
+            ya da sunucuya ulaşmaz.
+          </li>
+          <li>
+            <strong>Bildirimler:</strong> yalnızca cihazında zamanlanan yerel rota hatırlatmaları
+            için kullanılır. Uzaktan push bildirimi ya da pazarlama bildirimi göndermeyiz.
+          </li>
+          <li>
+            <strong>Hareket (CoreMotion):</strong> hareket verini toplamaz ve kullanmayız. Bu izin
+            yalnızca konum bileşeninin içerdiği bir sistem kütüphanesi nedeniyle Apple tarafından
+            zorunlu tutulduğu için uygulamada tanımlıdır.
+          </li>
+        </ul>
+        <p>
+          Uygulama analitik/izleme için üçüncü taraf takip teknolojisi kullanmaz; reklam kimliğiyle
+          cihazlar arası takip yapılmaz.
         </p>
       </Section>
       <Section reveal title="Kontrol sende">

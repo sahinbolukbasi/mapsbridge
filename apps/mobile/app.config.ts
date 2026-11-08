@@ -9,6 +9,11 @@ const PERMISSIONS_TR = {
     "Topluluk paylaşımına ve profil fotoğrafına görsel ekleyebilmen için fotoğraflarına erişilir.",
   photosAdd: "Rota ve harita görsellerini galerine kaydedebilmen için izin gerekir.",
   faceId: "Açtığında uygulama kilidini Face ID ile açabilmen için kullanılır.",
+  // Hareket (CoreMotion): Maps Bridge hareket verisi TOPLAMAZ ve kullanmaz. Bu metin, konum
+  // bileşeninin (expo-location) içerdiği sistem kütüphanesi nedeniyle Apple'ın zorunlu tuttuğu
+  // dürüst açıklamadır — I1. Ileride adım sayımı/hareket eklenirse metin güncellenir.
+  motion:
+    "Maps Bridge hareket verini toplamaz; bu izin yalnızca konum bileşeninin içerdiği sistem kütüphanesi gereği istenir ve etkin olarak kullanılmaz.",
 };
 
 export const APP_CONFIG = {
@@ -33,7 +38,10 @@ export const APP_CONFIG = {
       // yetenek Apple Developer'da açılınca birlikte geri eklenecek:
       //   associatedDomains: ["applinks:mapsbridge.com", "applinks:www.mapsbridge.com"],
       // O zamana kadar `mapsbridge://` şema bağlantıları çalışır.
-      buildNumber: "2",
+      // buildNumber: eas.json appVersionSource:"remote" + production.autoIncrement:true olduğundan
+      // EAS production derlemesinde bu değer YOK SAYILIR (uzak sayaç yönetir). Yine de yerel/prebuild
+      // ve tutarlılık için güncel tutulur. ITMS-90683 düzeltmesiyle 2 → 3.
+      buildNumber: "3",
       userInterfaceStyle: "dark",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
@@ -44,14 +52,72 @@ export const APP_CONFIG = {
         NSPhotoLibraryUsageDescription: PERMISSIONS_TR.photos,
         NSPhotoLibraryAddUsageDescription: PERMISSIONS_TR.photosAdd,
         NSFaceIDUsageDescription: PERMISSIONS_TR.faceId,
+        // ITMS-90683 düzeltmesi: expo-location CoreMotion'ı statik bağlar (CMMotionActivityManager);
+        // Apple uygulama kullanmasa da purpose string ister. Bu anahtar RESOLVED Info.plist'te
+        // bulunmalı. expo-location eklentisi motionUsagePermission:false ile bunu yazmaz, bu yüzden
+        // burada açıkça tanımlanır (eklenti dokümanı bu durumda elle eklenmesini söyler).
+        NSMotionUsageDescription: PERMISSIONS_TR.motion,
       },
       config: {
         googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
       },
+      // iOS Gizlilik Manifestosu (PrivacyInfo.xcprivacy) — Apple 1 Mayıs 2024'ten beri zorunlu
+      // kılıyor. Expo SDK 50+ bunu app config'teki `privacyManifests`ten prebuild'de üretir
+      // (@expo/config-plugins). Expo dokümanı: statik CocoaPods bağımlılıklarının kendi
+      // PrivacyInfo dosyalarını Apple her zaman doğru çözümlemediği için, paketlerin kullandığı
+      // "zorunlu gerekçe" API'lerini uygulama manifestinde toplamak gerekir. Aşağıdaki gerekçeler
+      // bundle'daki paketlerin (react-native, async-storage, expo-file-system/application/constants/
+      // notifications) ios/PrivacyInfo.xcprivacy dosyalarından toplanmıştır.
+      privacyManifests: {
+        NSPrivacyTracking: false,
+        NSPrivacyTrackingDomains: [] as string[],
+        NSPrivacyCollectedDataTypes: [
+          {
+            // Konum: "Yakınımda" ve haritada konum için (yalnız uygulama açıkken). Sunucuda
+            // saklanmaz, takip için kullanılmaz, kullanıcıya bağlı değildir.
+            NSPrivacyCollectedDataType: "NSPrivacyCollectedDataTypePreciseLocation",
+            NSPrivacyCollectedDataTypeLinked: false,
+            NSPrivacyCollectedDataTypeTracking: false,
+            NSPrivacyCollectedDataTypePurposes: ["NSPrivacyCollectedDataTypePurposeAppFunctionality"],
+          },
+          {
+            // Fotoğraflar: topluluk paylaşımı ve profil fotoğrafı (kullanıcı içeriği).
+            NSPrivacyCollectedDataType: "NSPrivacyCollectedDataTypePhotosorVideos",
+            NSPrivacyCollectedDataTypeLinked: true,
+            NSPrivacyCollectedDataTypeTracking: false,
+            NSPrivacyCollectedDataTypePurposes: ["NSPrivacyCollectedDataTypePurposeAppFunctionality"],
+          },
+          {
+            // Kullanıcı içeriği: topluluk gönderileri/rota paylaşımı.
+            NSPrivacyCollectedDataType: "NSPrivacyCollectedDataTypeOtherUserContent",
+            NSPrivacyCollectedDataTypeLinked: true,
+            NSPrivacyCollectedDataTypeTracking: false,
+            NSPrivacyCollectedDataTypePurposes: ["NSPrivacyCollectedDataTypePurposeAppFunctionality"],
+          },
+        ],
+        NSPrivacyAccessedAPITypes: [
+          {
+            // Dosya zaman damgası: react-native, async-storage, expo-file-system/application.
+            NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryFileTimestamp",
+            NSPrivacyAccessedAPITypeReasons: ["C617.1", "0A2A.1", "3B52.1"],
+          },
+          {
+            // Disk alanı: expo-file-system.
+            NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryDiskSpace",
+            NSPrivacyAccessedAPITypeReasons: ["E174.1", "85F4.1"],
+          },
+          {
+            // UserDefaults: react-native, expo-constants, expo-notifications.
+            NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryUserDefaults",
+            NSPrivacyAccessedAPITypeReasons: ["CA92.1"],
+          },
+        ],
+      },
     },
     android: {
       package: "com.mapsbridge.mobile",
-      versionCode: 2,
+      // versionCode: iOS buildNumber ile tutarlı (EAS remote autoIncrement bu değeri yönetir). 2 → 3.
+      versionCode: 3,
       userInterfaceStyle: "dark",
       adaptiveIcon: {
         foregroundImage: "./assets/android-icon-foreground.png",
@@ -98,10 +164,13 @@ export const APP_CONFIG = {
         "expo-location",
         {
           locationWhenInUsePermission: PERMISSIONS_TR.location,
-          // Yalnız uygulama açıkken: "Always" ve hareket izni metinleri Info.plist'e yazılmaz.
+          // Yalnız uygulama açıkken: "Always" izin metinleri Info.plist'e yazılmaz (false → anahtar silinir).
           locationAlwaysAndWhenInUsePermission: false,
           locationAlwaysPermission: false,
-          motionUsagePermission: false,
+          // NSMotionUsageDescription ZORUNLU (ITMS-90683): expo-location CoreMotion'ı statik bağlar.
+          // Eklenti motionUsagePermission:false alırsa anahtarı SİLER ve prebuild'de base infoPlist'teki
+          // değerimizi de temizler. Bu yüzden eklentiye de dürüst metni veriyoruz (ikisi aynı string).
+          motionUsagePermission: PERMISSIONS_TR.motion,
           isIosBackgroundLocationEnabled: false,
           isAndroidBackgroundLocationEnabled: false,
         },

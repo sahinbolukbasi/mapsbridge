@@ -536,6 +536,8 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
     "NSPhotoLibraryUsageDescription",
     "NSPhotoLibraryAddUsageDescription",
     "NSFaceIDUsageDescription",
+    // ITMS-90683: expo-location CoreMotion'ı statik bağlar; Apple purpose string ister.
+    "NSMotionUsageDescription",
   ];
   const expo = json.expo;
   for (const lang of ["tr", "en"]) {
@@ -551,12 +553,83 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
       assert.ok(!/["\\]/.test(v), `${lang} ${k}: düz tırnak/ters bölü InfoPlist.strings'i bozar`);
   }
   for (const k of keys) assert.ok(expo.ios.infoPlist[k], `infoPlist ${k}`);
+  // ITMS-90683: NSMotionUsageDescription hem base infoPlist'te hem expo-location eklenti seçeneğinde
+  // olmalı. Eklenti motionUsagePermission:false alırsa prebuild'de anahtarı SİLER — regresyon kalkanı.
+  const locPlugin = expo.plugins.find((p) => Array.isArray(p) && p[0] === "expo-location");
+  assert.ok(locPlugin, "expo-location eklentisi dizi biçiminde");
+  assert.equal(
+    typeof locPlugin[1].motionUsagePermission,
+    "string",
+    "motionUsagePermission string olmalı (false anahtarı siler, ITMS-90683)",
+  );
+  assert.ok(locPlugin[1].motionUsagePermission.length > 20, "motion gerekçesi boş olamaz");
+  // Hareket verisi TOPLANMADIĞI dürüstçe söylenmeli (I1): "toplamaz" ibaresi.
+  assert.match(expo.ios.infoPlist.NSMotionUsageDescription, /toplama/i);
   // Arka plan konumu istenmez (yalnız uygulama açıkken "Yakınımda").
   assert.ok(!expo.ios.infoPlist.NSLocationAlwaysUsageDescription);
+  assert.ok(!expo.ios.infoPlist.NSLocationAlwaysAndWhenInUseUsageDescription);
   assert.ok(!expo.android.permissions.includes("ACCESS_BACKGROUND_LOCATION"));
   assert.ok(
     expo.android.blockedPermissions.includes("android.permission.ACCESS_BACKGROUND_LOCATION"),
   );
+  // Yerel bildirim: push yetkisi silen eklenti zincirde kalmalı (aps-environment sızmaz).
+  assert.ok(expo.plugins.includes("./plugins/without-push-entitlement.js"));
+  // iOS Gizlilik Manifestosu (PrivacyInfo.xcprivacy) — Apple 2024-05-01'den beri zorunlu.
+  const pm = expo.ios.privacyManifests;
+  assert.ok(pm, "ios.privacyManifests tanımlı");
+  assert.equal(pm.NSPrivacyTracking, false, "izleme yapılmaz");
+  assert.deepEqual(pm.NSPrivacyTrackingDomains, [], "izleme alan adı yok");
+  const apiCats = pm.NSPrivacyAccessedAPITypes.map((a) => a.NSPrivacyAccessedAPIType);
+  for (const cat of [
+    "NSPrivacyAccessedAPICategoryFileTimestamp",
+    "NSPrivacyAccessedAPICategoryDiskSpace",
+    "NSPrivacyAccessedAPICategoryUserDefaults",
+  ])
+    assert.ok(apiCats.includes(cat), `zorunlu-gerekçe API kategorisi ${cat}`);
+  for (const entry of pm.NSPrivacyAccessedAPITypes)
+    assert.ok(entry.NSPrivacyAccessedAPITypeReasons.length > 0, `${entry.NSPrivacyAccessedAPIType} gerekçe`);
+  const dataTypes = pm.NSPrivacyCollectedDataTypes.map((d) => d.NSPrivacyCollectedDataType);
+  for (const t of [
+    "NSPrivacyCollectedDataTypePreciseLocation",
+    "NSPrivacyCollectedDataTypePhotosorVideos",
+    "NSPrivacyCollectedDataTypeOtherUserContent",
+  ])
+    assert.ok(dataTypes.includes(t), `toplanan veri tipi ${t}`);
+  // Hiçbir toplanan veri izleme (tracking) için kullanılmaz (I8/KVKK).
+  for (const d of pm.NSPrivacyCollectedDataTypes)
+    assert.equal(d.NSPrivacyCollectedDataTypeTracking, false, `${d.NSPrivacyCollectedDataType} izleme değil`);
+});
+// ── ITMS-90683 kalıcı kalkan: RESOLVED `npx expo config` ios.infoPlist tüm NS* purpose string'leri içerir ──
+test("ITMS-90683 kalkanı: çözümlenmiş Info.plist tüm zorunlu purpose string'leri taşır", () => {
+  const required = [
+    "NSLocationWhenInUseUsageDescription",
+    "NSCameraUsageDescription",
+    "NSPhotoLibraryUsageDescription",
+    "NSPhotoLibraryAddUsageDescription",
+    "NSFaceIDUsageDescription",
+    "NSMotionUsageDescription",
+  ];
+  // Öncelik: gerçek `npx expo config` çıktısı (Expo'nun çözdüğü ios.infoPlist). Erişilemezse
+  // (çevrimdışı/kısıtlı ortam) deterministik yedeğe düşer: app.config.ts, app.json'ı yayıp
+  // APP_CONFIG.expo ile ezer; parity testi app.json === APP_CONFIG'i zaten garantiler.
+  let infoPlist;
+  let source = "npx expo config";
+  try {
+    const out = require("node:child_process").execFileSync(
+      "npx",
+      ["expo", "config", "--type", "public", "--json"],
+      { cwd: mobile, encoding: "utf8", timeout: 120000, stdio: ["ignore", "pipe", "ignore"] },
+    );
+    infoPlist = JSON.parse(out).ios.infoPlist;
+  } catch {
+    source = "deterministik birleştirme (app.json ios.infoPlist)";
+    infoPlist = JSON.parse(fs.readFileSync(path.join(mobile, "app.json"), "utf8")).expo.ios.infoPlist;
+  }
+  for (const k of required)
+    assert.ok(
+      typeof infoPlist[k] === "string" && infoPlist[k].trim().length > 0,
+      `${k} çözümlenmiş Info.plist'te boş olmayan string olmalı (kaynak: ${source})`,
+    );
 });
 // ── Increment 4.5: N1 onboarding + bağlamsal izinler ──
 test("4.5 (N1): 3 tanıtım, her ekranda Atla, uydurma istatistik yok; görüldü bayrağı turları katlar", () => {

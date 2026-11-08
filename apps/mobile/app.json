@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mapsbridge.mobile",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "userInterfaceStyle": "dark",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -24,15 +24,54 @@
         "NSCameraUsageDescription": "Topluluk paylaşımına fotoğraf çekebilmen için kamera erişimi gerekir.",
         "NSPhotoLibraryUsageDescription": "Topluluk paylaşımına ve profil fotoğrafına görsel ekleyebilmen için fotoğraflarına erişilir.",
         "NSPhotoLibraryAddUsageDescription": "Rota ve harita görsellerini galerine kaydedebilmen için izin gerekir.",
-        "NSFaceIDUsageDescription": "Açtığında uygulama kilidini Face ID ile açabilmen için kullanılır."
+        "NSFaceIDUsageDescription": "Açtığında uygulama kilidini Face ID ile açabilmen için kullanılır.",
+        "NSMotionUsageDescription": "Maps Bridge hareket verini toplamaz; bu izin yalnızca konum bileşeninin içerdiği sistem kütüphanesi gereği istenir ve etkin olarak kullanılmaz."
       },
       "config": {
         "googleMapsApiKey": ""
+      },
+      "privacyManifests": {
+        "NSPrivacyTracking": false,
+        "NSPrivacyTrackingDomains": [],
+        "NSPrivacyCollectedDataTypes": [
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePreciseLocation",
+            "NSPrivacyCollectedDataTypeLinked": false,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": ["NSPrivacyCollectedDataTypePurposeAppFunctionality"]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePhotosorVideos",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": ["NSPrivacyCollectedDataTypePurposeAppFunctionality"]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeOtherUserContent",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": ["NSPrivacyCollectedDataTypePurposeAppFunctionality"]
+          }
+        ],
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1", "0A2A.1", "3B52.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": ["E174.1", "85F4.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ]
       }
     },
     "android": {
       "package": "com.mapsbridge.mobile",
-      "versionCode": 2,
+      "versionCode": 3,
       "userInterfaceStyle": "dark",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -104,7 +143,7 @@
           "locationWhenInUsePermission": "Maps Bridge, “Yakınımda” ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
           "locationAlwaysAndWhenInUsePermission": false,
           "locationAlwaysPermission": false,
-          "motionUsagePermission": false,
+          "motionUsagePermission": "Maps Bridge hareket verini toplamaz; bu izin yalnızca konum bileşeninin içerdiği sistem kütüphanesi gereği istenir ve etkin olarak kullanılmaz.",
           "isIosBackgroundLocationEnabled": false,
           "isAndroidBackgroundLocationEnabled": false
         }
