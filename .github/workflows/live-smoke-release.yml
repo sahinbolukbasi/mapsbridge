@@ -27,18 +27,6 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-central-1
 
-      - name: AI lambda error logs (last 6h, read-only)
-        continue-on-error: true
-        run: |
-          START=$(( ($(date +%s) - 6*3600) * 1000 ))
-          for g in /aws/lambda/mapsbridge-prod-ai /aws/lambda/mapsbridge-prod-ai-stream; do
-            echo "=== $g"
-            aws logs filter-log-events --log-group-name "$g" --start-time "$START" \
-              --filter-pattern '?ERROR ?Error ?"Task timed out" ?exception ?failed ?status=5' \
-              --max-items 60 --query 'events[].message' --output text 2>&1 \
-              | sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/<email>/g' | cut -c1-600 | tail -60
-          done
-
       - name: Authenticated end-to-end (temporary user)
         run: |
           set -u
@@ -106,3 +94,17 @@ jobs:
               "$API/ai/chat?op=places&action=detail&provider=amazon&id=$(jq -rn --arg v "$ID" '$v|@uri')"
             jq -c '{status, n: (.places|length? // 0), first: (.places[0] // {} | {name, category, address, openingHours, phone, website})}' d.json
           fi
+
+      - name: AI lambda error logs (last 2h, read-only; after E2E)
+        if: always()
+        continue-on-error: true
+        run: |
+          sleep 20  # CloudWatch alım gecikmesi
+          START=$(( ($(date +%s) - 2*3600) * 1000 ))
+          for g in /aws/lambda/mapsbridge-prod-ai /aws/lambda/mapsbridge-prod-ai-stream; do
+            echo "=== $g"
+            aws logs filter-log-events --log-group-name "$g" --start-time "$START" \
+              --filter-pattern '?ERROR ?Error ?"Task timed out" ?exception ?failed ?status=5' \
+              --max-items 60 --query 'events[].message' --output text 2>&1 \
+              | sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/<email>/g' | cut -c1-600 | tail -60
+          done
