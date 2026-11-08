@@ -17,14 +17,20 @@ let configured = false;
 export function configureNotifications(): void {
   if (configured) return;
   configured = true;
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-    }),
-  });
+  // Dayanıklılık: yerli bildirim modülü eksik/bozuk olsa bile açılış throw etmemeli (App mount
+  // yolunda çağrılır). Başarısız olursa bildirimler sessizce devre dışı kalır; uygulama çalışır.
+  try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+      }),
+    });
+  } catch (e) {
+    console.warn("[notifications] setNotificationHandler başarısız:", e);
+  }
 }
 export async function cancelRouteReminders(): Promise<void> {
   const raw = await storage.getItem(IDS_KEY).catch(() => null);

@@ -33,3 +33,5 @@ jobs:
       - run: npm run mobile:typecheck
       - name: Mobile design-system rules
         run: node --test apps/web/tests/mobile-design-system.test.cjs apps/web/tests/design-tokens.test.cjs
+      - name: Mobile resilience (error boundary + native wrappers + self-check)
+        run: node --test apps/web/tests/mobile/resilience.test.cjs

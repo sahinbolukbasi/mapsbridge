@@ -657,7 +657,10 @@ test("4.5 (N1): 3 tanıtım, her ekranda Atla, uydurma istatistik yok; görüld�
       `${k} uydurma sayı`,
     );
   const app = read("App.tsx");
-  assert.match(app, /if \(!onboardingSeen\) return <OnboardingScreen/);
+  // mobile-hardening: onboarding ekranı ekran-düzeyi ErrorBoundary ile sarılır (throw tüm uygulamayı
+  // karartmasın); davranış aynı — !onboardingSeen iken OnboardingScreen çizilir.
+  assert.match(app, /if \(!onboardingSeen\)/);
+  assert.match(app, /<ScreenErrorBoundary name="onboarding">\s*<OnboardingScreen/);
   assert.match(app, /<FirstRouteReminder\s+enabled=\{signedIn && ownerReady\}/);
 });
 test("4.5 (N1): izin önce gerekçe ekranıyla, 'Şimdi değil' her zaman; arka plan konumu yok", () => {

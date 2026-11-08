@@ -454,6 +454,9 @@ export const NATIVE_TR = {
   "native.tour.optimize": "Durak sırasını kuş uçuşu mesafeye göre kısaltır. Kredi harcamaz.",
   "native.splash.label": "MapsBridge yükleniyor",
   "native.error.body": "Ekran yüklenirken beklenmeyen bir sorun oluştu. Tekrar deneyebilirsin.",
+  "native.error.screenTitle": "Bu ekran açılamadı",
+  "native.error.screenBody":
+    "Bu bölümde beklenmeyen bir sorun oluştu. Diğer sekmeler çalışmaya devam ediyor; tekrar deneyebilir ya da başka bir sekmeye geçebilirsin.",
   "native.stopList.show": "Durak listesini göster",
   "native.stopList.empty": "Bu rotada henüz durak yok.",
   "native.guest.storageWarn": "Taslağın bu cihazda saklanamıyor; uygulamayı kapatırsan kaybolur.",

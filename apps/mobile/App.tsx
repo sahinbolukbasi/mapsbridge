@@ -51,6 +51,8 @@ import { BottomTabBar } from "./src/components/BottomTabBar";
 import { PaywallModal } from "./src/components/PaywallModal";
 import { SplashScreen } from "./src/components/SplashScreen";
 import { ErrorBoundary } from "./src/components/ErrorBoundary";
+import { ScreenErrorBoundary } from "./src/components/ScreenErrorBoundary";
+import { runNativeSelfCheck } from "./src/services/native-selfcheck";
 import { authService, UserSession } from "./src/services/api";
 import { storage } from "./src/services/storage";
 import { tripStore } from "./src/services/tripStore";
@@ -173,6 +175,9 @@ export function App() {
   const pendingLink = useRef<DeepLink | null>(null);
   const backgroundedAt = useRef<number | null>(null);
   useEffect(() => {
+    // Açılış öz-denetimi: yanlış/taşınmış bir yerli yöntem kullanıcı telefonunda render-time
+    // throw olmadan burada yakalanır (dev'de görünür). Asla throw etmez.
+    runNativeSelfCheck();
     configureNotifications();
     const t = setTimeout(() => sweepTiles(), 3000);
     storage
@@ -577,7 +582,12 @@ export function App() {
     );
   }
 
-  if (!onboardingSeen) return <OnboardingScreen onDone={() => setOnboardingSeen(true)} />;
+  if (!onboardingSeen)
+    return (
+      <ScreenErrorBoundary name="onboarding">
+        <OnboardingScreen onDone={() => setOnboardingSeen(true)} />
+      </ScreenErrorBoundary>
+    );
 
   const selectTab = (tab: MobileTab) => dispatch({ type: "select", tab });
 
@@ -704,12 +714,18 @@ export function App() {
                   >
                     <ScreenFocusContext.Provider value={active && !top}>
                       <View style={[styles.tabScreen, top ? styles.hidden : null]}>
-                        {renderTab(tab)}
+                        {/* Ekran-düzeyi hata sınırı: bir sekmedeki throw yalnız o sekmeyi
+                            etkiler; alt menü ve diğer sekmeler ayakta kalır (kök sınır son çare). */}
+                        <ScreenErrorBoundary name={tab}>{renderTab(tab)}</ScreenErrorBoundary>
                       </View>
                     </ScreenFocusContext.Provider>
                     {top ? (
                       <ScreenFocusContext.Provider value={active}>
-                        <View style={styles.tabScreen}>{renderStackScreen(top)}</View>
+                        <View style={styles.tabScreen}>
+                          <ScreenErrorBoundary name={top}>
+                            {renderStackScreen(top)}
+                          </ScreenErrorBoundary>
+                        </View>
                       </ScreenFocusContext.Provider>
                     ) : null}
                   </Animated.View>

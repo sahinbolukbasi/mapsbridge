@@ -15,6 +15,19 @@ export const HAPTICS_KEY = "mb_haptics_enabled";
 export function hapticsEnabled(): boolean {
   return enabled && !isReducedMotion();
 }
+// Açılış öz-denetimi (native-selfcheck.ts) için: R16 gereği expo-haptics YALNIZ bu dosyadan import
+// edilir, bu yüzden kullanılan yöntemlerin callable olup olmadığını buradan bildiririz. "modül.yöntem"
+// biçiminde eksik/yanlış tipli üyeleri döndürür (hepsi mevcutsa boş dizi).
+export function hapticsSelfCheck(): string[] {
+  const missing: string[] = [];
+  for (const name of ["selectionAsync", "notificationAsync", "impactAsync"] as const) {
+    if (typeof (Haptics as Record<string, unknown>)[name] !== "function") {
+      missing.push(`expo-haptics.${name}`);
+    }
+  }
+  return missing;
+}
+
 /** Tek atımlık haptik; desteklenmeyen cihazda ya da hata olursa sessizce yok sayılır. */
 export function haptic(kind: HapticKind): void {
   if (!hapticsEnabled()) return;
