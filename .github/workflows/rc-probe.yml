@@ -1,4 +1,4 @@
-name: RevenueCat API probe (read-only)
+name: RevenueCat API probe
 on:
   push:
     branches: [rc-probe]
@@ -33,6 +33,24 @@ jobs:
                   out += d.get("items", []); nxt = d.get("next_page")
               return out
           def dump(label, obj): print(label, json.dumps(obj, ensure_ascii=False, sort_keys=True))
+          def post(path, body):
+              req = urllib.request.Request(BASE + path, data=json.dumps(body).encode(), method="POST",
+                  headers={"Authorization": "Bearer " + KEY, "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r: return r.status, json.load(r)
+              except urllib.error.HTTPError as e:
+                  try: body = json.load(e)
+                  except Exception: body = {}
+                  return e.code, {k: body.get(k) for k in ("type", "code", "message")}
+          # TEK SEFERLİK YAZMA: current offering'e eksik paketleri ekle (varsa atla).
+          OFR = "ofrng762b1657ce"
+          WANT = [("explorer_monthly", "Kaşif Aylık"), ("agency_monthly", "Tur Lideri Aylık"),
+                  ("pack_30", "30 Kredi"), ("pack_100", "100 Kredi"), ("pack_300", "300 Kredi")]
+          have = {k["lookup_key"] for k in items(f"/v2/projects/{P}/offerings/{OFR}/packages?limit=100")}
+          for key, name in WANT:
+              if key in have: print("SKIP package exists", key); continue
+              code, d = post(f"/v2/projects/{P}/offerings/{OFR}/packages", {"lookup_key": key, "display_name": name})
+              print("CREATE package", key, code, d.get("id") if code == 201 else d)
           for a in items(f"/v2/projects/{P}/apps"): dump("APP", a)
           for p in items(f"/v2/projects/{P}/products?limit=100&expand=items.indicative_price"): dump("PRODUCT", p)
           for w in items(f"/v2/projects/{P}/integrations/webhooks"):
