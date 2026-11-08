@@ -105,10 +105,15 @@ jobs:
           mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
           printf 'exports.handler=async()=>({statusCode:200})' > /tmp/index.js
           touch -t 202001010000.00 /tmp/index.js
-          for name in auth chat marketplace cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
+          for name in auth chat marketplace kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
             zip -jqX infra/terraform/.build/lambdas/${name}.zip /tmp/index.js
           done
           zip -jqX infra/terraform/.build/layer/shared.zip /tmp/index.js
+          # cognito_custom_message source_code_hash'i ignore ETMEZ: placeholder zip,
+          # Cognito e-posta tetikleyicisinin canlı kodunu ezerdi. Canlı paket indirilir
+          # (hash aynı → no-op); indirilemezse job düşer, placeholder'a geri dönülmez.
+          URL=$(aws lambda get-function --function-name "${PREFIX}-cognito-custom-message" --query 'Code.Location' --output text)
+          curl -fsSL "$URL" -o infra/terraform/.build/lambdas/cognito-custom-message.zip
 
       - name: Terraform Init
         working-directory: infra/terraform
@@ -214,10 +219,15 @@ jobs:
           mkdir -p infra/terraform/.build/lambdas infra/terraform/.build/layer
           printf 'exports.handler=async()=>({statusCode:200})' > /tmp/index.js
           touch -t 202001010000.00 /tmp/index.js
-          for name in auth chat marketplace cognito-custom-message kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
+          for name in auth chat marketplace kb-ingest ws-onconnect ws-onmessage ws-ondisconnect; do
             zip -jqX infra/terraform/.build/lambdas/${name}.zip /tmp/index.js
           done
           zip -jqX infra/terraform/.build/layer/shared.zip /tmp/index.js
+          # cognito_custom_message source_code_hash'i ignore ETMEZ: placeholder zip,
+          # Cognito e-posta tetikleyicisinin canlı kodunu ezerdi. Canlı paket indirilir
+          # (hash aynı → no-op); indirilemezse job düşer, placeholder'a geri dönülmez.
+          URL=$(aws lambda get-function --function-name "${PREFIX}-cognito-custom-message" --query 'Code.Location' --output text)
+          curl -fsSL "$URL" -o infra/terraform/.build/lambdas/cognito-custom-message.zip
 
       - name: Terraform Init
         working-directory: infra/terraform

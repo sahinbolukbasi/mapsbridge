@@ -23,7 +23,13 @@ variable "aws_region" {
 variable "lambda_runtime" {
   type        = string
   default     = "nodejs20.x"
-  description = "Lambda runtime"
+  description = "Lambda runtime (shared layer compatible_runtimes; function_runtime boşsa fonksiyonlar da)"
+}
+
+variable "function_runtime" {
+  type        = string
+  default     = null
+  description = "Domain Lambda fonksiyonlarının runtime'ı. Canlı auth/chat/marketplace nodejs22.x; null ise lambda_runtime. Layer'ı (yeniden oluşturmayı) etkilemez."
 }
 
 variable "lambda_timeout" {

@@ -227,11 +227,13 @@ module "api" {
   tags           = local.tags
   aws_region     = var.aws_region
   lambda_runtime = "nodejs20.x"
-  lambda_timeout = var.lambda_timeout
-  lambda_memory  = var.lambda_memory
-  lambda_domains = local.lambda_packages
-  domain_routes  = local.domain_routes
-  cors_origins   = local.cors_origins
+  # Canlı fonksiyonlar nodejs22.x (konsoldan yükseltildi); 20.x'e geri düşürmesin.
+  function_runtime = "nodejs22.x"
+  lambda_timeout   = var.lambda_timeout
+  lambda_memory    = var.lambda_memory
+  lambda_domains   = local.lambda_packages
+  domain_routes    = local.domain_routes
+  cors_origins     = local.cors_origins
 
   cognito_user_pool_arn = aws_cognito_user_pool.users.arn
   cognito_user_pool_id  = aws_cognito_user_pool.users.id

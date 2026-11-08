@@ -175,7 +175,7 @@ resource "aws_lambda_function" "domain" {
   function_name = "${local.substack_name}-${each.key}"
   role          = aws_iam_role.lambda[each.key].arn
   handler       = "index.handler"
-  runtime       = var.lambda_runtime
+  runtime       = coalesce(var.function_runtime, var.lambda_runtime)
   architectures = ["arm64"] # Graviton — 34% cheaper, faster cold start
 
   filename         = each.value.zip_path
