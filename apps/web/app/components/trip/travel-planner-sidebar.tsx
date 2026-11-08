@@ -986,9 +986,8 @@ function PlaceSearch({
       </form>
       <div role="status" className="planner-search__status">
         {search.status === "empty" && t("planner.search.empty", "Sonuç bulunamadı.")}
-        {search.status === "loading" && (
-          <span className="ui-visually-hidden">{t("planner.search.loading", "Aranıyor…")}</span>
-        )}
+        {/* review-pages: arama sürerken görünür durum metni (Ara düğmesinin spinner'ı kalktı). */}
+        {search.status === "loading" && t("planner.search.loading", "Aranıyor…")}
       </div>
       {coords && (
         <Button

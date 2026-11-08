@@ -82,7 +82,12 @@ test("Section reveal ile düz Section aynı öznitelikleri taşır", async () =>
   const { renderSection } = await loadRender();
   // Öznitelik sırası önemsiz: kümeler karşılaştırılır.
   const attrs = (html) =>
-    (html.slice(0, html.indexOf(">")).replace(/ui-reveal /, "").match(/[\w-]+="[^"]*"/g) ?? [])
+    (
+      html
+        .slice(0, html.indexOf(">"))
+        .replace(/ui-reveal /, "")
+        .match(/[\w-]+="[^"]*"/g) ?? []
+    )
       .sort()
       .join(" ");
   const plain = renderSection({ id: "a", title: "Başlık" });

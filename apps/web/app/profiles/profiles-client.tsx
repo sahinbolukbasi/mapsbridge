@@ -22,9 +22,7 @@ export default function ProfilesClient() {
       />
     );
   return (
-    <PageShell
-      header={<PageHeader title={t("profiles.title", "Gezgin profili")} />}
-    >
+    <PageShell header={<PageHeader title={t("profiles.title", "Gezgin profili")} />}>
       {user === undefined ? (
         <LoadingState label={t("profiles.loading", "Profil yükleniyor…")} />
       ) : (

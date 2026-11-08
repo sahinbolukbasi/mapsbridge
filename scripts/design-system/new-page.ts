@@ -74,8 +74,7 @@ function main(argv: string[]): number {
     return 1;
   }
   mkdirSync(dir, { recursive: true });
-  for (const [name, body] of Object.entries(pageFiles(slug)))
-    writeFileSync(join(dir, name), body);
+  for (const [name, body] of Object.entries(pageFiles(slug))) writeFileSync(join(dir, name), body);
   console.log(`Oluşturuldu: apps/web/app/${slug}/{layout.tsx,page.tsx,${slug}.css}`);
   console.log("route-registry.ts'e ekleyin:");
   console.log(registryLine(slug, layout));

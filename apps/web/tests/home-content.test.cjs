@@ -250,7 +250,10 @@ test("§10 bölüm sırası: / ve /en/ (mobil bölüm yok, SSS q4 var)", (t) => 
   const en = fs.readFileSync(path.join(s.outDir, "en/index.html"), "utf8");
   // Başlık vurgu sözcüğü (PageHeader titleInk) metni span'e böler; etiketler atılarak aranır.
   const enText = en.replace(/<[^>]+>/g, "");
-  assert.ok(enText.includes("Describe your trip. Watch it land on the map."), "/en/ hero İngilizce");
+  assert.ok(
+    enText.includes("Describe your trip. Watch it land on the map."),
+    "/en/ hero İngilizce",
+  );
   assert.equal(en.includes("English version is in beta"), false, "/en/ beta notu kaldırıldı");
 });
 test("(e) S6: hiçbir web rotasının HTML'inde mağaza rozeti, indirme, sürüm ya da 'yakında' yok", (t) => {

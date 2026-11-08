@@ -336,7 +336,9 @@ export default function PublicProfileClient({
                       </span>
                     )}
                     <time dateTime={p.createdAt}>
-                      {new Date(p.createdAt).toLocaleDateString(locale === "en" ? "en-GB" : "tr-TR")}
+                      {new Date(p.createdAt).toLocaleDateString(
+                        locale === "en" ? "en-GB" : "tr-TR",
+                      )}
                     </time>
                   </p>
                 </li>

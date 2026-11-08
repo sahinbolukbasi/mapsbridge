@@ -713,7 +713,10 @@ test("native Paywall mağaza paketini katalogun packageId/productId alanıyla e�
   assert.deepEqual(packs, ["pack-30", "pack-100", "pack-300"]);
   assert.equal(mob.sellState("loading", undefined, false), "loading");
   assert.equal(mob.sellState({ status: "unavailable" }, undefined, false), "unavailable");
-  assert.equal(mob.sellState({ status: "ok", enabled: false, products: [] }, pro, true), "disabled");
+  assert.equal(
+    mob.sellState({ status: "ok", enabled: false, products: [] }, pro, true),
+    "disabled",
+  );
   assert.equal(mob.sellState(parsed, pro, false), "notDefined", "mağaza paketi yoksa satılmaz");
   assert.equal(mob.sellState(parsed, pro, true), "ok");
   assert.deepEqual(plain(mob.PAID_TIERS), ["explorer", "pro", "agency"]);

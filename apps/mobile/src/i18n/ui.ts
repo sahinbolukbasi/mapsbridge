@@ -392,7 +392,8 @@ export const UI_TR = {
   "nav.settings": "Ayarlar",
   "upgrade.balance": "Bakiyen",
   "checkout.type.credits": "Kredi paketi",
-  "pricing.faq.a2": "Ayrılan kredi otomatik olarak iade edilir. Bakiyen her zaman sunucudan gösterilir.",
+  "pricing.faq.a2":
+    "Ayrılan kredi otomatik olarak iade edilir. Bakiyen her zaman sunucudan gösterilir.",
 } as const;
 
 // Yalnız native'de olan metinler (web tr.json'da karşılığı yok). Anahtarlar `native.` ile başlar,
@@ -483,9 +484,11 @@ export const NATIVE_TR = {
   "native.onboarding.1.title": "Gezini anlat, rotan haritada belirsin.",
   "native.onboarding.1.body": "Birkaç dokunuşla gün gün rota. Yolda yanında, çevrimdışı da.",
   "native.onboarding.2.title": "Asistan sorar, sen dokunursun.",
-  "native.onboarding.2.body": "Her turda en fazla iki soru. Mekan bilgisi veriden gelir, uydurulmaz.",
+  "native.onboarding.2.body":
+    "Her turda en fazla iki soru. Mekan bilgisi veriden gelir, uydurulmaz.",
   "native.onboarding.3.title": "Rotanı paylaş, gezginlerle keşfet.",
-  "native.onboarding.3.body": "Rotanı mesajla ya da dosya olarak gönder; sana gelen paylaşım kodunu tek dokunuşla aç.",
+  "native.onboarding.3.body":
+    "Rotanı mesajla ya da dosya olarak gönder; sana gelen paylaşım kodunu tek dokunuşla aç.",
   "native.perm.notNow": "Şimdi değil",
   "native.perm.location.title": "Yakınındaki yerleri göstermek için konumunu kullanalım mı?",
   "native.perm.location.allow": "Konuma izin ver",
@@ -493,7 +496,8 @@ export const NATIVE_TR = {
   "native.perm.location.p2": "Konumun kimseyle paylaşılmaz; paylaşım ayrı, süreli ve onaylı",
   "native.perm.location.p3": "Ayarlardan istediğin zaman kapatırsın",
   "native.perm.notifications.title": "Rota hatırlatmaları açılsın mı?",
-  "native.perm.notifications.body": "Günün ilk durağından önce kısa bir hatırlatma. Pazarlama bildirimi yok.",
+  "native.perm.notifications.body":
+    "Günün ilk durağından önce kısa bir hatırlatma. Pazarlama bildirimi yok.",
   "native.perm.notifications.allow": "Bildirimlere izin ver",
   "native.perm.denied": "İzin kapalı. Ayarlardan açabilirsin.",
   "native.perm.openSettings": "Ayarları aç",
@@ -502,11 +506,14 @@ export const NATIVE_TR = {
   "native.paywall.monthly": "Aylık plan",
   "native.paywall.balanceUnknown": "Bakiye şu an okunamadı",
   "native.paywall.packOnce": "Tek seferlik, süresi dolmaz",
-  "native.paywall.packNote": "Paket kredisi, planlardan kredi başına daha pahalıdır. Düzenli kullanıyorsan aylık plan daha uygun.",
+  "native.paywall.packNote":
+    "Paket kredisi, planlardan kredi başına daha pahalıdır. Düzenli kullanıyorsan aylık plan daha uygun.",
   "native.paywall.packCta": "{n} kredi al",
   "native.paywall.notDefined": "Bu ürün mağazada henüz tanımlı değil.",
-  "native.paywall.renewIos": "Abonelik her ay otomatik yenilenir, Apple hesabından ücretlendirilir. Dönem bitmeden en az 24 saat önce Ayarlar › Apple Kimliği › Abonelikler'den iptal edebilirsin.",
-  "native.paywall.renewAndroid": "Abonelik her ay otomatik yenilenir, Google hesabından ücretlendirilir. Dönem bitmeden Play Store › Ödemeler ve abonelikler'den iptal edebilirsin.",
+  "native.paywall.renewIos":
+    "Abonelik her ay otomatik yenilenir, Apple hesabından ücretlendirilir. Dönem bitmeden en az 24 saat önce Ayarlar › Apple Kimliği › Abonelikler'den iptal edebilirsin.",
+  "native.paywall.renewAndroid":
+    "Abonelik her ay otomatik yenilenir, Google hesabından ücretlendirilir. Dönem bitmeden Play Store › Ödemeler ve abonelikler'den iptal edebilirsin.",
   "native.paywall.terms": "Koşullar",
   "native.paywall.privacy": "Gizlilik",
   "native.paywall.planActive": "{name} aktif",
@@ -521,7 +528,8 @@ export const NATIVE_TR = {
   "native.lock.unlock": "Kilidi aç",
   "native.settings.title": "Uygulama ayarları",
   "native.settings.lock": "Uygulama kilidi (Face ID / parmak izi)",
-  "native.settings.lockHint": "Açıkken uygulama açılışta ve bir dakikadan uzun arka planda kaldıktan sonra kilitlenir.",
+  "native.settings.lockHint":
+    "Açıkken uygulama açılışta ve bir dakikadan uzun arka planda kaldıktan sonra kilitlenir.",
   "native.settings.lockUnavailable": "Bu cihazda biyometrik kimlik doğrulama ayarlı değil.",
   "native.settings.haptics": "Dokunsal geri bildirim",
   "native.reminder.dayTitle": "Bugünkü rotan: {name}",
