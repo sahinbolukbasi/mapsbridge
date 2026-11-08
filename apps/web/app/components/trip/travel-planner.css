@@ -15,6 +15,29 @@
     color: var(--color-text-subtle);
     font-size: var(--font-size-xs);
   }
+  /* B3 (FEAT-002): etiketli panel bölümleri — Günler / Yer ara / Keşfet / Kayıtlı yerler.
+     Her bölüm görünür bir <h3> başlık taşır; aralarında ince ayraç ile ayrılır. */
+  .planner-group {
+    display: grid;
+    gap: var(--space-3);
+    padding-block-start: var(--space-4);
+    border-block-start: 1px solid var(--color-border);
+  }
+  .planner-group:first-of-type {
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+  .planner-group__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-caps);
+    text-transform: uppercase;
+  }
   /* Gün sekmeleri: yatay kaydırılan basılı düğmeler (aria-pressed). */
   .planner-days {
     display: flex;

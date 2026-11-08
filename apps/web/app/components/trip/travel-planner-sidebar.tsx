@@ -172,7 +172,10 @@ export function TravelPlannerSidebar({
     togglePinVisitedAnywhere,
     addDay,
   } = planner;
-  const [workspaceMode, setWorkspaceMode] = useState<"edit" | "discover" | "travel">("edit");
+  // B3 (FEAT-002): "edit" planlama görünümü (arama + Keşfet + gün durakları aynı anda görünür,
+  // ayrı etiketli bölümlerde), "travel" gezide ilerleme görünümü. Eski ayrık "discover" kipi
+  // kaldırıldı; Keşfet artık planlama görünümünde kalıcı bir bölüm.
+  const [workspaceMode, setWorkspaceMode] = useState<"edit" | "travel">("edit");
   const [showDetail, setShowDetail] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Pin | null>(null);
   const targetDay = activeDayIndex && activeDayIndex > 0 ? activeDayIndex : 1;
@@ -382,58 +385,9 @@ export function TravelPlannerSidebar({
         </div>
       )}
       <div className="planner-list" hidden={detailOpen}>
-        <div className="planner-days" role="group" aria-label={t("planner.days", "Günler")}>
-          <button
-            type="button"
-            className="planner-days__tab"
-            aria-pressed={!activeDayIndex}
-            onClick={() => setActiveDayIndex(0)}
-          >
-            {t("planner.days.all", "Tümü")}
-            <span className="planner-days__count">{allPins.length}</span>
-          </button>
-          {(activeTrip?.days ?? []).map((d) => (
-            <button
-              key={d.dayIndex}
-              type="button"
-              className="planner-days__tab"
-              aria-pressed={activeDayIndex === d.dayIndex}
-              onClick={() => setActiveDayIndex(d.dayIndex)}
-            >
-              <span
-                className="planner-days__dot trip-day-color"
-                data-day={dayColorIndex(d.dayIndex)}
-                aria-hidden="true"
-              />
-              {t("planner.days.day", "{n}. Gün").replace("{n}", String(d.dayIndex))}
-              <span className="planner-days__count">
-                {allPins.filter((p) => p.dayIndex === d.dayIndex).length}
-              </span>
-            </button>
-          ))}
-          <IconButton
-            icon="plus"
-            size="sm"
-            label={t("planner.days.add", "Gün ekle")}
-            onClick={() => {
-              addDay();
-              toast.show({
-                tone: "success",
-                message: t("planner.toast.dayAdded", "Yeni gün eklendi."),
-              });
-            }}
-          />
-        </div>
-
-        {allPins.some((p) => p.visited) && (
-          <Checkbox
-            variant="switch"
-            className="planner-list__visited"
-            label={t("planner.visited.hide", "Gezilenleri haritada gizle")}
-            checked={!planner.showVisitedOnMap}
-            onChange={(hide) => planner.setShowVisitedOnMap(!hide)}
-          />
-        )}
+        {/* B3 (FEAT-002): üstte görünüm anahtarı; altında net etiketli bölümler —
+            Günler, Yer ara, Keşfet (planlama görünümünde) ya da Gezide ilerlemesi,
+            en altta Kayıtlı yerler. */}
         <SegmentedControl
           className="planner-list__mode"
           size="sm"
@@ -441,32 +395,114 @@ export function TravelPlannerSidebar({
           label={t("planner.mode.label", "Görünüm")}
           options={[
             { value: "edit", label: t("planner.mode.edit", "Plan") },
-            { value: "discover", label: t("planner.mode.discover", "Keşfet") },
             { value: "travel", label: t("planner.mode.travel", "Gezide") },
           ]}
           value={workspaceMode}
           onChange={setWorkspaceMode}
         />
 
-        {workspaceMode === "discover" ? (
-          <DiscoverPanel
-            dayPins={activeDayIndex && activeDayIndex > 0 ? pinsWithTime : allPins}
-            allPins={[...allPins, ...generalPins]}
-            activeDay={activeDayIndex && activeDayIndex > 0 ? activeDayIndex : undefined}
-            mapCenter={mapCenter}
-            onAdd={(place, target) =>
-              addPlace(place, target === "trip" ? addTargetFor(activeDayIndex) : { kind: "general" })
-            }
-            onFocus={(lat, lng, label) => onFlyToCoords?.(lat, lng, label)}
-          />
-        ) : workspaceMode === "edit" ? (
-          <PlaceSearch
-            near={searchBias}
-            days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
-            activeDayIndex={activeDayIndex}
-            onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}
-            onAdd={addPlace}
-          />
+        <section
+          className="planner-group planner-group--days"
+          aria-labelledby="planner-group-days"
+        >
+          <h3 className="planner-group__title" id="planner-group-days">
+            <Icon name="calendar" size={16} aria-hidden="true" />
+            {t("planner.group.days", "Günler")}
+          </h3>
+          <div className="planner-days" role="group" aria-label={t("planner.days", "Günler")}>
+            <button
+              type="button"
+              className="planner-days__tab"
+              aria-pressed={!activeDayIndex}
+              onClick={() => setActiveDayIndex(0)}
+            >
+              {t("planner.days.all", "Tümü")}
+              <span className="planner-days__count">{allPins.length}</span>
+            </button>
+            {(activeTrip?.days ?? []).map((d) => (
+              <button
+                key={d.dayIndex}
+                type="button"
+                className="planner-days__tab"
+                aria-pressed={activeDayIndex === d.dayIndex}
+                onClick={() => setActiveDayIndex(d.dayIndex)}
+              >
+                <span
+                  className="planner-days__dot trip-day-color"
+                  data-day={dayColorIndex(d.dayIndex)}
+                  aria-hidden="true"
+                />
+                {t("planner.days.day", "{n}. Gün").replace("{n}", String(d.dayIndex))}
+                <span className="planner-days__count">
+                  {allPins.filter((p) => p.dayIndex === d.dayIndex).length}
+                </span>
+              </button>
+            ))}
+            <IconButton
+              icon="plus"
+              size="sm"
+              label={t("planner.days.add", "Gün ekle")}
+              onClick={() => {
+                addDay();
+                toast.show({
+                  tone: "success",
+                  message: t("planner.toast.dayAdded", "Yeni gün eklendi."),
+                });
+              }}
+            />
+          </div>
+          {allPins.some((p) => p.visited) && (
+            <Checkbox
+              variant="switch"
+              className="planner-list__visited"
+              label={t("planner.visited.hide", "Gezilenleri haritada gizle")}
+              checked={!planner.showVisitedOnMap}
+              onChange={(hide) => planner.setShowVisitedOnMap(!hide)}
+            />
+          )}
+        </section>
+
+        {workspaceMode === "edit" ? (
+          <>
+            <section
+              className="planner-group planner-group--search"
+              aria-labelledby="planner-group-search"
+            >
+              <h3 className="planner-group__title" id="planner-group-search">
+                <Icon name="search" size={16} aria-hidden="true" />
+                {t("planner.group.search", "Yer ara")}
+              </h3>
+              <PlaceSearch
+                near={searchBias}
+                days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
+                activeDayIndex={activeDayIndex}
+                onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}
+                onAdd={addPlace}
+              />
+            </section>
+            <section
+              className="planner-group planner-group--discover"
+              aria-labelledby="planner-group-discover"
+            >
+              <h3 className="planner-group__title" id="planner-group-discover">
+                <Icon name="compass" size={16} aria-hidden="true" />
+                {t("planner.group.discover", "Keşfet")}
+              </h3>
+              <DiscoverPanel
+                dayPins={activeDayIndex && activeDayIndex > 0 ? pinsWithTime : allPins}
+                allPins={[...allPins, ...generalPins]}
+                activeDay={activeDayIndex && activeDayIndex > 0 ? activeDayIndex : undefined}
+                mapCenter={mapCenter}
+                onAdd={(place, target) =>
+                  addPlace(
+                    place,
+                    target === "trip" ? addTargetFor(activeDayIndex) : { kind: "general" },
+                  )
+                }
+                onFocus={(lat, lng, label) => onFlyToCoords?.(lat, lng, label)}
+              />
+            </section>
+          </>
         ) : (
           <div className="planner-travel">
             <p className="planner-travel__progress-label" id="planner-progress">
@@ -589,8 +625,19 @@ export function TravelPlannerSidebar({
                   .filter((d) => d !== day.dayIndex)}
                 pins={pins}
                 onAddExtra={() => {
+                  // Keşfet artık planlama görünümünde kalıcı bölüm; o güne odaklan ve bölüme kaydır.
                   setActiveDayIndex(day.dayIndex);
-                  setWorkspaceMode("discover");
+                  setWorkspaceMode("edit");
+                  window.setTimeout(
+                    () =>
+                      document
+                        .getElementById("planner-group-discover")
+                        ?.scrollIntoView({
+                          block: "nearest",
+                          behavior: prefersReducedMotion() ? "auto" : "smooth",
+                        }),
+                    0,
+                  );
                 }}
                 onShift={(pinId, targetDay) => {
                   movePinToDay(pinId, targetDay);
@@ -740,13 +787,13 @@ export function TravelPlannerSidebar({
             liste görünür; her satırda gün seçimi + "Güne ekle" (sürükle-bırakın klavye alternatifi). */}
         <details className="planner-pool" aria-labelledby="planner-pool-title">
           <summary className="planner-pool__summary">
-            <span id="planner-pool-title" className="planner-pool__title">
-              <Icon name="bookmark" size={16} />
+            <h3 id="planner-pool-title" className="planner-pool__title">
+              <Icon name="bookmark" size={16} aria-hidden="true" />
               {t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
                 "{n}",
                 String(generalPins.length),
               )}
-            </span>
+            </h3>
             <Icon name="chevron" className="planner-pool__chevron" />
           </summary>
           {generalPins.length === 0 ? (
