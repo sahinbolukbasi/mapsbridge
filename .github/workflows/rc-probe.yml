@@ -34,7 +34,12 @@ jobs:
               return out
           def dump(label, obj): print(label, json.dumps(obj, ensure_ascii=False, sort_keys=True))
           for a in items(f"/v2/projects/{P}/apps"): dump("APP", a)
-          for p in items(f"/v2/projects/{P}/products?limit=100"): dump("PRODUCT", p)
+          for p in items(f"/v2/projects/{P}/products?limit=100&expand=items.indicative_price"): dump("PRODUCT", p)
+          for w in items(f"/v2/projects/{P}/integrations/webhooks"):
+              # Yetkilendirme başlığı gizli: yalnız var/yok bilgisi yazılır.
+              safe = {k: v for k, v in w.items() if "auth" not in k.lower() and "secret" not in k.lower()}
+              safe["has_authorization"] = any(("auth" in k.lower()) and v for k, v in w.items())
+              dump("WEBHOOK", safe)
           for e in items(f"/v2/projects/{P}/entitlements?limit=100"):
               dump("ENTITLEMENT", e)
               for p in items(f"/v2/projects/{P}/entitlements/{e['id']}/products?limit=100"):
