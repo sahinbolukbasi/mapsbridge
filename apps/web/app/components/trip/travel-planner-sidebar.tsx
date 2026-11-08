@@ -39,7 +39,16 @@ import { apiFetch } from "../../lib/api-client";
 import type { MultiAgentResponse } from "../../lib/ai/types";
 import { interactionTracker } from "../../lib/analytics/tracker";
 import { exportTripToGoogleMaps } from "../../features/trip-planner/google-maps-exporter";
-import { dayBufferRatio, dayTimeline, legKey } from "../../lib/trip/planner-logic";
+import {
+  ADD_TARGET_GENERAL,
+  addTargetFor,
+  dayBufferRatio,
+  dayTimeline,
+  defaultAddTargetValue,
+  legKey,
+  parseAddTarget,
+  type AddTarget,
+} from "../../lib/trip/planner-logic";
 import { isTextFieldTarget, plannerShortcut, SHORTCUT_HELP } from "../../lib/trip/shortcuts";
 import { MotionProvider, Reorder, useDragControls } from "../../lib/motion";
 import { prefersReducedMotion } from "../../lib/a11y/use-reduced-motion";
@@ -193,14 +202,15 @@ export function TravelPlannerSidebar({
     return () => window.removeEventListener("mapsbridge:show-pin-detail", open);
   }, []);
 
-  const addPlace = (place: Place, target: "trip" | "general") => {
+  // U3: ekleme hedefi artık kullanıcının seçtiği gün ya da Kaydedilenler (günsüz havuz).
+  const addPlace = (place: Place, target: AddTarget) => {
     const pin = {
       label: place.label || place.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
       address: place.address,
       lat: place.lat,
       lng: place.lng,
       category: place.category ?? ("genel" as PinCategory),
-      dayIndex: target === "trip" ? targetDay : 0,
+      dayIndex: target.kind === "day" ? target.day : 0,
       group: "Genel",
       visited: false,
       durationMinutes: 60,
@@ -210,13 +220,13 @@ export function TravelPlannerSidebar({
         ? { placeId: place.placeId, placeProvider: "amazon" as const }
         : {}),
     };
-    if (target === "trip") {
-      addPinDirectlyToTrip(activeTripId, pin, targetDay);
+    if (target.kind === "day") {
+      addPinDirectlyToTrip(activeTripId, pin, target.day);
       toast.show({
         tone: "success",
         message: t("planner.toast.addedToDay", "“{name}” {day}. güne eklendi.")
           .replace("{name}", pin.label)
-          .replace("{day}", String(targetDay)),
+          .replace("{day}", String(target.day)),
       });
     } else {
       addPinToGeneral(pin);
@@ -434,12 +444,16 @@ export function TravelPlannerSidebar({
             allPins={[...allPins, ...generalPins]}
             activeDay={activeDayIndex && activeDayIndex > 0 ? activeDayIndex : undefined}
             mapCenter={mapCenter}
-            onAdd={addPlace}
+            onAdd={(place, target) =>
+              addPlace(place, target === "trip" ? addTargetFor(activeDayIndex) : { kind: "general" })
+            }
             onFocus={(lat, lng, label) => onFlyToCoords?.(lat, lng, label)}
           />
         ) : workspaceMode === "edit" ? (
           <PlaceSearch
             near={searchBias}
+            days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
+            activeDayIndex={activeDayIndex}
             onPick={(place) => onFlyToCoords?.(place.lat, place.lng, place.label)}
             onAdd={addPlace}
           />
@@ -513,7 +527,8 @@ export function TravelPlannerSidebar({
               ...selectedMapPoint,
               label: selectedMapPoint.address.split(",")[0] || t("planner.stop.new", "Yeni durak"),
             }}
-            day={targetDay}
+            days={(activeTrip?.days ?? []).map((d) => d.dayIndex)}
+            activeDayIndex={activeDayIndex}
             onAdd={(target) => {
               addPlace(
                 {
@@ -681,15 +696,19 @@ export function TravelPlannerSidebar({
           </section>
         ))}
 
-        {/* P7: Kaydedilenler (günsüz yerler) her zaman görünür; her satırda gün seçimi. */}
-        <section className="planner-pool" aria-labelledby="planner-pool-title">
-          <h3 id="planner-pool-title" className="planner-pool__title">
-            <Icon name="bookmark" size={16} />
-            {t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
-              "{n}",
-              String(generalPins.length),
-            )}
-          </h3>
+        {/* U4: Kaydedilenler (günsüz yerler) varsayılan kapalı disclosure; başlıkta sayı. Açılınca
+            liste görünür; her satırda gün seçimi + "Güne ekle" (sürükle-bırakın klavye alternatifi). */}
+        <details className="planner-pool" aria-labelledby="planner-pool-title">
+          <summary className="planner-pool__summary">
+            <span id="planner-pool-title" className="planner-pool__title">
+              <Icon name="bookmark" size={16} />
+              {t("planner.pool.title", "Kayıtlı yerler ({n})").replace(
+                "{n}",
+                String(generalPins.length),
+              )}
+            </span>
+            <Icon name="chevron" className="planner-pool__chevron" />
+          </summary>
           {generalPins.length === 0 ? (
             <p className="planner-pool__empty">
               {t(
@@ -718,7 +737,7 @@ export function TravelPlannerSidebar({
               ))}
             </ul>
           )}
-        </section>
+        </details>
 
         {footer}
         <Accordion
@@ -888,12 +907,16 @@ function PoolRow({
  */
 function PlaceSearch({
   near,
+  days,
+  activeDayIndex,
   onPick,
   onAdd,
 }: {
   near?: { lat: number; lng: number };
+  days: number[];
+  activeDayIndex: number | null | undefined;
   onPick: (place: Place) => void;
-  onAdd: (place: Place, target: "trip" | "general") => void;
+  onAdd: (place: Place, target: AddTarget) => void;
 }) {
   const { t } = useLocale();
   const [query, setQuery] = useState("");
@@ -1090,6 +1113,8 @@ function PlaceSearch({
         <PlaceCard
           eyebrow={t("planner.search.found", "Arama sonucu")}
           place={picked}
+          days={days}
+          activeDayIndex={activeDayIndex}
           onAdd={(target) => {
             onAdd(picked, target);
             setPicked(null);
@@ -1101,20 +1126,27 @@ function PlaceSearch({
     </div>
   );
 }
+/**
+ * U3: ekleme kartı. Tek + eylemi, yanındaki gün <Select> ile seçilen hedefe (gezinin bir günü ya
+ * da Kaydedilenler) ekler. Varsayılan aktif gün (>0), yoksa Kaydedilenler (defaultAddTargetValue).
+ */
 function PlaceCard({
   eyebrow,
   place,
-  day,
+  days,
+  activeDayIndex,
   onAdd,
   onClose,
 }: {
   eyebrow: string;
   place: Place;
-  day?: number;
-  onAdd: (target: "trip" | "general") => void;
+  days: number[];
+  activeDayIndex: number | null | undefined;
+  onAdd: (target: AddTarget) => void;
   onClose: () => void;
 }) {
   const { t } = useLocale();
+  const [target, setTarget] = useState(() => defaultAddTargetValue(activeDayIndex, days));
   return (
     <div className="planner-place" data-surface="default">
       <div className="planner-place__head">
@@ -1124,23 +1156,27 @@ function PlaceCard({
       <p className="planner-place__name">{place.label}</p>
       <p className="planner-place__address">{place.address}</p>
       <div className="planner-place__actions">
+        <Select
+          aria-label={t("planner.place.targetLabel", "Nereye eklensin")}
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+        >
+          {days.map((d) => (
+            <option key={d} value={d}>
+              {t("planner.days.day", "{n}. Gün").replace("{n}", String(d))}
+            </option>
+          ))}
+          <option value={ADD_TARGET_GENERAL}>
+            {t("planner.detail.inPool", "Kayıtlı yerler")}
+          </option>
+        </Select>
         <Button
           size="sm"
           variant="primary"
           iconStart={<Icon name="plus" size={16} />}
-          onClick={() => onAdd("trip")}
+          onClick={() => onAdd(parseAddTarget(target, days))}
         >
-          {day
-            ? t("planner.place.addToDayN", "{n}. güne ekle").replace("{n}", String(day))
-            : t("planner.place.addToDay", "Güne ekle")}
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          iconStart={<Icon name="bookmark" size={16} />}
-          onClick={() => onAdd("general")}
-        >
-          {t("planner.place.addToPool", "Kayıtlı yerlere ekle")}
+          {t("planner.place.add", "Ekle")}
         </Button>
       </div>
     </div>

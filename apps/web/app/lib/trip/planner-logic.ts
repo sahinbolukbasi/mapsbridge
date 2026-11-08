@@ -143,15 +143,45 @@ export function pinsForMap<T extends { visited?: boolean }>(
   return hideVisited ? pins.filter((p) => !p.visited) : [...pins];
 }
 /**
+ * Bir yerin ekleneceği hedef: gezinin belirli bir günü ya da günsüz "Kaydedilenler" havuzu.
+ */
+export type AddTarget = { kind: "day"; day: number } | { kind: "general" };
+
+/**
  * P7: haritadan (çift tıklama / Google) eklenen yerin hedefi. Gün seçili değilken ("Tümü")
  * eskiden 1. güne düşüyordu; artık Kaydedilenler'e (günsüz havuz) gider.
  */
-export function addTargetFor(
-  activeDayIndex: number | null | undefined,
-): { kind: "day"; day: number } | { kind: "general" } {
+export function addTargetFor(activeDayIndex: number | null | undefined): AddTarget {
   return activeDayIndex && activeDayIndex > 0
     ? { kind: "day", day: activeDayIndex }
     : { kind: "general" };
+}
+
+/** U3 ekleme anı gün seçimi Select değeri için sabit: Kaydedilenler = günsüz havuz. */
+export const ADD_TARGET_GENERAL = "general";
+
+/**
+ * U3: ekleme kartındaki gün <Select>'inin seçili değeri → ekleme hedefi. "general" ve geçersiz
+ * (bilinmeyen / gün listesinde olmayan) değerler Kaydedilenler'e düşer; sayı bir güne eşlenir.
+ */
+export function parseAddTarget(value: string, days: readonly number[]): AddTarget {
+  if (value === ADD_TARGET_GENERAL) return { kind: "general" };
+  const day = Number(value);
+  return Number.isInteger(day) && days.includes(day) ? { kind: "day", day } : { kind: "general" };
+}
+
+/**
+ * U3: ekleme kartı Select'inin başlangıç değeri. Aktif gün (>0) varsa o gün, yoksa Kaydedilenler.
+ * Dönen değer `days` içinde yoksa (ör. gün silinmiş) Kaydedilenler'e düşer.
+ */
+export function defaultAddTargetValue(
+  activeDayIndex: number | null | undefined,
+  days: readonly number[],
+): string {
+  const target = addTargetFor(activeDayIndex);
+  return target.kind === "day" && days.includes(target.day)
+    ? String(target.day)
+    : ADD_TARGET_GENERAL;
 }
 /**
  * Pini içeren geziye `update` uygular; içermeyen gezi AYNI referansla döner. Böylece geri alma

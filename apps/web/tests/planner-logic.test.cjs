@@ -310,6 +310,22 @@ test("P2: isRealRoad:false yedek geometrinin bacakları süreye girmez", () => {
   );
 });
 
+test("U3: parseAddTarget — Select değeri ekleme hedefine çevrilir, geçersiz Kaydedilenler'e düşer", () => {
+  assert.deepEqual(plain(L.parseAddTarget("general", [1, 2])), { kind: "general" });
+  assert.deepEqual(plain(L.parseAddTarget("2", [1, 2, 3])), { kind: "day", day: 2 });
+  // gün listesinde olmayan sayı ve bilinmeyen değer Kaydedilenler'e düşer (I10: olmayan gün yazılmaz).
+  assert.deepEqual(plain(L.parseAddTarget("5", [1, 2])), { kind: "general" });
+  assert.deepEqual(plain(L.parseAddTarget("abc", [1, 2])), { kind: "general" });
+});
+
+test("U3: defaultAddTargetValue — aktif gün varsa o gün, yoksa/geçersizse Kaydedilenler", () => {
+  assert.equal(L.defaultAddTargetValue(2, [1, 2, 3]), "2");
+  assert.equal(L.defaultAddTargetValue(0, [1, 2]), L.ADD_TARGET_GENERAL);
+  assert.equal(L.defaultAddTargetValue(null, [1, 2]), L.ADD_TARGET_GENERAL);
+  // aktif gün listede yoksa (ör. gün silinmiş) Kaydedilenler.
+  assert.equal(L.defaultAddTargetValue(4, [1, 2]), L.ADD_TARGET_GENERAL);
+});
+
 test("P7: gün seçili değilken (Tümü / 0) eklenen yer Kaydedilenler'e gider", () => {
   assert.deepEqual(plain(L.addTargetFor(0)), { kind: "general" });
   assert.deepEqual(plain(L.addTargetFor(null)), { kind: "general" });
