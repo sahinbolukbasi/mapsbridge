@@ -1,0 +1,26 @@
+name: RevenueCat API probe (read-only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe RevenueCat API v2 with RC_SECRET_API_KEY (no secret printed)
+        env:
+          RC_KEY: ${{ secrets.RC_SECRET_API_KEY }}
+        run: |
+          code=$(curl -s -o /tmp/p.json -w "%{http_code}" -H "Authorization: Bearer $RC_KEY" https://api.revenuecat.com/v2/projects)
+          echo "v2 /projects HTTP $code"
+          python3 - <<'PY'
+          import json
+          try:
+            d=json.load(open('/tmp/p.json'))
+          except Exception as e:
+            print("unparseable", e); raise SystemExit
+          if 'items' in d:
+            for p in d['items']: print("project", p.get('id'), p.get('name'))
+          else:
+            print({k:d.get(k) for k in ('type','code','message','doc_url')})
+          PY
