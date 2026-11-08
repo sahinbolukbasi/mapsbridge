@@ -1,8 +1,10 @@
 {
-  "CFBundleDisplayName": "Maps Bridge",
-  "NSLocationWhenInUseUsageDescription": "Maps Bridge, “Yakınımda” ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
-  "NSCameraUsageDescription": "Topluluk paylaşımına fotoğraf çekebilmen için kamera erişimi gerekir.",
-  "NSPhotoLibraryUsageDescription": "Topluluk paylaşımına ve profil fotoğrafına görsel ekleyebilmen için fotoğraflarına erişilir.",
-  "NSPhotoLibraryAddUsageDescription": "Rota ve harita görsellerini galerine kaydedebilmen için izin gerekir.",
-  "NSFaceIDUsageDescription": "Açtığında uygulama kilidini Face ID ile açabilmen için kullanılır."
+  "ios": {
+    "CFBundleDisplayName": "Maps Bridge",
+    "NSLocationWhenInUseUsageDescription": "Maps Bridge, “Yakınımda” ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
+    "NSCameraUsageDescription": "Topluluk paylaşımına fotoğraf çekebilmen için kamera erişimi gerekir.",
+    "NSPhotoLibraryUsageDescription": "Topluluk paylaşımına ve profil fotoğrafına görsel ekleyebilmen için fotoğraflarına erişilir.",
+    "NSPhotoLibraryAddUsageDescription": "Rota ve harita görsellerini galerine kaydedebilmen için izin gerekir.",
+    "NSFaceIDUsageDescription": "Açtığında uygulama kilidini Face ID ile açabilmen için kullanılır."
+  }
 }

@@ -535,7 +535,11 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
   ];
   const expo = json.expo;
   for (const lang of ["tr", "en"]) {
-    const strings = JSON.parse(fs.readFileSync(path.join(mobile, expo.locales[lang]), "utf8"));
+    // Yalnız iOS (InfoPlist.strings): düz anahtarlar Android strings.xml'e de yazılır ve
+    // lintVitalRelease ExtraTranslation ile düşer (EAS Android 2a280c54).
+    const file = JSON.parse(fs.readFileSync(path.join(mobile, expo.locales[lang]), "utf8"));
+    assert.deepEqual(Object.keys(file), ["ios"], `${lang}: yalnız ios anahtarı`);
+    const strings = file.ios;
     for (const k of keys) assert.ok(strings[k] && strings[k].length > 20, `${lang} ${k}`);
     // Expo InfoPlist.strings'e değerleri kaçışsız yazar: düz " dosyayı bozar ve Xcode
     // "Couldn't parse property list" ile düşer (EAS iOS 6092b87a). Tipografik tırnak kullanılır.
