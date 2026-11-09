@@ -417,14 +417,15 @@ test("FEAT-012 (S6, S1, §7.1): mağaza/indir/yakında, EN POPÜLER, deneme ve k
   assert.deepEqual(offenders, [], offenders.join(", "));
 });
 
-test("Keşfet sekmesi mobilde kaldırıldı (F4); misafir Asistan'da başlar; Apple 'yakında' yok", () => {
+test("Keşfet sekmesi mobilde kaldırıldı (F4); misafir Planla'da (harita) başlar (G21); Apple 'yakında' yok", () => {
   const app = read("App.tsx");
   // Keşfet sekmesi mobilden kaldırıldı: App artık ExploreScreen render etmez.
   assert.doesNotMatch(app, /<ExploreScreen/);
   assert.doesNotMatch(app, /from "\.\/src\/screens\/ExploreScreen"/);
   assert.doesNotMatch(app, /WelcomeScreen|handleAppleSignIn|onSelectApple/);
-  // Misafir başlangıç sekmesi artık Asistan (explore yerine).
-  assert.match(app, /initialNav<MobileTab, MobileStackScreen>\("ai"\)/);
+  // G21: misafir başlangıç sekmesi artık Planla (harita) — onboarding sonrası ilk ekran harita.
+  assert.match(app, /initialNav<MobileTab, MobileStackScreen>\("plan"\)/);
+  assert.doesNotMatch(app, /initialNav<MobileTab, MobileStackScreen>\("ai"\)/);
   assert.doesNotMatch(code("src/screens/AuthScreen.tsx"), /Apple/);
 });
 

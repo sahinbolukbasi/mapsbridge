@@ -226,7 +226,7 @@ export function App() {
   // Tek IA (design §5.3, S7/S10): misafir ve üye sekme setleri; sekme başına ekran yığını.
   const signedIn = !!session;
   const tabs = signedIn ? MEMBER_TABS : GUEST_TABS;
-  const [nav, setNav] = useState<Nav>(() => initialNav<MobileTab, MobileStackScreen>("ai"));
+  const [nav, setNav] = useState<Nav>(() => initialNav<MobileTab, MobileStackScreen>("plan"));
   const navRef = useRef(nav);
   navRef.current = nav;
   const tabsRef = useRef(tabs);
@@ -268,8 +268,9 @@ export function App() {
     }
   }, [linkNonce, loadingSession, onboardingSeen]);
 
-  // Oturum açılınca/kapanınca sekme seti değişir: misafir Keşfet'te, üye Planla'da başlar (J6).
-  // Layout effect: boyamadan önce çalışır, eski sekme setiyle boş bir kare görünmez.
+  // Oturum açılınca/kapanınca sekme seti değişir: G21 — hem misafir hem üye Planla'da (harita)
+  // başlar; onboarding sonrası ilk ekran haritadır. Layout effect: boyamadan önce çalışır,
+  // eski sekme setiyle boş bir kare görünmez.
   useLayoutEffect(() => {
     if (loadingSession) return;
     const back = authReturnTab.current;
@@ -278,7 +279,7 @@ export function App() {
       ? back && MEMBER_TABS.includes(back)
         ? back
         : "plan"
-      : "ai";
+      : "plan";
     setNav(initialNav<MobileTab, MobileStackScreen>(home));
   }, [loadingSession, signedIn]);
 
