@@ -8,8 +8,10 @@ export const PLACES_CONTROL_KEY = "SYSTEM#PLACES_CONTROL";
 /** Kayıt yoksa ya da okunamazsa: Google kapalı (güvenli varsayılan). */
 export const DEFAULT_PLACES_CONTROL: PlacesControl = {
   googleEnabled: false,
-  userDailyLimit: 300,
-  monthlyGoogleCalls: 10000,
+  // G23: maliyet koruması — düşük güvenli varsayılan. Admin panelinden yükseltilebilir.
+  // monthlyGoogleCalls Google "Place Details" ücretsiz aylık kotası (~1.000) içinde tutulur.
+  userDailyLimit: 30,
+  monthlyGoogleCalls: 1000,
 };
 
 /** Kontrol kaydını doğrular; bozuk alan varsayılana düşer, googleEnabled yalnız `true` ise açık. */

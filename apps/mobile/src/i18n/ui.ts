@@ -511,7 +511,8 @@ export const NATIVE_TR = {
   "native.auth.username.available": "Bu kullanıcı adı uygun.",
   "native.auth.username.taken": "Bu kullanıcı adı alınmış, başka bir ad dene.",
   "native.auth.username.invalid": "Yalnız küçük harf, rakam ve alt çizgi; 3–30 karakter.",
-  "native.auth.err.usernameInvalid": "Kullanıcı adı yalnız küçük harf, rakam ve alt çizgi içerebilir (3–30 karakter).",
+  "native.auth.err.usernameInvalid":
+    "Kullanıcı adı yalnız küçük harf, rakam ve alt çizgi içerebilir (3–30 karakter).",
   "native.auth.err.usernameTaken": "Bu kullanıcı adı alınmış. Lütfen başka bir ad seç.",
   "native.auth.code": "Doğrulama kodu",
   "native.auth.google.title": "Google ile Giriş",

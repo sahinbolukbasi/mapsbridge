@@ -37,7 +37,7 @@ export const LIMITS = {
   radiusMaxM: 20000,
   radiusDefaultM: 5000,
   maxResults: 20,
-  guestDailyDefault: 60,
+  guestDailyDefault: 15,
 } as const;
 
 export type PlacesQuery =

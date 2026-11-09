@@ -41,7 +41,10 @@ import {
   recordInteraction,
 } from "../billing/store";
 import { sanitizePreferences } from "../../../../apps/web/app/lib/ai/preferences";
-import { classifyAIError, isContextSizeError } from "../../../../apps/web/app/lib/ai/error-classifier";
+import {
+  classifyAIError,
+  isContextSizeError,
+} from "../../../../apps/web/app/lib/ai/error-classifier";
 import type { ConversationState } from "../../../../apps/web/app/lib/ai/planning";
 import {
   buildPersonalContext,

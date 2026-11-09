@@ -168,11 +168,7 @@ test("B3: sidebar dört etiketli grubu <h3> başlık + aria-labelledby ile rende
     ["planner-pool-title", "Kayıtlı yerler"],
   ]) {
     assert.match(html, new RegExp(`aria-labelledby="${id}"`), `${id} aria-labelledby yok`);
-    assert.match(
-      html,
-      new RegExp(`<h3[^>]*id="${id}"`),
-      `${id} için <h3> başlık yok`,
-    );
+    assert.match(html, new RegExp(`<h3[^>]*id="${id}"`), `${id} için <h3> başlık yok`);
     assert.ok(html.includes(title), `"${title}" başlık metni render edilmedi`);
   }
   // Gün sekmeleri erişilebilir grup; gün durağı boş durumu + kayıtlı yerler boş metni.
@@ -206,7 +202,11 @@ test("B3: DiscoverPanel doğrudan render edilir (idle/boş dalı mount olur, svg
 
 test("B3: arama/Keşfet yükleniyor/hata/boş durumları doğru ARIA primitive'lerine bağlı (kaynak)", () => {
   // Arama hata durumu: role="alert" (Alert live="assertive") + Tekrar dene.
-  assert.match(sidebarSrc, /<Alert\s+tone="warning"\s+live="assertive"/, "arama hata Alert role=alert");
+  assert.match(
+    sidebarSrc,
+    /<Alert\s+tone="warning"\s+live="assertive"/,
+    "arama hata Alert role=alert",
+  );
   // Arama yükleniyor iskeleti aria-hidden; durum satırı role="status".
   assert.match(sidebarSrc, /className="planner-search__results" aria-hidden="true"/);
   assert.match(sidebarSrc, /<div role="status" className="planner-search__status">/);

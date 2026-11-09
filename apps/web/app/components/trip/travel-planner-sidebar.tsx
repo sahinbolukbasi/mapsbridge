@@ -402,10 +402,7 @@ export function TravelPlannerSidebar({
           onChange={setWorkspaceMode}
         />
 
-        <section
-          className="planner-group planner-group--days"
-          aria-labelledby="planner-group-days"
-        >
+        <section className="planner-group planner-group--days" aria-labelledby="planner-group-days">
           <h3 className="planner-group__title" id="planner-group-days">
             <Icon name="calendar" size={16} aria-hidden="true" />
             {t("planner.group.days", "Günler")}
@@ -631,12 +628,10 @@ export function TravelPlannerSidebar({
                   setWorkspaceMode("edit");
                   window.setTimeout(
                     () =>
-                      document
-                        .getElementById("planner-group-discover")
-                        ?.scrollIntoView({
-                          block: "nearest",
-                          behavior: prefersReducedMotion() ? "auto" : "smooth",
-                        }),
+                      document.getElementById("planner-group-discover")?.scrollIntoView({
+                        block: "nearest",
+                        behavior: prefersReducedMotion() ? "auto" : "smooth",
+                      }),
                     0,
                   );
                 }}
@@ -1355,9 +1350,7 @@ function PlaceCard({
               {t("planner.days.day", "{n}. Gün").replace("{n}", String(d))}
             </option>
           ))}
-          <option value={ADD_TARGET_GENERAL}>
-            {t("planner.detail.inPool", "Kayıtlı yerler")}
-          </option>
+          <option value={ADD_TARGET_GENERAL}>{t("planner.detail.inPool", "Kayıtlı yerler")}</option>
         </Select>
         <Button
           size="sm"

@@ -69,10 +69,17 @@ test("(b) planlayıcı ham <button>'ları type= taşır, submit sızıntısı yo
   const client = read("maps/maps-client.tsx");
 
   // maps-client araç çubuğu salt primitive'lerden kurulu: ham <button> olmamalı.
-  assert.deepEqual(rawButtons(client), [], "maps-client.tsx'te ham <button> olmamalı (primitive kullan)");
+  assert.deepEqual(
+    rawButtons(client),
+    [],
+    "maps-client.tsx'te ham <button> olmamalı (primitive kullan)",
+  );
 
   const sidebarButtons = rawButtons(sidebar);
-  assert.ok(sidebarButtons.length > 0, "sidebar'da en az bir ham <button> beklenir (gün sekmeleri)");
+  assert.ok(
+    sidebarButtons.length > 0,
+    "sidebar'da en az bir ham <button> beklenir (gün sekmeleri)",
+  );
   for (const attrs of sidebarButtons) {
     assert.match(attrs, /\btype=/, `ham <button> type= taşımıyor: <button${attrs}>`);
     assert.doesNotMatch(
