@@ -579,6 +579,7 @@ export const NATIVE_TR = {
     "Açıkken uygulama açılışta ve bir dakikadan uzun arka planda kaldıktan sonra kilitlenir.",
   "native.settings.lockUnavailable": "Bu cihazda biyometrik kimlik doğrulama ayarlı değil.",
   "native.settings.haptics": "Dokunsal geri bildirim",
+  "native.settings.version": "Sürüm {version} ({build})",
   "native.reminder.dayTitle": "Bugünkü rotan: {name}",
   "native.reminder.dayBody": "{n} durak · ilk durak {first}",
   "native.reminder.stopTitle": "Sıradaki durak: {name}",
