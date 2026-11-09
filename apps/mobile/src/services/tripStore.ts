@@ -91,6 +91,9 @@ interface StoredTrips {
   savedPool: TripStop[];
 }
 
+/** Sunucu eşitleme durumu (Kriter L): UI'de yükleniyor/çevrimdışı bilgisi için. */
+export type SyncState = "idle" | "syncing" | "ok" | "error";
+
 // Hesap yalıtımı (design §6.3/§6.4, KVKK): cihazdaki kayıt yalnızca sahibine gösterilir. Sahip
 // App tarafından `setOwner` ile verilir (oturum açılışı/girişi/çıkışı); o ana dek bellekte gezi
 // yoktur ve hiçbir şey yazılmaz. Misafir modunda sunucuya istek atılmaz.
@@ -100,6 +103,10 @@ class TripStore {
   private savedPool: TripStop[] = [];
   private listeners: Set<() => void> = new Set();
   private syncTimeout: ReturnType<typeof setTimeout> | null = null;
+  // L (Kriter L): eşitleme durumu — UI'de yükleniyor/çevrimdışı bilgisi ve boş-durum yanıltması
+  // önleme için. "idle" = üye değil ya da henüz denenmedi; "syncing" = sunucudan çekiliyor;
+  // "ok" = en az bir başarılı eşitleme; "error" = son çekme başarısız (yerel veri korunur).
+  private syncState: SyncState = "idle";
   /** Şu anki sahip (küçük harf e-posta / "guest"); null = App henüz bildirmedi. */
   private owner: string | null = null;
   /** Diskten okunmuş, sahibi doğrulanmamış kayıt (setOwner'da uygulanır ya da atılır). */
@@ -169,6 +176,7 @@ class TripStore {
     this.routes = [];
     this.activeRouteId = "";
     this.savedPool = [];
+    this.syncState = "idle";
   }
 
   private async applyOwner(next: string) {
@@ -220,9 +228,21 @@ class TripStore {
     }
   }
 
+  /** Son sunucu eşitlemesinin durumu (UI: yükleniyor / çevrimdışı bilgisi). */
+  public getSyncState(): SyncState {
+    return this.syncState;
+  }
+
+  private setSyncState(next: SyncState) {
+    if (this.syncState === next) return;
+    this.syncState = next;
+    this.notify();
+  }
+
   public async syncWithServer(): Promise<void> {
     const owner = this.owner;
     if (!owner || owner === GUEST_OWNER) return;
+    this.setSyncState("syncing");
     try {
       await this.uploadPending(owner);
       if (this.owner !== owner) return;
@@ -238,8 +258,14 @@ class TripStore {
         }
         this.notify();
       }
+      // L: başarılı çekme; sunucu dizi döndürmese bile (örn. geçici boş) yerel veri korunur ve
+      // durum "ok" sayılır (hata yok).
+      this.setSyncState("ok");
     } catch (err) {
+      // L: çekme/yükleme hatasında YEREL VERİ OLDUĞU GİBİ KORUNUR (this.routes'a dokunulmaz);
+      // yalnız durum "error" olur, UI sönük "çevrimdışı gösteriliyor" bilgisi verir.
       console.warn("Failed to sync routes from server:", err);
+      this.setSyncState("error");
     }
   }
 

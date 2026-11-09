@@ -20,6 +20,7 @@ import {
   Accordion,
   AuthGate,
   BottomSheet,
+  type SheetSnap,
   Button,
   Card,
   ConfirmDialog,
@@ -256,6 +257,9 @@ export function MapScreen({
   const [looking, setLooking] = useState(false);
   const [mode, setMode] = useState<"edit" | "discover">("edit");
   const [routeManagerOpen, setRouteManagerOpen] = useState(false); // G2
+  // B6: alt sayfa snap durumu; peek'te önce konumlar, half/full'de mod seçici + arama.
+  const [sheetSnap, setSheetSnap] = useState<SheetSnap>("peek");
+  const sheetExpanded = sheetSnap !== "peek";
   const [pool, setPool] = useState<TripStop[]>(tripStore.getSavedPool());
   const [discovered, setDiscovered] = useState<DiscoverAdd[]>([]);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
@@ -827,9 +831,16 @@ export function MapScreen({
       />
 
       <SafeArea style={styles.top} pointerEvents="box-none">
+        {/* G1: harita görünümünün kimliği — tam ekranı kapatmayan "Planla" başlığı. */}
+        <View style={styles.titleRow} pointerEvents="none">
+          <View style={styles.titleChip}>
+            <Txt variant="label">{tr("nav.desk")}</Txt>
+          </View>
+        </View>
         <View style={styles.topRow}>
+          {/* G1: sol üst = kayıtlı rotalar (PlanScreen'e döner). */}
           <IconButton
-            icon="chevron-left"
+            icon="bookmark"
             label={tr("planner.trips.title")}
             onPress={onOpenPlan}
             style={styles.floating}
@@ -880,21 +891,27 @@ export function MapScreen({
 
       <BottomSheet
         snap={["peek", "half", "full"]}
-        initial="half"
+        initial="peek"
+        value={sheetSnap}
+        onSnapChange={setSheetSnap}
         label={tr("planner.sheet.label")}
         expandLabel={tr("planner.sheet.expand")}
         collapseLabel={tr("planner.sheet.collapse")}
       >
         <ScrollView contentContainerStyle={styles.sheet} keyboardShouldPersistTaps="handled">
-          <SegmentedControl
-            label={tr("planner.mode.label")}
-            options={[
-              { value: "edit", label: tr("planner.mode.edit") },
-              { value: "discover", label: tr("planner.mode.discover") },
-            ]}
-            value={mode}
-            onChange={setMode}
-          />
+          {/* B6: en küçük boyutta (peek) önce konumlar görünür; mod seçici ve arama yukarı
+              çekilince (half/full) görünür. */}
+          {sheetExpanded ? (
+            <SegmentedControl
+              label={tr("planner.mode.label")}
+              options={[
+                { value: "edit", label: tr("planner.mode.edit") },
+                { value: "discover", label: tr("planner.mode.discover") },
+              ]}
+              value={mode}
+              onChange={setMode}
+            />
+          ) : null}
           {mapError ? (
             <Notice tone="warning" title={tr("planner.map.errorTitle")}>
               {tr("planner.map.errorBody")}
@@ -1129,6 +1146,18 @@ export function MapScreen({
                   decelerationRate="fast"
                   contentContainerStyle={styles.stopsStrip}
                   accessibilityLabel={tr("planner.sheet.label")}
+                  onMomentumScrollEnd={(e) => {
+                    const offsetX = e.nativeEvent.contentOffset.x;
+                    const itemWidth = stopPageWidth + tokens.space["2"];
+                    const idx = Math.max(
+                      0,
+                      Math.min(Math.round(offsetX / itemWidth), route.stops.length - 1),
+                    );
+                    const target = route.stops[idx];
+                    if (target && target.id !== selectedId) {
+                      focusStop(target);
+                    }
+                  }}
                 >
                   {route.stops.map((stop, i) => (
                     <View key={stop.id} style={{ width: stopPageWidth }}>
@@ -1178,46 +1207,50 @@ export function MapScreen({
                       </Txt>
                     ) : null}
                     {selected.notes ? <Txt variant="small">{selected.notes}</Txt> : null}
-                    <View style={styles.actions}>
+                    {/* C (görev 5): seçili durak eylemleri simge — Apple/Google yol tarifi, Gezildi,
+                        Düzenle, Paylaş, Sil. Etiketler erişilebilir ad; Sil tehlike rengiyle. */}
+                    <View style={styles.iconActions}>
                       {Platform.OS === "ios" ? (
-                        <Button
+                        <IconButton
+                          icon="compass"
                           label={tr("native.directions.apple")}
-                          variant="secondary"
-                          size="sm"
                           onPress={() => openExternal(selected, "apple")}
+                          style={styles.actionIcon}
                         />
                       ) : null}
-                      <Button
+                      <IconButton
+                        icon="map"
                         label={tr("planner.travel.googleMaps")}
-                        variant="secondary"
-                        size="sm"
                         onPress={() => openExternal(selected)}
+                        style={styles.actionIcon}
                       />
-                      <Button
+                      <IconButton
+                        icon="check"
+                        selected={selected.visited}
                         label={
                           selected.visited ? tr("planner.stop.done") : tr("planner.stop.markDone")
                         }
-                        variant="secondary"
-                        size="sm"
                         onPress={() => toggleVisited(selected)}
+                        style={styles.actionIcon}
                       />
-                      <Button
+                      <IconButton
+                        icon="edit"
                         label={tr("planner.detail.edit")}
-                        variant="secondary"
-                        size="sm"
                         onPress={() => openEdit(selected)}
+                        style={styles.actionIcon}
                       />
-                      <Button
+                      <IconButton
+                        icon="share"
                         label={tr("planner.pinShare.action")}
-                        variant="secondary"
-                        size="sm"
                         onPress={() => shareStop(selected)}
+                        style={styles.actionIcon}
                       />
-                      <Button
+                      <IconButton
+                        icon="trash"
+                        color={tokens.color.danger}
                         label={tr("planner.stop.delete")}
-                        variant="danger"
-                        size="sm"
                         onPress={() => setConfirmDelete(selected)}
+                        style={styles.actionIcon}
                       />
                     </View>
                     {/* U2: durak ayrıntısında yakında ne var (G4: kompakt). */}
@@ -1239,27 +1272,47 @@ export function MapScreen({
 
               {route.stops.length ? (
                 <View style={styles.cardBody}>
+                  {/* C (görev 6): birincil eylem (Optimize et) belirgin; ikincil eylemler simge
+                      satırı — alan verimli kullanılır, metin yerine erişilebilir adlı simge. */}
                   <Button label={tr("planner.optimize")} onPress={optimize} />
-                  <View style={styles.actions}>
-                    <Button label={tr("planner.share")} variant="secondary" onPress={share} />
-                    <Button label={tr("planner.ask")} variant="secondary" onPress={askAssistant} />
-                    <Button label={tr("native.share.gpx")} variant="secondary" onPress={shareGpx} />
-                    <Button
+                  <View style={styles.iconActions}>
+                    <IconButton
+                      icon="share"
+                      label={tr("planner.share")}
+                      onPress={share}
+                      style={styles.actionIcon}
+                    />
+                    <IconButton
+                      icon="sparkle"
+                      label={tr("planner.ask")}
+                      onPress={askAssistant}
+                      style={styles.actionIcon}
+                    />
+                    <IconButton
+                      icon="download"
+                      label={tr("native.share.gpx")}
+                      onPress={shareGpx}
+                      style={styles.actionIcon}
+                    />
+                    <IconButton
+                      icon="clock"
                       label={tr("native.reminder.set")}
-                      variant="secondary"
                       onPress={remind}
+                      style={styles.actionIcon}
                     />
                     {Platform.OS === "ios" ? (
-                      <Button
+                      <IconButton
+                        icon="compass"
                         label={tr("native.directions.apple")}
-                        variant="ghost"
                         onPress={() => openExternal(undefined, "apple")}
+                        style={styles.actionIcon}
                       />
                     ) : null}
-                    <Button
+                    <IconButton
+                      icon="map"
                       label={tr("planner.travel.googleMaps")}
-                      variant="ghost"
                       onPress={() => openExternal()}
+                      style={styles.actionIcon}
                     />
                   </View>
                   <Txt variant="caption" tone="muted">
@@ -1409,13 +1462,24 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: tokens.color.bg },
   map: { ...StyleSheet.absoluteFill, backgroundColor: tokens.color.surfaceSunken },
   top: { position: "absolute", top: 0, left: 0, right: 0 },
+  titleRow: {
+    alignItems: "center",
+    // Durum çubuğunun hemen altında; topRow kendi üst boşluğunu eklemeden önce başlık görünür.
+    paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ?? 24) + 8 : tokens.space["2"],
+  },
+  titleChip: {
+    paddingHorizontal: tokens.space["3"],
+    paddingVertical: tokens.space["1"],
+    borderRadius: tokens.radius.full,
+    backgroundColor: tokens.color.surface,
+    ...tokens.shadow.sm,
+  },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: tokens.space["2"],
     paddingHorizontal: tokens.space["3"],
-    // Android'de SafeArea üst boşluk eklemez (R5-6): durum çubuğu kadar elle.
-    paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ?? 24) + 8 : tokens.space["2"],
+    paddingTop: tokens.space["2"],
   },
   floating: {
     backgroundColor: tokens.color.surface,
@@ -1440,6 +1504,12 @@ const styles = StyleSheet.create({
   cardBody: { gap: tokens.space["2"] },
   stopsStrip: { gap: tokens.space["2"], paddingVertical: tokens.space["1"] },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["2"] },
+  // C: simge eylem satırı — kompakt, sarılabilir; her simge dokunulabilir yüzeyle.
+  iconActions: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["2"] },
+  actionIcon: {
+    backgroundColor: tokens.color.surfaceSunken,
+    borderRadius: tokens.radius.full,
+  },
   suggest: { gap: tokens.space["2"] },
   poolRow: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },
   poolText: { flex: 1, gap: tokens.space["1"] },

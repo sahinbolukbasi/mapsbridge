@@ -12,6 +12,7 @@ import {
   Notice,
   Screen,
   ScreenHeader,
+  Skeleton,
   TextField,
   Txt,
 } from "../ui";
@@ -34,7 +35,12 @@ interface PlanScreenProps {
 export function PlanScreen({ onOpenMap, guest = false, onRequireAuth }: PlanScreenProps) {
   const [routes, setRoutes] = useState<ActiveRoute[]>(tripStore.getAllRoutes());
   const [activeId, setActiveId] = useState<string>(tripStore.getActiveRoute().id);
+  // L (Kriter L / görev 19): eşitleme durumu — veri yüklenirken "hiç rota yok" yanıltması yerine
+  // yükleniyor/çevrimdışı gösterilir.
+  const [syncState, setSyncState] = useState(tripStore.getSyncState());
   const [creating, setCreating] = useState(false);
+  const [sharedRoutes, setSharedRoutes] = useState<Record<string, boolean>>({});
+  const [shareFeedbackRoute, setShareFeedbackRoute] = useState<ActiveRoute | null>(null);
   const [newName, setNewName] = useState("");
   const [nameError, setNameError] = useState<string | undefined>(undefined);
   const [renaming, setRenaming] = useState<ActiveRoute | null>(null);
@@ -47,6 +53,7 @@ export function PlanScreen({ onOpenMap, guest = false, onRequireAuth }: PlanScre
       tripStore.subscribe(() => {
         setRoutes([...tripStore.getAllRoutes()]);
         setActiveId(tripStore.getActiveRoute().id);
+        setSyncState(tripStore.getSyncState());
       }),
     [],
   );
@@ -78,8 +85,10 @@ export function PlanScreen({ onOpenMap, guest = false, onRequireAuth }: PlanScre
           right={
             <IconButton
               icon="plus"
+              color={tokens.color.buttonPrimaryFg}
               label={tr("planner.trips.new")}
               onPress={() => setCreating(true)}
+              style={styles.primaryPlusBtn}
             />
           }
         />
@@ -94,7 +103,20 @@ export function PlanScreen({ onOpenMap, guest = false, onRequireAuth }: PlanScre
           />
         ) : null}
 
-        {routes.length === 0 ? (
+        {/* L (görev 19): üye verisi sunucudan çekilemediyse sönük, bloklamayan bilgi — yerel
+            (çevrimdışı) rotalar yine gösterilir. */}
+        {!guest && syncState === "error" ? (
+          <Notice tone="warning" title={tr("planner.sync.offlineTitle")}>
+            {tr("planner.sync.offlineBody")}
+          </Notice>
+        ) : null}
+
+        {routes.length === 0 && !guest && syncState === "syncing" ? (
+          /* L (görev 19): veri yüklenirken "hiç rota yok" yerine iskelet gösterilir. */
+          <View accessible accessibilityLabel={tr("ui.loading")}>
+            <Skeleton variant="card" count={2} />
+          </View>
+        ) : routes.length === 0 ? (
           <Card variant="bordered">
             <View style={styles.empty}>
               <Txt variant="heading" header>
@@ -109,8 +131,8 @@ export function PlanScreen({ onOpenMap, guest = false, onRequireAuth }: PlanScre
         ) : (
           routes.map((route) => (
             <Card key={route.id} variant={route.id === activeId ? "raised" : "bordered"}>
-              <View style={styles.row}>
-                <View style={styles.flex}>
+              <View style={styles.cardContainer}>
+                <View style={styles.nameBlock}>
                   <Txt variant="heading" header numberOfLines={2}>
                     {route.name}
                   </Txt>
@@ -118,38 +140,47 @@ export function PlanScreen({ onOpenMap, guest = false, onRequireAuth }: PlanScre
                     {tr("trip.day.stops", { n: route.stops.length })}
                   </Txt>
                 </View>
-                <Button
-                  label={tr("home.lastTrip.open")}
-                  size="sm"
-                  variant="secondary"
-                  hint={route.name}
-                  onPress={() => open(route)}
-                />
-                <IconButton
-                  icon="edit"
-                  label={`${tr("planner.trips.name")}: ${route.name}`}
-                  onPress={() => {
-                    setRenaming(route);
-                    setRenameText(route.name);
-                  }}
-                />
-                <IconButton
-                  icon="trash"
-                  label={`${tr("planner.trips.delete")}: ${route.name}`}
-                  onPress={() => setDeleting(route)}
-                />
+                <View style={styles.cardActionRow}>
+                  <IconButton
+                    icon="map"
+                    label={`${tr("home.lastTrip.open")}: ${route.name}`}
+                    onPress={() => open(route)}
+                    style={styles.cardIconBtn}
+                  />
+                  <IconButton
+                    icon="edit"
+                    label={`${tr("planner.trips.name")}: ${route.name}`}
+                    onPress={() => {
+                      setRenaming(route);
+                      setRenameText(route.name);
+                    }}
+                    style={styles.cardIconBtn}
+                  />
+                  <IconButton
+                    icon="share"
+                    selected={!!sharedRoutes[route.id]}
+                    color={sharedRoutes[route.id] ? tokens.color.buttonPrimaryFg : undefined}
+                    label={`${tr("planner.share")}: ${route.name}`}
+                    onPress={() => {
+                      setSharedRoutes((prev) => ({ ...prev, [route.id]: true }));
+                      setShareFeedbackRoute(route);
+                    }}
+                    style={[
+                      styles.cardIconBtn,
+                      sharedRoutes[route.id] && styles.sharedActiveBtn,
+                    ]}
+                  />
+                  <IconButton
+                    icon="trash"
+                    label={`${tr("planner.trips.delete")}: ${route.name}`}
+                    onPress={() => setDeleting(route)}
+                    style={styles.cardIconBtn}
+                  />
+                </View>
               </View>
             </Card>
           ))
         )}
-
-        {routes.length ? (
-          <Button
-            label={tr("planner.trips.new")}
-            variant="secondary"
-            onPress={() => setCreating(true)}
-          />
-        ) : null}
       </ScrollView>
 
       <ModalFrame
@@ -202,6 +233,15 @@ export function PlanScreen({ onOpenMap, guest = false, onRequireAuth }: PlanScre
       </ModalFrame>
 
       <ConfirmDialog
+        visible={!!shareFeedbackRoute}
+        title={tr("planner.share")}
+        body={tr("planner.trips.sharedPopup")}
+        confirmLabel={tr("ui.close")}
+        onCancel={() => setShareFeedbackRoute(null)}
+        onConfirm={() => setShareFeedbackRoute(null)}
+      />
+
+      <ConfirmDialog
         visible={!!deleting}
         title={tr("planner.trips.deleteTitle")}
         body={
@@ -246,4 +286,23 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: tokens.space["1"] },
   flex: { flex: 1, gap: tokens.space["1"] },
   form: { padding: tokens.space["5"], gap: tokens.space["4"] },
+  primaryPlusBtn: {
+    backgroundColor: tokens.color.buttonPrimaryBg,
+    borderRadius: tokens.radius.full,
+  },
+  cardContainer: { gap: tokens.space["2"] },
+  nameBlock: { gap: tokens.space["1"] },
+  cardActionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: tokens.space["2"],
+    marginTop: tokens.space["1"],
+  },
+  cardIconBtn: {
+    backgroundColor: tokens.color.surfaceSunken,
+    borderRadius: tokens.radius.full,
+  },
+  sharedActiveBtn: {
+    backgroundColor: tokens.color.buttonPrimaryBg,
+  },
 });

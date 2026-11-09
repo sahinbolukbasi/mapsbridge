@@ -364,31 +364,23 @@ export function AuthScreen({
             ) : null}
 
             {mode === "login" || mode === "register" ? (
-              <View>
-                <TextField
-                  label={tr("native.auth.password")}
-                  value={password}
-                  onChangeText={setPassword}
-                  secure={!showPassword}
-                  autoComplete={mode === "register" ? "new-password" : "password"}
-                  textContentType={mode === "register" ? "newPassword" : "password"}
-                />
-                <View style={styles.pwToggle}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+              /* J (görev 14): şifre göster/gizle alan İÇİNDE göz simgesi (ayrı altsatır düğme yok). */
+              <TextField
+                label={tr("native.auth.password")}
+                value={password}
+                onChangeText={setPassword}
+                secure={!showPassword}
+                autoComplete={mode === "register" ? "new-password" : "password"}
+                textContentType={mode === "register" ? "newPassword" : "password"}
+                endAdornment={
+                  <IconButton
+                    icon={showPassword ? "eye-off" : "eye"}
                     label={showPassword ? tr("edit.pw.hide") : tr("edit.pw.show")}
-                    icon={
-                      <Icon
-                        name={showPassword ? "eye-off" : "eye"}
-                        size={20}
-                        color={tokens.color.buttonGhostFg}
-                      />
-                    }
+                    selected={showPassword}
                     onPress={() => setShowPassword((v) => !v)}
                   />
-                </View>
-              </View>
+                }
+              />
             ) : null}
 
             {mode === "confirm_signup" || mode === "reset_password" ? (
@@ -408,9 +400,17 @@ export function AuthScreen({
                 label={tr("edit.pw.new")}
                 value={newPassword}
                 onChangeText={setNewPassword}
-                secure
+                secure={!showPassword}
                 autoComplete="new-password"
                 textContentType="newPassword"
+                endAdornment={
+                  <IconButton
+                    icon={showPassword ? "eye-off" : "eye"}
+                    label={showPassword ? tr("edit.pw.hide") : tr("edit.pw.show")}
+                    selected={showPassword}
+                    onPress={() => setShowPassword((v) => !v)}
+                  />
+                }
               />
             ) : null}
 
@@ -456,7 +456,6 @@ export function AuthScreen({
 }
 
 const styles = StyleSheet.create({
-  pwToggle: { alignItems: "flex-end", marginTop: tokens.space["1"] },
   page: { padding: tokens.space["5"], gap: tokens.space["4"], paddingBottom: tokens.space["12"] },
   form: { gap: tokens.space["4"] },
   rules: { gap: tokens.space["1"] },

@@ -7,8 +7,8 @@ import { tokens, withAlpha } from "../theme";
 import { iconPaths } from "../theme/icon-paths";
 import { TILE_CACHE } from "../services/tile-logic";
 
-/** OSM standart karoları (web planlayıcı "Standart" katmanıyla aynı kaynak; atıf zorunlu). */
-export const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+/** Google Maps standart karoları (Google yol haritası). */
+export const TILE_URL = "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}";
 
 /**
  * Pin popup'ı (Increment 4.4, web pin-popup modeli): metinler RN'de hazırlanır (I11), WebView
@@ -91,17 +91,25 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
   .pin-check { position: absolute; margin-left: 26px; margin-top: -4px; width: 16px; height: 16px;
     border-radius: 8px; background: ${c.surface}; display: flex; align-items: center; justify-content: center; }
   .pin-pool .pin-num { background: ${c.surface}; color: ${c.text}; border: 2px dashed ${c.textMuted}; }
-  .leaflet-popup-content-wrapper { border-radius: 14px; }
-  .leaflet-popup-content { margin: 12px 14px; min-width: 200px; }
-  .pp p { margin: 0 0 4px; color: ${c.text}; font: 400 13px -apple-system, Roboto, sans-serif; }
-  .pp .pp-cat { color: ${c.textMuted}; font-size: 12px; font-weight: 600; }
-  .pp .pp-title { font-size: 15px; font-weight: 700; }
-  .pp .pp-addr, .pp .pp-note { color: ${c.textMuted}; }
-  .pp .pp-done { display: flex; align-items: center; gap: 4px; color: ${c.success}; font-weight: 600; }
-  .pp-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .pp-actions button { min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid ${c.buttonSecondaryBorder};
-    background: ${c.buttonSecondaryBg}; color: ${c.buttonSecondaryFg}; font: 700 13px -apple-system, Roboto, sans-serif; }
-  .pp-actions button.pp-primary { background: ${c.buttonPrimaryBg}; color: ${c.buttonPrimaryFg}; border-color: ${c.buttonPrimaryBg}; }
+  /* K (görev 15): pin popup — net tipografi hiyerarşisi, ferah boşluk, token renk. */
+  .leaflet-popup-content-wrapper { border-radius: 16px; padding: 2px; background: ${c.surface};
+    box-shadow: 0 8px 24px ${withAlpha(c.black, 0.18)}; }
+  .leaflet-popup-content { margin: 14px 16px; min-width: 210px; }
+  .leaflet-popup-tip { background: ${c.surface}; }
+  .pp { display: flex; flex-direction: column; gap: 3px; }
+  .pp p { margin: 0; color: ${c.text}; font: 400 13px -apple-system, Roboto, sans-serif; line-height: 1.35; }
+  .pp .pp-cat { color: ${c.textMuted}; font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase; }
+  .pp .pp-title { font-size: 16px; font-weight: 700; line-height: 1.25; margin-top: 1px; }
+  .pp .pp-addr, .pp .pp-note { color: ${c.textMuted}; font-size: 12px; }
+  .pp .pp-done { display: flex; align-items: center; gap: 4px; color: ${c.success}; font-weight: 600;
+    font-size: 12px; margin-top: 1px; }
+  .pp-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .pp-actions button { flex: 1 1 auto; min-height: 44px; padding: 0 14px; border-radius: 12px;
+    border: 1px solid ${c.buttonSecondaryBorder}; background: ${c.buttonSecondaryBg};
+    color: ${c.buttonSecondaryFg}; font: 600 13px -apple-system, Roboto, sans-serif; cursor: pointer; }
+  .pp-actions button.pp-primary { flex-basis: 100%; background: ${c.buttonPrimaryBg};
+    color: ${c.buttonPrimaryFg}; border-color: ${c.buttonPrimaryBg}; font-weight: 700; }
   .pin-temp .pin-num { background: ${c.surfaceInverse}; color: ${c.textInverse}; }
 </style>
 </head>
@@ -152,8 +160,9 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
       else if (!tileLoaded) fail();
     };
     L.tileLayer("${TILE_URL}", {
-      maxZoom: 19, crossOrigin: true,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      maxZoom: 20, crossOrigin: true,
+      subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      attribution: '&copy; Google Maps'
     }).on("tileload", function(e) {
         tileLoaded = true;
         var c = e.coords, img = e.tile, key = keyOf(c);

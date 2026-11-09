@@ -5,35 +5,34 @@ import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
 import { storage } from "../services/storage";
 import { APP_BUILD, APP_VERSION } from "../constants/app-version";
-import {
-  authenticate,
-  biometricAvailable,
-  lockEnabled,
-  setLockEnabled,
-} from "../services/biometric";
-// Uygulama ayarları (K4): isteğe bağlı biyometrik kilit (açarken bir kez doğrulanır) ve dokunsal
-// geri bildirim. Ayarlar yalnız cihazda saklanır.
+export const NOTIFICATIONS_KEY = "mapsbridge.settings.notifications";
+
+// Uygulama ayarları (K4): dokunsal geri bildirim ve mesaj bildirimleri. Ayarlar yalnız cihazda saklanır.
+// H (görev 16): biyometrik kilit (Face ID) alanı kaldırıldı — artık kullanıcıya sunulmaz.
 export function AppSettings() {
-  const [available, setAvailable] = useState(false);
-  const [lock, setLock] = useState(false);
   const [haptics, setHaptics] = useState(true);
+  const [notifications, setNotifications] = useState(true);
+
   useEffect(() => {
-    biometricAvailable().then(setAvailable);
-    lockEnabled().then(setLock);
     setHaptics(hapticsEnabled());
+    storage.getItem(NOTIFICATIONS_KEY).then((v) => {
+      if (v !== null) setNotifications(v === "true");
+    });
   }, []);
-  const toggleLock = async (next: boolean) => {
-    if (next && !(await authenticate())) return;
-    await setLockEnabled(next);
-    setLock(next);
-    haptic("selection");
-  };
+
   const toggleHaptics = (next: boolean) => {
     setHapticsEnabled(next);
     setHaptics(next);
     storage.setItem(HAPTICS_KEY, next ? "true" : "false").catch(() => undefined);
     if (next) haptic("selection");
   };
+
+  const toggleNotifications = (next: boolean) => {
+    setNotifications(next);
+    storage.setItem(NOTIFICATIONS_KEY, next ? "true" : "false").catch(() => undefined);
+    if (haptics) haptic("selection");
+  };
+
   return (
     <Card variant="bordered">
       <View style={styles.body}>
@@ -42,16 +41,15 @@ export function AppSettings() {
         </Txt>
         <View style={styles.row}>
           <View style={styles.text}>
-            <Txt variant="label">{tr("native.settings.lock")}</Txt>
+            <Txt variant="label">{tr("native.settings.notifications")}</Txt>
             <Txt variant="caption" tone="muted">
-              {available ? tr("native.settings.lockHint") : tr("native.settings.lockUnavailable")}
+              {tr("native.settings.notificationsHint")}
             </Txt>
           </View>
           <Switch
-            value={lock}
-            disabled={!available}
-            onValueChange={(v) => void toggleLock(v)}
-            accessibilityLabel={tr("native.settings.lock")}
+            value={notifications}
+            onValueChange={toggleNotifications}
+            accessibilityLabel={tr("native.settings.notifications")}
             trackColor={{ true: tokens.color.brand, false: tokens.color.borderStrong }}
           />
         </View>

@@ -176,38 +176,11 @@ export function CommunityScreen({
 
   return (
     <Screen
-      header={
-        <ScreenHeader
-          title={tr("community.title")}
-          right={
-            <IconButton
-              icon="edit"
-              label={tr("community.newPost")}
-              onPress={() => requireMember("save", () => setComposeOpen(true))}
-            />
-          }
-        />
-      }
+      header={<ScreenHeader title={tr("community.title")} />}
     >
       <ScrollView contentContainerStyle={styles.page}>
-        <Txt variant="small" tone="muted">
-          {tr("community.description")}
-        </Txt>
-        <Card
-          variant="bordered"
-          label={tr("community.compose.title")}
-          onPress={() => requireMember("save", () => setComposeOpen(true))}
-        >
-          <View style={styles.row}>
-            <Avatar name={me?.fullName ?? tr("native.user.fallback")} uri={me?.avatarUrl} />
-            <View style={styles.flex}>
-              <Txt variant="label">{tr("community.compose.title")}</Txt>
-              <Txt variant="caption" tone="muted">
-                {tr("community.compose.placeholder")}
-              </Txt>
-            </View>
-          </View>
-        </Card>
+        {/* D (görev 7): üst "Seyahat deneyimini paylaş" compose alanı, açıklama ve başlıktaki
+            kalem kaldırıldı; paylaşım oluşturma sol-alt FAB'de (misafir → AuthGate). */}
         <SegmentedControl
           label={tr("community.mode.label")}
           options={[
@@ -320,6 +293,9 @@ export function CommunityScreen({
                       </View>
                     </Card>
                   ) : null}
+                  {/* D (görev 8): gönderi eylemleri simge — beğeni (kalp), yorum, kaydet, paylaş.
+                      Yorum/beğeni sayısı simge yanında; kaydet durumu simge doluluğu (selected)
+                      + bookmark ikonuyla ayırt edilir (renk tek başına değil). */}
                   <View style={styles.actions}>
                     <LikeButton
                       liked={!!post.isLiked}
@@ -329,26 +305,29 @@ export function CommunityScreen({
                         requireMember("save", () => socialSyncService.toggleLike(post.id))
                       }
                     />
-                    <Button
-                      label={`${tr("community.post.comments")} · ${post.commentsCount}`}
-                      variant="ghost"
-                      size="sm"
-                      onPress={() => setCommentsFor(post)}
-                    />
-                    <Button
+                    <View style={styles.actionCount}>
+                      <IconButton
+                        icon="message"
+                        label={tr("community.post.comments")}
+                        onPress={() => setCommentsFor(post)}
+                      />
+                      <Txt variant="caption" tone="muted">
+                        {post.commentsCount}
+                      </Txt>
+                    </View>
+                    <IconButton
+                      icon="bookmark"
+                      selected={post.isBookmarked}
                       label={
                         post.isBookmarked ? tr("community.post.saved") : tr("community.post.save")
                       }
-                      variant="ghost"
-                      size="sm"
                       onPress={() =>
                         requireMember("save", () => socialSyncService.toggleBookmark(post.id))
                       }
                     />
-                    <Button
+                    <IconButton
+                      icon="share"
                       label={tr("community.post.share")}
-                      variant="ghost"
-                      size="sm"
                       onPress={() =>
                         Share.share({
                           message: `${post.authorName}: "${post.content}"\nhttps://mapsbridge.com/community/`,
@@ -508,7 +487,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: tokens.space["3"] },
   flex: { flex: 1 },
   authorBtn: { alignSelf: "flex-start" },
-  actions: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["1"] },
+  actions: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: tokens.space["1"] },
+  actionCount: { flexDirection: "row", alignItems: "center" },
   comment: { gap: tokens.space["1"] },
   fab: {
     position: "absolute",

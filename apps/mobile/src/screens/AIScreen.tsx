@@ -363,6 +363,20 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
     setMessages([{ ...WELCOME, id: `welcome-${Date.now()}` }]);
   };
 
+  const clearHistory = () => {
+    setHistoryItems([]);
+    newChat();
+    toast.show({ tone: "info", message: tr("assistant.history.cleared") });
+  };
+
+  const deleteHistoryItem = (id: string) => {
+    setHistoryItems((prev) => prev.filter((item) => item.conversationId !== id));
+    if (conversationId === id) {
+      newChat();
+    }
+    toast.show({ tone: "info", message: tr("assistant.history.deleted") });
+  };
+
   const openHistory = useCallback(() => {
     setHistoryOpen(true);
     setHistoryLoading(true);
@@ -411,6 +425,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           title={tr("nav.ai")}
           right={
             <View style={styles.headerActions}>
+              <IconButton icon="trash" label={tr("assistant.clearChat")} onPress={newChat} />
               <IconButton icon="clock" label={tr("native.ai.history.open")} onPress={openHistory} />
               <IconButton icon="plus" label={tr("native.ai.newChat")} onPress={newChat} />
             </View>
@@ -589,25 +604,40 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           ) : historyItems.length === 0 ? (
             <EmptyState icon="inbox" title={tr("native.ai.history.none")} />
           ) : (
-            historyItems.map((c) => (
-              <Card
-                key={c.conversationId}
-                variant="bordered"
-                label={c.destination || tr("native.ai.history.untitled")}
-                onPress={() => loadConversation(c.conversationId)}
-              >
-                <View style={styles.historyRow}>
-                  <Txt variant="label" numberOfLines={1}>
-                    {c.destination || tr("native.ai.history.untitled")}
-                  </Txt>
-                  {c.updatedAt ? (
-                    <Txt variant="caption" tone="muted">
-                      {new Date(c.updatedAt).toLocaleDateString("tr-TR")}
-                    </Txt>
-                  ) : null}
-                </View>
-              </Card>
-            ))
+            <>
+              <Button
+                label={tr("assistant.history.clearAll")}
+                variant="secondary"
+                size="sm"
+                onPress={clearHistory}
+              />
+              {historyItems.map((c) => (
+                <Card
+                  key={c.conversationId}
+                  variant="bordered"
+                  label={c.destination || tr("native.ai.history.untitled")}
+                  onPress={() => loadConversation(c.conversationId)}
+                >
+                  <View style={styles.historyRow}>
+                    <View style={styles.historyText}>
+                      <Txt variant="label" numberOfLines={1}>
+                        {c.destination || tr("native.ai.history.untitled")}
+                      </Txt>
+                      {c.updatedAt ? (
+                        <Txt variant="caption" tone="muted">
+                          {new Date(c.updatedAt).toLocaleDateString("tr-TR")}
+                        </Txt>
+                      ) : null}
+                    </View>
+                    <IconButton
+                      icon="trash"
+                      label={tr("studio.sessions.delete")}
+                      onPress={() => deleteHistoryItem(c.conversationId)}
+                    />
+                  </View>
+                </Card>
+              ))}
+            </>
           )}
         </ScrollView>
       </ModalFrame>
@@ -619,7 +649,13 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
 const styles = StyleSheet.create({
   headerActions: { flexDirection: "row", alignItems: "center", gap: tokens.space["1"] },
   historyBody: { padding: tokens.space["4"], gap: tokens.space["2"] },
-  historyRow: { gap: tokens.space["1"] },
+  historyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: tokens.space["2"],
+  },
+  historyText: { flex: 1, gap: tokens.space["1"] },
   tabs: { paddingHorizontal: tokens.space["4"], paddingTop: tokens.space["3"] },
   prep: { padding: tokens.space["4"], gap: tokens.space["3"] },
   cardBody: { gap: tokens.space["2"] },
