@@ -265,6 +265,7 @@ export const UI_TR = {
   "planner.trips.empty": "Henüz kayıtlı rota yok",
   "planner.trips.name": "Rota adı",
   "planner.trips.new": "Yeni rota",
+  "planner.trips.manage": "Rota yönetimi",
   "planner.trips.title": "Rotalarım",
   "planner.trips.titleRequired": "Rota adı gerekli.",
   "planner.untitled": "Yeni rota",

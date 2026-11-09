@@ -424,7 +424,13 @@ test("Keşfet sekmesi mobilde kaldırıldı (F4); hem misafir hem üye Planla (h
   assert.doesNotMatch(app, /from "\.\/src\/screens\/ExploreScreen"/);
   assert.doesNotMatch(app, /WelcomeScreen|handleAppleSignIn|onSelectApple/);
   // Başlangıç sekmesi Planla (harita) — hem misafir hem üye (G21; explore kaldırıldı F4).
-  assert.match(app, /initialNav<MobileTab, MobileStackScreen>\("plan"\)/);
+  // G1: startNav("plan") plan kökünün üstüne "map" iter → açılışta ÖNCE harita gelir.
+  assert.match(app, /const \[nav, setNav\] = useState<Nav>\(\(\) => startNav\("plan"\)\)/);
+  assert.match(
+    app,
+    /tab === "plan"\s*\?\s*navReducer\(base, \{ type: "push", screen: "map" \}\)/,
+    "G1: plan sekmesi map önceden itilir",
+  );
   assert.doesNotMatch(code("src/screens/AuthScreen.tsx"), /Apple/);
 });
 

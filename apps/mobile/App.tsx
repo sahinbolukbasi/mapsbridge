@@ -155,6 +155,15 @@ function ToastBridge({ onReady }: { onReady: (api: ToastApi) => void }) {
 /** Android geri tuşunda son çare sekmesi (design §12.1: … → Planla → çıkış). */
 const BACK_HOME: MobileTab = "plan";
 
+// G1: Planla sekmesi açılınca ÖNCE harita gelsin — plan kökünün üstüne "map" önceden itilir.
+// Geri (pop) rota listesine (PlanScreen) iner; rota yönetimi harita üstündeki düğmededir (G2).
+function startNav(tab: MobileTab): TabNavState<MobileTab, MobileStackScreen> {
+  const base = initialNav<MobileTab, MobileStackScreen>(tab);
+  return tab === "plan"
+    ? navReducer(base, { type: "push", screen: "map" })
+    : base;
+}
+
 export function App() {
   const [session, setSession] = useState<UserSession | null>(null);
   const [loadingSession, setLoadingSession] = useState<boolean>(true);
@@ -226,7 +235,7 @@ export function App() {
   // Tek IA (design §5.3, S7/S10): misafir ve üye sekme setleri; sekme başına ekran yığını.
   const signedIn = !!session;
   const tabs = signedIn ? MEMBER_TABS : GUEST_TABS;
-  const [nav, setNav] = useState<Nav>(() => initialNav<MobileTab, MobileStackScreen>("plan"));
+  const [nav, setNav] = useState<Nav>(() => startNav("plan"));
   const navRef = useRef(nav);
   navRef.current = nav;
   const tabsRef = useRef(tabs);
@@ -279,7 +288,7 @@ export function App() {
         ? back
         : "plan"
       : "plan";
-    setNav(initialNav<MobileTab, MobileStackScreen>(home));
+    setNav(startNav(home));
   }, [loadingSession, signedIn]);
 
   // Android geri tuşu (design §9, §12.1): yığın → önceki sekme → Planla → sistem (çıkış).
