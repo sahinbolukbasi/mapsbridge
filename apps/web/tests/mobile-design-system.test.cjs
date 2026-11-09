@@ -704,12 +704,12 @@ test("4.7 (K4): derin bağlantı, paylaşım, Yakınımda, yerel bildirim, karo 
   assert.match(map, /appleMapsUrl\(/);
   assert.match(map, /googleMapsUrl\(/);
   assert.match(map, /baseUrl: "https:\/\/mapsbridge\.com"/, "OSM Referer uygulama alan adı");
+  // rotalarm-ekrann-ilk-alta-kaldr (Kriter H): Face ID (biyometrik kilit) alanı AppSettings'ten
+  // kaldırıldı — ayar artık kullanıcıya sunulmaz. Açılış kilidi plumbing'i (App.tsx LockScreen,
+  // services/biometric) yerinde kalır; AppSettings ne authenticate ne de lock toggle'ı içerir.
   const settings = code("src/components/AppSettings.tsx");
-  assert.match(
-    settings,
-    /if \(next && !\(await authenticate\(\)\)\) return;/,
-    "kilidi açarken doğrulama",
-  );
+  assert.doesNotMatch(settings, /authenticate\(/, "Face ID kaldırıldı: AppSettings authenticate etmez");
+  assert.doesNotMatch(settings, /native\.settings\.lock/, "Face ID kaldırıldı: kilit satırı yok");
   const pkg = JSON.parse(fs.readFileSync(path.join(mobile, "package.json"), "utf8"));
   // Onaylı 8 paket kullanılıyor (ölü bağımlılık yok).
   const all = FILES.map(read).join("\n");

@@ -120,12 +120,15 @@ const styles = StyleSheet.create({
   leading: { flexDirection: "row", alignItems: "center" },
   input: {
     flex: 1,
-    minHeight: tokens.touch.min,
-    maxHeight: 132,
+    // G (görev 13): daha rahat yazma — dinlenme yüksekliği biraz artırıldı, çok satırlı için
+    // üst sınır genişletildi (hem Asistan hem Mesajlar composer'ı; gönder davranışı değişmez).
+    minHeight: tokens.touch.min + tokens.space["3"],
+    maxHeight: 160,
     paddingHorizontal: tokens.space["2"],
     paddingVertical: tokens.space["2"],
     fontSize: tokens.font.size.base,
     color: tokens.color.fieldFg,
+    textAlignVertical: "top",
   },
   note: { fontSize: tokens.font.size.xs, color: tokens.color.textMuted },
   reason: { fontSize: tokens.font.size.xs, color: tokens.color.warning },

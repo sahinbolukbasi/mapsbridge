@@ -2,11 +2,11 @@ import React, { useRef, useState } from "react";
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { socialSyncService, type MobileCommunityPost } from "../services/socialSync";
-import type { ActiveRoute } from "../services/tripStore";
+import { tripStore, type ActiveRoute } from "../services/tripStore";
 import {
   Button,
   Chip,
-  Icon,
+  ChipGroup,
   IconButton,
   Media,
   ModalFrame,
@@ -53,6 +53,12 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
   const [locationTag, setLocationTag] = useState("");
   const [locating, setLocating] = useState(false); // G7: otomatik konum
   const [attachRoute, setAttachRoute] = useState(false);
+  const allRoutes = tripStore.getAllRoutes().filter((r) => r.stops.length > 0);
+  const [selectedRouteId, setSelectedRouteId] = useState<string>(activeRoute.id);
+  const currentRoute = allRoutes.find((r) => r.id === selectedRouteId) ?? activeRoute;
+  const detectedHashtags = [...new Set(content.match(/#[\p{L}\p{N}_]+/gu) ?? [])];
+  // E (görev 10): rota iliştirildiğinde tek bir durak (pin) hakkında paylaşım — null = tüm rota.
+  const [attachStopId, setAttachStopId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [image, setImage] = useState<Picked | null>(null);
@@ -135,6 +141,7 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
     setContent("");
     setLocationTag("");
     setAttachRoute(false);
+    setAttachStopId(null);
     setImage(null);
     setError(null);
     setImageError(null);
@@ -155,24 +162,30 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
         hashtags,
         locationTag: locationTag.trim() || undefined,
         mediaImage: image?.uri,
-        routeAttachment:
-          attachRoute && activeRoute.stops.length
-            ? {
-                id: `rt_user_${Date.now()}`,
-                title: activeRoute.name,
-                stats: tr("community.post.stops", { n: activeRoute.stops.length }),
-                icon: "",
-                stops: activeRoute.stops.map((s) => ({
-                  id: s.id,
-                  name: s.name,
-                  category: s.category,
-                  lat: s.lat,
-                  lng: s.lng,
-                  address: s.address,
-                  duration: s.duration,
-                })),
-              }
-            : undefined,
+        routeAttachment: (() => {
+          if (!attachRoute || !currentRoute.stops.length) return undefined;
+          // Tek durak seçiliyse yalnız o pin paylaşılır; yoksa tüm rota (mevcut davranış).
+          const picked = attachStopId
+            ? currentRoute.stops.filter((s) => s.id === attachStopId)
+            : currentRoute.stops;
+          const stops = picked.length ? picked : currentRoute.stops;
+          const single = attachStopId && stops.length === 1;
+          return {
+            id: `rt_user_${Date.now()}`,
+            title: single ? stops[0].name : currentRoute.name,
+            stats: tr("community.post.stops", { n: stops.length }),
+            icon: "",
+            stops: stops.map((s) => ({
+              id: s.id,
+              name: s.name,
+              category: s.category,
+              lat: s.lat,
+              lng: s.lng,
+              address: s.address,
+              duration: s.duration,
+            })),
+          };
+        })(),
       });
       reset();
       onPublished(post);
@@ -192,6 +205,7 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
     >
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         <Animated.View style={{ transform: [{ translateX: shake }] }}>
+          {/* E (görev 9): içerik/mesaj alanı belirgin büyütüldü (daha fazla görünür satır). */}
           <TextField
             label={tr("community.compose.content")}
             hint={tr("community.compose.contentHint")}
@@ -204,9 +218,22 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
             onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
             error={error ?? undefined}
             multiline
+            numberOfLines={6}
+            inputStyle={styles.contentInput}
             maxLength={2000}
           />
         </Animated.View>
+        {detectedHashtags.length ? (
+          <View style={styles.hashtagRow}>
+            {detectedHashtags.map((tag) => (
+              <View key={tag} style={styles.hashtagBadge}>
+                <Txt variant="caption" style={styles.hashtagText}>
+                  {tag}
+                </Txt>
+              </View>
+            ))}
+          </View>
+        ) : null}
         <View style={styles.tools}>
           <Button
             label={tr("community.compose.chooseImage")}
@@ -266,25 +293,70 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
             ))}
           </View>
         ) : null}
+        {/* E (görev 9): konumu bul, yer kutusunun SAĞINDA (alan içi uç-aksesuar) — ayrı altsatır
+            düğmesi kaldırıldı. */}
         <TextField
           label={tr("edit.location")}
           hint={tr("ui.optional")}
           value={locationTag}
           onChangeText={setLocationTag}
           maxLength={80}
+          endAdornment={
+            <IconButton
+              icon="locate"
+              label={tr("native.community.useLocation")}
+              disabled={locating}
+              onPress={() => void useMyLocation()}
+            />
+          }
         />
-        <Button
-          label={tr("native.community.useLocation")}
-          variant="ghost"
-          size="sm"
-          loading={locating}
-          icon={<Icon name="locate" size={16} color={tokens.color.buttonGhostFg} />}
-          onPress={() => void useMyLocation()}
-        />
-        {activeRoute.stops.length ? (
-          <Chip icon="route" pressed={attachRoute} onPress={() => setAttachRoute((v) => !v)}>
-            {`${activeRoute.name} · ${tr("community.post.stops", { n: activeRoute.stops.length })}`}
-          </Chip>
+        {allRoutes.length ? (
+          <View style={styles.routeSection}>
+            <Chip
+              icon="route"
+              pressed={attachRoute}
+              onPress={() => {
+                setAttachRoute((v) => !v);
+                setAttachStopId(null);
+              }}
+            >
+              {`${currentRoute.name} · ${tr("community.post.stops", { n: currentRoute.stops.length })}`}
+            </Chip>
+
+            {attachRoute && allRoutes.length > 1 ? (
+              <ChipGroup label={tr("planner.trips.title")} mode="single">
+                {allRoutes.map((r) => (
+                  <Chip
+                    key={r.id}
+                    pressed={currentRoute.id === r.id}
+                    onPress={() => {
+                      setSelectedRouteId(r.id);
+                      setAttachStopId(null);
+                    }}
+                  >
+                    {r.name}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            ) : null}
+
+            {attachRoute && currentRoute.stops.length ? (
+              <ChipGroup label={tr("community.compose.pinLabel")} mode="single">
+                <Chip pressed={attachStopId === null} onPress={() => setAttachStopId(null)}>
+                  {tr("community.compose.wholeRoute")}
+                </Chip>
+                {currentRoute.stops.map((s) => (
+                  <Chip
+                    key={s.id}
+                    pressed={attachStopId === s.id}
+                    onPress={() => setAttachStopId((cur) => (cur === s.id ? null : s.id))}
+                  >
+                    {s.name}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            ) : null}
+          </View>
         ) : null}
         <Button
           label={tr("community.compose.submit")}
@@ -335,6 +407,16 @@ function EmojiKey({
 const styles = StyleSheet.create({
   form: { padding: tokens.space["5"], gap: tokens.space["3"], paddingBottom: tokens.space["12"] },
   tools: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["2"] },
+  contentInput: { minHeight: 132, paddingTop: tokens.space["2"], textAlignVertical: "top" },
+  hashtagRow: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["1"] },
+  hashtagBadge: {
+    backgroundColor: tokens.color.surfaceSunken,
+    paddingHorizontal: tokens.space["2"],
+    paddingVertical: tokens.space["1"],
+    borderRadius: tokens.radius.sm,
+  },
+  hashtagText: { color: tokens.color.brand, fontWeight: "600" },
+  routeSection: { gap: tokens.space["2"] },
   preview: { gap: tokens.space["1"] },
   previewBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   emojis: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["1"] },

@@ -7,6 +7,7 @@ import {
   View,
   type StyleProp,
   type TextInputProps,
+  type TextStyle,
   type ViewStyle,
 } from "react-native";
 import { tokens } from "../theme";
@@ -21,6 +22,10 @@ export interface TextFieldProps extends Omit<TextInputProps, "style" | "secureTe
   error?: string;
   secure?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** Giriş alanının (TextInput) ek stili — ör. çok satırlı alanda daha yüksek minHeight. */
+  inputStyle?: StyleProp<TextStyle>;
+  /** Alanın içinde sağda bir kontrol (ör. şifre göster/gizle göz simgesi, konumu bul). */
+  endAdornment?: React.ReactNode;
 }
 
 export function TextField({
@@ -31,6 +36,8 @@ export function TextField({
   error,
   secure,
   style,
+  inputStyle,
+  endAdornment,
   ...rest
 }: TextFieldProps) {
   const lastError = useRef<string | undefined>(undefined);
@@ -43,17 +50,34 @@ export function TextField({
       <Text style={styles.label} maxFontSizeMultiplier={tokens.font.maxScale.body}>
         {label}
       </Text>
-      <TextInput
-        {...rest}
-        value={value}
-        onChangeText={onChangeText}
-        secureTextEntry={secure}
-        accessibilityLabel={label}
-        accessibilityHint={hint}
-        placeholderTextColor={tokens.color.fieldPlaceholder}
-        maxFontSizeMultiplier={tokens.font.maxScale.body}
-        style={[styles.input, error ? styles.inputInvalid : null]}
-      />
+      {endAdornment ? (
+        <View style={[styles.adornedRow, error ? styles.inputInvalid : null]}>
+          <TextInput
+            {...rest}
+            value={value}
+            onChangeText={onChangeText}
+            secureTextEntry={secure}
+            accessibilityLabel={label}
+            accessibilityHint={hint}
+            placeholderTextColor={tokens.color.fieldPlaceholder}
+            maxFontSizeMultiplier={tokens.font.maxScale.body}
+            style={[styles.bareInput, inputStyle]}
+          />
+          <View style={styles.adornment}>{endAdornment}</View>
+        </View>
+      ) : (
+        <TextInput
+          {...rest}
+          value={value}
+          onChangeText={onChangeText}
+          secureTextEntry={secure}
+          accessibilityLabel={label}
+          accessibilityHint={hint}
+          placeholderTextColor={tokens.color.fieldPlaceholder}
+          maxFontSizeMultiplier={tokens.font.maxScale.body}
+          style={[styles.input, error ? styles.inputInvalid : null, inputStyle]}
+        />
+      )}
       {hint && !error ? (
         <Text style={styles.hint} maxFontSizeMultiplier={tokens.font.maxScale.body}>
           {hint}
@@ -89,6 +113,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: tokens.space["3"],
     fontSize: tokens.font.size.base,
   },
+  // Uç-aksesuarlı alan: kenarlık satırda; input kendi kenarlığını taşımaz, sağda kontrol oturur.
+  adornedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: tokens.touch.min,
+    borderWidth: 1,
+    borderColor: tokens.color.fieldBorder,
+    borderRadius: tokens.radius.md,
+    backgroundColor: tokens.color.fieldBg,
+    paddingRight: tokens.space["1"],
+  },
+  bareInput: {
+    flex: 1,
+    minHeight: tokens.touch.min,
+    color: tokens.color.fieldFg,
+    paddingHorizontal: tokens.space["3"],
+    fontSize: tokens.font.size.base,
+  },
+  adornment: { alignItems: "center", justifyContent: "center" },
   inputInvalid: { borderColor: tokens.color.fieldBorderInvalid },
   hint: {
     marginTop: tokens.space["1"],

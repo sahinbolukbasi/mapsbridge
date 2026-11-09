@@ -11,7 +11,6 @@ import {
   chatErrorKey,
   groupThreads,
   jwtSub,
-  resolveOutcome,
   type RequestAction,
 } from "../ui/logic/chat-requests";
 import { chatStore, type ChatBubbleItem, type ChatContact } from "../services/chatStore";
@@ -52,7 +51,6 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
   const [me, setMe] = useState("gezgin");
   const [newOpen, setNewOpen] = useState(false);
   const [newUser, setNewUser] = useState("");
-  const [newMessage, setNewMessage] = useState("");
   const [newError, setNewError] = useState<string | undefined>(undefined);
   const [newBusy, setNewBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -158,42 +156,46 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
     return contacts.filter((c) => `${c.name} ${c.username}`.toLocaleLowerCase("tr-TR").includes(q));
   }, [contacts, query]);
 
-  /**
-   * Yeni mesaj (B5, FEAT-005): önce-çöz-sonra-yaz. İlk mesaj `createThread` ile istek olarak
-   * gönderilir; bu sunucudaki çözme kapısıdır. 404 USER_NOT_FOUND → alıcı yok: sohbet AÇILMAZ,
-   * satır içi uyarı gösterilir. Başarı → sohbet bekleyen (pendingOut) durumda açılır.
-   */
-  const startNew = async () => {
-    const handle = newUser.trim().replace(/^@/, "");
-    const text = newMessage.trim();
-    if (!/[a-z0-9]/i.test(handle)) {
+  // F (görev 12): "Mesaj oluştur" ekranı — arama + kişi listesi (foto + ad + "Mesaj at").
+  // Mevcut kişi seçilince sohbet doğrudan açılır (sunucu çağrısı yok; ilk mesaj composer'dan
+  // gönderilince sendToServer → createThread çalışır). Yazarken username/ad'a göre filtrelenir.
+  const newChatContacts = useMemo(() => {
+    const q = newUser.trim().replace(/^@/, "").toLocaleLowerCase("tr-TR");
+    if (!q) return contacts;
+    return contacts.filter((c) =>
+      `${c.name} ${c.username}`.toLocaleLowerCase("tr-TR").includes(q),
+    );
+  }, [contacts, newUser]);
+
+  // Aranan handle mevcut kişilerden biriyle birebir eşleşmiyorsa "yeni kişiye yaz" satırı için.
+  const newHandle = newUser.trim().replace(/^@/, "");
+  const newHandleValid = /[a-z0-9]/i.test(newHandle);
+  const exactMatch = contacts.some(
+    (c) => c.username.toLocaleLowerCase("tr-TR") === newHandle.toLocaleLowerCase("tr-TR"),
+  );
+
+  const openExisting = (contact: ChatContact) => {
+    setNewOpen(false);
+    setNewUser("");
+    setNewError(undefined);
+    setActive(contact);
+  };
+
+  /** Yeni kişiye sohbet aç (yerel bekleyen); ilk mesaj composer'dan gidince istek oluşturulur. */
+  const startNewTo = async (handle: string) => {
+    if (!newHandleValid) {
       setNewError(tr("messages.newChat.required"));
-      return;
-    }
-    if (!text) {
-      setNewError(tr("messages.newChat.messageRequired"));
       return;
     }
     setNewBusy(true);
     setNewError(undefined);
     try {
-      const res = await chatRequestApi.createThread(handle, text);
       const { contact } = await chatStore.startOrGetDirectThread({ name: handle, handle });
-      setServerIds((m) => ({ ...m, [contact.id]: { id: res.threadId, pendingOut: true } }));
-      await chatStore.sendMessage(contact.id, { text, senderId: "me", senderName: me });
-      void loadServerThreads();
       setNewOpen(false);
       setNewUser("");
-      setNewMessage("");
       setActive(contact);
     } catch (err) {
-      const e = err as Partial<ChatApiError>;
-      const outcome = resolveOutcome({ status: e?.status, code: e?.code });
-      if (outcome === "notFound") {
-        setNewError(tr("messages.req.userNotFound"));
-      } else {
-        setNewError(errorText(err, true) ?? tr("messages.newChat.failed"));
-      }
+      setNewError(errorText(err, true) ?? tr("messages.newChat.failed"));
     } finally {
       setNewBusy(false);
     }
@@ -332,7 +334,14 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
         <ScreenHeader
           title={tr("messages.title")}
           right={
-            <IconButton icon="plus" label={tr("messages.new")} onPress={() => setNewOpen(true)} />
+            // F (görev 11): sağ-üst + belirgin birincil eylem (dolu daire, birincil renk).
+            <IconButton
+              icon="plus"
+              color={tokens.color.buttonPrimaryFg}
+              label={tr("messages.new")}
+              onPress={() => setNewOpen(true)}
+              style={styles.newFab}
+            />
           }
         />
       }
@@ -424,8 +433,10 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
             <Txt variant="small" tone="muted">
               {query.trim() ? tr("messages.empty.searchBody") : tr("messages.empty.body")}
             </Txt>
+            {/* F (görev 11): sohbet yokken tek çağrı "mesajlaşmayı başlat"; sohbet varken
+                (filtered dolu) bu blok render edilmez, orta düğme kalkar. */}
             {!query.trim() ? (
-              <Button label={tr("messages.new")} onPress={() => setNewOpen(true)} />
+              <Button label={tr("messages.start")} onPress={() => setNewOpen(true)} />
             ) : null}
           </View>
         ) : (
@@ -460,9 +471,12 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
         title={tr("messages.newChat.title")}
         onRequestClose={() => setNewOpen(false)}
       >
+        {/* F (görev 12): üstte arama, altında kişiler (foto + ad + en sağda "Mesaj at").
+            Yazdıkça username/ad'a göre filtrelenir; eşleşen kişi yoksa "yeni kişiye yaz" satırı. */}
         <View style={styles.form}>
           <TextField
             label={tr("messages.newChat.user")}
+            hint={tr("messages.newChat.searchHint")}
             value={newUser}
             onChangeText={(text) => {
               setNewUser(text);
@@ -472,23 +486,62 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
             autoCorrect={false}
             maxLength={40}
           />
-          <TextField
-            label={tr("messages.newChat.message")}
-            hint={tr("messages.newChat.messageHint")}
-            value={newMessage}
-            onChangeText={(text) => {
-              setNewMessage(text);
-              if (newError) setNewError(undefined);
-            }}
-            error={newError}
-            maxLength={2000}
-          />
-          <Button
-            label={tr("messages.newChat.start")}
-            size="lg"
-            loading={newBusy}
-            onPress={startNew}
-          />
+          {newError ? (
+            <View accessibilityRole="alert">
+              <Txt variant="small" tone="danger">
+                {newError}
+              </Txt>
+            </View>
+          ) : null}
+          {newHandleValid && !exactMatch ? (
+            <Card variant="bordered">
+              <View style={styles.row}>
+                <Avatar name={newHandle} />
+                <View style={styles.flex}>
+                  <Txt variant="label" numberOfLines={1}>
+                    {`@${newHandle}`}
+                  </Txt>
+                  <Txt variant="caption" tone="muted">
+                    {tr("messages.newChat.sendToNew")}
+                  </Txt>
+                </View>
+                <IconButton
+                  icon="send"
+                  color={tokens.color.buttonPrimaryFg}
+                  label={tr("messages.newChat.sendAction")}
+                  disabled={newBusy}
+                  onPress={() => void startNewTo(newHandle)}
+                  style={styles.newFab}
+                />
+              </View>
+            </Card>
+          ) : null}
+          {newChatContacts.length === 0 && !newHandleValid ? (
+            <Txt variant="small" tone="muted">
+              {tr("messages.newChat.noContacts")}
+            </Txt>
+          ) : (
+            newChatContacts.map((c) => (
+              <Card key={c.id} variant="bordered">
+                <View style={styles.row}>
+                  <Avatar name={c.name} uri={c.avatarUrl} />
+                  <View style={styles.flex}>
+                    <Txt variant="label" numberOfLines={1}>
+                      {c.name}
+                    </Txt>
+                    <Txt variant="caption" tone="muted" numberOfLines={1}>
+                      {c.username ? `@${c.username}` : ""}
+                    </Txt>
+                  </View>
+                  <IconButton
+                    icon="send"
+                    label={tr("messages.newChat.sendAction")}
+                    onPress={() => openExisting(c)}
+                  />
+                </View>
+              </Card>
+            ))
+          )}
         </View>
       </ModalFrame>
     </Screen>
@@ -507,6 +560,7 @@ const styles = StyleSheet.create({
     color: tokens.color.fieldFg,
     fontSize: tokens.font.size.md,
   },
+  newFab: { backgroundColor: tokens.color.buttonPrimaryBg, borderRadius: tokens.radius.full },
   empty: { gap: tokens.space["3"], paddingVertical: tokens.space["8"] },
   row: { flexDirection: "row", alignItems: "center", gap: tokens.space["3"] },
   flex: { flex: 1, gap: tokens.space["1"] },

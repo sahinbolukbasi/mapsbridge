@@ -343,6 +343,7 @@ function freshTripStore(initialStorage = {}, server = {}) {
   const api = {
     calls: [],
     async listRoutes() {
+      if (server.listFails) throw new Error("çevrimdışı-liste");
       return remote.map((r) => ({ ...r }));
     },
     async createRoute(name, stops) {
@@ -490,6 +491,59 @@ test("aktarım yüklemesi başarısızsa taslak beklemede kalır, eşitleme onu 
   assert.equal(routes[0].name, "Roma");
   assert.equal(routes[0].pendingUpload, true);
   assert.ok(api.calls.some((c) => c.name === "listRoutes"));
+});
+
+// ── rotalarm-ekrann-ilk-alta-kaldr (Kriter L): cache/senkron dayanıklılığı ──
+test("L: sunucu listesi çekilemezse yerel rotalar korunur, syncState 'error'", async () => {
+  // Diskte zaten bir üye rotası var; sunucu listRoutes hata verirse yerel veri SİLİNMEZ.
+  const { store } = freshTripStore(
+    {
+      mb_routes_owner: "a@x.com",
+      mb_all_routes: JSON.stringify([
+        { id: "local-1", name: "Cihazdaki", day: 1, stops: [STOP], origin: "user" },
+      ]),
+      mb_active_route_id: "local-1",
+    },
+    { listFails: true },
+  );
+  await store.setOwner("a@x.com");
+  await flush();
+  const routes = plain(store.getAllRoutes());
+  assert.equal(routes.length, 1, "eşitleme hatası yerel rotayı silmedi");
+  assert.equal(routes[0].name, "Cihazdaki");
+  assert.equal(store.getSyncState(), "error", "hata durumu UI'ye bildirilir");
+});
+
+test("L: başarılı eşitlemede sunucu kaynak olur ama pendingUpload korunur, syncState 'ok'", async () => {
+  const { store } = freshTripStore(
+    {},
+    { routes: [{ routeId: "srv-1", name: "Sunucudaki", stops: [] }], createFails: true },
+  );
+  // Misafir bir taslak oluşturur (sunucuya yazılamaz → pendingUpload), sonra üye olur.
+  await store.setOwner("guest");
+  store.createRoute("Taslak", [STOP]);
+  await store.setOwner("a@x.com");
+  await flush();
+  const names = plain(store.getAllRoutes().map((r) => r.name)).sort();
+  assert.deepEqual(names, ["Sunucudaki", "Taslak"], "sunucu rotası + bekleyen taslak birlikte");
+  assert.ok(
+    store.getAllRoutes().some((r) => r.name === "Taslak" && r.pendingUpload),
+    "yüklenemeyen taslak pendingUpload olarak korunur",
+  );
+  assert.equal(store.getSyncState(), "ok", "başarılı çekme sonrası durum ok");
+});
+
+test("L: çıkışta syncState 'idle'e döner (sonraki hesaba hata sızmaz)", async () => {
+  const { store } = freshTripStore(
+    { mb_routes_owner: "a@x.com" },
+    { listFails: true },
+  );
+  await store.setOwner("a@x.com");
+  await flush();
+  assert.equal(store.getSyncState(), "error");
+  await store.clearForSignOut();
+  await flush();
+  assert.equal(store.getSyncState(), "idle", "çıkışta eşitleme durumu sıfırlanır");
 });
 
 // ── FEAT-012: Keşfet metni, paylaşım kodu, misafir taslağı, katalog ve optimize paritesi ──
