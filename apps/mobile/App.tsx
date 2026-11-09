@@ -8,6 +8,7 @@ import {
   StatusBar,
   Alert,
   Linking,
+  Platform,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as ExpoLinking from "expo-linking";
@@ -64,13 +65,17 @@ import { clearDraft } from "./src/guest/guest-draft";
 import { setFontsAvailable, tokens } from "./src/theme";
 import { FONT_SOURCES } from "./src/theme/fonts";
 import { tr } from "./src/i18n/ui";
-const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+import { resolveGoogleClientId } from "./src/services/auth-config";
+const GOOGLE_CLIENT_ID = resolveGoogleClientId(Platform.OS);
 
 // Session persistence constants
 const SESSION_REFRESH_INTERVAL = 25 * 60 * 1000; // 25 min (Cognito access token = 60 min)
 const SESSION_MAX_IDLE_DAYS = 30; // Auto logout after 30 days of no use
 
-function buildGoogleAuthUrl(): string {
+function buildGoogleAuthUrl(): string | null {
+  // Savunma: resolveGoogleClientId asla boş dönmez, yine de client_id boşsa URL kurulmaz
+  // (boş client_id ile Google hata sayfası açılır). handleGoogleSignIn bunu Türkçe uyarıya çevirir.
+  if (!GOOGLE_CLIENT_ID) return null;
   const nonce = `mb_${Date.now()}`;
   const redirectUri = encodeURIComponent("https://mapsbridge.com/auth/callback");
   const scope = encodeURIComponent("openid email profile");
@@ -467,6 +472,10 @@ export function App() {
   const handleGoogleSignIn = async () => {
     try {
       const authUrl = buildGoogleAuthUrl();
+      if (!authUrl) {
+        Alert.alert(tr("native.auth.google.title"), tr("native.auth.google.openFailed"));
+        return;
+      }
       const canOpen = await Linking.canOpenURL(authUrl);
       if (canOpen) {
         await Linking.openURL(authUrl);

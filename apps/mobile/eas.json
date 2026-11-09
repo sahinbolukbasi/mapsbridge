@@ -10,6 +10,12 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_COGNITO_CLIENT_ID": "pl6pf56tthpka3sh28unilopr",
+        "EXPO_PUBLIC_COGNITO_USER_POOL_ID": "eu-central-1_LxXYGJV8d",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS": "",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID": ""
+      },
       "ios": {
         "simulator": false
       },
@@ -19,6 +25,12 @@
     },
     "production": {
       "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_COGNITO_CLIENT_ID": "pl6pf56tthpka3sh28unilopr",
+        "EXPO_PUBLIC_COGNITO_USER_POOL_ID": "eu-central-1_LxXYGJV8d",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS": "",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID": ""
+      },
       "ios": {
         "simulator": false
       },

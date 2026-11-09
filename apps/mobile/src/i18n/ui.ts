@@ -474,6 +474,8 @@ export const NATIVE_TR = {
   "native.auth.reset.title": "Yeni şifre belirle",
   "native.auth.reset.sub": "E-postana gelen kodla yeni şifreni oluştur.",
   "native.auth.err.loginFields": "E-posta ve şifreni gir.",
+  "native.auth.err.config":
+    "Giriş servisi yapılandırması eksik. Lütfen uygulamanın güncel sürümünü kullandığından emin ol ya da e-posta ile giriş yapmayı dene.",
   "native.auth.info.unconfirmed": "Hesabın henüz doğrulanmadı. E-postana gönderilen kodu gir.",
   "native.auth.err.registerFields": "Ad, soyad, telefon, e-posta ve şifre zorunlu.",
   "native.auth.info.codeSent": "Doğrulama kodu {email} adresine gönderildi.",

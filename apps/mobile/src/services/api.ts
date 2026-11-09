@@ -1,4 +1,6 @@
 import { storage } from "./storage";
+import { resolveCognitoClientId, COGNITO_REGION } from "./auth-config";
+import { tr } from "../i18n/ui";
 
 // Canlı API Gateway. Derleme anında EXPO_PUBLIC_API_BASE_URL ile ezilir (app.config.ts
 // extra.apiBaseUrl aynı değeri taşır). Eski varsayılan host NXDOMAIN veriyordu (diagnosis LB §8).
@@ -7,8 +9,6 @@ export const API_BASE = (
   (typeof process !== "undefined" ? process.env.EXPO_PUBLIC_API_BASE_URL : undefined) ||
   LIVE_API_BASE
 ).replace(/\/$/, "");
-const COGNITO_REGION = "eu-central-1";
-const COGNITO_CLIENT_ID = "62t35qsehl3o9cdc6i4mg01tqt";
 const COGNITO_ENDPOINT = `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/`;
 
 export interface UserSession {
@@ -52,7 +52,7 @@ async function cognitoRequest(target: string, body: Record<string, unknown>) {
       "content-type": "application/x-amz-json-1.1",
       "x-amz-target": `AWSCognitoIdentityProviderService.${target}`,
     },
-    body: JSON.stringify({ ClientId: COGNITO_CLIENT_ID, ...body }),
+    body: JSON.stringify({ ClientId: resolveCognitoClientId(), ...body }),
   });
   const data = await response.json();
   if (!response.ok) {
@@ -73,7 +73,13 @@ async function cognitoRequest(target: string, body: Record<string, unknown>) {
     if (errorType.includes("ExpiredCodeException")) {
       throw new Error("Doğrulama kodunun süresi dolmuş. Lütfen yeniden talep edin.");
     }
-    throw new Error(msg);
+    // Client/user pool id yanlış ya da eksikse Cognito ResourceNotFoundException döner; kullanıcıya
+    // ham İngilizce AWS metni değil anlaşılır Türkçe yapılandırma hatası göster.
+    if (errorType.includes("ResourceNotFoundException")) {
+      throw new Error(tr("native.auth.err.config"));
+    }
+    // Eşlenmemiş AWS mesajı ham (İngilizce) olabilir; yüzeye çıkarmak yerine genel Türkçe metin.
+    throw new Error("İşlem tamamlanamadı. Lütfen tekrar deneyin.");
   }
   return data;
 }
@@ -172,7 +178,7 @@ export const authService = {
         },
         body: JSON.stringify({
           AuthFlow: "REFRESH_TOKEN_AUTH",
-          ClientId: COGNITO_CLIENT_ID,
+          ClientId: resolveCognitoClientId(),
           AuthParameters: { REFRESH_TOKEN: refreshToken },
         }),
       });
