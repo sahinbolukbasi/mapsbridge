@@ -338,7 +338,7 @@ test("Tek IA (design §5.3): misafir/üye sekme setleri ve BottomTabBar Icon + P
   const types = read("src/types.ts");
   assert.match(
     types,
-    /GUEST_TABS: readonly MobileTab\[\] = \["explore", "plan", "ai", "community", "login"\]/,
+    /GUEST_TABS: readonly MobileTab\[\] = \["plan", "ai", "community", "login"\]/,
   );
   assert.match(
     types,
@@ -417,15 +417,14 @@ test("FEAT-012 (S6, S1, §7.1): mağaza/indir/yakında, EN POPÜLER, deneme ve k
   assert.deepEqual(offenders, [], offenders.join(", "));
 });
 
-test("FEAT-012: Keşfet metni yalnız i18n/home.ts'ten, girişi Asistan'a gider; Apple 'yakında' yok", () => {
-  const explore = read("src/screens/ExploreScreen.tsx");
-  assert.match(explore, /from "\.\.\/i18n\/home"/);
-  assert.match(explore, /readShareCode/);
-  assert.doesNotMatch(explore, /home\.mobile\./);
+test("Keşfet sekmesi mobilde kaldırıldı (F4); misafir Asistan'da başlar; Apple 'yakında' yok", () => {
   const app = read("App.tsx");
-  assert.match(app, /<ExploreScreen/);
+  // Keşfet sekmesi mobilden kaldırıldı: App artık ExploreScreen render etmez.
+  assert.doesNotMatch(app, /<ExploreScreen/);
+  assert.doesNotMatch(app, /from "\.\/src\/screens\/ExploreScreen"/);
   assert.doesNotMatch(app, /WelcomeScreen|handleAppleSignIn|onSelectApple/);
-  assert.match(app, /setAssistantPrompt\(\{ text, nonce: Date\.now\(\) \}\);\s*selectTab\("ai"\)/);
+  // Misafir başlangıç sekmesi artık Asistan (explore yerine).
+  assert.match(app, /initialNav<MobileTab, MobileStackScreen>\("ai"\)/);
   assert.doesNotMatch(code("src/screens/AuthScreen.tsx"), /Apple/);
 });
 

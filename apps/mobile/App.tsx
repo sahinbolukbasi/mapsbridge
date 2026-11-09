@@ -38,7 +38,6 @@ import { lockEnabled, shouldLock } from "./src/services/biometric";
 import { configureNotifications, scheduleRouteReminders } from "./src/services/notifications";
 import { sweepTiles } from "./src/services/tile-cache";
 import { ChatScreen } from "./src/screens/ChatScreen";
-import { ExploreScreen } from "./src/screens/ExploreScreen";
 import { GuestAssistantView } from "./src/screens/GuestAssistantView";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { MapScreen } from "./src/screens/MapScreen";
@@ -162,7 +161,8 @@ export function App() {
   const [authInitialMode, setAuthInitialMode] = useState<"login" | "register">("login");
   const [focusedStopId, setFocusedStopId] = useState<string | null>(null);
   // Keşfet hero metni → Asistan (misafir senaryosu); Topluluk "Mesaj gönder" → Mesajlar.
-  const [assistantPrompt, setAssistantPrompt] = useState<{ text: string; nonce: number }>();
+  // Keşfet kaldırıldığı için prompt artık set edilmiyor; AIScreen prop'u ileride derin bağlantı için durur.
+  const [assistantPrompt] = useState<{ text: string; nonce: number } | undefined>(undefined);
   const [chatOpen, setChatOpen] = useState<{ contact: ChatContact; nonce: number }>();
   const [plansOpen, setPlansOpen] = useState(false);
   // Toast'lar alt menünün üstünde (direction §3: mobil alt menünün üstü).
@@ -226,7 +226,7 @@ export function App() {
   // Tek IA (design §5.3, S7/S10): misafir ve üye sekme setleri; sekme başına ekran yığını.
   const signedIn = !!session;
   const tabs = signedIn ? MEMBER_TABS : GUEST_TABS;
-  const [nav, setNav] = useState<Nav>(() => initialNav<MobileTab, MobileStackScreen>("explore"));
+  const [nav, setNav] = useState<Nav>(() => initialNav<MobileTab, MobileStackScreen>("ai"));
   const navRef = useRef(nav);
   navRef.current = nav;
   const tabsRef = useRef(tabs);
@@ -278,7 +278,7 @@ export function App() {
       ? back && MEMBER_TABS.includes(back)
         ? back
         : "plan"
-      : "explore";
+      : "ai";
     setNav(initialNav<MobileTab, MobileStackScreen>(home));
   }, [loadingSession, signedIn]);
 
@@ -605,16 +605,6 @@ export function App() {
 
   const renderTab = (tab: MobileTab): React.ReactNode => {
     switch (tab) {
-      case "explore":
-        return (
-          <ExploreScreen
-            onStartAssistant={(text) => {
-              setAssistantPrompt({ text, nonce: Date.now() });
-              selectTab("ai");
-            }}
-            onOpenPlans={() => setPlansOpen(true)}
-          />
-        );
       case "plan":
         return (
           <PlanScreen

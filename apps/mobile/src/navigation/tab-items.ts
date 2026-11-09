@@ -11,7 +11,6 @@ export interface TabItem {
 }
 
 export const TAB_ITEMS: Record<MobileTab, TabItem> = {
-  explore: { labelKey: "nav.explore", label: "Keşfet", icon: "compass" },
   plan: { labelKey: "nav.desk", label: "Planla", icon: "map" },
   ai: { labelKey: "nav.ai", label: "Asistan", icon: "sparkle" },
   community: { labelKey: "nav.community", label: "Topluluk", icon: "users" },
