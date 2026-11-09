@@ -26,6 +26,12 @@ import { passwordCriteria } from "../lib/auth/password-criteria";
 import { AUTH_VISUALS } from "../components/auth/auth-visuals";
 import { WELCOME_CREDITS_DISPLAY } from "../lib/billing/credit-costs";
 import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
+import {
+  checkUsernameAvailable,
+  validateUsername,
+  type UsernameStatus,
+} from "../lib/auth/username-check";
+import { publishProfile } from "../lib/profile-sharing";
 
 interface GoogleCredentialResponse {
   credential: string;
@@ -38,14 +44,19 @@ interface GoogleTokenResponse {
 // Kayıt yalnız e-posta + şifre ister (design F15). Ad, kullanıcı adı ve telefon profil adımına
 // aittir; Cognito SignUp `name` özniteliğini zorunlu tuttuğu için handleSubmit bugünkü otomatik
 // türetmeyi (e-posta öneki) korur.
-type FieldKey = "email" | "password";
-const FIELD_ORDER: readonly FieldKey[] = ["email", "password"];
+type FieldKey = "fullName" | "username" | "email" | "password";
+const FIELD_ORDER: readonly FieldKey[] = ["fullName", "username", "email", "password"];
 const FIELD_LABELS: Record<FieldKey, string> = {
+  fullName: "Ad Soyad",
+  username: "Kullanıcı adı",
   email: "E-posta",
   password: "Şifre",
 };
 
 export default function SignUpPage() {
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -72,6 +83,29 @@ export default function SignUpPage() {
   const rules = passwordCriteria(password);
 
   const isPasswordValid = rules.every((r) => r.valid);
+  // Kullanıcı adı uygunluğu (F3): debounce + mevcut public GET /profiles/{username} (404=boşta).
+  useEffect(() => {
+    const raw = username.trim();
+    if (!raw) {
+      setUsernameStatus("idle");
+      return;
+    }
+    if (!validateUsername(raw)) {
+      setUsernameStatus("invalid");
+      return;
+    }
+    setUsernameStatus("checking");
+    let active = true;
+    const t = setTimeout(() => {
+      checkUsernameAvailable(raw).then((st) => {
+        if (active) setUsernameStatus(st);
+      });
+    }, 450);
+    return () => {
+      active = false;
+      clearTimeout(t);
+    };
+  }, [username]);
   // İstemci doğrulaması gönderimde (design §6.2): alan hataları + özet + ilk hatalı alana odak.
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const errorList = FIELD_ORDER.flatMap((key) =>
@@ -262,7 +296,13 @@ export default function SignUpPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const errors: Partial<Record<FieldKey, string>> = {};
-    // Yalnızca e-posta + şifre (KVKK veri minimizasyonu, design F15).
+    // Dört alan (F2): Ad Soyad, Kullanıcı adı, E-posta, Şifre. Telefon yok (KVKK veri minimizasyonu).
+    if (!fullName.trim()) errors.fullName = "Ad ve soyadını gir.";
+    const normUser = validateUsername(username);
+    if (!username.trim()) errors.username = "Bir kullanıcı adı seç.";
+    else if (!normUser)
+      errors.username = "Kullanıcı adı yalnız küçük harf, rakam, nokta, tire ve alt çizgi (1-40).";
+    else if (usernameStatus === "taken") errors.username = "Bu kullanıcı adı alınmış.";
     if (!email.trim()) errors.email = "E-posta adresinizi girin.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       errors.email = "Geçerli bir e-posta adresi girin (ör. deniz@ornek.com).";
@@ -278,41 +318,32 @@ export default function SignUpPage() {
     setMessage("");
 
     const cleanEmail = email.trim().toLowerCase();
-    // Telefon formda yok (F15): bugünkü "telefon girilmedi" değeri (boş) gönderilir.
-    const cleanPhone = "";
-    // Kullanıcı adı bugünkü otomatik türetmeyle e-posta önekinden üretilir.
-    const cleanUser = cleanEmail
-      .split("@")[0]
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_]/g, "");
-    // Cognito 'name' attribute'u zorunlu: kullanıcı adı > e-posta öneki (ad soyad formda yok).
-    const cleanName = cleanUser || cleanEmail.split("@")[0];
-
-    // Save profile details locally
+    const cleanName = fullName.trim();
+    const cleanUser = normUser as string; // doğrulandı
+    // Profil ayrıntılarını cihazda sakla (ad/soyad + seçilen kullanıcı adı). Telefon yok.
     try {
-      const nameParts = cleanName.split(" ");
+      const nameParts = cleanName.split(/\s+/);
       const firstName = nameParts[0] || cleanName;
       const lastName = nameParts.slice(1).join(" ") || "";
       localStorage.setItem(
         "mapsbridge.userProfileDetails",
-        JSON.stringify({
-          firstName,
-          lastName,
-          username: cleanUser || "gezgin",
-          phone: cleanPhone,
-        }),
+        JSON.stringify({ firstName, lastName, username: cleanUser }),
       );
     } catch {
       // ignore
     }
-
     try {
-      await signUp(cleanEmail, password, cleanName, cleanPhone);
+      // Cognito SignUp: telefon GÖNDERİLMEZ (cognito.ts imzası güncellendi).
+      await signUp(cleanEmail, password, cleanName);
+      // Seçilen kullanıcı adını profil olarak yayınla (en iyi çaba; kaydı bloklamaz).
+      try {
+        await publishProfile(cleanUser);
+      } catch {
+        // Profil yayını başarısızsa kayıt yine tamamlanır; kullanıcı adı yerelde saklı.
+      }
       const nextParam = nextUrl !== DEFAULT_NEXT ? `&next=${encodeURIComponent(nextUrl)}` : "";
-      const href = `/verify/?email=${encodeURIComponent(cleanEmail)}&phone=${encodeURIComponent(cleanPhone)}${nextParam}`;
+      const href = `/verify/?email=${encodeURIComponent(cleanEmail)}${nextParam}`;
       setSentTo(cleanEmail);
-      // Süreli yönlendirme yok (WCAG 2.2.1): kullanıcı "Kodu gir" ile kendi geçer.
       setVerifyHref(href);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Kayıt tamamlanamadı.");
@@ -430,6 +461,52 @@ export default function SignUpPage() {
             <AuthErrorSummary
               errors={errorList.map(([key, text]) => ({ id: key, label: FIELD_LABELS[key], text }))}
             />
+            <Field id="fullName" label="Ad Soyad" required error={fieldErrors.fullName}>
+              {(ids) => (
+                <Input
+                  {...ids}
+                  size="lg"
+                  iconStart="user"
+                  name="name"
+                  placeholder="Deniz Yılmaz"
+                  type="text"
+                  autoComplete="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              )}
+            </Field>
+            <Field
+              id="username"
+              label="Kullanıcı adı"
+              required
+              error={fieldErrors.username}
+              hint={
+                usernameStatus === "checking"
+                  ? "Kontrol ediliyor…"
+                  : usernameStatus === "available"
+                    ? "Bu kullanıcı adı uygun."
+                    : usernameStatus === "taken"
+                      ? "Bu kullanıcı adı alınmış."
+                      : usernameStatus === "invalid"
+                        ? "Yalnız küçük harf, rakam, nokta, tire, alt çizgi (1-40)."
+                        : "Profilinde ve paylaşımlarında görünür."
+              }
+            >
+              {(ids) => (
+                <Input
+                  {...ids}
+                  size="lg"
+                  iconStart="user"
+                  name="username"
+                  placeholder="deniz.yilmaz"
+                  type="text"
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                />
+              )}
+            </Field>
             <Field id="email" label="E-posta" required error={fieldErrors.email}>
               {(ids) => (
                 <Input

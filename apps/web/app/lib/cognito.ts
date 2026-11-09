@@ -102,15 +102,15 @@ async function request(target: string, body: Record<string, unknown>) {
   return payload;
 }
 
-export function signUp(email: string, password: string, name: string, phone: string) {
+export function signUp(email: string, password: string, name: string) {
   const cleanEmail = email.trim().toLowerCase();
+  // Telefon KALDIRILDI (F2): Cognito şemasında phone_number zorunlu değil; yalnız email + name.
   return request("SignUp", {
     Username: cleanEmail,
     Password: password,
     UserAttributes: [
       { Name: "email", Value: cleanEmail },
       { Name: "name", Value: name.trim() },
-      { Name: "phone_number", Value: phone.trim() },
     ],
   });
 }
