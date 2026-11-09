@@ -351,7 +351,7 @@ jobs:
 
       # admin-runtime aws_lambda_function'larında source_code_hash ignore edilmez:
       # placeholder zip apply'da canlı kodu ezerdi. Gerçek paketler üretilir.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -429,7 +429,7 @@ jobs:
 
       # admin-runtime aws_lambda_function'larında source_code_hash ignore edilmez:
       # placeholder zip apply'da canlı kodu ezerdi. Gerçek paketler üretilir.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -478,7 +478,7 @@ jobs:
 
       # source_code_hash ignore edilmez: placeholder zip apply'da araç lambdalarını
       # "Cannot find module 'index'" ile bozuyordu (2026-10-19 → 2026-11-08 canlı kesinti).
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -526,7 +526,7 @@ jobs:
 
       # source_code_hash ignore edilmez: placeholder zip apply'da araç lambdalarını
       # "Cannot find module 'index'" ile bozuyordu (2026-10-19 → 2026-11-08 canlı kesinti).
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
