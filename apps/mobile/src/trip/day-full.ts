@@ -5,9 +5,7 @@
 // pencere web ile aynı: aktif gün 09:00 → 21:00, varsayılan durak 60 dk, tampon eşiği %20 (I9).
 export type DayLeg = { duration: number; distance: number };
 
-export type DayFullSuggestion =
-  | { kind: "addExtra" }
-  | { kind: "shiftStop"; stopId: string };
+export type DayFullSuggestion = { kind: "addExtra" } | { kind: "shiftStop"; stopId: string };
 
 /** Aktif gün sonu (web ACTIVE_DAY_END_MINUTES ile aynı: 21:00). */
 export const ACTIVE_DAY_END_MINUTES = 21 * 60;
@@ -53,6 +51,7 @@ export function dayFullSuggestion(
   if (stops.length === 0 || stops.every((s) => s.visited)) return { kind: "addExtra" };
   const buffer = dayBufferRatio(stops, legs, startTime);
   if (buffer === null) return null;
-  if (buffer <= DAY_FULL_BUFFER_THRESHOLD) return { kind: "shiftStop", stopId: stops[stops.length - 1].id };
+  if (buffer <= DAY_FULL_BUFFER_THRESHOLD)
+    return { kind: "shiftStop", stopId: stops[stops.length - 1].id };
   return null;
 }

@@ -95,9 +95,7 @@ export function NearbyList({
         </Notice>
       ) : null}
       {state === "limited" ? <Notice tone="warning">{tr("nearby.limited")}</Notice> : null}
-      {state === "empty" ? (
-        <EmptyState icon="search" contour title={tr("nearby.empty")} />
-      ) : null}
+      {state === "empty" ? <EmptyState icon="search" contour title={tr("nearby.empty")} /> : null}
       {state === "ok" ? (
         <View style={styles.list} accessibilityLabel={tr("nearby.results")}>
           {items.map((item) => (
@@ -179,9 +177,7 @@ export function NearbyList({
           items={[
             {
               id: "nearby",
-              summary: count
-                ? `${tr("nearby.title")} (${count})`
-                : tr("nearby.title"),
+              summary: count ? `${tr("nearby.title")} (${count})` : tr("nearby.title"),
               content: <View style={styles.root}>{body}</View>,
             },
           ]}

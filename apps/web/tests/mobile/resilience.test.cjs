@@ -139,18 +139,29 @@ test("ScreenErrorBoundary: yerelleştirilmiş fallback metinleri ve retry sözle
   assert.match(SEB_SRC, /native\.error\.screenBody/);
   assert.match(SEB_SRC, /tr\("ui\.retry"\)/);
   // Fallback svg-bağımsız: EmptyState (→ Icon → react-native-svg) import EDİLMEZ (mobile-crash2).
-  assert.doesNotMatch(SEB_SRC, /import[^;]*\bEmptyState\b[^;]*from/, "EmptyState import edilmemeli (svg-bağımsız)");
+  assert.doesNotMatch(
+    SEB_SRC,
+    /import[^;]*\bEmptyState\b[^;]*from/,
+    "EmptyState import edilmemeli (svg-bağımsız)",
+  );
   assert.doesNotMatch(SEB_SRC, /<EmptyState/, "fallback JSX'inde EmptyState kullanılmamalı");
   // Kök ErrorBoundary son çare olarak korunur (App.tsx hâlâ sarar).
   const app = fs.readFileSync(path.join(MOBILE, "..", "App.tsx"), "utf8");
   assert.match(app, /<ErrorBoundary>\s*<App \/>\s*<\/ErrorBoundary>/);
-  assert.match(app, /<ScreenErrorBoundary name=\{tab\}>\{renderTab\(tab\)\}<\/ScreenErrorBoundary>/);
+  assert.match(
+    app,
+    /<ScreenErrorBoundary name=\{tab\}>\{renderTab\(tab\)\}<\/ScreenErrorBoundary>/,
+  );
   assert.match(app, /<ScreenErrorBoundary name=\{top\}>/, "yığın ekranı da sarılır");
   assert.match(app, /<ScreenErrorBoundary name="onboarding">/, "tanıtım da sarılır");
   // Kabuk bileşenleri (her zaman mount, per-screen sınır DIŞI) de ayrı sınırlarla sarılır; biri
   // çökse de kök "Bir şeyler ters gitti" tetiklenmez (mobile-crash2 adım 1).
   for (const name of ["paywall", "reminder", "shared", "tabbar"])
-    assert.match(app, new RegExp(`<ScreenErrorBoundary name="${name}">`), `${name} kabuğu sarılmalı`);
+    assert.match(
+      app,
+      new RegExp(`<ScreenErrorBoundary name="${name}">`),
+      `${name} kabuğu sarılmalı`,
+    );
 });
 
 // Gerçek ScreenErrorBoundary sınıfını, RN primitive'lerini hafif stub'lara (React.createElement
@@ -188,7 +199,10 @@ test("ScreenErrorBoundary: children çizer, throw'u yakalar, fallback + retry g�
   const childEl = React.createElement("child-content", null, "yüklendi");
   const inst = new ScreenErrorBoundary({ children: childEl, name: "explore" });
   inst.setState = function (updater) {
-    this.state = { ...this.state, ...(typeof updater === "function" ? updater(this.state) : updater) };
+    this.state = {
+      ...this.state,
+      ...(typeof updater === "function" ? updater(this.state) : updater),
+    };
   };
   let out = inst.render();
   assert.equal(out.type, React.Fragment, "sağlıklı durumda Fragment");
@@ -205,7 +219,11 @@ test("ScreenErrorBoundary: children çizer, throw'u yakalar, fallback + retry g�
   // yalnız saf RN Txt + Button. Böylece react-native-svg eksik olsa bile fallback yeniden throw etmez.
   inst.state = { hasError: true, error: err, resetKey: 0 };
   out = inst.render();
-  assert.equal(findMarker(out, "EmptyState"), null, "fallback EmptyState/Icon KULLANMAZ (svg-bağımsız)");
+  assert.equal(
+    findMarker(out, "EmptyState"),
+    null,
+    "fallback EmptyState/Icon KULLANMAZ (svg-bağımsız)",
+  );
   const titleTxt = findMarker(out, "Txt");
   assert.ok(titleTxt, "fallback saf RN Txt ile başlık çizer");
   assert.equal(titleTxt.props.children, i18n.NATIVE_TR["native.error.screenTitle"]);
@@ -263,7 +281,11 @@ test("nearby/currentPosition: fix varsa konum; reddedilince/throw → null (thro
       location: { last: { coords: { latitude: 41.0, longitude: 29.0 } } },
     },
   });
-  assert.deepEqual(plain(await near.currentPosition()), { lat: 41.0, lng: 29.0 }, "son bilinen konum");
+  assert.deepEqual(
+    plain(await near.currentPosition()),
+    { lat: 41.0, lng: 29.0 },
+    "son bilinen konum",
+  );
 
   const near2 = loadWrapper("services/nearby.ts", alias, {
     __expo: { location: { last: null, current: { coords: { latitude: 1, longitude: 2 } } } },
@@ -441,7 +463,11 @@ test("native-selfcheck: kullanılan tüm yöntemler mevcutken ok; eksik/yanlış
 
   // Bir yöntem tanımsız (taşınmış/yanlış import) → yakalanır (klasik 'object is not a function').
   const broken = selfcheck.checkNativeModules([
-    { module: "expo-haptics", ns: { selectionAsync: undefined }, members: [{ name: "selectionAsync", kind: "function" }] },
+    {
+      module: "expo-haptics",
+      ns: { selectionAsync: undefined },
+      members: [{ name: "selectionAsync", kind: "function" }],
+    },
   ]);
   assert.equal(broken.ok, false);
   assert.deepEqual(plain(broken.missing), ["expo-haptics.selectionAsync"]);

@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { tripStore, type ActiveRoute } from "../services/tripStore";
-import {
-  Button,
-  Card,
-  ConfirmDialog,
-  IconButton,
-  ModalFrame,
-  TextField,
-  Txt,
-} from "../ui";
+import { Button, Card, ConfirmDialog, IconButton, ModalFrame, TextField, Txt } from "../ui";
 import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
 
@@ -81,11 +73,7 @@ export function RouteManagerSheet({
             <Txt variant="label" tone="muted">
               {tr("trip.day.stops", { n: routes.length })}
             </Txt>
-            <Button
-              label={tr("planner.trips.new")}
-              size="sm"
-              onPress={() => setCreating(true)}
-            />
+            <Button label={tr("planner.trips.new")} size="sm" onPress={() => setCreating(true)} />
           </View>
 
           {routes.length === 0 ? (

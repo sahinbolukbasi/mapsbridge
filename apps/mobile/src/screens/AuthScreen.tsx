@@ -377,11 +377,7 @@ export function AuthScreen({
                   <Button
                     variant="ghost"
                     size="sm"
-                    label={
-                      showPassword
-                        ? tr("edit.pw.hide")
-                        : tr("edit.pw.show")
-                    }
+                    label={showPassword ? tr("edit.pw.hide") : tr("edit.pw.show")}
                     icon={
                       <Icon
                         name={showPassword ? "eye-off" : "eye"}

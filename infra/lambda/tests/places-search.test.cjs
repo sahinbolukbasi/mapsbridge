@@ -391,7 +391,12 @@ test("Google ayrıntı: sınırlı fotoğraf (≤3) çözülür, atıf/boyut ta�
                 userRatingCount: 1200,
                 reviews: [{ rating: 5, text: { text: "Harika" } }],
                 photos: [
-                  { name: "places/g1/photos/a", widthPx: 800, heightPx: 600, authorAttributions: [{ displayName: "Ali" }] },
+                  {
+                    name: "places/g1/photos/a",
+                    widthPx: 800,
+                    heightPx: 600,
+                    authorAttributions: [{ displayName: "Ali" }],
+                  },
                   { name: "places/g1/photos/b" },
                   { name: "places/g1/photos/c" },
                   { name: "places/g1/photos/d" },
@@ -406,7 +411,10 @@ test("Google ayrıntı: sınırlı fotoğraf (≤3) çözülür, atıf/boyut ta�
   );
   assert.equal(MAX_DETAIL_PHOTOS, 3);
   assert.ok(DETAIL_FIELD_MASK.includes("photos"), "ayrıntı maskesinde photos var");
-  assert.ok(!/photos|rating|reviews/.test(SEARCH_FIELD_MASK), "arama maskesinde foto/puan/yorum yok");
+  assert.ok(
+    !/photos|rating|reviews/.test(SEARCH_FIELD_MASK),
+    "arama maskesinde foto/puan/yorum yok",
+  );
 
   // Ayrıntı: puan + yorum + sınırlı foto döner.
   const detail = await googlePlaces.run({
@@ -432,7 +440,10 @@ test("Google ayrıntı: sınırlı fotoğraf (≤3) çözülür, atıf/boyut ta�
   await googlePlaces.run({ op: "search", q: "kahve", lang: "tr" });
   await googlePlaces.run({ op: "nearby", lat: 41, lng: 29, radius: 800, lang: "tr" });
   assert.equal(seen.filter((s) => s.url.includes("/media")).length, 0, "arama/yakın foto çözmez");
-  assert.ok(seen.every((s) => s.mask === SEARCH_FIELD_MASK), "arama/yakın dar maske");
+  assert.ok(
+    seen.every((s) => s.mask === SEARCH_FIELD_MASK),
+    "arama/yakın dar maske",
+  );
 });
 
 test("Google ayrıntı: fotoğraf alanı yoksa photos anahtarı hiç yazılmaz (I1/I10)", async () => {
@@ -469,7 +480,9 @@ test("Google ayrıntısı akışı: puan+yorum+foto döner; Amazon (googleConfig
       rating: 4.7,
       userRatingCount: 500,
       reviews: [{ author: "Ece", rating: 5, text: "Güzel" }],
-      photos: [{ url: "https://lh3.googleusercontent.com/x", attribution: "Ece", width: 800, height: 600 }],
+      photos: [
+        { url: "https://lh3.googleusercontent.com/x", attribution: "Ece", width: 800, height: 600 },
+      ],
     }),
   ]);
   const { load } = harness();
@@ -478,11 +491,7 @@ test("Google ayrıntısı akışı: puan+yorum+foto döner; Amazon (googleConfig
     control: { googleEnabled: true, userDailyLimit: 300, monthlyGoogleCalls: 10 },
   });
   const deps = { repo, providers: { google }, googleConfigured: true, now: () => NOW };
-  const res = await svc.runPlaces(
-    { action: "detail", id: "g1", provider: "google" },
-    user,
-    deps,
-  );
+  const res = await svc.runPlaces({ action: "detail", id: "g1", provider: "google" }, user, deps);
   assert.equal(res.body.provider, "google");
   assert.equal(res.body.places[0].rating, 4.7);
   assert.equal(res.body.places[0].reviews.length, 1);
@@ -500,11 +509,12 @@ test("Google ayrıntısı akışı: puan+yorum+foto döner; Amazon (googleConfig
 
   // Amazon ayrıntısı (googleConfigured=false): puan/yorum/foto yok.
   const amazon = fakeProvider("amazon", [PLACE({ id: "a1", provider: "amazon" })]);
-  const res2 = await svc.runPlaces(
-    { action: "detail", id: "a1", provider: "amazon" },
-    user,
-    { repo: memoryRepo(), providers: { amazon }, googleConfigured: false, now: () => NOW },
-  );
+  const res2 = await svc.runPlaces({ action: "detail", id: "a1", provider: "amazon" }, user, {
+    repo: memoryRepo(),
+    providers: { amazon },
+    googleConfigured: false,
+    now: () => NOW,
+  });
   assert.equal(res2.body.provider, "amazon");
   assert.equal(res2.body.places[0].rating, undefined);
   assert.equal(res2.body.places[0].reviews, undefined);

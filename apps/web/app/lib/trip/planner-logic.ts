@@ -122,9 +122,7 @@ export function dayBufferRatio(
  * Eşik I9 ile aynı (%20): tampon bunun altına inince gün "dolu" sayılır. shiftStop için seçilen
  * durak günün SON durağıdır (sıra listenin verildiği sıradır) — deterministik ve geri alınabilir.
  */
-export type DayFullSuggestion =
-  | { kind: "addExtra" }
-  | { kind: "shiftStop"; pinId: string };
+export type DayFullSuggestion = { kind: "addExtra" } | { kind: "shiftStop"; pinId: string };
 
 /** U6/I9 eşiği: aktif pencere tamponu bunun altındaysa gün "dolu". */
 export const DAY_FULL_BUFFER_THRESHOLD = 0.2;
@@ -140,7 +138,8 @@ export function dayFullSuggestion(
   // Bacak eksik / pencere yok → hesaplanamaz, öneri yok (I1/I2).
   if (buffer === null) return null;
   // Tampon eşiğin altındaysa son durağı başka güne kaydır; değilse öneri yok.
-  if (buffer <= DAY_FULL_BUFFER_THRESHOLD) return { kind: "shiftStop", pinId: stops[stops.length - 1].id };
+  if (buffer <= DAY_FULL_BUFFER_THRESHOLD)
+    return { kind: "shiftStop", pinId: stops[stops.length - 1].id };
   return null;
 }
 

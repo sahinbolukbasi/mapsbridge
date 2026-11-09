@@ -65,7 +65,12 @@ export function mapNearby(
     if (category) item.category = category;
     const address = text(p.address);
     if (address) item.address = address;
-    if (typeof p.rating === "number" && Number.isFinite(p.rating) && p.rating >= 0 && p.rating <= 5) {
+    if (
+      typeof p.rating === "number" &&
+      Number.isFinite(p.rating) &&
+      p.rating >= 0 &&
+      p.rating <= 5
+    ) {
       item.rating = p.rating;
       if (typeof p.userRatingCount === "number" && Number.isFinite(p.userRatingCount))
         item.userRatingCount = Math.round(p.userRatingCount);

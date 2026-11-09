@@ -411,11 +411,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           title={tr("nav.ai")}
           right={
             <View style={styles.headerActions}>
-              <IconButton
-                icon="clock"
-                label={tr("native.ai.history.open")}
-                onPress={openHistory}
-              />
+              <IconButton icon="clock" label={tr("native.ai.history.open")} onPress={openHistory} />
               <IconButton icon="plus" label={tr("native.ai.newChat")} onPress={newChat} />
             </View>
           }

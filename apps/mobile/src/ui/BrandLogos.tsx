@@ -31,7 +31,13 @@ export function GoogleLogo({ size = 18 }: { size?: number }) {
   );
 }
 
-export function AppleLogo({ size = 18, color = tokens.color.text }: { size?: number; color?: string }) {
+export function AppleLogo({
+  size = 18,
+  color = tokens.color.text,
+}: {
+  size?: number;
+  color?: string;
+}) {
   return (
     <Svg width={size} height={size} viewBox="0 0 170 170" accessibilityElementsHidden>
       <Path

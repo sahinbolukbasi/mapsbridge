@@ -167,12 +167,7 @@ export default function PinDirectionsPage() {
                 />
               )}
             </Field>
-            <Button
-              type="submit"
-              fullWidth
-              size="lg"
-              iconEnd={<Icon name="arrow" size={20} />}
-            >
+            <Button type="submit" fullWidth size="lg" iconEnd={<Icon name="arrow" size={20} />}>
               {t("p.lookup.submit", "Yol tarifini aç")}
             </Button>
           </form>
@@ -183,9 +178,7 @@ export default function PinDirectionsPage() {
             <div className="pin-dest__head">
               <Badge tone="success">{t("p.dest.badge", "Varış noktası")}</Badge>
             </div>
-            <p className="pin-dest__label">
-              {pin.label || t("p.dest.unnamed", "Seçilen durak")}
-            </p>
+            <p className="pin-dest__label">{pin.label || t("p.dest.unnamed", "Seçilen durak")}</p>
             <p className="pin-dest__coords">{coordLabel}</p>
 
             <div className="pin-geo" role="status">

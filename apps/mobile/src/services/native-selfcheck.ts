@@ -134,13 +134,7 @@ const SPECS: readonly ModuleSpec[] = [
   {
     module: "@react-native-async-storage/async-storage",
     ns: AsyncStorage,
-    members: [
-      fn("getItem"),
-      fn("setItem"),
-      fn("removeItem"),
-      fn("multiGet"),
-      fn("clear"),
-    ],
+    members: [fn("getItem"), fn("setItem"), fn("removeItem"), fn("multiGet"), fn("clear")],
   },
 ];
 

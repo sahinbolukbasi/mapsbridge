@@ -107,8 +107,7 @@ export function pinPopupModel(pin: Pin, detail?: ApiPlace | null): PinPopupModel
     if (count !== undefined && count >= 0 && model.rating !== undefined)
       model.userRatingCount = Math.round(count);
     const photos = (detail.photos || []).filter(
-      (p): p is ApiPlacePhoto =>
-        !!p && typeof p.url === "string" && /^https?:\/\//.test(p.url),
+      (p): p is ApiPlacePhoto => !!p && typeof p.url === "string" && /^https?:\/\//.test(p.url),
     );
     if (photos.length) model.photos = photos;
     const attr = text(detail.attribution);

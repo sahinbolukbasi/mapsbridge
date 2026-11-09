@@ -49,8 +49,8 @@ export default function Privacy() {
           </li>
           <li>
             <strong>Face ID / parmak izi (uygulama kilidi):</strong> isteğe bağlıdır ve varsayılan
-            olarak kapalıdır. Kimlik doğrulaması cihazında yapılır; hiçbir biyometrik veri uygulamaya
-            ya da sunucuya ulaşmaz.
+            olarak kapalıdır. Kimlik doğrulaması cihazında yapılır; hiçbir biyometrik veri
+            uygulamaya ya da sunucuya ulaşmaz.
           </li>
           <li>
             <strong>Bildirimler:</strong> yalnızca cihazında zamanlanan yerel rota hatırlatmaları

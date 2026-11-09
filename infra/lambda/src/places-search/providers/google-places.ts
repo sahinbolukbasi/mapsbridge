@@ -150,14 +150,11 @@ const resolvePhotoUrl: PhotoResolver = async (name) => {
   const key = await apiKey();
   let res: Response;
   try {
-    res = await fetch(
-      `${BASE}/${name}/media?maxWidthPx=${PHOTO_MAX_WIDTH}&skipHttpRedirect=true`,
-      {
-        method: "GET",
-        headers: { "X-Goog-Api-Key": key },
-        signal: AbortSignal.timeout(3500),
-      },
-    );
+    res = await fetch(`${BASE}/${name}/media?maxWidthPx=${PHOTO_MAX_WIDTH}&skipHttpRedirect=true`, {
+      method: "GET",
+      headers: { "X-Goog-Api-Key": key },
+      signal: AbortSignal.timeout(3500),
+    });
   } catch {
     return null;
   }

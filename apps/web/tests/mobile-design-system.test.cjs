@@ -592,7 +592,10 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
   ])
     assert.ok(apiCats.includes(cat), `zorunlu-gerekçe API kategorisi ${cat}`);
   for (const entry of pm.NSPrivacyAccessedAPITypes)
-    assert.ok(entry.NSPrivacyAccessedAPITypeReasons.length > 0, `${entry.NSPrivacyAccessedAPIType} gerekçe`);
+    assert.ok(
+      entry.NSPrivacyAccessedAPITypeReasons.length > 0,
+      `${entry.NSPrivacyAccessedAPIType} gerekçe`,
+    );
   const dataTypes = pm.NSPrivacyCollectedDataTypes.map((d) => d.NSPrivacyCollectedDataType);
   for (const t of [
     "NSPrivacyCollectedDataTypePreciseLocation",
@@ -602,7 +605,11 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
     assert.ok(dataTypes.includes(t), `toplanan veri tipi ${t}`);
   // Hiçbir toplanan veri izleme (tracking) için kullanılmaz (I8/KVKK).
   for (const d of pm.NSPrivacyCollectedDataTypes)
-    assert.equal(d.NSPrivacyCollectedDataTypeTracking, false, `${d.NSPrivacyCollectedDataType} izleme değil`);
+    assert.equal(
+      d.NSPrivacyCollectedDataTypeTracking,
+      false,
+      `${d.NSPrivacyCollectedDataType} izleme değil`,
+    );
 });
 // ── ITMS-90683 kalıcı kalkan: RESOLVED `npx expo config` ios.infoPlist tüm NS* purpose string'leri içerir ──
 test("ITMS-90683 kalkanı: çözümlenmiş Info.plist tüm zorunlu purpose string'leri taşır", () => {
@@ -628,7 +635,8 @@ test("ITMS-90683 kalkanı: çözümlenmiş Info.plist tüm zorunlu purpose strin
     infoPlist = JSON.parse(out).ios.infoPlist;
   } catch {
     source = "deterministik birleştirme (app.json ios.infoPlist)";
-    infoPlist = JSON.parse(fs.readFileSync(path.join(mobile, "app.json"), "utf8")).expo.ios.infoPlist;
+    infoPlist = JSON.parse(fs.readFileSync(path.join(mobile, "app.json"), "utf8")).expo.ios
+      .infoPlist;
   }
   for (const k of required)
     assert.ok(

@@ -13,10 +13,11 @@ export function MiniRouteMap({ route }: { route: UnifiedRoutePlan }) {
   const { t } = useLocale();
   const model = routeMiniMap(route);
   if (!model) return null;
-  const caption = fill(
-    t("studio.map.caption", "{title} · {days} gün · {stops} durak"),
-    { title: model.title, days: model.dayCount, stops: model.stopCount },
-  );
+  const caption = fill(t("studio.map.caption", "{title} · {days} gün · {stops} durak"), {
+    title: model.title,
+    days: model.dayCount,
+    stops: model.stopCount,
+  });
   return (
     <figure className="as-studio__minimap">
       <svg
