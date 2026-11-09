@@ -9,6 +9,7 @@ import {
   StyleSheet,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { tripStore, type ActiveRoute, type TripStop } from "../services/tripStore";
@@ -66,6 +67,7 @@ import { pinPopupModel } from "../trip/pin-popup";
 import { stopToPin } from "../trip/models";
 import { centroid } from "../trip/discovery-rank";
 import { DiscoverPanel, type DiscoverAdd } from "../components/DiscoverPanel";
+import { RouteManagerSheet } from "../components/RouteManagerSheet";
 import { NearbyList, type NearbyAddPlace } from "../components/NearbyList";
 import { usePermission } from "../components/PermissionPrompt";
 import { readTile, storeTile } from "../services/tile-cache";
@@ -238,6 +240,10 @@ export function MapScreen({
   onRequireAuth,
 }: MapScreenProps) {
   const [route, setRoute] = useState<ActiveRoute>(tripStore.getActiveRoute());
+  // G3: duraklar yatay kaydırılır; her sayfa ekran genişliğinin ~%84'ü (komşu kart hafif görünür,
+  // kaydırılabilirlik ipucu). BottomSheet içinde güvenli: pencere genişliğine oranlı sabit piksel.
+  const { width: windowWidth } = useWindowDimensions();
+  const stopPageWidth = Math.round(windowWidth * 0.84);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [legs, setLegs] = useState<Legs>({ key: "", legs: null });
   const [query, setQuery] = useState("");
@@ -249,6 +255,7 @@ export function MapScreen({
   const [candidateDay, setCandidateDay] = useState<number | null>(null);
   const [looking, setLooking] = useState(false);
   const [mode, setMode] = useState<"edit" | "discover">("edit");
+  const [routeManagerOpen, setRouteManagerOpen] = useState(false); // G2
   const [pool, setPool] = useState<TripStop[]>(tripStore.getSavedPool());
   const [discovered, setDiscovered] = useState<DiscoverAdd[]>([]);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
@@ -827,6 +834,13 @@ export function MapScreen({
             onPress={onOpenPlan}
             style={styles.floating}
           />
+          {/* G2: rota yönetimi (yeni/adını düzenle/sil/paylaş) — kapatılabilir alt sayfa. */}
+          <IconButton
+            icon="route"
+            label={tr("planner.trips.manage")}
+            onPress={() => setRouteManagerOpen(true)}
+            style={styles.floating}
+          />
           <View style={styles.search}>
             <TextInput
               value={query}
@@ -1000,12 +1014,13 @@ export function MapScreen({
                     {tr("planner.facts.source", { name: candidate.attribution })}
                   </Txt>
                 ) : null}
-                {/* U1: tıklanan noktada ne var + yakında ne var. */}
+                {/* U1: tıklanan noktada ne var + yakında ne var (G4: kompakt). */}
                 <NearbyList
                   lat={candidate.lat}
                   lng={candidate.lng}
                   addDay={addDay}
                   onAdd={addNearby}
+                  compact
                   onFocus={(lat, lng, label) =>
                     inject(
                       `window.setTempPin && window.setTempPin(${lat}, ${lng}, ${JSON.stringify(label)})`,
@@ -1103,9 +1118,20 @@ export function MapScreen({
                   </Txt>
                 </View>
               ) : (
-                <View>
+                /* G3: duraklar yatay (sola/sağa) kaydırılır — dikey liste yerine sayfalı şerit.
+                   StopRow prop sözlüğü değişmez (parite). Yürüme süresi karta altına Connector
+                   ile verilir (son durak hariç). onMove erişilebilir sıralama alternatifidir (R9). */
+                <ScrollView
+                  horizontal
+                  pagingEnabled={false}
+                  showsHorizontalScrollIndicator={false}
+                  snapToInterval={stopPageWidth + tokens.space["2"]}
+                  decelerationRate="fast"
+                  contentContainerStyle={styles.stopsStrip}
+                  accessibilityLabel={tr("planner.sheet.label")}
+                >
                   {route.stops.map((stop, i) => (
-                    <View key={stop.id}>
+                    <View key={stop.id} style={{ width: stopPageWidth }}>
                       <StopRow
                         index={i + 1}
                         day={multiDay ? stopDay(stop, day) : day}
@@ -1137,7 +1163,7 @@ export function MapScreen({
                       ) : null}
                     </View>
                   ))}
-                </View>
+                </ScrollView>
               )}
 
               {selected ? (
@@ -1194,12 +1220,13 @@ export function MapScreen({
                         onPress={() => setConfirmDelete(selected)}
                       />
                     </View>
-                    {/* U2: durak ayrıntısında yakında ne var. */}
+                    {/* U2: durak ayrıntısında yakında ne var (G4: kompakt). */}
                     <NearbyList
                       lat={selected.lat}
                       lng={selected.lng}
                       addDay={addDay}
                       onAdd={addNearby}
+                      compact
                       onFocus={(lat, lng, label) =>
                         inject(
                           `window.setTempPin && window.setTempPin(${lat}, ${lng}, ${JSON.stringify(label)})`,
@@ -1363,6 +1390,16 @@ export function MapScreen({
       ) : null}
       {locationPerm.element}
       {notifyPerm.element}
+      <RouteManagerSheet
+        visible={routeManagerOpen}
+        onClose={() => setRouteManagerOpen(false)}
+        onOpenRoute={() => setRouteManagerOpen(false)}
+        onShare={() => {
+          setRouteManagerOpen(false);
+          void share();
+        }}
+        guest={guest}
+      />
       <ScreenTourModal screen="map" />
     </View>
   );
@@ -1401,6 +1438,7 @@ const styles = StyleSheet.create({
   badgeRow: { alignItems: "center", paddingTop: tokens.space["2"] },
   sheet: { padding: tokens.space["4"], paddingBottom: tokens.space["16"], gap: tokens.space["3"] },
   cardBody: { gap: tokens.space["2"] },
+  stopsStrip: { gap: tokens.space["2"], paddingVertical: tokens.space["1"] },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["2"] },
   suggest: { gap: tokens.space["2"] },
   poolRow: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },

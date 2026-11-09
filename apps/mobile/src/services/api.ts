@@ -669,7 +669,8 @@ export const aiService = {
     conversationId?: string;
   } | null> {
     try {
-      return await apiRequest("/ai/route-planner");
+      // GET oturum/geçmiş: gateway'de GET yalnız /ai/chat'te kayıtlı (route-planner POST-only).
+      return await apiRequest("/ai/chat");
     } catch (e) {
       console.warn("[aiService] getLatestSession error:", e);
       return null;
@@ -701,10 +702,28 @@ export const aiService = {
     conversationId?: string;
   } | null> {
     try {
-      return await apiRequest(`/ai/route-planner?conversationId=${encodeURIComponent(convId)}`);
+      return await apiRequest(`/ai/chat?conversationId=${encodeURIComponent(convId)}`);
     } catch (e) {
       console.warn("[aiService] getSession error:", e);
       return null;
+    }
+  },
+  // G5: geçmiş sohbetlerin listesi (backend op=conversations; salt okunur). Boş dizi = geçmiş yok.
+  async listConversations(): Promise<
+    Array<{ conversationId: string; destination: string | null; updatedAt: string | null }>
+  > {
+    try {
+      const res = await apiRequest<{
+        conversations?: Array<{
+          conversationId: string;
+          destination: string | null;
+          updatedAt: string | null;
+        }>;
+      }>("/ai/chat?op=conversations");
+      return res?.conversations ?? [];
+    } catch (e) {
+      console.warn("[aiService] listConversations error:", e);
+      return [];
     }
   },
 };

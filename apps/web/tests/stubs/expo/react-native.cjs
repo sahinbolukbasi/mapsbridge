@@ -2,7 +2,7 @@
 // dokunduğu yüzeyler taklit edilir. Davranış globalThis.__expo ile sürülmez (RN değil); sabittir.
 const noop = () => {};
 
-const Platform = { OS: "ios", select: (o) => (o && (o.ios ?? o.default)) };
+const Platform = { OS: "ios", select: (o) => o && (o.ios ?? o.default) };
 
 const Linking = {
   openSettings: async () => undefined,

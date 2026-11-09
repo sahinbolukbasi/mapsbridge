@@ -64,10 +64,7 @@ test("sabit 3 duraklı rota: sabit viewBox, 3 nokta, path noktaları birleştiri
 
 test("aynı girdi → aynı çıktı (deterministik, I2)", () => {
   const build = () =>
-    route(
-      [stop("s1", 41.89, 12.49, 1), stop("s2", 41.9, 12.48, 1), stop("s3", 41.91, 12.5, 2)],
-      2,
-    );
+    route([stop("s1", 41.89, 12.49, 1), stop("s2", 41.9, 12.48, 1), stop("s3", 41.91, 12.5, 2)], 2);
   assert.deepEqual(routeMiniMap(build()), routeMiniMap(build()));
 });
 

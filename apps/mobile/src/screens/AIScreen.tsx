@@ -17,14 +17,17 @@ import {
   Button,
   Card,
   ComposerBar,
+  EmptyState,
   IconButton,
   MessageBubble,
   MessageLog,
+  ModalFrame,
   Notice,
   QuestionCard,
   Screen,
   ScreenHeader,
   SegmentedControl,
+  Skeleton,
   StopRow,
   Txt,
   useToast,
@@ -171,6 +174,12 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
   const [prep, setPrep] = useState<PrepCard[]>([]);
   const [guestDraft, setGuestDraft] = useState<GuestDraft | null>(null);
   const [conversationId, setConversationId] = useState(() => `conv-${Date.now()}`);
+  // G5: geçmiş sohbetler sayfası (açık/kapalı + liste + yükleniyor).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyItems, setHistoryItems] = useState<
+    Array<{ conversationId: string; destination: string | null; updatedAt: string | null }>
+  >([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const history = useRef<Array<{ role: "user" | "assistant"; content: string }>>([]);
   const sending = useRef(false);
   const pendingTurn = useRef<{ text: string; requestId: string } | null>(null);
@@ -189,56 +198,68 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
     };
   }, [owner]);
 
-  // Sunucudaki son sohbet (bugünkü davranış). Rota otomatik olarak plana YAZILMAZ; kart
-  // "Haritada aç" ile açılır (eskiden her açılışta yeni bir rota oluşuyordu).
+  // G5: bir sohbeti (son ya da seçilen geçmiş) mesaj + rota + geçmişe uygular. Rota otomatik
+  // plana YAZILMAZ; kart "Haritada aç" ile açılır. getLatestSession ve getSession aynı şekli döner.
+  const applyConversation = useCallback(
+    (
+      conv: NonNullable<Awaited<ReturnType<typeof aiService.getLatestSession>>>["conversation"],
+      id?: string,
+    ) => {
+      if (!conv?.messages?.length) return;
+      if (id) setConversationId(id);
+      const synced: ChatItem[] = conv.messages.map((m, idx) => ({
+        id: `sync-${idx}`,
+        sender: m.role === "user" ? "user" : "bot",
+        text: m.content,
+      }));
+      const r = conv.route;
+      if (r?.stops?.length) {
+        const stops: TripStop[] = r.stops
+          .filter((s) => Number.isFinite(s.lat) && Number.isFinite(s.lng))
+          .map((s, idx) => ({
+            id: s.id || `stop-${idx}`,
+            name: s.name,
+            category: s.category || tr("native.ai.defaultCategory"),
+            time: `${s.day || 1}. gün${s.timeSlot ? ` · ${s.timeSlot}` : ""}`,
+            duration: s.suggestedDuration || s.duration || "",
+            address: s.address || "",
+            lat: s.lat as number,
+            lng: s.lng as number,
+          }));
+        const lastBot = [...synced].reverse().find((m) => m.sender === "bot");
+        if (lastBot && stops.length)
+          lastBot.route = {
+            title:
+              r.title || tr("native.ai.routeTitle", { destination: r.destination ?? "" }).trim(),
+            stops,
+            days: [...new Set(stops.map(dayOf))],
+          };
+      }
+      history.current = conv.messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }))
+        .slice(-6);
+      setMessages(synced);
+    },
+    [],
+  );
+  // Sunucudaki son sohbet (bugünkü davranış).
   useEffect(() => {
     let alive = true;
     aiService
       .getLatestSession()
       .then((latest) => {
-        const conv = latest?.conversation;
-        if (!alive || !conv?.messages?.length) return;
-        const id = latest?.latestConversationId || latest?.conversationId;
-        if (id) setConversationId(id);
-        const synced: ChatItem[] = conv.messages.map((m, idx) => ({
-          id: `sync-${idx}`,
-          sender: m.role === "user" ? "user" : "bot",
-          text: m.content,
-        }));
-        const r = conv.route;
-        if (r?.stops?.length) {
-          const stops: TripStop[] = r.stops
-            .filter((s) => Number.isFinite(s.lat) && Number.isFinite(s.lng))
-            .map((s, idx) => ({
-              id: s.id || `stop-${idx}`,
-              name: s.name,
-              category: s.category || tr("native.ai.defaultCategory"),
-              time: `${s.day || 1}. gün${s.timeSlot ? ` · ${s.timeSlot}` : ""}`,
-              duration: s.suggestedDuration || s.duration || "",
-              address: s.address || "",
-              lat: s.lat as number,
-              lng: s.lng as number,
-            }));
-          const lastBot = [...synced].reverse().find((m) => m.sender === "bot");
-          if (lastBot && stops.length)
-            lastBot.route = {
-              title:
-                r.title || tr("native.ai.routeTitle", { destination: r.destination ?? "" }).trim(),
-              stops,
-              days: [...new Set(stops.map(dayOf))],
-            };
-        }
-        history.current = conv.messages
-          .filter((m) => m.role === "user" || m.role === "assistant")
-          .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }))
-          .slice(-6);
-        setMessages(synced);
+        if (!alive) return;
+        applyConversation(
+          latest?.conversation,
+          latest?.latestConversationId || latest?.conversationId,
+        );
       })
       .catch(() => undefined);
     return () => {
       alive = false;
     };
-  }, []);
+  }, [applyConversation]);
 
   const send = useCallback(
     async (raw: string, opts: { fromDraft?: boolean } = {}) => {
@@ -342,6 +363,33 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
     setMessages([{ ...WELCOME, id: `welcome-${Date.now()}` }]);
   };
 
+  const openHistory = useCallback(() => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    aiService
+      .listConversations()
+      .then((items) => setHistoryItems(items))
+      .catch(() => setHistoryItems([]))
+      .finally(() => setHistoryLoading(false));
+  }, []);
+  const loadConversation = useCallback(
+    (id: string) => {
+      setHistoryOpen(false);
+      aiService
+        .getSession(id)
+        .then((sess) => {
+          if (sess?.conversation?.messages?.length) {
+            setPrep([]);
+            setTab("chat");
+            applyConversation(sess.conversation, id);
+          } else {
+            toast.show({ tone: "warning", message: tr("native.ai.history.empty") });
+          }
+        })
+        .catch(() => toast.show({ tone: "danger", message: tr("ui.unexpectedError") }));
+    },
+    [applyConversation, toast],
+  );
   const openRoute = (msgId: string, plan: RoutePlan) => {
     const existing = opened.current.get(msgId);
     if (existing && tripStore.getAllRoutes().includes(existing)) {
@@ -361,7 +409,12 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
       header={
         <ScreenHeader
           title={tr("nav.ai")}
-          right={<IconButton icon="plus" label={tr("native.ai.newChat")} onPress={newChat} />}
+          right={
+            <View style={styles.headerActions}>
+              <IconButton icon="clock" label={tr("native.ai.history.open")} onPress={openHistory} />
+              <IconButton icon="plus" label={tr("native.ai.newChat")} onPress={newChat} />
+            </View>
+          }
         />
       }
     >
@@ -524,12 +577,49 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
         />
       </View>
       <RouteLoadingModal visible={routeLoading} onRunInBackground={() => setRouteLoading(false)} />
+      <ModalFrame
+        visible={historyOpen}
+        variant="sheet"
+        title={tr("native.ai.history.title")}
+        onRequestClose={() => setHistoryOpen(false)}
+      >
+        <ScrollView contentContainerStyle={styles.historyBody}>
+          {historyLoading ? (
+            <Skeleton variant="list-row" count={4} />
+          ) : historyItems.length === 0 ? (
+            <EmptyState icon="inbox" title={tr("native.ai.history.none")} />
+          ) : (
+            historyItems.map((c) => (
+              <Card
+                key={c.conversationId}
+                variant="bordered"
+                label={c.destination || tr("native.ai.history.untitled")}
+                onPress={() => loadConversation(c.conversationId)}
+              >
+                <View style={styles.historyRow}>
+                  <Txt variant="label" numberOfLines={1}>
+                    {c.destination || tr("native.ai.history.untitled")}
+                  </Txt>
+                  {c.updatedAt ? (
+                    <Txt variant="caption" tone="muted">
+                      {new Date(c.updatedAt).toLocaleDateString("tr-TR")}
+                    </Txt>
+                  ) : null}
+                </View>
+              </Card>
+            ))
+          )}
+        </ScrollView>
+      </ModalFrame>
       <ScreenTourModal screen="ai" />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  headerActions: { flexDirection: "row", alignItems: "center", gap: tokens.space["1"] },
+  historyBody: { padding: tokens.space["4"], gap: tokens.space["2"] },
+  historyRow: { gap: tokens.space["1"] },
   tabs: { paddingHorizontal: tokens.space["4"], paddingTop: tokens.space["3"] },
   prep: { padding: tokens.space["4"], gap: tokens.space["3"] },
   cardBody: { gap: tokens.space["2"] },

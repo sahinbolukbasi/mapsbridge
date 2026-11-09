@@ -77,10 +77,7 @@ export function PlaceFacts({ pin }: { pin: Pin }) {
         {t("planner.facts.title", "Yer bilgisi")}
       </h4>
       {m.photos && m.photos.length > 0 && (
-        <ul
-          className="planner-facts__photos"
-          aria-label={t("planner.facts.photos", "Fotoğraflar")}
-        >
+        <ul className="planner-facts__photos" aria-label={t("planner.facts.photos", "Fotoğraflar")}>
           {m.photos.map((photo, i) => (
             <li key={photo.url} className="planner-facts__photo">
               <Media

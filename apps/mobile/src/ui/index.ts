@@ -26,6 +26,7 @@ export { IconButton, hitSlopFor, type IconButtonProps } from "./IconButton";
 export { Card, type CardProps, type CardVariant } from "./Card";
 export { TextField, type TextFieldProps } from "./TextField";
 export { Icon, type IconName, type IconProps, type IconSize } from "./Icon";
+export { GoogleLogo, AppleLogo } from "./BrandLogos";
 export { Txt, type TxtProps, type TxtTone, type TxtVariant } from "./Txt";
 export { Chip, ChipGroup, type ChipProps, type ChipGroupProps } from "./Chip";
 export {

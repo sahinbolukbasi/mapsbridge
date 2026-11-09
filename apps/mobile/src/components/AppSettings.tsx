@@ -4,6 +4,7 @@ import { Card, HAPTICS_KEY, Txt, haptic, hapticsEnabled, setHapticsEnabled } fro
 import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
 import { storage } from "../services/storage";
+import { APP_BUILD, APP_VERSION } from "../constants/app-version";
 import {
   authenticate,
   biometricAvailable,
@@ -65,6 +66,12 @@ export function AppSettings() {
             trackColor={{ true: tokens.color.brand, false: tokens.color.borderStrong }}
           />
         </View>
+        {/* G13: en altta uygulama sürümü. */}
+        <View style={styles.versionRow}>
+          <Txt variant="caption" tone="subtle">
+            {tr("native.settings.version", { version: APP_VERSION, build: APP_BUILD })}
+          </Txt>
+        </View>
       </View>
     </Card>
   );
@@ -78,4 +85,5 @@ const styles = StyleSheet.create({
     minHeight: tokens.touch.min,
   },
   text: { flex: 1, gap: tokens.space["1"] },
+  versionRow: { alignItems: "center", paddingTop: tokens.space["1"] },
 });

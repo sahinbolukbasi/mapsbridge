@@ -9,6 +9,8 @@ import {
 import { chatStore, type ChatContact } from "../services/chatStore";
 import { EditPostModal } from "../components/EditPostModal";
 import { PostComposer } from "../components/PostComposer";
+import { currentPosition } from "../services/nearby";
+import { placesApi } from "../trip/places-api";
 import { LikeButton } from "../components/LikeButton";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import {
@@ -378,7 +380,7 @@ export function CommunityScreen({
                 <Txt variant="label">{c.displayName || c.user}</Txt>
                 <Txt variant="small">{c.text}</Txt>
                 <Txt variant="caption" tone="subtle">
-                  {c.time}
+                  {[c.time, c.location].filter(Boolean).join(" · ")}
                 </Txt>
               </View>
             ))
@@ -411,7 +413,24 @@ export function CommunityScreen({
                   if (!commentsFor || !comment.trim()) return;
                   let added;
                   try {
-                    added = await socialSyncService.addComment(commentsFor.id, comment.trim());
+                    // G8: yoruma cihaz konumundan yer etiketi turet (varsa); hata bloklanmaz.
+                    let location: string | undefined;
+                    try {
+                      const pos = await currentPosition();
+                      if (pos) {
+                        const { places } = await placesApi.reverse(pos.lat, pos.lng, "tr");
+                        const best = places?.[0];
+                        location =
+                          (best?.name || best?.address || "").trim().slice(0, 80) || undefined;
+                      }
+                    } catch {
+                      // konumsuz devam
+                    }
+                    added = await socialSyncService.addComment(
+                      commentsFor.id,
+                      comment.trim(),
+                      location,
+                    );
                   } catch {
                     setCommentError(tr("native.community.commentFailed"));
                     return;
@@ -469,6 +488,15 @@ export function CommunityScreen({
           }}
         />
       ) : null}
+      {/* G6: sol-altta kayan (+) — yorum/paylaşım oluşturma hızlı erişimi (misafir kapıya yönlenir). */}
+      <View style={styles.fab}>
+        <IconButton
+          icon="plus"
+          color={tokens.color.buttonPrimaryFg}
+          label={tr("community.newPost")}
+          onPress={() => requireMember("save", () => setComposeOpen(true))}
+        />
+      </View>
       <ScreenTourModal screen="community" />
     </Screen>
   );
@@ -482,5 +510,13 @@ const styles = StyleSheet.create({
   authorBtn: { alignSelf: "flex-start" },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["1"] },
   comment: { gap: tokens.space["1"] },
+  fab: {
+    position: "absolute",
+    left: tokens.space["4"],
+    bottom: tokens.space["6"],
+    backgroundColor: tokens.color.buttonPrimaryBg,
+    borderRadius: tokens.radius.full,
+    ...tokens.shadow.md,
+  },
   form: { padding: tokens.space["5"], gap: tokens.space["4"], paddingBottom: tokens.space["12"] },
 });

@@ -5,6 +5,7 @@ import { storage } from "../services/storage";
 import {
   Button,
   Card,
+  GoogleLogo,
   Icon,
   IconButton,
   Notice,
@@ -319,7 +320,7 @@ export function AuthScreen({
                   )}
                   variant="secondary"
                   size="lg"
-                  icon={<Icon name="globe" size={20} color={tokens.color.buttonSecondaryFg} />}
+                  icon={<GoogleLogo size={20} />}
                   onPress={onSelectGoogle}
                 />
                 <Txt variant="caption" tone="muted" align="center">
@@ -376,11 +377,7 @@ export function AuthScreen({
                   <Button
                     variant="ghost"
                     size="sm"
-                    label={
-                      showPassword
-                        ? tr("edit.pw.hide")
-                        : tr("edit.pw.show")
-                    }
+                    label={showPassword ? tr("edit.pw.hide") : tr("edit.pw.show")}
                     icon={
                       <Icon
                         name={showPassword ? "eye-off" : "eye"}

@@ -1214,9 +1214,7 @@ export default function AIPage() {
       setNotice(t("studio.optimize.none", "Rota sırası zaten en kısa sıraya yakın."));
       return;
     }
-    setSessions((s) =>
-      s.map((x) => (x.id === activeId ? { ...x, route: result.route } : x)),
-    );
+    setSessions((s) => s.map((x) => (x.id === activeId ? { ...x, route: result.route } : x)));
     setNotice(
       fill(t("studio.optimize.done", "Durak sırası güncellendi: yaklaşık {km} km daha kısa."), {
         km: String(result.savedDistanceKm).replace(".", ","),
@@ -1354,97 +1352,105 @@ export default function AIPage() {
               </div>
             ) : (
               <>
-            <div className="as-studio__sessions-top">
-            <Button
-              variant="primary"
-              fullWidth
-              iconStart={<Icon name="plus" size={16} />}
-              onClick={startNew}
-              disabled={busy}
-            >
-              {t("studio.new", "Yeni seyahat planla")}
-            </Button>
-            <IconButton
-              icon="chevron-left"
-              label={t("studio.sessions.collapse", "Sohbet geçmişini gizle")}
-              onClick={() => setSessionsCollapsed(true)}
-            />
-            </div>
-            <div className="as-studio__sessions-head">
-              <p className="as-studio__eyebrow">{t("studio.sessions.title", "Sohbet geçmişi")}</p>
-              {sessions.length > 0 && (
-                <span className="as-studio__meta">
-                  {fill(t("studio.sessions.count", "{n} kayıt"), { n: sessions.length })}
-                </span>
-              )}
-            </div>
-            {sessions.length ? (
-              <ul className="as-studio-history">
-                {sessions.map((s, idx) => {
-                  const active = s.id === activeId;
-                  const title = s.messages.length
-                    ? s.title
-                    : t("studio.sessions.untitled", "Yeni gezi");
-                  return (
-                    <li
-                      key={s.id}
-                      className="as-studio-history__item"
-                      data-active={active || undefined}
-                    >
-                      <button
-                        type="button"
-                        disabled={busy}
-                        className="as-studio-history__open"
-                        aria-current={active ? "true" : undefined}
-                        onClick={() => select(s.id)}
-                      >
-                        <Icon name={active ? "message" : "clock"} size={16} />
-                        <span className="as-studio-history__title">{title}</span>
-                        <span className="as-studio-history__code">
-                          {s.id.slice(0, 2).toUpperCase()}-{(idx + 1).toString().padStart(3, "0")}
-                        </span>
-                      </button>
-                      <IconButton
-                        icon="trash"
-                        size="sm"
-                        label={`${t("studio.sessions.delete", "Sohbeti sil")}: ${title}`}
-                        onClick={() => deleteSession(s.id)}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="as-studio__muted">
-                {t("studio.sessions.empty", "Birlikte ilk gezini planlayalım.")}
-              </p>
-            )}
-            <div className="as-studio__quota" data-surface="default">
-              <p className="as-studio__quota-title">
-                {wallet
-                  ? creditsLabel(t, wallet.credits)
-                  : t("studio.quota.fallback", "Seyahat danışmanın")}
-              </p>
-              <p className="as-studio__meta">{t("assistant.composer.costNote", CREDIT_NOTE_TR)}</p>
-              {wallet?.usage && (
-                <p className="as-studio__meta">
-                  {fill(
-                    t(
-                      "studio.quota.usage",
-                      "Bugün {used} / {limit} mesaj denemesi. Yenilenme: {time}.",
-                    ),
-                    {
-                      used: wallet.usage.requestsToday,
-                      limit: wallet.usage.dailyLimit,
-                      time: new Date(wallet.usage.resetsAt).toLocaleTimeString(dateLocale(locale), {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }),
-                    },
+                <div className="as-studio__sessions-top">
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    iconStart={<Icon name="plus" size={16} />}
+                    onClick={startNew}
+                    disabled={busy}
+                  >
+                    {t("studio.new", "Yeni seyahat planla")}
+                  </Button>
+                  <IconButton
+                    icon="chevron-left"
+                    label={t("studio.sessions.collapse", "Sohbet geçmişini gizle")}
+                    onClick={() => setSessionsCollapsed(true)}
+                  />
+                </div>
+                <div className="as-studio__sessions-head">
+                  <p className="as-studio__eyebrow">
+                    {t("studio.sessions.title", "Sohbet geçmişi")}
+                  </p>
+                  {sessions.length > 0 && (
+                    <span className="as-studio__meta">
+                      {fill(t("studio.sessions.count", "{n} kayıt"), { n: sessions.length })}
+                    </span>
                   )}
-                </p>
-              )}
-            </div>
+                </div>
+                {sessions.length ? (
+                  <ul className="as-studio-history">
+                    {sessions.map((s, idx) => {
+                      const active = s.id === activeId;
+                      const title = s.messages.length
+                        ? s.title
+                        : t("studio.sessions.untitled", "Yeni gezi");
+                      return (
+                        <li
+                          key={s.id}
+                          className="as-studio-history__item"
+                          data-active={active || undefined}
+                        >
+                          <button
+                            type="button"
+                            disabled={busy}
+                            className="as-studio-history__open"
+                            aria-current={active ? "true" : undefined}
+                            onClick={() => select(s.id)}
+                          >
+                            <Icon name={active ? "message" : "clock"} size={16} />
+                            <span className="as-studio-history__title">{title}</span>
+                            <span className="as-studio-history__code">
+                              {s.id.slice(0, 2).toUpperCase()}-
+                              {(idx + 1).toString().padStart(3, "0")}
+                            </span>
+                          </button>
+                          <IconButton
+                            icon="trash"
+                            size="sm"
+                            label={`${t("studio.sessions.delete", "Sohbeti sil")}: ${title}`}
+                            onClick={() => deleteSession(s.id)}
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="as-studio__muted">
+                    {t("studio.sessions.empty", "Birlikte ilk gezini planlayalım.")}
+                  </p>
+                )}
+                <div className="as-studio__quota" data-surface="default">
+                  <p className="as-studio__quota-title">
+                    {wallet
+                      ? creditsLabel(t, wallet.credits)
+                      : t("studio.quota.fallback", "Seyahat danışmanın")}
+                  </p>
+                  <p className="as-studio__meta">
+                    {t("assistant.composer.costNote", CREDIT_NOTE_TR)}
+                  </p>
+                  {wallet?.usage && (
+                    <p className="as-studio__meta">
+                      {fill(
+                        t(
+                          "studio.quota.usage",
+                          "Bugün {used} / {limit} mesaj denemesi. Yenilenme: {time}.",
+                        ),
+                        {
+                          used: wallet.usage.requestsToday,
+                          limit: wallet.usage.dailyLimit,
+                          time: new Date(wallet.usage.resetsAt).toLocaleTimeString(
+                            dateLocale(locale),
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          ),
+                        },
+                      )}
+                    </p>
+                  )}
+                </div>
               </>
             )}
           </aside>

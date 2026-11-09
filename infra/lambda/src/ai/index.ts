@@ -41,7 +41,10 @@ import {
   recordInteraction,
 } from "../billing/store";
 import { sanitizePreferences } from "../../../../apps/web/app/lib/ai/preferences";
-import { classifyAIError, isContextSizeError } from "../../../../apps/web/app/lib/ai/error-classifier";
+import {
+  classifyAIError,
+  isContextSizeError,
+} from "../../../../apps/web/app/lib/ai/error-classifier";
 import type { ConversationState } from "../../../../apps/web/app/lib/ai/planning";
 import {
   buildPersonalContext,
@@ -59,6 +62,7 @@ import {
 } from "../../../../apps/web/server/ai/memory-service";
 import { createHash } from "node:crypto";
 import { jsonResponse } from "../shared/http";
+import { listByPrefix } from "../shared/data";
 import { handlePlacesRequest } from "../places-search/handler";
 import { persistable } from "./persistable";
 interface Event {
@@ -118,6 +122,23 @@ async function handleRequest(event: Event) {
           usage: await aiUsage(user.sub),
           preferences: sanitizePreferences(await read(`USER#${user.sub}`, "AI_PREFERENCES")),
         });
+      }
+      // G5: geçmiş sohbetleri listele (?op=conversations). Salt okunur; kullanıcı yalnız kendi
+      // USER#<sub> altındaki AI_CHAT# öğelerini görür. Özet: id + varış + güncellenme (I1: uydurma yok).
+      if (queryParams.op === "conversations") {
+        const items = await listByPrefix(`USER#${user.sub}`, "AI_CHAT#", {
+          limit: 50,
+          scanForward: false,
+        });
+        const conversations = items
+          .map((it) => ({
+            conversationId: String(it.SK || "").replace(/^AI_CHAT#/, ""),
+            destination: typeof it.destination === "string" ? it.destination : null,
+            updatedAt: typeof it.updatedAt === "string" ? it.updatedAt : null,
+          }))
+          .filter((c) => c.conversationId)
+          .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+        return reply(200, { conversations });
       }
       const latest = await read(`USER#${user.sub}`, "AI_LATEST");
       let latestConversation = null;

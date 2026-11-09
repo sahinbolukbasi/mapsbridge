@@ -23,6 +23,10 @@ export interface MobileCommunityComment {
   displayName?: string;
   text: string;
   time: string;
+  /** G8: cihaz konumundan türetilen yer etiketi (varsa). KVKK: tek seferlik, saklanmaz. */
+  location?: string;
+  /** G8: gerçek zaman damgası (ISO); `time` bundan biçimlenir. */
+  createdAt?: string;
 }
 
 export interface MobileCommunityPost {
@@ -654,17 +658,28 @@ class SocialSyncService {
     // Sunucuda yeniden paylaşım ucu yok: yalnız bu cihazda sayılır.
     return updatedPost;
   }
-
-  async addComment(postId: string, text: string): Promise<MobileCommunityComment> {
+  // G8: konum cagiran ekranda turetilir (cihaz API); socialSync saf ve testlenebilir kalir.
+  async addComment(
+    postId: string,
+    text: string,
+    location?: string,
+  ): Promise<MobileCommunityComment> {
     const profile = await this.getUserProfile();
     const posts = await this.getPosts();
-
+    const now = new Date();
     const newComment: MobileCommunityComment = {
       id: `comment-${Date.now()}`,
       user: `@${profile.username}`,
       displayName: profile.fullName,
       text: text.trim(),
-      time: "Az önce",
+      time: now.toLocaleString("tr-TR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+      }),
+      createdAt: now.toISOString(),
+      ...(location ? { location } : {}),
     };
 
     const nextPosts = posts.map((post) => {

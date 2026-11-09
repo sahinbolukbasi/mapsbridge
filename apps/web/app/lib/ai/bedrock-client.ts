@@ -168,7 +168,13 @@ export async function invokeBedrockJSON<T>(
     // Girdi çok büyük (ValidationException / ContextBudgetError) belirsiz 503'e düşmesin;
     // çağırana kararlı kod taşınır (teşhis Öncelik A).
     const classified = classifyAIError(error);
-    return { success: false, data: null, model, error: "Model yanıtı alınamadı.", code: classified.code };
+    return {
+      success: false,
+      data: null,
+      model,
+      error: "Model yanıtı alınamadı.",
+      code: classified.code,
+    };
   } finally {
     const durationMs = Date.now() - started;
     const cost = recordModelUsage(

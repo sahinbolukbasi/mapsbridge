@@ -417,14 +417,20 @@ test("FEAT-012 (S6, S1, §7.1): mağaza/indir/yakında, EN POPÜLER, deneme ve k
   assert.deepEqual(offenders, [], offenders.join(", "));
 });
 
-test("Keşfet sekmesi mobilde kaldırıldı (F4); misafir Asistan'da başlar; Apple 'yakında' yok", () => {
+test("Keşfet sekmesi mobilde kaldırıldı (F4); hem misafir hem üye Planla (harita) ile başlar (G21); Apple 'yakında' yok", () => {
   const app = read("App.tsx");
   // Keşfet sekmesi mobilden kaldırıldı: App artık ExploreScreen render etmez.
   assert.doesNotMatch(app, /<ExploreScreen/);
   assert.doesNotMatch(app, /from "\.\/src\/screens\/ExploreScreen"/);
   assert.doesNotMatch(app, /WelcomeScreen|handleAppleSignIn|onSelectApple/);
-  // Misafir başlangıç sekmesi artık Asistan (explore yerine).
-  assert.match(app, /initialNav<MobileTab, MobileStackScreen>\("ai"\)/);
+  // Başlangıç sekmesi Planla (harita) — hem misafir hem üye (G21; explore kaldırıldı F4).
+  // G1: startNav("plan") plan kökünün üstüne "map" iter → açılışta ÖNCE harita gelir.
+  assert.match(app, /const \[nav, setNav\] = useState<Nav>\(\(\) => startNav\("plan"\)\)/);
+  assert.match(
+    app,
+    /tab === "plan"\s*\?\s*navReducer\(base, \{ type: "push", screen: "map" \}\)/,
+    "G1: plan sekmesi map önceden itilir",
+  );
   assert.doesNotMatch(code("src/screens/AuthScreen.tsx"), /Apple/);
 });
 
@@ -586,7 +592,10 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
   ])
     assert.ok(apiCats.includes(cat), `zorunlu-gerekçe API kategorisi ${cat}`);
   for (const entry of pm.NSPrivacyAccessedAPITypes)
-    assert.ok(entry.NSPrivacyAccessedAPITypeReasons.length > 0, `${entry.NSPrivacyAccessedAPIType} gerekçe`);
+    assert.ok(
+      entry.NSPrivacyAccessedAPITypeReasons.length > 0,
+      `${entry.NSPrivacyAccessedAPIType} gerekçe`,
+    );
   const dataTypes = pm.NSPrivacyCollectedDataTypes.map((d) => d.NSPrivacyCollectedDataType);
   for (const t of [
     "NSPrivacyCollectedDataTypePreciseLocation",
@@ -596,7 +605,11 @@ test("4.2: native paketler tam sürüm, app.json app.config.ts ile eşit, izin m
     assert.ok(dataTypes.includes(t), `toplanan veri tipi ${t}`);
   // Hiçbir toplanan veri izleme (tracking) için kullanılmaz (I8/KVKK).
   for (const d of pm.NSPrivacyCollectedDataTypes)
-    assert.equal(d.NSPrivacyCollectedDataTypeTracking, false, `${d.NSPrivacyCollectedDataType} izleme değil`);
+    assert.equal(
+      d.NSPrivacyCollectedDataTypeTracking,
+      false,
+      `${d.NSPrivacyCollectedDataType} izleme değil`,
+    );
 });
 // ── ITMS-90683 kalıcı kalkan: RESOLVED `npx expo config` ios.infoPlist tüm NS* purpose string'leri içerir ──
 test("ITMS-90683 kalkanı: çözümlenmiş Info.plist tüm zorunlu purpose string'leri taşır", () => {
@@ -622,7 +635,8 @@ test("ITMS-90683 kalkanı: çözümlenmiş Info.plist tüm zorunlu purpose strin
     infoPlist = JSON.parse(out).ios.infoPlist;
   } catch {
     source = "deterministik birleştirme (app.json ios.infoPlist)";
-    infoPlist = JSON.parse(fs.readFileSync(path.join(mobile, "app.json"), "utf8")).expo.ios.infoPlist;
+    infoPlist = JSON.parse(fs.readFileSync(path.join(mobile, "app.json"), "utf8")).expo.ios
+      .infoPlist;
   }
   for (const k of required)
     assert.ok(
@@ -697,7 +711,7 @@ test("4.7 (K4): derin bağlantı, paylaşım, Yakınımda, yerel bildirim, karo 
     "kilidi açarken doğrulama",
   );
   const pkg = JSON.parse(fs.readFileSync(path.join(mobile, "package.json"), "utf8"));
-  // Onaylı 7 paket kullanılıyor (ölü bağımlılık yok).
+  // Onaylı 8 paket kullanılıyor (ölü bağımlılık yok).
   const all = FILES.map(read).join("\n");
   for (const name of [
     "expo-haptics",
@@ -707,6 +721,7 @@ test("4.7 (K4): derin bağlantı, paylaşım, Yakınımda, yerel bildirim, karo 
     "expo-file-system",
     "expo-local-authentication",
     "expo-linking",
+    "expo-web-browser",
   ])
     assert.match(all, new RegExp(`from "${name}"`), `${name} kullanılmıyor`);
   assert.ok(

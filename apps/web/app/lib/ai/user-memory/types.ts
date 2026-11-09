@@ -53,8 +53,9 @@ export function isExplicitRememberRequest(text: string): boolean {
  * that requires explicit user consent before storage.
  */
 export function isSensitiveData(key: string, value: unknown): boolean {
+  // `alerj` Türkçe tek-l 'alerji/alerjik'i de yakalar; `allerg` İngilizce yazımı.
   const sensitivePatterns =
-    /sağlık|engellilik|disabled|health|din|religion|helal|halal|kosher|allerg/iu;
+    /sağlık|engellilik|disabled|health|din|religion|helal|halal|kosher|alerj|allerg/iu;
   return (
     sensitivePatterns.test(key) || (typeof value === "string" && sensitivePatterns.test(value))
   );

@@ -603,6 +603,7 @@
   "planner.trips.loadFailedBody": "Şimdilik bu cihazdaki rotalar gösteriliyor.",
   "planner.trips.name": "Rota adı",
   "planner.trips.new": "Yeni rota",
+  "planner.trips.manage": "Rota yönetimi",
   "planner.trips.title": "Rotalarım",
   "planner.trips.titleRequired": "Rota adı gerekli.",
   "planner.undo": "Geri al",

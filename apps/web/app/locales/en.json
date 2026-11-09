@@ -603,6 +603,7 @@
   "planner.trips.loadFailedBody": "Showing the routes on this device for now.",
   "planner.trips.name": "Route name",
   "planner.trips.new": "New route",
+  "planner.trips.manage": "Manage routes",
   "planner.trips.title": "My trips",
   "planner.trips.titleRequired": "Route name is required.",
   "planner.undo": "Undo",
