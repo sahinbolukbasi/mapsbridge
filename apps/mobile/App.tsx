@@ -174,10 +174,13 @@ export function App() {
   const toastRef = useRef<ToastApi | null>(null);
   const pendingLink = useRef<DeepLink | null>(null);
   const backgroundedAt = useRef<number | null>(null);
+  // Açılış öz-denetiminde eksik yerli üye bulunursa pasif (karartmayan) bir uyarı gösterilir.
+  const nativeDegraded = useRef(false);
   useEffect(() => {
     // Açılış öz-denetimi: yanlış/taşınmış bir yerli yöntem kullanıcı telefonunda render-time
     // throw olmadan burada yakalanır (dev'de görünür). Asla throw etmez.
-    runNativeSelfCheck();
+    const selfCheck = runNativeSelfCheck();
+    if (!selfCheck.ok) nativeDegraded.current = true;
     configureNotifications();
     const t = setTimeout(() => sweepTiles(), 3000);
     storage
@@ -733,25 +736,52 @@ export function App() {
               })}
           </View>
 
-          <View onLayout={(e) => setTabBarHeight(e.nativeEvent.layout.height)}>
-            <BottomTabBar tabs={tabs} activeTab={nav.tab} onSelectTab={selectTab} />
-          </View>
+          {/* Alt menü her zaman mount; native throw'u (ör. react-native-svg) kök sınıra
+              tırmanmasın diye ayrı sınır — çökerse menü boş kalır, uygulama ayakta. */}
+          <ScreenErrorBoundary name="tabbar">
+            <View onLayout={(e) => setTabBarHeight(e.nativeEvent.layout.height)}>
+              <BottomTabBar tabs={tabs} activeTab={nav.tab} onSelectTab={selectTab} />
+            </View>
+          </ScreenErrorBoundary>
 
+          {/* Kabuk bileşenleri (her zaman mount, per-screen sınır DIŞI): tekil hata sınırlarıyla
+              yerelleştirilir; birindeki native throw (react-native-purchases/webview/svg) kök
+              "Bir şeyler ters gitti" ekranını tetiklemesin (mobile-crash2). */}
           {/* Planlar (design §7.2 madde 8): misafirde bilgi + kayıt, üyede RevenueCat satın alma. */}
-          <PaywallModal
-            visible={plansOpen}
-            guest={!signedIn}
-            placement="assistant"
-            onClose={() => setPlansOpen(false)}
-            onRequireAuth={(mode) => openAuth(mode)}
+          <ScreenErrorBoundary name="paywall">
+            <PaywallModal
+              visible={plansOpen}
+              guest={!signedIn}
+              placement="assistant"
+              onClose={() => setPlansOpen(false)}
+              onRequireAuth={(mode) => openAuth(mode)}
+            />
+          </ScreenErrorBoundary>
+          <ScreenErrorBoundary name="reminder">
+            <FirstRouteReminder
+              enabled={signedIn && ownerReady}
+              onGranted={() => void scheduleRouteReminders(tripStore.getActiveRoute())}
+            />
+          </ScreenErrorBoundary>
+          <ScreenErrorBoundary name="shared">
+            <SharedRouteView code={sharedCode} onClose={() => setSharedCode(null)} />
+          </ScreenErrorBoundary>
+          <ToastBridge
+            onReady={(api) => {
+              toastRef.current = api;
+              // Öz-denetim bir yerli üyeyi eksik bulduysa karartmadan pasif bilgilendir
+              // (mobile-crash2 adım 4): throw yok, render bloklanmaz — yalnız görünür bozulma.
+              if (nativeDegraded.current) {
+                nativeDegraded.current = false;
+                api.show({ tone: "warning", message: tr("native.selfcheck.degraded") });
+              }
+            }}
           />
-          <FirstRouteReminder
-            enabled={signedIn && ownerReady}
-            onGranted={() => void scheduleRouteReminders(tripStore.getActiveRoute())}
-          />
-          <SharedRouteView code={sharedCode} onClose={() => setSharedCode(null)} />
-          <ToastBridge onReady={(api) => (toastRef.current = api)} />
-          {locked ? <LockScreen onUnlocked={() => setLocked(false)} /> : null}
+          {locked ? (
+            <ScreenErrorBoundary name="lock">
+              <LockScreen onUnlocked={() => setLocked(false)} />
+            </ScreenErrorBoundary>
+          ) : null}
         </View>
       </Toaster>
     </LockContext.Provider>

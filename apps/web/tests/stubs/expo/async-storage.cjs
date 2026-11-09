@@ -1,6 +1,7 @@
-// @react-native-async-storage/async-storage hafif bellek stub'ı (resilience.test.cjs).
+// @react-native-async-storage/async-storage hafif bellek stub (resilience.test.cjs).
 const mem = new Map();
 module.exports = {
+  __esModule: true,
   default: {
     getItem: async (k) => (mem.has(k) ? mem.get(k) : null),
     setItem: async (k, v) => void mem.set(k, v),

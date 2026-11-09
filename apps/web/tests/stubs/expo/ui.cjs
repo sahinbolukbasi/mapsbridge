@@ -10,4 +10,5 @@ module.exports = {
   Button: marker("Button"),
   EmptyState: marker("EmptyState"),
   SafeArea: marker("SafeArea"),
+  Txt: marker("Txt"),
 };

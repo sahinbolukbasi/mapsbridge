@@ -138,12 +138,19 @@ test("ScreenErrorBoundary: yerelleştirilmiş fallback metinleri ve retry sözle
   assert.match(SEB_SRC, /native\.error\.screenTitle/);
   assert.match(SEB_SRC, /native\.error\.screenBody/);
   assert.match(SEB_SRC, /tr\("ui\.retry"\)/);
+  // Fallback svg-bağımsız: EmptyState (→ Icon → react-native-svg) import EDİLMEZ (mobile-crash2).
+  assert.doesNotMatch(SEB_SRC, /import[^;]*\bEmptyState\b[^;]*from/, "EmptyState import edilmemeli (svg-bağımsız)");
+  assert.doesNotMatch(SEB_SRC, /<EmptyState/, "fallback JSX'inde EmptyState kullanılmamalı");
   // Kök ErrorBoundary son çare olarak korunur (App.tsx hâlâ sarar).
   const app = fs.readFileSync(path.join(MOBILE, "..", "App.tsx"), "utf8");
   assert.match(app, /<ErrorBoundary>\s*<App \/>\s*<\/ErrorBoundary>/);
   assert.match(app, /<ScreenErrorBoundary name=\{tab\}>\{renderTab\(tab\)\}<\/ScreenErrorBoundary>/);
   assert.match(app, /<ScreenErrorBoundary name=\{top\}>/, "yığın ekranı da sarılır");
   assert.match(app, /<ScreenErrorBoundary name="onboarding">/, "tanıtım da sarılır");
+  // Kabuk bileşenleri (her zaman mount, per-screen sınır DIŞI) de ayrı sınırlarla sarılır; biri
+  // çökse de kök "Bir şeyler ters gitti" tetiklenmez (mobile-crash2 adım 1).
+  for (const name of ["paywall", "reminder", "shared", "tabbar"])
+    assert.match(app, new RegExp(`<ScreenErrorBoundary name="${name}">`), `${name} kabuğu sarılmalı`);
 });
 
 // Gerçek ScreenErrorBoundary sınıfını, RN primitive'lerini hafif stub'lara (React.createElement
@@ -194,13 +201,15 @@ test("ScreenErrorBoundary: children çizer, throw'u yakalar, fallback + retry g�
   assert.equal(derived.error, err);
 
   // (c) Fallback: hasError=true → yerelleştirilmiş başlık/gövde + retry düğmesi; alert rolü.
+  // SVG/ikon-bağımsız: EmptyState→Icon→react-native-svg zinciri KULLANILMAZ (mobile-crash2 adım 2);
+  // yalnız saf RN Txt + Button. Böylece react-native-svg eksik olsa bile fallback yeniden throw etmez.
   inst.state = { hasError: true, error: err, resetKey: 0 };
   out = inst.render();
-  const empty = findMarker(out, "EmptyState");
-  assert.ok(empty, "fallback EmptyState çizer");
-  assert.equal(empty.props.title, i18n.NATIVE_TR["native.error.screenTitle"]);
-  assert.equal(empty.props.description, i18n.NATIVE_TR["native.error.screenBody"]);
-  const button = findMarker(empty.props.action, "Button") || findMarker(out, "Button");
+  assert.equal(findMarker(out, "EmptyState"), null, "fallback EmptyState/Icon KULLANMAZ (svg-bağımsız)");
+  const titleTxt = findMarker(out, "Txt");
+  assert.ok(titleTxt, "fallback saf RN Txt ile başlık çizer");
+  assert.equal(titleTxt.props.children, i18n.NATIVE_TR["native.error.screenTitle"]);
+  const button = findMarker(out, "Button");
   assert.ok(button, "retry düğmesi var");
   assert.equal(button.props.label, i18n.UI_TR["ui.retry"]);
 
@@ -316,6 +325,38 @@ test("haptics: expo-haptics throw etse de haptic() sessizce yok sayar (throw etm
   assert.doesNotThrow(() => h.haptic("impact"));
 });
 
+test("revenuecat.initRevenueCat: native eksik/throw olsa da açılış throw etmez (no-op)", async () => {
+  const alias = expoAlias(["react-native-purchases"]);
+  // API anahtarı mevcut (process.env) ama Purchases üyeleri throw ediyor (eksik pod senaryosu).
+  // initRevenueCat sessizce no-op olmalı; aksi halde App mount yolunda kök sınır tetiklenir.
+  const rc = loadWrapper("services/revenuecat.ts", alias, {
+    process: { env: { EXPO_PUBLIC_RC_API_KEY_IOS: "ios_key" } },
+    __expo: { purchases: { throwAll: true } },
+  });
+  await assert.doesNotReject(() => rc.initRevenueCat("user@example.com"), "native throw yutulmalı");
+  // Normal yolda da sorunsuz init.
+  const rc2 = loadWrapper("services/revenuecat.ts", alias, {
+    process: { env: { EXPO_PUBLIC_RC_API_KEY_IOS: "ios_key" } },
+    __expo: { purchases: { configured: false } },
+  });
+  await assert.doesNotReject(() => rc2.initRevenueCat("user@example.com"));
+  // API anahtarı yoksa SDK'ya hiç dokunmaz (erken return) → throw yok.
+  const rc3 = loadWrapper("services/revenuecat.ts", alias, {
+    process: { env: {} },
+    __expo: { purchases: { throwAll: true } },
+  });
+  await assert.doesNotReject(() => rc3.initRevenueCat("user@example.com"));
+});
+
+test("tile-cache: expo-file-system (File/Directory) throw etse de karo API'si sessiz kalır", () => {
+  const alias = expoAlias(["expo-file-system"]);
+  const tc = loadWrapper("services/tile-cache.ts", alias, {});
+  // Stub File/Directory varsayılan: exists=false, list=[] → hiçbir çağrı throw etmez.
+  assert.doesNotThrow(() => tc.storeTile("1/2/3", "AAAA"), "storeTile throw etmez");
+  assert.doesNotThrow(() => tc.sweepTiles(), "sweepTiles throw etmez");
+  assert.equal(typeof tc.sweepTiles(), "number");
+});
+
 // ── 3) Expo modül yöntem-varlığı öz-denetimi ──────────────────────────────────
 test("native-selfcheck: kullanılan tüm yöntemler mevcutken ok; eksik/yanlış tip yakalanır", () => {
   const alias = expoAlias([
@@ -326,9 +367,12 @@ test("native-selfcheck: kullanılan tüm yöntemler mevcutken ok; eksik/yanlış
     "expo-local-authentication",
     "expo-sharing",
     "expo-linking",
+    "react-native-purchases",
+    "react-native-webview",
+    "react-native-svg",
   ]);
   const selfcheck = loadWrapper("services/native-selfcheck.ts", alias, {
-    __expo: { selfcheckMode: "complete" },
+    __expo: { selfcheckMode: "complete", purchases: { configured: false } },
   });
 
   // Hepsi callable → ok, missing boş.
@@ -351,8 +395,49 @@ test("native-selfcheck: kullanılan tüm yöntemler mevcutken ok; eksik/yanlış
     "expo-local-authentication.authenticateAsync",
     "expo-sharing.shareAsync",
     "expo-linking.addEventListener",
+    // Kabuk bileşenlerinin kullandığı RN community modülleri (mobile-crash2).
+    "react-native-purchases.configure",
+    "react-native-purchases.isConfigured",
+    "react-native-purchases.logIn",
+    "react-native-purchases.getCustomerInfo",
+    "react-native-purchases.purchasePackage",
+    "react-native-purchases.restorePurchases",
+    "react-native-purchases.setAttributes",
+    "react-native-purchases.setLogLevel",
+    "react-native-webview.WebView",
+    "react-native-svg.Svg",
+    "react-native-svg.Path",
+    "@react-native-async-storage/async-storage.getItem",
+    "@react-native-async-storage/async-storage.multiGet",
   ])
     assert.ok(names.includes(needed), `${needed} öz-denetim listesinde olmalı`);
+
+  // EXACT yüzey: her modül.üye çifti tek tek undefined yapılınca tam o ad `missing`'te çıkar.
+  for (const target of [
+    "react-native-webview.WebView",
+    "react-native-svg.Path",
+    "react-native-purchases.purchasePackage",
+  ]) {
+    const [mod, member] = target.split(/\.(?=[^.]+$)/);
+    const specs = selfcheck.NATIVE_MODULE_SPECS.map((s) => ({
+      module: s.module,
+      ns: s.module === mod ? { ...s.ns, [member]: undefined } : s.ns,
+      members: s.members,
+    }));
+    const r = selfcheck.checkNativeModules(specs);
+    assert.equal(r.ok, false, `${target} eksikken ok=false olmalı`);
+    assert.ok(r.missing.includes(target), `${target} missing listesinde tam olarak çıkmalı`);
+  }
+
+  // Bir React bileşeni forwardRef/memo nesnesi (fonksiyon değil ama $$typeof taşır) → geçerli sayılır.
+  const fwdOk = selfcheck.checkNativeModules([
+    {
+      module: "react-native-webview",
+      ns: { WebView: { $$typeof: Symbol.for("react.forward_ref"), render: () => null } },
+      members: [{ name: "WebView", kind: "component" }],
+    },
+  ]);
+  assert.equal(fwdOk.ok, true, "forwardRef bileşeni geçerli render tipi sayılır");
 
   // Bir yöntem tanımsız (taşınmış/yanlış import) → yakalanır (klasik 'object is not a function').
   const broken = selfcheck.checkNativeModules([

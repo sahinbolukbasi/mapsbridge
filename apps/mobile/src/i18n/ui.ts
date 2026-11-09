@@ -457,6 +457,7 @@ export const NATIVE_TR = {
   "native.error.screenTitle": "Bu ekran açılamadı",
   "native.error.screenBody":
     "Bu bölümde beklenmeyen bir sorun oluştu. Diğer sekmeler çalışmaya devam ediyor; tekrar deneyebilir ya da başka bir sekmeye geçebilirsin.",
+  "native.selfcheck.degraded": "Bazı özellikler bu sürümde kullanılamıyor.",
   "native.stopList.show": "Durak listesini göster",
   "native.stopList.empty": "Bu rotada henüz durak yok.",
   "native.guest.storageWarn": "Taslağın bu cihazda saklanamıyor; uygulamayı kapatırsan kaybolur.",

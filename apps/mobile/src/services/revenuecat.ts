@@ -19,19 +19,23 @@ let _cachedCustomerInfo: CustomerInfo | null = null;
 export async function initRevenueCat(userId: string): Promise<void> {
   const apiKey = Platform.OS === "ios" ? RC_API_KEY_IOS : RC_API_KEY_ANDROID;
   if (!apiKey) return;
-  if (__DEV__) Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-  _cachedCustomerInfo = null;
-  // Aynı çalıştırmada çıkıp yeniden girişte SDK zaten yapılandırılmıştır: kimlik logIn ile değişir.
-  if (await Purchases.isConfigured().catch(() => false)) {
-    await Purchases.logIn(userId);
-  } else {
-    await Purchases.configure({ apiKey, appUserID: userId });
-  }
-  // Warm up cache
+  // Native pod bağlı değilse (ör. eski TestFlight binary) Purchases üyeleri undefined olabilir ve
+  // çağrılınca "object is not a function" atar. Tüm SDK dokunuşları try/catch ile sarılır; init
+  // sessizce no-op olur ve uygulama açılışı asla çökmez (mobile-crash2).
   try {
+    if (__DEV__) Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    _cachedCustomerInfo = null;
+    // Aynı çalıştırmada çıkıp yeniden girişte SDK zaten yapılandırılmıştır: kimlik logIn ile değişir.
+    if (await Purchases.isConfigured().catch(() => false)) {
+      await Purchases.logIn(userId);
+    } else {
+      await Purchases.configure({ apiKey, appUserID: userId });
+    }
+    // Warm up cache
     _cachedCustomerInfo = await Purchases.getCustomerInfo();
   } catch {
-    // Non-fatal
+    // Native eksik/çağrı başarısız: Pro özellikleri kapalı kalır, açılış sürer.
+    _cachedCustomerInfo = null;
   }
 }
 

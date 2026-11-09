@@ -4,6 +4,10 @@ import * as Notifications from "expo-notifications";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Sharing from "expo-sharing";
 import * as ExpoLinking from "expo-linking";
+import Purchases from "react-native-purchases";
+import { WebView } from "react-native-webview";
+import Svg, { Path } from "react-native-svg";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // R16: expo-haptics yalnız ui/haptics.ts'ten import edilir; haptik öz-denetimini oradan alırız.
 import { hapticsSelfCheck } from "../ui/haptics";
 
@@ -21,8 +25,15 @@ import { hapticsSelfCheck } from "../ui/haptics";
 //   expo-local-authentication → services/biometric.ts
 //   expo-sharing      → screens/MapScreen.tsx
 //   expo-linking      → App.tsx
+//
+// Kabuk bileşenleri de her zaman mount olur (mobile-crash2) ve kök sınırın dışındadır; bu yüzden
+// kullandıkları yerli-dışı (RN community) modüller de doğrulanır:
+//   react-native-purchases → services/revenuecat.ts (PaywallModal kabuğu)
+//   react-native-webview   → components/SharedRouteView.tsx (paylaşım kabuğu)
+//   react-native-svg       → ui/Icon.tsx (her ikon; EmptyState/fallback dâhil)
+//   @react-native-async-storage/async-storage → services/storage.ts (açılış oturumu)
 
-type MemberKind = "function" | "constructor";
+type MemberKind = "function" | "constructor" | "component";
 
 interface MemberSpec {
   readonly name: string;
@@ -38,6 +49,8 @@ interface ModuleSpec {
 
 const fn = (name: string): MemberSpec => ({ name, kind: "function" });
 const ctor = (name: string): MemberSpec => ({ name, kind: "constructor" });
+// React bileşeni (ör. WebView, Svg, Path): işlevsel olarak typeof "function" doğrulanır.
+const comp = (name: string): MemberSpec => ({ name, kind: "component" });
 
 // SDK-57 doğru giriş noktası: expo-file-system YENİ API (Paths/File/Directory) ana girişten gelir;
 // `expo-file-system/legacy` ayrı bir modüldür. tile-cache.ts yeni API'yi kullanır — bu yüzden
@@ -87,12 +100,69 @@ const SPECS: readonly ModuleSpec[] = [
     ns: ExpoLinking,
     members: [fn("addEventListener"), fn("getInitialURL")],
   },
+  // react-native-purchases: default export `Purchases` nesnesi. revenuecat.ts'te fiilen çağrılan
+  // yöntemler. Binary'de pod bağlı değilse bunlar undefined olur → "object is not a function".
+  {
+    module: "react-native-purchases",
+    ns: Purchases,
+    members: [
+      fn("configure"),
+      fn("isConfigured"),
+      fn("logIn"),
+      fn("logOut"),
+      fn("getOfferings"),
+      fn("getCustomerInfo"),
+      fn("purchasePackage"),
+      fn("restorePurchases"),
+      fn("setAttributes"),
+      fn("setLogLevel"),
+    ],
+  },
+  // react-native-webview: named export `WebView` (React bileşeni). SharedRouteView kabuğu kullanır.
+  {
+    module: "react-native-webview",
+    ns: { WebView },
+    members: [comp("WebView")],
+  },
+  // react-native-svg: her ikonun temeli (ui/Icon.tsx). Svg default + Path named export.
+  {
+    module: "react-native-svg",
+    ns: { Svg, Path },
+    members: [comp("Svg"), comp("Path")],
+  },
+  // async-storage: default export nesnesi (services/storage.ts → açılış oturumu okuması).
+  {
+    module: "@react-native-async-storage/async-storage",
+    ns: AsyncStorage,
+    members: [
+      fn("getItem"),
+      fn("setItem"),
+      fn("removeItem"),
+      fn("multiGet"),
+      fn("clear"),
+    ],
+  },
 ];
 
 export interface SelfCheckResult {
   ok: boolean;
   /** "modül.yöntem" biçiminde eksik/yanlış tipli üyeler. */
   missing: string[];
+}
+
+/**
+ * Bir üyenin kullanılabilir olup olmadığını döndürür. Fonksiyon/kurucu typeof "function"dır.
+ * React bileşeni ("component") ise işlevsel bileşen gibi bir fonksiyon OLABİLİR, ya da
+ * forwardRef/memo gibi `$$typeof` taşıyan bir nesne olabilir (react-native-webview WebView ve
+ * react-native-svg çoğu sürümde forwardRef döndürür). İkisi de geçerli bir render tipidir.
+ */
+function isRenderableOrCallable(value: unknown, kind: MemberKind): boolean {
+  if (typeof value === "function") return true;
+  if (kind === "component" && typeof value === "object" && value !== null) {
+    // forwardRef/memo bileşenleri: React element tipi olarak $$typeof taşır.
+    return "$$typeof" in (value as Record<string, unknown>);
+  }
+  return false;
 }
 
 /**
@@ -106,8 +176,7 @@ export function checkNativeModules(specs: readonly ModuleSpec[] = SPECS): SelfCh
     const ns = spec.ns;
     for (const member of spec.members) {
       const value = ns == null ? undefined : ns[member.name];
-      // Hem fonksiyon hem sınıf kurucusu typeof "function"dır; ikisi de callable olmalıdır.
-      if (typeof value !== "function") {
+      if (!isRenderableOrCallable(value, member.kind)) {
         missing.push(`${spec.module}.${member.name}`);
       }
     }

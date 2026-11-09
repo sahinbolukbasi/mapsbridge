@@ -1,7 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { Button, EmptyState, SafeArea } from "../ui";
+import { Button, SafeArea, Txt } from "../ui";
 import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
 
@@ -51,22 +51,30 @@ export class ScreenErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      // SVG/ikon-bağımsız fallback: EmptyState → Icon → react-native-svg zinciri kullanılmaz.
+      // Kök neden react-native-svg'nin bağlanmaması ise, ikonlu bir fallback de yeniden throw edip
+      // köke tırmanırdı (mobile-crash2). Yalnız saf RN (View+Txt+Button) ile çizilir.
       return (
         <SafeArea style={styles.container}>
-          <View accessibilityRole="alert">
-            <EmptyState
-              icon="alert"
-              contour
-              title={tr("native.error.screenTitle")}
-              description={tr("native.error.screenBody")}
-              action={
-                <Button
-                  label={tr("ui.retry")}
-                  variant="primary"
-                  size="lg"
-                  onPress={this.handleRetry}
-                />
-              }
+          <View style={styles.card} accessibilityRole="alert">
+            <Txt variant="title" header align="center">
+              {tr("native.error.screenTitle")}
+            </Txt>
+            <Txt variant="small" tone="muted" align="center">
+              {tr("native.error.screenBody")}
+            </Txt>
+            {/* Dev/test derlemelerinde gerçek hata mesajını yüzeye çıkar: TestFlight'ta hangi
+                çağrının attığını bir sonraki build'de görünür kılar (mobile-crash2 TASK). */}
+            {__DEV__ && this.state.error?.message ? (
+              <Txt variant="caption" tone="danger" numberOfLines={4}>
+                {this.state.error.message}
+              </Txt>
+            ) : null}
+            <Button
+              label={tr("ui.retry")}
+              variant="primary"
+              size="lg"
+              onPress={this.handleRetry}
             />
           </View>
         </SafeArea>
@@ -84,5 +92,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: tokens.space["5"],
+  },
+  card: {
+    width: "100%",
+    maxWidth: 400,
+    gap: tokens.space["4"],
+    alignItems: "center",
   },
 });
