@@ -114,6 +114,85 @@ export function kbEntityToPromptSnippet(entity: KBEntity): string {
 }
 
 /**
+ * Kaynak güvenilirlik sırası (Faz 2 / görev 9). Yüksek = daha güvenilir.
+ * KBSource.reliability ve KBConflict.values[].reliability ile aynı etiketler.
+ */
+export const RELIABILITY_RANK: Record<string, number> = {
+  official: 4,
+  institutional: 3,
+  major_publication: 2,
+  ugc: 1,
+};
+
+export interface ConflictResolution {
+  /** Otomatik seçilen değer (tek en-güvenilir kaynak varsa). */
+  resolvedValue?: unknown;
+  /** Seçimi yapan kaynağın id'si. */
+  resolvedBySourceId?: string;
+  /** Otomatik çözülemedi: en yüksek güvenilirlikte ≥2 kaynak farklı değerde. */
+  ambiguous: boolean;
+}
+
+/**
+ * Çoklu kaynak aynı alanda ayrıştığında çözümü SAF biçimde hesaplar:
+ *  - En yüksek RELIABILITY_RANK'a sahip kaynak(lar) seçilir.
+ *  - Bu en yüksek seviyede TEK bir farklı değer varsa → otomatik çözüm.
+ *  - En yüksek seviyede birden çok FARKLI değer varsa → ambiguous (insan/işaret).
+ * Mutasyon yok; yalnızca karar döner. Uygulama kb-store.resolveConflict veya
+ * addConflict ile kalıcılaştırılır.
+ */
+export function resolveByReliability(
+  values: Array<{ value: unknown; sourceId: string; reliability: string }>,
+): ConflictResolution {
+  if (values.length === 0) return { ambiguous: false };
+  const maxRank = Math.max(...values.map((v) => RELIABILITY_RANK[v.reliability] ?? 0));
+  const top = values.filter((v) => (RELIABILITY_RANK[v.reliability] ?? 0) === maxRank);
+  const distinct = [...new Set(top.map((v) => JSON.stringify(v.value)))];
+  if (distinct.length === 1) {
+    return {
+      resolvedValue: top[0].value,
+      resolvedBySourceId: top[0].sourceId,
+      ambiguous: false,
+    };
+  }
+  // En güvenilir seviyede birden çok farklı değer → otomatik çözülemez.
+  return { ambiguous: true };
+}
+
+/**
+ * Bir entity alanındaki kaynak çelişkisini store'a uygular:
+ *  - Otomatik çözülürse → değeri entity'ye yazar (resolveConflict, resolvedBy="reliability").
+ *  - Ambiguous ise → çelişkiyi kaydeder (addConflict), insan çözümüne bırakır.
+ * Immutable: yeni store + sonucu döner.
+ */
+export function applyConflictResolution(
+  store: KBStore,
+  entityId: string,
+  field: string,
+  values: Array<{ value: unknown; sourceId: string; reliability: string }>,
+  conflictId: string,
+): { store: KBStore; resolution: ConflictResolution } {
+  const resolution = resolveByReliability(values);
+  if (!resolution.ambiguous && resolution.resolvedValue !== undefined) {
+    // Önce çelişki kaydını ekle, sonra reliability ile çözülmüş işaretle + değeri uygula.
+    const withConflict = addConflict(store, { id: conflictId, entityId, field, values });
+    const resolved = resolveConflict(withConflict, entityId, field, resolution.resolvedValue);
+    // resolveConflict resolvedBy'ı "manual" yazar; reliability kaynağını not düş.
+    const conflicts = (resolved.conflicts.get(entityId) ?? []).map((c) =>
+      c.id === conflictId ? { ...c, resolvedBy: "reliability" } : c,
+    );
+    const newConflicts = new Map(resolved.conflicts);
+    newConflicts.set(entityId, conflicts);
+    return { store: { ...resolved, conflicts: newConflicts }, resolution };
+  }
+  // Ambiguous: yalnızca çelişkiyi kaydet, çözme.
+  return {
+    store: addConflict(store, { id: conflictId, entityId, field, values }),
+    resolution,
+  };
+}
+
+/**
  * Remove all stale entities (and their associated sources/conflicts) from the store.
  * Returns a new immutable store plus the count of pruned records.
  */

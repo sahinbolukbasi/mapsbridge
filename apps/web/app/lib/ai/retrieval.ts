@@ -3,18 +3,12 @@ import { BedrockAgentRuntimeClient, RetrieveCommand } from "@aws-sdk/client-bedr
 import type { MultiAgentRequestPayload } from "./types";
 import { sanitizePreferences } from "./preferences";
 import { normalizeText } from "./planning";
+import { aliasToCanonical } from "./city-aliases";
 
 export function canonicalCity(destination: string): string {
   const city = destination.split(",")[0].trim();
-  const aliases: Record<string, string> = {
-    roma: "Roma",
-    rome: "Roma",
-    tokyo: "Tokyo",
-    tokio: "Tokyo",
-    istanbul: "İstanbul",
-    lima: "Lima",
-  };
-  return aliases[normalizeText(city)] || city;
+  // Alias sözlüğü tek kaynaktan (city-aliases.ts) gelir; sessiz drift önlenir.
+  return aliasToCanonical(normalizeText(city)) || city;
 }
 
 export interface TravelSource {
@@ -26,6 +20,10 @@ export interface TravelSource {
 export interface TravelEvidence {
   status: "disabled" | "available" | "empty" | "unavailable";
   passages: Array<TravelSource & { text: string }>;
+  /** Grounding ölçümü (Faz 1 görev 4): bu kanıt setindeki pasaj sayısı. mergeEvidence
+   *  birleşik sette {remote, local, merged} olarak doldurur; tekil retrieval sonucunda
+   *  yalnızca o kaynağın sayısı anlamlıdır. Metrik/teşhis amaçlı, opsiyonel. */
+  counts?: { remote: number; local: number; merged: number };
 }
 let client: BedrockAgentRuntimeClient | undefined;
 export async function retrieveTravelEvidence(

@@ -143,6 +143,47 @@ export function runtimeSnapshot() {
     observedAt: new Date().toISOString(),
   };
 }
+/** RAG getirme sonucunun kaba durumu — teşhis ve grounding ölçümü için. */
+export type RetrievalStatus = "disabled" | "available" | "empty" | "unavailable";
+
+/** Kanıt birleştirme sayıları (retrieval.ts + bundled-evidence.ts mergeEvidence çıktısı). */
+export interface EvidenceCounts {
+  remote: number;
+  local: number;
+  merged: number;
+}
+
+/**
+ * CloudWatch EMF (embedded metric format) metrik yayımı — training-worker.ts
+ * `trainingMetric` deseniyle aynı. Sadece sayısal/kategorik; prompt/yanıt/kimlik
+ * asla loglanmaz. `dimensions` kardinalitesi düşük tutulur (retrievalStatus gibi).
+ */
+export function aiMetric(
+  name: string,
+  value: number,
+  unit = "Count",
+  dimensions?: Record<string, string>,
+) {
+  const dimKeys = dimensions ? Object.keys(dimensions) : [];
+  console.log(
+    JSON.stringify({
+      _aws: {
+        Timestamp: Date.now(),
+        CloudWatchMetrics: [
+          {
+            Namespace: "MapsBridge/AI",
+            Dimensions: [["Service", ...dimKeys]],
+            Metrics: [{ Name: name, Unit: unit }],
+          },
+        ],
+      },
+      Service: "ai",
+      ...dimensions,
+      [name]: value,
+    }),
+  );
+}
+
 // No prompts, responses, user IDs or provider error messages enter the operations log.
 export async function recordAIOperation(
   event: {
@@ -161,11 +202,29 @@ export async function recordAIOperation(
     estimatedModelCostUsd?: number | null;
     pricingStatus?: string;
     responseMode?: string;
+    retrievalStatus?: RetrievalStatus;
+    evidenceCounts?: EvidenceCounts;
   },
   key?: string,
 ): Promise<string> {
   const now = new Date().toISOString();
   const SK = key || `${now}#${crypto.randomUUID()}`;
+  // Terminal istek olaylarında CloudWatch metriği yay: gecikme + retrievalStatus
+  // dağılımı + grounding kanıt sayısı. Geriye uyumlu — alanlar opsiyonel.
+  if (event.kind === "request" && event.status !== "running") {
+    try {
+      if (typeof event.durationMs === "number")
+        aiMetric("RequestLatency", event.durationMs, "Milliseconds", {
+          Status: event.status,
+        });
+      if (event.retrievalStatus)
+        aiMetric("RetrievalOutcome", 1, "Count", { RetrievalStatus: event.retrievalStatus });
+      if (event.evidenceCounts)
+        aiMetric("EvidenceMerged", event.evidenceCounts.merged, "Count");
+    } catch {
+      // Metrik yayımı asla ana akışı düşürmez.
+    }
+  }
   if (!process.env.DYNAMODB_TABLE) return SK;
   try {
     await client().send(

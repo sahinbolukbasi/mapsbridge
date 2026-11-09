@@ -250,6 +250,8 @@ export interface MultiAgentResponse {
   research?: import("./place-research").PlaceResearch;
   conversationState?: import("./planning").ConversationState;
   retrievalStatus?: "disabled" | "available" | "empty" | "unavailable";
+  /** Grounding ölçümü (Faz 1 görev 4): kanıt birleştirme sayıları. recordAIOperation'a taşınır. */
+  evidenceCounts?: { remote: number; local: number; merged: number };
   sources?: import("./retrieval").TravelSource[];
   /** Citation coverage only; it does not claim that every model statement is factual. */
   sourceCoverage?: { requested: number; resolved: number; ratio: number };

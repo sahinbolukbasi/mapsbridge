@@ -66,3 +66,40 @@ Hedefe big-bang değil, küçük/bağımsız/geri-alınabilir adımlarla gidilir
 - **monitoring/services/\*.json** adları koddaki `services/*` klasörleri DEĞİL, mantıksal ürün yetenek alanlarıdır. Her JSON'da `_note` ile canlı kod eşlemesi var. `map-trip`→routes/shares, `community`→marketplace/articles, `identity-billing`→auth/billing/stripe (klasör ölü ama işlev canlı, monitör korunur).
 - **Structured logger EKSİK:** `packages/monitoring` paketi silinmiş; logging 21 lambda dosyasında dağınık `console.*` + lokal yardımcılarla yapılıyor. Tek tip trace-id/korelasyon yok. → HEDEF (FAZ 2): tek structured logger (ör. `packages/ai-core` ya da yeni `packages/observability`), X-Ray trace-id entegrasyonu. Bu bir refactor işi; FAZ 1'de yalnızca gerçek belgelendi.
 - **monitoring/ altyapısı sağlam:** alarms/, dashboards/, synthetics/ (`npm run monitor:synthetics`), tracing/, runbooks/ mevcut.
+
+## 8. Spec: bu-projede-olan-ai-chat — RAG/korpus/metrik güçlendirmesi (2026-11-09)
+
+> Kaynak spec: `.kiro/specs/bu-projede-olan-ai-chat/{requirements,design,tasks}.md`.
+> AI seyahat asistanını üç eksende güçlendirdi (brownfield): RAG grounding, korpus
+> büyütme (fine-tune YOK), konuşma-önce deneyim. Hepsi 12 invariant'a bağlı.
+
+### Yeni/değişen kod (hepsi mevcut sınır kurallarına uyar)
+
+- **`apps/web/app/lib/ai/city-aliases.ts`** (YENİ): şehir alias tek kaynağı. `retrieval.canonicalCity` + `bundled-evidence` oradan türer (sessiz drift biter).
+- **`apps/web/app/lib/ai/knowledge-base/kb-repo.ts`** (YENİ): KB entity/source/conflict kalıcılık katmanı. DIP — DynamoDB client DIŞARIDAN enjekte (DynamoDeps), ORM yok, tek-tablo KB_PATTERNS. `kb-store.ts` saf domain kalır.
+- **`kb-store.ts`** (genişledi): `resolveByReliability` + `applyConflictResolution` (official>institutional>major_publication>ugc; ambiguous→addConflict).
+- **`research-queue.ts`** (genişledi): `entityRef` + `planResearchJobs` (eksik entity → high-priority iş, dedup; I7 önceden hesaplama).
+- **`infra/lambda/src/ai/kb-freshness-worker.ts`** (YENİ, zamanlı lambda): bayat KB entity TTL temizliği. **SELF-CONTAINED** — `apps/web`'den import ETMEZ (ters-import baseline 6'da kalır, §2); `isStale`+kaskad silme knowledge-base kb-store/kb-repo ile aynı davranışın yerel kopyası. Metrik: KBScanned/KBPruned/KBOldestAgeSeconds/Heartbeat (MapsBridge/AI). **DEPLOY ADIMI:** Terraform/Step Functions zamanlamasına bağlanmalı (henüz bağlı değil).
+- **`shared/ai-operations.ts`** (genişledi): `aiMetric()` EMF yayıcı (MapsBridge/AI) + `recordAIOperation` opsiyonel `retrievalStatus`/`evidenceCounts` (geriye uyumlu). `ai/index.ts` iki başarı yolu bunları geçer.
+- **`retrieval.ts`/`bundled-evidence.ts`/`types.ts`/`supervisor.ts`**: `TravelEvidence.counts` + `mergeEvidence` doldurur + `MultiAgentResponse.evidenceCounts` → RequestLatency/RetrievalOutcome/EvidenceMerged metriği.
+- **`apps/web/server/ai/promotion.ts`** (YENİ): onaylı diyalog → RAG korpusu (olgu, tarihli) + few-shot (üslup, `toStyleOnly` olgu kırpar). **FINE-TUNE YOK** (I1): olgu RAG'da, üslup few-shot'ta.
+- **`sub-agents/dispatcher.ts`** (genişledi): I10 koşullu tetik (`isAgentRelevant`/`explicitlyWantsCar` — car-rental metro şehrinde `carRecommended=false` + açık istek yoksa tetiklenmez, olgudan/demografiden değil I5) + I2 deterministik sınır (`ROUTE_GEOMETRY_KEYS`/`assertNoRouteGeometry`/`SubAgentData` + `@ts-expect-error` derleme kanıtı).
+- **`prompts.ts`**: I11 dil eşleme talimatı eklendi (ANSWER_PROMPT + CHAT_STREAM_PROMPT); **PROMPT_VERSION v8→v9** (prompt=spec değişikliği).
+
+### Doküman düzeltmeleri (spec vs kod drift)
+
+- Eğitim kaydı `privacyReview` başlangıç değeri **`required`** (design/requirements "pending" demişti → gerçeğe hizalandı).
+
+### Kalite kapısı
+
+- **CI (çevrimdışı):** `ci-services.yml` → `golden-eval-gate` job, `eval:golden:validate` (100 golden vaka + kategori/id/beklenti doğrular; Bedrock gerektirmez). Kapı mantığı `golden-eval-gate.test.cjs` ile korunur.
+- **Canlı (release/operatör):** `eval:ai --golden` gerçek Bedrock'a bağlı + ücretli; prompt değişikliklerinde (ör. v9) ve release öncesi koşulur — regresyonda (passRate/grounding/route/decision-safety/p95) bloke.
+
+### Doğrulama (2026-11-09)
+
+typecheck web+backend temiz; test:backend 381/0, test:services 80/80, test:web 1117/0; danger-zones (billing/auth/routes/chat/stripe) 124/0; drift-guard yeşil (ters-import 6). Yeni testler: bundled-evidence, city-aliases, rag-degradation, grounding-guards, kb-repo, kb-freshness-worker, kb-conflict-resolution, research-queue-planner, dispatcher-conditional, dispatcher-degradation, dispatcher-i2-boundary, training-consent, guardrails-mask, google-content, promotion, training-metrics, clarification-discipline, ai-stream-sse, context-too-large, language-matching, memory-promotion-i6, forget-and-demographics, scope-no-charge, affiliate-separation-i8, model-critical-path, ai-operations-metrics, golden-eval-gate.
+
+### Faz sonrası iyileştirme adayları (davranış dondurma ilkesiyle bu spec'te düzeltilmedi)
+
+- `supervisor.ts` fiyat-doğrulama regex'i sembol-önce biçimde (`€320`) yalnız ilk rakamı yakalıyor.
+- `user-memory/types.ts` `isSensitiveData` İngilizce `allerg` yakalıyor, Türkçe tek-l `alerji` yakalamıyor (TR eş-anlamlı genişletme).

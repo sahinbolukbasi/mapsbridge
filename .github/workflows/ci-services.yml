@@ -5,12 +5,19 @@ on:
     paths:
       - "services/**"
       - "packages/**"
+      - "apps/web/app/lib/ai/**"
+      - "apps/web/server/ai/**"
+      - "apps/web/evals/**"
+      - "infra/scripts/validate-golden-eval.cjs"
       - ".github/workflows/ci-services.yml"
   push:
     branches: [main, develop]
     paths:
       - "services/**"
       - "packages/**"
+      - "apps/web/app/lib/ai/**"
+      - "apps/web/server/ai/**"
+      - "apps/web/evals/**"
 
 concurrency:
   group: ci-services-${{ github.ref }}
@@ -59,6 +66,26 @@ jobs:
       - run: npm ci
       - name: Run place-intelligence tests
         run: node --test services/place-intelligence/tests/*.test.cjs
+
+  golden-eval-gate:
+    name: AI Golden Eval Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      # Çevrimdışı kapı (Bedrock gerektirmez): golden manifest yapısını doğrular —
+      # 100 vaka, kategori sayıları (chat/route/clarify/prompt-injection/safety/
+      # memory-correction/tool-failure), tekil id, her vakada beklenti. grounding +
+      # netleştirme + güvenlik senaryolarının korpusta kaldığını garanti eder.
+      # Canlı regresyon kapısı (eval:ai --golden → rapor → eval:golden:validate <rapor>)
+      # gerçek Bedrock'a bağlıdır ve release iş akışında (live-smoke) koşulur; prompt
+      # değişikliklerinde (ör. PROMPT_VERSION bump) operatör tarafından çalıştırılmalıdır.
+      - name: Validate golden evaluation manifest
+        run: npm run eval:golden:validate
 
   typecheck-services:
     name: TypeScript Check (Services)
