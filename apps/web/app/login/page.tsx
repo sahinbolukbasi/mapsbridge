@@ -3,6 +3,7 @@
 import React, { FormEvent, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { signIn, handleGoogleCredentialResponse, getStoredSession } from "../lib/cognito";
+import { publishPendingUsername } from "../lib/profile-sharing";
 import { Alert, Button, Field, Icon, Input, Modal, PageShell } from "../components/ui";
 import {
   AuthCard,
@@ -198,6 +199,8 @@ export default function LoginPage() {
 
     try {
       await signIn(email.trim().toLowerCase(), password);
+      // G18: token artık var — kayıt sırasında seçilen kullanıcı adını yayınla (en iyi çaba).
+      await publishPendingUsername();
       redirectToNext();
     } catch (error) {
       const text = error instanceof Error ? error.message : "Giriş yapılamadı.";

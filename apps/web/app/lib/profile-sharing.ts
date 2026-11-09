@@ -31,3 +31,23 @@ export async function publishProfile(username: string, unpublish = false) {
   if (!response.ok) throw new Error(data.error || "Profil kaydedilemedi.");
   return `${window.location.origin}/u/?username=${encodeURIComponent(username)}`;
 }
+
+// G18 publish ZAMANLAMASI: kayıt anında token YOK; seçilen kullanıcı adı
+// `mapsbridge.userProfileDetails`'te saklanır ve kullanıcı DOĞRULAYIP GİRİNCE burada
+// yayınlanır. En iyi çaba — girişi bloklamaz. Token yoksa sessizce atlar.
+export async function publishPendingUsername(): Promise<void> {
+  const session = getStoredSession();
+  if (!session?.token) return;
+  let username = "";
+  try {
+    username = JSON.parse(userStorage.getItem("mapsbridge.userProfileDetails") || "{}").username || "";
+  } catch {
+    username = "";
+  }
+  if (!/^[a-z0-9_.-]{1,40}$/.test(username)) return;
+  try {
+    await publishProfile(username);
+  } catch {
+    // yayın başarısızsa girişe dokunma; kullanıcı adı yerelde saklı kalır
+  }
+}

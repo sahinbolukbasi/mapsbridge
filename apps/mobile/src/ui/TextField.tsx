@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   StyleSheet,
@@ -10,9 +10,12 @@ import {
   type ViewStyle,
 } from "react-native";
 import { tokens } from "../theme";
+import { IconButton } from "./IconButton";
+import { tr } from "../i18n/ui";
 
 // Etiketli metin alanı (design §7.3, §6.2). Görünür etiket = erişilebilir ad; hata değişince
-// ekran okuyucuya duyurulur (Android'de ayrıca canlı bölge).
+// ekran okuyucuya duyurulur (Android'de ayrıca canlı bölge). `secureToggle` ile şifre
+// göster/gizle düğmesi (G16): yalnız `secure` alanlarda anlamlı.
 export interface TextFieldProps extends Omit<TextInputProps, "style" | "secureTextEntry"> {
   label: string;
   value: string;
@@ -20,6 +23,8 @@ export interface TextFieldProps extends Omit<TextInputProps, "style" | "secureTe
   hint?: string;
   error?: string;
   secure?: boolean;
+  /** Şifre göster/gizle düğmesi (yalnız `secure` ile). */
+  secureToggle?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -30,10 +35,14 @@ export function TextField({
   hint,
   error,
   secure,
+  secureToggle,
   style,
   ...rest
 }: TextFieldProps) {
   const lastError = useRef<string | undefined>(undefined);
+  const [revealed, setRevealed] = useState(false);
+  const showToggle = !!secure && !!secureToggle;
+  const hidden = secure && !(showToggle && revealed);
   useEffect(() => {
     if (error && error !== lastError.current) AccessibilityInfo.announceForAccessibility(error);
     lastError.current = error;
@@ -43,17 +52,35 @@ export function TextField({
       <Text style={styles.label} maxFontSizeMultiplier={tokens.font.maxScale.body}>
         {label}
       </Text>
-      <TextInput
-        {...rest}
-        value={value}
-        onChangeText={onChangeText}
-        secureTextEntry={secure}
-        accessibilityLabel={label}
-        accessibilityHint={hint}
-        placeholderTextColor={tokens.color.fieldPlaceholder}
-        maxFontSizeMultiplier={tokens.font.maxScale.body}
-        style={[styles.input, error ? styles.inputInvalid : null]}
-      />
+      <View style={styles.inputWrap}>
+        <TextInput
+          {...rest}
+          value={value}
+          onChangeText={onChangeText}
+          secureTextEntry={hidden}
+          accessibilityLabel={label}
+          accessibilityHint={hint}
+          placeholderTextColor={tokens.color.fieldPlaceholder}
+          maxFontSizeMultiplier={tokens.font.maxScale.body}
+          style={[
+            styles.input,
+            showToggle ? styles.inputWithAction : null,
+            error ? styles.inputInvalid : null,
+          ]}
+        />
+        {showToggle ? (
+          <View style={styles.action}>
+            <IconButton
+              icon={revealed ? "eye-off" : "eye"}
+              label={revealed ? tr("edit.pw.hide") : tr("edit.pw.show")}
+              selected={revealed}
+              size={tokens.touch.min}
+              color={tokens.color.textMuted}
+              onPress={() => setRevealed((v) => !v)}
+            />
+          </View>
+        ) : null}
+      </View>
       {hint && !error ? (
         <Text style={styles.hint} maxFontSizeMultiplier={tokens.font.maxScale.body}>
           {hint}
@@ -79,6 +106,7 @@ const styles = StyleSheet.create({
     color: tokens.color.text,
     marginBottom: tokens.space["1"],
   },
+  inputWrap: { position: "relative", justifyContent: "center" },
   input: {
     minHeight: tokens.touch.min,
     borderWidth: 1,
@@ -89,6 +117,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: tokens.space["3"],
     fontSize: tokens.font.size.base,
   },
+  inputWithAction: { paddingRight: tokens.space["12"] },
+  action: { position: "absolute", right: tokens.space["1"] },
   inputInvalid: { borderColor: tokens.color.fieldBorderInvalid },
   hint: {
     marginTop: tokens.space["1"],

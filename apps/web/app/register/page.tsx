@@ -31,7 +31,6 @@ import {
   validateUsername,
   type UsernameStatus,
 } from "../lib/auth/username-check";
-import { publishProfile } from "../lib/profile-sharing";
 
 interface GoogleCredentialResponse {
   credential: string;
@@ -335,12 +334,9 @@ export default function SignUpPage() {
     try {
       // Cognito SignUp: telefon GÖNDERİLMEZ (cognito.ts imzası güncellendi).
       await signUp(cleanEmail, password, cleanName);
-      // Seçilen kullanıcı adını profil olarak yayınla (en iyi çaba; kaydı bloklamaz).
-      try {
-        await publishProfile(cleanUser);
-      } catch {
-        // Profil yayını başarısızsa kayıt yine tamamlanır; kullanıcı adı yerelde saklı.
-      }
+      // G18 publish ZAMANLAMASI: kayıt anında token YOK. Kullanıcı adı yukarıda
+      // `mapsbridge.userProfileDetails`'e yazıldı; kullanıcı doğrulayıp GİRİNCE
+      // login akışı publishPendingUsername ile yayınlar. Burada publishProfile ÇAĞRILMAZ.
       const nextParam = nextUrl !== DEFAULT_NEXT ? `&next=${encodeURIComponent(nextUrl)}` : "";
       const href = `/verify/?email=${encodeURIComponent(cleanEmail)}${nextParam}`;
       setSentTo(cleanEmail);
