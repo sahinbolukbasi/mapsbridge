@@ -394,6 +394,8 @@ async function handleRequest(event: Event) {
         responseMode: result.responseMode,
         ...requestCostSummary(),
         durationMs: Date.now() - operationStarted,
+        ...(result.retrievalStatus ? { retrievalStatus: result.retrievalStatus } : {}),
+        ...(result.evidenceCounts ? { evidenceCounts: result.evidenceCounts } : {}),
         agents: (result.agentsInvolved || []).map((a) => ({
           agentId: a.agentId,
           status: a.status,
@@ -712,6 +714,8 @@ async function handleStreamRequest(
             responseMode: result.responseMode,
             ...requestCostSummary(),
             durationMs: Date.now() - operationStarted,
+            ...(result.retrievalStatus ? { retrievalStatus: result.retrievalStatus } : {}),
+            ...(result.evidenceCounts ? { evidenceCounts: result.evidenceCounts } : {}),
             agents: (result.agentsInvolved || []).map((a) => ({
               agentId: a.agentId,
               status: a.status,

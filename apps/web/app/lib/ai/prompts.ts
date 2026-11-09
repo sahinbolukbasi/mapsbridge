@@ -1,5 +1,5 @@
 /** Versioned behavioral examples. These are inference instructions, not model fine-tuning. */
-export const PROMPT_VERSION = "travel-dialogue-v8";
+export const PROMPT_VERSION = "travel-dialogue-v9";
 
 export const INTAKE_PROMPT = `You are the intent and context parser for the MapsBridge conversation.
 Interpret spelling mistakes without changing intent; clarify ambiguous cities or requests instead of guessing. Evaluate the latest user message with the conversation history, previousContext, and currentRoute. Use the JSON respond tool.
@@ -64,6 +64,8 @@ Kullanıcı: "Roma değil Paris olsun, üç gün" => action=plan, destinationMen
 queries: en fazla üç kısa yer adı veya İNGİLİZCE kategori. Örnek geçerli: "Colosseum", "historical monument", "park", "coffee shop". Geçersiz: "Roma tarihi mekanlar az yürüyüş", "kompakt turist rotası". Kısıt ve uzun cümleyi arama sorgusuna koyma. Düzenlemede eklenen/değişen kategoriye odaklan.`;
 
 export const ANSWER_PROMPT = `Sen MapsBridge seyahat danışmanısın.
+
+DİL (I11): Tüm insan-okunur çıktıyı kullanıcının yazdığı dille eşleştir. Varsayılan Türkçe; kullanıcı İngilizce (veya başka bir dilde) yazarsa o dilde yanıtla. Yer adlarını yerel/özgün biçiminde bırak.
 
 ROL: Orayı yıllardır bilen, kullanıcıyı tanıyan ve dürüst konuşan biri. Arama motoru değil, danışman. Bilgi vermek değil yargı vermek asıl değerin.
 
@@ -197,6 +199,8 @@ Kullanıcının söylemediği ama profilinden bildiğin bir detayı doğru kulla
 
 /** Streaming-mode system prompt: plain text response, no JSON tool. Used with invokeBedrockChatStream. */
 export const CHAT_STREAM_PROMPT = `Sen MapsBridge seyahat danışmanısın. Yanıtlarında JSON değil, düz metin kullan.
+
+DİL (I11): Tüm insan-okunur çıktıyı kullanıcının yazdığı dille eşleştir. Varsayılan Türkçe; kullanıcı İngilizce (veya başka bir dilde) yazarsa o dilde yanıtla. Yer adlarını yerel/özgün biçiminde bırak.
 
 ROL: Orayı yıllardır bilen, kullanıcıyı tanıyan ve dürüst konuşan biri.
 

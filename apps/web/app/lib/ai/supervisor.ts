@@ -51,6 +51,7 @@ import {
   type ItineraryActionPayload,
 } from "./itinerary-actions";
 
+import { getDestinationBrief } from "../destination/index";
 import { runTransitStayAgent } from "./sub-agents/transit-stay-agent";
 import { runDiscoveryAgent } from "./sub-agents/discovery-agent";
 import { runEmergencyAgent } from "./sub-agents/emergency-agent";
@@ -490,6 +491,7 @@ export async function runMultiAgentSupervisor(
       orchestratorSummary: `${context.destination} için ${context.days} günlük gezi tercihlerini kaydettim, ancak yeterli gerçek durak bilgisi alınamadı. Uydurma bir rota vermek istemiyorum. Aynı planı yeniden aramamı isteyebilir veya belirli bir semt söyleyebilirsin.`,
       sources: [],
       retrievalStatus: evidence.status,
+      ...(evidence.counts ? { evidenceCounts: evidence.counts } : {}),
     });
   const modelRoute = currentRoute
     ? {
@@ -726,6 +728,7 @@ export async function runMultiAgentSupervisor(
         ],
         sources: [],
         retrievalStatus: evidence.status,
+        ...(evidence.counts ? { evidenceCounts: evidence.counts } : {}),
         ...(previous?.route ? { route: previous.route } : {}),
         clarification: {
           isUnderspecified: false,
@@ -799,6 +802,7 @@ export async function runMultiAgentSupervisor(
           ],
           sources: [],
           retrievalStatus: evidence.status,
+          ...(evidence.counts ? { evidenceCounts: evidence.counts } : {}),
           ...(previous?.route ? { route: previous.route } : {}),
           clarification: {
             isUnderspecified: false,
@@ -828,6 +832,7 @@ export async function runMultiAgentSupervisor(
           ],
           sources: [],
           retrievalStatus: evidence.status,
+          ...(evidence.counts ? { evidenceCounts: evidence.counts } : {}),
           ...(previous?.route ? { route: previous.route } : {}),
           clarification: {
             isUnderspecified: false,
@@ -888,6 +893,12 @@ export async function runMultiAgentSupervisor(
         /acil|yardım|hastane|polis|doktor|güvenlik|kayıp|pasaport|tehlike/iu.test(request);
 
       // Phase 3: Dispatch additional domain agents in parallel
+      // I10: hedef brief'inden OLGUSAL koşul (carRecommended). Yoksa undefined
+      // kalır ve dispatcher mevcut davranışını sürdürür.
+      const agentBrief = getDestinationBrief(agentDest);
+      const destinationFacts = agentBrief
+        ? { carRecommended: agentBrief.gettingAround.value.carRecommended }
+        : undefined;
       const dispatchPromise = intent.shouldFanOut
         ? dispatchSubAgents({
             request,
@@ -897,6 +908,7 @@ export async function runMultiAgentSupervisor(
             enabledAgents,
             timeoutMs: Math.min(4500, 25000 - (Date.now() - started)),
             startedAt: started,
+            ...(destinationFacts ? { destinationFacts } : {}),
           }).catch(() => [] as AgentDispatchResult[])
         : Promise.resolve([] as AgentDispatchResult[]);
 
@@ -1028,6 +1040,7 @@ export async function runMultiAgentSupervisor(
       sourceCoverage,
       sources,
       retrievalStatus: evidence.status,
+      ...(evidence.counts ? { evidenceCounts: evidence.counts } : {}),
       agentsInvolved: involved,
       intentClassification: intent,
       ...(stateEvents.length ? { tripStateEvents: stateEvents } : {}),

@@ -1,0 +1,38 @@
+{
+  "decisions": [
+    {
+      "id": "scope-brownfield-vs-rewrite",
+      "title": "Mevcut çok-ajanlı AI sohbet mimarisini sıfırdan mı yazalım yoksa üzerine mi geliştirelim?",
+      "options": [
+        "Mevcut sistemi (supervisor + 20+ sub-agent + Bedrock RAG) güçlendir (brownfield)",
+        "Sıfırdan yeni bir AI sohbet mimarisi kur (greenfield)"
+      ],
+      "recommended": "Mevcut sistemi (supervisor + 20+ sub-agent + Bedrock RAG) güçlendir (brownfield)",
+      "answer": "Mevcut sistemi (supervisor + 20+ sub-agent + Bedrock RAG) güçlendir (brownfield)"
+    },
+    {
+      "id": "rag-store",
+      "title": "RAG / vektör veritabanı için hangi altyapı?",
+      "options": [
+        "Mevcut Amazon Bedrock Knowledge Base + OpenSearch Serverless vektör store'u derinleştir",
+        "Harici vektör DB (pgvector / Pinecone / Qdrant) ekle"
+      ],
+      "recommended": "Mevcut Amazon Bedrock Knowledge Base + OpenSearch Serverless vektör store'u derinleştir",
+      "answer": "Mevcut Amazon Bedrock Knowledge Base + OpenSearch Serverless vektör store'u derinleştir"
+    },
+    {
+      "id": "training-approach",
+      "title": "LLM 'eğitimi' nasıl yorumlanmalı? (I1: temel model halüsinasyon yapamaz)",
+      "options": [
+        "Onaylı diyaloglardan RAG korpusu + few-shot distilasyon + değerlendirme döngüsü (fine-tune değil)",
+        "Temel modeli fine-tune et (Bedrock custom model)"
+      ],
+      "recommended": "Onaylı diyaloglardan RAG korpusu + few-shot distilasyon + değerlendirme döngüsü (fine-tune değil)",
+      "answer": "Onaylı diyaloglardan RAG korpusu + few-shot distilasyon + değerlendirme döngüsü (fine-tune değil)"
+    }
+  ],
+  "blocking": null,
+  "context": {
+    "template": "infra/lambda/src/ai + apps/web/app/lib/ai (supervisor, retrieval, knowledge-base, training) + services/ai-assistant"
+  }
+}

@@ -58,7 +58,7 @@ resource "aws_iam_role" "kb_ingest" {
   count = var.enable_bedrock ? 1 : 0
   name  = "${local.name}-kb-ingest"
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [{ Effect = "Allow", Principal = { Service = "lambda.amazonaws.com" }, Action = "sts:AssumeRole" }]
   })
   tags = local.tags
@@ -91,14 +91,14 @@ resource "aws_lambda_function" "kb_ingest" {
   source_code_hash = filebase64sha256("${path.module}/.build/lambdas/kb-ingest.zip")
   environment {
     variables = {
-      DYNAMODB_TABLE         = aws_dynamodb_table.data.name
-      KB_RAW_BUCKET          = aws_s3_bucket.kb_raw_data[0].bucket
+      DYNAMODB_TABLE           = aws_dynamodb_table.data.name
+      KB_RAW_BUCKET            = aws_s3_bucket.kb_raw_data[0].bucket
       TRAVEL_KNOWLEDGE_BASE_ID = var.travel_knowledge_base_id
-      BEDROCK_REGION         = "eu-central-1"
+      BEDROCK_REGION           = "eu-central-1"
     }
   }
   depends_on = [aws_iam_role_policy.kb_ingest, aws_cloudwatch_log_group.kb_ingest]
-  tags = local.tags
+  tags       = local.tags
 }
 
 # Step Functions State Machine for Data Normalization & Bedrock Ingestion
@@ -196,4 +196,101 @@ resource "aws_iam_role_policy" "sfn_invoke_lambda" {
       Resource = aws_lambda_function.kb_ingest[0].arn
     }]
   })
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# KB TTL Freshness Worker (spec: bu-projede-olan-ai-chat, Faz 2 / görev 8+30)
+# Bayat (expiresAt geçmiş) KB entity'lerini zamanlı olarak temizler ve tazelik
+# metriklerini (MapsBridge/AI: KBScanned/KBPruned/KBOldestAgeSeconds/Heartbeat) yayar.
+# Kaynak: infra/lambda/src/ai/kb-freshness-worker.ts (self-contained; apps/web importu yok).
+# ─────────────────────────────────────────────────────────────────────────────
+
+resource "aws_cloudwatch_log_group" "kb_freshness" {
+  count             = var.enable_bedrock ? 1 : 0
+  name              = "/aws/lambda/${local.name}-kb-freshness"
+  retention_in_days = 30
+  tags              = local.tags
+}
+
+resource "aws_iam_role" "kb_freshness" {
+  count = var.enable_bedrock ? 1 : 0
+  name  = "${local.name}-kb-freshness"
+  assume_role_policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [{ Effect = "Allow", Principal = { Service = "lambda.amazonaws.com" }, Action = "sts:AssumeRole" }]
+  })
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy" "kb_freshness" {
+  count = var.enable_bedrock ? 1 : 0
+  role  = aws_iam_role.kb_freshness[0].id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      { Effect = "Allow", Action = ["logs:CreateLogStream", "logs:PutLogEvents"], Resource = "${aws_cloudwatch_log_group.kb_freshness[0].arn}:*" },
+      # Scan (SK=META, kind=entity süzgeci) + kaskad silme (Query + DeleteItem). PutItem GEREKMEZ.
+      { Effect = "Allow", Action = ["dynamodb:Scan", "dynamodb:Query", "dynamodb:DeleteItem"], Resource = aws_dynamodb_table.data.arn },
+    ]
+  })
+}
+
+resource "aws_lambda_function" "kb_freshness" {
+  count            = var.enable_bedrock ? 1 : 0
+  function_name    = "${local.name}-kb-freshness"
+  role             = aws_iam_role.kb_freshness[0].arn
+  runtime          = "nodejs20.x"
+  architectures    = ["arm64"]
+  handler          = "index.handler"
+  timeout          = 300
+  memory_size      = 256
+  filename         = "${path.module}/.build/lambdas/kb-freshness.zip"
+  source_code_hash = filebase64sha256("${path.module}/.build/lambdas/kb-freshness.zip")
+  environment {
+    variables = {
+      DYNAMODB_TABLE = aws_dynamodb_table.data.name
+    }
+  }
+  depends_on = [aws_iam_role_policy.kb_freshness, aws_cloudwatch_log_group.kb_freshness]
+  tags       = local.tags
+}
+
+# Scheduler → Lambda invoke rolü (kb_ingest'in sfn rolünden ayrı; bu doğrudan lambda hedefler)
+resource "aws_iam_role" "scheduler_kb_freshness" {
+  count = var.enable_bedrock ? 1 : 0
+  name  = "${local.name}-scheduler-kb-freshness"
+  assume_role_policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [{ Effect = "Allow", Principal = { Service = "scheduler.amazonaws.com" }, Action = "sts:AssumeRole" }]
+  })
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy" "scheduler_kb_freshness" {
+  count = var.enable_bedrock ? 1 : 0
+  name  = "invoke-kb-freshness"
+  role  = aws_iam_role.scheduler_kb_freshness[0].id
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [{ Effect = "Allow", Action = ["lambda:InvokeFunction"], Resource = aws_lambda_function.kb_freshness[0].arn }]
+  })
+}
+
+# Günlük TTL temizliği — weekly_kb_refresh'ten (Pazar 03:00) bir saat sonra, her gün.
+# Worker bounded batch (100/çağrı, hasMore); büyük tablolar birkaç güne yayılarak temizlenir.
+resource "aws_scheduler_schedule" "daily_kb_freshness" {
+  count      = var.enable_bedrock ? 1 : 0
+  name       = "${local.name}-daily-kb-freshness"
+  group_name = "default"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression = "cron(0 4 * * ? *)"
+
+  target {
+    arn      = aws_lambda_function.kb_freshness[0].arn
+    role_arn = aws_iam_role.scheduler_kb_freshness[0].arn
+  }
 }

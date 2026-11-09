@@ -133,3 +133,48 @@ export function shouldEnqueue(queue: ResearchQueue, entityRef: string): boolean 
 export function getJobsForThread(queue: ResearchQueue, threadId: string): ResearchJob[] {
   return queue.jobs.filter((j) => j.requestedByThreadId === threadId);
 }
+
+/**
+ * entityRef üretici (Faz 2 / görev 10) — "city:kind:slug" biçimi. research-queue
+ * ve supervisor aynı biçimi kullansın diye tek yerde. slug normalize edilir.
+ */
+export function entityRef(city: string, kind: string, slug: string): string {
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9çğıöşü-]/giu, "");
+  return `${norm(city)}:${norm(kind)}:${norm(slug)}`;
+}
+
+/**
+ * Eksik entity'ler için araştırma işlerini SAF biçimde planlar (Faz 2 / görev 10).
+ *
+ * Amaç (I7): bir rota/sohbet isteği sırasında yeterli gerçek durak bulunamadığında
+ * ya da bir entity eksik olduğunda, bu araştırmayı TALEP ANINDA yapıp kullanıcıyı
+ * bekletmek yerine yüksek öncelikli bir işe alıp ÖNCEDEN HESAPLAMA kanalına koymak.
+ *
+ * - `needed`: istenen entityRef listesi (supervisor eksik şehir/entity'den üretir).
+ * - `shouldEnqueue` ile zaten pending/running olanlar atlanır (tekrar engelleme).
+ * - Mutasyon yok: yeni queue + enqueue edilen işler döner.
+ */
+export function planResearchJobs(
+  queue: ResearchQueue,
+  needed: string[],
+  priority: ResearchJobPriority = "high",
+  threadId?: string,
+): { queue: ResearchQueue; enqueued: ResearchJob[] } {
+  let q = queue;
+  const enqueued: ResearchJob[] = [];
+  const seenThisCall = new Set<string>();
+  for (const ref of needed) {
+    if (seenThisCall.has(ref)) continue; // aynı çağrıda tekrarı da engelle
+    seenThisCall.add(ref);
+    if (!shouldEnqueue(q, ref)) continue; // zaten pending/running
+    const { queue: next, job } = enqueueJob(q, ref, priority, threadId);
+    q = next;
+    enqueued.push(job);
+  }
+  return { queue: q, enqueued };
+}

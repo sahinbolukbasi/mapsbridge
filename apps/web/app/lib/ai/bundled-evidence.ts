@@ -3,6 +3,7 @@ import reviewed from "../../../../../data/travel/reviewed.json";
 import type { TravelEvidence } from "./retrieval";
 import type { MultiAgentRequestPayload } from "./types";
 import { normalizeText } from "./planning";
+import { CITY_ALIASES } from "./city-aliases";
 
 /** A small reviewed corpus can still ground answers when vector retrieval is unavailable. */
 export function bundledEvidence(
@@ -16,14 +17,8 @@ export function bundledEvidence(
     )
   )
     return { status: "empty", passages: [] };
-  const aliases: Record<string, string[]> = {
-    Tokyo: ["tokyo", "tokio"],
-    Roma: ["roma", "rome"],
-    İstanbul: ["istanbul"],
-    Lima: ["lima"],
-    Paris: ["paris"],
-    Barcelona: ["barcelona", "barselona"],
-  };
+  // Alias sözlüğü tek kaynaktan (city-aliases.ts) gelir; retrieval.ts ile aynı tablo.
+  const aliases = CITY_ALIASES;
   let city: string | undefined;
   let last = -1;
   for (const [name, terms] of Object.entries(aliases))
@@ -73,5 +68,15 @@ export function mergeEvidence(remote: TravelEvidence, local: TravelEvidence): Tr
   const passages = [...remote.passages];
   for (const source of local.passages)
     if (!passages.some((p) => p.url === source.url) && passages.length < 6) passages.push(source);
-  return { status: passages.length ? "available" : remote.status, passages };
+  return {
+    status: passages.length ? "available" : remote.status,
+    passages,
+    // Grounding ölçümü (görev 4): kaç pasaj uzaktan (RAG), kaç yerel korpustan,
+    // dedupe + sınır sonrası kaç tane kaldı. recordAIOperation evidenceCounts'a geçer.
+    counts: {
+      remote: remote.passages.length,
+      local: local.passages.length,
+      merged: passages.length,
+    },
+  };
 }

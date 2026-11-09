@@ -10,12 +10,72 @@ import { runFlightAgent } from "./flight-agent";
 // Types
 // ---------------------------------------------------------------------------
 
+/**
+ * I2 DETERMİNİSTİK SINIR (Faz 3 / görev 13).
+ * Rota geometrisi ve zamanlama DETERMİNİSTİK koddur (clustering/TSP/temporal fitting);
+ * bir sub-agent'ın (LLM çıktısı) bu alanları YAZMASI YASAKTIR. Aşağıdaki anahtarlar
+ * sub-agent payload'ında bulunamaz; hem tip düzeyinde (SubAgentData) hem çalışma
+ * zamanında (assertNoRouteGeometry) engellenir.
+ */
+export const ROUTE_GEOMETRY_KEYS = [
+  "stops",
+  "estimatedDays",
+  "droppedStops",
+  "day",
+  "timeSlot",
+  "estimatedMinutes",
+  "distanceToNextKm",
+  "cluster",
+  "clusters",
+] as const;
+
+type RouteGeometryKey = (typeof ROUTE_GEOMETRY_KEYS)[number];
+
+/**
+ * Tip-seviyesi güvence: bir sub-agent data tipi rota-geometri anahtarlarından
+ * HİÇBİRİNİ taşıyamaz (taşırsa o alan `never` olur ve atama derlenmez).
+ */
+export type SubAgentData<T> = T & { [K in RouteGeometryKey]?: never };
+
+// Derleme-zamanı kanıtı (I2): rota-geometri alanı taşıyan bir obje SubAgentData'ya
+// ATANAMAZ. @ts-expect-error BEKLENEN bir hatadır; kaldırılırsa veya SubAgentData
+// artık `stops`'u reddetmezse typecheck KIRILIR ve güvence sessizce kaybolmaz.
+const _i2TypeProof: SubAgentData<{ note: string }> = {
+  note: "ok",
+  // @ts-expect-error — stops bir rota-geometri anahtarı; SubAgentData reddetmeli.
+  stops: [],
+};
+void _i2TypeProof;
+
+/**
+ * Çalışma zamanı savunması: bir sub-agent çıktısı yanlışlıkla rota-geometri alanı
+ * içerirse bunları SÖKER (silerek döndürür) ve geliştirme ortamında uyarı loglar.
+ * Böylece ileride eklenen bir agent sızdırsa bile deterministik rota ezilmez.
+ */
+export function assertNoRouteGeometry(data: unknown): unknown {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return data;
+  const obj = data as Record<string, unknown>;
+  let leaked: string[] | undefined;
+  for (const key of ROUTE_GEOMETRY_KEYS) {
+    if (key in obj) {
+      (leaked ||= []).push(key);
+      delete obj[key];
+    }
+  }
+  if (leaked)
+    console.warn(
+      `[dispatcher] I2 ihlali engellendi: sub-agent çıktısından rota-geometri alanları söküldü: ${leaked.join(", ")}`,
+    );
+  return obj;
+}
+
 export interface AgentDispatchResult {
   agentId: string;
   agentName: string;
   icon: string;
   status: "completed" | "failed" | "timeout" | "skipped";
   durationMs: number;
+  /** Sub-agent çıktısı — rota geometrisi/zamanlaması İÇEREMEZ (I2, assertNoRouteGeometry ile sökülür). */
   data?: unknown;
   summaryNote?: string;
 }
@@ -28,13 +88,22 @@ export interface DispatchOptions {
   enabledAgents: Set<string>;
   timeoutMs: number;
   startedAt: number;
+  /**
+   * Hedefin OLGUSAL koşulları (I10 koşullu UI). Yalnızca olgu — demografi DEĞİL (I5).
+   * Supervisor destination brief'inden doldurur; bilinmeyen alanlar undefined kalır
+   * ve mevcut davranışı değiştirmez.
+   */
+  destinationFacts?: {
+    /** Şehirde araç önerilir mi? false → metro/yürüme şehri, araç kiralama ima edilmez. */
+    carRecommended?: boolean;
+  };
 }
 
 // ---------------------------------------------------------------------------
 // Agent registry — metadata + relevance patterns
 // ---------------------------------------------------------------------------
 
-interface AgentEntry {
+export interface AgentEntry {
   id: string;
   name: string;
   icon: string;
@@ -43,7 +112,7 @@ interface AgentEntry {
   alwaysInRoute: boolean;
 }
 
-const AGENT_REGISTRY: AgentEntry[] = [
+export const AGENT_REGISTRY: AgentEntry[] = [
   {
     id: "food",
     name: "Gastronomi Uzmanı",
@@ -111,23 +180,60 @@ function isSimpleQuery(request: string): boolean {
 // Relevance detection
 // ---------------------------------------------------------------------------
 
+/**
+ * Kullanıcı aracı AÇIKÇA ve ısrarla istiyor mu? ("araç kiralamak istiyorum",
+ * "araba tutacağım" gibi). Geçerken anmaktan (örn "araçla gezmeye gerek var mı?")
+ * ayrı tutulur; metro şehrinde bu ayrım I10 kapısında kullanılır.
+ */
+export function explicitlyWantsCar(request: string): boolean {
+  // "gerek var mı?" gibi SORU kalıpları istek sayılmaz; yalnızca net niyet fiilleri.
+  return /(araç|araba|kiralık\s*araç|rent).{0,20}(kirala|tut|istiyorum|lazım)|kiralık\s*araba/iu.test(
+    request,
+  );
+}
+
+/**
+ * I10 koşullu tetik kapısı (SAF). Bir agent'ın bu gezi için tetiklenip
+ * tetiklenmeyeceğine OLGULARDAN karar verir (demografiden değil — I5).
+ *
+ * Kural: car-rental agent'ı, hedef metro/yürüme şehriyse (carRecommended === false)
+ * VE kullanıcı aracı açıkça istemiyorsa TETİKLENMEZ. Fact bilinmiyorsa (undefined)
+ * veya kullanıcı ısrarla araç istiyorsa mevcut davranış korunur.
+ */
+export function isAgentRelevant(
+  entry: AgentEntry,
+  request: string,
+  mode: "chat" | "route",
+  simple: boolean,
+  facts?: DispatchOptions["destinationFacts"],
+): boolean {
+  // I10: metro/yürüme şehrinde araç kiralama kartı/ajanı render edilmez.
+  if (
+    entry.id === "car-rental" &&
+    facts?.carRecommended === false &&
+    !explicitlyWantsCar(request)
+  )
+    return false;
+
+  // Route modunda alwaysInRoute agent'lar daima (basit sorgu değilse).
+  if (mode === "route" && entry.alwaysInRoute && !simple) return true;
+
+  // Aksi halde istek metni agent desenine uyuyor mu?
+  return entry.pattern.test(request);
+}
+
 function detectRelevantAgents(
   request: string,
   mode: "chat" | "route",
   enabledAgents: Set<string>,
+  facts?: DispatchOptions["destinationFacts"],
 ): AgentEntry[] {
   const simple = isSimpleQuery(request);
 
   return AGENT_REGISTRY.filter((entry) => {
     // Must be enabled via feature flags
     if (!enabledAgents.has(entry.id)) return false;
-
-    // In route mode, always include agents marked alwaysInRoute —
-    // but skip them when the request is a simple/trivial query to avoid fan-out.
-    if (mode === "route" && entry.alwaysInRoute && !simple) return true;
-
-    // Otherwise check if the request text matches the agent's pattern
-    return entry.pattern.test(request);
+    return isAgentRelevant(entry, request, mode, simple, facts);
   });
 }
 
@@ -228,7 +334,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 export async function dispatchSubAgents(opts: DispatchOptions): Promise<AgentDispatchResult[]> {
   const { request, destination, profile, mode, enabledAgents, timeoutMs, startedAt } = opts;
 
-  const relevant = detectRelevantAgents(request, mode, enabledAgents);
+  const relevant = detectRelevantAgents(request, mode, enabledAgents, opts.destinationFacts);
 
   if (relevant.length === 0) {
     return [];
@@ -279,7 +385,8 @@ export async function dispatchSubAgents(opts: DispatchOptions): Promise<AgentDis
         icon: entry.icon,
         status: "completed",
         durationMs: result.durationMs,
-        data: result.data,
+        // I2: deterministik rota geometrisini LLM çıktısı ezemesin diye sök.
+        data: assertNoRouteGeometry(result.data),
       };
     } catch (error) {
       const isTimeout =
