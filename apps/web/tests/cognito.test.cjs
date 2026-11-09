@@ -72,7 +72,7 @@ function loadModule() {
   return mod.exports;
 }
 
-const { decodeJwtPayload, migrateLegacyStorageKeys, _localStorage } = loadModule();
+const { decodeJwtPayload, migrateLegacyStorageKeys, isJwt, _localStorage } = loadModule();
 
 // ─── decodeJwtPayload ─────────────────────────────────────────────
 
@@ -186,4 +186,82 @@ test("migrateLegacyStorageKeys does not overwrite existing new key", () => {
   mod.exports.migrateLegacyStorageKeys();
   assert.equal(store["mapsbridge.accessToken"], "existing-new-token");
   assert.equal(store["adreskopru.accessToken"], undefined);
+});
+
+// ─── isJwt ────────────────────────────────────────────────────────
+
+test("isJwt returns true for a 3-part base64url token", () => {
+  const jwt = makeJwt({ sub: "user-123", email: "a@b.com" });
+  assert.equal(isJwt(jwt), true);
+  assert.equal(jwt.split(".").length, 3);
+});
+
+test("isJwt returns false for an opaque dotless token", () => {
+  assert.equal(isJwt("ya29.a0AfH6SMByOpaqueAccessTokenNoDots"), false);
+  assert.equal(isJwt("header.payload"), false);
+  assert.equal(isJwt(""), false);
+});
+
+// ─── handleGoogleCredentialResponse: JWT vs opaque token ──────────
+
+// handleGoogleCredentialResponse writes mapsbridge.idToken; it needs window +
+// localStorage + document.cookie in context. Build an isolated module instance.
+function loadGoogleModule() {
+  const transformed = bundleCognito();
+  const mod = { exports: {} };
+  const store = {};
+  const mockLS = {
+    getItem: (k) => store[k] ?? null,
+    setItem: (k, v) => {
+      store[k] = v;
+    },
+    removeItem: (k) => {
+      delete store[k];
+    },
+  };
+  vm.runInNewContext(transformed, {
+    module: mod,
+    exports: mod.exports,
+    require,
+    process: { env: {} },
+    console,
+    Buffer,
+    JSON,
+    window: {},
+    document: { cookie: "" },
+    localStorage: mockLS,
+    sessionStorage: { getItem: () => null, removeItem: () => {} },
+    fetch: async () => ({ ok: true, json: async () => ({}) }),
+    atob: (s) => Buffer.from(s, "base64").toString("binary"),
+    decodeURIComponent,
+    Date,
+  });
+  return { exports: mod.exports, store };
+}
+
+test("handleGoogleCredentialResponse stores a valid Google JWT at mapsbridge.idToken", () => {
+  const { exports, store } = loadGoogleModule();
+  const jwt = makeJwt({ email: "guser@gmail.com", name: "Google Kullanıcı", sub: "g-1" });
+  const res = exports.handleGoogleCredentialResponse(jwt);
+  assert.equal(store["mapsbridge.idToken"], jwt);
+  assert.equal(store["mapsbridge.idToken"].split(".").length, 3);
+  assert.equal(res.email, "guser@gmail.com");
+});
+
+test("handleGoogleCredentialResponse throws Turkish error and stores nothing for opaque token", () => {
+  const { exports, store } = loadGoogleModule();
+  const opaque = "ya29.a0AfH6SMByOpaqueAccessTokenNoDots";
+  assert.throws(
+    () =>
+      exports.handleGoogleCredentialResponse(opaque, {
+        email: "guser@gmail.com",
+        name: "Google Kullanıcı",
+      }),
+    (err) => {
+      assert.match(String(err && err.message), /Google ile giriş tamamlanamadı/);
+      return true;
+    },
+  );
+  assert.equal(store["mapsbridge.idToken"], undefined);
+  assert.equal(store["mapsbridge.accessToken"], undefined);
 });

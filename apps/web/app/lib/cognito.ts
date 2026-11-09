@@ -28,6 +28,16 @@ export function decodeJwtPayload(token: string): Record<string, unknown> | null 
 }
 
 /**
+ * True only for a real 3-part base64url JWT (header.payload.signature).
+ * Mirrors the backend contract at infra/lambda/src/shared/auth.ts:60 so that an
+ * opaque Google access token (no dots) is never stored as a session token.
+ */
+export function isJwt(token: string): boolean {
+  if (typeof token !== "string") return false;
+  return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token);
+}
+
+/**
  * One-time migration: copy legacy `adreskopru.*` keys to `mapsbridge.*`
  * if the new keys don't exist yet, then remove the old keys.
  */
@@ -331,17 +341,14 @@ export function handleGoogleCredentialResponse(
   const cleanEmail = email.trim().toLowerCase();
   const cleanUsername = cleanEmail.split("@")[0].replace(/[^a-z0-9_]/g, "");
 
-  // Accept either a JWT (Google One Tap) or an opaque access token (OAuth tokenClient).
-  // When manualProfile is provided with a valid email, the access token was already
-  // used to fetch the user's profile from googleapis — no JWT decoding needed.
+  // Yalnızca gerçek bir JWT (Google One Tap id_token) oturum anahtarı olarak saklanır.
+  // Opak Google erişim token'ı (nokta içermeyen) backend'in 3-parçalı JWT regex'ini
+  // (infra/lambda/src/shared/auth.ts:60) geçemez ve her çağrıda 401 döner.
   const token = credential;
-  if (!token) {
-    throw new Error("Google kimlik doğrulaması başarısız oldu. Token alınamadı.");
-  }
-  const validatedPayload = decodeJwtPayload(token);
-  // If it's not a decodable JWT, that's fine as long as we got the profile via manualProfile
-  if (!validatedPayload && !manualProfile?.email) {
-    throw new Error("Google kimlik doğrulaması başarısız oldu. Geçerli bir token alınamadı.");
+  if (!isJwt(token)) {
+    throw new Error(
+      "Google ile giriş tamamlanamadı: kimlik doğrulama anahtarı alınamadı. Lütfen tekrar deneyin.",
+    );
   }
 
   localStorage.setItem("mapsbridge.accessToken", token);

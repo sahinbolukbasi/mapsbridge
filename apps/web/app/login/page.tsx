@@ -18,10 +18,6 @@ import { DEFAULT_NEXT, readNext } from "../lib/navigation/safe-next";
 interface GoogleCredentialResponse {
   credential: string;
 }
-interface GoogleTokenResponse {
-  error?: string;
-  access_token?: string;
-}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -136,63 +132,9 @@ export default function LoginPage() {
     setMessage("");
     const google = typeof window !== "undefined" ? window.google : null;
 
-    // 1. Google OAuth 2.0 Token Client (Standart kullanıcı tıklaması popup akışı)
-    if (google?.accounts?.oauth2) {
-      try {
-        const client = google.accounts.oauth2.initTokenClient({
-          client_id: clientId,
-          scope: "email profile openid",
-          callback: async (tokenResponse: GoogleTokenResponse) => {
-            if (tokenResponse.error) {
-              setIsGoogleLoading(false);
-              if (tokenResponse.error !== "popup_closed_by_user") {
-                console.warn("Google OAuth error:", tokenResponse);
-                setShowGoogleFallbackModal(true);
-              }
-              return;
-            }
-            if (tokenResponse.access_token) {
-              try {
-                const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-                });
-                const profile = (await userRes.json()) as {
-                  email?: string;
-                  name?: string;
-                  given_name?: string;
-                  picture?: string;
-                };
-                if (profile?.email) {
-                  handleGoogleCredentialResponse(tokenResponse.access_token, {
-                    email: profile.email,
-                    name: profile.name || profile.given_name || profile.email.split("@")[0],
-                    picture: profile.picture,
-                  });
-                  redirectToNext();
-                  return;
-                }
-              } catch (e: unknown) {
-                console.error("Google userinfo fetch failed", e);
-                setMessage("Google profil bilgisi alınamadı. Lütfen tekrar deneyin.");
-              } finally {
-                setIsGoogleLoading(false);
-              }
-            }
-          },
-          error_callback: (err: unknown) => {
-            setIsGoogleLoading(false);
-            console.warn("Google TokenClient error:", err);
-            setShowGoogleFallbackModal(true);
-          },
-        });
-        client.requestAccessToken({ prompt: "select_account" });
-        return;
-      } catch (err: unknown) {
-        console.warn("initTokenClient failed, falling back to One Tap", err);
-      }
-    }
-
-    // 2. One Tap prompt denemesi
+    // 1. Google One Tap (GIS) — oturum anahtarı olarak gerçek id_token (JWT) döndürür.
+    // handleCredential -> handleGoogleCredentialResponse(credential) yalnızca JWT saklar;
+    // backend'in 3-parçalı JWT sözleşmesini (shared/auth.ts) karşılayan tek yol budur.
     if (google?.accounts?.id) {
       try {
         google.accounts.id.prompt((notification: GooglePromptNotification) => {
@@ -202,7 +144,7 @@ export default function LoginPage() {
             setShowGoogleFallbackModal(true);
           }
         });
-        // 4 saniye içinde yanıt gelmezse fallback göster
+        // 3.5 saniye içinde yanıt gelmezse fallback göster
         setTimeout(() => {
           setIsGoogleLoading((loading) => {
             if (loading) setShowGoogleFallbackModal(true);
@@ -215,7 +157,7 @@ export default function LoginPage() {
       }
     }
 
-    // 3. Script yoksa veya alan adı Google Cloud'da henüz tanımlanmadıysa
+    // 2. Script yoksa veya alan adı Google Cloud'da henüz tanımlanmadıysa
     setIsGoogleLoading(false);
     setShowGoogleFallbackModal(true);
   };
