@@ -703,7 +703,7 @@ test("4.7 (K4): derin bağlantı, paylaşım, Yakınımda, yerel bildirim, karo 
     "kilidi açarken doğrulama",
   );
   const pkg = JSON.parse(fs.readFileSync(path.join(mobile, "package.json"), "utf8"));
-  // Onaylı 7 paket kullanılıyor (ölü bağımlılık yok).
+  // Onaylı 8 paket kullanılıyor (ölü bağımlılık yok).
   const all = FILES.map(read).join("\n");
   for (const name of [
     "expo-haptics",
@@ -713,6 +713,7 @@ test("4.7 (K4): derin bağlantı, paylaşım, Yakınımda, yerel bildirim, karo 
     "expo-file-system",
     "expo-local-authentication",
     "expo-linking",
+    "expo-web-browser",
   ])
     assert.match(all, new RegExp(`from "${name}"`), `${name} kullanılmıyor`);
   assert.ok(
