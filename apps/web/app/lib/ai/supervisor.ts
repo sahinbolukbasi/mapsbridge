@@ -757,8 +757,10 @@ export async function runMultiAgentSupervisor(
       throw Error("Sohbet yanıtı tamamlanamadı.");
     // Only reject prices that didn't come from verified flightData
     const responseText = JSON.stringify(output.data);
+    // Sembol-önce biçimde (€320) tüm sayıyı yakala; eskiden `[$₺€¥£]\s*\d` yalnız
+    // ilk rakamı alıyordu (€320→"3"), bu da doğrulanmış €320'yi bile reddedebiliyordu.
     const priceMatch = responseText.match(
-      /(?:\d[\d.,– -]*\s*(?:TL|USD|EUR|JPY|₺|€|¥)|[$₺€¥£]\s*\d)/iu,
+      /(?:\d[\d.,– -]*\s*(?:TL|USD|EUR|JPY|₺|€|¥)|[$₺€¥£]\s*\d[\d.,– -]*)/iu,
     );
     if (priceMatch) {
       const verifiedPrices = flightHint
