@@ -40,8 +40,8 @@ export const APP_CONFIG = {
       // O zamana kadar `mapsbridge://` şema bağlantıları çalışır.
       // buildNumber: eas.json appVersionSource:"remote" + production.autoIncrement:true olduğundan
       // EAS production derlemesinde bu değer YOK SAYILIR (uzak sayaç yönetir). Yine de yerel/prebuild
-      // ve tutarlılık için güncel tutulur. ITMS-90683 düzeltmesiyle 2 → 3.
-      buildNumber: "3",
+      // ve tutarlılık için güncel tutulur. ITMS-90683 düzeltmesiyle 2 → 3; auth-fix sürümü 3 → 19.
+      buildNumber: "19",
       userInterfaceStyle: "dark",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
@@ -116,8 +116,8 @@ export const APP_CONFIG = {
     },
     android: {
       package: "com.mapsbridge.mobile",
-      // versionCode: iOS buildNumber ile tutarlı (EAS remote autoIncrement bu değeri yönetir). 2 → 3.
-      versionCode: 3,
+      // versionCode: iOS buildNumber ile tutarlı (EAS remote autoIncrement bu değeri yönetir). 2 → 3; auth-fix sürümü 3 → 19.
+      versionCode: 19,
       userInterfaceStyle: "dark",
       adaptiveIcon: {
         foregroundImage: "./assets/android-icon-foreground.png",

@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mapsbridge.mobile",
-      "buildNumber": "3",
+      "buildNumber": "19",
       "userInterfaceStyle": "dark",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -71,7 +71,7 @@
     },
     "android": {
       "package": "com.mapsbridge.mobile",
-      "versionCode": 3,
+      "versionCode": 19,
       "userInterfaceStyle": "dark",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
