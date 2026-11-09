@@ -9,6 +9,7 @@ import {
   StyleSheet,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { tripStore, type ActiveRoute, type TripStop } from "../services/tripStore";
@@ -239,6 +240,10 @@ export function MapScreen({
   onRequireAuth,
 }: MapScreenProps) {
   const [route, setRoute] = useState<ActiveRoute>(tripStore.getActiveRoute());
+  // G3: duraklar yatay kaydırılır; her sayfa ekran genişliğinin ~%84'ü (komşu kart hafif görünür,
+  // kaydırılabilirlik ipucu). BottomSheet içinde güvenli: pencere genişliğine oranlı sabit piksel.
+  const { width: windowWidth } = useWindowDimensions();
+  const stopPageWidth = Math.round(windowWidth * 0.84);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [legs, setLegs] = useState<Legs>({ key: "", legs: null });
   const [query, setQuery] = useState("");
@@ -1113,9 +1118,20 @@ export function MapScreen({
                   </Txt>
                 </View>
               ) : (
-                <View>
+                /* G3: duraklar yatay (sola/sağa) kaydırılır — dikey liste yerine sayfalı şerit.
+                   StopRow prop sözlüğü değişmez (parite). Yürüme süresi karta altına Connector
+                   ile verilir (son durak hariç). onMove erişilebilir sıralama alternatifidir (R9). */
+                <ScrollView
+                  horizontal
+                  pagingEnabled={false}
+                  showsHorizontalScrollIndicator={false}
+                  snapToInterval={stopPageWidth + tokens.space["2"]}
+                  decelerationRate="fast"
+                  contentContainerStyle={styles.stopsStrip}
+                  accessibilityLabel={tr("planner.sheet.label")}
+                >
                   {route.stops.map((stop, i) => (
-                    <View key={stop.id}>
+                    <View key={stop.id} style={{ width: stopPageWidth }}>
                       <StopRow
                         index={i + 1}
                         day={multiDay ? stopDay(stop, day) : day}
@@ -1147,7 +1163,7 @@ export function MapScreen({
                       ) : null}
                     </View>
                   ))}
-                </View>
+                </ScrollView>
               )}
 
               {selected ? (
@@ -1422,6 +1438,7 @@ const styles = StyleSheet.create({
   badgeRow: { alignItems: "center", paddingTop: tokens.space["2"] },
   sheet: { padding: tokens.space["4"], paddingBottom: tokens.space["16"], gap: tokens.space["3"] },
   cardBody: { gap: tokens.space["2"] },
+  stopsStrip: { gap: tokens.space["2"], paddingVertical: tokens.space["1"] },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["2"] },
   suggest: { gap: tokens.space["2"] },
   poolRow: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },
