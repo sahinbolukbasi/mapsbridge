@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { authService, type UserSession } from "../services/api";
 import {
   Button,
   Card,
+  GoogleLogo,
   Icon,
   IconButton,
   Notice,
@@ -15,6 +16,12 @@ import {
 } from "../ui";
 import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
+
+// G19: üçüncü-taraf giriş (Cognito IdP + native kimlik doğrulama) kullanıcı sağlayıcı ayarını
+// yapınca bağlanır. O zamana dek bu ekranda yalnızca Google (bugünkü OAuth) + e-posta vardır;
+// diğer sağlayıcı düğmeleri HİÇ render edilmez (karar S20/S27, mobile-design-system guard).
+
+type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid" | "unknown";
 
 // Kimlik ekranı (design §6.4, §9 "Kimlik (AuthCard)"; kararlar S7, S20): web AuthCard adımlarıyla
 // aynı sıra: Giriş / Kayıt → e-posta doğrulama kodu; Şifremi unuttum → kod + yeni şifre. Kapılardan
@@ -30,6 +37,7 @@ interface AuthScreenProps {
   initialMode?: AuthMode;
 }
 
+const USERNAME_RE = /^[a-z0-9_.-]{1,40}$/;
 const RULES = [
   { key: "edit.pw.rule.length", test: (p: string) => p.length >= 12 },
   { key: "edit.pw.rule.lower", test: (p: string) => /[a-zğüşıöç]/.test(p) },
@@ -62,16 +70,50 @@ export function AuthScreen({
   initialMode = "login",
 }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("+90");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
+
+  // F3/G18: canlı kullanıcı adı uygunluğu — debounce'lu, mevcut public GET /profiles/{username}.
+  // Yeni backend ucu YOK. Ağ/5xx = "unknown" (kaydı bloklamaz, yalnız kesin "taken" bloklar).
+  useEffect(() => {
+    if (mode !== "register") return;
+    const cleanUser = username.trim().toLowerCase();
+    if (!cleanUser) {
+      setUsernameStatus("idle");
+      return;
+    }
+    if (!USERNAME_RE.test(cleanUser)) {
+      setUsernameStatus("invalid");
+      return;
+    }
+    setUsernameStatus("checking");
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const res = await authService.checkUsername(cleanUser);
+      if (!cancelled) setUsernameStatus(res === "available" ? "available" : res === "taken" ? "taken" : "unknown");
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [username, mode]);
+
+  const usernameMsg: Record<UsernameStatus, string> = {
+    idle: "",
+    checking: tr("native.auth.username.checking"),
+    available: tr("native.auth.username.available"),
+    taken: tr("native.auth.username.taken"),
+    invalid: tr("native.auth.username.invalid"),
+    unknown: "",
+  };
 
   const go = (next: AuthMode) => {
     setError("");
@@ -98,7 +140,10 @@ export function AuthScreen({
     }
     run(async () => {
       try {
-        onSuccess(await authService.signIn(email, password));
+        const session = await authService.signIn(email, password);
+        // G18: token artık var — kayıt sırasında seçilen kullanıcı adını yayınla (en iyi çaba).
+        await authService.flushPendingUsername();
+        onSuccess(session);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "";
         if (msg.includes("UserNotConfirmedException") || msg.includes("not confirmed")) {
@@ -116,14 +161,18 @@ export function AuthScreen({
 
   const signUp = () => {
     const cleanEmail = email.trim().toLowerCase();
-    if (
-      !firstName.trim() ||
-      !lastName.trim() ||
-      !cleanEmail ||
-      !password ||
-      phone.trim().length < 10
-    ) {
+    const cleanUser = username.trim().toLowerCase();
+    // F2: Ad Soyad + Kullanıcı adı + E-posta + Şifre (telefon yok).
+    if (!fullName.trim() || !cleanUser || !cleanEmail || !password) {
       setError(tr("native.auth.err.registerFields"));
+      return;
+    }
+    if (!USERNAME_RE.test(cleanUser)) {
+      setError(tr("native.auth.err.usernameInvalid"));
+      return;
+    }
+    if (usernameStatus === "taken") {
+      setError(tr("native.auth.err.usernameTaken"));
       return;
     }
     if (!pwValid) {
@@ -131,12 +180,10 @@ export function AuthScreen({
       return;
     }
     run(async () => {
-      await authService.signUp(
-        cleanEmail,
-        password,
-        `${firstName.trim()} ${lastName.trim()}`,
-        phone.trim(),
-      );
+      await authService.signUp(cleanEmail, password, fullName.trim());
+      // G18 publish ZAMANLAMASI: kayıt anında token YOK. Kullanıcı adını cihaza yaz;
+      // kullanıcı doğrulayıp GİRİNCE signIn içinde flushPendingUsername ile yayınlanır.
+      await authService.stashPendingUsername(cleanUser);
       setInfo(tr("native.auth.info.codeSent", { email: cleanEmail }));
       setMode("confirm_signup");
     });
@@ -242,7 +289,7 @@ export function AuthScreen({
                   )}
                   variant="secondary"
                   size="lg"
-                  icon={<Icon name="globe" size={20} color={tokens.color.buttonSecondaryFg} />}
+                  icon={<GoogleLogo size={18} />}
                   onPress={onSelectGoogle}
                 />
                 <Txt variant="caption" tone="muted" align="center">
@@ -254,26 +301,22 @@ export function AuthScreen({
             {mode === "register" ? (
               <>
                 <TextField
-                  label={tr("native.auth.firstName")}
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  autoComplete="given-name"
-                  textContentType="givenName"
+                  label={tr("edit.fullName")}
+                  value={fullName}
+                  onChangeText={setFullName}
+                  autoComplete="name"
+                  textContentType="name"
                 />
                 <TextField
-                  label={tr("native.auth.lastName")}
-                  value={lastName}
-                  onChangeText={setLastName}
-                  autoComplete="family-name"
-                  textContentType="familyName"
-                />
-                <TextField
-                  label={tr("native.auth.phone")}
-                  value={phone}
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                  autoComplete="tel"
-                  textContentType="telephoneNumber"
+                  label={tr("edit.username")}
+                  value={username}
+                  onChangeText={(v) => setUsername(v.toLowerCase())}
+                  hint={usernameStatus === "idle" ? tr("edit.username.hint") : usernameMsg[usernameStatus]}
+                  error={usernameStatus === "taken" || usernameStatus === "invalid" ? usernameMsg[usernameStatus] : undefined}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="username-new"
+                  textContentType="username"
                 />
               </>
             ) : null}
@@ -297,6 +340,7 @@ export function AuthScreen({
                 value={password}
                 onChangeText={setPassword}
                 secure
+                secureToggle
                 autoComplete={mode === "register" ? "new-password" : "password"}
                 textContentType={mode === "register" ? "newPassword" : "password"}
               />
@@ -320,6 +364,7 @@ export function AuthScreen({
                 value={newPassword}
                 onChangeText={setNewPassword}
                 secure
+                secureToggle
                 autoComplete="new-password"
                 textContentType="newPassword"
               />

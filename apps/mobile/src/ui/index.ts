@@ -66,6 +66,7 @@ export {
 } from "./StopRow";
 export { AuthGate, type AuthGateProps, type AuthGateReason } from "./AuthGate";
 export { Media, type MediaProps, type MediaRatio } from "./Media";
+export { GoogleLogo, AppleLogo } from "./BrandLogos";
 export {
   AccessibleStopList,
   mapLabel,

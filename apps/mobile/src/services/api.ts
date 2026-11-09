@@ -123,7 +123,8 @@ export const authService = {
     return session;
   },
 
-  async signUp(email: string, pass: string, name: string, phone: string = "+905550000000") {
+  async signUp(email: string, pass: string, name: string) {
+    // Telefon KALDIRILDI (F2): Cognito şemasında phone_number zorunlu değil; yalnız email + name.
     const cleanEmail = email.trim().toLowerCase();
     return cognitoRequest("SignUp", {
       Username: cleanEmail,
@@ -131,9 +132,52 @@ export const authService = {
       UserAttributes: [
         { Name: "email", Value: cleanEmail },
         { Name: "name", Value: name.trim() },
-        { Name: "phone_number", Value: phone.trim() },
       ],
     });
+  },
+  // F3: kullanıcı adı uygunluğu — mevcut public GET /profiles/{username} (404=boşta, 200=alınmış).
+  async checkUsername(username: string): Promise<"available" | "taken" | "unknown"> {
+    try {
+      const res = await fetch(
+        `${API_BASE}/profiles/${encodeURIComponent(username.trim().toLowerCase())}`,
+        { method: "GET" },
+      );
+      if (res.status === 404) return "available";
+      if (res.status === 200) return "taken";
+      return "unknown";
+    } catch {
+      return "unknown";
+    }
+  },
+  // Username publish ZAMANLAMASI (G18): kayıt anında token YOK; kullanıcı adı yerel
+  // tutulur ve kullanıcı DOĞRULAYIP GİRİNCE burada yayınlanır (web profile-sharing.ts
+  // ile aynı uç: POST /profile/publish, Bearer token). En iyi çaba — kaydı bloklamaz.
+  async publishProfile(username: string): Promise<boolean> {
+    const token = await storage.getItem("mb_token");
+    if (!token) return false;
+    const clean = username.trim().toLowerCase();
+    if (!/^[a-z0-9_.-]{1,40}$/.test(clean)) return false;
+    try {
+      const res = await fetch(`${API_BASE}/profile/publish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ username: clean, profile: {} }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+  // Kayıt sırasında seçilen kullanıcı adını, token gelene kadar cihazda sakla (G18).
+  async stashPendingUsername(username: string): Promise<void> {
+    await storage.setItem("mb_pending_username", username.trim().toLowerCase());
+  },
+  // Giriş başarılı olunca bekleyen kullanıcı adını yayınla ve temizle (G18).
+  async flushPendingUsername(): Promise<void> {
+    const pending = await storage.getItem("mb_pending_username");
+    if (!pending) return;
+    const ok = await this.publishProfile(pending);
+    if (ok) await storage.removeItem("mb_pending_username");
   },
 
   async confirmSignUp(email: string, code: string) {
