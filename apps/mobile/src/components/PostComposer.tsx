@@ -6,6 +6,7 @@ import type { ActiveRoute } from "../services/tripStore";
 import {
   Button,
   Chip,
+  Icon,
   IconButton,
   Media,
   ModalFrame,
@@ -19,6 +20,8 @@ import {
 import { tr, type UiKey } from "../i18n/ui";
 import { tokens } from "../theme";
 import { EMOJIS, insertAt } from "../community/emoji";
+import { currentPosition } from "../services/nearby";
+import { placesApi } from "../trip/places-api";
 // Paylaşım yazma (web NewPostModal karşılığı, Increment 4.4, M3): fotoğraf seçme (expo-image-picker),
 // JPG/PNG/WEBP ≤ 10 MB doğrulaması, önizleme + kaldır, presign yükleme ilerlemesi; yükleme olmazsa
 // görsel cihazda kalır ve "Yalnız bu cihazda" rozeti görünür. Emoji seçici içerik METNİNE emoji
@@ -48,6 +51,7 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
   const [content, setContent] = useState("");
   const [selection, setSelection] = useState<{ start: number; end: number } | null>(null);
   const [locationTag, setLocationTag] = useState("");
+  const [locating, setLocating] = useState(false); // G7: otomatik konum
   const [attachRoute, setAttachRoute] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -56,6 +60,23 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const shake = useRef(new Animated.Value(0)).current;
+  // G7: cihaz konumundan yer etiketini otomatik doldur (en sade). Konum yoksa sessizce vazgeçer;
+  // izin/konum hatası paylaşımı bloklamaz (etiket elle de girilebilir). KVKK: tek seferlik, saklamaz.
+  const useMyLocation = async () => {
+    setLocating(true);
+    try {
+      const pos = await currentPosition();
+      if (!pos) return;
+      const { places } = await placesApi.reverse(pos.lat, pos.lng, "tr");
+      const best = places?.[0];
+      const label = (best?.name || best?.address || "").trim();
+      if (label) setLocationTag(label.slice(0, 80));
+    } catch {
+      // yoksayılır
+    } finally {
+      setLocating(false);
+    }
+  };
   const runShake = () => {
     const d = tokens.motion.distance.sm * 2;
     const step = tokens.motion.duration.fast / 2;
@@ -251,6 +272,14 @@ export function PostComposer({ visible, onClose, activeRoute, onPublished }: Pos
           value={locationTag}
           onChangeText={setLocationTag}
           maxLength={80}
+        />
+        <Button
+          label={tr("native.community.useLocation")}
+          variant="ghost"
+          size="sm"
+          loading={locating}
+          icon={<Icon name="locate" size={16} color={tokens.color.buttonGhostFg} />}
+          onPress={() => void useMyLocation()}
         />
         {activeRoute.stops.length ? (
           <Chip icon="route" pressed={attachRoute} onPress={() => setAttachRoute((v) => !v)}>

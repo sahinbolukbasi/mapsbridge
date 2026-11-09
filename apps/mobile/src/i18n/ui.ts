@@ -472,6 +472,7 @@ export const NATIVE_TR = {
   "native.date.format": "YYYY-AA-GG",
   "native.community.publishFailed": "Paylaşım gönderilemedi. Bağlantını kontrol edip tekrar dene.",
   "native.community.commentFailed": "Yorum gönderilemedi. Bağlantını kontrol edip tekrar dene.",
+  "native.community.useLocation": "Konumumu kullan",
   "native.auth.mode": "Hesap",
   "native.auth.login.sub": "Rotalarına ve asistana kaldığın yerden devam et.",
   "native.auth.register.sub": "Rotalarını hesabında sakla, asistanla taslak rotanı oluştur.",
