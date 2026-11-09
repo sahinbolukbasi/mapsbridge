@@ -7,11 +7,11 @@ import {
   View,
   StatusBar,
   Alert,
-  Linking,
   Platform,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as ExpoLinking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 import { GUEST_TABS, MEMBER_TABS, type MobileStackScreen, type MobileTab } from "./src/types";
 import {
   initialNav,
@@ -483,10 +483,14 @@ export function App() {
         Alert.alert(tr("native.auth.google.title"), tr("native.auth.google.openFailed"));
         return;
       }
-      const canOpen = await Linking.canOpenURL(authUrl);
-      if (canOpen) {
-        await Linking.openURL(authUrl);
-      } else {
+      // G20: uygulama-İÇİ Google girişi (ASWebAuthenticationSession / Chrome Custom Tab) —
+      // ayrı Safari/Chrome açmaz, Gmail oturumunu paylaşır. Dönüş callback URL'iyle gelir;
+      // token'ı doğrudan `result.url`'den işleriz (deep-link dinleyici yedek kalır).
+      const redirectUri = "https://mapsbridge.com/auth/callback";
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+      if (result.type === "success" && result.url) {
+        handleGoogleIntercept(result.url);
+      } else if (result.type !== "cancel" && result.type !== "dismiss") {
         Alert.alert(tr("native.auth.google.title"), tr("native.auth.google.openFailed"));
       }
     } catch (e) {
