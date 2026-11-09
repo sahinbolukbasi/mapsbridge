@@ -430,6 +430,11 @@ export const NATIVE_TR = {
   "native.ai.welcome":
     "Nereye gitmek istiyorsun? Seyahatini birlikte planlayabilir ya da aklındaki soruyla başlayabiliriz.",
   "native.ai.newChat": "Yeni sohbet",
+  "native.ai.history.open": "Geçmiş sohbetler",
+  "native.ai.history.title": "Geçmiş sohbetlerim",
+  "native.ai.history.none": "Henüz kayıtlı sohbet yok.",
+  "native.ai.history.untitled": "Adsız sohbet",
+  "native.ai.history.empty": "Bu sohbetin içeriği yüklenemedi.",
   "native.ai.viewLabel": "Asistan görünümü",
   "native.ai.noReply": "Yanıt alınamadı. Aynı mesajı tekrar göndererek sonucu kontrol edebilirsin.",
   "native.ai.assumptions": "Varsayımlar: {list}",

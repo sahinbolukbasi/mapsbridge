@@ -707,6 +707,24 @@ export const aiService = {
       return null;
     }
   },
+  // G5: geçmiş sohbetlerin listesi (backend op=conversations; salt okunur). Boş dizi = geçmiş yok.
+  async listConversations(): Promise<
+    Array<{ conversationId: string; destination: string | null; updatedAt: string | null }>
+  > {
+    try {
+      const res = await apiRequest<{
+        conversations?: Array<{
+          conversationId: string;
+          destination: string | null;
+          updatedAt: string | null;
+        }>;
+      }>("/ai/route-planner?op=conversations");
+      return res?.conversations ?? [];
+    } catch (e) {
+      console.warn("[aiService] listConversations error:", e);
+      return [];
+    }
+  },
 };
 
 // ─── Messaging / Chat Service ───────────────────────────────────────────────
