@@ -87,7 +87,7 @@ jobs:
 
           # Map: bundle-name → entry point (relative to repo root)
           # auth, chat, marketplace → main terraform stack (mapsbridge-prod-api-*)
-          # ai, ai-stream, routes, admin, stripe, operations, revenuecat, community, background-monitor, kb-ingest, places → admin-runtime (mapsbridge-prod-*)
+          # ai, ai-stream, routes, admin, stripe, operations, revenuecat, community, background-monitor, kb-ingest, kb-freshness, places → admin-runtime (mapsbridge-prod-*)
           # ws-onconnect, ws-onmessage, ws-ondisconnect → messaging (mapsbridge-prod-*)
           declare -A ENTRIES=(
             ["auth"]="$LAMBDA_ROOT/src/auth/index.ts"
@@ -100,6 +100,7 @@ jobs:
             ["operations"]="$LAMBDA_ROOT/src/operations/index.ts"
             ["background-monitor"]="$LAMBDA_ROOT/src/background-monitor/index.ts"
             ["kb-ingest"]="$LAMBDA_ROOT/src/kb-ingest/index.ts"
+            ["kb-freshness"]="$LAMBDA_ROOT/src/ai/kb-freshness-worker.ts"
             ["places"]="$LAMBDA_ROOT/src/places/index.ts"
             ["ws-onconnect"]="$LAMBDA_ROOT/src/ws/onconnect.ts"
             ["ws-onmessage"]="$LAMBDA_ROOT/src/ws/onmessage.ts"
@@ -175,6 +176,7 @@ jobs:
             ["operations"]="${PREFIX}-operations"
             ["background-monitor"]="${PREFIX}-background-monitor"
             ["kb-ingest"]="${PREFIX}-kb-ingest"
+            ["kb-freshness"]="${PREFIX}-kb-freshness"
             ["places"]="${PREFIX}-places"
             ["ws-onconnect"]="${PREFIX}-ws-onconnect"
             ["ws-onmessage"]="${PREFIX}-ws-onmessage"
