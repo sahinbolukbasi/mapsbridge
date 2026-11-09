@@ -229,7 +229,7 @@ export async function runMultiAgentSupervisor(
     {
       systemPrompt: INTAKE_PROMPT,
       history: modelHistory(6),
-      maxTokens: 1300,
+      maxTokens: 800,
       temperature: 0,
       timeoutMs: 7500,
       schema: INTAKE_SCHEMA,
@@ -679,7 +679,7 @@ export async function runMultiAgentSupervisor(
       return invokeBedrockChatStream(JSON.stringify(input), {
         systemPrompt: streamSystemPrompt,
         history: modelHistory(keepTurns),
-        maxTokens: 1600,
+        maxTokens: 1000,
         temperature: 0.2,
         timeoutMs: Math.max(1000, Math.min(18000, 24500 - (Date.now() - started))),
         onToken: onStreamToken,
@@ -706,7 +706,7 @@ export async function runMultiAgentSupervisor(
       {
         systemPrompt: answerSystemPrompt,
         history: modelHistory(keepTurns),
-        maxTokens: mode === "route" ? Math.min(4200, 1400 + (context.days || 1) * 450) : 1600,
+        maxTokens: mode === "route" ? Math.min(4200, 1400 + (context.days || 1) * 450) : 1000,
         temperature: 0.2,
         timeoutMs: Math.max(1000, Math.min(18000, 24500 - (Date.now() - started))),
         schema: answerSchema(mode === "route"),

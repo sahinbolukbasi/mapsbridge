@@ -15,7 +15,12 @@ export interface AIControl {
 export function configuredModels(env = process.env): string[] {
   return [
     ...new Set(
-      [env.BEDROCK_MODEL_ID, env.BEDROCK_INTAKE_MODEL_ID].filter((id): id is string => !!id),
+      [
+        env.BEDROCK_MODEL_ID,
+        env.BEDROCK_INTAKE_MODEL_ID,
+        "meta.llama3-1-8b-instruct-v1:0",
+        "amazon.nova-micro-v1:0",
+      ].filter((id): id is string => !!id),
     ),
   ];
 }

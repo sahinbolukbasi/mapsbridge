@@ -335,7 +335,8 @@ export function isUsableIntake(value: unknown): boolean {
 /** One bounded fallback; an invalid intake can never silently route a request. */
 export async function invokeIntakeJSON<T>(prompt: string, options: BedrockInvokeOptions = {}) {
   const candidate =
-    process.env.CUSTOM_MODEL_ENABLED === "true" ? process.env.BEDROCK_INTAKE_MODEL_ID : undefined;
+    process.env.BEDROCK_INTAKE_MODEL_ID ||
+    (process.env.CUSTOM_MODEL_ENABLED === "true" ? "meta.llama3-1-8b-instruct-v1:0" : undefined);
   const start = Date.now(),
     budget = options.timeoutMs || 7500;
   if (candidate) {
