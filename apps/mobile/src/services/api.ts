@@ -123,7 +123,8 @@ export const authService = {
     return session;
   },
 
-  async signUp(email: string, pass: string, name: string, phone: string = "+905550000000") {
+  async signUp(email: string, pass: string, name: string) {
+    // Telefon KALDIRILDI (F2): Cognito şemasında phone_number zorunlu değil; yalnız email + name.
     const cleanEmail = email.trim().toLowerCase();
     return cognitoRequest("SignUp", {
       Username: cleanEmail,
@@ -131,11 +132,37 @@ export const authService = {
       UserAttributes: [
         { Name: "email", Value: cleanEmail },
         { Name: "name", Value: name.trim() },
-        { Name: "phone_number", Value: phone.trim() },
       ],
     });
   },
+  // F3: kullanıcı adı uygunluğu — mevcut public GET /profiles/{username} (404=boşta, 200=alınmış).
+  async checkUsername(username: string): Promise<"available" | "taken" | "unknown"> {
+    try {
+      const res = await fetch(
+        `${API_BASE}/profiles/${encodeURIComponent(username.trim().toLowerCase())}`,
+        { method: "GET" },
+      );
+      if (res.status === 404) return "available";
+      if (res.status === 200) return "taken";
+      return "unknown";
+    } catch {
+      return "unknown";
+    }
+  },
 
+  // F3: Kayıt sonrası profil yayınlama — mevcut public POST /profile/publish (Bearer token ile).
+  // Kullanıcı adı backend ile aynı kuralda doğrulanır (3–30, [a-z0-9_]). profile = {firstName, lastName}.
+  async publishProfile(
+    token: string,
+    username: string,
+    profile: { firstName: string; lastName: string },
+  ): Promise<void> {
+    await fetch(`${API_BASE}/profile/publish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ username: username.trim().toLowerCase(), profile }),
+    });
+  },
   async confirmSignUp(email: string, code: string) {
     return cognitoRequest("ConfirmSignUp", {
       Username: email.trim().toLowerCase(),

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { authService, type UserSession } from "../services/api";
+import { storage } from "../services/storage";
 import {
   Button,
   Card,
@@ -29,6 +30,11 @@ interface AuthScreenProps {
   onSelectGoogle?: () => void;
   initialMode?: AuthMode;
 }
+
+// F3: Kullanıcı adı kuralı backend ile birebir (auth/index.ts handlePublishProfile):
+// 3–30 karakter, yalnız küçük harf/rakam/alt çizgi. İstemci doğrulaması bununla hizalı
+// olmalı; aksi halde yayınlama (POST /profile/publish) 400 döner.
+const USERNAME_RE = /^[a-z0-9_]{3,30}$/;
 
 const RULES = [
   { key: "edit.pw.rule.length", test: (p: string) => p.length >= 12 },
@@ -62,11 +68,14 @@ export function AuthScreen({
   initialMode = "login",
 }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<
+    "idle" | "checking" | "available" | "taken" | "invalid" | "unknown"
+  >("idle");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("+90");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,6 +100,32 @@ export function AuthScreen({
     }
   };
 
+  // F3: Kayıt sonrası seçilen kullanıcı adını ilk girişte yayınla. Kayıt anında token yok;
+  // kullanıcı adı cihaza yazılır (mb_pending_username) ve burada giriş başarılı olunca
+  // mevcut public POST /profile/publish ile yayınlanır. Hata sessizce yutulur (profil
+  // yayınlama başarısızlığı girişi bloklamaz; kullanıcı profilinden tekrar deneyebilir).
+  const publishPendingProfile = async (token: string) => {
+    try {
+      const pendingUser = await storage.getItem("mb_pending_username");
+      if (!pendingUser) return;
+      const pendingName = (await storage.getItem("mb_pending_fullname")) || "";
+      const [firstName, ...rest] = pendingName.trim().split(/\s+/);
+      await authService.publishProfile(token, pendingUser, {
+        firstName: firstName || "Gezgin",
+        lastName: rest.join(" "),
+      });
+      await storage.removeItem("mb_pending_username");
+      await storage.removeItem("mb_pending_fullname");
+    } catch {
+      // yoksayılır — profil yayınlama girişi bloklamaz
+    }
+  };
+
+  const finishSignIn = async (session: UserSession) => {
+    await publishPendingProfile(session.token);
+    onSuccess(session);
+  };
+
   const signIn = () => {
     if (!email.trim() || !password) {
       setError(tr("native.auth.err.loginFields"));
@@ -98,7 +133,7 @@ export function AuthScreen({
     }
     run(async () => {
       try {
-        onSuccess(await authService.signIn(email, password));
+        await finishSignIn(await authService.signIn(email, password));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "";
         if (msg.includes("UserNotConfirmedException") || msg.includes("not confirmed")) {
@@ -114,16 +149,45 @@ export function AuthScreen({
   const pwFor = mode === "reset_password" ? newPassword : password;
   const pwValid = RULES.every((r) => r.test(pwFor));
 
+  // F3: kullanıcı adı uygunluğu (debounce + mevcut public GET /profiles/{username}).
+  useEffect(() => {
+    if (mode !== "register") return;
+    const raw = username.trim().toLowerCase();
+    if (!raw) {
+      setUsernameStatus("idle");
+      return;
+    }
+    if (!USERNAME_RE.test(raw)) {
+      setUsernameStatus("invalid");
+      return;
+    }
+    setUsernameStatus("checking");
+    let active = true;
+    const t = setTimeout(() => {
+      authService.checkUsername(raw).then((st) => {
+        if (active) setUsernameStatus(st);
+      });
+    }, 450);
+    return () => {
+      active = false;
+      clearTimeout(t);
+    };
+  }, [username, mode]);
+
   const signUp = () => {
     const cleanEmail = email.trim().toLowerCase();
-    if (
-      !firstName.trim() ||
-      !lastName.trim() ||
-      !cleanEmail ||
-      !password ||
-      phone.trim().length < 10
-    ) {
+    const cleanUser = username.trim().toLowerCase();
+    // F2: Ad Soyad + Kullanıcı adı + E-posta + Şifre (telefon yok).
+    if (!fullName.trim() || !cleanUser || !cleanEmail || !password) {
       setError(tr("native.auth.err.registerFields"));
+      return;
+    }
+    if (!USERNAME_RE.test(cleanUser)) {
+      setError(tr("native.auth.err.usernameInvalid"));
+      return;
+    }
+    if (usernameStatus === "taken") {
+      setError(tr("native.auth.err.usernameTaken"));
       return;
     }
     if (!pwValid) {
@@ -131,12 +195,14 @@ export function AuthScreen({
       return;
     }
     run(async () => {
-      await authService.signUp(
-        cleanEmail,
-        password,
-        `${firstName.trim()} ${lastName.trim()}`,
-        phone.trim(),
-      );
+      await authService.signUp(cleanEmail, password, fullName.trim());
+      // Token kayıt anında yok; seçilen kullanıcı adını cihaza yaz, ilk girişte yayınlanır.
+      try {
+        await storage.setItem("mb_pending_username", cleanUser);
+        await storage.setItem("mb_pending_fullname", fullName.trim());
+      } catch {
+        // yoksayılır
+      }
       setInfo(tr("native.auth.info.codeSent", { email: cleanEmail }));
       setMode("confirm_signup");
     });
@@ -200,6 +266,17 @@ export function AuthScreen({
   const head = TITLES[mode];
   const showPwRules = (mode === "register" || mode === "reset_password") && pwFor.length > 0;
 
+  const usernameHint =
+    usernameStatus === "checking"
+      ? tr("native.auth.username.checking")
+      : usernameStatus === "available"
+        ? tr("native.auth.username.available")
+        : usernameStatus === "taken"
+          ? tr("native.auth.username.taken")
+          : usernameStatus === "invalid"
+            ? tr("native.auth.username.invalid")
+            : tr("native.auth.username.help");
+
   return (
     <Screen
       keyboardAvoiding
@@ -254,26 +331,20 @@ export function AuthScreen({
             {mode === "register" ? (
               <>
                 <TextField
-                  label={tr("native.auth.firstName")}
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  autoComplete="given-name"
-                  textContentType="givenName"
+                  label={tr("native.auth.fullName")}
+                  value={fullName}
+                  onChangeText={setFullName}
+                  autoComplete="name"
+                  textContentType="name"
                 />
                 <TextField
-                  label={tr("native.auth.lastName")}
-                  value={lastName}
-                  onChangeText={setLastName}
-                  autoComplete="family-name"
-                  textContentType="familyName"
-                />
-                <TextField
-                  label={tr("native.auth.phone")}
-                  value={phone}
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                  autoComplete="tel"
-                  textContentType="telephoneNumber"
+                  label={tr("edit.username")}
+                  value={username}
+                  onChangeText={(t) => setUsername(t.toLowerCase())}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="username"
+                  hint={usernameHint}
                 />
               </>
             ) : null}
@@ -292,14 +363,35 @@ export function AuthScreen({
             ) : null}
 
             {mode === "login" || mode === "register" ? (
-              <TextField
-                label={tr("native.auth.password")}
-                value={password}
-                onChangeText={setPassword}
-                secure
-                autoComplete={mode === "register" ? "new-password" : "password"}
-                textContentType={mode === "register" ? "newPassword" : "password"}
-              />
+              <View>
+                <TextField
+                  label={tr("native.auth.password")}
+                  value={password}
+                  onChangeText={setPassword}
+                  secure={!showPassword}
+                  autoComplete={mode === "register" ? "new-password" : "password"}
+                  textContentType={mode === "register" ? "newPassword" : "password"}
+                />
+                <View style={styles.pwToggle}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    label={
+                      showPassword
+                        ? tr("edit.pw.hide")
+                        : tr("edit.pw.show")
+                    }
+                    icon={
+                      <Icon
+                        name={showPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color={tokens.color.buttonGhostFg}
+                      />
+                    }
+                    onPress={() => setShowPassword((v) => !v)}
+                  />
+                </View>
+              </View>
             ) : null}
 
             {mode === "confirm_signup" || mode === "reset_password" ? (
@@ -367,6 +459,7 @@ export function AuthScreen({
 }
 
 const styles = StyleSheet.create({
+  pwToggle: { alignItems: "flex-end", marginTop: tokens.space["1"] },
   page: { padding: tokens.space["5"], gap: tokens.space["4"], paddingBottom: tokens.space["12"] },
   form: { gap: tokens.space["4"] },
   rules: { gap: tokens.space["1"] },
