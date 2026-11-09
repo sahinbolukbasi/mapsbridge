@@ -78,21 +78,27 @@ export const APP_CONFIG = {
             NSPrivacyCollectedDataType: "NSPrivacyCollectedDataTypePreciseLocation",
             NSPrivacyCollectedDataTypeLinked: false,
             NSPrivacyCollectedDataTypeTracking: false,
-            NSPrivacyCollectedDataTypePurposes: ["NSPrivacyCollectedDataTypePurposeAppFunctionality"],
+            NSPrivacyCollectedDataTypePurposes: [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+            ],
           },
           {
             // Fotoğraflar: topluluk paylaşımı ve profil fotoğrafı (kullanıcı içeriği).
             NSPrivacyCollectedDataType: "NSPrivacyCollectedDataTypePhotosorVideos",
             NSPrivacyCollectedDataTypeLinked: true,
             NSPrivacyCollectedDataTypeTracking: false,
-            NSPrivacyCollectedDataTypePurposes: ["NSPrivacyCollectedDataTypePurposeAppFunctionality"],
+            NSPrivacyCollectedDataTypePurposes: [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+            ],
           },
           {
             // Kullanıcı içeriği: topluluk gönderileri/rota paylaşımı.
             NSPrivacyCollectedDataType: "NSPrivacyCollectedDataTypeOtherUserContent",
             NSPrivacyCollectedDataTypeLinked: true,
             NSPrivacyCollectedDataTypeTracking: false,
-            NSPrivacyCollectedDataTypePurposes: ["NSPrivacyCollectedDataTypePurposeAppFunctionality"],
+            NSPrivacyCollectedDataTypePurposes: [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+            ],
           },
         ],
         NSPrivacyAccessedAPITypes: [

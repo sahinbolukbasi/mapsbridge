@@ -159,9 +159,7 @@ const BACK_HOME: MobileTab = "plan";
 // Geri (pop) rota listesine (PlanScreen) iner; rota yönetimi harita üstündeki düğmededir (G2).
 function startNav(tab: MobileTab): TabNavState<MobileTab, MobileStackScreen> {
   const base = initialNav<MobileTab, MobileStackScreen>(tab);
-  return tab === "plan"
-    ? navReducer(base, { type: "push", screen: "map" })
-    : base;
+  return tab === "plan" ? navReducer(base, { type: "push", screen: "map" }) : base;
 }
 
 export function App() {

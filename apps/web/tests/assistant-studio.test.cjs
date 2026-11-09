@@ -343,7 +343,7 @@ test("FEAT-004: sohbet geçmişi daraltma — daraltılınca yalnız + (ve aç) 
   assert.match(client, /SESSIONS_COLLAPSED_KEY/);
   // Daraltılmış dalda yalnız IconButton'lar (yeni + aç); "Yeni seyahat planla" metin düğmesi YOK.
   const collapsed = client.slice(
-    client.indexOf('data-collapsed={sessionsCollapsed'),
+    client.indexOf("data-collapsed={sessionsCollapsed"),
     client.indexOf('<div className="as-studio__sessions-head">'),
   );
   assert.match(collapsed, /sessionsCollapsed \?/);

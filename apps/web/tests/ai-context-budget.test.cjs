@@ -23,7 +23,9 @@ function loadTs(relative) {
       TextEncoder,
       require(spec) {
         if (spec.startsWith("."))
-          return load(path.resolve(path.dirname(filepath), spec.endsWith(".ts") ? spec : spec + ".ts"));
+          return load(
+            path.resolve(path.dirname(filepath), spec.endsWith(".ts") ? spec : spec + ".ts"),
+          );
         return {}; // tip-dışı npm/stub
       },
     });
@@ -151,7 +153,10 @@ test("budgetHistory boş/geçersiz girdiyi güvenle işler", () => {
 
 test("summarizeTurn ilk cümleyi 120 karakterle sınırlar ve rolü etiketler", () => {
   const { summarizeTurn } = loadTs("token-budget.ts");
-  assert.equal(summarizeTurn(turn("user", "Roma gezmek istiyorum. İkinci cümle.")), "Kullanıcı: Roma gezmek istiyorum.");
+  assert.equal(
+    summarizeTurn(turn("user", "Roma gezmek istiyorum. İkinci cümle.")),
+    "Kullanıcı: Roma gezmek istiyorum.",
+  );
   assert.equal(summarizeTurn(turn("assistant", "Kaç gün?")), "Asistan: Kaç gün?");
   assert.equal(summarizeTurn(turn("user", "   ")), "");
   assert.ok(summarizeTurn(turn("user", "a".repeat(500))).length <= "Kullanıcı: ".length + 120);

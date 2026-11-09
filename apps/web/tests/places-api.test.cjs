@@ -103,7 +103,12 @@ test("parsePlacesResponse: fotoğraf — geçerli http(s) korunur, bozuk atılı
             provider: "google",
             attribution: "Google",
             photos: [
-              { url: "https://lh3.googleusercontent.com/a", attribution: "Ali", width: 800, height: 600 },
+              {
+                url: "https://lh3.googleusercontent.com/a",
+                attribution: "Ali",
+                width: 800,
+                height: 600,
+              },
               { url: "http://ornek.test/b" }, // http da kabul
               { url: "ftp://x/c" }, // geçersiz şema → atılır
               { url: 42 }, // url string değil → atılır

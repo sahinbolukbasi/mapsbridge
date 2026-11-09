@@ -11,7 +11,11 @@ import { mapNearby, type NearbyItem } from "../../lib/trip/nearby";
 import { detectCategoryFromText } from "../../lib/trip/geocoding-service";
 import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
 import type { AddTarget } from "../../lib/trip/planner-logic";
-import { defaultAddTargetValue, parseAddTarget, ADD_TARGET_GENERAL } from "../../lib/trip/planner-logic";
+import {
+  defaultAddTargetValue,
+  parseAddTarget,
+  ADD_TARGET_GENERAL,
+} from "../../lib/trip/planner-logic";
 import type { PinCategory } from "../../lib/trip/models";
 import { RatingBadge } from "./rating-badge";
 import { Button, EmptyState, ErrorState, Icon, Select, Skeleton } from "../ui";
@@ -92,7 +96,9 @@ export function NearbyList({
       </h4>
       <div role="status" className="planner-discover__status">
         {state === "loading" && (
-          <span className="ui-visually-hidden">{t("nearby.loading", "Yakın yerler aranıyor…")}</span>
+          <span className="ui-visually-hidden">
+            {t("nearby.loading", "Yakın yerler aranıyor…")}
+          </span>
         )}
       </div>
       {state === "loading" ? (

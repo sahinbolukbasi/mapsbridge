@@ -144,8 +144,24 @@ function makePlanner(generalPins) {
 test("U4: 'Kayıtlı yerler' disclosure varsayılan KAPALI, başlıkta sayı", async () => {
   const render = await loadRender();
   const pins = [
-    { id: "g1", label: "Pantheon", address: "Roma", category: "genel", dayIndex: 0, lat: 41.9, lng: 12.4 },
-    { id: "g2", label: "Trevi", address: "Roma", category: "genel", dayIndex: 0, lat: 41.9, lng: 12.5 },
+    {
+      id: "g1",
+      label: "Pantheon",
+      address: "Roma",
+      category: "genel",
+      dayIndex: 0,
+      lat: 41.9,
+      lng: 12.4,
+    },
+    {
+      id: "g2",
+      label: "Trevi",
+      address: "Roma",
+      category: "genel",
+      dayIndex: 0,
+      lat: 41.9,
+      lng: 12.5,
+    },
   ];
   const { html, misses } = render(makePlanner(pins));
   // <details class="planner-pool"> KAPALI başlar: markup'ta open özniteliği YOK.

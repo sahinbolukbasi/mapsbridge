@@ -70,12 +70,7 @@ export class ScreenErrorBoundary extends Component<Props, State> {
                 {this.state.error.message}
               </Txt>
             ) : null}
-            <Button
-              label={tr("ui.retry")}
-              variant="primary"
-              size="lg"
-              onPress={this.handleRetry}
-            />
+            <Button label={tr("ui.retry")} variant="primary" size="lg" onPress={this.handleRetry} />
           </View>
         </SafeArea>
       );
