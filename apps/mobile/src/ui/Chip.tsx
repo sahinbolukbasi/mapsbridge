@@ -1,5 +1,5 @@
 import React, { Children, createContext, isValidElement, useContext } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { fontFamily, tokens } from "../theme";
 import { Icon, type IconName } from "./Icon";
 import { chipLocked, type ChoiceMode } from "./logic/choice";
@@ -60,10 +60,19 @@ export interface ChipGroupProps {
   labelHidden?: boolean;
   mode: ChoiceMode;
   max?: number;
+  /** Yatay kaydırma desteği. */
+  scrollable?: boolean;
   children: React.ReactNode;
 }
 
-export function ChipGroup({ label, labelHidden = false, mode, max, children }: ChipGroupProps) {
+export function ChipGroup({
+  label,
+  labelHidden = false,
+  mode,
+  max,
+  scrollable = false,
+  children,
+}: ChipGroupProps) {
   const selectedCount = Children.toArray(children).filter(
     (child) => isValidElement<{ pressed?: boolean }>(child) && child.props.pressed,
   ).length;
@@ -77,11 +86,23 @@ export function ChipGroup({ label, labelHidden = false, mode, max, children }: C
           {label}
         </Text>
       )}
-      <View style={styles.items}>
-        <ChipGroupContext.Provider value={{ mode, max, selectedCount }}>
-          {children}
-        </ChipGroupContext.Provider>
-      </View>
+      {scrollable ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.scrollItems}
+        >
+          <ChipGroupContext.Provider value={{ mode, max, selectedCount }}>
+            {children}
+          </ChipGroupContext.Provider>
+        </ScrollView>
+      ) : (
+        <View style={styles.items}>
+          <ChipGroupContext.Provider value={{ mode, max, selectedCount }}>
+            {children}
+          </ChipGroupContext.Provider>
+        </View>
+      )}
     </View>
   );
 }
@@ -112,4 +133,5 @@ const styles = StyleSheet.create({
     color: tokens.color.text,
   },
   items: { flexDirection: "row", flexWrap: "wrap", gap: tokens.space["2"] },
+  scrollItems: { flexDirection: "row", gap: tokens.space["2"], paddingVertical: tokens.space["1"] },
 });

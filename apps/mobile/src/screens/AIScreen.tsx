@@ -17,7 +17,9 @@ import {
   Button,
   Card,
   ComposerBar,
+  ConfirmDialog,
   EmptyState,
+  Icon,
   IconButton,
   MessageBubble,
   MessageLog,
@@ -176,6 +178,8 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
   const [conversationId, setConversationId] = useState(() => `conv-${Date.now()}`);
   // G5: geçmiş sohbetler sayfası (açık/kapalı + liste + yükleniyor).
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [routePickerOpen, setRoutePickerOpen] = useState(false);
+  const [confirmDeleteHistoryId, setConfirmDeleteHistoryId] = useState<string | "all" | null>(null);
   const [historyItems, setHistoryItems] = useState<
     Array<{ conversationId: string; destination: string | null; updatedAt: string | null }>
   >([]);
@@ -364,17 +368,11 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
   };
 
   const clearHistory = () => {
-    setHistoryItems([]);
-    newChat();
-    toast.show({ tone: "info", message: tr("assistant.history.cleared") });
+    setConfirmDeleteHistoryId("all");
   };
 
   const deleteHistoryItem = (id: string) => {
-    setHistoryItems((prev) => prev.filter((item) => item.conversationId !== id));
-    if (conversationId === id) {
-      newChat();
-    }
-    toast.show({ tone: "info", message: tr("assistant.history.deleted") });
+    setConfirmDeleteHistoryId(id);
   };
 
   const openHistory = useCallback(() => {
@@ -425,7 +423,6 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           title={tr("nav.ai")}
           right={
             <View style={styles.headerActions}>
-              <IconButton icon="trash" label={tr("assistant.clearChat")} onPress={newChat} />
               <IconButton icon="clock" label={tr("native.ai.history.open")} onPress={openHistory} />
               <IconButton icon="plus" label={tr("native.ai.newChat")} onPress={newChat} />
             </View>
@@ -475,7 +472,7 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
         <MessageLog
           label={tr("assistant.log.label")}
           busy={busy}
-          typing={false}
+          typing={busy && !thinkingRoute && !routeLoading}
           announcement={announcement}
         >
           {messages.map((msg) =>
@@ -573,7 +570,9 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
               }
             />
           ) : null}
-          {busy && !routeLoading ? <ThinkingSteps isRoute={thinkingRoute} /> : null}
+          {busy && !routeLoading && thinkingRoute ? (
+            <ThinkingSteps isRoute={thinkingRoute} />
+          ) : null}
           {prep.length && tab === "chat" ? (
             <Button label={tr("ai.prepLink")} variant="ghost" onPress={() => setTab("prep")} />
           ) : null}
@@ -585,6 +584,13 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           label={tr("assistant.composer.label")}
           note={tr("assistant.composer.costNote")}
           busy={busy}
+          leading={
+            <IconButton
+              icon="plus"
+              label={tr("native.ai.routePicker.title")}
+              onPress={() => setRoutePickerOpen(true)}
+            />
+          }
           onSubmit={(text) => {
             setTab("chat");
             send(text);
@@ -641,6 +647,83 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           )}
         </ScrollView>
       </ModalFrame>
+
+      <ModalFrame
+        visible={routePickerOpen}
+        variant="sheet"
+        title={tr("native.ai.routePicker.title")}
+        onRequestClose={() => setRoutePickerOpen(false)}
+      >
+        <ScrollView
+          contentContainerStyle={styles.routePickerList}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Txt variant="caption" tone="muted">
+            {tr("native.ai.routePicker.subtitle")}
+          </Txt>
+          {tripStore.getAllRoutes().length === 0 ? (
+            <EmptyState icon="route" title={tr("planner.trips.empty")} />
+          ) : (
+            tripStore.getAllRoutes().map((r) => (
+              <Card
+                key={r.id}
+                variant="bordered"
+                label={r.name}
+                onPress={() => {
+                  setRoutePickerOpen(false);
+                  const stopNames = r.stops.map((s) => s.name).join(", ");
+                  const prompt = `"${r.name}" rotam hakkında konuşmak istiyorum.${stopNames ? ` Duraklar: ${stopNames}.` : ""} Bu rota için bana ne gibi önerilerde bulunabilirsin?`;
+                  setTab("chat");
+                  send(prompt);
+                }}
+              >
+                <View style={styles.routePickerRow}>
+                  <View style={styles.routePickerText}>
+                    <Txt variant="label" numberOfLines={1}>
+                      {r.name}
+                    </Txt>
+                    <Txt variant="caption" tone="muted">
+                      {tr("trip.day.stops", { n: r.stops.length })}
+                    </Txt>
+                  </View>
+                  <Icon name="chevron" size={16} color={tokens.color.textMuted} />
+                </View>
+              </Card>
+            ))
+          )}
+        </ScrollView>
+      </ModalFrame>
+
+      <ConfirmDialog
+        visible={confirmDeleteHistoryId !== null}
+        title={
+          confirmDeleteHistoryId === "all"
+            ? tr("native.ai.history.clearConfirmTitle")
+            : tr("native.ai.history.deleteConfirmTitle")
+        }
+        body={
+          confirmDeleteHistoryId === "all"
+            ? tr("native.ai.history.clearConfirmBody")
+            : tr("native.ai.history.deleteConfirmBody")
+        }
+        confirmLabel={tr("community.post.delete")}
+        onCancel={() => setConfirmDeleteHistoryId(null)}
+        onConfirm={() => {
+          if (confirmDeleteHistoryId === "all") {
+            setHistoryItems([]);
+            newChat();
+            toast.show({ tone: "info", message: tr("assistant.history.cleared") });
+          } else if (confirmDeleteHistoryId) {
+            const id = confirmDeleteHistoryId;
+            setHistoryItems((prev) => prev.filter((item) => item.conversationId !== id));
+            if (conversationId === id) {
+              newChat();
+            }
+            toast.show({ tone: "info", message: tr("assistant.history.deleted") });
+          }
+          setConfirmDeleteHistoryId(null);
+        }}
+      />
       <ScreenTourModal screen="ai" />
     </Screen>
   );
@@ -656,6 +739,14 @@ const styles = StyleSheet.create({
     gap: tokens.space["2"],
   },
   historyText: { flex: 1, gap: tokens.space["1"] },
+  routePickerList: { padding: tokens.space["4"], gap: tokens.space["3"] },
+  routePickerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: tokens.space["2"],
+  },
+  routePickerText: { flex: 1, gap: tokens.space["1"] },
   tabs: { paddingHorizontal: tokens.space["4"], paddingTop: tokens.space["3"] },
   prep: { padding: tokens.space["4"], gap: tokens.space["3"] },
   cardBody: { gap: tokens.space["2"] },

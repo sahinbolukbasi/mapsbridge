@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   Alert,
+  Image,
   Linking,
   Platform,
   ScrollView,
@@ -11,11 +12,13 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { WebView } from "react-native-webview";
 import { tripStore, type ActiveRoute, type TripStop } from "../services/tripStore";
 import { trainingService } from "../services/api";
 import { storage } from "../services/storage";
 import { ScreenTourModal } from "../components/ScreenTourModal";
+import { AppleLogo, GoogleLogo } from "../ui/BrandLogos";
 import {
   Accordion,
   AuthGate,
@@ -23,6 +26,7 @@ import {
   type SheetSnap,
   Button,
   Card,
+  Chip,
   ConfirmDialog,
   Connector,
   DayHeader,
@@ -257,6 +261,10 @@ export function MapScreen({
   const [looking, setLooking] = useState(false);
   const [mode, setMode] = useState<"edit" | "discover">("edit");
   const [routeManagerOpen, setRouteManagerOpen] = useState(false); // G2
+  const [reorderOpen, setReorderOpen] = useState(false);
+  const [customDays, setCustomDays] = useState<number[]>([]);
+  const [selectedDayFilter, setSelectedDayFilter] = useState<number | null>(null);
+  const [editPhotoUrl, setEditPhotoUrl] = useState<string | undefined>(undefined);
   // B6: alt sayfa snap durumu; peek'te önce konumlar, half/full'de mod seçici + arama.
   const [sheetSnap, setSheetSnap] = useState<SheetSnap>("peek");
   const sheetExpanded = sheetSnap !== "peek";
@@ -765,6 +773,26 @@ export function MapScreen({
     setEditName(stop.name);
     setEditDuration(String(parseMinutes(stop.duration) ?? ""));
     setEditNotes(stop.notes ?? "");
+    setEditPhotoUrl(stop.photoUrl);
+  };
+
+  const pickStopPhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        toast.show({ tone: "warning", message: tr("native.profile.photoPermission") });
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+        allowsEditing: false,
+      });
+      if (result.canceled || !result.assets?.length) return;
+      setEditPhotoUrl(result.assets[0].uri);
+    } catch {
+      toast.show({ tone: "danger", message: tr("ui.unexpectedError") });
+    }
   };
 
   const saveEdit = () => {
@@ -775,6 +803,7 @@ export function MapScreen({
       duration:
         Number.isFinite(minutes) && minutes > 0 ? `${Math.round(minutes)} dk` : editing.duration,
       notes: editNotes.trim() || undefined,
+      photoUrl: editPhotoUrl,
     });
     setEditing(null);
     toast.show({ tone: "success", message: tr("planner.toast.saved") });
@@ -807,10 +836,16 @@ export function MapScreen({
     suggestionLegs,
   );
   // "Durağı kaydır" için hedef günler (çok günlü rotada mevcut gün dışındakiler).
-  const routeDays = multiDay
+  const baseRouteDays = multiDay
     ? Array.from(new Set(route.stops.map((s) => stopDay(s, day)))).sort((a, b) => a - b)
     : [day];
+  const allDays = Array.from(new Set([...baseRouteDays, ...customDays])).sort((a, b) => a - b);
+  const routeDays = allDays;
   const otherDays = routeDays.filter((d) => d !== addDay);
+  const displayedStops =
+    selectedDayFilter !== null
+      ? route.stops.filter((s) => stopDay(s, day) === selectedDayFilter)
+      : route.stops;
 
   return (
     <View style={styles.root}>
@@ -838,14 +873,7 @@ export function MapScreen({
           </View>
         </View>
         <View style={styles.topRow}>
-          {/* G1: sol üst = kayıtlı rotalar (PlanScreen'e döner). */}
-          <IconButton
-            icon="bookmark"
-            label={tr("planner.trips.title")}
-            onPress={onOpenPlan}
-            style={styles.floating}
-          />
-          {/* G2: rota yönetimi (yeni/adını düzenle/sil/paylaş) — kapatılabilir alt sayfa. */}
+          {/* G2: rota yönetimi (yeni/adını düzenle/sil/paylaş) — tek rota düğmesi. */}
           <IconButton
             icon="route"
             label={tr("planner.trips.manage")}
@@ -1107,17 +1135,71 @@ export function MapScreen({
 
           {mode === "edit" ? (
             <>
-              <DayHeader
-                title={route.name || tr("planner.untitled")}
-                eyebrow={multiDay ? undefined : tr("planner.days.day", { n: day })}
-                stops={route.stops.length}
-                meters={totalMeters}
-                minutes={totalMinutes}
-                offline={route.stops.length > 0}
-              />
+              {sheetSnap === "peek" ? (
+                <View style={styles.peekHeaderRow}>
+                  <Txt variant="heading" header numberOfLines={1} style={styles.peekRouteName}>
+                    {route.name || tr("planner.untitled")}
+                  </Txt>
+                  <Txt variant="caption" tone="muted" style={styles.peekDayLabel}>
+                    {multiDay ? `${routeDays.length} Gün` : tr("planner.days.day", { n: day })}
+                  </Txt>
+                </View>
+              ) : (
+                <>
+                  <DayHeader
+                    title={route.name || tr("planner.untitled")}
+                    eyebrow={multiDay ? undefined : tr("planner.days.day", { n: day })}
+                    stops={route.stops.length}
+                    meters={totalMeters}
+                    minutes={totalMinutes}
+                    offline={route.stops.length > 0}
+                  />
+
+                  {/* Gün Seçici / Ekleme alanı */}
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.daySelectorRow}
+                  >
+                    <Chip
+                      pressed={selectedDayFilter === null}
+                      onPress={() => setSelectedDayFilter(null)}
+                    >
+                      {selectedDayFilter === null ? "Tüm Günler" : "Tümü"}
+                    </Chip>
+                    {allDays.map((d) => (
+                      <Chip
+                        key={d}
+                        pressed={selectedDayFilter === d}
+                        onPress={() => setSelectedDayFilter(d)}
+                      >
+                        {tr("planner.days.day", { n: d })}
+                      </Chip>
+                    ))}
+                    <Button
+                      label={tr("planner.days.add")}
+                      size="sm"
+                      variant="secondary"
+                      icon={<Icon name="plus" size={16} />}
+                      onPress={() => {
+                        const next = Math.max(...allDays, 0) + 1;
+                        setCustomDays((prev) => [...prev, next]);
+                        setSelectedDayFilter(next);
+                        toast.show({
+                          tone: "info",
+                          message: tr("planner.toast.addedToDay", { name: "", day: next }).replace(
+                            "“” ",
+                            "",
+                          ),
+                        });
+                      }}
+                    />
+                  </ScrollView>
+                </>
+              )}
 
               {/* U6: gün boş/bitmiş → ekstra yer; dolu → son durağı başka güne kaydır. */}
-              {suggestion && suggestionStops.length > 0 ? (
+              {suggestion && suggestionStops.length > 0 && sheetSnap !== "peek" ? (
                 <DayFullBanner
                   suggestion={suggestion}
                   stops={suggestionStops}
@@ -1127,7 +1209,7 @@ export function MapScreen({
                 />
               ) : null}
 
-              {route.stops.length === 0 ? (
+              {displayedStops.length === 0 ? (
                 <View style={styles.cardBody}>
                   <Txt variant="heading">{tr("planner.day.empty")}</Txt>
                   <Txt variant="small" tone="muted">
@@ -1135,64 +1217,74 @@ export function MapScreen({
                   </Txt>
                 </View>
               ) : (
-                /* G3: duraklar yatay (sola/sağa) kaydırılır — dikey liste yerine sayfalı şerit.
-                   StopRow prop sözlüğü değişmez (parite). Yürüme süresi karta altına Connector
-                   ile verilir (son durak hariç). onMove erişilebilir sıralama alternatifidir (R9). */
-                <ScrollView
-                  horizontal
-                  pagingEnabled={false}
-                  showsHorizontalScrollIndicator={false}
-                  snapToInterval={stopPageWidth + tokens.space["2"]}
-                  decelerationRate="fast"
-                  contentContainerStyle={styles.stopsStrip}
-                  accessibilityLabel={tr("planner.sheet.label")}
-                  onMomentumScrollEnd={(e) => {
-                    const offsetX = e.nativeEvent.contentOffset.x;
-                    const itemWidth = stopPageWidth + tokens.space["2"];
-                    const idx = Math.max(
-                      0,
-                      Math.min(Math.round(offsetX / itemWidth), route.stops.length - 1),
-                    );
-                    const target = route.stops[idx];
-                    if (target && target.id !== selectedId) {
-                      focusStop(target);
-                    }
-                  }}
-                >
-                  {route.stops.map((stop, i) => (
-                    <View key={stop.id} style={{ width: stopPageWidth }}>
-                      <StopRow
-                        index={i + 1}
-                        day={multiDay ? stopDay(stop, day) : day}
-                        time={stop.time || undefined}
-                        name={stop.name}
-                        category={categoryIcon(stop.category)}
-                        categoryLabel={
-                          stop.visited
-                            ? `${stop.category} · ${tr("planner.stop.done")}`
-                            : stop.category
-                        }
-                        duration={parseMinutes(stop.duration)}
-                        selected={stop.id === selectedId}
-                        isFirst={i === 0}
-                        isLast={i === route.stops.length - 1}
-                        onPress={() => focusStop(stop)}
-                        onMove={(direction) => move(i, direction)}
-                      />
-                      {i < route.stops.length - 1 ? (
-                        <Connector
-                          mode="walk"
-                          minutes={
-                            currentLegs?.[i] ? Math.round(currentLegs[i].duration / 60) : undefined
+                /* G3: duraklar yatay (sola/sağa) kaydırılır — dikey liste yerine sayfalı şerit. */
+                <View>
+                  <ScrollView
+                    horizontal
+                    pagingEnabled={false}
+                    showsHorizontalScrollIndicator={false}
+                    snapToInterval={stopPageWidth + tokens.space["2"]}
+                    decelerationRate="fast"
+                    contentContainerStyle={styles.stopsStrip}
+                    accessibilityLabel={tr("planner.sheet.label")}
+                    onMomentumScrollEnd={(e) => {
+                      const offsetX = e.nativeEvent.contentOffset.x;
+                      const itemWidth = stopPageWidth + tokens.space["2"];
+                      const idx = Math.max(
+                        0,
+                        Math.min(Math.round(offsetX / itemWidth), displayedStops.length - 1),
+                      );
+                      const target = displayedStops[idx];
+                      if (target && target.id !== selectedId) {
+                        focusStop(target);
+                      }
+                    }}
+                  >
+                    {displayedStops.map((stop, i) => (
+                      <View key={stop.id} style={{ width: stopPageWidth }}>
+                        <StopRow
+                          index={i + 1}
+                          day={multiDay ? stopDay(stop, day) : day}
+                          time={stop.time || undefined}
+                          name={stop.name}
+                          category={categoryIcon(stop.category)}
+                          categoryLabel={
+                            stop.visited
+                              ? `${stop.category} · ${tr("planner.stop.done")}`
+                              : stop.category
                           }
-                          meters={
-                            currentLegs?.[i] ? Math.round(currentLegs[i].distance) : undefined
-                          }
+                          duration={parseMinutes(stop.duration)}
+                          selected={stop.id === selectedId}
+                          isFirst={i === 0}
+                          isLast={i === displayedStops.length - 1}
+                          onPress={() => focusStop(stop)}
                         />
-                      ) : null}
-                    </View>
-                  ))}
-                </ScrollView>
+                        {i < displayedStops.length - 1 ? (
+                          <Connector
+                            mode="walk"
+                            minutes={
+                              currentLegs?.[i]
+                                ? Math.round(currentLegs[i].duration / 60)
+                                : undefined
+                            }
+                            meters={
+                              currentLegs?.[i] ? Math.round(currentLegs[i].distance) : undefined
+                            }
+                          />
+                        ) : null}
+                      </View>
+                    ))}
+                  </ScrollView>
+                  <View style={styles.reorderBar}>
+                    <Button
+                      label={tr("native.planner.stops.reorder")}
+                      icon={<Icon name="sort" size={16} />}
+                      variant="secondary"
+                      size="sm"
+                      onPress={() => setReorderOpen(true)}
+                    />
+                  </View>
+                </View>
               )}
 
               {selected ? (
@@ -1207,19 +1299,19 @@ export function MapScreen({
                       </Txt>
                     ) : null}
                     {selected.notes ? <Txt variant="small">{selected.notes}</Txt> : null}
-                    {/* C (görev 5): seçili durak eylemleri simge — Apple/Google yol tarifi, Gezildi,
+                    {/* C (görev 5): seçili durak eylemleri simge — Apple/Google logolu yol tarifi, Gezildi,
                         Düzenle, Paylaş, Sil. Etiketler erişilebilir ad; Sil tehlike rengiyle. */}
                     <View style={styles.iconActions}>
                       {Platform.OS === "ios" ? (
                         <IconButton
-                          icon="compass"
+                          icon={<AppleLogo size={20} />}
                           label={tr("native.directions.apple")}
                           onPress={() => openExternal(selected, "apple")}
                           style={styles.actionIcon}
                         />
                       ) : null}
                       <IconButton
-                        icon="map"
+                        icon={<GoogleLogo size={20} />}
                         label={tr("planner.travel.googleMaps")}
                         onPress={() => openExternal(selected)}
                         style={styles.actionIcon}
@@ -1420,8 +1512,56 @@ export function MapScreen({
             onChangeText={setEditNotes}
             multiline
             maxLength={500}
+            style={{ minHeight: 90 }}
           />
+          {editPhotoUrl ? (
+            <View style={styles.photoPreviewWrap}>
+              <Image source={{ uri: editPhotoUrl }} style={styles.photoPreview} />
+              <Button
+                label={tr("planner.photos.remove")}
+                variant="ghost"
+                size="sm"
+                onPress={() => setEditPhotoUrl(undefined)}
+              />
+            </View>
+          ) : (
+            <Button
+              label={tr("native.planner.photos.pick")}
+              variant="secondary"
+              size="sm"
+              icon={<Icon name="camera" size={16} />}
+              onPress={pickStopPhoto}
+            />
+          )}
           <Button label={tr("planner.edit.save")} size="lg" onPress={saveEdit} />
+        </ScrollView>
+      </ModalFrame>
+
+      <ModalFrame
+        visible={reorderOpen}
+        variant="sheet"
+        title={tr("native.planner.stops.reorderTitle")}
+        onRequestClose={() => setReorderOpen(false)}
+      >
+        <ScrollView contentContainerStyle={styles.reorderList} keyboardShouldPersistTaps="handled">
+          {route.stops.map((stop, i) => (
+            <StopRow
+              key={stop.id}
+              index={i + 1}
+              day={multiDay ? stopDay(stop, day) : day}
+              time={stop.time || undefined}
+              name={stop.name}
+              category={categoryIcon(stop.category)}
+              categoryLabel={stop.category}
+              isFirst={i === 0}
+              isLast={i === route.stops.length - 1}
+              onMove={(direction) => move(i, direction)}
+              onPress={() => {
+                focusStop(stop);
+                setReorderOpen(false);
+              }}
+            />
+          ))}
         </ScrollView>
       </ModalFrame>
 
@@ -1514,4 +1654,28 @@ const styles = StyleSheet.create({
   poolRow: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },
   poolText: { flex: 1, gap: tokens.space["1"] },
   form: { padding: tokens.space["5"], gap: tokens.space["4"] },
+  peekHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: tokens.space["1"],
+    paddingBottom: tokens.space["2"],
+  },
+  peekRouteName: { flex: 1, marginRight: tokens.space["2"] },
+  peekDayLabel: { fontSize: tokens.font.size.sm },
+  daySelectorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: tokens.space["2"],
+    paddingVertical: tokens.space["1"],
+  },
+  reorderBar: { alignItems: "center", paddingTop: tokens.space["2"] },
+  reorderList: { padding: tokens.space["4"], gap: tokens.space["2"] },
+  photoPreviewWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: tokens.space["3"],
+    marginVertical: tokens.space["2"],
+  },
+  photoPreview: { width: 72, height: 72, borderRadius: tokens.radius.md },
 });

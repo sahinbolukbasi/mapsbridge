@@ -34,6 +34,7 @@ export function IconButton({
   color,
   style,
 }: IconButtonProps) {
+  const iconColor = color ?? (selected ? tokens.color.accent : tokens.color.text);
   return (
     <Pressable
       onPress={onPress}
@@ -45,13 +46,14 @@ export function IconButton({
       style={({ pressed }) => [
         styles.base,
         { width: size, height: size, borderRadius: size / 2 },
+        selected ? styles.selected : null,
         style,
         pressed ? styles.pressed : null,
         disabled ? styles.disabled : null,
       ]}
     >
       {typeof icon === "string" ? (
-        <Icon name={icon as IconName} size={size >= 40 ? 20 : 16} color={color} />
+        <Icon name={icon as IconName} size={size >= 40 ? 20 : 16} color={iconColor} />
       ) : (
         icon
       )}
@@ -63,6 +65,9 @@ const styles = StyleSheet.create({
   base: {
     alignItems: "center",
     justifyContent: "center",
+  },
+  selected: {
+    backgroundColor: tokens.color.surfaceSunken,
   },
   pressed: { opacity: 0.7 },
   disabled: { opacity: 0.4 },

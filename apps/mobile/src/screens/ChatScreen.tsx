@@ -24,6 +24,7 @@ import {
   MessageBubble,
   MessageLog,
   ModalFrame,
+  Notice,
   Screen,
   ScreenHeader,
   TextField,
@@ -493,30 +494,12 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
               </Txt>
             </View>
           ) : null}
-          {newHandleValid && !exactMatch ? (
-            <Card variant="bordered">
-              <View style={styles.row}>
-                <Avatar name={newHandle} />
-                <View style={styles.flex}>
-                  <Txt variant="label" numberOfLines={1}>
-                    {`@${newHandle}`}
-                  </Txt>
-                  <Txt variant="caption" tone="muted">
-                    {tr("messages.newChat.sendToNew")}
-                  </Txt>
-                </View>
-                <IconButton
-                  icon="send"
-                  color={tokens.color.buttonPrimaryFg}
-                  label={tr("messages.newChat.sendAction")}
-                  disabled={newBusy}
-                  onPress={() => void startNewTo(newHandle)}
-                  style={styles.newFab}
-                />
-              </View>
-            </Card>
+          {newUser.trim() && newChatContacts.length === 0 ? (
+            <Notice tone="danger" title={tr("messages.req.userNotFound")}>
+              {tr("messages.req.userNotFound")}
+            </Notice>
           ) : null}
-          {newChatContacts.length === 0 && !newHandleValid ? (
+          {!newUser.trim() && newChatContacts.length === 0 ? (
             <Txt variant="small" tone="muted">
               {tr("messages.newChat.noContacts")}
             </Txt>

@@ -185,7 +185,7 @@ export function DiscoverPanel({
 
   return (
     <View style={styles.root}>
-      <ChipGroup label={tr("discover.interests")} mode="multi" max={3}>
+      <ChipGroup label={tr("discover.interests")} mode="multi" max={3} scrollable>
         {PLACE_CATEGORY_IDS.map((c) => (
           <Chip key={c} pressed={interests.includes(c)} onPress={() => toggle(c)}>
             {tr(`discover.cat.${c}` as UiKey)}

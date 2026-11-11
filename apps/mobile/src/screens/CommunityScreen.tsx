@@ -30,6 +30,7 @@ import {
   Skeleton,
   TextField,
   Txt,
+  haptic,
   useToast,
   type AuthGateReason,
 } from "../ui";

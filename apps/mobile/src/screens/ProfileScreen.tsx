@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { authService, type UserSession } from "../services/api";
+import { authService, billingService, type UserSession, type WalletSnapshot } from "../services/api";
 import {
   socialSyncService,
   type MobileCommunityPost,
@@ -12,7 +12,7 @@ import { EditPostModal } from "../components/EditPostModal";
 import { PaywallModal } from "../components/PaywallModal";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import { AppSettings } from "../components/AppSettings";
-import { Avatar, Button, Card, ConfirmDialog, Screen, ScreenHeader, Txt } from "../ui";
+import { Avatar, Button, Card, ConfirmDialog, Screen, ScreenHeader, SegmentedControl, Txt } from "../ui";
 import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
 
@@ -31,10 +31,26 @@ function isOwn(p: MobileCommunityPost, me: MobileUserProfile): boolean {
   return p.authorHandle === `@${me.username}` || (!!me.email && p.authorEmail === me.email);
 }
 
+function tierName(tier?: string): string {
+  switch (tier) {
+    case "agency":
+      return "Tur Lideri";
+    case "pro":
+      return "Pro";
+    case "explorer":
+      return "Gezgin";
+    default:
+      return "Ücretsiz Plan";
+  }
+}
+
 export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: ProfileScreenProps) {
   const [session, setSession] = useState<UserSession | null>(null);
   const [profile, setProfile] = useState<MobileUserProfile | null>(null);
   const [posts, setPosts] = useState<MobileCommunityPost[]>([]);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<MobileCommunityPost[]>([]);
+  const [savedTab, setSavedTab] = useState<"posts" | "routes">("posts");
+  const [wallet, setWallet] = useState<WalletSnapshot | null>(null);
   const [routeCount, setRouteCount] = useState(tripStore.getAllRoutes().length);
   const [editOpen, setEditOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<MobileCommunityPost | null>(null);
@@ -46,19 +62,27 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
   useEffect(() => {
     let alive = true;
     authService.getSession().then((s) => alive && setSession(s));
+    billingService
+      .getWallet()
+      .then((w) => alive && setWallet(w))
+      .catch(() => undefined);
     socialSyncService.getUserProfile().then(async (p) => {
       if (!alive) return;
       setProfile(p);
       const all = await socialSyncService.getPosts();
-      if (alive) setPosts(all.filter((x) => isOwn(x, p)));
+      if (alive) {
+        setPosts(all.filter((x) => isOwn(x, p)));
+        setBookmarkedPosts(all.filter((x) => !!x.isBookmarked));
+      }
     });
     const unsubProfile = socialSyncService.subscribeProfile((p) => setProfile(p));
-    const unsubPosts = socialSyncService.subscribePosts((all) =>
+    const unsubPosts = socialSyncService.subscribePosts((all) => {
       setPosts((prev) => {
         const me = profileRef.current;
         return me ? all.filter((x) => isOwn(x, me)) : prev;
-      }),
-    );
+      });
+      setBookmarkedPosts(all.filter((x) => !!x.isBookmarked));
+    });
     const unsubTrip = tripStore.subscribe(() => setRouteCount(tripStore.getAllRoutes().length));
     return () => {
       alive = false;
@@ -95,13 +119,29 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
 
         <Card variant="bordered">
           <View style={styles.body}>
-            <Txt variant="heading" header>
-              {tr("profile.plans")}
+            <View style={styles.planHeaderRow}>
+              <Txt variant="heading" header>
+                {tr("profile.plans")}
+              </Txt>
+              <View style={styles.planBadge}>
+                <Txt variant="caption" tone="highlight">
+                  {tierName(wallet?.tier)}
+                </Txt>
+              </View>
+            </View>
+            <Txt variant="label">
+              {tr("upgrade.balance")}:{" "}
+              {wallet?.credits !== undefined
+                ? tr("credits.other", { n: wallet.credits })
+                : "100 kredi"}
             </Txt>
             <Txt variant="small" tone="muted">
               {tr("upgrade.note")}
             </Txt>
-            <Button label={tr("upgrade.compare")} onPress={() => setPaywall(true)} />
+            <Button
+              label={tr("native.profile.plans.edit")}
+              onPress={() => setPaywall(true)}
+            />
           </View>
         </Card>
 
@@ -155,6 +195,72 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
           )}
         </View>
 
+        <View style={styles.body}>
+          <Txt variant="heading" header>
+            {tr("native.profile.saved.title")}
+          </Txt>
+          <SegmentedControl
+            label={tr("native.profile.saved.title")}
+            options={[
+              { value: "posts", label: tr("publicProfile.tabPosts") },
+              { value: "routes", label: tr("publicProfile.tabRoutes") },
+            ]}
+            value={savedTab}
+            onChange={setSavedTab}
+          />
+          {savedTab === "posts" ? (
+            bookmarkedPosts.length === 0 ? (
+              <Card variant="bordered">
+                <View style={styles.body}>
+                  <Txt variant="small" tone="muted">
+                    {tr("native.profile.saved.emptyPosts")}
+                  </Txt>
+                </View>
+              </Card>
+            ) : (
+              bookmarkedPosts.map((p) => (
+                <Card key={p.id} variant="bordered">
+                  <View style={styles.body}>
+                    <Txt variant="label">{p.authorName}</Txt>
+                    <Txt variant="caption" tone="subtle">
+                      {[p.timeAgo, p.locationTag].filter(Boolean).join(" · ")}
+                    </Txt>
+                    <Txt variant="small">{p.content}</Txt>
+                  </View>
+                </Card>
+              ))
+            )
+          ) : tripStore.getAllRoutes().length === 0 ? (
+            <Card variant="bordered">
+              <View style={styles.body}>
+                <Txt variant="small" tone="muted">
+                  {tr("native.profile.saved.emptyRoutes")}
+                </Txt>
+              </View>
+            </Card>
+          ) : (
+            tripStore.getAllRoutes().map((r) => (
+              <Card key={r.id} variant="bordered">
+                <View style={styles.body}>
+                  <Txt variant="label">{r.name}</Txt>
+                  <Txt variant="caption" tone="muted">
+                    {tr("trip.day.stops", { n: r.stops.length })}
+                  </Txt>
+                  <Button
+                    label={tr("home.lastTrip.open")}
+                    variant="secondary"
+                    size="sm"
+                    onPress={() => {
+                      tripStore.switchActiveRoute(r.id);
+                      onOpenPlan?.();
+                    }}
+                  />
+                </View>
+              </Card>
+            ))
+          )}
+        </View>
+
         <AppSettings />
         <Button label={tr("nav.logout")} variant="danger" onPress={() => setConfirmOut(true)} />
       </ScrollView>
@@ -172,7 +278,17 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
         onSaved={() => undefined}
         onDeleted={(id) => setPosts((prev) => prev.filter((x) => x.id !== id))}
       />
-      <PaywallModal visible={paywall} onClose={() => setPaywall(false)} placement="profile" />
+      <PaywallModal
+        visible={paywall}
+        onClose={() => {
+          setPaywall(false);
+          billingService
+            .getWallet()
+            .then(setWallet)
+            .catch(() => undefined);
+        }}
+        placement="profile"
+      />
       <ConfirmDialog
         visible={confirmOut}
         title={tr("native.profile.signOutTitle")}
@@ -194,4 +310,15 @@ const styles = StyleSheet.create({
   head: { flexDirection: "row", alignItems: "center", gap: tokens.space["4"] },
   flex: { flex: 1, gap: tokens.space["1"] },
   body: { gap: tokens.space["2"] },
+  planHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  planBadge: {
+    paddingHorizontal: tokens.space["2"],
+    paddingVertical: tokens.space["1"],
+    borderRadius: tokens.radius.full,
+    backgroundColor: tokens.color.surfaceSunken,
+  },
 });
