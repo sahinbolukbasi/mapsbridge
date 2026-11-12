@@ -82,6 +82,7 @@ export function CommunityScreen({
   const [comment, setComment] = useState("");
   const [commentError, setCommentError] = useState<string | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const toast = useToast();
 
   useEffect(() => {
@@ -122,11 +123,24 @@ export function CommunityScreen({
   }, [posts]);
 
   const visible = useMemo(() => {
-    const list = tag ? posts.filter((p) => p.hashtags?.includes(tag)) : [...posts];
+    let list = tag ? posts.filter((p) => p.hashtags?.includes(tag)) : [...posts];
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter((p) => {
+        const matchContent = p.content.toLowerCase().includes(q);
+        const matchAuthor =
+          p.authorName.toLowerCase().includes(q) ||
+          p.authorHandle.toLowerCase().includes(q);
+        const matchLocation = p.locationTag?.toLowerCase().includes(q);
+        const matchTags = p.hashtags?.some((h) => h.toLowerCase().includes(q));
+        const matchRoute = p.routeAttachment?.title.toLowerCase().includes(q);
+        return matchContent || matchAuthor || matchLocation || matchTags || matchRoute;
+      });
+    }
     return mode === "popular"
       ? list.sort((a, b) => b.likesCount - a.likesCount)
       : list.sort((a, b) => b.createdAtMs - a.createdAtMs);
-  }, [posts, tag, mode]);
+  }, [posts, tag, mode, searchQuery]);
 
   const requireMember = (reason: AuthGateReason, action: () => void) =>
     guest ? setGate(reason) : action();
@@ -191,6 +205,25 @@ export function CommunityScreen({
           value={mode}
           onChange={setMode}
         />
+
+        {/* Güncel ve Popüler butonlarının hemen altındaki arama alanı */}
+        <View style={styles.searchBar}>
+          <TextField
+            label="Toplulukta Ara"
+            placeholder="Gönderi, yazar, mekan veya etiket ara..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.trim().length > 0 ? (
+            <IconButton
+              icon="x"
+              label="Aramayı Temizle"
+              onPress={() => setSearchQuery("")}
+              style={styles.searchClearBtn}
+            />
+          ) : null}
+        </View>
+
         {tags.length ? (
           <ChipGroup label={tr("community.filter.label")} mode="single">
             {tags.map((h) => (
@@ -209,13 +242,21 @@ export function CommunityScreen({
           <EmptyState
             icon="users"
             contour
-            title={tr("community.empty.title")}
-            description={tr("community.empty.body")}
+            title={searchQuery.trim() ? "Eşleşen Paylaşım Bulunamadı" : tr("community.empty.title")}
+            description={
+              searchQuery.trim()
+                ? `"${searchQuery}" aramasıyla eşleşen bir seyahat paylaşımı bulunamadı.`
+                : tr("community.empty.body")
+            }
             action={
-              <Button
-                label={tr("community.empty.cta")}
-                onPress={() => requireMember("save", () => setComposeOpen(true))}
-              />
+              searchQuery.trim() ? (
+                <Button label="Aramayı Temizle" variant="secondary" onPress={() => setSearchQuery("")} />
+              ) : (
+                <Button
+                  label={tr("community.empty.cta")}
+                  onPress={() => requireMember("save", () => setComposeOpen(true))}
+                />
+              )
             }
           />
         ) : (
@@ -498,6 +539,15 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.color.buttonPrimaryBg,
     borderRadius: tokens.radius.full,
     ...tokens.shadow.md,
+  },
+  searchBar: {
+    position: "relative",
+    justifyContent: "center",
+  },
+  searchClearBtn: {
+    position: "absolute",
+    right: tokens.space["2"],
+    top: tokens.space["3"],
   },
   form: { padding: tokens.space["5"], gap: tokens.space["4"], paddingBottom: tokens.space["12"] },
 });

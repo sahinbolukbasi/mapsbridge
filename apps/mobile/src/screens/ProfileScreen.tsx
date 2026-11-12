@@ -99,7 +99,7 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
   const handle = profile?.username ? `@${profile.username}` : (session?.email ?? "");
 
   return (
-    <Screen header={<ScreenHeader title={tr("nav.profile")} />}>
+    <Screen>
       <ScrollView contentContainerStyle={styles.page}>
         <View style={styles.head}>
           <Avatar name={name || "?"} uri={profile?.avatarUrl} size={72} />

@@ -935,7 +935,18 @@ export function MapScreen({
               maxFontSizeMultiplier={tokens.font.maxScale.body}
               style={[styles.searchInput, { fontFamily: fontFamily("regular") }]}
             />
-            <IconButton icon="search" label={tr("planner.search.submit")} onPress={runSearch} />
+            {query.trim().length > 0 ? (
+              <IconButton
+                icon="x"
+                label="Aramayı Temizle"
+                onPress={() => {
+                  setQuery("");
+                  resetSearch();
+                }}
+              />
+            ) : (
+              <IconButton icon="search" label={tr("planner.search.submit")} onPress={runSearch} />
+            )}
           </View>
           <IconButton
             icon="locate"
@@ -945,7 +956,7 @@ export function MapScreen({
           />
         </View>
 
-        {/* Arama sonuçları arama çubuğunun hemen altında floating liste olarak gösterilir */}
+        {/* Arama sonuçları sadece search box altında arka plansız temiz seçenekler olarak sıralanır */}
         {query.trim().length > 0 && search.status === "results" ? (
           <View style={styles.floatingResults}>
             <ScrollView
@@ -954,31 +965,39 @@ export function MapScreen({
               nestedScrollEnabled
             >
               {search.results.map((place) => (
-                <Card
+                <Pressable
                   key={`${place.lat},${place.lng}`}
-                  variant="bordered"
-                  style={styles.floatingResultCard}
+                  style={styles.floatingResultItem}
                   onPress={() => {
                     pickResult(place);
                     setQuery("");
+                    resetSearch();
                   }}
                 >
-                  <View style={styles.resultItem}>
-                    <Icon name="map" size={16} color={tokens.color.highlight} />
-                    <View style={styles.resultTexts}>
-                      <Txt variant="label" numberOfLines={1}>
-                        {place.name}
+                  <Icon name="map" size={16} color={tokens.color.primary} />
+                  <View style={styles.resultTexts}>
+                    <Txt variant="label" numberOfLines={1}>
+                      {place.name}
+                    </Txt>
+                    {place.address ? (
+                      <Txt variant="caption" tone="muted" numberOfLines={1}>
+                        {place.address}
                       </Txt>
-                      {place.address ? (
-                        <Txt variant="caption" tone="muted" numberOfLines={1}>
-                          {place.address}
-                        </Txt>
-                      ) : null}
-                    </View>
+                    ) : null}
                   </View>
-                </Card>
+                </Pressable>
               ))}
             </ScrollView>
+          </View>
+        ) : null}
+
+        {query.trim().length > 0 && search.status === "error" ? (
+          <View style={styles.floatingResults}>
+            <Notice
+              tone="danger"
+              title={tr("planner.search.error")}
+              action={{ label: tr("ui.retry"), onPress: () => void runSearch() }}
+            />
           </View>
         ) : null}
         {guest ? (
@@ -1059,27 +1078,6 @@ export function MapScreen({
             </View>
           ) : null}
 
-          {search.status === "loading" ? (
-            <View
-              accessible
-              accessibilityLabel={tr("planner.search.loading")}
-              style={styles.cardBody}
-            >
-              <Txt variant="small" tone="muted">
-                {tr("planner.search.loading")}
-              </Txt>
-              <Skeleton variant="list-row" count={3} />
-            </View>
-          ) : null}
-
-          {search.status === "error" ? (
-            <Notice
-              tone="danger"
-              title={tr("planner.search.error")}
-              action={{ label: tr("ui.retry"), onPress: () => void runSearch() }}
-            />
-          ) : null}
-
           {candidate ? (
             <Card variant="bordered">
               <View style={styles.cardBody}>
@@ -1150,35 +1148,6 @@ export function MapScreen({
                 />
               </View>
             </Card>
-          ) : null}
-
-          {search.status === "results" || search.status === "empty" ? (
-            <View style={styles.cardBody}>
-              <Txt variant="heading" header>
-                {tr("planner.search.results")}
-              </Txt>
-              {search.status === "empty" ? (
-                <Txt variant="small" tone="muted">
-                  {tr("planner.search.empty")}
-                </Txt>
-              ) : (
-                search.results.map((place) => (
-                  <Card
-                    key={`${place.lat},${place.lng}`}
-                    variant="bordered"
-                    label={`${place.name}, ${place.address}`}
-                    onPress={() => pickResult(place)}
-                  >
-                    <Txt variant="label">{place.name}</Txt>
-                    {place.address ? (
-                      <Txt variant="caption" tone="muted">
-                        {place.address}
-                      </Txt>
-                    ) : null}
-                  </Card>
-                ))
-              )}
-            </View>
           ) : null}
 
           {mode === "discover" ? (
@@ -1944,23 +1913,26 @@ const styles = StyleSheet.create({
   form: { padding: tokens.space["5"], gap: tokens.space["4"] },
   floatingResults: {
     marginHorizontal: tokens.space["3"],
-    marginTop: tokens.space["2"],
-    maxHeight: 220,
+    marginTop: tokens.space["1"],
+    maxHeight: 240,
     borderRadius: tokens.radius.lg,
     backgroundColor: tokens.color.surface,
-    ...tokens.shadow.md,
     borderWidth: 1,
-    borderColor: tokens.color.borderSubtle,
+    borderColor: tokens.color.border,
     overflow: "hidden",
   },
   floatingResultsScroll: {
-    padding: tokens.space["2"],
+    paddingVertical: tokens.space["1"],
   },
-  floatingResultCard: {
-    paddingVertical: tokens.space["2"],
+  floatingResultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: tokens.space["3"],
+    paddingVertical: tokens.space["3"],
     paddingHorizontal: tokens.space["3"],
-    marginBottom: tokens.space["1"],
-    borderRadius: tokens.radius.md,
+    borderBottomWidth: 1,
+    borderBottomColor: tokens.color.borderSubtle,
+    backgroundColor: tokens.color.surface,
   },
   resultItem: {
     flexDirection: "row",
