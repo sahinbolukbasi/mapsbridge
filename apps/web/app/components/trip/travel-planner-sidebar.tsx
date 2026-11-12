@@ -1173,30 +1173,46 @@ function PlaceSearch({
       <form className="planner-search__form" role="search" onSubmit={submit} noValidate>
         {/* Hap arama (direction planner.html): görünür kısa etiket (§10), başta arama ikonu;
             yazarken 400 ms sonra kendiliğinden arar, Enter hemen gönderir. */}
-        <Field
-          id="planner-search-input"
-          className="planner-search__field"
-          label={t("planner.search.labelShort", "Yer ara")}
-          hint={t(
-            "planner.search.hintShort",
-            "En az 3 harf; haritaya dokunarak da ekleyebilirsin.",
-          )}
-        >
-          {(ids) => (
-            <Input
-              {...ids}
-              type="search"
-              shape="pill"
-              iconStart="search"
-              enterKeyHint="search"
-              placeholder={t("planner.search.placeholder", "Mekan, adres ya da koordinat")}
-              value={query}
-              maxLength={120}
-              autoComplete="off"
-              onChange={(e) => setQuery(e.target.value)}
+        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "flex-end" }}>
+          <div style={{ flex: 1 }}>
+            <Field
+              id="planner-search-input"
+              className="planner-search__field"
+              label={t("planner.search.labelShort", "Yer ara")}
+              hint={t(
+                "planner.search.hintShort",
+                "En az 3 harf; haritaya dokunarak da ekleyebilirsin.",
+              )}
+            >
+              {(ids) => (
+                <Input
+                  {...ids}
+                  type="search"
+                  shape="pill"
+                  iconStart="search"
+                  enterKeyHint="search"
+                  placeholder={t("planner.search.placeholder", "Mekan, adres ya da koordinat")}
+                  value={query}
+                  maxLength={120}
+                  autoComplete="off"
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              )}
+            </Field>
+          </div>
+          {query.trim().length > 0 && (
+            <IconButton
+              icon="x"
+              size="sm"
+              variant="ghost"
+              label={t("ui.clear", "Temizle")}
+              onClick={() => {
+                setQuery("");
+                dispatch({ type: "reset" });
+              }}
             />
           )}
-        </Field>
+        </div>
       </form>
       <div role="status" className="planner-search__status">
         {search.status === "empty" && t("planner.search.empty", "Sonuç bulunamadı.")}

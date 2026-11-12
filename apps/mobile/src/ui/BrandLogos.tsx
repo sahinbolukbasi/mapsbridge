@@ -30,11 +30,11 @@ export function YandexLogo({ size = 18 }: { size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessibilityElementsHidden>
       <Path
-        fill="#FC3F1D"
+        fill={tokens.thirdParty.yandex}
         d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z"
       />
       <Path
-        fill="#FFFFFF"
+        fill={tokens.color.onDay}
         d="M13.8 18.5h-2.1V7.8h-.7c-1.6 0-2.5.9-2.5 2.1 0 1.3.6 2.2 2 3.5l1.6 1.4-3.1 3.7H6.7l2.8-3.4c-1.8-1.6-2.7-3.1-2.7-5.1 0-2.3 1.7-4 4.5-4h2.5v12.5z"
       />
     </Svg>

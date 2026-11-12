@@ -1403,6 +1403,7 @@ export default function AIPage() {
           data-panel={panelOpen ? "open" : "closed"}
           data-wide={panelWide ? "true" : undefined}
           data-view={mobileTab}
+          data-collapsed={sessionsCollapsed ? "true" : undefined}
         >
           <aside
             className="as-studio__sessions"

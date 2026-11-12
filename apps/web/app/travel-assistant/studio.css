@@ -102,7 +102,12 @@
     gap: var(--space-2);
   }
   .as-studio__sessions[data-collapsed] {
-    padding: var(--space-3) var(--space-2);
+    width: 56px;
+    min-width: 56px;
+    max-width: 56px;
+    padding: var(--space-3) var(--space-1);
+    box-sizing: border-box;
+    overflow: hidden;
   }
   .as-studio__sessions-head {
     display: flex;
@@ -953,13 +958,13 @@
     }
     /* Daraltılmış sohbet geçmişi: yalnız dar bir ray (+ ve aç düğmeleri). */
     .as-studio[data-collapsed] {
-      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-columns: 56px minmax(0, 1fr);
     }
     .as-studio[data-collapsed][data-panel="open"] {
-      grid-template-columns: auto minmax(var(--app-panel), 1fr) var(--app-draft);
+      grid-template-columns: 56px minmax(var(--app-panel), 1fr) var(--app-draft);
     }
     .as-studio[data-collapsed][data-panel="open"][data-wide] {
-      grid-template-columns: auto minmax(var(--app-panel), 1fr) clamp(26rem, 34vw, 36rem);
+      grid-template-columns: 56px minmax(var(--app-panel), 1fr) clamp(26rem, 34vw, 36rem);
     }
     .as-studio__sessions {
       display: flex;

@@ -3,20 +3,24 @@
 // (innerHTML yok; metin React ile kaçışlanır). Model lib/trip/pin-popup.ts'ten: alanlar yalnız
 // pin kaydı ve yer proxy'si ayrıntısından (I1); boş alan çizilmez (I10). Stil yalnız
 // styles/vendor-overrides.css (.planner-popup, G22).
+import { useState } from "react";
 import { useLocale } from "../../lib/locale-context";
 import type { PinPopupModel } from "../../lib/trip/pin-popup";
 import { DEFAULT_CATEGORY_META } from "../../lib/trip/models";
 import { Button, Icon } from "../ui";
 import { dayColorIndex } from "./trip-format";
+import { buildDirections } from "../../lib/share/map-directions";
 
 export function PinPopupContent({
   model,
+  dest,
   onDetails,
   onToggleVisited,
   onAddToDay,
   addDay,
 }: {
   model: PinPopupModel;
+  dest?: { lat: number; lng: number; label: string } | null;
   onDetails: () => void;
   onToggleVisited: () => void;
   /** Yalnız Kaydedilenler'deki (günsüz) yer için. */
@@ -24,7 +28,9 @@ export function PinPopupContent({
   addDay: number;
 }) {
   const { t } = useLocale();
+  const [showNav, setShowNav] = useState(false);
   const meta = DEFAULT_CATEGORY_META[model.category] ?? DEFAULT_CATEGORY_META.genel;
+
   return (
     <div className="planner-popup__inner">
       <p className="planner-popup__category">
@@ -50,10 +56,56 @@ export function PinPopupContent({
           {t("planner.stop.done", "Tamamlandı")}
         </p>
       )}
+
+      {showNav && dest && (
+        <div
+          className="planner-popup__nav"
+          style={{ display: "flex", gap: "4px", margin: "8px 0", flexWrap: "wrap" }}
+        >
+          <Button
+            size="sm"
+            variant="secondary"
+            href={buildDirections({ dest, provider: "google" })}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Google
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            href={buildDirections({ dest, provider: "apple" })}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Apple
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            href={buildDirections({ dest, provider: "yandex" })}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Yandex
+          </Button>
+        </div>
+      )}
+
       <div className="planner-popup__actions">
         <Button size="sm" variant="primary" onClick={onDetails}>
           {t("planner.popup.details", "Ayrıntı")}
         </Button>
+        {dest && (
+          <Button
+            size="sm"
+            variant="secondary"
+            iconStart={<Icon name="locate" size={16} />}
+            onClick={() => setShowNav((v) => !v)}
+          >
+            {t("planner.directions", "Yol Tarifi")}
+          </Button>
+        )}
         {onAddToDay ? (
           <Button
             size="sm"

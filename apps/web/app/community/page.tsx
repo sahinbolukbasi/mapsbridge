@@ -8,6 +8,8 @@ import {
   ConfirmDialog,
   EmptyState,
   Icon,
+  IconButton,
+  Input,
   PageHeader,
   PageShell,
   SegmentedControl,
@@ -54,6 +56,7 @@ export default function CommunityPage() {
     fallback: "latest",
   });
   const [category, setCategory] = useState<FeedCategory>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [composerOpen, setComposerOpen] = useState(false);
   const [editing, setEditing] = useState<CommunityPost | null>(null);
   const [deleting, setDeleting] = useState<CommunityPost | null>(null);
@@ -79,6 +82,21 @@ export default function CommunityPage() {
     () => filterFeed(posts, { mode, category, followed }),
     [posts, mode, category, followed],
   );
+
+  const searched = useMemo(() => {
+    const q = searchQuery.trim().toLocaleLowerCase("tr-TR");
+    if (!q) return visible;
+    return visible.filter((p) => {
+      const matchText = (p.content || "").toLocaleLowerCase("tr-TR").includes(q);
+      const matchAuthor =
+        (p.authorDisplayName || "").toLocaleLowerCase("tr-TR").includes(q) ||
+        (p.authorUsername || "").toLocaleLowerCase("tr-TR").includes(q);
+      const matchLoc = (p.locationTag || "").toLocaleLowerCase("tr-TR").includes(q);
+      const matchHash = (p.hashtags || []).some((h) => h.toLocaleLowerCase("tr-TR").includes(q));
+      const matchRoute = (p.linkedRoute?.title || "").toLocaleLowerCase("tr-TR").includes(q);
+      return matchText || matchAuthor || matchLoc || matchHash || matchRoute;
+    });
+  }, [visible, searchQuery]);
 
   /** Yazma eylemi: misafirde kapı (false), oturumluda eylem (true). */
   function guarded(action: () => void): boolean {
@@ -186,37 +204,92 @@ export default function CommunityPage() {
             ]}
           />
 
+          <div
+            className="community-search"
+            style={{
+              margin: "var(--space-3) 0",
+              display: "flex",
+              gap: "var(--space-2)",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ flex: 1, position: "relative" }}>
+              <Input
+                type="search"
+                shape="pill"
+                iconStart="search"
+                aria-label={t("community.search.label", "Paylaşımlarda ara")}
+                placeholder={t(
+                  "community.search.placeholder",
+                  "Paylaşımlarda, yazarlarda veya rotalarda ara...",
+                )}
+                value={searchQuery}
+                maxLength={100}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            {searchQuery.trim().length > 0 && (
+              <IconButton
+                icon="x"
+                size="sm"
+                variant="ghost"
+                label={t("ui.clear", "Temizle")}
+                onClick={() => setSearchQuery("")}
+              />
+            )}
+          </div>
+
           {/* Kısa durum duyurusu; kartların kendisi canlı bölge değildir. */}
           <div role="status">
             <VisuallyHidden>
               {t("community.count", "{n} paylaşım gösteriliyor").replace(
                 "{n}",
-                String(visible.length),
+                String(searched.length),
               )}
             </VisuallyHidden>
           </div>
           <div className="community-feed">
-            {visible.length === 0 ? (
-              <EmptyState
-                icon="users"
-                contour
-                title={t("community.empty.title", "Henüz paylaşım yok")}
-                description={
-                  mode === "following"
-                    ? t(
-                        "community.empty.following",
-                        "Takip ettiğin gezginlerin paylaşımları burada görünür.",
-                      )
-                    : t("community.empty.body", "İlk seyahat deneyimini paylaşarak akışı başlat.")
-                }
-                action={
-                  <Button variant="secondary" onClick={openComposer}>
-                    {t("community.empty.cta", "İlk paylaşımı yap")}
-                  </Button>
-                }
-              />
+            {searched.length === 0 ? (
+              searchQuery.trim().length > 0 ? (
+                <EmptyState
+                  icon="search"
+                  contour
+                  title={t("community.search.emptyTitle", "Eşleşen Paylaşım Bulunamadı")}
+                  description={t(
+                    "community.search.emptyDesc",
+                    "Farklı bir arama terimi deneyebilir veya aramayı temizleyebilirsiniz.",
+                  )}
+                  action={
+                    <Button variant="secondary" onClick={() => setSearchQuery("")}>
+                      {t("community.search.clear", "Aramayı Temizle")}
+                    </Button>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  icon="users"
+                  contour
+                  title={t("community.empty.title", "Henüz paylaşım yok")}
+                  description={
+                    mode === "following"
+                      ? t(
+                          "community.empty.following",
+                          "Takip ettiğin gezginlerin paylaşımları burada görünür.",
+                        )
+                      : t(
+                          "community.empty.body",
+                          "İlk seyahat deneyimini paylaşarak akışı başlat.",
+                        )
+                  }
+                  action={
+                    <Button variant="secondary" onClick={openComposer}>
+                      {t("community.empty.cta", "İlk paylaşımı yap")}
+                    </Button>
+                  }
+                />
+              )
             ) : (
-              visible.map((post) => (
+              searched.map((post) => (
                 <PostCard
                   key={post.id}
                   post={post}

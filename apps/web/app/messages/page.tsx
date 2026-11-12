@@ -8,6 +8,7 @@ import {
   Avatar,
   Button,
   Celebrate,
+  ConfirmDialog,
   EmptyState,
   Field,
   Icon,
@@ -85,6 +86,8 @@ export default function MessagesPage() {
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [newChatOpen, setNewChatOpen] = useState(false);
+  const [confirmDeleteThread, setConfirmDeleteThread] = useState(false);
+  const [msgToDelete, setMsgToDelete] = useState<ChatMessage | null>(null);
   // Mesaj istekleri (Increment 1.14): sunucu thread'leri + istek durumu.
   const [serverThreads, setServerThreads] = useState<ChatThreadSummary[]>([]);
   const [mySub, setMySub] = useState("");
@@ -434,16 +437,29 @@ export default function MessagesPage() {
               </Button>
             </div>
           </div>
-          <Field label={t("messages.search", "Sohbet ara")} className="msg-list__search">
-            {(ids) => (
-              <Input
-                {...ids}
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+          <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "flex-end" }}>
+            <div style={{ flex: 1 }}>
+              <Field label={t("messages.search", "Sohbet ara")} className="msg-list__search">
+                {(ids) => (
+                  <Input
+                    {...ids}
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                  />
+                )}
+              </Field>
+            </div>
+            {query.trim().length > 0 && (
+              <IconButton
+                icon="x"
+                size="sm"
+                variant="ghost"
+                label={t("ui.clear", "Temizle")}
+                onClick={() => setQuery("")}
               />
             )}
-          </Field>
+          </div>
           <Tabs
             className="msg-list__tabs"
             label={t("messages.tabs.label", "Mesaj kutusu")}
@@ -541,12 +557,25 @@ export default function MessagesPage() {
                   />
                 </span>
                 <Avatar name={active.title} size="sm" decorative />
-                <div className="msg-thread__who">
+                <a
+                  href={`/${cleanHandle(active.title)}`}
+                  className="msg-thread__who"
+                  style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+                >
                   <h2 id="msg-thread-title" className="msg-thread__title">
                     {active.title}
                   </h2>
                   <p className="msg-thread__sub">@{active.title}</p>
-                </div>
+                </a>
+                <span className="msg-thread__actions" style={{ marginLeft: "auto" }}>
+                  <IconButton
+                    icon="trash"
+                    label={t("messages.deleteThread", "Sohbeti sil")}
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setConfirmDeleteThread(true)}
+                  />
+                </span>
               </div>
               {acceptedId === active.id && (
                 <div className="msg-thread__celebrate">
@@ -577,10 +606,30 @@ export default function MessagesPage() {
                       {m.text}
                     </p>
                   ) : (
-                    <MessageBubble key={m.id} role={m.isOutgoing ? "user" : "assistant"}>
-                      <span className="msg-bubble__text">{m.text}</span>
-                      {m.time && <span className="msg-bubble__time">{m.time}</span>}
-                    </MessageBubble>
+                    <div
+                      key={m.id}
+                      className="msg-bubble-wrap"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "var(--space-1)",
+                        flexDirection: m.isOutgoing ? "row-reverse" : "row",
+                      }}
+                    >
+                      <MessageBubble role={m.isOutgoing ? "user" : "assistant"}>
+                        <span className="msg-bubble__text">{m.text}</span>
+                        {m.time && <span className="msg-bubble__time">{m.time}</span>}
+                      </MessageBubble>
+                      {m.isOutgoing && (
+                        <IconButton
+                          icon="trash"
+                          size="sm"
+                          variant="ghost"
+                          label={t("ui.delete", "Sil")}
+                          onClick={() => setMsgToDelete(m)}
+                        />
+                      )}
+                    </div>
                   ),
                 )}
               </MessageLog>
@@ -626,6 +675,69 @@ export default function MessagesPage() {
           )}
         </section>
       </div>
+
+      <ConfirmDialog
+        open={confirmDeleteThread}
+        title={t("messages.delete.title", "Sohbeti Sil")}
+        consequence={t(
+          "messages.delete.body",
+          "Bu sohbeti ve mesaj geçmişini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+        )}
+        confirmLabel={t("ui.delete", "Sil")}
+        tone="danger"
+        onConfirm={async () => {
+          if (!active) return;
+          const targetTitle = active.title;
+          setConversations((prev) => prev.filter((c) => c.id !== active.id));
+          try {
+            const raw = localStorage.getItem(DIRECT_MESSAGES_KEY);
+            if (raw) {
+              const list = JSON.parse(raw);
+              if (Array.isArray(list)) {
+                const filtered = list.filter(
+                  (m) => m.toUsername !== targetTitle && m.fromUsername !== targetTitle,
+                );
+                localStorage.setItem(DIRECT_MESSAGES_KEY, JSON.stringify(filtered));
+              }
+            }
+          } catch {}
+          setActiveId("");
+          setPane("list");
+          setConfirmDeleteThread(false);
+        }}
+        onClose={() => setConfirmDeleteThread(false)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(msgToDelete)}
+        title={t("messages.deleteMsg.title", "Mesajı Sil")}
+        consequence={t("messages.deleteMsg.body", "Bu mesajı silmek istediğinize emin misiniz?")}
+        confirmLabel={t("ui.delete", "Sil")}
+        tone="danger"
+        onConfirm={async () => {
+          if (!msgToDelete || !active) return;
+          const msgId = msgToDelete.id;
+          setConversations((prev) =>
+            prev.map((c) =>
+              c.id === active.id
+                ? { ...c, messages: c.messages.filter((m) => m.id !== msgId) }
+                : c,
+            ),
+          );
+          try {
+            const raw = localStorage.getItem(DIRECT_MESSAGES_KEY);
+            if (raw) {
+              const list = JSON.parse(raw);
+              if (Array.isArray(list)) {
+                const filtered = list.filter((m: { id: string }) => m.id !== msgId);
+                localStorage.setItem(DIRECT_MESSAGES_KEY, JSON.stringify(filtered));
+              }
+            }
+          } catch {}
+          setMsgToDelete(null);
+        }}
+        onClose={() => setMsgToDelete(null)}
+      />
 
       <NewChatModal
         open={newChatOpen}

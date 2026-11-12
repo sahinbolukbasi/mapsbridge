@@ -547,6 +547,28 @@ export default function Panel() {
           {t("planner.optimize", "Rotayı optimize et")}
         </Button>
       )}
+      {planner.activeTrip && planner.pinsWithTime.length > 0 && (
+        <Button
+          variant="secondary"
+          iconStart={<Icon name="download" size={20} />}
+          onClick={() => {
+            const md = tripToMarkdown(planner.activeTrip!);
+            const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${(planner.activeTrip?.title || "rota-rehberi").replace(/[^a-zA-Z0-9_\-\u00C0-\u017F]+/g, "_")}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.show({
+              tone: "success",
+              message: t("planner.toast.downloaded", "Rota rehberi indirildi."),
+            });
+          }}
+        >
+          {t("planner.downloadGuide", "Rehberi İndir")}
+        </Button>
+      )}
       {shareTarget && (
         <Button
           variant="secondary"
@@ -781,6 +803,7 @@ export default function Panel() {
         ? createPortal(
             <PinPopupContent
               model={popupModel}
+              dest={{ lat: popupPin.lat, lng: popupPin.lng, label: popupPin.label }}
               addDay={targetDay}
               onDetails={() => openPin(popupPin.id)}
               onToggleVisited={() => planner.togglePinVisitedAnywhere(popupPin.id)}

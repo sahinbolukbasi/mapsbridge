@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  serverExternalPackages: ["@polar-sh/sdk", "ioredis"],
 };
 
 export default nextConfig;

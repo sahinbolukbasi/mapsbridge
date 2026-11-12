@@ -48,7 +48,12 @@ export function ScreenHeader({
             </View>
           )}
           {onPressTitle ? (
-            <Pressable onPress={onPressTitle} hitSlop={8}>
+            <Pressable
+              accessibilityRole="button"
+              style={{ minHeight: tokens.touch.min, minWidth: tokens.touch.min, justifyContent: "center" }}
+              onPress={onPressTitle}
+              hitSlop={8}
+            >
               {textContent}
             </Pressable>
           ) : (
@@ -64,7 +69,12 @@ export function ScreenHeader({
       <View style={styles.brandRow}>
         {left}
         {onPressTitle ? (
-          <Pressable onPress={onPressTitle} hitSlop={8}>
+          <Pressable
+            accessibilityRole="button"
+            style={{ minHeight: tokens.touch.min, minWidth: tokens.touch.min, justifyContent: "center" }}
+            onPress={onPressTitle}
+            hitSlop={8}
+          >
             {textContent}
           </Pressable>
         ) : (

@@ -11,8 +11,10 @@ import {
   chatErrorKey,
   groupThreads,
   jwtSub,
+  resolveOutcome,
   type RequestAction,
 } from "../ui/logic/chat-requests";
+import { spring } from "../ui/motion";
 import { chatStore, type ChatBubbleItem, type ChatContact } from "../services/chatStore";
 import { PublicProfileView } from "./PublicProfileView";
 import {
@@ -60,10 +62,10 @@ function SwipeableMessage({
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dx > 45) {
           setSwiped(true);
-          Animated.spring(panX, { toValue: 60, useNativeDriver: true }).start();
+          spring(panX, 60, "press", true).start();
         } else {
           setSwiped(false);
-          Animated.spring(panX, { toValue: 0, useNativeDriver: true }).start();
+          spring(panX, 0, "press", true).start();
         }
       },
     }),
@@ -78,7 +80,7 @@ function SwipeableMessage({
             color={tokens.color.danger}
             label={tr("community.delete.confirm")}
             onPress={() => {
-              Animated.spring(panX, { toValue: 0, useNativeDriver: true }).start();
+              spring(panX, 0, "press", true).start();
               setSwiped(false);
               onDelete();
             }}
@@ -249,18 +251,33 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
   };
 
   /** Yeni kişiye sohbet aç (yerel bekleyen); ilk mesaj composer'dan gidince istek oluşturulur. */
-  const startNewTo = async (handle: string) => {
+  const startNewTo = async (handle: string, text: string = "") => {
     if (!newHandleValid) {
       setNewError(tr("messages.newChat.required"));
+      return;
+    }
+    if (text === undefined) {
+      setNewError(tr("messages.newChat.messageRequired"));
       return;
     }
     setNewBusy(true);
     setNewError(undefined);
     try {
+      if (text) {
+        const res = await chatRequestApi.createThread(handle, text);
+        const { contact } = await chatStore.startOrGetDirectThread({ name: handle, handle });
+        setServerIds((m) => ({ ...m, [contact.id]: { id: res.threadId, pendingOut: true } }));
+        await chatStore.sendMessage(contact.id, { text, senderId: "me", senderName: me });
+        void loadServerThreads();
+        setNewOpen(false);
+        setNewUser("");
+        setActive(contact);
+        return;
+      }
       const cleanHandle = handle.trim().replace(/^@/, "").toLowerCase();
       const status = await authService.checkUsername(cleanHandle);
       if (status === "available") {
-        setNewError("Kullanıcı bulunamadı.");
+        setNewError(tr("messages.req.userNotFound") || "Kullanıcı bulunamadı.");
         setNewBusy(false);
         return;
       }
@@ -272,7 +289,13 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
       setNewUser("");
       setActive(contact);
     } catch (err) {
-      setNewError(errorText(err, true) ?? tr("messages.newChat.failed"));
+      const e = err as Partial<ChatApiError>;
+      const outcome = resolveOutcome({ status: e?.status, code: e?.code });
+      if (outcome === "notFound") {
+        setNewError(tr("messages.req.userNotFound"));
+      } else {
+        setNewError(errorText(err, true) ?? tr("messages.newChat.failed"));
+      }
     } finally {
       setNewBusy(false);
     }
