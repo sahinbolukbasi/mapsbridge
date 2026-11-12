@@ -19,7 +19,7 @@ import {
 // sürükleme PanResponder ile; bırakınca motion.spring(…, "sheet") ile oturur (reduce: anında).
 export type { SheetSnap };
 
-const RATIO: Record<SheetSnap, number> = { peek: 0.25, half: 0.55, full: 0.92 };
+const RATIO: Record<SheetSnap, number> = { peek: 0.35, half: 0.58, full: 0.92 };
 const HANDLE_HEIGHT = tokens.touch.min;
 
 export interface BottomSheetProps {

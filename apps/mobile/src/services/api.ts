@@ -504,6 +504,49 @@ export interface AIAskResponse {
   tripProfile?: Record<string, unknown>;
   /** Visible assumptions the model made when filling missing info */
   assumptions?: string[];
+  /** Post-Route Bedrock AgentCore User Harness (Hotel, Flight/Bus, City Transit, Car Rental, e-SIM & DB/Vector tags) */
+  postRouteHarness?: {
+    destination: string;
+    tripType: "business" | "short_break" | "leisure";
+    isInternational: boolean;
+    userTags: string[];
+    accommodation: {
+      title: string;
+      summary: string;
+      recommendedAreas: string[];
+      lodgingType: string;
+      actionPrompt: string;
+    };
+    intercityTransport: {
+      title: string;
+      mode: "flight_and_bus" | "flight" | "bus_or_train";
+      flightSummary: string;
+      busOrTrainSummary: string;
+      cheapestFlightNote?: string;
+      actionPrompt: string;
+    };
+    cityTransit: {
+      title: string;
+      summary: string;
+      cardRecommendation: string;
+      clusterTransferNote: string;
+      actionPrompt: string;
+    };
+    carRental: {
+      recommended: boolean;
+      title: string;
+      summary: string;
+      actionPrompt: string;
+    };
+    esim?: {
+      required: boolean;
+      title: string;
+      summary: string;
+      tips: string[];
+      actionPrompt: string;
+    };
+  };
+  userTags?: string[];
   suggestedQuestions?: string[];
   creditsUsed?: number;
   remainingCredits?: number;
@@ -630,6 +673,12 @@ export const aiService = {
         flightPrices: json.flightPrices,
         travelAdvisory: json.travelAdvisory,
         clarification: json.clarification,
+        postRouteHarness: json.postRouteHarness,
+        userTags: json.userTags,
+        assumptions: json.assumptions,
+        feasibility: json.feasibility,
+        tripProfile: json.tripProfile,
+        conversationState: json.conversationState,
         suggestedQuestions: json.suggestedQuestions || json.clarification?.guidingQuestions || [],
         creditsUsed: json.billing?.cost ?? json.cost,
         remainingCredits: json.billing?.credits,
@@ -667,6 +716,7 @@ export const aiService = {
     };
     latestConversationId?: string;
     conversationId?: string;
+    userDisplayName?: string;
   } | null> {
     try {
       // GET oturum/geçmiş: gateway'de GET yalnız /ai/chat'te kayıtlı (route-planner POST-only).
@@ -700,6 +750,7 @@ export const aiService = {
     };
     latestConversationId?: string;
     conversationId?: string;
+    userDisplayName?: string;
   } | null> {
     try {
       return await apiRequest(`/ai/chat?conversationId=${encodeURIComponent(convId)}`);
@@ -844,10 +895,15 @@ export const chatRequestApi = {
 export const CATALOG_TIMEOUT_MS = 8000;
 export type WalletSnapshot = { credits: number; tier: string };
 export const billingService = {
-  /** Sunucu bakiyesi (web refreshWallet ile aynı uç: GET /revenuecat/wallet). İstemci hesaplamaz. */
+  /** Sunucu bakiyesi (web refreshWallet ile aynı uç: GET /polar/wallet). İstemci hesaplamaz. */
   async getWallet(): Promise<WalletSnapshot | null> {
     try {
-      const data = await apiRequest<{ credits?: unknown; tier?: unknown }>("/revenuecat/wallet");
+      let data: { credits?: unknown; tier?: unknown } | null = null;
+      try {
+        data = await apiRequest<{ credits?: unknown; tier?: unknown }>("/polar/wallet");
+      } catch {
+        data = await apiRequest<{ credits?: unknown; tier?: unknown }>("/revenuecat/wallet");
+      }
       return typeof data?.credits === "number" && Number.isFinite(data.credits)
         ? { credits: data.credits, tier: typeof data.tier === "string" ? data.tier : "free" }
         : null;
@@ -859,12 +915,27 @@ export const billingService = {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), CATALOG_TIMEOUT_MS);
     try {
-      const res = await fetch(`${API_BASE}/revenuecat/plans`, { signal: controller.signal });
+      let res = await fetch(`${API_BASE}/polar/plans`, { signal: controller.signal });
+      if (!res.ok) {
+        res = await fetch(`${API_BASE}/revenuecat/plans`, { signal: controller.signal });
+      }
       if (!res.ok) throw new Error(`Katalog yüklenemedi (${res.status})`);
       return await res.json();
     } finally {
       clearTimeout(timer);
     }
+  },
+  async createCheckout(targetId: string, mode: "subscription" | "credit_pack" = "subscription"): Promise<{ url: string }> {
+    return await apiRequest<{ url: string }>("/polar/checkout", {
+      method: "POST",
+      body: JSON.stringify({ targetId, mode }),
+    });
+  },
+  async openCustomerPortal(): Promise<{ url: string }> {
+    return await apiRequest<{ url: string }>("/polar/portal", {
+      method: "POST",
+      body: "{}",
+    });
   },
 };
 

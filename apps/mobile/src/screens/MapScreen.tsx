@@ -18,7 +18,9 @@ import { tripStore, type ActiveRoute, type TripStop } from "../services/tripStor
 import { trainingService } from "../services/api";
 import { storage } from "../services/storage";
 import { ScreenTourModal } from "../components/ScreenTourModal";
-import { AppleLogo, GoogleLogo } from "../ui/BrandLogos";
+import { AppleLogo, GoogleLogo, YandexLogo } from "../ui/BrandLogos";
+import { PinShareModal } from "../components/PinShareModal";
+import { buildDirections } from "../share/map-directions";
 import {
   Accordion,
   AuthGate,
@@ -72,7 +74,6 @@ import { pinPopupModel } from "../trip/pin-popup";
 import { stopToPin } from "../trip/models";
 import { centroid } from "../trip/discovery-rank";
 import { DiscoverPanel, type DiscoverAdd } from "../components/DiscoverPanel";
-import { RouteManagerSheet } from "../components/RouteManagerSheet";
 import { NearbyList, type NearbyAddPlace } from "../components/NearbyList";
 import { usePermission } from "../components/PermissionPrompt";
 import { readTile, storeTile } from "../services/tile-cache";
@@ -260,8 +261,9 @@ export function MapScreen({
   const [candidateDay, setCandidateDay] = useState<number | null>(null);
   const [looking, setLooking] = useState(false);
   const [mode, setMode] = useState<"edit" | "discover">("edit");
-  const [routeManagerOpen, setRouteManagerOpen] = useState(false); // G2
   const [reorderOpen, setReorderOpen] = useState(false);
+  const [showcaseStop, setShowcaseStop] = useState<TripStop | null>(null);
+  const [sharePinTarget, setSharePinTarget] = useState<TripStop | null>(null);
   const [customDays, setCustomDays] = useState<number[]>([]);
   const [selectedDayFilter, setSelectedDayFilter] = useState<number | null>(null);
   const [editPhotoUrl, setEditPhotoUrl] = useState<string | undefined>(undefined);
@@ -706,9 +708,23 @@ export function MapScreen({
     }).catch(() => undefined);
   };
 
-  // Yol tarifi (K4): iOS'ta Apple Haritalar, her iki platformda Google Haritalar (bağımlılık yok).
-  const openExternal = (stop?: TripStop, app: "google" | "apple" = "google") => {
-    const points = stop ? [stop] : route.stops;
+  // Yol tarifi (K4): Google, Yandex, Apple Haritalar (Apple sonda, D3 buildDirections uyumlu).
+  const openExternal = (
+    stop?: TripStop,
+    app: "google" | "yandex" | "apple" = "google",
+  ) => {
+    if (stop && Number.isFinite(stop.lat) && Number.isFinite(stop.lng)) {
+      const url = buildDirections({
+        dest: { lat: stop.lat, lng: stop.lng },
+        origin: mapCenter,
+        provider: app,
+      });
+      Linking.openURL(url).catch(() =>
+        Alert.alert("Yol Tarifi", tr("ui.unexpectedError")),
+      );
+      return;
+    }
+    const points = route.stops;
     const url = app === "apple" ? appleMapsUrl(points) : googleMapsUrl(points);
     if (!url) return;
     Linking.openURL(url).catch(() =>
@@ -866,20 +882,7 @@ export function MapScreen({
       />
 
       <SafeArea style={styles.top} pointerEvents="box-none">
-        {/* G1: harita görünümünün kimliği — tam ekranı kapatmayan "Planla" başlığı. */}
-        <View style={styles.titleRow} pointerEvents="none">
-          <View style={styles.titleChip}>
-            <Txt variant="label">{tr("nav.desk")}</Txt>
-          </View>
-        </View>
         <View style={styles.topRow}>
-          {/* G2: rota yönetimi (yeni/adını düzenle/sil/paylaş) — tek rota düğmesi. */}
-          <IconButton
-            icon="route"
-            label={tr("planner.trips.manage")}
-            onPress={() => setRouteManagerOpen(true)}
-            style={styles.floating}
-          />
           <View style={styles.search}>
             <TextInput
               value={query}
@@ -905,6 +908,43 @@ export function MapScreen({
             style={styles.floating}
           />
         </View>
+
+        {/* Arama sonuçları arama çubuğunun hemen altında floating liste olarak gösterilir */}
+        {query.trim().length > 0 && search.status === "results" ? (
+          <View style={styles.floatingResults}>
+            <ScrollView
+              style={styles.floatingResultsScroll}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled
+            >
+              {search.results.map((place) => (
+                <Card
+                  key={`${place.lat},${place.lng}`}
+                  variant="bordered"
+                  style={styles.floatingResultCard}
+                  onPress={() => {
+                    pickResult(place);
+                    setQuery("");
+                  }}
+                >
+                  <View style={styles.resultItem}>
+                    <Icon name="map" size={16} color={tokens.color.highlight} />
+                    <View style={styles.resultTexts}>
+                      <Txt variant="label" numberOfLines={1}>
+                        {place.name}
+                      </Txt>
+                      {place.address ? (
+                        <Txt variant="caption" tone="muted" numberOfLines={1}>
+                          {place.address}
+                        </Txt>
+                      ) : null}
+                    </View>
+                  </View>
+                </Card>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
         {guest ? (
           <View style={styles.badgeRow}>
             <Button
@@ -1302,6 +1342,18 @@ export function MapScreen({
                     {/* C (görev 5): seçili durak eylemleri simge — Apple/Google logolu yol tarifi, Gezildi,
                         Düzenle, Paylaş, Sil. Etiketler erişilebilir ad; Sil tehlike rengiyle. */}
                     <View style={styles.iconActions}>
+                      <IconButton
+                        icon={<GoogleLogo size={20} />}
+                        label={tr("planner.travel.googleMaps")}
+                        onPress={() => openExternal(selected, "google")}
+                        style={styles.actionIcon}
+                      />
+                      <IconButton
+                        icon={<YandexLogo size={20} />}
+                        label="Yandex Haritalar"
+                        onPress={() => openExternal(selected, "yandex")}
+                        style={styles.actionIcon}
+                      />
                       {Platform.OS === "ios" ? (
                         <IconButton
                           icon={<AppleLogo size={20} />}
@@ -1310,12 +1362,6 @@ export function MapScreen({
                           style={styles.actionIcon}
                         />
                       ) : null}
-                      <IconButton
-                        icon={<GoogleLogo size={20} />}
-                        label={tr("planner.travel.googleMaps")}
-                        onPress={() => openExternal(selected)}
-                        style={styles.actionIcon}
-                      />
                       <IconButton
                         icon="check"
                         selected={selected.visited}
@@ -1326,15 +1372,15 @@ export function MapScreen({
                         style={styles.actionIcon}
                       />
                       <IconButton
-                        icon="edit"
-                        label={tr("planner.detail.edit")}
-                        onPress={() => openEdit(selected)}
+                        icon="info"
+                        label={"Tanıtım & Detay"}
+                        onPress={() => setShowcaseStop(selected)}
                         style={styles.actionIcon}
                       />
                       <IconButton
                         icon="share"
                         label={tr("planner.pinShare.action")}
-                        onPress={() => shareStop(selected)}
+                        onPress={() => setSharePinTarget(selected)}
                         style={styles.actionIcon}
                       />
                       <IconButton
@@ -1392,6 +1438,18 @@ export function MapScreen({
                       onPress={remind}
                       style={styles.actionIcon}
                     />
+                    <IconButton
+                      icon="map"
+                      label={tr("planner.travel.googleMaps")}
+                      onPress={() => openExternal(undefined, "google")}
+                      style={styles.actionIcon}
+                    />
+                    <IconButton
+                      icon="map"
+                      label="Yandex Haritalar"
+                      onPress={() => openExternal(undefined, "yandex")}
+                      style={styles.actionIcon}
+                    />
                     {Platform.OS === "ios" ? (
                       <IconButton
                         icon="compass"
@@ -1400,12 +1458,6 @@ export function MapScreen({
                         style={styles.actionIcon}
                       />
                     ) : null}
-                    <IconButton
-                      icon="map"
-                      label={tr("planner.travel.googleMaps")}
-                      onPress={() => openExternal()}
-                      style={styles.actionIcon}
-                    />
                   </View>
                   <Txt variant="caption" tone="muted">
                     {tr("planner.note.osrm")}
@@ -1583,16 +1635,99 @@ export function MapScreen({
       ) : null}
       {locationPerm.element}
       {notifyPerm.element}
-      <RouteManagerSheet
-        visible={routeManagerOpen}
-        onClose={() => setRouteManagerOpen(false)}
-        onOpenRoute={() => setRouteManagerOpen(false)}
-        onShare={() => {
-          setRouteManagerOpen(false);
-          void share();
-        }}
-        guest={guest}
+
+      <PinShareModal
+        visible={!!sharePinTarget}
+        onClose={() => setSharePinTarget(null)}
+        pin={
+          sharePinTarget
+            ? {
+                title: sharePinTarget.name,
+                lat: sharePinTarget.lat,
+                lng: sharePinTarget.lng,
+                address: sharePinTarget.address,
+              }
+            : null
+        }
       />
+
+      <ModalFrame
+        visible={!!showcaseStop}
+        variant="sheet"
+        title={showcaseStop?.name ?? "Yer Tanıtımı"}
+        onRequestClose={() => setShowcaseStop(null)}
+      >
+        {showcaseStop ? (
+          <ScrollView
+            contentContainerStyle={styles.showcaseContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            {showcaseStop.photoUrl ? (
+              <Image
+                source={{ uri: showcaseStop.photoUrl }}
+                style={styles.showcaseImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.showcasePlaceholder}>
+                <Icon name="image" size={32} color={tokens.color.textMuted} />
+              </View>
+            )}
+            <View style={styles.showcaseBody}>
+              <View style={styles.showcaseTitleRow}>
+                <Txt variant="title" header style={{ flex: 1 }}>
+                  {showcaseStop.name}
+                </Txt>
+                {showcaseStop.category ? (
+                  <View style={styles.categoryBadge}>
+                    <Txt variant="caption" tone="highlight">
+                      {showcaseStop.category}
+                    </Txt>
+                  </View>
+                ) : null}
+              </View>
+              {showcaseStop.address ? (
+                <View style={styles.addressRow}>
+                  <Icon name="map" size={16} color={tokens.color.textMuted} />
+                  <Txt variant="small" tone="muted" style={{ flex: 1 }}>
+                    {showcaseStop.address}
+                  </Txt>
+                </View>
+              ) : null}
+              {showcaseStop.notes ? (
+                <Card variant="bordered">
+                  <View style={styles.notesBox}>
+                    <Txt variant="label">{"Notlar & Açıklama"}</Txt>
+                    <Txt variant="body">{showcaseStop.notes}</Txt>
+                  </View>
+                </Card>
+              ) : null}
+              <View style={styles.showcaseActions}>
+                <Button
+                  label={"Düzenle"}
+                  variant="primary"
+                  icon={<Icon name="edit" size={16} />}
+                  onPress={() => {
+                    const st = showcaseStop;
+                    setShowcaseStop(null);
+                    openEdit(st);
+                  }}
+                />
+                <Button
+                  label={"Paylaşım Kodu & QR"}
+                  variant="secondary"
+                  icon={<Icon name="share" size={16} />}
+                  onPress={() => {
+                    const st = showcaseStop;
+                    setShowcaseStop(null);
+                    setSharePinTarget(st);
+                  }}
+                />
+              </View>
+            </View>
+          </ScrollView>
+        ) : null}
+      </ModalFrame>
       <ScreenTourModal screen="map" />
     </View>
   );
@@ -1654,15 +1789,92 @@ const styles = StyleSheet.create({
   poolRow: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },
   poolText: { flex: 1, gap: tokens.space["1"] },
   form: { padding: tokens.space["5"], gap: tokens.space["4"] },
+  floatingResults: {
+    marginHorizontal: tokens.space["3"],
+    marginTop: tokens.space["2"],
+    maxHeight: 220,
+    borderRadius: tokens.radius.lg,
+    backgroundColor: tokens.color.surface,
+    ...tokens.shadow.md,
+    borderWidth: 1,
+    borderColor: tokens.color.borderSubtle,
+    overflow: "hidden",
+  },
+  floatingResultsScroll: {
+    padding: tokens.space["2"],
+  },
+  floatingResultCard: {
+    paddingVertical: tokens.space["2"],
+    paddingHorizontal: tokens.space["3"],
+    marginBottom: tokens.space["1"],
+    borderRadius: tokens.radius.md,
+  },
+  resultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: tokens.space["3"],
+  },
+  resultTexts: {
+    flex: 1,
+  },
   peekHeaderRow: {
+    paddingHorizontal: tokens.space["1"],
+    paddingBottom: tokens.space["2"],
+    gap: 2,
+  },
+  peekRouteName: {
+    fontSize: tokens.font.size.lg,
+    fontWeight: "700",
+  },
+  peekDayLabel: {
+    fontSize: tokens.font.size.xs,
+  },
+  showcaseContent: {
+    padding: tokens.space["4"],
+    gap: tokens.space["3"],
+    paddingBottom: tokens.space["8"],
+  },
+  showcaseImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: tokens.radius.lg,
+  },
+  showcasePlaceholder: {
+    width: "100%",
+    height: 140,
+    borderRadius: tokens.radius.lg,
+    backgroundColor: tokens.color.surfaceSunken,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  showcaseBody: {
+    gap: tokens.space["3"],
+  },
+  showcaseTitleRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: tokens.space["1"],
-    paddingBottom: tokens.space["2"],
+    gap: tokens.space["2"],
   },
-  peekRouteName: { flex: 1, marginRight: tokens.space["2"] },
-  peekDayLabel: { fontSize: tokens.font.size.sm },
+  categoryBadge: {
+    paddingHorizontal: tokens.space["2"],
+    paddingVertical: tokens.space["1"],
+    backgroundColor: tokens.color.surfaceSunken,
+    borderRadius: tokens.radius.full,
+  },
+  addressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: tokens.space["2"],
+  },
+  notesBox: {
+    padding: tokens.space["3"],
+    gap: tokens.space["1"],
+  },
+  showcaseActions: {
+    gap: tokens.space["2"],
+    marginTop: tokens.space["2"],
+  },
   daySelectorRow: {
     flexDirection: "row",
     alignItems: "center",

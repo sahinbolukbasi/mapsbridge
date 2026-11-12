@@ -52,6 +52,7 @@ import {
 } from "./itinerary-actions";
 
 import { getDestinationBrief } from "../destination/index";
+import { buildPostRouteHarness, extractUserAndTripTags } from "./post-route-harness";
 import { runTransitStayAgent } from "./sub-agents/transit-stay-agent";
 import { runDiscoveryAgent } from "./sub-agents/discovery-agent";
 import { runEmergencyAgent } from "./sub-agents/emergency-agent";
@@ -130,6 +131,94 @@ export async function runMultiAgentSupervisor(
   const baseProfile = previous?.profile
     ? cleanTripProfile(previous.profile as unknown as Record<string, unknown>)
     : contextToProfile(base);
+
+  // Hydrate missing profile slots from saved DB preferences so known user data is never re-asked
+  const savedPrefs = sanitizePreferences(payload.preferences);
+  if (savedPrefs.pace && !baseProfile.pace) {
+    const pNorm = savedPrefs.pace.toLowerCase();
+    if (/sakin|rahat|relaxed|calm/i.test(pNorm)) baseProfile.pace = "relaxed";
+    else if (/yoğun|hızlı|fast|explorer/i.test(pNorm)) baseProfile.pace = "fast";
+    else if (/dengeli|orta|moderate|classic/i.test(pNorm)) baseProfile.pace = "moderate";
+  }
+  if (savedPrefs.budget && (!baseProfile.budget || baseProfile.budget.level === "unspecified")) {
+    const bNorm = savedPrefs.budget.toLowerCase();
+    if (/ekonomik|ucuz|budget/i.test(bNorm)) baseProfile.budget = { level: "budget" };
+    else if (/lüks|rahat|luxury/i.test(bNorm)) baseProfile.budget = { level: "luxury" };
+    else if (/orta|dengeli|mid/i.test(bNorm)) baseProfile.budget = { level: "mid" };
+  }
+  if (savedPrefs.interests?.length && (!base.interests || base.interests.length === 0)) {
+    base.interests = [...savedPrefs.interests];
+    baseProfile.interests.general = [
+      ...new Set([...(baseProfile.interests.general || []), ...savedPrefs.interests]),
+    ].slice(0, 6);
+  }
+  baseProfile.completeness = calculateTripCompleteness(baseProfile);
+
+  // Instant personalized greeting fast-path ("merhaba" -> "Merhaba [Kullanıcı Adı], nasıl yardımcı olabilirim?")
+  const cleanDisplayName =
+    typeof payload.userDisplayName === "string" && payload.userDisplayName.trim()
+      ? payload.userDisplayName.trim().slice(0, 60)
+      : "";
+  const isPureMerhaba = /^merhaba[.,!?]*$/iu.test(request.trim());
+  const isNamedGreeting =
+    Boolean(cleanDisplayName) &&
+    /^(merhaba|selam|selamlar|günaydın|iyi\s+(günler|akşamlar)|hey|hi|hello)[.,!?]*$/iu.test(
+      request.trim(),
+    );
+  if (isPureMerhaba || isNamedGreeting) {
+    const greetingText = cleanDisplayName
+      ? `Merhaba ${cleanDisplayName}, nasıl yardımcı olabilirim?`
+      : "Merhaba, nasıl yardımcı olabilirim?";
+    return {
+      provider: "aws_bedrock",
+      modelUsed: "greeting-fastpath",
+      responseMode: "clarify",
+      orchestratorSummary: greetingText,
+      agentsInvolved: [
+        {
+          agentId: "context",
+          agentName: "Seyahat danışmanı",
+          icon: "🗺️",
+          status: "completed",
+          durationMs: Date.now() - started,
+        },
+      ],
+      preferenceUpdates: {},
+      tripContext: base,
+      tripProfile: baseProfile,
+      promptVersion: PROMPT_VERSION,
+      sources: [],
+      retrievalStatus: "disabled",
+      clarification: {
+        isUnderspecified: true,
+        message: greetingText,
+        guidingQuestions: [greetingText],
+        quickOptions: [
+          { label: "🗺️ Yeni Rota Planla", prompt: "Yeni bir seyahat rotası planlamak istiyorum." },
+          {
+            label: "💼 İş Seyahati Planla",
+            prompt: "İş seyahatine çıkacağım, toplantı saatlerime uygun rota yapalım.",
+          },
+          {
+            label: "⚡ Hafta Sonu Kaçamağı",
+            prompt: "2 günlük hafta sonu kaçamağı için rota öner.",
+          },
+          { label: "☕ Mekan & Lezzet Ara", prompt: "Bulunduğum şehirde iyi kahve ve yemek mekanı öner." },
+        ],
+        nearbyPins: [],
+      },
+      conversationState: {
+        version: (previous?.version || 0) + 1,
+        context: base,
+        profile: baseProfile,
+        messages: boundedHistory([
+          ...conversation,
+          { role: "user", content: request },
+          { role: "assistant", content: greetingText },
+        ]),
+      },
+    };
+  }
 
   // 1. Topic Safety & Prompt Injection Check
   const safety = validateTopicSafety(request);
@@ -244,7 +333,9 @@ export async function runMultiAgentSupervisor(
       /^(merhaba|selam|selamlar|günaydın|iyi\s+(günler|akşamlar)|hey|hi|hello|teşekkür|sağ\s*ol)\b/iu.test(
         request.trim(),
       )
-        ? "Merhaba! Seyahat rotası, şehir keşfi, konaklama veya yerel lezzetler konusunda yardımcı olabilirim. Nereye gitmek istiyorsun?"
+        ? cleanDisplayName
+          ? `Merhaba ${cleanDisplayName}, nasıl yardımcı olabilirim?`
+          : "Merhaba! Seyahat rotası, şehir keşfi, konaklama veya yerel lezzetler konusunda yardımcı olabilirim. Nereye gitmek istiyorsun?"
         : "Sohbet bağlamını şu anda güvenilir biçimde çözümleyemedim. Lütfen isteğini biraz daha kısa ve açık yazarak tekrar dener misin?";
     return {
       provider: "aws_bedrock",
@@ -674,9 +765,12 @@ export async function runMultiAgentSupervisor(
     }
   }
 
+  const fastModelId =
+    typeof process !== "undefined" ? process.env.BEDROCK_FAST_MODEL_ID || undefined : undefined;
   const generate = (repair?: string, keepTurns = 6) => {
     if (mode === "chat" && !repair && onStreamToken) {
       return invokeBedrockChatStream(JSON.stringify(input), {
+        modelId: fastModelId,
         systemPrompt: streamSystemPrompt,
         history: modelHistory(keepTurns),
         maxTokens: 1000,
@@ -704,6 +798,7 @@ export async function runMultiAgentSupervisor(
           : {}),
       }),
       {
+        modelId: mode === "chat" ? fastModelId : undefined,
         systemPrompt: answerSystemPrompt,
         history: modelHistory(keepTurns),
         maxTokens: mode === "route" ? Math.min(4200, 1400 + (context.days || 1) * 450) : 1000,
@@ -1031,6 +1126,18 @@ export async function runMultiAgentSupervisor(
     });
   }
 
+  const userTags = extractUserAndTripTags(tripProfile, context, savedPrefs, route);
+  const postRouteHarness = route
+    ? buildPostRouteHarness({
+        route,
+        profile: tripProfile,
+        context,
+        preferences: savedPrefs,
+        flightPrices,
+        stayAndTransit,
+      })
+    : undefined;
+
   return complete(
     {
       responseMode: mode,
@@ -1046,6 +1153,8 @@ export async function runMultiAgentSupervisor(
       ...(stateEvents.length ? { tripStateEvents: stateEvents } : {}),
       ...(itineraryActions.length ? { itineraryActions } : {}),
       ...(route ? { route } : {}),
+      ...(postRouteHarness ? { postRouteHarness } : {}),
+      ...(userTags.length ? { userTags } : {}),
       ...(research ? { research } : {}),
       ...(stayAndTransit ? { stayAndTransit } : {}),
       ...(discovery ? { discovery } : {}),

@@ -55,7 +55,7 @@ export function MessageBubble({ role, children }: MessageBubbleProps) {
   );
 }
 
-/** "Yanıt hazırlanıyor…": hareket tercihinde 3 nokta, metin her zaman ekran okuyucuya kalır. */
+/** Sadece 3 nokta animasyonu (metin yalnız ekran okuyucu etiketi olarak kalır). */
 export function TypingIndicator() {
   const reduced = useReducedMotion();
   const pulse = useRef(new Animated.Value(0.4)).current;
@@ -78,16 +78,11 @@ export function TypingIndicator() {
       accessibilityRole="progressbar"
       accessibilityLabel={tr("assistant.typing")}
     >
-      {reduced ? null : (
-        <Animated.View style={[styles.dots, { opacity: pulse }]}>
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-        </Animated.View>
-      )}
-      <Text style={styles.typingText} maxFontSizeMultiplier={tokens.font.maxScale.body}>
-        {tr("assistant.typing")}
-      </Text>
+      <Animated.View style={[styles.dots, { opacity: reduced ? 0.7 : pulse }]}>
+        <View style={styles.dot} />
+        <View style={styles.dot} />
+        <View style={styles.dot} />
+      </Animated.View>
     </View>
   );
 }

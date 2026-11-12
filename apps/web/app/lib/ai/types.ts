@@ -242,6 +242,48 @@ export interface FeasibilityReport {
   estimatedCostTotal: number;
 }
 
+export interface PostRouteHarness {
+  destination: string;
+  tripType: "business" | "short_break" | "leisure";
+  isInternational: boolean;
+  userTags: string[];
+  accommodation: {
+    title: string;
+    summary: string;
+    recommendedAreas: string[];
+    lodgingType: string;
+    actionPrompt: string;
+  };
+  intercityTransport: {
+    title: string;
+    mode: "flight_and_bus" | "flight" | "bus_or_train";
+    flightSummary: string;
+    busOrTrainSummary: string;
+    cheapestFlightNote?: string;
+    actionPrompt: string;
+  };
+  cityTransit: {
+    title: string;
+    summary: string;
+    cardRecommendation: string;
+    clusterTransferNote: string;
+    actionPrompt: string;
+  };
+  carRental: {
+    recommended: boolean;
+    title: string;
+    summary: string;
+    actionPrompt: string;
+  };
+  esim?: {
+    required: boolean;
+    title: string;
+    summary: string;
+    tips: string[];
+    actionPrompt: string;
+  };
+}
+
 export interface MultiAgentResponse {
   promptVersion?: string;
   responseMode?: "clarify" | "chat" | "route";
@@ -276,6 +318,10 @@ export interface MultiAgentResponse {
   travelAdvisory?: TravelAdvisoryInfo;
   clarification?: PromptClarification;
   nearbyPins?: NearbyPin[];
+  /** Post-Route Bedrock AgentCore User Harness (Hotel, Flight/Bus, City Transit, Car Rental, e-SIM & DB/Vector tags). */
+  postRouteHarness?: PostRouteHarness;
+  /** Derived user & trip tags for DB + Vector DB persistence. */
+  userTags?: string[];
   /** Faz C — affiliate deep link cards (flights, hotels, car, insurance, activities). */
   affiliateCards?: import("../affiliate/types").AffiliateCard[];
   /** Faz 2 — focus-aware context chips (§12.2). Max 4 per turn; never static. */
@@ -307,6 +353,7 @@ export interface MultiAgentRequestPayload {
   preferences?: TravelPreferences;
   prompt: string;
   userEmail?: string;
+  userDisplayName?: string;
   userLocation?: { lat: number; lng: number };
   profileContext?: TravelerProfileContext;
   conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;

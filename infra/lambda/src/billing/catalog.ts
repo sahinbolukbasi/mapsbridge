@@ -78,3 +78,85 @@ export type CatalogProduct = ReturnType<typeof revenuecatCatalog>[number];
 /** Satın alınabilir: satış açık + ürün kimliği + sunucu fiyatı var. */
 export const isProductAvailable = (p: CatalogProduct) =>
   process.env.BILLING_ENABLED === "true" && !!p.productId && p.amount !== null;
+
+// ─── Polar Catalog ────────────────────────────────────────────────────────
+export interface PolarProduct {
+  id: string;
+  mode: "subscription" | "credit_pack";
+  credits: number;
+  amount: number | null;
+  productId?: string;
+  name: string;
+}
+
+function envPolarPrice(key: string, fallback: number): number | null {
+  const raw = process.env[key];
+  if (!raw) return fallback;
+  const num = Number(raw);
+  return Number.isSafeInteger(num) && num > 0 ? num : fallback;
+}
+
+export const polarCatalog = (): PolarProduct[] => [
+  {
+    id: "explorer",
+    mode: "subscription",
+    credits: 100,
+    amount: envPolarPrice("POLAR_PRICE_EXPLORER", 19900),
+    productId: process.env.POLAR_PRODUCT_EXPLORER || "polar_prod_explorer",
+    name: "Kaşif (Explorer)",
+  },
+  {
+    id: "pro",
+    mode: "subscription",
+    credits: 500,
+    amount: envPolarPrice("POLAR_PRICE_PRO", 49900),
+    productId: process.env.POLAR_PRODUCT_PRO || "polar_prod_pro",
+    name: "Pro Kaşif (Pro Traveler)",
+  },
+  {
+    id: "agency",
+    mode: "subscription",
+    credits: 2500,
+    amount: envPolarPrice("POLAR_PRICE_AGENCY", 149900),
+    productId: process.env.POLAR_PRODUCT_AGENCY || "polar_prod_agency",
+    name: "Tur Lideri & Grup Paketi",
+  },
+  {
+    id: "pack-30",
+    mode: "credit_pack",
+    credits: 30,
+    amount: envPolarPrice("POLAR_PRICE_PACK_30", 9900),
+    productId: process.env.POLAR_PRODUCT_PACK_30 || process.env.POLAR_PRODUCT_PACK_STARTER || "polar_prod_pack_30",
+    name: "Başlangıç Paketi (30 Kredi)",
+  },
+  {
+    id: "pack-100",
+    mode: "credit_pack",
+    credits: 100,
+    amount: envPolarPrice("POLAR_PRICE_PACK_100", 24900),
+    productId: process.env.POLAR_PRODUCT_PACK_100 || process.env.POLAR_PRODUCT_PACK_POPULAR || "polar_prod_pack_100",
+    name: "Gezgin Paketi (100 Kredi)",
+  },
+  {
+    id: "pack-300",
+    mode: "credit_pack",
+    credits: 300,
+    amount: envPolarPrice("POLAR_PRICE_PACK_300", 59900),
+    productId: process.env.POLAR_PRODUCT_PACK_300 || process.env.POLAR_PRODUCT_PACK_MASTER || "polar_prod_pack_300",
+    name: "Usta Kaşif Paketi (300 Kredi)",
+  },
+  {
+    id: "pack-pro",
+    mode: "credit_pack",
+    credits: 3000,
+    amount: envPolarPrice("POLAR_PRICE_PACK_PRO", 189900),
+    productId: process.env.POLAR_PRODUCT_PACK_PRO || "polar_prod_pack_pro",
+    name: "Stratejik Kaşif (3000 Kredi)",
+  },
+];
+
+export const isPolarProductAvailable = (p: PolarProduct) =>
+  (process.env.BILLING_ENABLED === "true" || process.env.POLAR_ENABLED === "true" || !process.env.ENVIRONMENT || process.env.ENVIRONMENT === "dev") &&
+  !!p.productId &&
+  p.amount !== null;
+

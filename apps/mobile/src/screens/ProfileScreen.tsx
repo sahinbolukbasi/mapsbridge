@@ -12,6 +12,8 @@ import { EditPostModal } from "../components/EditPostModal";
 import { PaywallModal } from "../components/PaywallModal";
 import { ScreenTourModal } from "../components/ScreenTourModal";
 import { AppSettings } from "../components/AppSettings";
+import { DocumentManagerModal } from "../components/DocumentManagerModal";
+import { PinShareModal } from "../components/PinShareModal";
 import { Avatar, Button, Card, ConfirmDialog, Screen, ScreenHeader, SegmentedControl, Txt } from "../ui";
 import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
@@ -56,6 +58,8 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
   const [editingPost, setEditingPost] = useState<MobileCommunityPost | null>(null);
   const [paywall, setPaywall] = useState(false);
   const [confirmOut, setConfirmOut] = useState(false);
+  const [docManagerOpen, setDocManagerOpen] = useState(false);
+  const [shareCodeOpen, setShareCodeOpen] = useState(false);
   const profileRef = useRef<MobileUserProfile | null>(null);
   profileRef.current = profile;
 
@@ -261,6 +265,38 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
           )}
         </View>
 
+        <Card variant="bordered">
+          <View style={styles.body}>
+            <Txt variant="heading" header>
+              {"Seyahat Belgelerim"}
+            </Txt>
+            <Txt variant="small" tone="muted">
+              {"Uçak biletleri, otel rezervasyonları, vizeler ve etkinlik biletlerinizi düzenleyin ve takip edin."}
+            </Txt>
+            <Button
+              label={"Belgelerimi Yönet"}
+              variant="secondary"
+              onPress={() => setDocManagerOpen(true)}
+            />
+          </View>
+        </Card>
+
+        <Card variant="bordered">
+          <View style={styles.body}>
+            <Txt variant="heading" header>
+              {"Paylaşım Kodu & QR"}
+            </Txt>
+            <Txt variant="small" tone="muted">
+              {"6 haneli sayı kodu veya QR ile konum ve rota paylaşın, pop-up menüden yol tarifi alın."}
+            </Txt>
+            <Button
+              label={"Paylaşım Kodunu ve QR'ı Aç"}
+              variant="secondary"
+              onPress={() => setShareCodeOpen(true)}
+            />
+          </View>
+        </Card>
+
         <AppSettings />
         <Button label={tr("nav.logout")} variant="danger" onPress={() => setConfirmOut(true)} />
       </ScrollView>
@@ -298,6 +334,20 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
         onConfirm={() => {
           setConfirmOut(false);
           onSignOut();
+        }}
+      />
+      <DocumentManagerModal
+        visible={docManagerOpen}
+        onClose={() => setDocManagerOpen(false)}
+      />
+      <PinShareModal
+        visible={shareCodeOpen}
+        onClose={() => setShareCodeOpen(false)}
+        pin={{
+          title: profile?.fullName ? `${profile.fullName} Konumu` : "Seyahat Konumu",
+          lat: 41.0082,
+          lng: 28.9784,
+          address: profile?.location || "İstanbul, Türkiye",
         }}
       />
       <ScreenTourModal screen="profile" />

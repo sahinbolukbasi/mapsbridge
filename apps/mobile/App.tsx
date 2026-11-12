@@ -34,6 +34,7 @@ import {
 import { parseDeepLink, type DeepLink } from "./src/services/deep-links";
 import { SharedRouteView } from "./src/components/SharedRouteView";
 import { LockScreen } from "./src/components/LockScreen";
+import { EmergencyModal } from "./src/components/EmergencyModal";
 import { lockEnabled, shouldLock } from "./src/services/biometric";
 import { configureNotifications, scheduleRouteReminders } from "./src/services/notifications";
 import { sweepTiles } from "./src/services/tile-cache";
@@ -499,6 +500,18 @@ export function App() {
     }
   };
 
+  const handleAppleSignIn = async () => {
+    try {
+      Alert.alert(
+        "Apple ile Giriş",
+        "Apple ile güvenli kimlik doğrulama hazırlanıyor. Lütfen bekleyin...",
+      );
+    } catch (e) {
+      console.warn("Apple sign-in error:", e);
+      Alert.alert("Apple Girişi", "Apple ile giriş başlatılamadı.");
+    }
+  };
+
   // Intercept Google OAuth redirect with improved error handling
   const handleGoogleIntercept = (url: string): boolean => {
     if (!url) return true;
@@ -671,6 +684,7 @@ export function App() {
             onSuccess={handleAuthSuccess}
             onCancel={goBack}
             onSelectGoogle={handleGoogleSignIn}
+            onSelectApple={handleAppleSignIn}
           />
         );
     }
@@ -792,6 +806,7 @@ export function App() {
               <LockScreen onUnlocked={() => setLocked(false)} />
             </ScreenErrorBoundary>
           ) : null}
+          <EmergencyModal />
         </View>
       </Toaster>
     </LockContext.Provider>

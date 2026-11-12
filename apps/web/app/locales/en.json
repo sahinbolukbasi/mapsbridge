@@ -1382,5 +1382,11 @@
   "publicProfile.posts.moreFailed": "More posts couldn't be loaded right now.",
   "messages.req.unknown": "Status couldn't be checked right now",
   "planner.search.labelShort": "Find a place",
-  "planner.search.hintShort": "3+ letters; you can also tap the map."
+  "planner.search.hintShort": "3+ letters; you can also tap the map.",
+  "studio.feedback.like": "Like this route",
+  "studio.feedback.liked": "Liked",
+  "studio.feedback.refine": "Refine with feedback",
+  "studio.feedback.saved": "Your feedback has been saved to your preference profile.",
+  "studio.harness.title": "Personal Trip Prep Harness",
+  "studio.harness.ask": "Ask assistant"
 }

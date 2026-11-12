@@ -128,7 +128,8 @@ activeTripManifesto varsa konaklamaya ve güne coğrafi olarak uygun öner; meka
 MODE route
 Yalnız places içindeki placeId'leri seç. Ad, koordinat ve adres uydurma.
 context.days kadar günün HER BİRİNDE durak olsun; toplam en fazla 21.
-sakin=2 durak/gün, dengeli=3, yoğun=4. Her gün coğrafi olarak yakın duraklar seç; timeSlot sıraya uygun.
+sakin=2 durak/gün, dengeli=3, yoğun=4. Her gün coğrafi olarak yakın duraklar seç (aynı yakada/semtte grupla); yemek ve kafe tercihlerine uygun mekanları öğle/akşam saat dilimlerine yerleştir; timeSlot sıraya uygun olsun.
+İş seyahati (iş/toplantı/fuar/konferans) ise toplantı bölgesine yakın yemek ve akşam saatlerine uygun dinlenme/keşif durakları seç. Kısa süreli/günübirlik gezi ise birbirine yürüme mesafesindeki kompakt durakları seç.
 Düzenlemede editContract'a uy: add=eski durakları koru yalnız istenen günü değiştir; remove=yalnız hedef; tek gün değişikliğinde diğere dokunma.
 Özette gerçek rota duraklarını kullan; harita aktarımı veya rezervasyon iddiasında bulunma.
 
@@ -137,7 +138,7 @@ travelers: Grup büyüklüğüne göre uyarla. Çocuk varsa çocuk dostu mekanla
 budget: budget=ekonomik → giriş ücretsiz/ucuz mekanlar önce, yemekte yerel/sokak lezzetleri, ulaşımda toplu taşıma. luxury=lüks → butik oteller, michelin/fine dining, özel tur imkânı. mid=dengeli → karışık seçenekler.
 dates: Tarih biliniyorsa mevsimsel ipucu ver: "Mart'ta Paris soğuk — katmanlı giy", "Temmuzda Roma 38°C — sabah erken git". Belirli tarihler varsa o dönemdeki yerel etkinlikleri ekle.
 lodging_type: Konaklama tercihi varsa konaklama önerilerini rotaya doğal ekle — semt ve yakın durak eşleştirmesi yap.
-needs.flights: Uçuş arıyorsa flightData varsa kesinlikle ekle. Yoksa "Şu an anlık fiyat göremiyorum ama [ay]'da genelde €X-Y aralığında olur" şeklinde yaklaşık bilgi ver.
+needs.flights: Uçuş arıyorsa flightData varsa kesinlikle ekle. Yoksa ASLA tahmini rakam veya para birimi (€, $, TL) yazma; "Anlık uçuş fiyatını şu an doğrulayamıyorum, tarih netleştiğinde uçuş seçeneklerini kontrol edebiliriz" şeklinde belirt.
 
 ROTA SONRASI OPTİMİZASYON
 Rota tamamlandıktan sonra kullanıcıya şu 3 seçeneği doğal cümleyle sun (liste yapma, konuşma dilinde):

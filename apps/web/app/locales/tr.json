@@ -1403,5 +1403,11 @@
   "publicProfile.posts.moreFailed": "Daha fazla paylaşım şu an yüklenemedi.",
   "messages.req.unknown": "Durum şu an doğrulanamadı",
   "planner.search.labelShort": "Yer ara",
-  "planner.search.hintShort": "En az 3 harf; haritaya dokunarak da ekleyebilirsin."
+  "planner.search.hintShort": "En az 3 harf; haritaya dokunarak da ekleyebilirsin.",
+  "studio.feedback.like": "Rotayı beğendim",
+  "studio.feedback.liked": "Beğenildi",
+  "studio.feedback.refine": "Geri bildirimle düzenle",
+  "studio.feedback.saved": "Geri bildiriminiz tercih profilinize kaydedildi.",
+  "studio.harness.title": "Kişisel Seyahat Hazırlık Planı",
+  "studio.harness.ask": "Asistana sor"
 }

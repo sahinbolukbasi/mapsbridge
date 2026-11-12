@@ -1,8 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Linking, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { tripStore, type ActiveRoute, type TripStop } from "../services/tripStore";
-import { aiService, generateUUID, type AIAskResponse } from "../services/api";
+import {
+  aiService,
+  authService,
+  generateUUID,
+  type AIAskResponse,
+  type MobileConversationState,
+} from "../services/api";
 import { storage } from "../services/storage";
+import { documentStore } from "../services/documentStore";
 import {
   clearDraft,
   buildGuestSummaryMessage,
@@ -78,6 +86,7 @@ interface PrepCard {
   title: string;
   lines: string[];
   link?: { label: string; url: string };
+  actionPrompt?: string;
 }
 
 const WELCOME: ChatItem = {
@@ -85,6 +94,15 @@ const WELCOME: ChatItem = {
   sender: "bot",
   text: tr("native.ai.welcome"),
 };
+
+function buildPersonalizedWelcome(displayName?: string): ChatItem {
+  const clean = (displayName || "").trim();
+  return {
+    id: `welcome-${Date.now()}`,
+    sender: "bot",
+    text: clean && clean !== "guest" ? `Merhaba ${clean}, nasıl yardımcı olabilirim?` : tr("native.ai.welcome"),
+  };
+}
 
 const dayOf = (stop: TripStop): number => stopDay(stop, 1);
 
@@ -116,16 +134,63 @@ function toOptions(res: AIAskResponse): ChatItem["options"] {
   };
 }
 
-/** Hazırlık sekmesi kartları (I8: affiliate yalnızca burada). Yalnızca sunucudan gelen metin. */
+/** Hazırlık sekmesi kartları (I8: affiliate ve Post-Route AgentCore Harness burada). */
 function toPrep(res: AIAskResponse): PrepCard[] {
   const cards: PrepCard[] = [];
   const lines = (...v: Array<string | undefined>) => v.filter((x): x is string => !!x);
+  const harness = res.postRouteHarness;
+  if (harness) {
+    cards.push({
+      title: harness.accommodation.title,
+      lines: lines(
+        harness.accommodation.summary,
+        `Önerilen Bölgeler: ${harness.accommodation.recommendedAreas.join(", ")}`,
+        `Tercih Tipi: ${harness.accommodation.lodgingType}`,
+      ),
+      actionPrompt: harness.accommodation.actionPrompt,
+    });
+    cards.push({
+      title: harness.intercityTransport.title,
+      lines: lines(
+        harness.intercityTransport.flightSummary,
+        harness.intercityTransport.busOrTrainSummary,
+      ),
+      actionPrompt: harness.intercityTransport.actionPrompt,
+    });
+    cards.push({
+      title: harness.cityTransit.title,
+      lines: lines(
+        harness.cityTransit.summary,
+        `Ulaşım Kartı: ${harness.cityTransit.cardRecommendation}`,
+        harness.cityTransit.clusterTransferNote,
+      ),
+      actionPrompt: harness.cityTransit.actionPrompt,
+    });
+    cards.push({
+      title: harness.carRental.title,
+      lines: lines(harness.carRental.summary),
+      actionPrompt: harness.carRental.actionPrompt,
+    });
+    if (harness.esim?.required) {
+      cards.push({
+        title: harness.esim.title,
+        lines: lines(harness.esim.summary, ...harness.esim.tips),
+        actionPrompt: harness.esim.actionPrompt,
+      });
+    }
+    if (harness.userTags.length) {
+      cards.push({
+        title: "Kişisel Profil & Seyahat Etiketleri (AgentCore Vector DB)",
+        lines: [harness.userTags.join(" · ")],
+      });
+    }
+  }
   const stay = lines(
     res.stayAndTransit?.lodgingSummary,
     res.stayAndTransit?.transitSummary,
     res.stayAndTransit?.neighborhoodTips,
   );
-  if (stay.length) cards.push({ title: tr("native.prep.stay"), lines: stay });
+  if (stay.length && !harness) cards.push({ title: tr("native.prep.stay"), lines: stay });
   const disc = lines(
     res.discovery?.foodHighlights,
     res.discovery?.hiddenGems,
@@ -184,10 +249,34 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
     Array<{ conversationId: string; destination: string | null; updatedAt: string | null }>
   >([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [userDisplayName, setUserDisplayName] = useState<string>(() =>
+    owner && owner !== "guest" ? owner.split("@")[0] : "",
+  );
+  const [routeFeedback, setRouteFeedback] = useState<Record<string, "up" | "down">>({});
   const history = useRef<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const conversationStateRef = useRef<MobileConversationState | undefined>(undefined);
   const sending = useRef(false);
   const pendingTurn = useRef<{ text: string; requestId: string } | null>(null);
   const opened = useRef(new Map<string, ActiveRoute>());
+
+  useEffect(() => {
+    let alive = true;
+    authService
+      .getSession()
+      .then((sess) => {
+        if (!alive || !sess?.name) return;
+        setUserDisplayName(sess.name);
+        setMessages((prev) =>
+          prev.length === 1 && prev[0].id.startsWith("welcome")
+            ? [buildPersonalizedWelcome(sess.name)]
+            : prev,
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [owner]);
 
   // Girişten sonra misafir taslağı (hesap yalıtımlı; otomatik istek yok).
   useEffect(() => {
@@ -254,6 +343,14 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
       .getLatestSession()
       .then((latest) => {
         if (!alive) return;
+        if (latest?.userDisplayName) {
+          setUserDisplayName(latest.userDisplayName);
+          setMessages((prev) =>
+            prev.length === 1 && prev[0].id.startsWith("welcome")
+              ? [buildPersonalizedWelcome(latest.userDisplayName)]
+              : prev,
+          );
+        }
         applyConversation(
           latest?.conversation,
           latest?.latestConversationId || latest?.conversationId,
@@ -270,7 +367,18 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
       const text = raw.trim();
       if (!text || sending.current) return;
       sending.current = true;
-      setThinkingRoute(opts.fromDraft === true || thinkingIsRoute(text.length, messages.length));
+      // Sadece tüm sorular tamamlanıp gerçek rota oluşturma aşamasına geçildiğinde rota yükleme animasyonu gösterilir;
+      // normal sohbet ve soru-cevap (Q&A) aşamasında yalnızca 3 nokta animasyonu görünür.
+      const prevCtx = conversationStateRef.current?.context;
+      const isRouteGenerationReady =
+        opts.fromDraft === true ||
+        /gün\s*gün\s*seyahat\s*rotamı\s*oluştur|rotayı\s*(?:oluştur|hazırla)|hemen\s*oluştur/iu.test(
+          text,
+        ) ||
+        (Boolean(prevCtx?.destination) &&
+          Boolean(prevCtx?.days) &&
+          thinkingIsRoute(text.length, messages.length));
+      setThinkingRoute(isRouteGenerationReady);
       setBusy(true);
       if (opts.fromDraft) setRouteLoading(true);
       setMessages((prev) => [...prev, { id: `user-${Date.now()}`, sender: "user", text }]);
@@ -286,8 +394,12 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           history: history.current.slice(-6),
           requestId: turn.requestId,
           trainingConsent: false,
+          conversationState: conversationStateRef.current,
         });
         pendingTurn.current = null;
+        if (res.conversationState) {
+          conversationStateRef.current = res.conversationState;
+        }
         history.current = [
           ...history.current,
           { role: "user" as const, content: text },
@@ -361,10 +473,11 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
     if (sending.current) return;
     pendingTurn.current = null;
     history.current = [];
+    conversationStateRef.current = undefined;
     setConversationId(`conv-${Date.now()}`);
     setPrep([]);
     setTab("chat");
-    setMessages([{ ...WELCOME, id: `welcome-${Date.now()}` }]);
+    setMessages([buildPersonalizedWelcome(userDisplayName)]);
   };
 
   const clearHistory = () => {
@@ -402,6 +515,37 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
     },
     [applyConversation, toast],
   );
+
+  const pickAndAttachDocument = async () => {
+    try {
+      const res = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        quality: 0.8,
+      });
+      if (!res.canceled && res.assets?.[0]?.uri) {
+        const asset = res.assets[0];
+        const fileName = asset.fileName || "Seyahat Belgesi";
+        await documentStore.addDocument({
+          title: fileName.replace(/\.[^/.]+$/, ""),
+          category: "ticket",
+          fileName: fileName,
+          fileUri: asset.uri,
+          validDate: new Date().toISOString().split("T")[0],
+          status: "upcoming",
+          notes: "AI Asistan sohbetinden otomatik kaydedildi",
+        });
+        toast.show({
+          tone: "info",
+          message: "Belge 'Seyahat Belgelerim' bölümüne kaydedildi.",
+        });
+        setTab("chat");
+        send(`Yüklediğim seyahat belgesi (${fileName}) hakkında detayları çıkarabilir misin?`);
+      }
+    } catch (e) {
+      console.warn("Document attach error:", e);
+    }
+  };
   const openRoute = (msgId: string, plan: RoutePlan) => {
     const existing = opened.current.get(msgId);
     if (existing && tripStore.getAllRoutes().includes(existing)) {
@@ -456,6 +600,17 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
                     {line}
                   </Txt>
                 ))}
+                {card.actionPrompt ? (
+                  <Button
+                    label="Asistana Sor & Planla"
+                    variant="secondary"
+                    size="sm"
+                    onPress={() => {
+                      setTab("chat");
+                      send(card.actionPrompt!);
+                    }}
+                  />
+                ) : null}
                 {card.link ? (
                   <Button
                     label={card.link.label}
@@ -514,6 +669,31 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
                         label={tr("home.lastTrip.open")}
                         onPress={() => openRoute(msg.id, msg.route!)}
                       />
+                      <View style={styles.inlineConfirmRow}>
+                        <Button
+                          label={routeFeedback[msg.id] === "up" ? "Beğenildi ✓" : "👍 Rotayı Beğendim"}
+                          variant={routeFeedback[msg.id] === "up" ? "primary" : "secondary"}
+                          size="sm"
+                          onPress={() => {
+                            setRouteFeedback((prev) => ({ ...prev, [msg.id]: "up" }));
+                            toast.show({
+                              tone: "success",
+                              message: "Geri bildiriminiz tercih profilinize kaydedildi.",
+                            });
+                          }}
+                        />
+                        <Button
+                          label="✏️ Geri Bildirim & Düzenle"
+                          variant="ghost"
+                          size="sm"
+                          onPress={() => {
+                            setRouteFeedback((prev) => ({ ...prev, [msg.id]: "down" }));
+                            send(
+                              `"${msg.route!.title}" rotam üzerinde geri bildirimim var: durakları ve gün dağılımını birlikte revize edelim.`,
+                            );
+                          }}
+                        />
+                      </View>
                     </View>
                   </Card>
                 ) : null}
@@ -544,9 +724,15 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
                       ] as unknown as CardQuestions
                     }
                     disabled={busy}
-                    onSubmit={(answers) => {
-                      const picked = msg.options!.items[Number(answers.server?.[0])];
+                    onSubmit={(answers, labels) => {
+                      const ans = answers.server?.[0] || "";
+                      if (ans.startsWith("custom:")) {
+                        send(ans.slice(7));
+                        return;
+                      }
+                      const picked = msg.options!.items[Number(ans)];
                       if (picked) send(picked.prompt);
+                      else if (labels.length) send(labels.join(", "));
                     }}
                   />
                 ) : null}
@@ -585,11 +771,18 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           note={tr("assistant.composer.costNote")}
           busy={busy}
           leading={
-            <IconButton
-              icon="plus"
-              label={tr("native.ai.routePicker.title")}
-              onPress={() => setRoutePickerOpen(true)}
-            />
+            <View style={styles.composerLeading}>
+              <IconButton
+                icon="plus"
+                label={tr("native.ai.routePicker.title")}
+                onPress={() => setRoutePickerOpen(true)}
+              />
+              <IconButton
+                icon="image"
+                label={"Belge Yükle"}
+                onPress={pickAndAttachDocument}
+              />
+            </View>
           }
           onSubmit={(text) => {
             setTab("chat");
@@ -611,21 +804,46 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
             <EmptyState icon="inbox" title={tr("native.ai.history.none")} />
           ) : (
             <>
-              <Button
-                label={tr("assistant.history.clearAll")}
-                variant="secondary"
-                size="sm"
-                onPress={clearHistory}
-              />
+              {confirmDeleteHistoryId === "all" ? (
+                <Card variant="bordered">
+                  <View style={styles.inlineConfirmRow}>
+                    <Txt variant="caption" tone="danger" style={{ flex: 1 }}>
+                      {tr("native.ai.history.clearConfirmBody")}
+                    </Txt>
+                    <Button
+                      label={tr("community.post.delete")}
+                      variant="danger"
+                      size="sm"
+                      onPress={() => {
+                        setHistoryItems([]);
+                        newChat();
+                        setConfirmDeleteHistoryId(null);
+                        toast.show({ tone: "info", message: tr("assistant.history.cleared") });
+                      }}
+                    />
+                    <Button
+                      label={tr("ui.cancel")}
+                      variant="ghost"
+                      size="sm"
+                      onPress={() => setConfirmDeleteHistoryId(null)}
+                    />
+                  </View>
+                </Card>
+              ) : (
+                <Button
+                  label={tr("assistant.history.clearAll")}
+                  variant="secondary"
+                  size="sm"
+                  onPress={clearHistory}
+                />
+              )}
               {historyItems.map((c) => (
-                <Card
-                  key={c.conversationId}
-                  variant="bordered"
-                  label={c.destination || tr("native.ai.history.untitled")}
-                  onPress={() => loadConversation(c.conversationId)}
-                >
+                <Card key={c.conversationId} variant="bordered">
                   <View style={styles.historyRow}>
-                    <View style={styles.historyText}>
+                    <Pressable
+                      style={styles.historyText}
+                      onPress={() => loadConversation(c.conversationId)}
+                    >
                       <Txt variant="label" numberOfLines={1}>
                         {c.destination || tr("native.ai.history.untitled")}
                       </Txt>
@@ -634,12 +852,39 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
                           {new Date(c.updatedAt).toLocaleDateString("tr-TR")}
                         </Txt>
                       ) : null}
-                    </View>
-                    <IconButton
-                      icon="trash"
-                      label={tr("studio.sessions.delete")}
-                      onPress={() => deleteHistoryItem(c.conversationId)}
-                    />
+                    </Pressable>
+                    {confirmDeleteHistoryId === c.conversationId ? (
+                      <View style={styles.inlineConfirmRow}>
+                        <Button
+                          label={tr("community.post.delete")}
+                          variant="danger"
+                          size="sm"
+                          onPress={() => {
+                            const id = c.conversationId;
+                            setHistoryItems((prev) =>
+                              prev.filter((item) => item.conversationId !== id),
+                            );
+                            if (conversationId === id) {
+                              newChat();
+                            }
+                            setConfirmDeleteHistoryId(null);
+                            toast.show({ tone: "info", message: tr("assistant.history.deleted") });
+                          }}
+                        />
+                        <Button
+                          label={tr("ui.cancel")}
+                          variant="ghost"
+                          size="sm"
+                          onPress={() => setConfirmDeleteHistoryId(null)}
+                        />
+                      </View>
+                    ) : (
+                      <IconButton
+                        icon="trash"
+                        label={tr("studio.sessions.delete")}
+                        onPress={() => deleteHistoryItem(c.conversationId)}
+                      />
+                    )}
                   </View>
                 </Card>
               ))}
@@ -694,36 +939,6 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
         </ScrollView>
       </ModalFrame>
 
-      <ConfirmDialog
-        visible={confirmDeleteHistoryId !== null}
-        title={
-          confirmDeleteHistoryId === "all"
-            ? tr("native.ai.history.clearConfirmTitle")
-            : tr("native.ai.history.deleteConfirmTitle")
-        }
-        body={
-          confirmDeleteHistoryId === "all"
-            ? tr("native.ai.history.clearConfirmBody")
-            : tr("native.ai.history.deleteConfirmBody")
-        }
-        confirmLabel={tr("community.post.delete")}
-        onCancel={() => setConfirmDeleteHistoryId(null)}
-        onConfirm={() => {
-          if (confirmDeleteHistoryId === "all") {
-            setHistoryItems([]);
-            newChat();
-            toast.show({ tone: "info", message: tr("assistant.history.cleared") });
-          } else if (confirmDeleteHistoryId) {
-            const id = confirmDeleteHistoryId;
-            setHistoryItems((prev) => prev.filter((item) => item.conversationId !== id));
-            if (conversationId === id) {
-              newChat();
-            }
-            toast.show({ tone: "info", message: tr("assistant.history.deleted") });
-          }
-          setConfirmDeleteHistoryId(null);
-        }}
-      />
       <ScreenTourModal screen="ai" />
     </Screen>
   );
@@ -731,6 +946,8 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
 
 const styles = StyleSheet.create({
   headerActions: { flexDirection: "row", alignItems: "center", gap: tokens.space["1"] },
+  composerLeading: { flexDirection: "row", alignItems: "center", gap: tokens.space["1"] },
+  inlineConfirmRow: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },
   historyBody: { padding: tokens.space["4"], gap: tokens.space["2"] },
   historyRow: {
     flexDirection: "row",

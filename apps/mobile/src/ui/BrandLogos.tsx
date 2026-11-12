@@ -2,12 +2,7 @@ import React from "react";
 import Svg, { Path } from "react-native-svg";
 import { tokens } from "../theme";
 
-// Google + Apple marka logoları (G17). Web'deki GoogleLogo/AppleLogo bileşenleriyle aynı
-// path'ler. Renk literal'i YAZILMAZ: Google renkleri yalnız tokens.thirdParty'den gelir
-// (design-system §Renk "Google renkleri yalnızca GoogleLogo bileşenindedir"), Apple logosu
-// metin rengini (tokens.color) alır. Dekoratif: etiket metinle değil buton etrafındaki
-// erişilebilir adla verilir, bu yüzden svg aria-hidden.
-
+// Google + Yandex + Apple marka logoları
 export function GoogleLogo({ size = 18 }: { size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessibilityElementsHidden>
@@ -31,6 +26,21 @@ export function GoogleLogo({ size = 18 }: { size?: number }) {
   );
 }
 
+export function YandexLogo({ size = 18 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessibilityElementsHidden>
+      <Path
+        fill="#FC3F1D"
+        d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z"
+      />
+      <Path
+        fill="#FFFFFF"
+        d="M13.8 18.5h-2.1V7.8h-.7c-1.6 0-2.5.9-2.5 2.1 0 1.3.6 2.2 2 3.5l1.6 1.4-3.1 3.7H6.7l2.8-3.4c-1.8-1.6-2.7-3.1-2.7-5.1 0-2.3 1.7-4 4.5-4h2.5v12.5z"
+      />
+    </Svg>
+  );
+}
+
 export function AppleLogo({
   size = 18,
   color = tokens.color.text,
@@ -39,10 +49,10 @@ export function AppleLogo({
   color?: string;
 }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 170 170" accessibilityElementsHidden>
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessibilityElementsHidden>
       <Path
         fill={color}
-        d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.69-7.85-12-14.42-6-9.13-10.74-19.55-14.22-31.26-3.48-11.71-5.22-22.95-5.22-33.72 0-14.13 3.59-26.06 10.76-35.79 7.18-9.73 16.2-14.65 27.08-14.77 5.22 0 10.79 1.39 16.71 4.17 5.92 2.78 9.78 4.22 11.58 4.31 1.41 0 5.48-1.57 12.21-4.71 6.74-3.14 12.63-4.52 17.68-4.14 13.48.87 23.97 5.86 31.47 14.97-12.06 7.28-17.98 17.26-17.76 29.95.22 9.89 3.96 18.06 11.22 24.51 7.26 6.45 15.82 10.12 25.68 11.01-2.17 6.74-4.78 13.32-7.84 19.74zM119.22 31.81c0-7.39 2.66-14.39 7.99-20.99 5.33-6.61 11.85-10.55 19.57-11.82.22 1.3.33 2.39.33 3.26 0 7.39-2.83 14.45-8.49 21.18-5.65 6.74-12.28 10.59-19.89 11.56-.11-1.09-.17-2.17-.17-3.19z"
+        d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.98.6-2.62 1.34-.57.65-1.07 1.71-.93 2.73 1 .08 2.02-.51 2.63-1.22z"
       />
     </Svg>
   );

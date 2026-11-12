@@ -87,6 +87,7 @@ export function writeJob(
   sessionId: string,
   preferences: TravelPreferences,
   trip?: { destination?: string; days?: number },
+  userTags?: string[],
 ): MemoryJob | undefined {
   if (
     !memoryTable() ||
@@ -100,7 +101,12 @@ export function writeJob(
   const summary = trip?.destination
     ? { destination: trip.destination.slice(0, 120), days: trip.days }
     : undefined;
-  if (!Object.keys(safe).length && !summary) return undefined;
+  const cleanTags = Array.isArray(userTags)
+    ? userTags
+        .filter((t): t is string => typeof t === "string" && /^[a-z0-9:_]{2,40}$/.test(t))
+        .slice(0, 16)
+    : [];
+  if (!Object.keys(safe).length && !summary && !cleanTags.length) return undefined;
   return {
     PK: `USER#${userId}`,
     SK: `OUTBOX#${requestId}`,
@@ -111,7 +117,11 @@ export function writeJob(
     sessionId: "s_" + createHash("sha256").update(sessionId).digest("hex"),
     createdAt: new Date().toISOString(),
     status: "pending",
-    payload: JSON.stringify({ confirmedTravelPreferences: safe, currentTripOnly: summary }),
+    payload: JSON.stringify({
+      confirmedTravelPreferences: safe,
+      currentTripOnly: summary,
+      ...(cleanTags.length ? { userTags: cleanTags } : {}),
+    }),
   };
 }
 export async function retrievePersonalMemory(

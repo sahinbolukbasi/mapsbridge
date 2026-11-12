@@ -8,9 +8,9 @@ export type LatLng = { lat: number; lng: number };
 
 /** Sağlayıcı üstverisi: id + i18n etiket anahtarı (UI sırası bu dizidir). */
 export const PROVIDERS: ReadonlyArray<{ id: MapProvider; labelKey: string; fallback: string }> = [
-  { id: "apple", labelKey: "p.provider.apple", fallback: "Apple Haritalar" },
   { id: "google", labelKey: "p.provider.google", fallback: "Google Haritalar" },
   { id: "yandex", labelKey: "p.provider.yandex", fallback: "Yandex Haritalar" },
+  { id: "apple", labelKey: "p.provider.apple", fallback: "Apple Haritalar" },
 ];
 
 /** "lat,lng" (6 ondalık); URL bileşeni olarak güvenli kodlanır. */

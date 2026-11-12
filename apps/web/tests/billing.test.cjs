@@ -126,9 +126,9 @@ test("payment failure never falls back to simulated success or local grant", asy
   assert.equal(result.success, false);
   assert.equal(s.getWallet().credits, 0);
 });
-test("checkout sends no card fields and calls revenuecat endpoint", async () => {
+test("checkout sends no card fields and calls polar endpoint", async () => {
   const h = harness({
-      fetch: async () => ({ url: "https://billing.revenuecat.com/checkout?app_user_id=u" }),
+      fetch: async () => ({ url: "https://polar.sh/checkout/polar_session_123" }),
     }),
     s = h.load("billing-service.ts").billingService;
   const result = await s.processCheckout({
@@ -139,11 +139,11 @@ test("checkout sends no card fields and calls revenuecat endpoint", async () => 
   });
   assert.equal(result.success, true);
   assert.equal(result.creditsAdded, undefined);
-  assert.ok(result.stripeRedirectUrl?.startsWith("https://"));
+  assert.ok(result.stripeRedirectUrl?.startsWith("https://") || result.polarRedirectUrl?.startsWith("https://"));
   const body = JSON.parse(h.calls[0].opts.body);
   assert.equal(body.cardNumber, undefined);
   assert.equal(body.cardCvc, undefined);
-  assert.equal(h.calls[0].endpoint, "/revenuecat/checkout");
+  assert.equal(h.calls[0].endpoint, "/polar/checkout");
 });
 test("non-https redirect and unsupported payout/guide sale are not reported as success", async () => {
   const h = harness({ fetch: async () => ({ url: "http://insecure.example" }) }),

@@ -243,9 +243,10 @@ export function mergeTripProfile(
   const explicitDays =
     daysMention.length > 0 &&
     userText.toLocaleLowerCase("tr").includes(daysMention.toLocaleLowerCase("tr"));
-  const parsedDays = explicitDays ? parseDays(daysMention) : undefined;
+  const parsedDays =
+    (explicitDays ? parseDays(daysMention) : undefined) ?? parseDaysFromUserText(userText);
 
-  // Detect negative preferences and constraints
+  // Detect negative preferences, business travel, and constraints
   const detectedConstraints: string[] = [];
   if (/balık\s*yem(em|ez)|deniz\s*ürünü\s*yem(em|ez)|no_seafood/iu.test(userText))
     detectedConstraints.push("deniz ürünü / balık yok");
@@ -253,6 +254,8 @@ export function mergeTripProfile(
     detectedConstraints.push("kalabalıktan uzak");
   if (/alkol\s*kullanm(am|az)|alkolsüz/iu.test(userText)) detectedConstraints.push("alkolsüz");
   if (/yokuş\s*çıkamam|az\s*yürü/iu.test(userText)) detectedConstraints.push("düşük yürüme yükü");
+  if (/iş\s*(?:seyahati|gezisi|için)|toplantı|fuar|konferans|kongre/iu.test(userText))
+    detectedConstraints.push("iş seyahati");
 
   const allConstraints = [
     ...(previous.constraints || []),
@@ -269,9 +272,24 @@ export function mergeTripProfile(
       ? undefined
       : cleanUpdates.duration_days || previous.duration_days);
 
+  const autoFood: string[] = [];
+  const autoCulture: string[] = [];
+  const autoGeneral: string[] = [];
+  if (/kahve|kafe|restoran|yemek|lezzet|mutfak|gastronomi|lokanta/iu.test(userText))
+    autoFood.push("lezzet");
+  if (/müze|tarih|kültür|sanat|antik|mimari/iu.test(userText)) autoCulture.push("tarih");
+  if (/iş\s*(?:seyahati|gezisi|için)|toplantı|fuar|konferans|kongre/iu.test(userText))
+    autoGeneral.push("iş seyahati");
+  if (/alışveriş|butik|çarşı|pazar/iu.test(userText)) autoGeneral.push("alışveriş");
+  if (/doğa|park|manzara|sahil|deniz/iu.test(userText)) autoGeneral.push("doğa");
+
   const mergedInterests: TripInterests = {
     food: [
-      ...new Set([...(previous.interests.food || []), ...(cleanUpdates.interests.food || [])]),
+      ...new Set([
+        ...(previous.interests.food || []),
+        ...(cleanUpdates.interests.food || []),
+        ...autoFood,
+      ]),
     ].slice(0, 6),
     sports: [
       ...new Set([...(previous.interests.sports || []), ...(cleanUpdates.interests.sports || [])]),
@@ -280,12 +298,14 @@ export function mergeTripProfile(
       ...new Set([
         ...(previous.interests.culture || []),
         ...(cleanUpdates.interests.culture || []),
+        ...autoCulture,
       ]),
     ].slice(0, 6),
     general: [
       ...new Set([
         ...(previous.interests.general || []),
         ...(cleanUpdates.interests.general || []),
+        ...autoGeneral,
       ]),
     ].slice(0, 6),
   };
@@ -333,11 +353,14 @@ export function generateConciergeQuestion(profile: TripProfile): {
       question: `${profile.destination} için kaç günlük bir seyahat düşünüyorsun?`,
       quickOptions: [
         {
+          label: "☀️ Günübirlik (1 gün)",
+          prompt: `${profile.destination} için 1 günlük kompakt rota istiyorum.`,
+        },
+        {
           label: "⚡ Hafta sonu (2 gün)",
           prompt: `${profile.destination} için 2 günlük plan istiyorum.`,
         },
         { label: "🗓️ 3 Gün", prompt: `${profile.destination} için 3 günlük bir rota yapalım.` },
-        { label: "✨ 4 Gün", prompt: `${profile.destination} için 4 gün kalacağım.` },
         {
           label: "🌟 1 Hafta (7 gün)",
           prompt: `${profile.destination} için 7 günlük dolu dolu bir seyahat olsun.`,
@@ -367,6 +390,41 @@ export function generateConciergeQuestion(profile: TripProfile): {
     };
   }
 
+  const allConstraintsAndGeneral = [
+    ...(profile.constraints || []),
+    ...(profile.interests.general || []),
+  ].join(" ");
+  const isBusinessTrip = /iş\s*(?:seyahati|gezisi)|toplantı|fuar|konferans|kongre/iu.test(
+    allConstraintsAndGeneral,
+  );
+  const hasBusinessSchedule = /akşam|öğle|yarım\s*gün|serbest|18:00|merkez\s*odaklı/iu.test(
+    allConstraintsAndGeneral,
+  );
+  if (isBusinessTrip && !hasBusinessSchedule && profile.completeness < 0.7) {
+    return {
+      question: `${profile.destination} iş seyahatinde çalışma/toplantı bölgen neresi ve gezi için hangi saatlerin uygun?`,
+      quickOptions: [
+        {
+          label: "🌆 Akşam Saatleri Boş",
+          prompt: "Gündüz toplantılarım var, akşam 18:00 sonrası yemek ve şehir keşfi olsun.",
+        },
+        {
+          label: "⏱️ Öğle & Akşam Molaları",
+          prompt:
+            "Toplantı çevresinde hızlı öğle yemeği ve akşam prestijli restoran/keşif durakları olsun.",
+        },
+        {
+          label: "📅 Yarım Gün Serbest",
+          prompt: "Son günüm yarım gün serbest, o güne kültür ve keşif rotası ekleyelim.",
+        },
+        {
+          label: "🚀 Direkt Rotayı Oluştur",
+          prompt: `${profile.destination} iş seyahatim için merkez odaklı kompakt rotayı hemen oluştur.`,
+        },
+      ],
+    };
+  }
+
   const interestCount =
     (profile.interests.food?.length || 0) +
     (profile.interests.sports?.length || 0) +
@@ -382,8 +440,8 @@ export function generateConciergeQuestion(profile: TripProfile): {
         },
         { label: "🏛️ Müze & Tarih", prompt: "Müzeler, tarihi sokaklar ve kültürel simgeler." },
         {
-          label: "🛍️ Alışveriş & Pazar",
-          prompt: "Yerel pazarlar, butikler ve alışveriş sokakları.",
+          label: "💼 İş Seyahati & Akşam Keşfi",
+          prompt: "İş seyahati için gidiyorum; toplantı sonrası akşam yemeği ve hızlı şehir keşfi.",
         },
         {
           label: "💎 Yerel & Keşif",
@@ -534,7 +592,8 @@ export function mergeContext(
   const explicitDays =
     daysMention.length > 0 &&
     userText.toLocaleLowerCase("tr").includes(daysMention.toLocaleLowerCase("tr"));
-  const parsedDays = explicitDays ? parseDays(daysMention) : undefined;
+  const parsedDays =
+    (explicitDays ? parseDays(daysMention) : undefined) ?? parseDaysFromUserText(userText);
   const interests = next.interests.filter(
     (i) => mentionsInterest(userText, i) || previous.interests.includes(i),
   );
@@ -581,27 +640,53 @@ export function normalizeText(value: string) {
     .replace(/ı/g, "i");
 }
 export function parseDays(mention: string): number | undefined {
-  const text = normalizeText(mention);
-  // Ordinal day edits are not a change to total trip length.
-  if (/gune|gunde|gunu|birinci|ikinci|ucuncu|dorduncu|besinci|altinci|yedinci|\d+\./u.test(text))
+  const text = normalizeText(mention).trim();
+  if (!text) return undefined;
+  if (/\bgunubirlik\b/u.test(text)) return 1;
+  // Ordinal day edits ("ikinci güne", "2. gün", "birinci gün") are not a change to total trip length.
+  if (
+    /\b(?:birinci|ikinci|ucuncu|dorduncu|besinci|altinci|yedinci)\b|\b\d+\s*\.\s*(?:gun|$)|(?:^|\s)gun(?:e|de|u)(?:\s|$)/u.test(
+      text,
+    )
+  )
     return undefined;
-  if (/hafta sonu/u.test(text)) return 2;
-  const number = text.match(/(?:^|\s)([1-9]|[12]\d|30)(?:\s|$)/u);
+  if (/hafta\s*sonu/u.test(text)) return 2;
+  if (/(?:^|\s)(?:1|bir)\s*hafta(?:\s|lik|$)/u.test(text)) return 7;
+  const number = text.match(/(?:^|\s)([1-9]|[12]\d|30)(?:\s|gun|$)/u);
   if (number) return Number(number[1]);
   const words = ["bir", "iki", "uc", "dort", "bes", "alti", "yedi", "sekiz", "dokuz", "on"];
-  const token = text.match(/^(bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)(?:\s|$)/u)?.[1];
+  const token = text.match(
+    /(?:^|\s)(bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)(?:\s+gun|\s|$)/u,
+  )?.[1];
   return token ? words.indexOf(token) + 1 : undefined;
+}
+function parseDaysFromUserText(userText: string): number | undefined {
+  const text = normalizeText(userText);
+  if (/\bgunubirlik\b/u.test(text)) return 1;
+  if (/\bhafta\s*sonu\b/u.test(text)) return 2;
+  if (/\b(?:1|bir)\s*hafta(?:lik)?\b/u.test(text)) return 7;
+  const numMatch = text.match(/(?:^|\s)([1-9]|[12]\d|30)\s*gun(?:luk|lugune|\b)/u);
+  if (numMatch) return Number(numMatch[1]);
+  const words = ["bir", "iki", "uc", "dort", "bes", "alti", "yedi", "sekiz", "dokuz", "on"];
+  const wordMatch = text.match(
+    /(?:^|\s)(bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)\s*gun(?:luk|lugune|\b)/u,
+  );
+  if (wordMatch) return words.indexOf(wordMatch[1]) + 1;
+  return undefined;
 }
 function mentionsInterest(request: string, interest: string) {
   const text = normalizeText(request),
     value = normalizeText(interest);
   const aliases: Record<string, string[]> = {
     tarih: ["tarih", "muze", "antik"],
-    kultur: ["kultur", "sanat"],
-    lezzet: ["lezzet", "yemek", "mutfak", "gastronomi"],
-    doga: ["doga", "park", "yuruyus"],
+    kultur: ["kultur", "sanat", "mimari"],
+    lezzet: ["lezzet", "yemek", "mutfak", "gastronomi", "restoran", "lokanta"],
+    doga: ["doga", "park", "yuruyus", "manzara", "sahil", "deniz"],
     kahve: ["kahve", "kafe"],
-    muze: ["muze"],
+    muze: ["muze", "galeri", "sergi"],
+    is: ["is seyahati", "toplanti", "fuar", "konferans", "kongre", "is gezisi"],
+    alisveris: ["alisveris", "butik", "pazar", "carsi"],
+    yerel: ["yerel", "kesif", "gizli", "sokak"],
   };
   return (aliases[value] || [value]).some((word) => text.includes(word));
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { tokens, withAlpha } from "../theme";
 import { Icon } from "./Icon";
 
@@ -12,6 +12,7 @@ export interface ScreenHeaderProps {
   left?: React.ReactNode;
   right?: React.ReactNode;
   variant?: "brand" | "default";
+  onPressTitle?: () => void;
 }
 
 const compact = tokens.font.maxScale.compact;
@@ -22,7 +23,21 @@ export function ScreenHeader({
   left,
   right,
   variant = "default",
+  onPressTitle,
 }: ScreenHeaderProps) {
+  const textContent = (
+    <View style={styles.brandTextWrap}>
+      <Text style={styles.title} accessibilityRole="header" maxFontSizeMultiplier={compact}>
+        {title}
+      </Text>
+      {subtitle ? (
+        <Text style={styles.subtitle} maxFontSizeMultiplier={compact}>
+          {subtitle}
+        </Text>
+      ) : null}
+    </View>
+  );
+
   if (variant === "brand") {
     return (
       <View style={styles.header}>
@@ -32,20 +47,13 @@ export function ScreenHeader({
               <Icon name="compass" size={20} color={tokens.color.onPrimary} />
             </View>
           )}
-          <View style={styles.brandTextWrap}>
-            <Text
-              style={styles.brandTitle}
-              accessibilityRole="header"
-              maxFontSizeMultiplier={compact}
-            >
-              {title ?? "MapsBridge"}
-            </Text>
-            {subtitle ? (
-              <Text style={styles.brandSubtitle} maxFontSizeMultiplier={compact}>
-                {subtitle}
-              </Text>
-            ) : null}
-          </View>
+          {onPressTitle ? (
+            <Pressable onPress={onPressTitle} hitSlop={8}>
+              {textContent}
+            </Pressable>
+          ) : (
+            textContent
+          )}
         </View>
         {right ? <View style={styles.actionRow}>{right}</View> : null}
       </View>
@@ -55,16 +63,13 @@ export function ScreenHeader({
     <View style={[styles.header, styles.defaultHeader]}>
       <View style={styles.brandRow}>
         {left}
-        <View style={styles.brandTextWrap}>
-          <Text style={styles.title} accessibilityRole="header" maxFontSizeMultiplier={compact}>
-            {title}
-          </Text>
-          {subtitle ? (
-            <Text style={styles.subtitle} maxFontSizeMultiplier={compact}>
-              {subtitle}
-            </Text>
-          ) : null}
-        </View>
+        {onPressTitle ? (
+          <Pressable onPress={onPressTitle} hitSlop={8}>
+            {textContent}
+          </Pressable>
+        ) : (
+          textContent
+        )}
       </View>
       {right ? <View style={styles.actionRow}>{right}</View> : null}
     </View>

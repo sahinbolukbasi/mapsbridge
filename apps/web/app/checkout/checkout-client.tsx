@@ -43,7 +43,7 @@ import {
 } from "../lib/billing/catalog";
 import { parseCheckoutParams, type CheckoutTab } from "../lib/billing/checkout-params";
 import { WELCOME_CREDITS_DISPLAY } from "../lib/billing/credit-costs";
-import { verifyRevenueCatPurchase } from "../lib/billing/revenuecat-client";
+import { verifyPolarPurchase } from "../lib/billing/polar-client";
 import { getStoredSession } from "../lib/cognito";
 import { useLocale } from "../lib/locale-context";
 import "./checkout.css";
@@ -128,8 +128,8 @@ export default function CheckoutClient() {
       let attempts = 0;
       const check = async () => {
         try {
-          // RevenueCat webhook arrives async; poll wallet until credits appear
-          await verifyRevenueCatPurchase().catch(() => null);
+          // Polar webhook arrives async; poll wallet until credits appear
+          await verifyPolarPurchase().catch(() => null);
           const updated = await billingService.refreshWallet();
           if (stopped) return;
           // Bakiye her yoklamada güncellenir (Increment 2.8): doğrulanınca yeni bakiye görünür.
@@ -168,8 +168,9 @@ export default function CheckoutClient() {
       targetId: product.id,
       cycle: product.mode === "subscription" ? period : undefined,
     });
-    if (result.stripeRedirectUrl) {
-      location.assign(result.stripeRedirectUrl);
+    const redirectUrl = result.polarRedirectUrl || result.stripeRedirectUrl;
+    if (redirectUrl) {
+      location.assign(redirectUrl);
       return;
     }
     setNotice({ text: result.message });

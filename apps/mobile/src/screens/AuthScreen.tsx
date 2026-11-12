@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Image, ScrollView, StyleSheet, View } from "react-native";
 import { authService, type UserSession } from "../services/api";
 import { storage } from "../services/storage";
 import {
+  AppleLogo,
   Button,
   Card,
   GoogleLogo,
@@ -29,6 +30,7 @@ interface AuthScreenProps {
   onSuccess: (session: UserSession) => void;
   onCancel?: () => void;
   onSelectGoogle?: () => void;
+  onSelectApple?: () => void;
   initialMode?: AuthMode;
 }
 
@@ -66,6 +68,7 @@ export function AuthScreen({
   onSuccess,
   onCancel,
   onSelectGoogle,
+  onSelectApple,
   initialMode = "login",
 }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -284,16 +287,18 @@ export function AuthScreen({
       header={
         <ScreenHeader
           title={head.title}
-          left={
-            onCancel ? (
-              <IconButton icon="chevron-left" label={tr("nav.back")} onPress={onCancel} />
-            ) : undefined
-          }
+          left={undefined}
         />
       }
     >
       <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
-        <Txt tone="muted">{head.sub(email.trim())}</Txt>
+        <View style={styles.brandHeader}>
+          <Image
+            source={require("../../assets/logo-mapsbridge.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
         <Card variant="bordered" padding="5">
           <View style={styles.form}>
             {mode === "login" || mode === "register" ? (
@@ -310,23 +315,39 @@ export function AuthScreen({
             {info ? <Notice tone="success">{info}</Notice> : null}
             {error ? <Notice tone="danger">{error}</Notice> : null}
 
-            {(mode === "login" || mode === "register") && onSelectGoogle ? (
-              <>
+            {mode === "login" || mode === "register" ? (
+              <View style={styles.socialButtons}>
+                {onSelectGoogle ? (
+                  <Button
+                    label={tr(
+                      mode === "register"
+                        ? "native.auth.google.register"
+                        : "native.auth.google.login",
+                    )}
+                    variant="secondary"
+                    size="lg"
+                    icon={<GoogleLogo size={20} />}
+                    onPress={onSelectGoogle}
+                  />
+                ) : null}
                 <Button
-                  label={tr(
-                    mode === "register"
-                      ? "native.auth.google.register"
-                      : "native.auth.google.login",
-                  )}
+                  label={mode === "register" ? "Apple ile Kaydol" : "Apple ile Giriş Yap"}
                   variant="secondary"
                   size="lg"
-                  icon={<GoogleLogo size={20} />}
-                  onPress={onSelectGoogle}
+                  icon={<AppleLogo size={20} />}
+                  onPress={
+                    onSelectApple ||
+                    (() =>
+                      Alert.alert(
+                        "Apple ile Giriş",
+                        "Apple ile güvenli kimlik doğrulama başlatılıyor.",
+                      ))
+                  }
                 />
                 <Txt variant="caption" tone="muted" align="center">
                   {tr("native.auth.or")}
                 </Txt>
-              </>
+              </View>
             ) : null}
 
             {mode === "register" ? (
@@ -457,6 +478,19 @@ export function AuthScreen({
 
 const styles = StyleSheet.create({
   page: { padding: tokens.space["5"], gap: tokens.space["4"], paddingBottom: tokens.space["12"] },
+  brandHeader: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: tokens.space["3"],
+  },
+  logo: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+  },
+  socialButtons: {
+    gap: tokens.space["2"],
+  },
   form: { gap: tokens.space["4"] },
   rules: { gap: tokens.space["1"] },
   rule: { flexDirection: "row", alignItems: "center", gap: tokens.space["2"] },

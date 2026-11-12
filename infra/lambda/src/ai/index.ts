@@ -90,6 +90,23 @@ function getAuthHeader(headers?: Record<string, string>): string | undefined {
   return undefined;
 }
 
+function extractDisplayName(
+  profileRecord: Record<string, unknown> | null | undefined,
+  email?: string,
+): string | undefined {
+  if (typeof profileRecord?.fullName === "string" && profileRecord.fullName.trim()) {
+    return profileRecord.fullName.trim().slice(0, 60);
+  }
+  if (typeof profileRecord?.username === "string" && profileRecord.username.trim()) {
+    return profileRecord.username.trim().slice(0, 60);
+  }
+  if (typeof email === "string" && email.includes("@")) {
+    const local = email.split("@")[0]?.trim();
+    if (local) return local.slice(0, 60);
+  }
+  return undefined;
+}
+
 export async function handler(event: Event) {
   return withAIRequestMeter(() => handleRequest(event));
 }
@@ -112,11 +129,14 @@ async function handleRequest(event: Event) {
       if (user.emailVerified) await initializeTrial(user.sub);
       const queryParams = event.queryStringParameters || {};
       const convId = queryParams.conversationId;
+      const profileRecord = await read(`USER#${user.sub}`, "PROFILE").catch(() => null);
+      const userDisplayName = extractDisplayName(profileRecord, user.email);
       if (convId && /^[a-zA-Z0-9_-]{16,100}$/.test(convId)) {
         const stored = await read(`USER#${user.sub}`, `AI_CHAT#${convId}`);
         return reply(200, {
           conversationId: convId,
           conversation: stored || null,
+          ...(userDisplayName ? { userDisplayName } : {}),
           ...(await wallet(user.sub)),
           configured: !!process.env.BEDROCK_MODEL_ID,
           usage: await aiUsage(user.sub),
@@ -148,6 +168,7 @@ async function handleRequest(event: Event) {
       return reply(200, {
         latestConversationId: latest?.conversationId || null,
         conversation: latestConversation || null,
+        ...(userDisplayName ? { userDisplayName } : {}),
         ...(await wallet(user.sub)),
         configured: !!process.env.BEDROCK_MODEL_ID,
         usage: await aiUsage(user.sub),
@@ -250,6 +271,8 @@ async function handleRequest(event: Event) {
       return reply(400, { error: "Geçerli işlem kimliği gerekli." });
     const settings = await getMemorySettings(user.sub);
     const preferences = sanitizePreferences(await read(`USER#${user.sub}`, "AI_PREFERENCES"));
+    const profileRecord = await read(`USER#${user.sub}`, "PROFILE").catch(() => null);
+    const userDisplayName = extractDisplayName(profileRecord, user.email);
     const storedConversation = body.conversationId
       ? await read(`USER#${user.sub}`, `AI_CHAT#${body.conversationId}`)
       : null;
@@ -257,6 +280,7 @@ async function handleRequest(event: Event) {
       user.sub,
       {
         prompt: normalized.prompt,
+        userDisplayName,
         routeMode: normalized.routeMode,
         preferences,
         conversationHistory: history,
@@ -357,6 +381,7 @@ async function handleRequest(event: Event) {
                   body.conversationId || body.requestId,
                   updates,
                   result.tripContext,
+                  result.userTags,
                 ),
               },
             }
@@ -578,6 +603,8 @@ async function handleStreamRequest(
 
       const settings = await getMemorySettings(user.sub);
       const preferences = sanitizePreferences(await read(`USER#${user.sub}`, "AI_PREFERENCES"));
+      const profileRecord = await read(`USER#${user.sub}`, "PROFILE").catch(() => null);
+      const userDisplayName = extractDisplayName(profileRecord, user.email);
       const storedConversation = body.conversationId
         ? await read(`USER#${user.sub}`, `AI_CHAT#${body.conversationId}`)
         : null;
@@ -585,6 +612,7 @@ async function handleStreamRequest(
         user.sub,
         {
           prompt: normalized.prompt,
+          userDisplayName,
           routeMode: normalized.routeMode,
           preferences,
           conversationHistory: normalized.conversationHistory as {
@@ -685,6 +713,7 @@ async function handleStreamRequest(
                       body.conversationId || body.requestId,
                       updates,
                       result.tripContext,
+                      result.userTags,
                     ),
                   },
                 }

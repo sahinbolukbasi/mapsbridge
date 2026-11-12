@@ -450,7 +450,39 @@ export function autoSplitPinsIntoDays(
     });
   }
 
-  // Filter empty clusters and sort each cluster by 2-opt
+  // Rebalance empty clusters when pins.length >= dayCount so no day is ever left empty
+  for (let cIdx = 0; cIdx < dayCount; cIdx++) {
+    if (clusters[cIdx].length > 0) continue;
+    // Find largest donor cluster with > 1 pin
+    let donorIdx = -1;
+    let maxLen = 1;
+    for (let j = 0; j < dayCount; j++) {
+      if (clusters[j].length > maxLen) {
+        maxLen = clusters[j].length;
+        donorIdx = j;
+      }
+    }
+    if (donorIdx === -1) break;
+    const donor = clusters[donorIdx];
+    const donorCentroid = centroids[donorIdx];
+    // Pick the pin farthest from the donor centroid
+    let farthestPinIdx = 0;
+    let maxDist = -1;
+    donor.forEach((p, idx) => {
+      const d = calculateDistanceKm(p.lat, p.lng, donorCentroid.lat, donorCentroid.lng);
+      if (d > maxDist) {
+        maxDist = d;
+        farthestPinIdx = idx;
+      }
+    });
+    const [movedPin] = donor.splice(farthestPinIdx, 1);
+    if (movedPin) {
+      clusters[cIdx].push(movedPin);
+      centroids[cIdx] = { lat: movedPin.lat, lng: movedPin.lng };
+    }
+  }
+
+  // Filter any remaining empty clusters (only possible if pins.length < dayCount)
   const validClusters = clusters.filter((c) => c.length > 0);
 
   const smartTitles = [
@@ -462,11 +494,52 @@ export function autoSplitPinsIntoDays(
     "Parklar, Doğa & Seyir Noktaları",
   ];
 
+  const isFoodCategory = (cat: string) =>
+    /^(yemek|gastronomi|kafe|restoran|food|cafe|restaurant)$/i.test(cat || "");
+
+  const orderClusterGeographicallyAndByMeal = (clusterPins: Pin[]): Pin[] => {
+    if (clusterPins.length <= 1) return [...clusterPins];
+    // Nearest-neighbor geographic ordering starting from northernmost/westernmost pin
+    const remaining = [...clusterPins].sort((a, b) => b.lat - a.lat || a.lng - b.lng);
+    const geoOrdered: Pin[] = [remaining.shift()!];
+    while (remaining.length > 0) {
+      const last = geoOrdered[geoOrdered.length - 1];
+      let nearestIdx = 0;
+      let bestDist = Infinity;
+      remaining.forEach((cand, i) => {
+        const d = calculateDistanceKm(last.lat, last.lng, cand.lat, cand.lng);
+        if (d < bestDist) {
+          bestDist = d;
+          nearestIdx = i;
+        }
+      });
+      geoOrdered.push(remaining.splice(nearestIdx, 1)[0]);
+    }
+    // If there are both non-food sights and food stops, weave food stops into mid-day/evening slots
+    const sights = geoOrdered.filter((p) => !isFoodCategory(p.category));
+    const foods = geoOrdered.filter((p) => isFoodCategory(p.category));
+    if (sights.length === 0 || foods.length === 0) return geoOrdered;
+    const woven: Pin[] = [];
+    let fIdx = 0;
+    sights.forEach((sight, sIdx) => {
+      woven.push(sight);
+      // Place lunch stop after the 1st or 2nd morning sight, and dinner at the end
+      if (fIdx < foods.length && (sIdx === 0 || sIdx === Math.floor(sights.length / 2))) {
+        woven.push(foods[fIdx++]);
+      }
+    });
+    while (fIdx < foods.length) {
+      woven.push(foods[fIdx++]);
+    }
+    return woven;
+  };
+
   const resultDays = validClusters.map((clusterPins, idx) => {
     const dayIndex = idx + 1;
+    const sortedCluster = orderClusterGeographicallyAndByMeal(clusterPins);
     // Categorize top category
     const catCounts: Record<string, number> = {};
-    clusterPins.forEach((p) => {
+    sortedCluster.forEach((p) => {
       catCounts[p.category] = (catCounts[p.category] || 0) + 1;
     });
     const topCat = Object.entries(catCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
@@ -476,7 +549,7 @@ export function autoSplitPinsIntoDays(
     else if (topCat === "yemek" || topCat === "gastronomi") subtitle = "Gastronomi & Kafe Molaları";
     else if (topCat === "manzara" || topCat === "doga") subtitle = "Doğa, Park & Manzara";
 
-    const orderedPins = clusterPins.map((p, pIdx) => ({
+    const orderedPins = sortedCluster.map((p, pIdx) => ({
       ...p,
       dayIndex,
       order: pIdx + 1,

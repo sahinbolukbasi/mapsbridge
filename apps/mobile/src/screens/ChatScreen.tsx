@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { ScrollView, StyleSheet, TextInput, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Animated, PanResponder, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { tripStore, type TripStop } from "../services/tripStore";
 import {
   authService,
@@ -14,6 +14,7 @@ import {
   type RequestAction,
 } from "../ui/logic/chat-requests";
 import { chatStore, type ChatBubbleItem, type ChatContact } from "../services/chatStore";
+import { PublicProfileView } from "./PublicProfileView";
 import {
   Avatar,
   Button,
@@ -33,6 +34,69 @@ import {
 } from "../ui";
 import { tr } from "../i18n/ui";
 import { fontFamily, tokens } from "../theme";
+
+function SwipeableMessage({
+  children,
+  onDelete,
+  time,
+  isOutgoing,
+}: {
+  children: React.ReactNode;
+  onDelete: () => void;
+  time: string;
+  isOutgoing?: boolean;
+}) {
+  const panX = useRef(new Animated.Value(0)).current;
+  const [swiped, setSwiped] = useState(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 15,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dx > 0) {
+          panX.setValue(Math.min(gestureState.dx, 70));
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dx > 45) {
+          setSwiped(true);
+          Animated.spring(panX, { toValue: 60, useNativeDriver: true }).start();
+        } else {
+          setSwiped(false);
+          Animated.spring(panX, { toValue: 0, useNativeDriver: true }).start();
+        }
+      },
+    }),
+  ).current;
+
+  return (
+    <View style={styles.msgSwipeWrap}>
+      {swiped ? (
+        <View style={styles.swipeDeleteAction}>
+          <IconButton
+            icon="trash"
+            color={tokens.color.danger}
+            label={tr("community.delete.confirm")}
+            onPress={() => {
+              Animated.spring(panX, { toValue: 0, useNativeDriver: true }).start();
+              setSwiped(false);
+              onDelete();
+            }}
+          />
+        </View>
+      ) : null}
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={[{ transform: [{ translateX: panX }] }, styles.msg]}
+      >
+        {children}
+        <Txt variant="caption" tone="subtle" style={isOutgoing ? styles.timeOut : undefined}>
+          {time}
+        </Txt>
+      </Animated.View>
+    </View>
+  );
+}
 
 // Mesajlar sekmesi (design §5.3, §9 "Mesajlar"; kararlar S10, S21): yalnız birebir sohbet; grup
 // oluşturma ya da sohbet türü süzgeci yok (S21). Sohbet listesi → sohbet (MessageLog + ComposerBar).
@@ -55,6 +119,8 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
   const [newError, setNewError] = useState<string | undefined>(undefined);
   const [newBusy, setNewBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [viewingProfile, setViewingProfile] = useState<ChatContact | null>(null);
+  const [msgToDelete, setMsgToDelete] = useState<ChatBubbleItem | null>(null);
   // Mesaj istekleri (Increment 1.14): sunucu thread'leri + kişi → sunucu thread eşlemesi.
   const [mySub, setMySub] = useState("");
   const [serverThreads, setServerThreads] = useState<ServerChatThread[]>([]);
@@ -191,7 +257,17 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
     setNewBusy(true);
     setNewError(undefined);
     try {
-      const { contact } = await chatStore.startOrGetDirectThread({ name: handle, handle });
+      const cleanHandle = handle.trim().replace(/^@/, "").toLowerCase();
+      const status = await authService.checkUsername(cleanHandle);
+      if (status === "available") {
+        setNewError("Kullanıcı bulunamadı.");
+        setNewBusy(false);
+        return;
+      }
+      const { contact } = await chatStore.startOrGetDirectThread({
+        name: cleanHandle,
+        handle: cleanHandle,
+      });
       setNewOpen(false);
       setNewUser("");
       setActive(contact);
@@ -215,7 +291,8 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
         header={
           <ScreenHeader
             title={active.name}
-            subtitle={active.username}
+            subtitle={active.username ? `@${active.username.replace(/^@/, "")}` : undefined}
+            onPressTitle={() => setViewingProfile(active)}
             left={
               <IconButton
                 icon="chevron-left"
@@ -243,7 +320,12 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
             </Txt>
           ) : (
             messages.map((m) => (
-              <View key={m.id} style={styles.msg}>
+              <SwipeableMessage
+                key={m.id}
+                time={m.time}
+                isOutgoing={m.isOutgoing}
+                onDelete={() => setMsgToDelete(m)}
+              >
                 {m.text ? (
                   <MessageBubble role={m.isOutgoing ? "user" : "assistant"}>{m.text}</MessageBubble>
                 ) : null}
@@ -277,14 +359,7 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
                     </View>
                   </Card>
                 ) : null}
-                <Txt
-                  variant="caption"
-                  tone="subtle"
-                  style={m.isOutgoing ? styles.timeOut : undefined}
-                >
-                  {m.time}
-                </Txt>
-              </View>
+              </SwipeableMessage>
             ))
           )}
         </MessageLog>
@@ -325,6 +400,33 @@ export function ChatScreen({ onOpenMap, openContact }: ChatScreenProps) {
             setActive(null);
           }}
         />
+        <ConfirmDialog
+          visible={!!msgToDelete}
+          title={"Mesajı Sil"}
+          body={"Bu mesajı silmek istediğinize emin misiniz?"}
+          confirmLabel={tr("community.delete.confirm")}
+          onCancel={() => setMsgToDelete(null)}
+          onConfirm={async () => {
+            if (active && msgToDelete) {
+              await chatStore.deleteMessage(active.id, msgToDelete.id);
+              setMessages((prev) => prev.filter((x) => x.id !== msgToDelete.id));
+            }
+            setMsgToDelete(null);
+          }}
+        />
+        {viewingProfile ? (
+          <View style={StyleSheet.absoluteFill}>
+            <PublicProfileView
+              user={{
+                name: viewingProfile.name,
+                handle: viewingProfile.username?.replace(/^@/, "") || viewingProfile.name,
+                avatar: viewingProfile.avatarUrl,
+              }}
+              posts={[]}
+              onBack={() => setViewingProfile(null)}
+            />
+          </View>
+        ) : null}
       </Screen>
     );
   }
@@ -547,7 +649,18 @@ const styles = StyleSheet.create({
   empty: { gap: tokens.space["3"], paddingVertical: tokens.space["8"] },
   row: { flexDirection: "row", alignItems: "center", gap: tokens.space["3"] },
   flex: { flex: 1, gap: tokens.space["1"] },
-  msg: { gap: tokens.space["1"] },
+  msg: { gap: tokens.space["1"], flex: 1 },
+  msgSwipeWrap: { position: "relative", width: "100%" },
+  swipeDeleteAction: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
   timeOut: { textAlign: "right" },
   cardBody: { gap: tokens.space["2"] },
   composer: {

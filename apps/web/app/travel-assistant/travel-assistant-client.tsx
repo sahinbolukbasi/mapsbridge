@@ -19,6 +19,7 @@ import {
   type EmergencyInfo,
   type FlightPriceInfo,
   type TravelAdvisoryInfo,
+  type PostRouteHarness,
 } from "../lib/ai/types";
 import type { TripContext } from "../lib/ai/planning";
 import {
@@ -54,7 +55,7 @@ import {
 } from "../components/ui";
 import { useLocale } from "../lib/locale-context";
 import { ComposerBar } from "../components/assistant/composer-bar";
-import { MessageBubble, MessageLog } from "../components/assistant/message-log";
+import { MessageBubble, MessageLog, TypingIndicator } from "../components/assistant/message-log";
 import { QuestionCard } from "../components/assistant/question-card";
 import { clampQuestions } from "../components/assistant/logic/question-limits";
 import {
@@ -115,6 +116,7 @@ interface Session {
   emergency?: EmergencyInfo | null;
   flightPrices?: FlightPriceInfo | null;
   travelAdvisory?: TravelAdvisoryInfo | null;
+  postRouteHarness?: PostRouteHarness | null;
 }
 interface Wallet {
   credits: number;
@@ -145,6 +147,72 @@ function creditsLabel(t: Translate, n: number): string {
     {
       n,
     },
+  );
+}
+
+function PostRouteHarnessView({
+  harness,
+  onAsk,
+}: {
+  harness: PostRouteHarness | null | undefined;
+  onAsk: (prompt: string) => void;
+}) {
+  const { t } = useLocale();
+  if (!harness) return null;
+  const items = [
+    {
+      id: "stay",
+      title: harness.accommodation.title,
+      body: `${harness.accommodation.summary} (${harness.accommodation.recommendedAreas.join(", ")})`,
+      prompt: harness.accommodation.actionPrompt,
+    },
+    {
+      id: "transport",
+      title: harness.intercityTransport.title,
+      body: `${harness.intercityTransport.flightSummary} ${harness.intercityTransport.busOrTrainSummary}`,
+      prompt: harness.intercityTransport.actionPrompt,
+    },
+    {
+      id: "city-transit",
+      title: harness.cityTransit.title,
+      body: `${harness.cityTransit.summary} · ${harness.cityTransit.cardRecommendation}`,
+      prompt: harness.cityTransit.actionPrompt,
+    },
+    {
+      id: "car",
+      title: harness.carRental.title,
+      body: harness.carRental.summary,
+      prompt: harness.carRental.actionPrompt,
+    },
+    ...(harness.esim?.required
+      ? [
+          {
+            id: "esim",
+            title: harness.esim.title,
+            body: `${harness.esim.summary} · ${harness.esim.tips.join(" ")}`,
+            prompt: harness.esim.actionPrompt,
+          },
+        ]
+      : []),
+  ];
+  return (
+    <div className="as-studio-section">
+      <p className="as-studio-section__title">
+        <Icon name="compass" size={16} />
+        {t("studio.harness.title", "Kişisel Seyahat Hazırlık Planı")}
+      </p>
+      <ul className="as-studio-cards">
+        {items.map((it) => (
+          <li key={it.id} className="as-studio-card">
+            <strong>{it.title}</strong>
+            <p className="as-studio-card__text">{it.body}</p>
+            <Button variant="secondary" size="sm" onClick={() => onAsk(it.prompt)}>
+              {t("studio.harness.ask", "Asistana sor")}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -255,6 +323,7 @@ export default function AIPage() {
   const [mobileTab, setMobileTab] = useState<"chat" | "draft">("chat");
   const [currentTrip, setCurrentTrip] = useState<Trip | null>(null);
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
+  const [likedRouteIds, setLikedRouteIds] = useState<Record<string, boolean>>({});
   const [routeMode, setRouteMode] = useState<RouteStyleKey>("classic");
   const [streamText, setStreamText] = useState("");
   const [streamPhase, setStreamPhase] = useState<LivePhase | null>(null);
@@ -864,6 +933,7 @@ export default function AIPage() {
               emergency: result.emergency,
               flightPrices: result.flightPrices,
               travelAdvisory: result.travelAdvisory,
+              postRouteHarness: result.postRouteHarness,
             }
           : {}),
         ...(result.nearbyPins?.length ? { nearbyPins: result.nearbyPins } : {}),
@@ -889,6 +959,9 @@ export default function AIPage() {
                 travelAdvisory:
                   result.travelAdvisory ||
                   (result.responseMode === "chat" ? x.travelAdvisory : null),
+                postRouteHarness:
+                  result.postRouteHarness ||
+                  (result.responseMode === "chat" ? x.postRouteHarness : null),
                 messages: [...x.messages, message],
               }
             : x,
@@ -1582,13 +1655,15 @@ export default function AIPage() {
                         ▋
                       </span>
                     </div>
-                  ) : (
+                  ) : session?.context?.destination && session?.context?.days ? (
                     <div className="as-studio__typing" role="status">
                       <ThinkingSteps
                         isRoute={input.length > 20 || (session?.messages.length || 0) >= 2}
                         livePhase={streamPhase}
                       />
                     </div>
+                  ) : (
+                    <TypingIndicator />
                   ))
                 }
               >
@@ -1686,6 +1761,35 @@ export default function AIPage() {
                           >
                             {t("studio.msg.showRoute", "Rotayı göster")}
                           </Button>
+                          <Button
+                            variant={likedRouteIds[m.id] ? "primary" : "ghost"}
+                            size="sm"
+                            onClick={() => {
+                              setLikedRouteIds((prev) => ({ ...prev, [m.id]: true }));
+                              setNotice(
+                                t(
+                                  "studio.feedback.saved",
+                                  "Geri bildiriminiz tercih profilinize kaydedildi.",
+                                ),
+                              );
+                            }}
+                          >
+                            {likedRouteIds[m.id]
+                              ? t("studio.feedback.liked", "Beğenildi")
+                              : t("studio.feedback.like", "Rotayı beğendim")}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setInput(
+                                `${m.route!.destination} rotam üzerinde değişiklik yapmak istiyorum: `,
+                              );
+                              setTimeout(() => textareaRef.current?.focus(), 50);
+                            }}
+                          >
+                            {t("studio.feedback.refine", "Geri bildirimle düzenle")}
+                          </Button>
                         </div>
                         <Button variant="link" onClick={openPrep}>
                           {t(
@@ -1734,11 +1838,19 @@ export default function AIPage() {
                         return (
                           <QuestionCard
                             questions={qs}
-                            onSubmit={(answers) => {
-                              const picked = replies[Number(answers[`qr-${m.id}`]?.[0])];
-                              if (picked === undefined) return;
-                              const prompt = typeof picked === "string" ? picked : picked.prompt;
-                              pick(prompt);
+                            onSubmit={(answers, labels) => {
+                              const ans = answers[`qr-${m.id}`]?.[0] || "";
+                              if (ans.startsWith("custom:")) {
+                                pick(ans.slice(7));
+                                return;
+                              }
+                              const picked = replies[Number(ans)];
+                              if (picked !== undefined) {
+                                const prompt = typeof picked === "string" ? picked : picked.prompt;
+                                pick(prompt);
+                              } else if (labels.length > 0) {
+                                pick(labels.join(", "));
+                              }
                             }}
                             note={
                               <Button
@@ -2166,7 +2278,15 @@ export default function AIPage() {
                         panel: (
                           <PrepPanel
                             context={prepContext}
-                            flightBlock={<FlightPrices info={session?.flightPrices} />}
+                            flightBlock={
+                              <>
+                                <PostRouteHarnessView
+                                  harness={session?.postRouteHarness}
+                                  onAsk={pick}
+                                />
+                                <FlightPrices info={session?.flightPrices} />
+                              </>
+                            }
                           />
                         ),
                       },

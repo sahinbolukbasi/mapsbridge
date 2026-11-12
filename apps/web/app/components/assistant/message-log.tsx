@@ -48,17 +48,17 @@ export function MessageBubble({
   );
 }
 
-/** "Yanıt hazırlanıyor…": hareket tercihinde 3 nokta (metin ekran okuyucuya kalır), aksi halde statik metin. */
+/** Sadece 3 nokta animasyonu görünür; metin yalnız ekran okuyucuya kalır. */
 export function TypingIndicator() {
   const { t } = useLocale();
   return (
-    <span className="as-typing" role="status">
+    <span className="as-typing" role="status" aria-label={t("assistant.typing", "Yanıt hazırlanıyor…")}>
       <span className="as-typing__dots" aria-hidden="true">
         <span className="as-typing__dot" />
         <span className="as-typing__dot" />
         <span className="as-typing__dot" />
       </span>
-      <span className="as-typing__text">{t("assistant.typing", "Yanıt hazırlanıyor…")}</span>
+      <span className="ui-visually-hidden">{t("assistant.typing", "Yanıt hazırlanıyor…")}</span>
     </span>
   );
 }

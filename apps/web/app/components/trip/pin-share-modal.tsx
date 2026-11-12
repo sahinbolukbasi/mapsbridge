@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Alert, Button, Icon, Modal } from "../ui";
 import { useLocale } from "../../lib/locale-context";
-import { encodePinCode, type PinPoint } from "../../lib/share/pin-link";
+import { encodePinCode, generateNumericPinCode, type PinPoint } from "../../lib/share/pin-link";
+import { buildDirections } from "../../lib/share/map-directions";
 import "./travel-planner.css";
 
 /**
@@ -33,12 +34,13 @@ export function PinShareModal({
     }
   }, [open]);
 
-  const { code, url } = useMemo(() => {
-    if (!target) return { code: "", url: "" };
+  const { code, numericCode, url } = useMemo(() => {
+    if (!target) return { code: "", numericCode: "", url: "" };
     const c = encodePinCode(target);
+    const num = generateNumericPinCode(target);
     const origin =
       typeof window !== "undefined" ? window.location.origin : "https://mapsbridge.com";
-    return { code: c, url: `${origin}/p/?c=${c}` };
+    return { code: c, numericCode: num, url: `${origin}/p/?c=${num}` };
   }, [target]);
 
   function copy(kind: "code" | "link", text: string) {
@@ -82,14 +84,16 @@ export function PinShareModal({
         </p>
         <div className="planner-share__code">
           <span className="planner-share__code-label">
-            {t("planner.pinShare.code", "Durak kodu")}
+            {t("planner.pinShare.code", "6 Haneli Paylaşım Kodu")}
           </span>
-          <span className="planner-share__code-value">{code}</span>
+          <span className="planner-share__code-value" style={{ letterSpacing: "3px", fontSize: "1.3rem", fontWeight: "bold" }}>
+            {numericCode.slice(0, 3)} {numericCode.slice(3)}
+          </span>
           <Button
             size="sm"
             variant="secondary"
             iconStart={<Icon name={copied === "code" ? "check" : "copy"} size={16} />}
-            onClick={() => copy("code", code)}
+            onClick={() => copy("code", numericCode)}
           >
             {copied === "code"
               ? t("planner.share.copied", "Kopyalandı")
@@ -105,6 +109,39 @@ export function PinShareModal({
           />
         </div>
         <p className="planner-share__url">{url}</p>
+        <div style={{ display: "flex", gap: "8px", width: "100%", justifyContent: "center", margin: "8px 0" }}>
+          {target && (
+            <>
+              <Button
+                size="sm"
+                variant="secondary"
+                href={buildDirections({ dest: target, provider: "google" })}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google Haritalar
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                href={buildDirections({ dest: target, provider: "yandex" })}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Yandex Haritalar
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                href={buildDirections({ dest: target, provider: "apple" })}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Apple Haritalar
+              </Button>
+            </>
+          )}
+        </div>
         <div className="planner-share__actions">
           <Button
             variant="primary"

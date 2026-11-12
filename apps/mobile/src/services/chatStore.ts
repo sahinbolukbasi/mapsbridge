@@ -214,6 +214,20 @@ class ChatStore {
     return newMsg;
   }
 
+  // ─── Delete Message ──────────────────────────────────────────────────────────
+  async deleteMessage(threadId: string, messageId: string): Promise<void> {
+    const messages = await this.getMessages(threadId);
+    const nextMessages = messages.filter((m) => m.id !== messageId);
+    await storage.setItem(
+      `${STORAGE_KEY_MESSAGES_PREFIX}${threadId}`,
+      JSON.stringify(nextMessages),
+    );
+    const listeners = this.messageListeners.get(threadId);
+    if (listeners) {
+      listeners.forEach((fn) => fn(nextMessages));
+    }
+  }
+
   // ─── Delete Thread ────────────────────────────────────────────────────────────
   async deleteThread(threadId: string): Promise<void> {
     const threads = await this.getThreads();

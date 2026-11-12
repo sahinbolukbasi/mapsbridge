@@ -17,6 +17,7 @@ docs-legacy/
 .env
 .env.*
 !.env.example
+infra/secrets/
 *.tfvars
 !*.tfvars.example
 *.auto.tfvars.json

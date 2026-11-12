@@ -87,12 +87,40 @@ export function encodePinCode(pin: PinPoint): string {
   }
 }
 
+const pinRegistry = new Map<string, PinPoint>();
+
+export function registerNumericPin(code: string, pin: PinPoint): void {
+  pinRegistry.set(code, pin);
+}
+
+export function resolveNumericPin(code: string): PinPoint | null {
+  return pinRegistry.get(code) || null;
+}
+
+/**
+ * 6 haneli sayısal paylaşım kodu üretir (örn. "482910").
+ */
+export function generateNumericPinCode(pin: PinPoint): string {
+  const str = `${Number(pin.lat).toFixed(4)}_${Number(pin.lng).toFixed(4)}_${pin.label}`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) % 1000000;
+  }
+  const code = Math.abs(hash).toString().padStart(6, "0");
+  registerNumericPin(code, pin);
+  return code;
+}
+
 /**
  * Kodu `{lat,lng,label}`'e çözer. Biçim, aralık veya ayrıştırma hatasında `null` döner
  * (asla fırlatmaz, asla koordinat uydurmaz — I1).
  */
 export function decodePinCode(code: string | null | undefined): PinPoint | null {
   const raw = (code ?? "").replace(/\s+/g, "");
+  if (/^\d{6}$/.test(raw)) {
+    const fromRegistry = resolveNumericPin(raw);
+    if (fromRegistry) return fromRegistry;
+  }
   if (!SHARE_CODE_PATTERN.test(raw)) return null;
   const b64url = unescapeFromShareCharset(raw);
   if (b64url === null) return null;

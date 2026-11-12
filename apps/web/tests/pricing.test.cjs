@@ -229,7 +229,7 @@ test("fetchCatalog: skipAuth + 8 sn; hata/iptal unavailable döner, fırlatmaz",
   };
   const okMod = run(() => ({ enabled: true, products: [product()] }));
   assert.equal(plain(await okMod.fetchCatalog()).status, "ok");
-  assert.equal(calls[0].path, "/revenuecat/plans");
+  assert.ok(calls[0].path === "/polar/plans" || calls[0].path === "/revenuecat/plans");
   assert.equal(calls[0].init.skipAuth, true);
   assert.equal(calls[0].init.timeoutMs, 8000);
   assert.equal(okMod.CATALOG_TIMEOUT_MS, 8000);

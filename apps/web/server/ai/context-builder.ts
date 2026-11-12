@@ -87,6 +87,10 @@ export async function buildPersonalContext(
     settings,
     payload: {
       ...payload,
+      userDisplayName:
+        typeof payload.userDisplayName === "string" && payload.userDisplayName.trim()
+          ? payload.userDisplayName.trim().slice(0, 60)
+          : undefined,
       profileContext: undefined,
       preferences: sanitizePreferences(payload.preferences),
       conversationState: erased ? undefined : payload.conversationState,

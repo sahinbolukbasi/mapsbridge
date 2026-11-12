@@ -18,6 +18,8 @@ export function configuredModels(env = process.env): string[] {
       [
         env.BEDROCK_MODEL_ID,
         env.BEDROCK_INTAKE_MODEL_ID,
+        env.BEDROCK_FAST_MODEL_ID,
+        "anthropic.claude-3-5-haiku-20241022-v1:0",
         "meta.llama3-1-8b-instruct-v1:0",
         "amazon.nova-micro-v1:0",
       ].filter((id): id is string => !!id),

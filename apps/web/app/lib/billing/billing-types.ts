@@ -107,5 +107,6 @@ export interface CheckoutResult {
   newBalance?: number;
   newTier?: SubscriptionTierId;
   transactionId?: string;
-  stripeRedirectUrl?: string; // kept for interface compatibility; now points to RC checkout
+  polarRedirectUrl?: string;
+  stripeRedirectUrl?: string; // kept for interface compatibility; now points to Polar checkout
 }

@@ -6,6 +6,7 @@ import type {
   EmergencyInfo,
   FlightPriceInfo,
   TravelAdvisoryInfo,
+  PostRouteHarness,
   RouteStop,
 } from "./types";
 
@@ -32,6 +33,7 @@ export interface ChatMessage {
   emergency?: EmergencyInfo;
   flightPrices?: FlightPriceInfo;
   travelAdvisory?: TravelAdvisoryInfo;
+  postRouteHarness?: PostRouteHarness;
   quickReplies?: Array<string | QuickReplyOption>;
   actions?: Array<{ type: string; payload: unknown }>;
 }

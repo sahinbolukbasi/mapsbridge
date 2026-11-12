@@ -30,7 +30,8 @@ export type Catalog =
   { status: "ok"; enabled: boolean; products: CatalogProduct[] } | { status: "unavailable" };
 
 export const CATALOG_TIMEOUT_MS = 8000;
-const CATALOG_ENDPOINT = "/revenuecat/plans";
+const CATALOG_ENDPOINT = "/polar/plans";
+const LEGACY_CATALOG_ENDPOINT = "/revenuecat/plans";
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -83,10 +84,18 @@ export async function fetchCatalog(signal?: AbortSignal): Promise<Catalog> {
     const aborted = new Promise<never>((_, reject) => {
       controller.signal.addEventListener("abort", () => reject(new Error("catalog aborted")));
     });
-    const raw = await Promise.race([
-      apiFetch<unknown>(CATALOG_ENDPOINT, { skipAuth: true, timeoutMs: CATALOG_TIMEOUT_MS }),
-      aborted,
-    ]);
+    let raw: unknown;
+    try {
+      raw = await Promise.race([
+        apiFetch<unknown>(CATALOG_ENDPOINT, { skipAuth: true, timeoutMs: CATALOG_TIMEOUT_MS }),
+        aborted,
+      ]);
+    } catch {
+      raw = await Promise.race([
+        apiFetch<unknown>(LEGACY_CATALOG_ENDPOINT, { skipAuth: true, timeoutMs: CATALOG_TIMEOUT_MS }),
+        aborted,
+      ]);
+    }
     return parseCatalog(raw);
   } catch (err) {
     if (process.env.NODE_ENV !== "production")

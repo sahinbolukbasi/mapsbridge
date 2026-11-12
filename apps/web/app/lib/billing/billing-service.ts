@@ -1,6 +1,6 @@
 import { apiFetch } from "../api-client";
 import { getStoredSession } from "../cognito";
-import { createRevenueCatCheckout } from "./revenuecat-client";
+import { createPolarCheckout } from "./polar-client";
 import { getActionCreditCost, type AICreditAction } from "@mapsbridge/contracts";
 // ============================================================
 // MapsBridge Billing & Monetization Service
@@ -199,12 +199,27 @@ export class BillingService {
     this.walletOwner = "";
     this.serverWallet = { ...DEFAULT_WALLET };
     if (!owner) return this.getWallet();
-    const data = await apiFetch<{
+    let data: {
       credits: number;
       tier: SubscriptionTierId;
       currentPeriodEnd?: string;
       welcomeGift?: WalletData["welcomeGift"];
-    }>("/revenuecat/wallet");
+    };
+    try {
+      data = await apiFetch<{
+        credits: number;
+        tier: SubscriptionTierId;
+        currentPeriodEnd?: string;
+        welcomeGift?: WalletData["welcomeGift"];
+      }>("/polar/wallet");
+    } catch {
+      data = await apiFetch<{
+        credits: number;
+        tier: SubscriptionTierId;
+        currentPeriodEnd?: string;
+        welcomeGift?: WalletData["welcomeGift"];
+      }>("/revenuecat/wallet");
+    }
     if (getStoredSession()?.token !== owner) return this.getWallet();
     this.walletOwner = owner;
     this.serverWallet = {
@@ -236,7 +251,7 @@ export class BillingService {
     throw new Error("Kredi yalnız doğrulanmış ödeme ile eklenebilir.");
   }
   public async processCheckout(payload: CheckoutPayload): Promise<CheckoutResult> {
-    return createRevenueCatCheckout(payload);
+    return createPolarCheckout(payload);
   }
   public recordRouteSale(_title: string, _price: number): void {
     throw new Error("Satış sunucu doğrulaması gerektirir.");

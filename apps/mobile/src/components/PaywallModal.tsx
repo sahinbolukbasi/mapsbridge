@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 import type { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import { getOfferings, purchasePackage, restorePurchases } from "../services/revenuecat";
 import { billingService, type WalletSnapshot } from "../services/api";
@@ -130,7 +131,15 @@ export function PaywallModal({
     if (guest) return "unavailable";
     if (catalog === "loading") return "loading";
     const pkg = pkgOf(product);
-    return pkg ? { storePrice: pkg.product.priceString, period: "monthly" } : "none";
+    if (pkg) return { storePrice: pkg.product.priceString, period: "monthly" };
+    if (product && typeof product.amount === "number") {
+      const priceStr = `${Math.round(product.amount / 100)} ₺`;
+      return {
+        storePrice: product.mode === "subscription" ? `${priceStr} / ay` : priceStr,
+        period: "monthly",
+      };
+    }
+    return "none";
   };
 
   const changeMode = (next: Mode) => {
@@ -142,12 +151,24 @@ export function PaywallModal({
 
   const buy = async () => {
     const product = productOf(selected);
-    const pkg = pkgOf(product);
-    if (!product || !pkg) return;
+    if (!product) return;
     setPurchasing(true);
     try {
-      const result = await purchasePackage(pkg, placement);
-      if (result.success) {
+      // 1. Polar Hosted Checkout
+      let polarSuccess = false;
+      try {
+        const session = await billingService.createCheckout(product.id, product.mode);
+        if (session?.url && session.url.startsWith("http")) {
+          await WebBrowser.openBrowserAsync(session.url);
+          polarSuccess = true;
+        }
+      } catch (polarErr) {
+        console.warn("[Polar Checkout] Not available, trying package fallback:", polarErr);
+      }
+
+      if (polarSuccess) {
+        await new Promise((r) => setTimeout(r, 1000));
+        await loadWallet();
         setDone(
           selected.kind === "plan"
             ? {
@@ -162,14 +183,52 @@ export function PaywallModal({
               },
         );
         onProUnlocked?.();
-        loadWallet();
-      } else if (result.error !== "cancelled") {
-        toast.show({
-          tone: "danger",
-          title: tr("pricing.unavailable"),
-          message: result.error || tr("ui.unexpectedError"),
-        });
+        return;
       }
+
+      // 2. Fallback to package if configured
+      const pkg = pkgOf(product);
+      if (pkg) {
+        const result = await purchasePackage(pkg, placement);
+        if (result.success) {
+          setDone(
+            selected.kind === "plan"
+              ? {
+                  title: tr("native.paywall.planActive", {
+                    name: tr(`pricing.tier.${selected.tier}`),
+                  }),
+                  message: tr("native.paywall.planActiveBody"),
+                }
+              : {
+                  title: tr("native.paywall.packDone"),
+                  message: tr("native.paywall.packDoneBody", { n: groupThousands(product.credits) }),
+                },
+          );
+          onProUnlocked?.();
+          loadWallet();
+          return;
+        } else if (result.error !== "cancelled") {
+          toast.show({
+            tone: "danger",
+            title: tr("pricing.unavailable"),
+            message: result.error || tr("ui.unexpectedError"),
+          });
+          return;
+        }
+      }
+
+      // If neither succeeded and wasn't cancelled
+      toast.show({
+        tone: "info",
+        title: tr("pricing.unavailable"),
+        message: "Ödeme sayfası açılamadı. Lütfen internet bağlantınızı kontrol edin.",
+      });
+    } catch (err: unknown) {
+      toast.show({
+        tone: "danger",
+        title: tr("pricing.unavailable"),
+        message: err instanceof Error ? err.message : tr("ui.unexpectedError"),
+      });
     } finally {
       setPurchasing(false);
     }
@@ -178,10 +237,17 @@ export function PaywallModal({
   const restore = async () => {
     setRestoring(true);
     try {
-      const result = await restorePurchases();
-      if (result.isPro) {
+      try {
+        const portal = await billingService.openCustomerPortal();
+        if (portal?.url && portal.url.startsWith("http")) {
+          await WebBrowser.openBrowserAsync(portal.url);
+        }
+      } catch {}
+
+      await loadWallet();
+      const updated = await billingService.getWallet();
+      if (updated && (updated.tier !== "free" || updated.credits > 0)) {
         onProUnlocked?.();
-        loadWallet();
         toast.show({ tone: "success", message: tr("native.paywall.restore") });
       } else {
         toast.show({ tone: "info", message: tr("native.paywall.restoreNone") });

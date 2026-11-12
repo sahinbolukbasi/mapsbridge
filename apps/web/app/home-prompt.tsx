@@ -166,7 +166,11 @@ export function ShareCodeForm({
       return;
     }
     setError(null);
-    router.push(`/k/?code=${encodeURIComponent(code)}`);
+    if (/^\d{6}$/.test(code)) {
+      router.push(`/p/?c=${encodeURIComponent(code)}`);
+    } else {
+      router.push(`/k/?code=${encodeURIComponent(code)}`);
+    }
   }
 
   return (
