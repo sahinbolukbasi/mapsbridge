@@ -32,3 +32,4 @@ export function StatCard({ label, value, subValue, badge, icon }: StatCardProps)
     </div>
   );
 }
+

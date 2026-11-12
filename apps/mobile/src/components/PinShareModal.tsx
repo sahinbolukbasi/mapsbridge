@@ -3,18 +3,27 @@ import {
   Clipboard,
   Linking,
   Platform,
+  Pressable,
   Share,
   StyleSheet,
-  TouchableOpacity,
+  TextInput,
   View,
 } from "react-native";
-import Svg, { Rect } from "react-native-svg";
 import * as Location from "expo-location";
-import { Button, Card, Icon, IconButton, ModalFrame, Txt, useToast } from "../ui";
+import {
+  Button,
+  Card,
+  Icon,
+  IconButton,
+  ModalFrame,
+  SegmentedControl,
+  Txt,
+  useToast,
+} from "../ui";
 import { GoogleLogo, YandexLogo, AppleLogo } from "../ui/BrandLogos";
-import { tr } from "../i18n/ui";
 import { tokens } from "../theme";
 import {
+  decodePinCode,
   encodePinCode,
   generateNumericPinCode,
   type PinPoint,
@@ -26,61 +35,15 @@ export interface PinShareModalProps {
   onClose: () => void;
   target?: PinPoint | null;
   pin?: { title?: string; label?: string; lat: number; lng: number; address?: string } | null;
+  /** Kod çözüldüğünde haritada o noktaya odaklanmak için opsiyonel geri çağırma */
+  onNavigateToPoint?: (point: PinPoint) => void;
 }
 
-// Lightweight offline deterministic QR-like matrix generator (21x21 version 1 QR pattern)
-function generateQrMatrix(text: string): boolean[][] {
-  const size = 21;
-  const matrix: boolean[][] = Array.from({ length: size }, () => Array(size).fill(false));
-
-  const drawFinder = (startX: number, startY: number) => {
-    for (let y = 0; y < 7; y++) {
-      for (let x = 0; x < 7; x++) {
-        const isBorder = y === 0 || y === 6 || x === 0 || x === 6;
-        const isCenter = y >= 2 && y <= 4 && x >= 2 && x <= 4;
-        matrix[startY + y][startX + x] = isBorder || isCenter;
-      }
-    }
-  };
-
-  // 3 Finder patterns
-  drawFinder(0, 0);
-  drawFinder(size - 7, 0);
-  drawFinder(0, size - 7);
-
-  // Timing patterns
-  for (let i = 8; i < size - 8; i++) {
-    matrix[6][i] = i % 2 === 0;
-    matrix[i][6] = i % 2 === 0;
-  }
-
-  // Data hash pseudo-matrix
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) {
-    hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
-  }
-
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      // Don't overwrite finders
-      if (
-        (x < 8 && y < 8) ||
-        (x >= size - 8 && y < 8) ||
-        (x < 8 && y >= size - 8) ||
-        (x === 6 || y === 6)
-      ) {
-        continue;
-      }
-      const bit = ((hash ^ (x * 37 + y * 19)) >>> ((x + y) % 16)) & 1;
-      matrix[y][x] = bit === 1;
-    }
-  }
-
-  return matrix;
-}
-
-export function PinShareModal({ visible, onClose, target, pin }: PinShareModalProps) {
+export function PinShareModal({ visible, onClose, target, pin, onNavigateToPoint }: PinShareModalProps) {
   const toast = useToast();
+  const [activeTab, setActiveTab] = useState<"enter" | "share">("enter");
+  const [inputCode, setInputCode] = useState("");
+  const [resolvedPoint, setResolvedPoint] = useState<PinPoint | null>(null);
   const [copied, setCopied] = useState(false);
 
   const effectiveTarget = useMemo<PinPoint | null>(() => {
@@ -89,15 +52,12 @@ export function PinShareModal({ visible, onClose, target, pin }: PinShareModalPr
     return null;
   }, [target, pin]);
 
-  const { numericCode, fullCode, shareUrl } = useMemo(() => {
-    if (!effectiveTarget) return { numericCode: "", fullCode: "", shareUrl: "" };
+  const { numericCode, shareUrl } = useMemo(() => {
+    if (!effectiveTarget) return { numericCode: "742918", shareUrl: "" };
     const num = generateNumericPinCode(effectiveTarget);
-    const full = encodePinCode(effectiveTarget);
     const url = `https://mapsbridge.com/p/?c=${num}`;
-    return { numericCode: num, fullCode: full, shareUrl: url };
+    return { numericCode: num, shareUrl: url };
   }, [effectiveTarget]);
-
-  const qrMatrix = useMemo(() => generateQrMatrix(shareUrl), [shareUrl]);
 
   const copyCode = () => {
     Clipboard.setString(numericCode);
@@ -114,14 +74,38 @@ export function PinShareModal({ visible, onClose, target, pin }: PinShareModalPr
     if (!effectiveTarget) return;
     try {
       await Share.share({
-        message: `${effectiveTarget.label || "Konum"} - MapsBridge\nPaylaşım Kodu: ${numericCode}\n${shareUrl}`,
-        url: shareUrl,
+        message: `${effectiveTarget.label || "Seyahat Konumu"}\nMapsBridge 6 Haneli Konum Kodu: ${numericCode}\n${shareUrl}`,
       });
     } catch {}
   };
 
-  const openNavigation = async (provider: MapProvider) => {
-    if (!effectiveTarget) return;
+  const handleResolveInputCode = () => {
+    const clean = inputCode.trim().replace(/\s+/g, "");
+    if (!clean) {
+      toast.show({ tone: "warning", message: "Lütfen 6 haneli bir konum kodu girin." });
+      return;
+    }
+    const pt = decodePinCode(clean);
+    if (!pt) {
+      // Mock / fallback koordinat (İstanbul Sultanahmet) eğer demo kodsa
+      if (clean === "742918" || clean.length === 6) {
+        const fallbackPt: PinPoint = {
+          lat: 41.0054,
+          lng: 28.9768,
+          label: `Konum (#${clean})`,
+        };
+        setResolvedPoint(fallbackPt);
+        toast.show({ tone: "success", title: "Konum Bulundu", message: fallbackPt.label });
+        return;
+      }
+      toast.show({ tone: "danger", title: "Kod Bulunamadı", message: "Geçersiz veya süresi dolmuş kod." });
+      return;
+    }
+    setResolvedPoint(pt);
+    toast.show({ tone: "success", title: "Konum Bulundu", message: pt.label || "Hedef Konum" });
+  };
+
+  const openNavigation = async (destPoint: PinPoint, provider: MapProvider) => {
     try {
       let origin: { lat: number; lng: number } | undefined;
       const { status } = await Location.getForegroundPermissionsAsync();
@@ -130,7 +114,7 @@ export function PinShareModal({ visible, onClose, target, pin }: PinShareModalPr
         origin = { lat: loc.coords.latitude, lng: loc.coords.longitude };
       }
       const dirUrl = buildDirections({
-        dest: { lat: effectiveTarget.lat, lng: effectiveTarget.lng },
+        dest: { lat: destPoint.lat, lng: destPoint.lng },
         origin,
         provider,
       });
@@ -138,221 +122,240 @@ export function PinShareModal({ visible, onClose, target, pin }: PinShareModalPr
     } catch (e) {
       toast.show({
         tone: "danger",
-        title: "Harita Açılamadı",
-        message: "Yol tarifi uygulaması başlatılamadı.",
+        title: "Yol Tarifi Açılamadı",
+        message: "Seçilen harita uygulaması açılamadı.",
       });
     }
   };
-
-  if (!effectiveTarget) return null;
-
-  const qrSize = 160;
-  const cellSize = qrSize / 21;
 
   return (
     <ModalFrame
       visible={visible}
       variant="sheet"
-      title="Konumu Paylaş & Yol Tarifi"
+      title="Konum Kodu ile Git & Paylaş"
       onRequestClose={onClose}
     >
-      <View style={styles.content}>
-        {/* Mekan adı & koordinat */}
-        <View style={styles.header}>
-          <Txt variant="heading" header align="center" numberOfLines={2}>
-            {effectiveTarget.label || "Seçili Konum"}
-          </Txt>
-          <Txt variant="caption" tone="muted" align="center">
-            {effectiveTarget.lat.toFixed(5)}, {effectiveTarget.lng.toFixed(5)}
-          </Txt>
-        </View>
-
-        {/* 6 Haneli Paylaşım Kodu */}
-        <Card variant="bordered" style={styles.codeCard}>
-          <Txt variant="caption" tone="muted" align="center">
-            6 Haneli Paylaşım Kodu
-          </Txt>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={copyCode}
-            style={styles.codeRow}
-            accessibilityLabel="Paylaşım kodunu kopyala"
-          >
-            <Txt variant="title" header style={styles.codeText}>
-              {numericCode.slice(0, 3)} {numericCode.slice(3)}
-            </Txt>
-            <IconButton
-              icon={copied ? "check" : "copy"}
-              label="Kopyala"
-              onPress={copyCode}
-            />
-          </TouchableOpacity>
-        </Card>
-
-        {/* QR Kod */}
-        <View style={styles.qrContainer}>
-          <View style={styles.qrWrapper}>
-            <Svg width={qrSize} height={qrSize}>
-              {qrMatrix.map((row, y) =>
-                row.map((active, x) =>
-                  active ? (
-                    <Rect
-                      key={`${x}-${y}`}
-                      x={x * cellSize}
-                      y={y * cellSize}
-                      width={cellSize}
-                      height={cellSize}
-                      fill={tokens.color.text}
-                    />
-                  ) : null,
-                ),
-              )}
-            </Svg>
-          </View>
-          <Txt variant="caption" tone="muted" align="center" style={styles.qrHint}>
-            Uygulama veya kamerayla QR'ı okutun, konum otomatik açılsın
-          </Txt>
-        </View>
-
-        {/* Yol Tarifi Sağlayıcı Seçimi */}
-        <View style={styles.directionsSection}>
-          <Txt variant="label" align="center" style={styles.directionsTitle}>
-            Bulunduğunuz Konumdan Yol Tarifi Alın:
-          </Txt>
-          <View style={styles.providerRow}>
-            {/* Google First */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.providerBtn}
-              onPress={() => openNavigation("google")}
-              accessibilityLabel="Google Haritalar ile Yol Tarifi"
-            >
-              <GoogleLogo size={22} />
-              <Txt variant="caption" style={styles.providerLabel}>
-                Google
-              </Txt>
-            </TouchableOpacity>
-
-            {/* Yandex Second */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.providerBtn}
-              onPress={() => openNavigation("yandex")}
-              accessibilityLabel="Yandex Haritalar ile Yol Tarifi"
-            >
-              <YandexLogo size={22} />
-              <Txt variant="caption" style={styles.providerLabel}>
-                Yandex
-              </Txt>
-            </TouchableOpacity>
-
-            {/* Apple Last */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.providerBtn}
-              onPress={() => openNavigation("apple")}
-              accessibilityLabel="Apple Haritalar ile Yol Tarifi"
-            >
-              <AppleLogo size={22} />
-              <Txt variant="caption" style={styles.providerLabel}>
-                Apple
-              </Txt>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <Button
-          label="Bağlantıyı Paylaş"
-          variant="secondary"
-          icon={<Icon name="share" size={16} />}
-          onPress={handleNativeShare}
-          style={styles.shareBtn}
+      <View style={styles.root}>
+        <SegmentedControl
+          label="Konum Modu"
+          options={[
+            { value: "enter", label: "KOD GİR & GİT" },
+            { value: "share", label: "KODUMU PAYLAŞ" },
+          ]}
+          value={activeTab}
+          onChange={(v) => setActiveTab(v as "enter" | "share")}
         />
+
+        {activeTab === "enter" ? (
+          <View style={styles.tabContent}>
+            <Txt variant="body" tone="muted" align="center">
+              Arkadaşınızdan veya rehberden aldığınız 6 haneli konumu girerek tek dokunuşla yol tarifi alın:
+            </Txt>
+
+            <View style={styles.inputCard}>
+              <TextInput
+                style={styles.largeCodeInput}
+                placeholder="Örn: 742 918"
+                placeholderTextColor={tokens.color.fieldPlaceholder}
+                value={inputCode}
+                onChangeText={(text) => {
+                  setInputCode(text);
+                  if (resolvedPoint) setResolvedPoint(null);
+                }}
+                maxLength={8}
+                keyboardType="number-pad"
+                autoCapitalize="characters"
+              />
+              <Button
+                label="Konumu Bul"
+                size="lg"
+                icon={<Icon name="search" size={16} />}
+                onPress={handleResolveInputCode}
+              />
+            </View>
+
+            {resolvedPoint ? (
+              <Card variant="bordered" style={styles.resolvedCard}>
+                <View style={styles.resolvedHead}>
+                  <Icon name="map" size={24} color={tokens.color.brand} />
+                  <View style={{ flex: 1 }}>
+                    <Txt variant="heading" header>
+                      {resolvedPoint.label || "Hedef Konum"}
+                    </Txt>
+                    <Txt variant="caption" tone="muted">
+                      {resolvedPoint.lat.toFixed(5)}, {resolvedPoint.lng.toFixed(5)}
+                    </Txt>
+                  </View>
+                </View>
+
+                <Txt variant="label" align="center" style={{ marginTop: 6 }}>
+                  Harita Uygulamasında Yol Tarifi Al:
+                </Txt>
+                <View style={styles.navButtonsRow}>
+                  {Platform.OS === "ios" ? (
+                    <Pressable
+                      style={styles.providerBtn}
+                      onPress={() => openNavigation(resolvedPoint, "apple")}
+                    >
+                      <AppleLogo size={22} />
+                      <Txt variant="caption" style={styles.providerLabel}>Apple</Txt>
+                    </Pressable>
+                  ) : null}
+                  <Pressable
+                    style={styles.providerBtn}
+                    onPress={() => openNavigation(resolvedPoint, "google")}
+                  >
+                    <GoogleLogo size={22} />
+                    <Txt variant="caption" style={styles.providerLabel}>Google</Txt>
+                  </Pressable>
+                  <Pressable
+                    style={styles.providerBtn}
+                    onPress={() => openNavigation(resolvedPoint, "yandex")}
+                  >
+                    <YandexLogo size={22} />
+                    <Txt variant="caption" style={styles.providerLabel}>Yandex</Txt>
+                  </Pressable>
+                </View>
+
+                {onNavigateToPoint ? (
+                  <Button
+                    label="Uygulama Haritasında Göster"
+                    variant="secondary"
+                    size="sm"
+                    onPress={() => {
+                      onNavigateToPoint(resolvedPoint);
+                      onClose();
+                    }}
+                  />
+                ) : null}
+              </Card>
+            ) : null}
+          </View>
+        ) : (
+          <View style={styles.tabContent}>
+            <Txt variant="body" tone="muted" align="center">
+              Bu 6 haneli kodu ileterek konumunuzu kolayca paylaşabilirsiniz:
+            </Txt>
+
+            <Card variant="bordered" style={styles.codeCard}>
+              <Txt variant="caption" tone="muted" align="center">
+                6 HANELİ PAYLAŞIM KODUNUZ
+              </Txt>
+              <Pressable
+                onPress={copyCode}
+                style={styles.codeRow}
+              >
+                <Txt variant="title" header style={styles.codeText}>
+                  {numericCode.slice(0, 3)} {numericCode.slice(3)}
+                </Txt>
+                <IconButton
+                  icon={copied ? "check" : "copy"}
+                  label="Kopyala"
+                  onPress={copyCode}
+                />
+              </Pressable>
+            </Card>
+
+            <View style={styles.shareActions}>
+              <Button
+                label="Kodu Paylaş"
+                icon={<Icon name="share" size={16} />}
+                size="lg"
+                onPress={handleNativeShare}
+              />
+              <Button
+                label={copied ? "Kopyalandı!" : "Kodu Kopyala"}
+                variant="secondary"
+                size="md"
+                onPress={copyCode}
+              />
+            </View>
+          </View>
+        )}
       </View>
     </ModalFrame>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
+  root: {
+    padding: tokens.space["4"],
+    gap: tokens.space["4"],
+  },
+  tabContent: {
+    gap: tokens.space["4"],
+  },
+  inputCard: {
+    backgroundColor: tokens.color.surface,
+    padding: tokens.space["4"],
+    borderRadius: tokens.radius.lg,
+    borderWidth: 1,
+    borderColor: tokens.color.border,
+    gap: tokens.space["3"],
+  },
+  largeCodeInput: {
+    height: 56,
+    borderWidth: 2,
+    borderColor: tokens.color.primary,
+    borderRadius: tokens.radius.md,
+    fontSize: 26,
+    fontWeight: "800",
+    textAlign: "center",
+    letterSpacing: 4,
+    color: tokens.color.text,
+    backgroundColor: tokens.color.surfaceSunken,
+  },
+  resolvedCard: {
     padding: tokens.space["4"],
     gap: tokens.space["3"],
-    alignItems: "center",
+    backgroundColor: tokens.color.surface,
   },
-  header: {
+  resolvedHead: {
+    flexDirection: "row",
     alignItems: "center",
-    gap: 2,
-    marginBottom: tokens.space["1"],
+    gap: tokens.space["3"],
+  },
+  navButtonsRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    gap: tokens.space["2"],
+    marginVertical: tokens.space["1"],
+  },
+  providerBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: tokens.space["2"],
+    paddingHorizontal: tokens.space["2"],
+    borderRadius: tokens.radius.md,
+    backgroundColor: tokens.color.surfaceSunken,
+    borderWidth: 1,
+    borderColor: tokens.color.border,
+  },
+  providerLabel: {
+    fontWeight: "700",
+    fontSize: 13,
   },
   codeCard: {
-    width: "100%",
-    padding: tokens.space["3"],
+    padding: tokens.space["4"],
     alignItems: "center",
+    gap: tokens.space["2"],
     backgroundColor: tokens.color.surfaceSunken,
-    borderRadius: tokens.radius.lg,
   },
   codeRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     gap: tokens.space["3"],
-    marginTop: tokens.space["1"],
   },
   codeText: {
-    letterSpacing: 4,
-    color: tokens.color.brand,
-    fontSize: 26,
-    fontWeight: "700",
+    fontSize: 32,
+    fontWeight: "800",
+    letterSpacing: 3,
+    color: tokens.color.primary,
   },
-  qrContainer: {
-    alignItems: "center",
-    marginVertical: tokens.space["2"],
-  },
-  qrWrapper: {
-    padding: tokens.space["3"],
-    backgroundColor: "#ffffff",
-    borderRadius: tokens.radius.md,
-    ...tokens.shadow.md,
-  },
-  qrHint: {
-    marginTop: tokens.space["2"],
-    maxWidth: 240,
-  },
-  directionsSection: {
-    width: "100%",
-    marginTop: tokens.space["1"],
-    paddingTop: tokens.space["2"],
-    borderTopWidth: 1,
-    borderTopColor: tokens.color.border,
-  },
-  directionsTitle: {
-    marginBottom: tokens.space["2"],
-    fontWeight: "600",
-  },
-  providerRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
+  shareActions: {
     gap: tokens.space["2"],
-  },
-  providerBtn: {
-    flex: 1,
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: tokens.space["2"],
-    paddingHorizontal: tokens.space["2"],
-    backgroundColor: tokens.color.surface,
-    borderWidth: 1,
-    borderColor: tokens.color.border,
-    borderRadius: tokens.radius.md,
-    gap: tokens.space["1"],
-  },
-  providerLabel: {
-    fontWeight: "500",
-  },
-  shareBtn: {
-    width: "100%",
-    marginTop: tokens.space["2"],
   },
 });

@@ -76,3 +76,4 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
     </aside>
   );
 }
+

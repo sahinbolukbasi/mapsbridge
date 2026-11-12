@@ -86,3 +86,4 @@ export function AdminHeader({ activeTab, onRefresh, refreshing }: AdminHeaderPro
     </header>
   );
 }
+

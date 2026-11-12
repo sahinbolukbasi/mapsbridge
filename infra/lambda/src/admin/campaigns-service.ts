@@ -163,3 +163,4 @@ export async function handleSendCampaign(event: ApiGatewayEvent) {
   await recordAuditLog(actorSub, "campaign_broadcast", campaignId, `İletildi: ${campaign.title}`);
   return ok({ status: "sent", campaignId, sentCount: simulatedSentCount });
 }
+

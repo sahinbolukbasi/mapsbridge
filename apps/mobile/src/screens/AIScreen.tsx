@@ -771,18 +771,11 @@ export function AIScreen({ owner, onOpenMap, onOpenPlans }: AIScreenProps) {
           note={tr("assistant.composer.costNote")}
           busy={busy}
           leading={
-            <View style={styles.composerLeading}>
-              <IconButton
-                icon="plus"
-                label={tr("native.ai.routePicker.title")}
-                onPress={() => setRoutePickerOpen(true)}
-              />
-              <IconButton
-                icon="image"
-                label={"Belge Yükle"}
-                onPress={pickAndAttachDocument}
-              />
-            </View>
+            <IconButton
+              icon="plus"
+              label={tr("native.ai.routePicker.title")}
+              onPress={() => setRoutePickerOpen(true)}
+            />
           }
           onSubmit={(text) => {
             setTab("chat");

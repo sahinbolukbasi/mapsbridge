@@ -234,6 +234,35 @@ class SocialSyncService {
 
   // ─── Profile Operations ───────────────────────────────────────────────────────
   async getUserProfile(): Promise<MobileUserProfile> {
+    // 1. Önce DynamoDB sunucu profilini kontrol et (cihaz yenilenmesi veya güncelleme durumunda veriler kaybolmaz)
+    try {
+      const res = await communityFetch("/community/profile");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.profile && typeof data.profile === "object") {
+          const p = data.profile;
+          const serverProfile: MobileUserProfile = {
+            fullName: p.fullName || "",
+            username: p.username || "",
+            email: p.email || "",
+            travelTitle: p.travelTitle || "",
+            bio: p.bio || "",
+            location: p.location || "",
+            avatarUrl: p.avatarUrl || undefined,
+            followersCount: 0,
+            followingCount: 0,
+            routesCount: 0,
+            stopsCount: 0,
+            verified: false,
+          };
+          await storage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(serverProfile));
+          return serverProfile;
+        }
+      }
+    } catch (netErr) {
+      // Ağ hatasında yerel saklamadan devam et
+    }
+
     try {
       const stored = await storage.getItem(STORAGE_KEY_PROFILE);
       if (stored) {
@@ -280,9 +309,20 @@ class SocialSyncService {
       travelTitle: sanitizeText(updates.travelTitle) || current.travelTitle,
     };
 
+    // 1. Cihaz yerel depolamasına yaz
     await storage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(updated));
     this.profileListeners.forEach((fn) => fn(updated));
     await this.syncAuthorDetailsOnPosts(updated.fullName, updated.username, updated.avatarUrl);
+
+    // 2. DynamoDB sunucu veritabanına kalıcı olarak kaydet
+    try {
+      await communityFetch("/community/profile", {
+        method: "PUT",
+        body: JSON.stringify(updated),
+      });
+    } catch (err) {
+      console.warn("[SocialSync] Profil DynamoDB'ye yazılamadı, yerel kayıt korundu:", err);
+    }
 
     return updated;
   }

@@ -221,3 +221,46 @@ export async function reservedUsername(sub: string): Promise<string | undefined>
   const u = r.Item ? unmarshall(r.Item).username : undefined;
   return typeof u === "string" && /^[a-z0-9_]{3,30}$/.test(u) ? u : undefined;
 }
+
+export interface UserProfileRecord {
+  sub: string;
+  fullName: string;
+  username: string;
+  email: string;
+  travelTitle?: string;
+  bio?: string;
+  location?: string;
+  avatarUrl?: string;
+  updatedAt: string;
+}
+
+/** Kullanıcının profilini DynamoDB'den kalıcı olarak çeker. */
+export async function getUserProfile(sub: string): Promise<UserProfileRecord | null> {
+  const r = await db().send(
+    new GetItemCommand({
+      TableName: T(),
+      Key: marshall({ PK: `USER#${sub}`, SK: "PROFILE" }),
+      ConsistentRead: true,
+    }),
+  );
+  if (!r.Item) return null;
+  const { PK: _pk, SK: _sk, ...profile } = unmarshall(r.Item);
+  return profile as UserProfileRecord;
+}
+
+/** Kullanıcının profilini DynamoDB'de kalıcı olarak saklar. */
+export async function saveUserProfile(profile: UserProfileRecord): Promise<void> {
+  await db().send(
+    new PutItemCommand({
+      TableName: T(),
+      Item: marshall(
+        {
+          PK: `USER#${profile.sub}`,
+          SK: "PROFILE",
+          ...profile,
+        },
+        { removeUndefinedValues: true },
+      ),
+    }),
+  );
+}

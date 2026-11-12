@@ -215,3 +215,4 @@ export function SystemLogsModule({ errors, auditLogs, onRefresh }: SystemLogsMod
     </div>
   );
 }
+

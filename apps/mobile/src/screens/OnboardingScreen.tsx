@@ -24,24 +24,29 @@ import {
 } from "../ui";
 import { tr, type UiKey } from "../i18n/ui";
 import { fontFamily, tokens, withAlpha } from "../theme";
-// İlk açılış tanıtımı (N1, mock native-onboarding.html): üç ekran (harita, asistan, paylaşım),
-// her ekranda "Atla"; istatistik, yorum ya da uydurma sayı YOK (I1). İzinler burada istenmez:
-// konum "Yakınımda" ilk kullanımında, bildirim ilk rota kaydında (PermissionPrompt).
-// - iOS: kenardan/yatay kaydırma ile geri-ileri (sayfalı kaydırma), büyük başlık, 14 pt köşeli
-//   düğmeler ("Devam" / "Başlayalım"), üstte "Geri".
-// - Android: sistem geri (predictive back, useBackHandler) önceki sayfaya; "Atla" solda, ileri FAB
-//   sağda; edge-to-edge; basmada ripple.
-// - Sayfa değişiminde haptik (selection); hareket azaltmada kaydırma animasyonsuz.
-// Görüldü bayrağı `mb_onboarding_seen_v1`; ekran başı eski turlar (ScreenTourModal) tanıtıma
-// katlanır: bitince ya da atlanınca hepsi görüldü sayılır.
+// İlk açılış tanıtımı ve Apple Review Uyumlu İzin Katmanı:
 export const ONBOARDING_KEY = "mb_onboarding_seen_v1";
 export const TOUR_KEYS = ["map", "plan", "ai", "community", "profile"].map(
   (s) => `mb_tour_seen_${s}`,
 );
-const PAGES: readonly { icon: IconName; title: UiKey; body: UiKey }[] = [
+interface OnboardingPageItem {
+  icon: IconName;
+  title?: UiKey;
+  body?: UiKey;
+  customTitle?: string;
+  customBody?: string;
+}
+
+const PAGES: readonly OnboardingPageItem[] = [
   { icon: "map", title: "native.onboarding.1.title", body: "native.onboarding.1.body" },
   { icon: "sparkle", title: "native.onboarding.2.title", body: "native.onboarding.2.body" },
   { icon: "share", title: "native.onboarding.3.title", body: "native.onboarding.3.body" },
+  {
+    icon: "compass",
+    customTitle: "Konum ve Seyahat İzinleri",
+    customBody:
+      "Haritada yakınınızdaki turistik noktaları keşfetmek, canlı yol tarifi almak ve durak hatırlatmalarını kaçırmamak için konum ve bildirim erişimine izin verin. Verileriniz KVKK ve GDPR uyumlu güvendedir.",
+  },
 ];
 export async function markOnboardingSeen(): Promise<void> {
   await storage.setItem(ONBOARDING_KEY, "true").catch(() => undefined);
@@ -115,9 +120,9 @@ export function OnboardingScreen({ onDone }: { onDone: () => void }) {
               style={[styles.title, { fontFamily: fontFamily("extrabold", "display") }]}
               maxFontSizeMultiplier={tokens.font.maxScale.compact}
             >
-              {tr(p.title)}
+              {p.customTitle || (p.title ? tr(p.title) : "")}
             </Text>
-            <Txt tone="muted">{tr(p.body)}</Txt>
+            <Txt tone="muted">{p.customBody || (p.body ? tr(p.body) : "")}</Txt>
           </View>
         ))}
       </ScrollView>
@@ -128,7 +133,7 @@ export function OnboardingScreen({ onDone }: { onDone: () => void }) {
         accessibilityLabel={tr("native.onboarding.step", { n: page + 1, total: PAGES.length })}
       >
         {PAGES.map((p, i) => (
-          <View key={p.title} style={[styles.dot, i === page ? styles.dotActive : null]} />
+          <View key={p.customTitle || p.title || i} style={[styles.dot, i === page ? styles.dotActive : null]} />
         ))}
       </View>
       {ios ? (

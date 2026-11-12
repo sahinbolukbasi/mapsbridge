@@ -239,30 +239,53 @@ export function buildLeafletHtml(initialStops: MapStopPayload[], reducedMotion: 
         m.addTo(markers);
         byId[s.id] = m;
       });
-      if (pts.length > 1) {
-        line = L.polyline(pts, { color: "${c.mapRoute}", weight: 4, opacity: 0.5, dashArray: "6 6" }).addTo(map);
-      }
       var key = pts.map(function(p) { return p[1].toFixed(5) + "," + p[0].toFixed(5); }).join(";");
       if (key === legsKey) return;
       legsKey = key;
-      if (pts.length < 2) { post({ type: "ROUTE_LEGS", key: key, legs: [] }); return; }
+      if (pts.length < 2) { 
+        if (line) { map.removeLayer(line); line = null; }
+        post({ type: "ROUTE_LEGS", key: key, legs: [] }); 
+        return; 
+      }
       if (pts.length > ${OSRM_MAX_POINTS}) { post({ type: "ROUTE_LEGS", key: key, legs: null }); return; }
-      fetch("https://router.project-osrm.org/route/v1/walking/" + key + "?overview=full&geometries=geojson")
+      
+      // Gerçek yol geometrisi ile yol tarifi (driving/walking turn-by-turn)
+      var osrmUrl = "https://router.project-osrm.org/route/v1/driving/" + key + "?overview=full&geometries=geojson&steps=true";
+      fetch(osrmUrl)
         .then(function(r) { return r.json(); })
         .then(function(data) {
           if (key !== legsKey) return;
           var route = data && data.routes && data.routes[0];
-          if (!route) { post({ type: "ROUTE_LEGS", key: key, legs: null }); return; }
-          if (route.geometry) {
-            if (line) map.removeLayer(line);
-            line = L.polyline(route.geometry.coordinates.map(function(c) { return [c[1], c[0]]; }),
-              { color: "${c.mapRoute}", weight: 5, opacity: 0.95 }).addTo(map);
+          if (!route || !route.geometry) {
+            // Yedek olarak walking profili dene
+            return fetch("https://router.project-osrm.org/route/v1/walking/" + key + "?overview=full&geometries=geojson")
+              .then(function(r) { return r.json(); })
+              .then(function(wData) {
+                var wRoute = wData && wData.routes && wData.routes[0];
+                if (wRoute && wRoute.geometry) return wRoute;
+                return null;
+              });
           }
-          post({ type: "ROUTE_LEGS", key: key, legs: (route.legs || []).map(function(l) {
+          return route;
+        })
+        .then(function(activeRoute) {
+          if (!activeRoute) { post({ type: "ROUTE_LEGS", key: key, legs: null }); return; }
+          if (line) map.removeLayer(line);
+          // Gerçek navigasyon yolu gibi estetik ve belirgin çizgi
+          line = L.polyline(activeRoute.geometry.coordinates.map(function(c) { return [c[1], c[0]]; }), {
+            color: "${c.mapRoute}",
+            weight: 6,
+            opacity: 0.95,
+            lineJoin: "round",
+            lineCap: "round"
+          }).addTo(map);
+          post({ type: "ROUTE_LEGS", key: key, legs: (activeRoute.legs || []).map(function(l) {
             return { duration: l.duration, distance: l.distance };
           }) });
         })
-        .catch(function() { if (key === legsKey) post({ type: "ROUTE_LEGS", key: key, legs: null }); });
+        .catch(function() { 
+          if (key === legsKey) post({ type: "ROUTE_LEGS", key: key, legs: null }); 
+        });
     };
     // Konum RN'den (expo-location, izin gerekçesiyle) gelir; WebView geolocation yalnız yedek.
     window.showUser = function(lat, lng) {

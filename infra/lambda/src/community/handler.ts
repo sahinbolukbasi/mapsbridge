@@ -31,6 +31,8 @@ router.add("PUT /community/posts/{id}", updatePost);
 router.add("DELETE /community/posts/{id}", deletePost);
 router.add("POST /community/posts/{id}/like", (e) => mark(e, "LIKE"));
 router.add("POST /community/posts/{id}/bookmark", (e) => mark(e, "SAVE"));
+router.add("GET /community/profile", getProfile);
+router.add("PUT /community/profile", updateProfile);
 
 const ID_RE = /^[A-Za-z0-9_-]{6,64}$/;
 
@@ -122,6 +124,37 @@ async function mark(event: ApiGatewayEvent, kind: "LIKE" | "SAVE") {
     changed,
     on: body.on,
     count: kind === "LIKE" ? (post?.likesCount ?? 0) : (post?.savesCount ?? 0),
+  });
+}
+
+async function getProfile(event: ApiGatewayEvent) {
+  const user = await requireUser(event);
+  const profile = await repo.getUserProfile(user.sub);
+  return jsonResponse(200, {
+    success: true,
+    profile: profile || null,
+  });
+}
+
+async function updateProfile(event: ApiGatewayEvent) {
+  const user = await requireUser(event);
+  const body = parseBody<Record<string, unknown>>(event);
+  const existing = await repo.getUserProfile(user.sub);
+  const updated: repo.UserProfileRecord = {
+    sub: user.sub,
+    email: user.email || existing?.email || "",
+    fullName: typeof body?.fullName === "string" ? body.fullName.trim() : (existing?.fullName || user.email?.split("@")[0] || "Gezgin"),
+    username: typeof body?.username === "string" ? body.username.trim().toLowerCase() : (existing?.username || user.email?.split("@")[0] || "gezgin"),
+    travelTitle: typeof body?.travelTitle === "string" ? body.travelTitle.trim() : existing?.travelTitle,
+    bio: typeof body?.bio === "string" ? body.bio.trim() : existing?.bio,
+    location: typeof body?.location === "string" ? body.location.trim() : existing?.location,
+    avatarUrl: typeof body?.avatarUrl === "string" ? body.avatarUrl.trim() : existing?.avatarUrl,
+    updatedAt: new Date().toISOString(),
+  };
+  await repo.saveUserProfile(updated);
+  return jsonResponse(200, {
+    success: true,
+    profile: updated,
   });
 }
 

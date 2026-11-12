@@ -127,3 +127,4 @@ export async function handleResolveSystemError(event: ApiGatewayEvent) {
     return notFound("Hata kaydı bulunamadı veya güncellenemedi.");
   }
 }
+

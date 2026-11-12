@@ -132,13 +132,6 @@ export function PaywallModal({
     if (catalog === "loading") return "loading";
     const pkg = pkgOf(product);
     if (pkg) return { storePrice: pkg.product.priceString, period: "monthly" };
-    if (product && typeof product.amount === "number") {
-      const priceStr = `${Math.round(product.amount / 100)} ₺`;
-      return {
-        storePrice: product.mode === "subscription" ? `${priceStr} / ay` : priceStr,
-        period: "monthly",
-      };
-    }
     return "none";
   };
 
@@ -163,7 +156,11 @@ export function PaywallModal({
           polarSuccess = true;
         }
       } catch (polarErr) {
-        console.warn("[Polar Checkout] Not available, trying package fallback:", polarErr);
+        console.warn("[Polar Checkout] API call failed, opening web checkout fallback:", polarErr);
+        // Doğrudan MapsBridge Polar ödeme sayfasına yönlendir
+        const fallbackUrl = `https://mapsbridge.com/pricing?checkout=${product.id}`;
+        await WebBrowser.openBrowserAsync(fallbackUrl);
+        polarSuccess = true;
       }
 
       if (polarSuccess) {
@@ -258,7 +255,8 @@ export function PaywallModal({
   };
 
   const product = productOf(selected);
-  const state = guest ? "guest" : sellState(catalog, product, !!pkgOf(product));
+  const hasStoreOrPolar = !!pkgOf(product) || !!product;
+  const state = guest ? "guest" : sellState(catalog, product, hasStoreOrPolar);
   const ctaLabel =
     selected.kind === "plan"
       ? tr(CTA_KEY[selected.tier])

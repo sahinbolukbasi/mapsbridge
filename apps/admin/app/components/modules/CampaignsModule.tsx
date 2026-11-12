@@ -247,3 +247,4 @@ export function CampaignsModule({ campaigns, onRefresh }: CampaignsModuleProps) 
     </div>
   );
 }
+

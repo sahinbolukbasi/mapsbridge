@@ -3,7 +3,6 @@ import { Alert, Image, ScrollView, StyleSheet, View } from "react-native";
 import { authService, type UserSession } from "../services/api";
 import { storage } from "../services/storage";
 import {
-  AppleLogo,
   Button,
   Card,
   GoogleLogo,
@@ -22,15 +21,13 @@ import { tokens } from "../theme";
 // Kimlik ekranı (design §6.4, §9 "Kimlik (AuthCard)"; kararlar S7, S20): web AuthCard adımlarıyla
 // aynı sıra: Giriş / Kayıt → e-posta doğrulama kodu; Şifremi unuttum → kod + yeni şifre. Kapılardan
 // ve Giriş sekmesinden açılır. Cognito çağrıları (authService) DEĞİŞMEDİ. Google bugünkü OAuth
-// akışıyla; Apple ile giriş henüz entegre değil (yalnız "yakında" uyarısı veriyordu), bu yüzden web
-// gibi düğme çizilmez (I10, S20). İşlevsiz "Beni hatırla" kutusu kaldırıldı (S20).
+// akışıyla; işlevsiz "Beni hatırla" kutusu kaldırıldı (S20).
 type AuthMode = "login" | "register" | "confirm_signup" | "forgot_password" | "reset_password";
 
 interface AuthScreenProps {
   onSuccess: (session: UserSession) => void;
   onCancel?: () => void;
   onSelectGoogle?: () => void;
-  onSelectApple?: () => void;
   initialMode?: AuthMode;
 }
 
@@ -68,7 +65,6 @@ export function AuthScreen({
   onSuccess,
   onCancel,
   onSelectGoogle,
-  onSelectApple,
   initialMode = "login",
 }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -330,20 +326,6 @@ export function AuthScreen({
                     onPress={onSelectGoogle}
                   />
                 ) : null}
-                <Button
-                  label={mode === "register" ? "Apple ile Kaydol" : "Apple ile Giriş Yap"}
-                  variant="secondary"
-                  size="lg"
-                  icon={<AppleLogo size={20} />}
-                  onPress={
-                    onSelectApple ||
-                    (() =>
-                      Alert.alert(
-                        "Apple ile Giriş",
-                        "Apple ile güvenli kimlik doğrulama başlatılıyor.",
-                      ))
-                  }
-                />
                 <Txt variant="caption" tone="muted" align="center">
                   {tr("native.auth.or")}
                 </Txt>

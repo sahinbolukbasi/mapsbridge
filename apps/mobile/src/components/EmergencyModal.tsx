@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Linking, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Icon, Txt } from "../ui";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Button, Icon, ModalFrame, Txt } from "../ui";
 import { tokens } from "../theme";
 import { shakeDetector } from "../services/shakeEmergency";
 
@@ -21,7 +21,7 @@ export function EmergencyModal() {
     if (!active) return;
     if (countdown <= 0) {
       setActive(false);
-      // Initiate emergency call
+      // Ek onay sormadan derhal acil arama başlat
       void Linking.openURL("tel:112");
       return;
     }
@@ -36,59 +36,49 @@ export function EmergencyModal() {
   if (!active) return null;
 
   return (
-    <Modal visible={active} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.dialog}>
-          <View style={styles.iconWrapper}>
-            <Icon name="alert" size={32} color="#ffffff" />
-          </View>
-
-          <Txt variant="heading" header align="center" style={styles.title}>
-            Acil Durum Uyarısı!
-          </Txt>
-
-          <Txt variant="body" align="center" style={styles.bodyText}>
-            Telefon sallandı. Bulunduğunuz konuma göre acil durum hattı (112) aranacak.
-          </Txt>
-
-          <View style={styles.counterCircle}>
-            <Text style={styles.counterText}>{countdown}</Text>
-          </View>
-
-          <Txt variant="caption" tone="muted" align="center">
-            Aramayı durdurmak için aşağıdaki butona basın
-          </Txt>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.cancelBtn}
-            onPress={() => setActive(false)}
-          >
-            <Text style={styles.cancelText}>İptal Et</Text>
-          </TouchableOpacity>
+    <ModalFrame
+      visible={active}
+      variant="dialog"
+      title="Acil Durum Uyarısı"
+      onRequestClose={() => setActive(false)}
+    >
+      <View style={styles.dialog}>
+        <View style={styles.iconWrapper}>
+          <Icon name="alert" size={32} color={tokens.color.onPrimary} />
         </View>
+
+        <Txt variant="heading" header align="center" style={styles.title}>
+          Acil Durum Uyarısı!
+        </Txt>
+
+        <Txt variant="body" align="center" style={styles.bodyText}>
+          Telefon sallandı. Bulunduğunuz konuma göre acil durum hattı (112) aranacak.
+        </Txt>
+
+        <View style={styles.counterCircle}>
+          <Text style={styles.counterText}>{countdown}</Text>
+        </View>
+
+        <Txt variant="caption" tone="muted" align="center">
+          Aramayı durdurmak için aşağıdaki butona basın
+        </Txt>
+
+        <Button
+          label="İptal Et"
+          variant="secondary"
+          size="lg"
+          onPress={() => setActive(false)}
+        />
       </View>
-    </Modal>
+    </ModalFrame>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.75)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: tokens.space["4"],
-  },
   dialog: {
-    width: "100%",
-    maxWidth: 340,
-    backgroundColor: tokens.color.surface,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.space["5"],
+    padding: tokens.space["4"],
     alignItems: "center",
     gap: tokens.space["3"],
-    ...tokens.shadow.lg,
   },
   iconWrapper: {
     width: 64,
@@ -101,16 +91,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: "800",
     color: tokens.color.danger,
   },
   bodyText: {
     color: tokens.color.text,
   },
   counterCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     borderWidth: 4,
     borderColor: tokens.color.danger,
     justifyContent: "center",
@@ -118,21 +107,8 @@ const styles = StyleSheet.create({
     marginVertical: tokens.space["2"],
   },
   counterText: {
-    fontSize: 34,
-    fontWeight: "800",
+    fontSize: 40,
+    fontWeight: "bold",
     color: tokens.color.danger,
-  },
-  cancelBtn: {
-    width: "100%",
-    backgroundColor: tokens.color.borderStrong,
-    paddingVertical: tokens.space["3"],
-    borderRadius: tokens.radius.lg,
-    alignItems: "center",
-    marginTop: tokens.space["2"],
-  },
-  cancelText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: tokens.color.text,
   },
 });

@@ -82,3 +82,4 @@ export async function handleTriggerPolarSync(event: ApiGatewayEvent) {
     message: "Polar ürün ve fiyat katmanları başarıyla senkronize edildi.",
   });
 }
+

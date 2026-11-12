@@ -500,18 +500,6 @@ export function App() {
     }
   };
 
-  const handleAppleSignIn = async () => {
-    try {
-      Alert.alert(
-        "Apple ile Giriş",
-        "Apple ile güvenli kimlik doğrulama hazırlanıyor. Lütfen bekleyin...",
-      );
-    } catch (e) {
-      console.warn("Apple sign-in error:", e);
-      Alert.alert("Apple Girişi", "Apple ile giriş başlatılamadı.");
-    }
-  };
-
   // Intercept Google OAuth redirect with improved error handling
   const handleGoogleIntercept = (url: string): boolean => {
     if (!url) return true;
@@ -684,7 +672,6 @@ export function App() {
             onSuccess={handleAuthSuccess}
             onCancel={goBack}
             onSelectGoogle={handleGoogleSignIn}
-            onSelectApple={handleAppleSignIn}
           />
         );
     }

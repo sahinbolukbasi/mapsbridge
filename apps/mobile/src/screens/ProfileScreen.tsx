@@ -284,13 +284,13 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
         <Card variant="bordered">
           <View style={styles.body}>
             <Txt variant="heading" header>
-              {"Paylaşım Kodu & QR"}
+              {"Konum Kodu ile Git & Paylaş"}
             </Txt>
             <Txt variant="small" tone="muted">
-              {"6 haneli sayı kodu veya QR ile konum ve rota paylaşın, pop-up menüden yol tarifi alın."}
+              {"6 haneli seyahat kodunu girerek konuma gidin ya da kendi konum kodunuzu arkadaşlarınızla paylaşın."}
             </Txt>
             <Button
-              label={"Paylaşım Kodunu ve QR'ı Aç"}
+              label={"Konum Kodunu Aç / Kod Gir"}
               variant="secondary"
               onPress={() => setShareCodeOpen(true)}
             />

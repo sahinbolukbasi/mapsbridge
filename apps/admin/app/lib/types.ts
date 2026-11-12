@@ -215,3 +215,4 @@ export interface AuditLogRecord {
   details?: Record<string, unknown>;
   createdAt: string;
 }
+
