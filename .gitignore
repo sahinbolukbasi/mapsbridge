@@ -32,6 +32,8 @@ errored.tfstate
 **/.build/
 apps/web/.next/
 apps/web/out/
+apps/admin/.next/
+apps/admin/out/
 *.tsbuildinfo
 __pycache__/
 # OS

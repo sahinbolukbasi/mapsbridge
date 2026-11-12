@@ -105,20 +105,27 @@ resource "aws_cloudfront_function" "admin_router" {
   count   = local.admin_enabled ? 1 : 0
   name    = "${local.name}-admin-router"
   runtime = "cloudfront-js-2.0"
-  comment = "Admin SPA router — routes all HTML requests to /u/admin/index.html"
+  comment = "Admin SPA router — routes requests to isolated admin bundle index.html"
   publish = true
   code    = <<-JS
     function handler(event) {
-      // admin.mapsbridge.com → redirect to mapsbridge.com/u/admin/
-      // Auth is localStorage-based and origin-scoped; admin panel must run on the main domain.
-      return {
-        statusCode: 301,
-        statusDescription: 'Moved Permanently',
-        headers: {
-          'location': { value: 'https://mapsbridge.com/u/admin/' },
-          'cache-control': { value: 'no-store' }
-        }
-      };
+      var request = event.request;
+      var uri = request.uri;
+
+      // Dosya uzantısı içeren statik varlıklar (_next, css, js, ico, png)
+      if (uri.indexOf('.') !== -1) {
+        return request;
+      }
+
+      // Dizin yolları index.html ile tamamlanır
+      if (uri.endsWith('/')) {
+        request.uri = uri + 'index.html';
+        return request;
+      }
+
+      // SPA alt yolları için index.html
+      request.uri = uri + '/index.html';
+      return request;
     }
   JS
 }

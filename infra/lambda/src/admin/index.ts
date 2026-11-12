@@ -70,6 +70,30 @@ import {
   handleAdminListRoutes,
   handleAdminRouteAction,
 } from "./moderation";
+import {
+  handleListSystemErrors,
+  handleLogSystemError,
+  handleResolveSystemError,
+} from "./errors-service";
+import {
+  handleListCampaigns,
+  handleCreateCampaign,
+  handleSendCampaign,
+} from "./campaigns-service";
+import {
+  handleListCreditTransactions,
+  handleAdjustUserCredits,
+} from "./credit-ledger-service";
+import {
+  handleGetPolarStatus,
+  handleListPolarWebhooks,
+  handleTriggerPolarSync,
+} from "./polar-admin-service";
+import {
+  handleGetAIDetailedConfig,
+  handleUpdateAIDetailedConfig,
+  handleListAIFeedback,
+} from "./ai-config-service";
 
 type Handler = (
   event: ApiGatewayEvent,
@@ -126,6 +150,34 @@ const routes: Record<string, Handler> = {
   "POST /admin/promo": handleCreatePromoCode,
   "POST /admin/promo/{code}/deactivate": handleDeactivatePromoCode,
 };
+
+const registerExtended = (method: string, path: string, fn: Handler) => {
+  routes[`${method} ${path}`] = fn;
+};
+
+// System Errors & Error Tracking
+registerExtended("GET", "/admin/system-errors", handleListSystemErrors);
+registerExtended("POST", "/admin/system-errors", handleLogSystemError);
+registerExtended("POST", "/admin/system-errors/{id}/resolve", handleResolveSystemError);
+
+// Campaigns & Push/Web Notifications
+registerExtended("GET", "/admin/campaigns", handleListCampaigns);
+registerExtended("POST", "/admin/campaigns", handleCreateCampaign);
+registerExtended("POST", "/admin/campaigns/{id}/send", handleSendCampaign);
+
+// Credit Ledger & Transactions
+registerExtended("GET", "/admin/credit-transactions", handleListCreditTransactions);
+registerExtended("POST", "/admin/credit-transactions", handleAdjustUserCredits);
+
+// Polar Payments & Subscriptions
+registerExtended("GET", "/admin/polar/status", handleGetPolarStatus);
+registerExtended("GET", "/admin/polar/webhooks", handleListPolarWebhooks);
+registerExtended("POST", "/admin/polar/sync", handleTriggerPolarSync);
+
+// Bedrock AgentCore & AI Harness Configuration
+registerExtended("GET", "/admin/ai-config", handleGetAIDetailedConfig);
+registerExtended("POST", "/admin/ai-config", handleUpdateAIDetailedConfig);
+registerExtended("GET", "/admin/ai-feedback", handleListAIFeedback);
 
 Object.assign(routes, managementRoutes);
 const router = new Router();
