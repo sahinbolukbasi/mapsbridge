@@ -21,6 +21,8 @@ export default tseslint.config(
       "**/.build/**",
       "**/*.cjs",
       "**/*.js",
+      "**/*.mjs",
+      "scripts/**",
       ".worktrees/**",
       ".agents/**",
       "**/.worktrees/**",

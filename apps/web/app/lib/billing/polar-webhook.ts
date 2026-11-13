@@ -1,6 +1,5 @@
 import { DynamoDBClient, TransactWriteItemsCommand, UpdateItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-// @ts-ignore
 import { webhooks } from "@polar-sh/sdk/2026-10";
 
 let ddb: DynamoDBClient | null = null;

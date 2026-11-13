@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-// @ts-ignore
 import { createPolar } from "@polar-sh/sdk/2026-10";
 
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization") || "";
-    const token = authHeader.replace(/^Bearer /, "").trim();
+    const _token = authHeader.replace(/^Bearer /, "").trim();
 
     let body: { targetId?: string; mode?: string; cycle?: string } = {};
     try {

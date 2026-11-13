@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-// @ts-ignore
 import { createPolar } from "@polar-sh/sdk/2026-10";
 
 export async function POST(req: NextRequest) {

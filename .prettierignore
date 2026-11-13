@@ -7,6 +7,9 @@ package-lock.json
 infra/terraform
 figma/
 apps/mobile/ios/Pods/
+apps/mobile/ios/build/
+apps/mobile/android/build/
+.expo/
 results.sarif
 
 # design-tokens üretimi (npm run tokens:build); biçim üreticiye aittir

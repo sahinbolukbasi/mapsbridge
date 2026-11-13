@@ -9,11 +9,11 @@ import {
   grantCredits,
   initializeTrial,
 } from "../billing/store";
-import { polarCatalog, isPolarProductAvailable, type PolarProduct } from "../billing/catalog";
+import { polarCatalog, isPolarProductAvailable } from "../billing/catalog";
 import { getDynamoClient } from "../shared/dynamo";
 import { UpdateItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-// @ts-ignore
+// @ts-expect-error Subpath export requires nodenext
 import { createPolar, webhooks } from "@polar-sh/sdk/2026-10";
 
 function appOrigin(): string {
