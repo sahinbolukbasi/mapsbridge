@@ -31,6 +31,8 @@ import type {
   LeafletMarker,
 } from "../components/trip/map-canvas";
 import { PinPopupContent } from "../components/trip/pin-popup";
+import { PlaceFacts } from "../components/trip/place-facts";
+import { generateNumericPinCode } from "../lib/share/pin-link";
 import { DISCOVERY_POOL_EVENT, type DiscoveryPoolDetail } from "../components/trip/discover-panel";
 import { openPinEffects, pinPopupModel } from "../lib/trip/pin-popup";
 import { takeFlash } from "../lib/navigation/flash";
@@ -97,6 +99,7 @@ export default function Panel() {
   const [gate, setGate] = useState<"ai" | "save" | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [detailModalPinId, setDetailModalPinId] = useState<string | null>(null);
   // Asistandan gelen rota (Increment 2.8): kaydedildi / cihazda açıldı geri bildirimi.
   useEffect(() => {
     const flash = takeFlash();
@@ -774,6 +777,11 @@ export default function Panel() {
       planner.generalPins.find((p) => p.id === popup.pinId))
     : undefined;
   const popupModel = popupPin ? pinPopupModel(popupPin) : null;
+  const detailModalPin = detailModalPinId
+    ? (planner.activeTrip?.pins.find((p) => p.id === detailModalPinId) ??
+      planner.generalPins.find((p) => p.id === detailModalPinId) ??
+      null)
+    : null;
   return (
     <PageShell className="planner">
       {/* AC-34: tek h1 "Rota planlayıcı" (registry, görsel olarak gizli). */}
@@ -805,7 +813,14 @@ export default function Panel() {
               model={popupModel}
               dest={{ lat: popupPin.lat, lng: popupPin.lng, label: popupPin.label }}
               addDay={targetDay}
-              onDetails={() => openPin(popupPin.id)}
+              onDetails={() => {
+                generateNumericPinCode({
+                  lat: popupPin.lat,
+                  lng: popupPin.lng,
+                  label: popupPin.label,
+                });
+                setDetailModalPinId(popupPin.id);
+              }}
               onToggleVisited={() => planner.togglePinVisitedAnywhere(popupPin.id)}
               onAddToDay={
                 popupPin.dayIndex > 0 || !planner.activeTripId
@@ -853,6 +868,22 @@ export default function Panel() {
         }}
       />
       <ShareModal open={shareOpen} target={shareTarget} onClose={() => setShareOpen(false)} />
+      <Modal
+        open={detailModalPin !== null}
+        onClose={() => setDetailModalPinId(null)}
+        size="md"
+        title={
+          detailModalPin
+            ? `${detailModalPin.label} · ${t("planner.facts.title", "Yer bilgisi")}`
+            : t("planner.facts.title", "Yer bilgisi")
+        }
+        description={t(
+          "planner.facts.modalDesc",
+          "Web fotoğrafları, açık/kapalı durumu, açılış saatleri, resmi web sitesi ve alan hakkında ayrıntılı bilgiler.",
+        )}
+      >
+        {detailModalPin && <PlaceFacts pin={detailModalPin} />}
+      </Modal>
       <Modal
         open={summaryOpen}
         onClose={() => setSummaryOpen(false)}

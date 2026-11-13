@@ -180,11 +180,15 @@ export class AdminApiClient {
           questionFlow: "1. Destinasyon & Gün sayısı\n2. Seyahat amacı & İlgi alanları\n3. Bütçe ve tempo\n4. Rota oluşturma",
         },
         routing: {
-          fastModel: "meta.llama3-1-8b-instruct-v1:0",
-          routingModel: "anthropic.claude-3-5-haiku-20241022-v1:0",
-          postRouteHarnessModel: "anthropic.claude-3-5-haiku-20241022-v1:0",
+          fastModel: "eu.amazon.nova-micro-v1:0",
+          routingModel: "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+          postRouteHarnessModel: "eu.amazon.nova-lite-v1:0",
+          tier1FastIntakeModel: "eu.amazon.nova-micro-v1:0",
+          tier2StandardChatModel: "eu.amazon.nova-lite-v1:0",
+          tier3PrimaryRouteModel: "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+          tier4DeepReplanningModel: "eu.anthropic.claude-3-5-sonnet-20241022-v2:0",
           temperature: 0.3,
-          maxTokens: 2048,
+          maxTokens: 2800,
         },
         tools: {
           placesSearch: true,
@@ -192,12 +196,17 @@ export class AdminApiClient {
           transitDirections: true,
           esimLookup: true,
           hotelLookup: true,
+          curatedCityIntel: true,
+          principalAxisClustering: true,
+          chronoSpatial2Opt: true,
         },
         vectorDb: {
-          indexName: "mapsbridge-agentcore-memory",
+          indexName: "mapsbridge-agentcore-geovector-v3",
           status: "active",
-          totalVectors: 14850,
+          totalVectors: 75160,
           lastSyncedAt: new Date().toISOString(),
+          embeddingModelId: "amazon.titan-embed-text-v2:0",
+          dimensions: 1024,
         },
         updatedAt: new Date().toISOString(),
         updatedBy: "Şahin B.",
@@ -205,8 +214,10 @@ export class AdminApiClient {
     }
   }
 
-  public static async updateAIDetailedConfig(config: Partial<AIAgentCoreConfig>) {
-    return this.fetch("/admin/ai-config", {
+  public static async updateAIDetailedConfig(
+    config: Partial<AIAgentCoreConfig> & Record<string, unknown>,
+  ): Promise<{ config?: AIAgentCoreConfig; actionSummary?: string }> {
+    return this.fetch<{ config?: AIAgentCoreConfig; actionSummary?: string }>("/admin/ai-config", {
       method: "POST",
       body: JSON.stringify(config),
     });

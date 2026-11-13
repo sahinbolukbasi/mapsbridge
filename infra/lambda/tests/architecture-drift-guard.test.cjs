@@ -87,8 +87,8 @@ test("drift-guard: services/ klasörleri steering ile birebir eşleşir", () => 
 // ---------------------------------------------------------------------------
 test("drift-guard: packages/ klasörleri steering ile birebir eşleşir", () => {
   const actual = listDirs("packages");
-  // HEDEF: ileride packages/ai-core eklenecek (PLAN FAZ2 R3). Eklenince bu listeyi güncelle.
-  const expected = ["contracts", "design-tokens"];
+  // packages/ai-core eklendi (PLAN FAZ2 R3).
+  const expected = ["ai-core", "contracts", "design-tokens"];
   assert.deepEqual(
     actual,
     expected,

@@ -103,7 +103,7 @@ export interface PolarWebhookEvent {
   createdAt: string;
 }
 
-// AI AgentCore & Harness
+// AI AgentCore & Harness + Isolated AI Lab
 export interface AIAgentCoreConfig {
   prompts: {
     systemPrompt: string;
@@ -115,21 +115,124 @@ export interface AIAgentCoreConfig {
     fastModel: string;
     routingModel: string;
     postRouteHarnessModel: string;
+    tier1FastIntakeModel?: string;
+    tier2StandardChatModel?: string;
+    tier3PrimaryRouteModel?: string;
+    tier4DeepReplanningModel?: string;
     temperature: number;
     maxTokens: number;
   };
+  agentCore?: {
+    memoryEnabled: boolean;
+    episodicReflectionEnabled: boolean;
+    longTermPreferenceTtlDays: number;
+    sessionContextTtlDays: number;
+    harnessStages: Array<{
+      id: string;
+      order: number;
+      name: string;
+      deterministic: boolean;
+      timeoutMs: number;
+      description: string;
+    }>;
+    memoryNamespaces: Array<{
+      id: string;
+      namespaceTemplate: string;
+      ttlDays: number;
+      strategy: string;
+      description: string;
+    }>;
+  };
+  subAgents?: Array<{
+    id: string;
+    name: string;
+    domain: string;
+    defaultTier: string;
+    wired: boolean;
+    enabledByDefault: boolean;
+    timeoutMs: number;
+    description: string;
+    tools: string[];
+    guardrails: string[];
+  }>;
   tools: {
     placesSearch: boolean;
     weatherCheck: boolean;
     transitDirections: boolean;
     esimLookup: boolean;
     hotelLookup: boolean;
+    curatedCityIntel?: boolean;
+    principalAxisClustering?: boolean;
+    chronoSpatial2Opt?: boolean;
   };
   vectorDb: {
     indexName: string;
     status: "active" | "syncing" | "error";
     totalVectors: number;
     lastSyncedAt: string;
+    embeddingModelId?: string;
+    dimensions?: number;
+  };
+  isolatedLab?: {
+    environment: string;
+    autonomousMode24x7: boolean;
+    daemons: Array<{
+      id: string;
+      name: string;
+      scheduleCron: string;
+      intervalMinutes: number;
+      enabled: boolean;
+      tier: string;
+      targetLambdaOrWorker: string;
+      description: string;
+      lastHeartbeatAt?: string;
+      status: "running" | "idle" | "degraded" | "paused";
+      metrics: {
+        cyclesCompleted24h: number;
+        itemsProcessed24h: number;
+        avgCycleDurationMs: number;
+        successRate: number;
+      };
+    }>;
+    vectorDb: {
+      provider: string;
+      embeddingModelId: string;
+      dimensions: number;
+      namespaces: Array<{
+        namespace: string;
+        description: string;
+        embeddingModelId: string;
+        dimensions: number;
+        metric: string;
+        documentCount: number;
+        freshnessScore: number;
+        lastIndexedAt: string;
+        autoSyncEnabled: boolean;
+      }>;
+    };
+    rag: {
+      enabled: boolean;
+      hybridSearchEnabled: boolean;
+      vectorWeight: number;
+      lexicalBm25Weight: number;
+      geoProximityWeight: number;
+      topK: number;
+      minSimilarityThreshold: number;
+      strictSourceAttribution: boolean;
+      autoFreshnessSweepHours: number;
+    };
+    fineTuning: {
+      enabled: boolean;
+      autoCurateFromThumbsUp: boolean;
+      autoCurateFromGoldenEval: boolean;
+      piiScrubbingEnforced: boolean;
+      targetBaseModelId: string;
+      trainingMethod: "SFT" | "DPO" | "DISTILLATION";
+      minQualityScoreThreshold: number;
+      s3DatasetBucketPrefix: string;
+      lastExportedAt?: string;
+      curatedSampleCount: number;
+    };
   };
   updatedAt: string;
   updatedBy: string;

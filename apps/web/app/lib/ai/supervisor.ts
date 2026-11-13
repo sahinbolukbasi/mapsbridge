@@ -1070,7 +1070,7 @@ export async function runMultiAgentSupervisor(
           durationMs: emergencyRes.durationMs,
         });
       }
-      // Merge dispatch results into involved agents
+      // Merge dispatch results into involved agents and enrich discovery/stayAndTransit from dr.data
       const dispatchResults = await dispatchPromise;
       for (const dr of dispatchResults) {
         if (dr.status !== "skipped") {
@@ -1082,6 +1082,81 @@ export async function runMultiAgentSupervisor(
             durationMs: dr.durationMs,
             ...(dr.summaryNote ? { summaryNote: dr.summaryNote } : {}),
           });
+        }
+        if (dr.status === "completed" && dr.data && typeof dr.data === "object") {
+          const d = dr.data as Record<string, unknown>;
+          if (dr.agentId === "food" && Array.isArray(d.recommendations)) {
+            const foodGems = (
+              d.recommendations as Array<{
+                name?: string;
+                area?: string;
+                highlight?: string;
+                category?: string;
+              }>
+            )
+              .filter((r) => r?.name && r?.highlight)
+              .slice(0, 4)
+              .map((r) => ({
+                name: String(r.name),
+                category: (r.category === "specialty_coffee" || r.category === "bakery"
+                  ? "cafe"
+                  : "food") as "food" | "cafe",
+                description: String(r.highlight),
+                highlight: String(r.highlight),
+                ...(r.area ? { addressOrArea: String(r.area) } : {}),
+              }));
+            if (foodGems.length) {
+              const baseDiscovery: LocalDiscoveryInfo = discovery || {
+                specialties: [],
+                gems: [],
+                cultureTips: [],
+              };
+              const existingNames = new Set(baseDiscovery.gems.map((g) => g.name.toLowerCase()));
+              for (const fg of foodGems) {
+                if (!existingNames.has(fg.name.toLowerCase())) {
+                  baseDiscovery.gems.push(fg);
+                }
+              }
+              discovery = baseDiscovery;
+            }
+          }
+          if (dr.agentId === "city-intel" && d.intelligence && typeof d.intelligence === "object") {
+            const intel = d.intelligence as {
+              culturalEtiquette?: string[];
+              clothingAdvice?: string;
+            };
+            const tips = [
+              ...(Array.isArray(intel.culturalEtiquette) ? intel.culturalEtiquette : []),
+              ...(intel.clothingAdvice ? [intel.clothingAdvice] : []),
+            ];
+            if (tips.length) {
+              const baseDiscovery: LocalDiscoveryInfo = discovery || {
+                specialties: [],
+                gems: [],
+                cultureTips: [],
+              };
+              baseDiscovery.cultureTips = [
+                ...new Set([...baseDiscovery.cultureTips, ...tips]),
+              ].slice(0, 6);
+              discovery = baseDiscovery;
+            }
+          }
+          if (dr.agentId === "city-transit" && d.guide && typeof d.guide === "object") {
+            const guide = d.guide as { cardName?: string; bestOptionForTourists?: string };
+            if (guide.cardName || guide.bestOptionForTourists) {
+              const transitNote = [guide.cardName, guide.bestOptionForTourists]
+                .filter(Boolean)
+                .join(" — ");
+              if (stayAndTransit && !stayAndTransit.cityCardRecommendation) {
+                stayAndTransit.cityCardRecommendation = transitNote;
+              }
+            }
+          }
+          if (dr.agentId === "hotel-deal" && typeof d.recommendedArea === "string") {
+            if (stayAndTransit && !stayAndTransit.recommendedAreas.includes(d.recommendedArea)) {
+              stayAndTransit.recommendedAreas.push(d.recommendedArea);
+            }
+          }
         }
       }
     } catch (agentErr) {

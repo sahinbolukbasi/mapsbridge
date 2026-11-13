@@ -19,6 +19,10 @@ export function configuredModels(env = process.env): string[] {
         env.BEDROCK_MODEL_ID,
         env.BEDROCK_INTAKE_MODEL_ID,
         env.BEDROCK_FAST_MODEL_ID,
+        "eu.amazon.nova-micro-v1:0",
+        "eu.amazon.nova-lite-v1:0",
+        "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "eu.anthropic.claude-3-5-sonnet-20241022-v2:0",
         "anthropic.claude-3-5-haiku-20241022-v1:0",
         "meta.llama3-1-8b-instruct-v1:0",
         "amazon.nova-micro-v1:0",
@@ -41,7 +45,20 @@ export function chooseModel(control: AIControl, requested?: string): string {
   if (control.disabledModels.includes(model)) throw new Error("MODEL_DISABLED");
   return model;
 }
-const defaultEnabledAgents = new Set(["context", "transit", "discovery", "emergency"]);
+const defaultEnabledAgents = new Set([
+  "context",
+  "transit",
+  "discovery",
+  "emergency",
+  "route",
+  "food",
+  "city-transit",
+  "car-rental",
+  "city-intel",
+  "hotel-deal",
+  "flight",
+  "dynamic-replanning",
+]);
 export async function readEnabledAIAgents(): Promise<Set<string>> {
   if (!process.env.DYNAMODB_TABLE) return new Set(defaultEnabledAgents);
   try {

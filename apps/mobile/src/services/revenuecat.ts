@@ -52,12 +52,144 @@ export async function resetRevenueCat(): Promise<void> {
   }
 }
 
+function buildPolarFallbackPackage(
+  identifier: string,
+  productId: string,
+  title: string,
+  description: string,
+  price: number,
+  priceString: string,
+  isSubscription: boolean,
+): PurchasesPackage {
+  return {
+    identifier,
+    packageType: (isSubscription && identifier === "$rc_monthly" ? "MONTHLY" : "CUSTOM") as PurchasesPackage["packageType"],
+    offeringIdentifier: "polar_live",
+    presentedOfferingContext: {
+      offeringIdentifier: "polar_live",
+      placementIdentifier: null,
+      targetingContext: null,
+    },
+    product: {
+      identifier: productId,
+      description,
+      title,
+      price,
+      priceString,
+      pricePerWeek: null,
+      pricePerMonth: isSubscription ? price : null,
+      pricePerYear: null,
+      pricePerWeekString: null,
+      pricePerMonthString: isSubscription ? priceString : null,
+      pricePerYearString: null,
+      currencyCode: "TRY",
+      introPrice: null,
+      discounts: null,
+      productCategory: null,
+      productType: (isSubscription ? "AUTO_RENEWABLE_SUBSCRIPTION" : "NON_CONSUMABLE") as PurchasesPackage["product"]["productType"],
+      subscriptionPeriod: isSubscription ? "P1M" : null,
+      defaultOption: null,
+      subscriptionOptions: null,
+      presentedOfferingIdentifier: "polar_live",
+      presentedOfferingContext: {
+        offeringIdentifier: "polar_live",
+        placementIdentifier: null,
+        targetingContext: null,
+      },
+    } as unknown as PurchasesPackage["product"],
+  } as unknown as PurchasesPackage;
+}
+
+const POLAR_FALLBACK_PACKAGES: PurchasesPackage[] = [
+  buildPolarFallbackPackage(
+    "polar_explorer",
+    "a3443dcc-7050-4705-82c3-f986b0ef94ea",
+    "Kaşif (Explorer)",
+    "Kaşif (Explorer) — 100 Kredi / Ay",
+    199,
+    "₺199 / $6.99",
+    true,
+  ),
+  buildPolarFallbackPackage(
+    "$rc_monthly",
+    "bc53edf5-476c-4f5f-805a-3b2c1e8e8739",
+    "Pro Kaşif (Pro Traveler)",
+    "Pro Kaşif (Pro Traveler) — 500 Kredi / Ay",
+    499,
+    "₺499 / $14.99",
+    true,
+  ),
+  buildPolarFallbackPackage(
+    "polar_agency",
+    "62d9b9e3-9ddb-49db-b1d6-67d50f76c2b6",
+    "Tur Lideri & Grup Paketi",
+    "Tur Lideri & Grup Paketi — 2500 Kredi / Ay",
+    1499,
+    "₺1.499 / $49.99",
+    true,
+  ),
+  buildPolarFallbackPackage(
+    "polar_pack_30",
+    "cd802b74-05b9-4234-b08b-21a1152ec8d6",
+    "Başlangıç Paketi (30 Kredi)",
+    "Başlangıç Kredi Paketi (30 Kredi)",
+    99,
+    "₺99 / $2.99",
+    false,
+  ),
+  buildPolarFallbackPackage(
+    "polar_pack_100",
+    "31f3e0d0-8d81-4a3b-83f1-56bcbb5cde40",
+    "Gezgin Paketi (100 Kredi)",
+    "Gezgin Kredi Paketi (100 Kredi)",
+    249,
+    "₺249 / $7.99",
+    false,
+  ),
+  buildPolarFallbackPackage(
+    "polar_pack_300",
+    "86fadb96-c068-4b69-b23a-0ed871d57718",
+    "Usta Kaşif Paketi (300 Kredi)",
+    "Usta Kaşif Paketi (300 Kredi)",
+    599,
+    "₺599 / $18.99",
+    false,
+  ),
+  buildPolarFallbackPackage(
+    "polar_pack_pro",
+    "adcadbdf-662d-4e3b-b53e-d3ae586225e8",
+    "Stratejik Kaşif (3000 Kredi)",
+    "Stratejik Kaşif (3000 Kredi)",
+    1899,
+    "₺1.899 / $59.99",
+    false,
+  ),
+];
+
+const POLAR_FALLBACK_OFFERING: PurchasesOffering = {
+  identifier: "polar_live",
+  serverDescription: "Maps Bridge Polar Multi-Market Catalog",
+  metadata: {},
+  availablePackages: POLAR_FALLBACK_PACKAGES,
+  lifetime: null,
+  annual: null,
+  sixMonth: null,
+  threeMonth: null,
+  twoMonth: null,
+  monthly: POLAR_FALLBACK_PACKAGES[1] ?? null,
+  weekly: null,
+  webCheckoutUrl: "https://buy.polar.sh/polar_cl_TitGKcwxcS7AtB2jTsmHW99kQc7sudzdd5gXP0rAve0",
+} as unknown as PurchasesOffering;
+
 export async function getOfferings(): Promise<PurchasesOffering | null> {
   try {
     const offerings = await Purchases.getOfferings();
-    return offerings.current;
+    if (offerings.current && offerings.current.availablePackages.length > 0) {
+      return offerings.current;
+    }
+    return POLAR_FALLBACK_OFFERING;
   } catch {
-    return null;
+    return POLAR_FALLBACK_OFFERING;
   }
 }
 

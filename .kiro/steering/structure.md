@@ -18,7 +18,8 @@ mapsbridge/
 │   ├── identity-billing/   # Cüzdan servisi iskeleti. ÖLÜ — hiçbir canlı kod import etmiyor (grep=0). Gerçek billing infra/lambda/src/billing/store.ts'de. → HEDEF: silinecek (kullanıcı onayı).
 │   ├── messaging/          # Gerçek zamanlı sohbet domain/application. CANLI (infra/lambda/src/chat/index.ts:36 import eder).
 │   └── place-intelligence/ # POI/Place Intelligence domain/application/infrastructure. CANLI (infra/lambda/src/places/index.ts import eder). Tek tam Clean Architecture örneği.
-├── packages/               # Paylaşılan kütüphaneler. DİSKTEKİ GERÇEK: 2 paket.
+├── packages/               # Paylaşılan kütüphaneler. DİSKTEKİ GERÇEK: 3 paket.
+│   ├── ai-core/            # Modüler AI mikroservis çekirdeği: Bedrock 4-tier matrisi, AgentCore bellek/harness, küratörlü şehir istihbaratı, 2D ana eksenli rota optimizasyonu ve 7/24 otonom AI Lab.
 │   ├── contracts/          # Domain tipleri, DTO'lar, value object'ler. TEK canlı runtime paylaşım kanalı (web + services + lambda tip çeker). → HEDEF: büyüyecek.
 │   └── design-tokens/      # UI token kaynağı (TS) → üretilmiş tokens.css + web TS + RN tema. CANLI (yalnızca üretim zamanı, runtime import yok). Kurallar: design-system.md.
 ├── infra/                  # Infrastructure as Code

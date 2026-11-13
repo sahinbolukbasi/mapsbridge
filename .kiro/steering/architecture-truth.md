@@ -103,3 +103,9 @@ typecheck web+backend temiz; test:backend 381/0, test:services 80/80, test:web 1
 
 - `supervisor.ts` fiyat-doğrulama regex'i sembol-önce biçimde (`€320`) yalnız ilk rakamı yakalıyor.
 - `user-memory/types.ts` `isSensitiveData` İngilizce `allerg` yakalıyor, Türkçe tek-l `alerji` yakalamıyor (TR eş-anlamlı genişletme).
+
+## 9. Modüler AI Core (`packages/ai-core`) & 7/24 Otonom Ajan Laboratuvarı (2026-11-12)
+
+- **`packages/ai-core`** eklendi (`architecture-manifest.ts`, `curated-city-intelligence.ts`, `route-optimizer.ts`, `autonomous-lab.ts`): Web, Mobil ve Admin panellerine tek bir modüler mikroservis katmanı olarak hizmet verir.
+- **2D Ana Eksenli (Principal-Axis) Rota Kümeleme & Küratörlü Yedekleme**: Doğu-Batı uzanımlı şehirlerde (İstanbul, Roma, Paris, Lizbon) yakalar arası zikzakları önler; çok kaynaklı mekan araştırmasını küratörlü yerel cevherlerle zenginleştirir.
+- **Birleşik Alt Ajan (Sub-Agent) Matrisi & Canlı Admin Kontrolü**: 12 alt ajan (`context`, `discovery`, `route`, `food`, `transit`, `city-transit`, `hotel-deal`, `flight`, `car-rental`, `city-intel`, `emergency`, `dynamic-replanning`) ve 7/24 otonom arka plan ajanları Admin Panel üzerinden canlı yönetilir.

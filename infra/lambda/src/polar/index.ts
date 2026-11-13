@@ -125,37 +125,52 @@ export async function handler(event: ApiGatewayEvent) {
 
       const { token: secretToken } = await getPolarSecrets();
       if (!secretToken) {
-        // Fallback for dev / unconfigured token
-        const returnUrl = `${appOrigin()}/checkout?mock_success=true&product=${product.id}`;
+        const directUrl =
+          product.checkoutUrl ||
+          `${appOrigin()}/checkout?mock_success=true&product=${product.id}`;
         return jsonResponse(201, {
-          url: returnUrl,
-          checkoutId: `polar_mock_${Date.now()}`,
-          polarRedirectUrl: returnUrl,
-          stripeRedirectUrl: returnUrl,
+          url: directUrl,
+          checkoutId: `polar_direct_${Date.now()}`,
+          polarRedirectUrl: directUrl,
+          stripeRedirectUrl: directUrl,
         });
       }
 
-      const polar = getPolarClient(secretToken);
-      const origin = appOrigin();
-      const checkout = await polar.checkouts.create({
-        products: [product.productId || product.id],
-        external_customer_id: userId,
-        customer_email: user.email || undefined,
-        metadata: {
-          userId,
-          targetId: product.id,
-          mode: product.mode,
-        },
-        success_url: `${origin}/checkout?success=true&checkout_id={CHECKOUT_ID}`,
-        return_url: `${origin}/checkout`,
-      });
+      try {
+        const polar = getPolarClient(secretToken);
+        const origin = appOrigin();
+        const checkout = await polar.checkouts.create({
+          products: [product.productId || product.id],
+          external_customer_id: userId,
+          customer_email: user.email || undefined,
+          metadata: {
+            userId,
+            targetId: product.id,
+            mode: product.mode,
+          },
+          success_url: `${origin}/checkout?success=true&checkout_id={CHECKOUT_ID}`,
+          return_url: `${origin}/checkout`,
+        });
 
-      return jsonResponse(201, {
-        url: checkout.url,
-        checkoutId: checkout.id,
-        polarRedirectUrl: checkout.url,
-        stripeRedirectUrl: checkout.url,
-      });
+        return jsonResponse(201, {
+          url: checkout.url,
+          checkoutId: checkout.id,
+          polarRedirectUrl: checkout.url,
+          stripeRedirectUrl: checkout.url,
+        });
+      } catch (checkoutErr) {
+        if (product.checkoutUrl) {
+          const fallbackUrl = new URL(product.checkoutUrl);
+          if (user.email) fallbackUrl.searchParams.set("customer_email", user.email);
+          return jsonResponse(201, {
+            url: fallbackUrl.href,
+            checkoutId: `polar_link_${Date.now()}`,
+            polarRedirectUrl: fallbackUrl.href,
+            stripeRedirectUrl: fallbackUrl.href,
+          });
+        }
+        throw checkoutErr;
+      }
     }
 
     // Create Polar Customer Portal Session

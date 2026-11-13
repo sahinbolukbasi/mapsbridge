@@ -87,14 +87,62 @@ export function encodePinCode(pin: PinPoint): string {
   }
 }
 
+const NUMERIC_STORAGE_KEY = "mb_numeric_pin_registry_v1";
 const pinRegistry = new Map<string, PinPoint>();
 
+interface SimpleStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+}
+
+function getLocalStore(): SimpleStorage | null {
+  try {
+    const ls = (globalThis as { localStorage?: SimpleStorage }).localStorage;
+    return ls && typeof ls.getItem === "function" && typeof ls.setItem === "function" ? ls : null;
+  } catch {
+    return null;
+  }
+}
+
 export function registerNumericPin(code: string, pin: PinPoint): void {
+  if (!/^\d{6}$/.test(code)) return;
   pinRegistry.set(code, pin);
+  try {
+    const store = getLocalStore();
+    if (!store) return;
+    const raw = store.getItem(NUMERIC_STORAGE_KEY);
+    const parsed: Record<string, PinPoint> = raw ? JSON.parse(raw) : {};
+    parsed[code] = { lat: Number(pin.lat), lng: Number(pin.lng), label: pin.label ?? "" };
+    store.setItem(NUMERIC_STORAGE_KEY, JSON.stringify(parsed));
+  } catch {
+    // Depolama erişilemezse bellek içi kayıt yeterli
+  }
 }
 
 export function resolveNumericPin(code: string): PinPoint | null {
-  return pinRegistry.get(code) || null;
+  const inMem = pinRegistry.get(code);
+  if (inMem) return inMem;
+  try {
+    const store = getLocalStore();
+    if (!store) return null;
+    const raw = store.getItem(NUMERIC_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, PinPoint>;
+    const found = parsed?.[code];
+    if (
+      found &&
+      typeof found.lat === "number" &&
+      Number.isFinite(found.lat) &&
+      typeof found.lng === "number" &&
+      Number.isFinite(found.lng)
+    ) {
+      pinRegistry.set(code, found);
+      return found;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 /**
@@ -112,6 +160,18 @@ export function generateNumericPinCode(pin: PinPoint): string {
 }
 
 /**
+ * Doğrudan paylaşılan konum sayfasına giden tam bağlantıyı üretir.
+ * Hem sunucusuz tam koordinat kodunu (`c`) hem de 6 haneli sayısal kodu (`code`) içerir;
+ * böylece QR okutulduğunda başka cihazda bile anında paylaşılan konum sayfası açılır.
+ */
+export function buildPinShareUrl(pin: PinPoint, origin = "https://mapsbridge.com"): string {
+  const encoded = encodePinCode(pin);
+  const numeric = generateNumericPinCode(pin);
+  const base = origin.replace(/\/+$/, "");
+  return `${base}/p/?c=${encodeURIComponent(encoded)}&code=${encodeURIComponent(numeric)}`;
+}
+
+/**
  * Kodu `{lat,lng,label}`'e çözer. Biçim, aralık veya ayrıştırma hatasında `null` döner
  * (asla fırlatmaz, asla koordinat uydurmaz — I1).
  */
@@ -119,7 +179,7 @@ export function decodePinCode(code: string | null | undefined): PinPoint | null 
   const raw = (code ?? "").replace(/\s+/g, "");
   if (/^\d{6}$/.test(raw)) {
     const fromRegistry = resolveNumericPin(raw);
-    if (fromRegistry) return fromRegistry;
+    return fromRegistry ?? null;
   }
   if (!SHARE_CODE_PATTERN.test(raw)) return null;
   const b64url = unescapeFromShareCharset(raw);
@@ -138,4 +198,35 @@ export function decodePinCode(code: string | null | undefined): PinPoint | null 
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
   if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
   return { lat, lng, label };
+}
+
+/**
+ * Hem 6 haneli kodu, hem sunucusuz pin kodunu, hem de QR'dan okutulan tam URL'yi (`https://.../p/?c=...`)
+ * `{lat,lng,label}` noktasına çözer. Geçersizse `null` döner.
+ */
+export function decodePinOrUrl(input: string | null | undefined): PinPoint | null {
+  if (!input) return null;
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const cMatch = /[?&]c=([^&#\s]+)/i.exec(trimmed);
+  if (cMatch?.[1]) {
+    try {
+      const fromC = decodePinCode(decodeURIComponent(cMatch[1]));
+      if (fromC) return fromC;
+    } catch {
+      const fromC = decodePinCode(cMatch[1]);
+      if (fromC) return fromC;
+    }
+  }
+  const codeMatch = /[?&](?:code|kod)=([^&#\s]+)/i.exec(trimmed);
+  if (codeMatch?.[1]) {
+    try {
+      const fromCode = decodePinCode(decodeURIComponent(codeMatch[1]));
+      if (fromCode) return fromCode;
+    } catch {
+      const fromCode = decodePinCode(codeMatch[1]);
+      if (fromCode) return fromCode;
+    }
+  }
+  return decodePinCode(trimmed);
 }

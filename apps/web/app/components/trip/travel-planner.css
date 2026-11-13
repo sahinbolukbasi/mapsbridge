@@ -663,22 +663,48 @@
     display: grid;
     gap: var(--space-4);
   }
+  .planner-share__banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-brand);
+  }
+  .planner-share__coords {
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+  }
   .planner-share__hint {
     margin: 0;
-    color: var(--color-text-muted);
+    color: var(--color-text);
     font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
   }
   .planner-share__code {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: space-between;
     gap: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
   }
   .planner-share__code-label {
-    color: var(--color-text-muted);
+    color: var(--color-text);
     font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
   }
   .planner-share__code-value {
+    color: var(--color-primary);
     font-family: var(--font-family-mono);
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-bold);

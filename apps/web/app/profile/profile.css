@@ -118,4 +118,26 @@
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
   }
+
+  .profile-code-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
+  .profile-qr-scanner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .profile-qr-video {
+    width: 100%;
+    min-height: 15rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-primary);
+    background: var(--color-surface-sunken);
+    object-fit: cover;
+  }
 }

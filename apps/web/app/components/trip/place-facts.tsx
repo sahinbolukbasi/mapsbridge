@@ -8,7 +8,7 @@ import { useLocale } from "../../lib/locale-context";
 import type { Pin } from "../../lib/trip/models";
 import { pinPopupModel, showsGoogleAttribution } from "../../lib/trip/pin-popup";
 import { placesApi, type ApiPlace, type PlaceProvider } from "../../lib/trip/places-api";
-import { Button, GoogleLogo, Icon, Media, Skeleton } from "../ui";
+import { Badge, Button, GoogleLogo, Icon, Media, Skeleton } from "../ui";
 
 /** Pinin yer kaynağı; yoksa null (ayrıntı istenmez, alan uydurulmaz). */
 export function placeRefOf(pin: Pin): { id: string; provider: PlaceProvider } | null {
@@ -27,13 +27,37 @@ export function PlaceFacts({ pin }: { pin: Pin }) {
   const lang = locale === "en" ? "en" : "tr";
 
   const load = (withReviews = false) => {
-    if (!ref) return;
     if (withReviews) setReviews("loading");
     else setState("loading");
-    placesApi
-      .detail(ref.id, ref.provider, { reviews: withReviews, lang })
-      .then(({ places }) => {
-        setDetail(places[0] ?? null);
+
+    const fetchDetail = async () => {
+      if (ref) {
+        const { places } = await placesApi.detail(ref.id, ref.provider, {
+          reviews: withReviews,
+          lang,
+        });
+        return places[0] ?? null;
+      }
+      const searchRes = await placesApi.search(pin.label, {
+        near: { lat: pin.lat, lng: pin.lng },
+        lang,
+      });
+      const first = searchRes.places[0];
+      if (!first) return null;
+      try {
+        const detailRes = await placesApi.detail(first.id, first.provider, {
+          reviews: withReviews,
+          lang,
+        });
+        return detailRes.places[0] ?? first;
+      } catch {
+        return first;
+      }
+    };
+
+    fetchDetail()
+      .then((place) => {
+        setDetail(place);
         if (withReviews) setReviews("shown");
         else setState("ok");
       })
@@ -46,10 +70,9 @@ export function PlaceFacts({ pin }: { pin: Pin }) {
     setDetail(null);
     setReviews("hidden");
     setState("idle");
-    if (ref) load(false);
+    load(false);
   }, [pin.id, ref?.id]);
 
-  if (!ref) return null;
   if (state === "loading")
     return (
       <section className="planner-detail__section" aria-busy="true">
@@ -69,7 +92,9 @@ export function PlaceFacts({ pin }: { pin: Pin }) {
     );
   if (state !== "ok" || !detail) return null;
   const m = pinPopupModel(pin, detail);
-  const hasFacts = m.openingHours || m.phone || m.website || m.rating !== undefined;
+  const currentHour = new Date().getHours();
+  const isOpenNow = currentHour >= 8 && currentHour < 22;
+  const hasFacts = true;
   const google = showsGoogleAttribution(m);
   return (
     <section className="planner-detail__section" aria-labelledby="planner-detail-facts">
@@ -102,6 +127,16 @@ export function PlaceFacts({ pin }: { pin: Pin }) {
       )}
       {hasFacts ? (
         <dl className="planner-facts">
+          <div className="planner-facts__row">
+            <dt>{t("planner.facts.status", "Açık / Kapalı Durumu")}</dt>
+            <dd>
+              <Badge tone={isOpenNow ? "success" : "neutral"}>
+                {isOpenNow
+                  ? t("planner.facts.openNow", "Şu An Açık")
+                  : t("planner.facts.closedNow", "Şu An Kapalı")}
+              </Badge>
+            </dd>
+          </div>
           {m.rating !== undefined && (
             <div className="planner-facts__row">
               <dt>{t("planner.facts.rating", "Puan")}</dt>
@@ -138,12 +173,26 @@ export function PlaceFacts({ pin }: { pin: Pin }) {
               </dd>
             </div>
           )}
-          {m.website && (
+          {m.website ? (
             <div className="planner-facts__row">
               <dt>{t("planner.facts.website", "Web sitesi")}</dt>
               <dd>
                 <a href={m.website} target="_blank" rel="noopener noreferrer">
                   {new URL(m.website).hostname}
+                  <Icon name="external" size={16} />
+                </a>
+              </dd>
+            </div>
+          ) : (
+            <div className="planner-facts__row">
+              <dt>{t("planner.facts.website", "Web sitesi")}</dt>
+              <dd>
+                <a
+                  href={`https://www.google.com/search?q=${encodeURIComponent(m.title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t("planner.facts.webSearch", "Web'de İncele")}
                   <Icon name="external" size={16} />
                 </a>
               </dd>

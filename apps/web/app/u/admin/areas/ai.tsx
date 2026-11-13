@@ -12,6 +12,12 @@ import { EditDialog } from "../edit-dialog";
 import { formatDate, formatNumber, formatRate, statusLabel } from "../format";
 import { RecordTable } from "../record-table";
 import { useAdminMutation, useAreaData } from "../use-area-data";
+import {
+  AGENTCORE_MEMORY_NAMESPACES,
+  BEDROCK_MODEL_MATRIX,
+  DEFAULT_AUTONOMOUS_DAEMONS,
+  DEFAULT_ISOLATED_AI_LAB_STATE,
+} from "../../../../../../packages/ai-core/src/index";
 
 export function AiArea() {
   return (
@@ -647,6 +653,36 @@ function AgentCore() {
               ["Son saat hata", formatNumber(w.errorsLastHour)],
               ["DLQ mesajı", formatNumber(w.dlqMessages)],
               ["Son güncelleme", formatDate(w.lastUpdate)],
+            ]}
+          />
+        </Panel>
+        <Panel title="AgentCore Bellek İsim Alanları (Memory Namespaces)">
+          <DetailList
+            items={AGENTCORE_MEMORY_NAMESPACES.map((ns) => [
+              `${ns.namespaceTemplate} (${ns.strategy}, TTL ${ns.ttlDays}g)`,
+              ns.description,
+            ])}
+          />
+        </Panel>
+        <Panel title="Amazon Bedrock 4-Katmanlı Model Router Matrisi">
+          <DetailList
+            items={Object.values(BEDROCK_MODEL_MATRIX).map((tier) => [
+              `${tier.tier.toUpperCase()} — ${tier.roleName}`,
+              `${tier.modelId} (~${tier.estimatedLatencyMs}ms • $${tier.costPer1kInputUsd}/1K in)`,
+            ])}
+          />
+        </Panel>
+        <Panel title="İzole AI Lab: Vector DB, Hibrit RAG & 7/24 Otonom Ajanlar">
+          <DetailList
+            items={[
+              ["Vector DB Sağlayıcı", DEFAULT_ISOLATED_AI_LAB_STATE.vectorDb.provider],
+              ["Embedding Modeli", `${DEFAULT_ISOLATED_AI_LAB_STATE.vectorDb.embeddingModelId} (${DEFAULT_ISOLATED_AI_LAB_STATE.vectorDb.dimensions}d)`],
+              ["Hibrit RAG Ağırlıkları", `Vektör %${Math.round(DEFAULT_ISOLATED_AI_LAB_STATE.rag.vectorWeight * 100)} • BM25 %${Math.round(DEFAULT_ISOLATED_AI_LAB_STATE.rag.lexicalBm25Weight * 100)} • Coğrafi Yakınlık %${Math.round(DEFAULT_ISOLATED_AI_LAB_STATE.rag.geoProximityWeight * 100)}`],
+              ["Fine-Tuning Küratörü", `${DEFAULT_ISOLATED_AI_LAB_STATE.fineTuning.trainingMethod} (${DEFAULT_ISOLATED_AI_LAB_STATE.fineTuning.targetBaseModelId}) — ${DEFAULT_ISOLATED_AI_LAB_STATE.fineTuning.curatedSampleCount} onaylı örnek`],
+              ...DEFAULT_AUTONOMOUS_DAEMONS.map((d) => [
+                `[7/24 Ajan] ${d.name}`,
+                `${d.scheduleCron} • Başarı %${(d.metrics.successRate * 100).toFixed(1)} (${d.metrics.itemsProcessed24h} kayıt/24s)`,
+              ] as [string, string]),
             ]}
           />
         </Panel>

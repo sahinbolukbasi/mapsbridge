@@ -190,9 +190,7 @@ export function CommunityScreen({
   const activeRoute = tripStore.getActiveRoute();
 
   return (
-    <Screen
-      header={<ScreenHeader title={tr("community.title")} />}
-    >
+    <Screen>
       <ScrollView contentContainerStyle={styles.page}>
         {/* D (görev 7): üst "Seyahat deneyimini paylaş" compose alanı, açıklama ve başlıktaki
             kalem kaldırıldı; paylaşım oluşturma sol-alt FAB'de (misafir → AuthGate). */}
@@ -364,7 +362,15 @@ export function CommunityScreen({
                         post.isBookmarked ? tr("community.post.saved") : tr("community.post.save")
                       }
                       onPress={() =>
-                        requireMember("save", () => socialSyncService.toggleBookmark(post.id))
+                        requireMember("save", () => socialSyncService.toggleBookmark(post.id).then((updated) => {
+                          toast.show({
+                            tone: "success",
+                            message:
+                              updated?.isBookmarked !== false
+                                ? "Gönderi kaydedildi."
+                                : "Kaydedilenlerden çıkarıldı.",
+                          });
+                        }))
                       }
                     />
                     <IconButton
@@ -477,10 +483,10 @@ export function CommunityScreen({
         onPublished={(post) => {
           setComposeOpen(false);
           toast.show({
-            tone: post.deviceOnly ? "warning" : "success",
+            tone: "success",
             message: post.deviceOnly
-              ? `${tr("community.toast.posted")} · ${tr("community.post.deviceOnly")}`
-              : tr("community.toast.posted"),
+              ? `Gönderi kaydedildi · ${tr("community.post.deviceOnly")}`
+              : "Gönderi kaydedildi ve paylaşıldı.",
           });
         }}
       />
@@ -489,7 +495,7 @@ export function CommunityScreen({
         visible={!!editing}
         post={editing}
         onClose={() => setEditing(null)}
-        onSaved={() => toast.show({ tone: "success", message: tr("community.toast.updated") })}
+        onSaved={() => toast.show({ tone: "success", message: "Gönderi kaydedildi." })}
         onDeleted={() => toast.show({ tone: "info", message: tr("community.toast.deleted") })}
       />
 

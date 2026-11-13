@@ -4,16 +4,16 @@
 const PERMISSIONS_TR = {
   location:
     "Maps Bridge, “Yakınımda” ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
-  camera: "Topluluk paylaşımına fotoğraf çekebilmen için kamera erişimi gerekir.",
+  camera:
+    "Topluluk paylaşımına fotoğraf çekebilmen ve paylaşılan 6 haneli konum QR kodlarını okutabilmen için kamera erişimi gerekir.",
   photos:
     "Topluluk paylaşımına ve profil fotoğrafına görsel ekleyebilmen için fotoğraflarına erişilir.",
   photosAdd: "Rota ve harita görsellerini galerine kaydedebilmen için izin gerekir.",
   faceId: "Açtığında uygulama kilidini Face ID ile açabilmen için kullanılır.",
-  // Hareket (CoreMotion): Maps Bridge hareket verisi TOPLAMAZ ve kullanmaz. Bu metin, konum
-  // bileşeninin (expo-location) içerdiği sistem kütüphanesi nedeniyle Apple'ın zorunlu tuttuğu
-  // dürüst açıklamadır — I1. Ileride adım sayımı/hareket eklenirse metin güncellenir.
+  // Hareket (CoreMotion): Maps Bridge hareket verisi TOPLAMAZ. İvmeölçer yalnızca cihaz içinde
+  // isteğe bağlı Sallayarak Acil Yardım (112 SOS) algılaması ve expo-location sistem kütüphanesi için kullanılır.
   motion:
-    "Maps Bridge hareket verini toplamaz; bu izin yalnızca konum bileşeninin içerdiği sistem kütüphanesi gereği istenir ve etkin olarak kullanılmaz.",
+    "Maps Bridge hareket verini sunucuda toplamaz; ivmeölçer yalnızca cihaz içinde isteğe bağlı Sallayarak Acil Yardım (112 SOS) algılaması ve konum bileşeninin sistem kütüphanesi için kullanılır.",
 };
 
 export const APP_CONFIG = {

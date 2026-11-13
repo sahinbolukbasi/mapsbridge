@@ -2,10 +2,10 @@
   "ios": {
     "CFBundleDisplayName": "Maps Bridge",
     "NSLocationWhenInUseUsageDescription": "Maps Bridge, “Yakınımda” ve haritada konumunu göstermek için uygulamayı kullanırken konumuna erişir. Konumun sunucuda saklanmaz.",
-    "NSCameraUsageDescription": "Topluluk paylaşımına fotoğraf çekebilmen için kamera erişimi gerekir.",
+    "NSCameraUsageDescription": "Topluluk paylaşımına fotoğraf çekebilmen ve paylaşılan 6 haneli konum QR kodlarını okutabilmen için kamera erişimi gerekir.",
     "NSPhotoLibraryUsageDescription": "Topluluk paylaşımına ve profil fotoğrafına görsel ekleyebilmen için fotoğraflarına erişilir.",
     "NSPhotoLibraryAddUsageDescription": "Rota ve harita görsellerini galerine kaydedebilmen için izin gerekir.",
     "NSFaceIDUsageDescription": "Açtığında uygulama kilidini Face ID ile açabilmen için kullanılır.",
-    "NSMotionUsageDescription": "Maps Bridge hareket verini toplamaz; bu izin yalnızca konum bileşeninin içerdiği sistem kütüphanesi gereği istenir ve etkin olarak kullanılmaz."
+    "NSMotionUsageDescription": "Maps Bridge hareket verini sunucuda toplamaz; ivmeölçer yalnızca cihaz içinde isteğe bağlı Sallayarak Acil Yardım (112 SOS) algılaması ve konum bileşeninin sistem kütüphanesi için kullanılır."
   }
 }

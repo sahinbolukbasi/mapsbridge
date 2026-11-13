@@ -311,6 +311,31 @@ export async function changePasswordDirect(newPassword: string) {
   return data;
 }
 
+export async function deleteAccountDirect() {
+  const session = getStoredSession();
+  if (!session?.token) {
+    throw new Error("Oturumunuz bulunamadı. Lütfen tekrar giriş yapın.");
+  }
+
+  const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://pwi1j8mq0j.execute-api.eu-central-1.amazonaws.com"}/auth/delete-account`;
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.token}`,
+      },
+      body: JSON.stringify({ accessToken: session.token }),
+    });
+    if (!res.ok && res.status !== 404) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || "Hesap silme işlemi tamamlanamadı.");
+    }
+  } finally {
+    signOut();
+  }
+}
+
 export function handleGoogleCredentialResponse(
   credential: string,
   manualProfile?: { email: string; name?: string; picture?: string },

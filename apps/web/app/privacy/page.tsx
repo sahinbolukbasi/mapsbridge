@@ -45,7 +45,8 @@ export default function Privacy() {
           </li>
           <li>
             <strong>Kamera ve fotoğraflar:</strong> topluluk paylaşımlarına ve profil fotoğrafına
-            görsel ekleyebilmen için erişilir. Yalnızca senin seçtiğin görseller işlenir.
+            görsel ekleyebilmen ve paylaşılan 6 haneli konum QR kodlarını okutabilmen için erişilir.
+            Yalnızca senin seçtiğin görseller veya okuttuğun QR kod işlenir.
           </li>
           <li>
             <strong>Face ID / parmak izi (uygulama kilidi):</strong> isteğe bağlıdır ve varsayılan
@@ -57,15 +58,33 @@ export default function Privacy() {
             için kullanılır. Uzaktan push bildirimi ya da pazarlama bildirimi göndermeyiz.
           </li>
           <li>
-            <strong>Hareket (CoreMotion):</strong> hareket verini toplamaz ve kullanmayız. Bu izin
-            yalnızca konum bileşeninin içerdiği bir sistem kütüphanesi nedeniyle Apple tarafından
-            zorunlu tutulduğu için uygulamada tanımlıdır.
+            <strong>Hareket (CoreMotion / İvmeölçer):</strong> hareket verini sunucuda toplamayız.
+            İvmeölçer yalnızca cihaz içinde isteğe bağlı Sallayarak Acil Yardım (112 SOS) algılaması
+            ve konum bileşeninin içerdiği sistem kütüphanesi için kullanılır.
           </li>
         </ul>
         <p>
           Uygulama analitik/izleme için üçüncü taraf takip teknolojisi kullanmaz; reklam kimliğiyle
           cihazlar arası takip yapılmaz.
         </p>
+      </Section>
+      <Section reveal title="Hesap ve veri silme hakkın (Apple & Google Play uyumluluğu)">
+        <p>
+          Hesabını ve ilişkili tüm verilerini (profil, rotalar, cüzdan kayıtları ve AI hafızası)
+          dilediğin an kalıcı olarak silebilirsin:
+        </p>
+        <ul>
+          <li>
+            <strong>Mobil uygulamada:</strong> <em>Profil &gt; Hesabımı Kalıcı Olarak Sil</em>{" "}
+            adımından onay vererek hesabını anında silebilirsin.
+          </li>
+          <li>
+            <strong>Web üzerinden:</strong>{" "}
+            <a href="/profile/edit/?tab=tehlike">Profil Düzenle &gt; Cihaz verisi ve Hesap Silme</a>{" "}
+            sayfasından veya <a href="/contact/">İletişim</a> sayfası üzerinden hesap silme talebini
+            tamamlayabilirsin.
+          </li>
+        </ul>
       </Section>
       <Section reveal title="Kontrol sende">
         <p>

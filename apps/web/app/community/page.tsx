@@ -119,7 +119,10 @@ export default function CommunityPage() {
     });
     trackEvent("post_view", { targetId: post.id, targetTitle: post.content.slice(0, 30) });
     setComposerOpen(false);
-    toast.show({ tone: "success", message: t("community.toast.posted", "Paylaşımın yayınlandı.") });
+    toast.show({
+      tone: "success",
+      message: t("community.toast.posted", "Gönderi kaydedildi ve yayınlandı."),
+    });
   }
 
   async function sharePost(post: CommunityPost) {
@@ -153,17 +156,9 @@ export default function CommunityPage() {
   return (
     <PageShell className="community-page">
       <PageHeader
+        variant="hidden"
         title={t("community.title", "Topluluk")}
         titleText={t("community.title", "Topluluk")}
-        description={t(
-          "community.description",
-          "Gezginlerin paylaştığı deneyimleri ve rotaları oku; beğendiğin rotayı kendi planına kopyala.",
-        )}
-        actions={
-          <Button onClick={openComposer} iconStart={<Icon name="plus" size={16} />}>
-            {t("community.newPost", "Paylaşım yap")}
-          </Button>
-        }
       />
 
       <div className="community-layout">
@@ -177,32 +172,21 @@ export default function CommunityPage() {
           </ChipGroup>
         </aside>
         <div className="community-main">
-          {/* Satır içi composer daveti: dokununca paylaşım penceresi açılır (misafirde AuthGate). */}
-          <div className="community-prompt" data-enter="">
-            <span className="community-prompt__icon" aria-hidden="true">
-              <Icon name="camera" size={20} />
-            </span>
-            <button type="button" className="community-prompt__field" onClick={openComposer}>
-              {t("community.compose.placeholder", "Nereyi keşfettin?")}
-            </button>
-            <Button
-              variant="secondary"
-              onClick={openComposer}
-              iconStart={<Icon name="image" size={16} />}
-            >
-              {t("community.compose.chooseImage", "Fotoğraf seç")}
+          <div className="community-top-actions">
+            <SegmentedControl<FeedMode>
+              label={t("community.mode.label", "Akış")}
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: "latest", label: t("community.mode.latest", "Güncel") },
+                { value: "popular", label: t("community.mode.popular", "Popüler") },
+                { value: "following", label: t("community.mode.following", "Takip ettiklerin") },
+              ]}
+            />
+            <Button onClick={openComposer} iconStart={<Icon name="plus" size={16} />}>
+              {t("community.newPost", "Paylaşım yap")}
             </Button>
           </div>
-          <SegmentedControl<FeedMode>
-            label={t("community.mode.label", "Akış")}
-            value={mode}
-            onChange={setMode}
-            options={[
-              { value: "latest", label: t("community.mode.latest", "Güncel") },
-              { value: "popular", label: t("community.mode.popular", "Popüler") },
-              { value: "following", label: t("community.mode.following", "Takip ettiklerin") },
-            ]}
-          />
 
           <div
             className="community-search"
@@ -298,7 +282,17 @@ export default function CommunityPage() {
                   next={NEXT}
                   actions={{
                     onToggleLike: (id) => guarded(() => webSocialSync.toggleLike(id)),
-                    onToggleBookmark: (id) => guarded(() => webSocialSync.toggleBookmark(id)),
+                    onToggleBookmark: (id) =>
+                      guarded(() => {
+                        const updated = webSocialSync.toggleBookmark(id);
+                        toast.show({
+                          tone: "success",
+                          message:
+                            updated?.savedByMe !== false
+                              ? t("community.toast.saved", "Gönderi kaydedildi.")
+                              : t("community.toast.unsaved", "Kaydedilenlerden çıkarıldı."),
+                        });
+                      }),
                     onAddComment: (id, text) => guarded(() => webSocialSync.addComment(id, text)),
                     onToggleFollow: (username) =>
                       guarded(() => toggleFollowUser(username.replace(/^@/, ""))),
@@ -326,7 +320,7 @@ export default function CommunityPage() {
             if (webSocialSync.editPost(id, updates))
               toast.show({
                 tone: "success",
-                message: t("community.toast.updated", "Paylaşımın güncellendi."),
+                message: t("community.toast.updated", "Gönderi kaydedildi."),
               });
           }}
         />

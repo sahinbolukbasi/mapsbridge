@@ -2,10 +2,10 @@
   "ios": {
     "CFBundleDisplayName": "Maps Bridge",
     "NSLocationWhenInUseUsageDescription": "Maps Bridge uses your location while you use the app to power “Near me” and show where you are on the map. Your location is not stored on our servers.",
-    "NSCameraUsageDescription": "Camera access lets you take photos for your community posts.",
+    "NSCameraUsageDescription": "Camera access lets you take photos for your community posts and scan shared 6-digit location QR codes.",
     "NSPhotoLibraryUsageDescription": "Photo access lets you add images to community posts and your profile picture.",
     "NSPhotoLibraryAddUsageDescription": "This permission lets you save route and map images to your photo library.",
     "NSFaceIDUsageDescription": "Used to unlock the app with Face ID when you turn on the app lock.",
-    "NSMotionUsageDescription": "Maps Bridge does not collect your motion data; this permission is only requested because of a system library bundled with the location component and is not actively used."
+    "NSMotionUsageDescription": "Maps Bridge does not collect your motion data on servers; the accelerometer is only used on-device for optional Shake-to-SOS (112 emergency) detection and the location component system library."
   }
 }

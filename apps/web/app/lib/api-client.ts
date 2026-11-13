@@ -25,6 +25,8 @@ export interface ApiResponseError {
   upgradeUrl?: string;
 }
 
+const inFlightGetRequests = new Map<string, Promise<unknown>>();
+
 /**
  * Base fetcher with JWT injection, automatic retry on token expiry, and timeout
  */
@@ -35,95 +37,114 @@ export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {
     ? endpoint
     : `${API_ENDPOINT}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
-  const headers: Record<string, string> = {
-    "content-type": "application/json",
-    ...((customHeaders as Record<string, string>) || {}),
+  const method = (fetchOptions.method || "GET").toUpperCase();
+  const dedupeKey = method === "GET" ? `${method}:${url}` : null;
+  if (dedupeKey && inFlightGetRequests.has(dedupeKey)) {
+    return inFlightGetRequests.get(dedupeKey) as Promise<T>;
+  }
+
+  const executeFetch = async (): Promise<T> => {
+    const headers: Record<string, string> = {
+      "content-type": "application/json",
+      ...((customHeaders as Record<string, string>) || {}),
+    };
+
+    if (!skipAuth) {
+      let session = getStoredSession();
+      if (session?.token && typeof isTokenExpired === "function" && isTokenExpired(session.token)) {
+        try {
+          const refreshed = await refreshSession();
+          if (refreshed?.token) {
+            session = { token: refreshed.token, email: session.email };
+          }
+        } catch (refreshErr) {
+          if (typeof window !== "undefined" && window.dispatchEvent) {
+            window.dispatchEvent(
+              new CustomEvent("mapsbridge:token-refresh-failed", {
+                detail: { error: refreshErr },
+              }),
+            );
+          }
+        }
+      }
+      if (session?.token) {
+        headers["Authorization"] = `Bearer ${session.token}`;
+      }
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        ...fetchOptions,
+        headers,
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "TimeoutError") {
+        throw new Error("İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edin.");
+      }
+      throw new Error("Sunucuya erişilemedi. Çevrimdışı modda çalışılıyor.");
+    }
+
+    // Handle 401 Unauthorized (attempt token refresh once)
+    if (response.status === 401 && !skipAuth) {
+      const refreshed = await refreshSession();
+      const fallback = getStoredSession();
+      const newToken = refreshed?.token || fallback?.token;
+      if (newToken && headers["Authorization"] !== `Bearer ${newToken}`) {
+        headers["Authorization"] = `Bearer ${newToken}`;
+        try {
+          response = await fetch(url, {
+            ...fetchOptions,
+            headers,
+            signal: AbortSignal.timeout(timeoutMs),
+          });
+        } catch {
+          // The authenticated retry may have committed a mutation before the
+          // connection failed. Do not report the original 401 as its outcome.
+          throw new Error("Sunucu yanıtı alınamadı. İşlemin sonucunu tekrar kontrol edin.");
+        }
+      } else if (!refreshed?.token) {
+        // Don't sign out on a failed refresh — the token may still be valid
+        // for requests that aren't caught by isTokenExpired (e.g. Google access tokens).
+        // The UI auth guard will handle showing the login prompt when needed.
+        window.dispatchEvent(new CustomEvent("mapsbridge:session-expired"));
+      }
+    }
+
+    if (!response.ok) {
+      let errorData: { error?: string; code?: string; upgradeUrl?: string } | null;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { error: response.statusText };
+      }
+
+      const apiError: ApiResponseError = {
+        status: response.status,
+        message: errorData?.error || `İşlem başarısız oldu (${response.status})`,
+        code: errorData?.code,
+        upgradeUrl: errorData?.upgradeUrl,
+      };
+      throw apiError;
+    }
+
+    // Check if response is empty (e.g. 204 No Content)
+    if (response.status === 204) {
+      return {} as T;
+    }
+
+    return response.json() as Promise<T>;
   };
 
-  if (!skipAuth) {
-    let session = getStoredSession();
-    if (session?.token && typeof isTokenExpired === "function" && isTokenExpired(session.token)) {
-      try {
-        const refreshed = await refreshSession();
-        if (refreshed?.token) {
-          session = { token: refreshed.token, email: session.email };
-        }
-      } catch (refreshErr) {
-        if (typeof window !== "undefined" && window.dispatchEvent) {
-          window.dispatchEvent(
-            new CustomEvent("mapsbridge:token-refresh-failed", { detail: { error: refreshErr } }),
-          );
-        }
-      }
-    }
-    if (session?.token) {
-      headers["Authorization"] = `Bearer ${session.token}`;
-    }
+  if (!dedupeKey) {
+    return executeFetch();
   }
-
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      ...fetchOptions,
-      headers,
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-  } catch (err: unknown) {
-    if (err instanceof Error && err.name === "TimeoutError") {
-      throw new Error("İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edin.");
-    }
-    throw new Error("Sunucuya erişilemedi. Çevrimdışı modda çalışılıyor.");
-  }
-
-  // Handle 401 Unauthorized (attempt token refresh once)
-  if (response.status === 401 && !skipAuth) {
-    const refreshed = await refreshSession();
-    const fallback = getStoredSession();
-    const newToken = refreshed?.token || fallback?.token;
-    if (newToken && headers["Authorization"] !== `Bearer ${newToken}`) {
-      headers["Authorization"] = `Bearer ${newToken}`;
-      try {
-        response = await fetch(url, {
-          ...fetchOptions,
-          headers,
-          signal: AbortSignal.timeout(timeoutMs),
-        });
-      } catch {
-        // The authenticated retry may have committed a mutation before the
-        // connection failed. Do not report the original 401 as its outcome.
-        throw new Error("Sunucu yanıtı alınamadı. İşlemin sonucunu tekrar kontrol edin.");
-      }
-    } else if (!refreshed?.token) {
-      // Don't sign out on a failed refresh — the token may still be valid
-      // for requests that aren't caught by isTokenExpired (e.g. Google access tokens).
-      // The UI auth guard will handle showing the login prompt when needed.
-      window.dispatchEvent(new CustomEvent("mapsbridge:session-expired"));
-    }
-  }
-
-  if (!response.ok) {
-    let errorData: { error?: string; code?: string; upgradeUrl?: string } | null;
-    try {
-      errorData = await response.json();
-    } catch {
-      errorData = { error: response.statusText };
-    }
-
-    const apiError: ApiResponseError = {
-      status: response.status,
-      message: errorData?.error || `İşlem başarısız oldu (${response.status})`,
-      code: errorData?.code,
-      upgradeUrl: errorData?.upgradeUrl,
-    };
-    throw apiError;
-  }
-
-  // Check if response is empty (e.g. 204 No Content)
-  if (response.status === 204) {
-    return {} as T;
-  }
-
-  return response.json() as Promise<T>;
+  const tracked = executeFetch().finally(() => {
+    inFlightGetRequests.delete(dedupeKey);
+  });
+  inFlightGetRequests.set(dedupeKey, tracked);
+  return tracked;
 }
 
 // ─── Route Domain Services ──────────────────────────────────────────────────

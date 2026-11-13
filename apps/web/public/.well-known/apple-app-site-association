@@ -1,0 +1,36 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TEAMID.com.mapsbridge.mobile"],
+        "components": [
+          {
+            "/": "/k/*",
+            "comment": "6-digit shared location and route codes"
+          },
+          {
+            "/": "/traveler/*",
+            "comment": "Public traveler profiles"
+          },
+          {
+            "/": "/maps/*",
+            "comment": "Shared map routes and stops"
+          },
+          {
+            "/": "/p/*",
+            "comment": "Community posts"
+          },
+          {
+            "/": "/auth/callback*",
+            "comment": "OAuth callback redirect"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["TEAMID.com.mapsbridge.mobile"]
+  }
+}
+

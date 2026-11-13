@@ -17,7 +17,7 @@ export function AppSettings() {
   const [haptics, setHaptics] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [locationSharing, setLocationSharing] = useState(true);
-  const [shakeEmergency, setShakeEmergency] = useState(false);
+  const [shakeEmergency, setShakeEmergency] = useState(true);
 
   useEffect(() => {
     setHaptics(hapticsEnabled());
@@ -28,7 +28,7 @@ export function AppSettings() {
       if (v !== null) setLocationSharing(v === "true");
     });
     storage.getItem(SHAKE_EMERGENCY_KEY).then((v) => {
-      if (v !== null) setShakeEmergency(v === "true");
+      setShakeEmergency(v !== "false");
     });
   }, []);
 

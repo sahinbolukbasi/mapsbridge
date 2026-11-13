@@ -58,6 +58,8 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
   const [editingPost, setEditingPost] = useState<MobileCommunityPost | null>(null);
   const [paywall, setPaywall] = useState(false);
   const [confirmOut, setConfirmOut] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [docManagerOpen, setDocManagerOpen] = useState(false);
   const [shareCodeOpen, setShareCodeOpen] = useState(false);
   const profileRef = useRef<MobileUserProfile | null>(null);
@@ -284,13 +286,13 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
         <Card variant="bordered">
           <View style={styles.body}>
             <Txt variant="heading" header>
-              {"Konum Kodu ile Git & Paylaş"}
+              {"Konum Kodu Gir & QR Okut"}
             </Txt>
             <Txt variant="small" tone="muted">
-              {"6 haneli seyahat kodunu girerek konuma gidin ya da kendi konum kodunuzu arkadaşlarınızla paylaşın."}
+              {"Paylaşılan 6 haneli konum kodunu girerek veya kameranızla QR kodu okutarak doğrudan paylaşılan konum sayfasına gidin."}
             </Txt>
             <Button
-              label={"Konum Kodunu Aç / Kod Gir"}
+              label={"6 Haneli Kod Gir / QR Okut"}
               variant="secondary"
               onPress={() => setShareCodeOpen(true)}
             />
@@ -299,6 +301,12 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
 
         <AppSettings />
         <Button label={tr("nav.logout")} variant="danger" onPress={() => setConfirmOut(true)} />
+        <Button
+          label={deletingAccount ? "Hesap Siliniyor..." : "Hesabımı Kalıcı Olarak Sil"}
+          variant="ghost"
+          disabled={deletingAccount}
+          onPress={() => setConfirmDelete(true)}
+        />
       </ScrollView>
 
       <EditProfileModal
@@ -336,19 +344,35 @@ export function ProfileScreen({ onSignOut, onOpenPlan, onOpenCommunity }: Profil
           onSignOut();
         }}
       />
+      <ConfirmDialog
+        visible={confirmDelete}
+        title={"Hesabın kalıcı olarak silinsin mi?"}
+        body={
+          "Bu işlem geri alınamaz. Profilin, kayıtlı rotaların, cüzdan bakiyen ve tüm hesap verilerin sunucularımızdan kalıcı olarak silinir."
+        }
+        confirmLabel={"Hesabımı Kalıcı Sil"}
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={() => {
+          if (deletingAccount) return;
+          setDeletingAccount(true);
+          setConfirmDelete(false);
+          authService
+            .deleteAccount()
+            .catch(() => authService.signOut())
+            .finally(() => {
+              setDeletingAccount(false);
+              onSignOut();
+            });
+        }}
+      />
       <DocumentManagerModal
         visible={docManagerOpen}
         onClose={() => setDocManagerOpen(false)}
       />
       <PinShareModal
         visible={shareCodeOpen}
+        mode="enter"
         onClose={() => setShareCodeOpen(false)}
-        pin={{
-          title: profile?.fullName ? `${profile.fullName} Konumu` : "Seyahat Konumu",
-          lat: 41.0082,
-          lng: 28.9784,
-          address: profile?.location || "İstanbul, Türkiye",
-        }}
       />
       <ScreenTourModal screen="profile" />
     </Screen>

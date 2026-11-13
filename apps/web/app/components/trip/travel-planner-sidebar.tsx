@@ -75,9 +75,8 @@ import {
   cx,
   useToast,
 } from "../ui";
-import { GooglePlaceInfo } from "./google-place-info";
-import { PlaceFacts } from "./place-facts";
 import { PinShareModal } from "./pin-share-modal";
+import { generateNumericPinCode } from "../../lib/share/pin-link";
 import { DiscoverPanel } from "./discover-panel";
 import { NearbyList, type NearbyAddPlace } from "./nearby-list";
 import { CATEGORY_ICON } from "../../lib/trip/pin-popup";
@@ -1445,7 +1444,8 @@ function PinDetail({
     setDayIndex(pin.dayIndex || 0);
     setAnswer(null);
     setQuestion("");
-  }, [pin.id]);
+    generateNumericPinCode({ lat: pin.lat, lng: pin.lng, label: pin.label });
+  }, [pin.id, pin.lat, pin.lng, pin.label]);
 
   const addPhoto = (src: string) => {
     if (!src.trim()) return;
@@ -1737,8 +1737,6 @@ function PinDetail({
             )}
           </section>
 
-          <PlaceFacts pin={pin} />
-
           <NearbyList
             lat={pin.lat}
             lng={pin.lng}
@@ -1865,18 +1863,6 @@ function PinDetail({
               </form>
             </div>
           </section>
-
-          {googleMapsEnabled && (
-            <section className="planner-detail__section">
-              <GooglePlaceInfo
-                placeId={pin.googlePlaceId}
-                label={pin.label}
-                lat={pin.lat}
-                lng={pin.lng}
-                onLink={(linked) => updatePinAnywhere(pin.id, { googlePlaceId: linked })}
-              />
-            </section>
-          )}
         </>
       )}
 

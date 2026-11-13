@@ -30,6 +30,25 @@ export default function Terms() {
           açılış saatleri ve işletme bilgileri değişebilir.
         </p>
       </Section>
+      <Section reveal title="Abonelikler, kredi paketleri ve iptal koşulları">
+        <p>
+          MapsBridge üzerinde sunulan Gezgin, Pro ve Tur Lideri aylık abonelikleri ile tek seferlik
+          kredi paketleri; mobil uygulamada Apple App Store / Google Play (RevenueCat) veya Polar
+          güvenli ödeme altyapısı üzerinden tahsil edilir. Aylık abonelikler, mevcut dönem bitiminden
+          en az 24 saat önce iptal edilmediği sürece otomatik olarak yenilenir. Aboneliğini cihazının
+          mağaza abonelik ayarlarından veya profilindeki ödeme yönetimi ekranından dilediğin an iptal
+          edebilir ve mobil uygulamada <em>Satın Alımları Geri Yükle</em> seçeneğini
+          kullanabilirsin.
+        </p>
+      </Section>
+      <Section reveal title="Hesap kapatma ve silme">
+        <p>
+          Kullanıcılar hesaplarını mobil uygulama içindeki <em>Profil &gt; Hesabımı Kalıcı Olarak Sil</em>{" "}
+          butonundan veya web üzerinde{" "}
+          <a href="/profile/edit/?tab=tehlike">Profil Düzenle &gt; Hesabımı Kalıcı Olarak Sil</a>{" "}
+          sayfasından diledikleri zaman kalıcı olarak kapatabilirler.
+        </p>
+      </Section>
       <Section reveal title="Yasak kullanımlar">
         <p>
           Gizli takip, izinsiz konum paylaşımı, taciz veya hukuka aykırı herhangi bir kullanım

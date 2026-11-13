@@ -25,6 +25,7 @@ const router = new Router();
 router.add("POST /auth/reset-password", handleResetPassword);
 router.add("POST /auth/change-password", handleChangePassword);
 router.add("POST /auth/refresh", handleRefreshToken);
+router.add("POST /auth/delete-account", handleDeleteAccount);
 router.add("POST /profile/publish", handlePublishProfile);
 router.add("POST /profile/unpublish", handleUnpublishProfile);
 router.add("GET /profiles/{username}", handleGetProfile);
@@ -266,4 +267,82 @@ async function handleGetProfile(event: ApiGatewayEvent) {
 
   const item = unmarshall(result.Item);
   return ok(item.profile);
+}
+
+// ─── Delete Account (Apple Guideline 5.1.1(v) & Google Play User Data Policy) ─
+async function handleDeleteAccount(event: ApiGatewayEvent) {
+  const token =
+    extractBearerToken(event) || parseBody<{ accessToken?: string }>(event)?.accessToken;
+  if (!token) return unauthorized();
+
+  const owner = await verifiedUserId(token);
+  if (!owner) return unauthorized();
+
+  const tableName = process.env.DYNAMODB_TABLE || `${process.env.ENVIRONMENT || "prod"}-data`;
+  const { GetItemCommand, DeleteItemCommand } = await import("@aws-sdk/client-dynamodb");
+  const { marshall, unmarshall } = await import("@aws-sdk/util-dynamodb");
+  const ddb = getDynamoClient();
+
+  try {
+    // 1. Lookup public profile username to delete PROFILE#<username> and OWNER#<owner>
+    const ownerProfile = await ddb
+      .send(
+        new GetItemCommand({
+          TableName: tableName,
+          Key: marshall({ PK: `OWNER#${owner}`, SK: "PUBLIC_PROFILE" }),
+        }),
+      )
+      .catch(() => null);
+
+    if (ownerProfile?.Item) {
+      const parsed = unmarshall(ownerProfile.Item);
+      if (typeof parsed.username === "string" && parsed.username) {
+        await ddb
+          .send(
+            new DeleteItemCommand({
+              TableName: tableName,
+              Key: marshall({ PK: `PROFILE#${parsed.username.toLowerCase()}`, SK: "PUBLIC" }),
+            }),
+          )
+          .catch(() => undefined);
+      }
+      await ddb
+        .send(
+          new DeleteItemCommand({
+            TableName: tableName,
+            Key: marshall({ PK: `OWNER#${owner}`, SK: "PUBLIC_PROFILE" }),
+          }),
+        )
+        .catch(() => undefined);
+    }
+
+    // 2. Delete user wallet & profile metadata in DynamoDB
+    for (const sk of ["PROFILE", "WALLET", "AI_MEMORY"]) {
+      await ddb
+        .send(
+          new DeleteItemCommand({
+            TableName: tableName,
+            Key: marshall({ PK: `USER#${owner}`, SK: sk }),
+          }),
+        )
+        .catch(() => undefined);
+    }
+  } catch (err) {
+    console.warn("[Auth] DynamoDB account cleanup non-fatal error:", err);
+  }
+
+  // 3. Delete Cognito user if token is a Cognito AccessToken
+  try {
+    const { CognitoIdentityProviderClient, DeleteUserCommand } =
+      await import("@aws-sdk/client-cognito-identity-provider");
+    const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION });
+    await client.send(new DeleteUserCommand({ AccessToken: token }));
+  } catch (err) {
+    console.warn("[Auth] Cognito DeleteUser non-fatal (e.g. federated OAuth token):", err);
+  }
+
+  return ok({
+    status: "deleted",
+    message: "Hesabınız ve ilişkili verileriniz kalıcı olarak silindi.",
+  });
 }

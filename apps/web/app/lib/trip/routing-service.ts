@@ -412,13 +412,53 @@ export function autoSplitPinsIntoDays(
     };
   }
 
-  // K-means geographic clustering
-  // Pick initial centroids spread out
+  // K-means geographic clustering with 2D Principal-Axis initialization
+  // Computes physical spread (in km) across latitude vs longitude so East-West cities
+  // (e.g. Istanbul across the Bosphorus, Rome, Paris, Lisbon) split cleanly by corridor.
+  const meanLat = pins.reduce((sum, p) => sum + p.lat, 0) / pins.length;
+  const cosLat = Math.max(0.2, Math.cos((meanLat * Math.PI) / 180));
+  const lats = pins.map((p) => p.lat);
+  const lngs = pins.map((p) => p.lng);
+  const latSpanKm = (Math.max(...lats) - Math.min(...lats)) * 111;
+  const lngSpanKm = (Math.max(...lngs) - Math.min(...lngs)) * 111 * cosLat;
+
+  const projectAlongPrincipalAxis = (p: Pin): number => {
+    if (lngSpanKm > latSpanKm * 1.25) {
+      return p.lng * cosLat + p.lat * 0.25;
+    }
+    if (latSpanKm > lngSpanKm * 1.25) {
+      return p.lat + p.lng * cosLat * 0.25;
+    }
+    return p.lat * 0.7 + p.lng * cosLat * 0.7;
+  };
+
+  // Detect natural water barrier (e.g. Istanbul Bosphorus ~41.0N, 29.005E)
+  const isBosphorusSplit =
+    meanLat > 40.9 &&
+    meanLat < 41.2 &&
+    pins.some((p) => p.lng < 29.002) &&
+    pins.some((p) => p.lng > 29.012);
+
+  const penaltyAwareDistanceKm = (
+    a: { lat: number; lng: number },
+    b: { lat: number; lng: number },
+  ): number => {
+    const base = calculateDistanceKm(a.lat, a.lng, b.lat, b.lng);
+    if (isBosphorusSplit && dayCount >= 2) {
+      const sideA = a.lng > 29.005 ? 1 : 0;
+      const sideB = b.lng > 29.005 ? 1 : 0;
+      if (sideA !== sideB) return base + 6.5; // discourage cross-continent mixing on same day
+    }
+    return base;
+  };
+
   const centroids: { lat: number; lng: number }[] = [];
-  const sortedByLat = [...pins].sort((a, b) => a.lat - b.lat);
+  const sortedByAxis = [...pins].sort(
+    (a, b) => projectAlongPrincipalAxis(a) - projectAlongPrincipalAxis(b),
+  );
   for (let i = 0; i < dayCount; i++) {
-    const idx = Math.floor((i / (dayCount - 1 || 1)) * (sortedByLat.length - 1));
-    centroids.push({ lat: sortedByLat[idx].lat, lng: sortedByLat[idx].lng });
+    const idx = Math.floor((i / (dayCount - 1 || 1)) * (sortedByAxis.length - 1));
+    centroids.push({ lat: sortedByAxis[idx].lat, lng: sortedByAxis[idx].lng });
   }
 
   // 10 iterations of centroid adjustment
@@ -431,7 +471,7 @@ export function autoSplitPinsIntoDays(
       let bestCluster = 0;
       let minDist = Infinity;
       centroids.forEach((c, cIdx) => {
-        const d = calculateDistanceKm(pin.lat, pin.lng, c.lat, c.lng);
+        const d = penaltyAwareDistanceKm(pin, c);
         if (d < minDist) {
           minDist = d;
           bestCluster = cIdx;
@@ -479,6 +519,37 @@ export function autoSplitPinsIntoDays(
     if (movedPin) {
       clusters[cIdx].push(movedPin);
       centroids[cIdx] = { lat: movedPin.lat, lng: movedPin.lng };
+    }
+  }
+
+  // Soft capacity balancing: if one day is heavily overloaded (>= maxPerDay + 2) and another
+  // has only 1 stop, shift boundary stop closest to the light day's centroid.
+  const idealPerDay = Math.ceil(pins.length / dayCount);
+  if (pins.length >= dayCount * 2) {
+    for (let pass = 0; pass < dayCount; pass++) {
+      const lightIdx = clusters.findIndex((c) => c.length === 1);
+      const heavyIdx = clusters.findIndex((c) => c.length > Math.max(3, idealPerDay + 1));
+      if (lightIdx === -1 || heavyIdx === -1 || lightIdx === heavyIdx) break;
+      const heavy = clusters[heavyIdx];
+      const targetCentroid = centroids[lightIdx];
+      let bestMoveIdx = 0;
+      let bestMoveDist = Infinity;
+      heavy.forEach((p, idx) => {
+        const d = penaltyAwareDistanceKm(p, targetCentroid);
+        if (d < bestMoveDist) {
+          bestMoveDist = d;
+          bestMoveIdx = idx;
+        }
+      });
+      // Only move if within reasonable urban transfer distance (<12 km)
+      if (bestMoveDist <= 12) {
+        const [shifted] = heavy.splice(bestMoveIdx, 1);
+        if (shifted) {
+          clusters[lightIdx].push(shifted);
+        }
+      } else {
+        break;
+      }
     }
   }
 

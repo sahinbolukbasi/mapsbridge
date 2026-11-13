@@ -1,6 +1,7 @@
 import type { UnifiedRoutePlan, TripProfile, TripInterests } from "./types";
 import type { AnsweredSlot } from "./trip-state";
 import type { ThreadFocus } from "./focus-manager";
+import { findCityIntelligence } from "../../../../../packages/ai-core/src/curated-city-intelligence";
 export interface TripContext {
   destination?: string;
   days?: number;
@@ -349,8 +350,12 @@ export function generateConciergeQuestion(profile: TripProfile): {
   }
 
   if (!profile.duration_days) {
+    const cityIntel = findCityIntelligence(profile.destination);
+    const insiderPrefix = cityIntel
+      ? `${profile.destination} harika bir seçim! (${cityIntel.insiderSummary}) `
+      : "";
     return {
-      question: `${profile.destination} için kaç günlük bir seyahat düşünüyorsun?`,
+      question: `${insiderPrefix}${profile.destination} için kaç günlük bir seyahat düşünüyorsun?`,
       quickOptions: [
         {
           label: "☀️ Günübirlik (1 gün)",
@@ -360,10 +365,10 @@ export function generateConciergeQuestion(profile: TripProfile): {
           label: "⚡ Hafta sonu (2 gün)",
           prompt: `${profile.destination} için 2 günlük plan istiyorum.`,
         },
-        { label: "🗓️ 3 Gün", prompt: `${profile.destination} için 3 günlük bir rota yapalım.` },
+        { label: "🗓️ 3 Gün (Önerilen)", prompt: `${profile.destination} için 3 günlük bir rota yapalım.` },
         {
-          label: "🌟 1 Hafta (7 gün)",
-          prompt: `${profile.destination} için 7 günlük dolu dolu bir seyahat olsun.`,
+          label: "🌟 5-7 Gün (Kapsamlı)",
+          prompt: `${profile.destination} için 5 günlük dolu dolu bir seyahat olsun.`,
         },
       ],
     };

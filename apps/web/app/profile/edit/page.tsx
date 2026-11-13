@@ -27,7 +27,7 @@ import { AVAILABLE_INTERESTS } from "../../features/profile/constants";
 import { apiFetch } from "../../lib/api-client";
 import { billingService } from "../../lib/billing/billing-service";
 import type { WalletData } from "../../lib/billing/billing-types";
-import { changePasswordDirect, getStoredSession } from "../../lib/cognito";
+import { changePasswordDirect, deleteAccountDirect, getStoredSession } from "../../lib/cognito";
 import { useLocale } from "../../lib/locale-context";
 import { webSocialSync } from "../../lib/social-sync";
 import { userStorage } from "../../lib/user-storage";
@@ -99,6 +99,8 @@ export default function EditProfilePage() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [walletFailed, setWalletFailed] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     const session = getStoredSession();
@@ -449,25 +451,47 @@ export default function EditProfilePage() {
   );
 
   const dangerTab = (
-    <Card className="edit-danger">
-      <p className="edit-danger__title">
-        {t("edit.clear.title", "Bu cihazdaki profil bilgilerini sil")}
-      </p>
-      <p className="edit-danger__body">
-        {t(
-          "edit.clear.body",
-          "Ad, tanıtım, fotoğraf ve tercihlerin bu tarayıcıdan silinir. Hesabın ve sunucudaki verilerin silinmez; hesabını kapatmak için destek ekibine yaz.",
-        )}
-      </p>
-      <div className="edit-actions">
-        <Button variant="danger" onClick={() => setConfirmClear(true)}>
-          {t("edit.clear.cta", "Cihazdaki bilgileri sil")}
-        </Button>
-        <Button href="/support/" variant="ghost">
-          {t("edit.clear.support", "Destek")}
-        </Button>
-      </div>
-    </Card>
+    <div className="edit-stack">
+      <Card className="edit-danger">
+        <p className="edit-danger__title">
+          {t("edit.clear.title", "Bu cihazdaki profil bilgilerini sil")}
+        </p>
+        <p className="edit-danger__body">
+          {t(
+            "edit.clear.body",
+            "Ad, tanıtım, fotoğraf ve tercihlerin bu tarayıcıdan silinir. Hesabın ve sunucudaki verilerin silinmez.",
+          )}
+        </p>
+        <div className="edit-actions">
+          <Button variant="secondary" onClick={() => setConfirmClear(true)}>
+            {t("edit.clear.cta", "Cihazdaki bilgileri sil")}
+          </Button>
+          <Button href="/support/" variant="ghost">
+            {t("edit.clear.support", "Destek")}
+          </Button>
+        </div>
+      </Card>
+      <Card className="edit-danger">
+        <p className="edit-danger__title">
+          {t("edit.deleteAccount.title", "Hesabımı kalıcı olarak sil")}
+        </p>
+        <p className="edit-danger__body">
+          {t(
+            "edit.deleteAccount.body",
+            "MapsBridge hesabını, yayınlanan profilini, kayıtlı rotalarını, cüzdan bakiyeni ve AI hafızanı sunucularımızdan kalıcı olarak siler. Bu işlem geri alınamaz.",
+          )}
+        </p>
+        <div className="edit-actions">
+          <Button
+            variant="danger"
+            loading={deletingAccount}
+            onClick={() => setConfirmDeleteAccount(true)}
+          >
+            {t("edit.deleteAccount.cta", "Hesabımı Kalıcı Olarak Sil")}
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 
   return (
@@ -515,6 +539,32 @@ export default function EditProfilePage() {
           window.location.href = "/";
         }}
         onClose={() => setConfirmClear(false)}
+      />
+      <ConfirmDialog
+        open={confirmDeleteAccount}
+        title={t("edit.deleteAccount.confirmTitle", "Hesabın kalıcı olarak silinsin mi?")}
+        consequence={t(
+          "edit.deleteAccount.confirmBody",
+          "Bu işlem geri alınamaz. Profilin, rotaların, cüzdan bakiyen ve tüm hesap verilerin sunucularımızdan kalıcı olarak silinir.",
+        )}
+        confirmLabel={t("edit.deleteAccount.confirm", "Hesabımı Kalıcı Sil")}
+        tone="danger"
+        onConfirm={async () => {
+          if (deletingAccount) return;
+          setDeletingAccount(true);
+          try {
+            await deleteAccountDirect();
+          } catch {
+            // Oturum her durumda kapatılır
+          } finally {
+            userStorage.removeItem("mapsbridge.userProfileDetails");
+            userStorage.removeItem("mapsbridge.userAvatar");
+            userStorage.removeItem("mapsbridge.userCoverPhoto");
+            userStorage.removeItem("mapsbridge.userPreferences");
+            window.location.href = "/";
+          }
+        }}
+        onClose={() => setConfirmDeleteAccount(false)}
       />
     </PageShell>
   );

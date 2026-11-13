@@ -1,16 +1,20 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Alert, Button, Icon, Modal } from "../ui";
+import { Alert, Badge, Button, Icon, Modal } from "../ui";
 import { useLocale } from "../../lib/locale-context";
-import { encodePinCode, generateNumericPinCode, type PinPoint } from "../../lib/share/pin-link";
+import {
+  buildPinShareUrl,
+  encodePinCode,
+  generateNumericPinCode,
+  type PinPoint,
+} from "../../lib/share/pin-link";
 import { buildDirections } from "../../lib/share/map-directions";
 import "./travel-planner.css";
 
 /**
- * Durak paylaşımı (D3): bir pin'in koordinatı + etiketi SUNUCUSUZ kısa koda gömülür ve /p/?c=<kod>
- * bağlantısı + QR olarak gösterilir. Hesap gerekmez (misafir de kullanır); ağ turu yok (I12).
- * /k/ süreli konum paylaşımından ayrıdır: bu, taksiciye gösterilecek açık varış noktasıdır.
+ * Haritalar ekranı durak paylaşımı (D3): yalnızca seçilen konumun 6 haneli paylaşım kodu ve
+ * doğrudan paylaşılan sayfayı açan QR kodu oluşturulur (kod girişi ve QR okutma Profil ekranındadır).
  */
 export function PinShareModal({
   open,
@@ -34,13 +38,17 @@ export function PinShareModal({
     }
   }, [open]);
 
-  const { code, numericCode, url } = useMemo(() => {
+  const { numericCode, url } = useMemo(() => {
     if (!target) return { code: "", numericCode: "", url: "" };
     const c = encodePinCode(target);
     const num = generateNumericPinCode(target);
     const origin =
       typeof window !== "undefined" ? window.location.origin : "https://mapsbridge.com";
-    return { code: c, numericCode: num, url: `${origin}/p/?c=${num}` };
+    return {
+      code: c,
+      numericCode: num,
+      url: buildPinShareUrl(target, origin),
+    };
   }, [target]);
 
   function copy(kind: "code" | "link", text: string) {
@@ -76,6 +84,17 @@ export function PinShareModal({
       description={target?.label}
     >
       <div className="planner-share__body">
+        {target && (
+          <div className="planner-share__banner">
+            <Badge tone="brand">
+              <Icon name="map" size={16} />
+              {target.label || t("planner.pinShare.title", "Seçilen Konum")}
+            </Badge>
+            <p className="planner-share__coords">
+              {target.lat.toFixed(5)}, {target.lng.toFixed(5)}
+            </p>
+          </div>
+        )}
         <p className="planner-share__hint">
           {t(
             "planner.pinShare.hint",
@@ -86,7 +105,7 @@ export function PinShareModal({
           <span className="planner-share__code-label">
             {t("planner.pinShare.code", "6 Haneli Paylaşım Kodu")}
           </span>
-          <span className="planner-share__code-value" style={{ letterSpacing: "3px", fontSize: "1.3rem", fontWeight: "bold" }}>
+          <span className="planner-share__code-value">
             {numericCode.slice(0, 3)} {numericCode.slice(3)}
           </span>
           <Button
@@ -103,45 +122,43 @@ export function PinShareModal({
         <div className="planner-share__qr" data-surface="default">
           <QRCodeSVG
             value={url}
-            size={128}
+            size={156}
             level="M"
             title={t("planner.pinShare.qr", "Durak bağlantısının QR kodu")}
           />
         </div>
         <p className="planner-share__url">{url}</p>
-        <div style={{ display: "flex", gap: "8px", width: "100%", justifyContent: "center", margin: "8px 0" }}>
-          {target && (
-            <>
-              <Button
-                size="sm"
-                variant="secondary"
-                href={buildDirections({ dest: target, provider: "google" })}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Google Haritalar
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                href={buildDirections({ dest: target, provider: "yandex" })}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Yandex Haritalar
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                href={buildDirections({ dest: target, provider: "apple" })}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Apple Haritalar
-              </Button>
-            </>
-          )}
-        </div>
+        {target && (
+          <div className="planner-share__actions">
+            <Button
+              size="sm"
+              variant="secondary"
+              href={buildDirections({ dest: target, provider: "google" })}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Google Haritalar
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              href={buildDirections({ dest: target, provider: "yandex" })}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Yandex Haritalar
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              href={buildDirections({ dest: target, provider: "apple" })}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Apple Haritalar
+            </Button>
+          </div>
+        )}
         <div className="planner-share__actions">
           <Button
             variant="primary"
@@ -156,10 +173,10 @@ export function PinShareModal({
             href={url}
             target="_blank"
             rel="noreferrer"
-            variant="ghost"
+            variant="secondary"
             iconEnd={<Icon name="external" size={20} />}
           >
-            {t("planner.pinShare.open", "Yol tarifi sayfasını aç")}
+            {t("planner.pinShare.open", "Paylaşılan sayfayı aç")}
           </Button>
         </div>
         {copyError && (

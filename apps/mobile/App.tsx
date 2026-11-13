@@ -504,9 +504,6 @@ export function App() {
   const handleGoogleIntercept = (url: string): boolean => {
     if (!url) return true;
 
-    // Log URL for debugging (remove in production)
-    console.warn("Google Auth URL:", url);
-
     // Check for OAuth callback or tokens in URL
     const hasCallback =
       url.includes("mapsbridge.com/auth/callback") ||

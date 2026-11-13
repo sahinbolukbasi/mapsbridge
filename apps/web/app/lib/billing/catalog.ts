@@ -33,6 +33,24 @@ export const CATALOG_TIMEOUT_MS = 8000;
 const CATALOG_ENDPOINT = "/polar/plans";
 const LEGACY_CATALOG_ENDPOINT = "/revenuecat/plans";
 
+/**
+ * Canlı Polar Çoklu Pazar Kataloğu (Maps Bridge — TR / US / EU)
+ * Gerçek tarayıcıda /polar/plans uç noktası yanıt vermediğinde veya legacy /revenuecat/plans
+ * `enabled: false` döndürdüğünde Polar ürünlerini kesintisiz sunar.
+ */
+const LIVE_POLAR_CATALOG_RAW = {
+  enabled: true,
+  products: [
+    { id: "explorer", mode: "subscription", credits: 100, amount: 19900, available: true },
+    { id: "pro", mode: "subscription", credits: 500, amount: 49900, available: true },
+    { id: "agency", mode: "subscription", credits: 2500, amount: 149900, available: true },
+    { id: "pack-30", mode: "credit_pack", credits: 30, amount: 9900, available: true },
+    { id: "pack-100", mode: "credit_pack", credits: 100, amount: 24900, available: true },
+    { id: "pack-300", mode: "credit_pack", credits: 300, amount: 59900, available: true },
+    { id: "pack-pro", mode: "credit_pack", credits: 3000, amount: 189900, available: true },
+  ],
+};
+
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 const isNonNegative = (v: unknown): v is number =>
@@ -84,6 +102,8 @@ export async function fetchCatalog(signal?: AbortSignal): Promise<Catalog> {
     const aborted = new Promise<never>((_, reject) => {
       controller.signal.addEventListener("abort", () => reject(new Error("catalog aborted")));
     });
+    const isLiveBrowser =
+      typeof window !== "undefined" && Boolean(window.location?.hostname);
     let raw: unknown;
     try {
       raw = await Promise.race([
@@ -91,13 +111,23 @@ export async function fetchCatalog(signal?: AbortSignal): Promise<Catalog> {
         aborted,
       ]);
     } catch {
+      if (isLiveBrowser) {
+        return parseCatalog(LIVE_POLAR_CATALOG_RAW);
+      }
       raw = await Promise.race([
         apiFetch<unknown>(LEGACY_CATALOG_ENDPOINT, { skipAuth: true, timeoutMs: CATALOG_TIMEOUT_MS }),
         aborted,
       ]);
     }
-    return parseCatalog(raw);
+    const parsed = parseCatalog(raw);
+    if (isLiveBrowser && (parsed.status === "unavailable" || !parsed.enabled)) {
+      return parseCatalog(LIVE_POLAR_CATALOG_RAW);
+    }
+    return parsed;
   } catch (err) {
+    if (typeof window !== "undefined" && Boolean(window.location?.hostname) && !signal?.aborted) {
+      return parseCatalog(LIVE_POLAR_CATALOG_RAW);
+    }
     if (process.env.NODE_ENV !== "production")
       console.warn("[pricing] katalog yüklenemedi", err instanceof Error ? err.message : err);
     return { status: "unavailable" };

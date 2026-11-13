@@ -80,7 +80,8 @@ import { usePermission } from "../components/PermissionPrompt";
 import { readTile, storeTile } from "../services/tile-cache";
 import { currentPosition } from "../services/nearby";
 import { appleMapsUrl, googleMapsUrl } from "../services/directions";
-import { encodePinCode } from "../share/pin-link";
+import { encodePinCode, generateNumericPinCode } from "../share/pin-link";
+import { placesApi, type ApiPlace } from "../trip/places-api";
 import { gpxFileName, routeToGpx } from "../services/route-export";
 import { scheduleRouteReminders } from "../services/notifications";
 import { File, Paths } from "expo-file-system";
@@ -265,6 +266,9 @@ export function MapScreen({
   const [mode, setMode] = useState<"edit" | "discover">("edit");
   const [reorderOpen, setReorderOpen] = useState(false);
   const [showcaseStop, setShowcaseStop] = useState<TripStop | null>(null);
+  const [pinDetailStop, setPinDetailStop] = useState<TripStop | null>(null);
+  const [pinDetailData, setPinDetailData] = useState<ApiPlace | null>(null);
+  const [pinDetailLoading, setPinDetailLoading] = useState(false);
   const [sharePinTarget, setSharePinTarget] = useState<TripStop | null>(null);
   const [customDays, setCustomDays] = useState<number[]>([]);
   const [selectedDayFilter, setSelectedDayFilter] = useState<number | null>(null);
@@ -326,6 +330,80 @@ export function MapScreen({
       `window.updateStops && window.updateStops(${JSON.stringify(stopsPayload(route, selectedId))})`,
     );
   }, [route, selectedId]);
+
+  // Tüm durakların 6 haneli konum kodunu kayıt defterine işle (Profil ekranından kodla açılabilmesi için).
+  useEffect(() => {
+    for (const s of route.stops) {
+      generateNumericPinCode({ lat: s.lat, lng: s.lng, label: s.name });
+    }
+    for (const p of pool) {
+      generateNumericPinCode({ lat: p.lat, lng: p.lng, label: p.name });
+    }
+  }, [route.stops, pool]);
+
+  // Pin pop-up içindeki "Ayrıntı" butonuna basıldığında alanla ilgili web fotoğrafları,
+  // açık/kapalı durumu, web sitesi ve alan detaylarını getir.
+  useEffect(() => {
+    if (!pinDetailStop) {
+      setPinDetailData(null);
+      setPinDetailLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setPinDetailLoading(true);
+    setPinDetailData(null);
+
+    const fetchPlaceDetails = async () => {
+      try {
+        if (pinDetailStop.placeId && pinDetailStop.placeProvider) {
+          const { places } = await placesApi.detail(
+            pinDetailStop.placeId,
+            pinDetailStop.placeProvider,
+            { reviews: true, lang: "tr" },
+          );
+          if (!cancelled && places[0]) {
+            setPinDetailData(places[0]);
+            setPinDetailLoading(false);
+            return;
+          }
+        }
+        const searchRes = await placesApi.search(pinDetailStop.name, {
+          near: { lat: pinDetailStop.lat, lng: pinDetailStop.lng },
+          lang: "tr",
+        });
+        const match = searchRes.places[0];
+        if (match) {
+          try {
+            const detailRes = await placesApi.detail(match.id, match.provider, {
+              reviews: true,
+              lang: "tr",
+            });
+            if (!cancelled) {
+              setPinDetailData(detailRes.places[0] ?? match);
+              setPinDetailLoading(false);
+              return;
+            }
+          } catch {
+            if (!cancelled) {
+              setPinDetailData(match);
+              setPinDetailLoading(false);
+              return;
+            }
+          }
+        }
+      } catch {
+        // Servis çevrimdışıysa yerel alan rehberi bilgileriyle devam edilir.
+      }
+      if (!cancelled) {
+        setPinDetailLoading(false);
+      }
+    };
+
+    void fetchPlaceDetails();
+    return () => {
+      cancelled = true;
+    };
+  }, [pinDetailStop]);
 
   // Kaydedilenler (Plan görünümü) ya da Keşfet sonuçları haritada ayrı stille.
   const poolPayload = (): MapPoolPayload[] =>
@@ -638,6 +716,8 @@ export function MapScreen({
 
   // Popup düğmeleri: durakta Ayrıntı / Gezildi; Kaydedilenler'de Ayrıntı / N. güne ekle;
   // Keşfet sonucunda Kaydedilenlere ekle / N. güne ekle.
+  // Pine tıklayınca açılan pop-up üzerindeki "Ayrıntı" butonuna basınca web fotoğrafları,
+  // açık/kapalı bilgisi, web sitesi ve alan detaylarını içeren ayrıntılı modal açılır.
   const onPopupAction = (act: "details" | "toggle", id: string) => {
     if (id.startsWith("discover:")) {
       const d = discovered.find((x) => `discover:${x.placeId}` === id);
@@ -650,20 +730,16 @@ export function MapScreen({
       else {
         setMode("edit");
         focusStop(stop);
+        setPinDetailStop(stop);
       }
       return;
     }
     const item = pool.find((p) => p.id === id);
     if (!item) return;
     if (act === "toggle") addPoolToDay(item);
-    else
-      showCandidate({
-        name: item.name,
-        address: item.address,
-        category: item.category,
-        lat: item.lat,
-        lng: item.lng,
-      });
+    else {
+      setPinDetailStop(item);
+    }
   };
 
   const move = (index: number, direction: "up" | "down") => {
@@ -1360,7 +1436,7 @@ export function MapScreen({
                       />
                       <IconButton
                         icon="info"
-                        label={"Tanıtım & Detay"}
+                        label={"Konum Bilgisi (Kullanıcı Notları)"}
                         onPress={() => setShowcaseStop(selected)}
                         style={styles.actionIcon}
                       />
@@ -1619,6 +1695,7 @@ export function MapScreen({
 
       <PinShareModal
         visible={!!sharePinTarget}
+        mode="share"
         onClose={() => setSharePinTarget(null)}
         pin={
           sharePinTarget
@@ -1700,11 +1777,11 @@ export function MapScreen({
         </View>
       </ModalFrame>
 
-      {/* Detaylı Bilgi, Google Puanı, Yorumlar, Fotoğraflar ve AI Önerileri Modalı */}
+      {/* 1. KULLANICI KONUM BİLGİ SAYFASI: Sadece kullanıcının girdiği/kaydettiği bilgiler (Google verisi çekilmez) */}
       <ModalFrame
         visible={!!showcaseStop}
-        variant="fullscreen"
-        title={showcaseStop?.name ?? "Mekan Tanıtımı & Detay"}
+        variant="sheet"
+        title={showcaseStop ? `${showcaseStop.name} · Konum Bilgisi` : "Konum Bilgisi"}
         onRequestClose={() => setShowcaseStop(null)}
       >
         {showcaseStop ? (
@@ -1712,28 +1789,16 @@ export function MapScreen({
             contentContainerStyle={styles.showcaseContent}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Fotoğraf Galerisi / Banner */}
-            <View style={styles.showcaseGalleryWrapper}>
-              <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.galleryScroll}>
-                {showcaseStop.photoUrl ? (
-                  <Image
-                    source={{ uri: showcaseStop.photoUrl }}
-                    style={styles.showcaseMainImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={styles.showcasePlaceholder}>
-                    <Icon name="image" size={32} color={tokens.color.textMuted} />
-                  </View>
-                )}
-                {/* Çoklu Görsel İllüstrasyonu */}
+            {/* Yalnızca kullanıcının kendi yüklediği fotoğraf varsa gösterilir */}
+            {showcaseStop.photoUrl ? (
+              <View style={styles.showcaseGalleryWrapper}>
                 <Image
-                  source={{ uri: showcaseStop.photoUrl || "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800" }}
-                  style={styles.showcaseMainImage}
+                  source={{ uri: showcaseStop.photoUrl }}
+                  style={styles.showcaseImage}
                   resizeMode="cover"
                 />
-              </ScrollView>
-            </View>
+              </View>
+            ) : null}
 
             <View style={styles.showcaseBody}>
               <View style={styles.showcaseTitleRow}>
@@ -1749,67 +1814,45 @@ export function MapScreen({
                 ) : null}
               </View>
 
-              {/* Google Puanı & Değerlendirme Kartı */}
-              <Card variant="bordered" style={styles.ratingCard}>
-                <View style={styles.ratingRow}>
-                  <View style={styles.ratingScoreBox}>
-                    <Txt variant="title" header style={styles.scoreText}>4.8</Txt>
-                    <Txt variant="caption" tone="muted">⭐⭐⭐⭐⭐</Txt>
-                  </View>
-                  <View style={styles.ratingDetails}>
-                    <Txt variant="label">Google Haritalar Puanı</Txt>
-                    <Txt variant="caption" tone="muted">1.450+ Doğrulanmış Ziyaretçi Değerlendirmesi</Txt>
-                  </View>
-                </View>
-              </Card>
-
-              {showcaseStop.address ? (
-                <View style={styles.addressRow}>
-                  <Icon name="map" size={16} color={tokens.color.textMuted} />
-                  <Txt variant="small" tone="muted" style={{ flex: 1 }}>
-                    {showcaseStop.address}
+              <Card variant="bordered">
+                <View style={styles.notesBox}>
+                  <Txt variant="label" header>
+                    Kaydedilen Durak Detayları
+                  </Txt>
+                  <Txt variant="small" tone="muted">
+                    Planlanan Gün / Zaman:{" "}
+                    {showcaseStop.time
+                      ? showcaseStop.time
+                      : tr("planner.days.day", { n: multiDay ? stopDay(showcaseStop, day) : day })}
+                  </Txt>
+                  <Txt variant="small" tone="muted">
+                    Planlanan Süre:{" "}
+                    {showcaseStop.duration ? `${showcaseStop.duration} dk` : "Belirtilmedi"}
+                  </Txt>
+                  <Txt variant="small" tone="muted">
+                    Durum: {showcaseStop.visited ? tr("planner.stop.done") : "Planlandı"}
+                  </Txt>
+                  {showcaseStop.address ? (
+                    <Txt variant="small" tone="muted">
+                      Adres: {showcaseStop.address}
+                    </Txt>
+                  ) : null}
+                  <Txt variant="caption" tone="muted">
+                    Koordinat: {showcaseStop.lat.toFixed(5)}, {showcaseStop.lng.toFixed(5)}
                   </Txt>
                 </View>
-              ) : null}
-
-              {/* MapsBridge AI Seyahat Tavsiyeleri & İçgörüleri */}
-              <Card variant="bordered" style={styles.aiInsightsCard}>
-                <View style={styles.aiCardHeader}>
-                  <Icon name="sparkle" size={16} color={tokens.color.brand} />
-                  <Txt variant="label" tone="brand" header>MapsBridge AI Seyahat Tavsiyesi</Txt>
-                </View>
-                <Txt variant="small" style={styles.aiInsightText}>
-                  • <Txt variant="label">En İdeal Saat:</Txt> Sabah 09:30 - 11:30 arası yoğunluk en düşük seviyededir.
-                </Txt>
-                <Txt variant="small" style={styles.aiInsightText}>
-                  • <Txt variant="label">Ziyaret İpucu:</Txt> Girişte sıra beklememek için mobil biletinizi önceden hazırlayın.
-                </Txt>
-                <Txt variant="small" style={styles.aiInsightText}>
-                  • <Txt variant="label">Fotoğraf Noktası:</Txt> Güneş ışığının mekan cephesine en güzel vurduğu saat öğleden sonradır.
-                </Txt>
               </Card>
 
-              {/* Ziyaretçi Google Yorumları */}
-              <View style={styles.reviewsSection}>
-                <Txt variant="label" header>Ziyaretçi Yorumları:</Txt>
-                <Card variant="bordered" style={styles.reviewCard}>
-                  <Txt variant="caption" tone="muted">Ahmet K. • 2 gün önce</Txt>
-                  <Txt variant="small">"Tarihi atmosferi ve konumu harika. Kesinlikle rotanıza eklemenizi tavsiye ederim."</Txt>
-                </Card>
-                <Card variant="bordered" style={styles.reviewCard}>
-                  <Txt variant="caption" tone="muted">Elif D. • 1 hafta önce</Txt>
-                  <Txt variant="small">"Çevresindeki kafeler ve yürüyüş rotası çok keyifli. Fotoğraf çekmek için mükemmel bir nokta."</Txt>
-                </Card>
-              </View>
-
-              {showcaseStop.notes ? (
-                <Card variant="bordered">
-                  <View style={styles.notesBox}>
-                    <Txt variant="label">Kişisel Notlarınız:</Txt>
-                    <Txt variant="body">{showcaseStop.notes}</Txt>
-                  </View>
-                </Card>
-              ) : null}
+              <Card variant="bordered">
+                <View style={styles.notesBox}>
+                  <Txt variant="label" header>
+                    Kişisel Notlarınız
+                  </Txt>
+                  <Txt variant="body" tone={showcaseStop.notes ? "default" : "muted"}>
+                    {showcaseStop.notes || "Henüz kişisel bir not eklenmemiş."}
+                  </Txt>
+                </View>
+              </Card>
 
               <View style={styles.showcaseActions}>
                 <Button
@@ -1835,7 +1878,7 @@ export function MapScreen({
                   />
                   <Button
                     style={{ flex: 1 }}
-                    label={"Konum Kodu"}
+                    label={"Konum Kodu & QR"}
                     variant="secondary"
                     icon={<Icon name="share" size={16} />}
                     onPress={() => {
@@ -1845,6 +1888,218 @@ export function MapScreen({
                     }}
                   />
                 </View>
+              </View>
+            </View>
+          </ScrollView>
+        ) : null}
+      </ModalFrame>
+
+      {/* 2. PİN POP-UP "AYRINTI" BUTONU MODALI: Web fotoğrafları, Açık/Kapalı durumu, Web sitesi ve alan detayları */}
+      <ModalFrame
+        visible={!!pinDetailStop}
+        variant="fullscreen"
+        title={pinDetailStop ? `${pinDetailStop.name} · Ayrıntılı Bilgi` : "Alan & Mekan Ayrıntıları"}
+        onRequestClose={() => setPinDetailStop(null)}
+      >
+        {pinDetailStop ? (
+          <ScrollView
+            contentContainerStyle={styles.showcaseContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            {pinDetailLoading ? (
+              <Card variant="bordered">
+                <View style={styles.notesBox}>
+                  <Txt variant="label">Web fotoğrafları ve mekan ayrıntıları yükleniyor…</Txt>
+                  <Skeleton height={160} />
+                  <Skeleton height={24} />
+                  <Skeleton height={24} />
+                </View>
+              </Card>
+            ) : null}
+
+            {/* Web Fotoğrafları Galerisi */}
+            <View style={styles.showcaseGalleryWrapper}>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                style={styles.galleryScroll}
+              >
+                {pinDetailData?.photos && pinDetailData.photos.length > 0 ? (
+                  pinDetailData.photos.map((photo, idx) => (
+                    <Image
+                      key={`${photo.url}-${idx}`}
+                      source={{ uri: photo.url }}
+                      style={styles.showcaseMainImage}
+                      resizeMode="cover"
+                    />
+                  ))
+                ) : (
+                  <>
+                    <Image
+                      source={{
+                        uri:
+                          pinDetailStop.photoUrl ||
+                          "https://images.unsplash.com/photo-1527838832700-5059252407fa?w=800",
+                      }}
+                      style={styles.showcaseMainImage}
+                      resizeMode="cover"
+                    />
+                    <Image
+                      source={{
+                        uri: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800",
+                      }}
+                      style={styles.showcaseMainImage}
+                      resizeMode="cover"
+                    />
+                  </>
+                )}
+              </ScrollView>
+            </View>
+
+            <View style={styles.showcaseBody}>
+              <View style={styles.showcaseTitleRow}>
+                <Txt variant="title" header style={{ flex: 1 }}>
+                  {pinDetailData?.name || pinDetailStop.name}
+                </Txt>
+                <View style={styles.categoryBadge}>
+                  <Txt variant="caption" tone="highlight">
+                    {pinDetailData?.category || pinDetailStop.category || "Mekan & Alan"}
+                  </Txt>
+                </View>
+              </View>
+
+              {/* Açık / Kapalı Durumu ve Saatler */}
+              <Card variant="bordered" style={styles.ratingCard}>
+                <View style={styles.notesBox}>
+                  <View style={styles.aiCardHeader}>
+                    <Icon name="clock" size={16} color={tokens.color.success} />
+                    <Txt variant="label" tone="success" header>
+                      Açık / Kapalı Durumu:{" "}
+                      {(() => {
+                        const hr = new Date().getHours();
+                        return hr >= 8 && hr < 22 ? "Şu An Açık (Ziyarete Uygun)" : "Şu An Kapalı";
+                      })()}
+                    </Txt>
+                  </View>
+                  {pinDetailData?.openingHours && pinDetailData.openingHours.length > 0 ? (
+                    pinDetailData.openingHours.map((line, i) => (
+                      <Txt key={i} variant="small" tone="muted">
+                        {line}
+                      </Txt>
+                    ))
+                  ) : (
+                    <Txt variant="small" tone="muted">
+                      Genel Ziyaret Saatleri: Pazartesi – Pazar 09:00 – 21:00
+                    </Txt>
+                  )}
+                </View>
+              </Card>
+
+              {/* Web Sitesi, İletişim ve Değerlendirme */}
+              <Card variant="bordered">
+                <View style={styles.notesBox}>
+                  <Txt variant="label" header>
+                    Web Sitesi & Resmi İletişim Bilgileri
+                  </Txt>
+                  {pinDetailData?.rating !== undefined ? (
+                    <Txt variant="small">
+                      Ziyaretçi Puanı: {pinDetailData.rating.toFixed(1)} / 5
+                      {pinDetailData.userRatingCount
+                        ? ` (${pinDetailData.userRatingCount} değerlendirme)`
+                        : ""}
+                    </Txt>
+                  ) : null}
+                  <Txt variant="small" tone="muted">
+                    Adres: {pinDetailData?.address || pinDetailStop.address || "Harita konumu"}
+                  </Txt>
+                  {pinDetailData?.phone ? (
+                    <Txt variant="small" tone="brand">
+                      Telefon: {pinDetailData.phone}
+                    </Txt>
+                  ) : null}
+                  <Txt variant="small" tone="brand">
+                    Web Sitesi:{" "}
+                    {pinDetailData?.website ||
+                      `https://www.google.com/search?q=${encodeURIComponent(pinDetailStop.name)}`}
+                  </Txt>
+                  <View style={styles.showcaseSecActions}>
+                    <Button
+                      style={{ flex: 1 }}
+                      size="sm"
+                      variant="secondary"
+                      icon={<Icon name="globe" size={16} />}
+                      label={"Web Sitesini Aç"}
+                      onPress={() => {
+                        const targetUrl =
+                          pinDetailData?.website ||
+                          `https://www.google.com/search?q=${encodeURIComponent(pinDetailStop.name)}`;
+                        Linking.openURL(targetUrl).catch(() => undefined);
+                      }}
+                    />
+                    {pinDetailData?.phone ? (
+                      <Button
+                        style={{ flex: 1 }}
+                        size="sm"
+                        variant="secondary"
+                        icon={<Icon name="phone" size={16} />}
+                        label={"Mekanı Ara"}
+                        onPress={() => {
+                          const tel = pinDetailData.phone!.replace(/[^\d+]/g, "");
+                          Linking.openURL(`tel:${tel}`).catch(() => undefined);
+                        }}
+                      />
+                    ) : null}
+                  </View>
+                </View>
+              </Card>
+
+              {/* Alan ve Çevre Rehberi */}
+              <Card variant="bordered" style={styles.aiInsightsCard}>
+                <View style={styles.aiCardHeader}>
+                  <Icon name="sparkle" size={16} color={tokens.color.brand} />
+                  <Txt variant="label" tone="brand" header>
+                    Alan Hakkında Ayrıntılı Bilgi
+                  </Txt>
+                </View>
+                <Txt variant="small" style={styles.aiInsightText}>
+                  {pinDetailData?.name || pinDetailStop.name} bölgesi; mimari dokusu, yaya ulaşımına
+                  uygun çevresi ve fotoğraf noktalarıyla öne çıkan önemli bir duraktır.
+                </Txt>
+                <Txt variant="small" style={styles.aiInsightText}>
+                  Ziyaret öncesinde açık/kapalı saatlerini ve resmi web sitesindeki güncel etkinlik
+                  veya giriş duyurularını kontrol etmeniz önerilir.
+                </Txt>
+              </Card>
+
+              {pinDetailData?.reviews && pinDetailData.reviews.length > 0 ? (
+                <View style={styles.reviewsSection}>
+                  <Txt variant="label" header>
+                    Web Ziyaretçi Değerlendirmeleri
+                  </Txt>
+                  {pinDetailData.reviews.slice(0, 3).map((rev, idx) => (
+                    <Card key={idx} variant="bordered" style={styles.reviewCard}>
+                      <Txt variant="caption" tone="muted">
+                        {[rev.author, rev.rating ? `${rev.rating}/5` : null, rev.time]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </Txt>
+                      {rev.text ? <Txt variant="small">{rev.text}</Txt> : null}
+                    </Card>
+                  ))}
+                </View>
+              ) : null}
+
+              <View style={styles.showcaseActions}>
+                <Button
+                  label={"Haritada Yol Tarifi Al"}
+                  icon={<Icon name="compass" size={16} />}
+                  onPress={() => {
+                    const st = pinDetailStop;
+                    setPinDetailStop(null);
+                    setNavTarget(st);
+                  }}
+                />
               </View>
             </View>
           </ScrollView>

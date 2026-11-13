@@ -3,7 +3,11 @@ import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from
 import * as WebBrowser from "expo-web-browser";
 import type { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import { getOfferings, purchasePackage, restorePurchases } from "../services/revenuecat";
-import { billingService, type WalletSnapshot } from "../services/api";
+import {
+  POLAR_LIVE_CHECKOUT_LINKS,
+  billingService,
+  type WalletSnapshot,
+} from "../services/api";
 import {
   PAID_TIERS,
   creditPacks,
@@ -156,9 +160,10 @@ export function PaywallModal({
           polarSuccess = true;
         }
       } catch (polarErr) {
-        console.warn("[Polar Checkout] API call failed, opening web checkout fallback:", polarErr);
-        // Doğrudan MapsBridge Polar ödeme sayfasına yönlendir
-        const fallbackUrl = `https://mapsbridge.com/pricing?checkout=${product.id}`;
+        console.warn("[Polar Checkout] API call failed, opening live Polar checkout link:", polarErr);
+        const fallbackUrl =
+          POLAR_LIVE_CHECKOUT_LINKS[product.id] ||
+          `https://mapsbridge.com/pricing?checkout=${product.id}`;
         await WebBrowser.openBrowserAsync(fallbackUrl);
         polarSuccess = true;
       }

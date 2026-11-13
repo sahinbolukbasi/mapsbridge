@@ -13,7 +13,7 @@ import {
   PageShell,
 } from "../components/ui";
 import { useLocale } from "../lib/locale-context";
-import { decodePinCode, type PinPoint } from "../lib/share/pin-link";
+import { decodePinCode, decodePinOrUrl, type PinPoint } from "../lib/share/pin-link";
 import {
   buildDirections,
   defaultProvider,
@@ -46,10 +46,13 @@ export default function PinDirectionsPage() {
   const [geo, setGeo] = useState<GeoState>("idle");
   const [provider, setProvider] = useState<MapProvider>("google");
 
-  // URL'den kodu çöz (kanonik `c`). Geçersiz/eksikse kod giriş kartı açık kalır.
+  // URL'den kodu çöz (kanonik `c` veya 6 haneli `code`). Geçersiz/eksikse kod giriş kartı açık kalır.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const decoded = decodePinCode(params.get("c"));
+    const decoded =
+      decodePinOrUrl(window.location.search) ??
+      decodePinCode(params.get("c")) ??
+      decodePinCode(params.get("code"));
     const ua =
       typeof navigator !== "undefined"
         ? navigator.userAgent || (navigator as Navigator & { platform?: string }).platform
@@ -57,8 +60,16 @@ export default function PinDirectionsPage() {
     setProvider(defaultProvider(ua));
     if (decoded) {
       setPin(decoded);
-      setCode(params.get("c") ?? "");
+      setCode(params.get("code") ?? params.get("c") ?? "");
       requestGeo();
+    } else if (params.get("c") || params.get("code")) {
+      setFieldError(
+        t(
+          "p.error.code",
+          "Kod hatalı: Girdiğiniz 6 haneli konum kodu geçersiz veya süresi dolmuş.",
+        ),
+      );
+      codeRef.current?.focus({ preventScroll: true });
     } else {
       codeRef.current?.focus({ preventScroll: true });
     }
@@ -97,9 +108,15 @@ export default function PinDirectionsPage() {
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    const decoded = decodePinCode(code);
+    const cleaned = code.replace(/\s+/g, "").slice(0, 6);
+    const decoded = cleaned.length === 6 ? decodePinOrUrl(cleaned) : null;
     if (!decoded) {
-      setFieldError(t("p.error.code", "Geçersiz kod. Bağlantıdaki kodu olduğu gibi gir."));
+      setFieldError(
+        t(
+          "p.error.code",
+          "Kod hatalı: Girdiğiniz 6 haneli konum kodu geçersiz veya süresi dolmuş.",
+        ),
+      );
       codeRef.current?.focus();
       return;
     }
@@ -145,6 +162,11 @@ export default function PinDirectionsPage() {
             </div>
           </div>
           <form onSubmit={submit} className="pin-form" noValidate data-surface="default">
+            {fieldError && (
+              <Alert tone="danger" live="assertive">
+                {fieldError}
+              </Alert>
+            )}
             <Field label={t("p.lookup.label", "Durak kodu")} error={fieldError} required>
               {(ids) => (
                 <Input
@@ -153,15 +175,20 @@ export default function PinDirectionsPage() {
                   size="lg"
                   iconStart="map"
                   type="text"
-                  inputMode="text"
+                  inputMode="numeric"
                   autoComplete="off"
                   autoCapitalize="off"
                   spellCheck={false}
-                  maxLength={80}
+                  maxLength={6}
                   value={code}
                   onChange={(e) => {
-                    setCode(e.target.value);
-                    if (fieldError && decodePinCode(normalizeShareCode(e.target.value)))
+                    const sanitized = e.target.value.replace(/[^0-9A-Za-z]/g, "").slice(0, 6);
+                    setCode(sanitized);
+                    if (
+                      fieldError &&
+                      sanitized.length === 6 &&
+                      decodePinCode(normalizeShareCode(sanitized))
+                    )
                       setFieldError(null);
                   }}
                 />

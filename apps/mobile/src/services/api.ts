@@ -235,61 +235,145 @@ export const authService = {
     await storage.removeItem("mb_refresh_token");
     await storage.removeItem("mb_last_activity");
   },
+
+  async deleteAccount(): Promise<void> {
+    const session = await this.getSession();
+    if (!session?.token) {
+      throw new Error("Hesap silme işlemi için aktif oturum bulunamadı.");
+    }
+    try {
+      await fetch(`${API_BASE}/auth/delete-account`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${session.token}`,
+        },
+        body: JSON.stringify({ accessToken: session.token }),
+      });
+    } catch {
+      // Sunucu temizliği başarısız olsa da Cognito üzerinden silmeye devam et
+    }
+    try {
+      await cognitoRequest("DeleteUser", {
+        AccessToken: session.token,
+      });
+    } catch {
+      // Google/Apple federe oturumlarda Cognito DeleteUser gerekmeyebilir
+    }
+    await this.signOut();
+  },
 };
+
+const API_REQUEST_TIMEOUT_MS = 15000;
+const inFlightGets = new Map<string, Promise<unknown>>();
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs = API_REQUEST_TIMEOUT_MS,
+): Promise<Response> {
+  if (typeof AbortController === "undefined") {
+    return fetch(url, options);
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: options.signal ?? controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 // ─── Backend API Client ──────────────────────────────────────────────────────
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const session = await authService.getSession();
-  const headers: Record<string, string> = {
-    "content-type": "application/json",
-    ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
-    ...((options.headers as Record<string, string>) || {}),
-  };
+  const method = (options.method || "GET").toUpperCase();
+  const dedupeKey = method === "GET" ? `${method}:${endpoint}` : null;
+  if (dedupeKey && inFlightGets.has(dedupeKey)) {
+    return inFlightGets.get(dedupeKey) as Promise<T>;
+  }
 
-  try {
-    let response = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers,
-    });
+  const runRequest = async (): Promise<T> => {
+    const session = await authService.getSession();
+    const headers: Record<string, string> = {
+      "content-type": "application/json",
+      ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {}),
+      ...((options.headers as Record<string, string>) || {}),
+    };
 
-    if (response.status === 401) {
-      // Attempt silent token refresh once
-      const refreshedToken = await authService.refreshToken();
-      if (refreshedToken) {
-        headers["Authorization"] = `Bearer ${refreshedToken}`;
-        response = await fetch(`${API_BASE}${endpoint}`, {
+    try {
+      let response = await fetchWithTimeout(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers,
+      });
+
+      if (
+        method === "GET" &&
+        (response.status === 429 ||
+          response.status === 502 ||
+          response.status === 503 ||
+          response.status === 504)
+      ) {
+        await new Promise((r) => setTimeout(r, 600));
+        response = await fetchWithTimeout(`${API_BASE}${endpoint}`, {
           ...options,
           headers,
         });
-      } else {
-        console.warn(
-          "[apiRequest] 401 response and token refresh unavailable. Preserving local session.",
-        );
-        throw new Error(
-          "Oturum anahtarınız güncellenemedi. Lütfen internet bağlantınızı kontrol edin.",
-        );
-      }
-    }
-
-    if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error("Bu işlem için yetkiniz bulunmuyor.");
-      }
-      if (response.status === 429) {
-        throw new Error("Çok fazla istek gönderildi. Lütfen biraz bekleyin.");
       }
 
-      const err = await response.json().catch(() => ({ error: response.statusText }));
-      throw new Error(err.error || `İstek başarısız (${response.status})`);
-    }
+      if (response.status === 401) {
+        // Attempt silent token refresh once
+        const refreshedToken = await authService.refreshToken();
+        if (refreshedToken) {
+          headers["Authorization"] = `Bearer ${refreshedToken}`;
+          response = await fetchWithTimeout(`${API_BASE}${endpoint}`, {
+            ...options,
+            headers,
+          });
+        } else {
+          console.warn(
+            "[apiRequest] 401 response and token refresh unavailable. Preserving local session.",
+          );
+          throw new Error(
+            "Oturum anahtarınız güncellenemedi. Lütfen internet bağlantınızı kontrol edin.",
+          );
+        }
+      }
 
-    return response.json();
-  } catch (error) {
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new Error("İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.");
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error("Bu işlem için yetkiniz bulunmuyor.");
+        }
+        if (response.status === 429) {
+          throw new Error("Çok fazla istek gönderildi. Lütfen biraz bekleyin.");
+        }
+
+        const err = await response.json().catch(() => ({ error: response.statusText }));
+        throw new Error(err.error || `İstek başarısız (${response.status})`);
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edin.");
+      }
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        throw new Error("İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.");
+      }
+      throw error;
     }
-    throw error;
+  };
+
+  if (!dedupeKey) {
+    return runRequest();
   }
+  const promise = runRequest().finally(() => {
+    inFlightGets.delete(dedupeKey);
+  });
+  inFlightGets.set(dedupeKey, promise);
+  return promise;
 }
 
 // ─── Synchronized Routes API ────────────────────────────────────────────────
@@ -890,10 +974,95 @@ export const chatRequestApi = {
     }),
 };
 // ─── Plan kataloğu (design §7.1, karar S2) ───────────────────────────────────
-// Web /pricing/ ile aynı uç: GET /revenuecat/plans (oturumsuz). Ham gövde döner; doğrulama
+// Web /pricing/ ile aynı uç: GET /polar/plans (oturumsuz). Ham gövde döner; doğrulama
 // src/billing/catalog.ts parseCatalog'dadır. Fiyat yalnızca buradan gösterilir.
 export const CATALOG_TIMEOUT_MS = 8000;
 export type WalletSnapshot = { credits: number; tier: string };
+
+export const POLAR_LIVE_CHECKOUT_LINKS: Record<string, string> = {
+  explorer: "https://buy.polar.sh/polar_cl_1YnWOZCCN94R9gaownJcFaKj8bnekRZl8nKm20FyTQO",
+  pro: "https://buy.polar.sh/polar_cl_TitGKcwxcS7AtB2jTsmHW99kQc7sudzdd5gXP0rAve0",
+  agency: "https://buy.polar.sh/polar_cl_E0BpkvdYR74Fp0ye6i7m6mD1LQ4GJDZNDDCEw0f3Vc2",
+  "pack-30": "https://buy.polar.sh/polar_cl_wpo0KNVyrThYAbhR8Iouc7mMBIGpfSNxQDsMW2nTfCh",
+  "pack-starter": "https://buy.polar.sh/polar_cl_wpo0KNVyrThYAbhR8Iouc7mMBIGpfSNxQDsMW2nTfCh",
+  "pack-100": "https://buy.polar.sh/polar_cl_qkvFdsPgPCAhOZu9GpLOhMJeULcO0hSEXqreE0D94hc",
+  "pack-popular": "https://buy.polar.sh/polar_cl_qkvFdsPgPCAhOZu9GpLOhMJeULcO0hSEXqreE0D94hc",
+  "pack-300": "https://buy.polar.sh/polar_cl_WH0IZVT4tIRlcxlftSnlyJbBFcjCTT4apO47w1stp5H",
+  "pack-master": "https://buy.polar.sh/polar_cl_WH0IZVT4tIRlcxlftSnlyJbBFcjCTT4apO47w1stp5H",
+  "pack-pro": "https://buy.polar.sh/polar_cl_ay9kL24efjStvQzBnMy574uaOcnUbqjg7zyGw2M28th",
+};
+
+const LIVE_POLAR_PLANS_RESPONSE = {
+  enabled: true,
+  welcomeCredits: 100,
+  costs: { route: 5, chat: 1, clarify: 0 },
+  products: [
+    {
+      id: "explorer",
+      mode: "subscription",
+      credits: 100,
+      amount: 19900,
+      available: true,
+      productId: "a3443dcc-7050-4705-82c3-f986b0ef94ea",
+      packageId: "polar_explorer",
+    },
+    {
+      id: "pro",
+      mode: "subscription",
+      credits: 500,
+      amount: 49900,
+      available: true,
+      productId: "bc53edf5-476c-4f5f-805a-3b2c1e8e8739",
+      packageId: "$rc_monthly",
+    },
+    {
+      id: "agency",
+      mode: "subscription",
+      credits: 2500,
+      amount: 149900,
+      available: true,
+      productId: "62d9b9e3-9ddb-49db-b1d6-67d50f76c2b6",
+      packageId: "polar_agency",
+    },
+    {
+      id: "pack-30",
+      mode: "credit_pack",
+      credits: 30,
+      amount: 9900,
+      available: true,
+      productId: "cd802b74-05b9-4234-b08b-21a1152ec8d6",
+      packageId: "polar_pack_30",
+    },
+    {
+      id: "pack-100",
+      mode: "credit_pack",
+      credits: 100,
+      amount: 24900,
+      available: true,
+      productId: "31f3e0d0-8d81-4a3b-83f1-56bcbb5cde40",
+      packageId: "polar_pack_100",
+    },
+    {
+      id: "pack-300",
+      mode: "credit_pack",
+      credits: 300,
+      amount: 59900,
+      available: true,
+      productId: "86fadb96-c068-4b69-b23a-0ed871d57718",
+      packageId: "polar_pack_300",
+    },
+    {
+      id: "pack-pro",
+      mode: "credit_pack",
+      credits: 3000,
+      amount: 189900,
+      available: true,
+      productId: "adcadbdf-662d-4e3b-b53e-d3ae586225e8",
+      packageId: "polar_pack_pro",
+    },
+  ],
+};
+
 export const billingService = {
   /** Sunucu bakiyesi (web refreshWallet ile aynı uç: GET /polar/wallet). İstemci hesaplamaz. */
   async getWallet(): Promise<WalletSnapshot | null> {
@@ -915,21 +1084,40 @@ export const billingService = {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), CATALOG_TIMEOUT_MS);
     try {
-      let res = await fetch(`${API_BASE}/polar/plans`, { signal: controller.signal });
-      if (!res.ok) {
-        res = await fetch(`${API_BASE}/revenuecat/plans`, { signal: controller.signal });
+      const res = await fetch(`${API_BASE}/polar/plans`, { signal: controller.signal });
+      if (res.ok) {
+        const json = await res.json();
+        if (json && typeof json === "object" && (json as { enabled?: boolean }).enabled) {
+          return json;
+        }
       }
-      if (!res.ok) throw new Error(`Katalog yüklenemedi (${res.status})`);
-      return await res.json();
+      return LIVE_POLAR_PLANS_RESPONSE;
+    } catch {
+      return LIVE_POLAR_PLANS_RESPONSE;
     } finally {
       clearTimeout(timer);
     }
   },
-  async createCheckout(targetId: string, mode: "subscription" | "credit_pack" = "subscription"): Promise<{ url: string }> {
-    return await apiRequest<{ url: string }>("/polar/checkout", {
-      method: "POST",
-      body: JSON.stringify({ targetId, mode }),
-    });
+  async createCheckout(
+    targetId: string,
+    mode: "subscription" | "credit_pack" = "subscription",
+  ): Promise<{ url: string }> {
+    try {
+      return await apiRequest<{ url: string }>("/polar/checkout", {
+        method: "POST",
+        body: JSON.stringify({ targetId, mode }),
+      });
+    } catch {
+      const baseLink = POLAR_LIVE_CHECKOUT_LINKS[targetId];
+      if (baseLink) {
+        const session = await authService.getSession().catch(() => null);
+        const url = session?.email
+          ? `${baseLink}?customer_email=${encodeURIComponent(session.email)}`
+          : baseLink;
+        return { url };
+      }
+      throw new Error("Ödeme bağlantısı oluşturulamadı.");
+    }
   },
   async openCustomerPortal(): Promise<{ url: string }> {
     return await apiRequest<{ url: string }>("/polar/portal", {

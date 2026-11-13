@@ -1,15 +1,19 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthGate } from "../components/auth-gate";
 import {
+  Alert,
   Avatar,
   Button,
   Card,
   ConfirmDialog,
   EmptyState,
+  Field,
   Icon,
+  Input,
   LoadingState,
+  Modal,
   PageHeader,
   PageShell,
   Section,
@@ -21,6 +25,7 @@ import { billingService } from "../lib/billing/billing-service";
 import { getStoredSession } from "../lib/cognito";
 import { sameUser } from "../lib/community/feed";
 import { useLocale } from "../lib/locale-context";
+import { decodePinOrUrl, encodePinCode } from "../lib/share/pin-link";
 import { webSocialSync } from "../lib/social-sync";
 import { userStorage } from "../lib/user-storage";
 import { profileTabRedirect } from "../lib/navigation/profile-redirect";
@@ -71,6 +76,96 @@ export default function ProfilePage() {
   const [points, setPoints] = useState<LegacySavedPoint[]>([]);
   const [editing, setEditing] = useState<CommunityPost | null>(null);
   const [deleting, setDeleting] = useState<CommunityPost | null>(null);
+  const [pinCodeInput, setPinCodeInput] = useState("");
+  const [pinCodeError, setPinCodeError] = useState<string | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerError, setScannerError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const scanTimerRef = useRef<number | null>(null);
+
+  const stopScanner = () => {
+    if (scanTimerRef.current !== null) {
+      window.clearInterval(scanTimerRef.current);
+      scanTimerRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setScannerOpen(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (scanTimerRef.current !== null) window.clearInterval(scanTimerRef.current);
+      if (streamRef.current) streamRef.current.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  const handleResolvePinCode = (rawInput: string) => {
+    const trimmed = rawInput.trim();
+    if (!trimmed) {
+      setPinCodeError("Lütfen 6 haneli konum kodunu girin.");
+      return;
+    }
+    const decoded = decodePinOrUrl(trimmed);
+    if (!decoded) {
+      const msg =
+        "Kod hatalı: Girdiğiniz 6 haneli konum kodu geçersiz veya bulunamadı. Lütfen kodu kontrol edip tekrar deneyin.";
+      setPinCodeError(msg);
+      toast.show({
+        tone: "danger",
+        message: "Kod hatalı! Girdiğiniz 6 haneli konum kodu bulunamadı.",
+      });
+      return;
+    }
+    setPinCodeError(null);
+    stopScanner();
+    const encoded = encodePinCode(decoded);
+    const cleanCode = trimmed.replace(/[^0-9A-Za-z]/g, "").slice(0, 6);
+    router.push(`/p/?c=${encodeURIComponent(encoded)}&code=${encodeURIComponent(cleanCode)}`);
+  };
+
+  const startQrScanner = async () => {
+    setScannerError(null);
+    setPinCodeError(null);
+    setScannerOpen(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      const DetectorCtor = (
+        window as unknown as {
+          BarcodeDetector?: new (opts: { formats: string[] }) => {
+            detect: (el: HTMLVideoElement) => Promise<Array<{ rawValue?: string }>>;
+          };
+        }
+      ).BarcodeDetector;
+      if (DetectorCtor) {
+        const detector = new DetectorCtor({ formats: ["qr_code"] });
+        scanTimerRef.current = window.setInterval(async () => {
+          if (!videoRef.current) return;
+          try {
+            const codes = await detector.detect(videoRef.current);
+            if (codes && codes.length > 0 && codes[0].rawValue) {
+              handleResolvePinCode(codes[0].rawValue);
+            }
+          } catch {
+            // frame not ready
+          }
+        }, 250);
+      }
+    } catch {
+      setScannerError("Kamera izni alınamadı veya cihazda kamera bulunamadı.");
+    }
+  };
 
   // Rotalarım planlayıcıya taşındı (design §5.1): sayfa içi yönlendirme.
   useEffect(() => {
@@ -242,6 +337,63 @@ export default function ProfilePage() {
             </Button>
           </div>
         </Card>
+        <Card className="profile-tile profile-code-tile">
+          <p className="profile-tile__label">
+            {t("profile.pinCode.title", "Konum Kodu Gir & QR Okut")}
+          </p>
+          <p className="profile-tile__body">
+            {t(
+              "profile.pinCode.body",
+              "Paylaşılan 6 haneli konum kodunu girin veya kamera ile QR kodu okutarak konuma doğrudan gidin.",
+            )}
+          </p>
+          <form
+            className="profile-code-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleResolvePinCode(pinCodeInput);
+            }}
+          >
+            <Field label={t("profile.pinCode.inputLabel", "6 Haneli Konum Kodu")}>
+              {(ids) => (
+                <Input
+                  {...ids}
+                  value={pinCodeInput}
+                  maxLength={6}
+                  placeholder="482910"
+                  onChange={(e) => {
+                    const sanitized = e.target.value.replace(/[^0-9A-Za-z]/g, "").slice(0, 6);
+                    setPinCodeInput(sanitized);
+                    if (pinCodeError) setPinCodeError(null);
+                  }}
+                />
+              )}
+            </Field>
+            {pinCodeError && (
+              <Alert tone="danger" live="assertive">
+                {pinCodeError}
+              </Alert>
+            )}
+            <div className="profile-tile__actions">
+              <Button
+                type="submit"
+                size="sm"
+                iconStart={<Icon name="compass" size={16} />}
+                disabled={!pinCodeInput.trim()}
+              >
+                {t("profile.pinCode.open", "Konumu Aç")}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                iconStart={<Icon name="camera" size={16} />}
+                onClick={() => void startQrScanner()}
+              >
+                {t("profile.pinCode.scanQr", "Kamera ile QR Okut")}
+              </Button>
+            </div>
+          </form>
+        </Card>
       </div>
 
       <Section title={t("profile.posts", "Paylaşımlarım")}>
@@ -268,7 +420,16 @@ export default function ProfilePage() {
                 next={NEXT}
                 actions={{
                   onToggleLike: (id) => webSocialSync.toggleLike(id),
-                  onToggleBookmark: (id) => webSocialSync.toggleBookmark(id),
+                  onToggleBookmark: (id) => {
+                    const updated = webSocialSync.toggleBookmark(id);
+                    toast.show({
+                      tone: "success",
+                      message:
+                        updated?.savedByMe !== false
+                          ? t("community.toast.saved", "Gönderi kaydedildi.")
+                          : t("community.toast.unsaved", "Kaydedilenlerden çıkarıldı."),
+                    });
+                  },
                   onAddComment: (id, text) => {
                     webSocialSync.addComment(id, text);
                     return true;
@@ -329,6 +490,28 @@ export default function ProfilePage() {
         }}
         onClose={() => setDeleting(null)}
       />
+      <Modal
+        open={scannerOpen}
+        onClose={stopScanner}
+        size="sm"
+        title={t("profile.pinCode.scannerTitle", "QR Kodu Kamera ile Okut")}
+        description={t(
+          "profile.pinCode.scannerDesc",
+          "Paylaşılan konum QR kodunu kameraya yaklaştırın; okunduğunda konum sayfası otomatik açılır.",
+        )}
+      >
+        <div className="profile-qr-scanner">
+          <video ref={videoRef} autoPlay playsInline muted className="profile-qr-video" />
+          {scannerError && (
+            <Alert tone="danger" live="assertive">
+              {scannerError}
+            </Alert>
+          )}
+          <Button variant="secondary" onClick={stopScanner}>
+            {t("ui.close", "Kapat")}
+          </Button>
+        </div>
+      </Modal>
     </PageShell>
   );
 }
